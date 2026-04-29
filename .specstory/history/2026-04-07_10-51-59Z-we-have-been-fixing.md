@@ -16,7 +16,6 @@ Use the same git worktree
 
 However, some of the issues are not working as intended yet.
 
-
 1. in the lock-manual
 2. I am able to drag and drop the the tile from the bank to the slot fine, and all style look great
 3. when I drag from the slot to the bank, there is a weird corner color (which is the same color of the correct/wrong tile, like red or blue). I want the same exactly style of the draggable tile from the bank to the slot.
@@ -35,6 +34,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:07Z)**_
 Let me start by invoking the appropriate skill for this task. The user is asking about fixing issues in an existing implementation, which involves debugging and possibly implementing features. Let me check if there are relevant skills to use.
 
 The issues described involve:
+
 1. Drag and drop behavior
 2. Visual styling issues when dragging from slot to bank
 3. Drop functionality not working (tile disappears)
@@ -42,7 +42,6 @@ The issues described involve:
 5. Magnetic/snap effect for bank
 
 This seems like a debugging + implementation task. Let me check the `superpowers:systematic-debugging` skill since there are bugs to fix.
-
 
 I'm weighing whether to start with systematic-debugging for the core bugs or brainstorming for the new features like the snap effect and return animation. The primary request is fixing issues, so I'll invoke systematic-debugging first to tackle the drag-and-drop problems and the disappearing tile bug.
 </details></think>
@@ -55,6 +54,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:07Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -84,6 +84,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -92,6 +93,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -99,6 +101,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -134,6 +137,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -147,6 +151,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -275,6 +280,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -294,6 +300,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -344,17 +351,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -364,14 +372,15 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:14Z)**_
 Let me follow the systematic debugging process. First, I need to understand the codebase before proposing any fixes. Let me read the relevant files.
 
 The issues are:
+
 1. In "lock-manual" - unclear what the issue is (maybe the user stopped typing before completing this)
 2. Drag from bank to slot works fine - styles look great
 3. Drag from slot to bank shows weird corner color (the correct/wrong color like red/blue) - should look like the draggable tile from bank to slot
 4. Dropping tile from slot to bank doesn't work - tile disappears; tapping slot brings tile back but should animate with "eject" effect
 5. Should be able to drop into bank with same snap/magnetic effect as slot
 
-
 6. Now I'm looking at the plan document and the relevant component files to understand the current implementation.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:14Z)**_
@@ -387,6 +396,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:16Z)**_
 ```text
 File content (17483 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:17Z)**_
@@ -420,6 +430,7 @@ Find relevant component files
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:21Z)**_
@@ -429,98 +440,99 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:21Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-29	
-30	  const ariaLabel = isEmpty
-31	    ? `Slot ${index + 1}, empty`
-32	    : `Slot ${index + 1}, filled with ${label}`;
-33	
-34	  const stateClasses = [
-35	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-36	    isEmpty && !isActive
-37	      ? 'border-border'
-38	      : isEmpty && isActive
-39	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-40	        : isWrong
-41	          ? 'border-destructive bg-destructive/10 text-destructive'
-42	          : 'border-primary bg-primary/10 text-primary',
-43	  ]
-44	    .filter(Boolean)
-45	    .join(' ');
-46	
-47	  return (
-48	    <Tag
-49	      ref={
-50	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-51	      }
-52	      aria-label={ariaLabel}
-53	      data-zone-index={index}
-54	      className={[stateClasses, className].filter(Boolean).join(' ')}
-55	    >
-56	      {isEmpty ? (
-57	        <>
-58	          {children(renderProps)}
-59	          {showCursor ? (
-60	            <span
-61	              aria-hidden="true"
-62	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-63	            />
-64	          ) : null}
-65	        </>
-66	      ) : (
-67	        <>
-68	          <div
-69	            className="absolute inset-0 bg-muted/60 shadow-inner"
-70	            aria-hidden="true"
-71	          />
-72	          <button
-73	            ref={dragRef}
-74	            type="button"
-75	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
-76	            aria-hidden={isBeingDragged ? 'true' : undefined}
-77	            style={skeuoStyle}
-78	            onClick={handleClick}
-79	            onPointerDown={pointerHandlers.onPointerDown}
-80	            onPointerMove={pointerHandlers.onPointerMove}
-81	            onPointerUp={pointerHandlers.onPointerUp}
-82	            onPointerCancel={pointerHandlers.onPointerCancel}
-83	          >
-84	            {children(renderProps)}
-85	          </button>
-86	        </>
-87	      )}
-88	    </Tag>
-89	  );
-90	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+29 
+30   const ariaLabel = isEmpty
+31     ? `Slot ${index + 1}, empty`
+32     : `Slot ${index + 1}, filled with ${label}`;
+33 
+34   const stateClasses = [
+35     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+36     isEmpty && !isActive
+37       ? 'border-border'
+38       : isEmpty && isActive
+39         ? 'border-primary ring-2 ring-primary ring-offset-2'
+40         : isWrong
+41           ? 'border-destructive bg-destructive/10 text-destructive'
+42           : 'border-primary bg-primary/10 text-primary',
+43   ]
+44     .filter(Boolean)
+45     .join(' ');
+46 
+47   return (
+48     <Tag
+49       ref={
+50         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+51       }
+52       aria-label={ariaLabel}
+53       data-zone-index={index}
+54       className={[stateClasses, className].filter(Boolean).join(' ')}
+55     >
+56       {isEmpty ? (
+57         <>
+58           {children(renderProps)}
+59           {showCursor ? (
+60             <span
+61               aria-hidden="true"
+62               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+63             />
+64           ) : null}
+65         </>
+66       ) : (
+67         <>
+68           <div
+69             className="absolute inset-0 bg-muted/60 shadow-inner"
+70             aria-hidden="true"
+71           />
+72           <button
+73             ref={dragRef}
+74             type="button"
+75             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+76             aria-hidden={isBeingDragged ? 'true' : undefined}
+77             style={skeuoStyle}
+78             onClick={handleClick}
+79             onPointerDown={pointerHandlers.onPointerDown}
+80             onPointerMove={pointerHandlers.onPointerMove}
+81             onPointerUp={pointerHandlers.onPointerUp}
+82             onPointerCancel={pointerHandlers.onPointerCancel}
+83           >
+84             {children(renderProps)}
+85           </button>
+86         </>
+87       )}
+88     </Tag>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:22Z)**_
@@ -577,6 +589,7 @@ Find files with drag/drop/bank related code
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/WordSpell/WordSpell.tsx
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/routes/$locale/_app/game/$gameId.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:25Z)**_
@@ -592,216 +605,217 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:26Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx`
 
 ```text
-1	import { render } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { useSlotTileDrag } from './useSlotTileDrag';
-4	import type { ReactNode } from 'react';
-5	
-6	vi.mock('@/lib/game-event-bus', () => ({
-7	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-8	}));
-9	
-10	vi.mock('@/lib/audio/AudioFeedback', () => ({
-11	  playSound: vi.fn(),
-12	  queueSound: vi.fn(),
-13	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-14	}));
-15	
-16	// Capture the options passed to draggable so tests can invoke the callbacks.
-17	type DraggableDropArgs = {
-18	  location: {
-19	    current: {
-20	      dropTargets: { data: Record<string, unknown> }[];
-21	    };
-22	  };
-23	};
-24	
-25	type DraggableOptions = {
-26	  element: HTMLElement;
-27	  getInitialData?: () => Record<string, unknown>;
-28	  onDragStart?: () => void;
-29	  onDrop?: (args: DraggableDropArgs) => void;
-30	};
-31	
-32	let capturedDraggableOptions: DraggableOptions | null = null;
-33	
-34	const mockCleanup = () => {};
-35	
-36	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-37	  draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
-38	    capturedDraggableOptions = opts;
-39	    return mockCleanup;
-40	  }),
-41	}));
-42	
-43	const mockDispatch = vi.fn();
-44	
-45	vi.mock('./useAnswerGameDispatch', () => ({
-46	  useAnswerGameDispatch: () => mockDispatch,
-47	}));
-48	
-49	// useTouchDrag uses pointer events — mock it to simplify unit tests here.
-50	vi.mock('./useTouchDrag', () => ({
-51	  useTouchDrag: () => ({
-52	    onPointerDown: vi.fn(),
-53	    onPointerMove: vi.fn(),
-54	    onPointerUp: vi.fn(),
-55	    onPointerCancel: vi.fn(),
-56	  }),
-57	}));
-58	
-59	// Test component that attaches the dragRef to an actual button element so the
-60	// useEffect inside useSlotTileDrag can find element !== null and register the
-61	// draggable adapter.
-62	const SlotTileDragHarness = ({
-63	  tileId,
-64	  zoneIndex,
-65	  onDrop,
-66	}: {
-67	  tileId: string | null;
-68	  zoneIndex: number;
-69	  onDrop: (id: string, idx: number) => void;
-70	  children?: ReactNode;
-71	}) => {
-72	  const { dragRef } = useSlotTileDrag({
-73	    tileId,
-74	    label: 'A',
-75	    zoneIndex,
-76	    onDrop,
-77	  });
-78	  return (
-79	    <button type="button" ref={dragRef} data-testid="drag-tile">
-80	      A
-81	    </button>
-82	  );
-83	};
-84	
-85	describe('useSlotTileDrag', () => {
-86	  it('registers draggable on mount when tileId is provided', () => {
-87	    capturedDraggableOptions = null;
-88	    render(
-89	      <SlotTileDragHarness
-90	        tileId="tile-1"
-91	        zoneIndex={0}
-92	        onDrop={vi.fn()}
-93	      />,
-94	    );
-95	    expect(capturedDraggableOptions).not.toBeNull();
-96	  });
-97	
-98	  describe('HTML5 onDrop — no drop targets', () => {
-99	    it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
-100	      capturedDraggableOptions = null;
-101	      mockDispatch.mockClear();
-102	      const mockOnDrop = vi.fn();
-103	
-104	      render(
-105	        <SlotTileDragHarness
-106	          tileId="tile-1"
-107	          zoneIndex={0}
-108	          onDrop={mockOnDrop}
-109	        />,
-110	      );
-111	
-112	      expect(capturedDraggableOptions).not.toBeNull();
-113	
-114	      (
-115	        capturedDraggableOptions as unknown as DraggableOptions
-116	      ).onDrop?.({
-117	        location: { current: { dropTargets: [] } },
-118	      });
-119	
-120	      expect(mockDispatch).toHaveBeenCalledWith({
-121	        type: 'REMOVE_TILE',
-122	        zoneIndex: 0,
-123	      });
-124	      expect(mockDispatch).toHaveBeenCalledWith({
-125	        type: 'SET_DRAG_ACTIVE',
-126	        tileId: null,
-127	      });
-128	      expect(mockOnDrop).not.toHaveBeenCalled();
-129	    });
-130	  });
-131	
-132	  describe('HTML5 onDrop — drop target with no zoneIndex', () => {
-133	    it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
-134	      capturedDraggableOptions = null;
-135	      mockDispatch.mockClear();
-136	      const mockOnDrop = vi.fn();
-137	
-138	      render(
-139	        <SlotTileDragHarness
-140	          tileId="tile-1"
-141	          zoneIndex={0}
-142	          onDrop={mockOnDrop}
-143	        />,
-144	      );
-145	
-146	      expect(capturedDraggableOptions).not.toBeNull();
-147	
-148	      (
-149	        capturedDraggableOptions as unknown as DraggableOptions
-150	      ).onDrop?.({
-151	        location: {
-152	          current: {
-153	            dropTargets: [{ data: { someOtherKey: 'value' } }],
-154	          },
-155	        },
-156	      });
-157	
-158	      expect(mockDispatch).toHaveBeenCalledWith({
-159	        type: 'REMOVE_TILE',
-160	        zoneIndex: 0,
-161	      });
-162	      expect(mockDispatch).toHaveBeenCalledWith({
-163	        type: 'SET_DRAG_ACTIVE',
-164	        tileId: null,
-165	      });
-166	      expect(mockOnDrop).not.toHaveBeenCalled();
-167	    });
-168	  });
-169	
-170	  describe('HTML5 onDrop — confirmed drop on valid target', () => {
-171	    it('dispatches REMOVE_TILE and SET_DRAG_ACTIVE, then calls onDrop with correct args', () => {
-172	      capturedDraggableOptions = null;
-173	      mockDispatch.mockClear();
-174	      const mockOnDrop = vi.fn();
-175	
-176	      render(
-177	        <SlotTileDragHarness
-178	          tileId="tile-1"
-179	          zoneIndex={0}
-180	          onDrop={mockOnDrop}
-181	        />,
-182	      );
-183	
-184	      expect(capturedDraggableOptions).not.toBeNull();
-185	
-186	      (
-187	        capturedDraggableOptions as unknown as DraggableOptions
-188	      ).onDrop?.({
-189	        location: {
-190	          current: {
-191	            dropTargets: [{ data: { zoneIndex: 2 } }],
-192	          },
-193	        },
-194	      });
-195	
-196	      expect(mockDispatch).toHaveBeenCalledWith({
-197	        type: 'REMOVE_TILE',
-198	        zoneIndex: 0,
-199	      });
-200	      expect(mockDispatch).toHaveBeenCalledWith({
-201	        type: 'SET_DRAG_ACTIVE',
-202	        tileId: null,
-203	      });
-204	      expect(mockOnDrop).toHaveBeenCalledOnce();
-205	      expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
-206	    });
-207	  });
-208	});
+1 import { render } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { useSlotTileDrag } from './useSlotTileDrag';
+4 import type { ReactNode } from 'react';
+5 
+6 vi.mock('@/lib/game-event-bus', () => ({
+7   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+8 }));
+9 
+10 vi.mock('@/lib/audio/AudioFeedback', () => ({
+11   playSound: vi.fn(),
+12   queueSound: vi.fn(),
+13   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+14 }));
+15 
+16 // Capture the options passed to draggable so tests can invoke the callbacks.
+17 type DraggableDropArgs = {
+18   location: {
+19     current: {
+20       dropTargets: { data: Record<string, unknown> }[];
+21     };
+22   };
+23 };
+24 
+25 type DraggableOptions = {
+26   element: HTMLElement;
+27   getInitialData?: () => Record<string, unknown>;
+28   onDragStart?: () => void;
+29   onDrop?: (args: DraggableDropArgs) => void;
+30 };
+31 
+32 let capturedDraggableOptions: DraggableOptions | null = null;
+33 
+34 const mockCleanup = () => {};
+35 
+36 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+37   draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
+38     capturedDraggableOptions = opts;
+39     return mockCleanup;
+40   }),
+41 }));
+42 
+43 const mockDispatch = vi.fn();
+44 
+45 vi.mock('./useAnswerGameDispatch', () => ({
+46   useAnswerGameDispatch: () => mockDispatch,
+47 }));
+48 
+49 // useTouchDrag uses pointer events — mock it to simplify unit tests here.
+50 vi.mock('./useTouchDrag', () => ({
+51   useTouchDrag: () => ({
+52     onPointerDown: vi.fn(),
+53     onPointerMove: vi.fn(),
+54     onPointerUp: vi.fn(),
+55     onPointerCancel: vi.fn(),
+56   }),
+57 }));
+58 
+59 // Test component that attaches the dragRef to an actual button element so the
+60 // useEffect inside useSlotTileDrag can find element !== null and register the
+61 // draggable adapter.
+62 const SlotTileDragHarness = ({
+63   tileId,
+64   zoneIndex,
+65   onDrop,
+66 }: {
+67   tileId: string | null;
+68   zoneIndex: number;
+69   onDrop: (id: string, idx: number) => void;
+70   children?: ReactNode;
+71 }) => {
+72   const { dragRef } = useSlotTileDrag({
+73     tileId,
+74     label: 'A',
+75     zoneIndex,
+76     onDrop,
+77   });
+78   return (
+79     <button type="button" ref={dragRef} data-testid="drag-tile">
+80       A
+81     </button>
+82   );
+83 };
+84 
+85 describe('useSlotTileDrag', () => {
+86   it('registers draggable on mount when tileId is provided', () => {
+87     capturedDraggableOptions = null;
+88     render(
+89       <SlotTileDragHarness
+90         tileId="tile-1"
+91         zoneIndex={0}
+92         onDrop={vi.fn()}
+93       />,
+94     );
+95     expect(capturedDraggableOptions).not.toBeNull();
+96   });
+97 
+98   describe('HTML5 onDrop — no drop targets', () => {
+99     it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
+100       capturedDraggableOptions = null;
+101       mockDispatch.mockClear();
+102       const mockOnDrop = vi.fn();
+103 
+104       render(
+105         <SlotTileDragHarness
+106           tileId="tile-1"
+107           zoneIndex={0}
+108           onDrop={mockOnDrop}
+109         />,
+110       );
+111 
+112       expect(capturedDraggableOptions).not.toBeNull();
+113 
+114       (
+115         capturedDraggableOptions as unknown as DraggableOptions
+116       ).onDrop?.({
+117         location: { current: { dropTargets: [] } },
+118       });
+119 
+120       expect(mockDispatch).toHaveBeenCalledWith({
+121         type: 'REMOVE_TILE',
+122         zoneIndex: 0,
+123       });
+124       expect(mockDispatch).toHaveBeenCalledWith({
+125         type: 'SET_DRAG_ACTIVE',
+126         tileId: null,
+127       });
+128       expect(mockOnDrop).not.toHaveBeenCalled();
+129     });
+130   });
+131 
+132   describe('HTML5 onDrop — drop target with no zoneIndex', () => {
+133     it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
+134       capturedDraggableOptions = null;
+135       mockDispatch.mockClear();
+136       const mockOnDrop = vi.fn();
+137 
+138       render(
+139         <SlotTileDragHarness
+140           tileId="tile-1"
+141           zoneIndex={0}
+142           onDrop={mockOnDrop}
+143         />,
+144       );
+145 
+146       expect(capturedDraggableOptions).not.toBeNull();
+147 
+148       (
+149         capturedDraggableOptions as unknown as DraggableOptions
+150       ).onDrop?.({
+151         location: {
+152           current: {
+153             dropTargets: [{ data: { someOtherKey: 'value' } }],
+154           },
+155         },
+156       });
+157 
+158       expect(mockDispatch).toHaveBeenCalledWith({
+159         type: 'REMOVE_TILE',
+160         zoneIndex: 0,
+161       });
+162       expect(mockDispatch).toHaveBeenCalledWith({
+163         type: 'SET_DRAG_ACTIVE',
+164         tileId: null,
+165       });
+166       expect(mockOnDrop).not.toHaveBeenCalled();
+167     });
+168   });
+169 
+170   describe('HTML5 onDrop — confirmed drop on valid target', () => {
+171     it('dispatches REMOVE_TILE and SET_DRAG_ACTIVE, then calls onDrop with correct args', () => {
+172       capturedDraggableOptions = null;
+173       mockDispatch.mockClear();
+174       const mockOnDrop = vi.fn();
+175 
+176       render(
+177         <SlotTileDragHarness
+178           tileId="tile-1"
+179           zoneIndex={0}
+180           onDrop={mockOnDrop}
+181         />,
+182       );
+183 
+184       expect(capturedDraggableOptions).not.toBeNull();
+185 
+186       (
+187         capturedDraggableOptions as unknown as DraggableOptions
+188       ).onDrop?.({
+189         location: {
+190           current: {
+191             dropTargets: [{ data: { zoneIndex: 2 } }],
+192           },
+193         },
+194       });
+195 
+196       expect(mockDispatch).toHaveBeenCalledWith({
+197         type: 'REMOVE_TILE',
+198         zoneIndex: 0,
+199       });
+200       expect(mockDispatch).toHaveBeenCalledWith({
+201         type: 'SET_DRAG_ACTIVE',
+202         tileId: null,
+203       });
+204       expect(mockOnDrop).toHaveBeenCalledOnce();
+205       expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
+206     });
+207   });
+208 });
 209
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:27Z)**_
@@ -851,6 +865,7 @@ List answer-game component source files
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchKeyboardInput.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:30Z)**_
@@ -866,126 +881,127 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:30Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTouchDrag } from './useTouchDrag';
-5	import type { TouchDragHandlers } from './useTouchDrag';
-6	import type { RefObject } from 'react';
-7	
-8	export interface SlotTileDrag extends TouchDragHandlers {
-9	  dragRef: RefObject<HTMLButtonElement | null>;
-10	}
-11	
-12	interface UseSlotTileDragOptions {
-13	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-14	  tileId: string | null;
-15	  label: string | null;
-16	  zoneIndex: number;
-17	  /**
-18	   * Called when the dragged tile is dropped on a target zone.
-19	   * REMOVE_TILE is dispatched before this callback, so the tile is back
-20	   * in the bank and can be placed normally.
-21	   */
-22	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-23	}
-24	
-25	/**
-26	 * Enables an occupied slot tile to be dragged back to the bank or to another
-27	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-28	 *
-29	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-30	 * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
-31	 * dispatched first (returning the tile to the bank) then onDrop is called so
-32	 * the drop target can place it normally. On cancel or missed drop, REMOVE_TILE
-33	 * is dispatched to return the tile to the bank.
-34	 */
-35	export const useSlotTileDrag = ({
-36	  tileId,
-37	  label,
-38	  zoneIndex,
-39	  onDrop,
-40	}: UseSlotTileDragOptions): SlotTileDrag => {
-41	  const dispatch = useAnswerGameDispatch();
-42	  const dragRef = useRef<HTMLButtonElement>(null);
-43	
-44	  // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
-45	  const onDropRef = useRef(onDrop);
-46	  useEffect(() => {
-47	    onDropRef.current = onDrop;
-48	  }, [onDrop]);
-49	
-50	  // HTML5 DnD — desktop
-51	  useEffect(() => {
-52	    if (!tileId) return;
-53	    const element = dragRef.current;
-54	    if (!element) return;
-55	    const currentTileId = tileId;
-56	    const currentZoneIndex = zoneIndex;
-57	    return draggable({
-58	      element,
-59	      // Include sourceZoneIndex so the drop target can identify slot-tile drags
-60	      // and defer placement to this hook's onDrop handler.
-61	      getInitialData: () => ({
-62	        tileId: currentTileId,
-63	        sourceZoneIndex: currentZoneIndex,
-64	      }),
-65	      onDragStart: () =>
-66	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-67	      onDrop: ({ location }) => {
-68	        const targets = location.current.dropTargets;
-69	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-70	
-71	        // Always return the tile to the bank first.
-72	        dispatch({ type: 'REMOVE_TILE', zoneIndex: currentZoneIndex });
-73	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-74	
-75	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-76	          // Confirmed drop on a valid zone: place via the onDrop callback.
-77	          onDropRef.current(currentTileId, targetZoneIndex);
-78	        }
-79	        // else: no target or target has no zoneIndex — tile stays in bank.
-80	      },
-81	    });
-82	  }, [tileId, zoneIndex, dispatch]);
-83	
-84	  // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
-85	  const handleTouchDrop = useCallback(
-86	    (droppedTileId: string, targetZoneIndex: number) => {
-87	      dispatch({ type: 'REMOVE_TILE', zoneIndex });
-88	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-89	      onDrop(droppedTileId, targetZoneIndex);
-90	    },
-91	    [dispatch, zoneIndex, onDrop],
-92	  );
-93	
-94	  // Pointer-events drag — touch / mobile
-95	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-96	    useTouchDrag({
-97	      tileId: tileId ?? '',
-98	      label: label ?? '',
-99	      onDragStart: tileId
-100	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-101	        : undefined,
-102	      onDragCancel: tileId
-103	        ? () => {
-104	            dispatch({ type: 'REMOVE_TILE', zoneIndex });
-105	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-106	          }
-107	        : undefined,
-108	      onDrop: handleTouchDrop,
-109	    });
-110	
-111	  return {
-112	    dragRef,
-113	    onPointerDown,
-114	    onPointerMove,
-115	    onPointerUp,
-116	    onPointerCancel,
-117	  };
-118	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTouchDrag } from './useTouchDrag';
+5 import type { TouchDragHandlers } from './useTouchDrag';
+6 import type { RefObject } from 'react';
+7 
+8 export interface SlotTileDrag extends TouchDragHandlers {
+9   dragRef: RefObject<HTMLButtonElement | null>;
+10 }
+11 
+12 interface UseSlotTileDragOptions {
+13   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+14   tileId: string | null;
+15   label: string | null;
+16   zoneIndex: number;
+17   /**
+18    * Called when the dragged tile is dropped on a target zone.
+19    * REMOVE_TILE is dispatched before this callback, so the tile is back
+20    * in the bank and can be placed normally.
+21    */
+22   onDrop: (tileId: string, targetZoneIndex: number) => void;
+23 }
+24 
+25 /**
+26  * Enables an occupied slot tile to be dragged back to the bank or to another
+27  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+28  *
+29  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+30  * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
+31  * dispatched first (returning the tile to the bank) then onDrop is called so
+32  * the drop target can place it normally. On cancel or missed drop, REMOVE_TILE
+33  * is dispatched to return the tile to the bank.
+34  */
+35 export const useSlotTileDrag = ({
+36   tileId,
+37   label,
+38   zoneIndex,
+39   onDrop,
+40 }: UseSlotTileDragOptions): SlotTileDrag => {
+41   const dispatch = useAnswerGameDispatch();
+42   const dragRef = useRef<HTMLButtonElement>(null);
+43 
+44   // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
+45   const onDropRef = useRef(onDrop);
+46   useEffect(() => {
+47     onDropRef.current = onDrop;
+48   }, [onDrop]);
+49 
+50   // HTML5 DnD — desktop
+51   useEffect(() => {
+52     if (!tileId) return;
+53     const element = dragRef.current;
+54     if (!element) return;
+55     const currentTileId = tileId;
+56     const currentZoneIndex = zoneIndex;
+57     return draggable({
+58       element,
+59       // Include sourceZoneIndex so the drop target can identify slot-tile drags
+60       // and defer placement to this hook's onDrop handler.
+61       getInitialData: () => ({
+62         tileId: currentTileId,
+63         sourceZoneIndex: currentZoneIndex,
+64       }),
+65       onDragStart: () =>
+66         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+67       onDrop: ({ location }) => {
+68         const targets = location.current.dropTargets;
+69         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+70 
+71         // Always return the tile to the bank first.
+72         dispatch({ type: 'REMOVE_TILE', zoneIndex: currentZoneIndex });
+73         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+74 
+75         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+76           // Confirmed drop on a valid zone: place via the onDrop callback.
+77           onDropRef.current(currentTileId, targetZoneIndex);
+78         }
+79         // else: no target or target has no zoneIndex — tile stays in bank.
+80       },
+81     });
+82   }, [tileId, zoneIndex, dispatch]);
+83 
+84   // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
+85   const handleTouchDrop = useCallback(
+86     (droppedTileId: string, targetZoneIndex: number) => {
+87       dispatch({ type: 'REMOVE_TILE', zoneIndex });
+88       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+89       onDrop(droppedTileId, targetZoneIndex);
+90     },
+91     [dispatch, zoneIndex, onDrop],
+92   );
+93 
+94   // Pointer-events drag — touch / mobile
+95   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+96     useTouchDrag({
+97       tileId: tileId ?? '',
+98       label: label ?? '',
+99       onDragStart: tileId
+100         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+101         : undefined,
+102       onDragCancel: tileId
+103         ? () => {
+104             dispatch({ type: 'REMOVE_TILE', zoneIndex });
+105             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+106           }
+107         : undefined,
+108       onDrop: handleTouchDrop,
+109     });
+110 
+111   return {
+112     dragRef,
+113     onPointerDown,
+114     onPointerMove,
+115     onPointerUp,
+116     onPointerCancel,
+117   };
+118 };
 119
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:30Z)**_
@@ -995,84 +1011,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:30Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => {
-37	        speakTileRef.current(tile.label);
-38	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-39	      },
-40	      onDrop: () => {
-41	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-42	      },
-43	    });
-44	  }, [tile.id, tile.label, dispatch]);
-45	
-46	  // Pointer-events drag — touch / mobile
-47	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-48	    useTouchDrag({
-49	      tileId: tile.id,
-50	      label: tile.label,
-51	      onDragStart: () => {
-52	        speakTileRef.current(tile.label);
-53	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-54	      },
-55	      onDragCancel: () =>
-56	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-57	      onDrop: (droppedTileId, zoneIndex) => {
-58	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-59	        placeTile(droppedTileId, zoneIndex);
-60	      },
-61	    });
-62	
-63	  const handleClick = () => {
-64	    speakTile(tile.label);
-65	    placeInNextSlot(tile.id);
-66	  };
-67	
-68	  return {
-69	    ref,
-70	    handleClick,
-71	    onPointerDown,
-72	    onPointerMove,
-73	    onPointerUp,
-74	    onPointerCancel,
-75	  };
-76	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => {
+37         speakTileRef.current(tile.label);
+38         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+39       },
+40       onDrop: () => {
+41         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+42       },
+43     });
+44   }, [tile.id, tile.label, dispatch]);
+45 
+46   // Pointer-events drag — touch / mobile
+47   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+48     useTouchDrag({
+49       tileId: tile.id,
+50       label: tile.label,
+51       onDragStart: () => {
+52         speakTileRef.current(tile.label);
+53         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+54       },
+55       onDragCancel: () =>
+56         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+57       onDrop: (droppedTileId, zoneIndex) => {
+58         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+59         placeTile(droppedTileId, zoneIndex);
+60       },
+61     });
+62 
+63   const handleClick = () => {
+64     speakTile(tile.label);
+65     placeInNextSlot(tile.id);
+66   };
+67 
+68   return {
+69     ref,
+70     handleClick,
+71     onPointerDown,
+72     onPointerMove,
+73     onPointerUp,
+74     onPointerCancel,
+75   };
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:31Z)**_
@@ -1082,197 +1099,198 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:31Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useFreeSwap } from '../useFreeSwap';
-6	import { useSlotTileDrag } from '../useSlotTileDrag';
-7	import { useTileEvaluation } from '../useTileEvaluation';
-8	import {
-9	  triggerEjectReturn,
-10	  triggerPop,
-11	  triggerShake,
-12	} from './slot-animations';
-13	import type { RefObject } from 'react';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	}
-24	
-25	export interface UseSlotBehaviorReturn {
-26	  renderProps: SlotRenderProps;
-27	  slotRef: RefObject<HTMLElement | null>;
-28	  dragRef: RefObject<HTMLButtonElement | null>;
-29	  handleClick: () => void;
-30	  isBeingDragged: boolean;
-31	  pointerHandlers: {
-32	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-33	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-34	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-36	  };
-37	}
-38	
-39	export const useSlotBehavior = (
-40	  index: number,
-41	): UseSlotBehaviorReturn => {
-42	  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
-43	    useAnswerGameContext();
-44	  const dispatch = useAnswerGameDispatch();
-45	  const { placeTile } = useTileEvaluation();
-46	  const { swapOrPlace } = useFreeSwap();
-47	
-48	  const zone = zones[index];
-49	  const tileId = zone?.placedTileId ?? null;
-50	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-51	  const label = tile?.label ?? null;
-52	  const isWrong = zone?.isWrong ?? false;
-53	  const isLocked = zone?.isLocked ?? false;
-54	  const isEmpty = tileId === null;
-55	
-56	  // Resolve interaction mode: explicit config or inferred from inputMethod
-57	  const slotInteraction =
-58	    config.slotInteraction ??
-59	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-60	  const isOrdered = slotInteraction === 'ordered';
-61	
-62	  const isActive = isOrdered && activeSlotIndex === index;
-63	  const showCursor =
-64	    isActive && isEmpty && config.inputMethod !== 'drag';
-65	  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
-66	
-67	  const slotRef = useRef<HTMLElement | null>(null);
-68	  const prevIsWrongRef = useRef(isWrong);
-69	  const prevTileIdRef = useRef(tileId);
-70	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-71	  // it when EJECT_TILE fires and the tile is back in the bank.
-72	  const startFadeRef = useRef<(() => void) | null>(null);
-73	
-74	  // Drop target handler — choose evaluation or swap based on interaction mode
-75	  const handleDrop = useCallback(
-76	    (droppedTileId: string, targetZoneIndex: number) => {
-77	      if (isOrdered) {
-78	        placeTile(droppedTileId, targetZoneIndex);
-79	      } else {
-80	        swapOrPlace(droppedTileId, targetZoneIndex);
-81	      }
-82	    },
-83	    [isOrdered, placeTile, swapOrPlace],
-84	  );
-85	
-86	  // Register as drop target
-87	  useEffect(() => {
-88	    const el = slotRef.current;
-89	    if (!el) return;
-90	    return dropTargetForElements({
-91	      element: el,
-92	      getData: () => ({ zoneIndex: index }),
-93	      onDrop: ({ source }) => {
-94	        // Slot-tile drags (sourceZoneIndex present) handle their own
-95	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-96	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-97	        const sourceTileId = source.data['tileId'];
-98	        if (typeof sourceTileId === 'string') {
-99	          handleDrop(sourceTileId, index);
-100	          // Clear drag active state here — the draggable component (bank tile)
-101	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-102	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-103	        }
-104	      },
-105	    });
-106	  }, [index, handleDrop, dispatch]);
-107	
-108	  // Drag source for filled slots
-109	  const {
-110	    dragRef,
-111	    onPointerDown,
-112	    onPointerMove,
-113	    onPointerUp,
-114	    onPointerCancel,
-115	  } = useSlotTileDrag({
-116	    tileId,
-117	    label,
-118	    zoneIndex: index,
-119	    onDrop: handleDrop,
-120	  });
-121	
-122	  // Click handler: remove tile from slot (returns to bank)
-123	  const handleClick = useCallback(() => {
-124	    if (isEmpty) return;
-125	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-126	  }, [isEmpty, dispatch, index]);
-127	
-128	  // Feedback animations: trigger on state transitions
-129	  useEffect(() => {
-130	    const el = slotRef.current;
-131	    if (!el) return;
-132	
-133	    const wasWrong = prevIsWrongRef.current;
-134	    prevIsWrongRef.current = isWrong;
-135	
-136	    const prevTileId = prevTileIdRef.current;
-137	    prevTileIdRef.current = tileId;
-138	    const freshlyPlaced = tileId !== null && prevTileId === null;
-139	
-140	    if (isWrong && !wasWrong) {
-141	      triggerShake(el);
-142	
-143	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-144	        // After the shake settles, start the fly animation. The ghost parks at
-145	        // the hole and waits; startFadeRef.current() is called below when
-146	        // EJECT_TILE fires and the tile is visible in the bank.
-147	        const timerId = setTimeout(() => {
-148	          const tileEl = dragRef.current;
-149	          if (!tileEl) return;
-150	          const { startFade } = triggerEjectReturn(
-151	            tileEl,
-152	            tileId,
-153	            () => {},
-154	          );
-155	          startFadeRef.current = startFade;
-156	        }, 350);
-157	        return () => clearTimeout(timerId);
-158	      }
-159	    } else if (!isWrong && wasWrong && tileId === null) {
-160	      // EJECT_TILE fired: tile is now back in the bank — fade the ghost out.
-161	      startFadeRef.current?.();
-162	      startFadeRef.current = null;
-163	    } else if (freshlyPlaced && !isWrong) {
-164	      triggerPop(el);
-165	    }
-166	  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
-167	
-168	  return {
-169	    renderProps: {
-170	      label,
-171	      tileId,
-172	      isActive,
-173	      isWrong,
-174	      isLocked,
-175	      isEmpty,
-176	      showCursor,
-177	    },
-178	    slotRef,
-179	    dragRef,
-180	    handleClick,
-181	    isBeingDragged,
-182	    pointerHandlers: {
-183	      onPointerDown,
-184	      onPointerMove,
-185	      onPointerUp,
-186	      onPointerCancel,
-187	    },
-188	  };
-189	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useFreeSwap } from '../useFreeSwap';
+6 import { useSlotTileDrag } from '../useSlotTileDrag';
+7 import { useTileEvaluation } from '../useTileEvaluation';
+8 import {
+9   triggerEjectReturn,
+10   triggerPop,
+11   triggerShake,
+12 } from './slot-animations';
+13 import type { RefObject } from 'react';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23 }
+24 
+25 export interface UseSlotBehaviorReturn {
+26   renderProps: SlotRenderProps;
+27   slotRef: RefObject<HTMLElement | null>;
+28   dragRef: RefObject<HTMLButtonElement | null>;
+29   handleClick: () => void;
+30   isBeingDragged: boolean;
+31   pointerHandlers: {
+32     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+33     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+34     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+36   };
+37 }
+38 
+39 export const useSlotBehavior = (
+40   index: number,
+41 ): UseSlotBehaviorReturn => {
+42   const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
+43     useAnswerGameContext();
+44   const dispatch = useAnswerGameDispatch();
+45   const { placeTile } = useTileEvaluation();
+46   const { swapOrPlace } = useFreeSwap();
+47 
+48   const zone = zones[index];
+49   const tileId = zone?.placedTileId ?? null;
+50   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+51   const label = tile?.label ?? null;
+52   const isWrong = zone?.isWrong ?? false;
+53   const isLocked = zone?.isLocked ?? false;
+54   const isEmpty = tileId === null;
+55 
+56   // Resolve interaction mode: explicit config or inferred from inputMethod
+57   const slotInteraction =
+58     config.slotInteraction ??
+59     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+60   const isOrdered = slotInteraction === 'ordered';
+61 
+62   const isActive = isOrdered && activeSlotIndex === index;
+63   const showCursor =
+64     isActive && isEmpty && config.inputMethod !== 'drag';
+65   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+66 
+67   const slotRef = useRef<HTMLElement | null>(null);
+68   const prevIsWrongRef = useRef(isWrong);
+69   const prevTileIdRef = useRef(tileId);
+70   // Holds the startFade handle returned by triggerEjectReturn so we can call
+71   // it when EJECT_TILE fires and the tile is back in the bank.
+72   const startFadeRef = useRef<(() => void) | null>(null);
+73 
+74   // Drop target handler — choose evaluation or swap based on interaction mode
+75   const handleDrop = useCallback(
+76     (droppedTileId: string, targetZoneIndex: number) => {
+77       if (isOrdered) {
+78         placeTile(droppedTileId, targetZoneIndex);
+79       } else {
+80         swapOrPlace(droppedTileId, targetZoneIndex);
+81       }
+82     },
+83     [isOrdered, placeTile, swapOrPlace],
+84   );
+85 
+86   // Register as drop target
+87   useEffect(() => {
+88     const el = slotRef.current;
+89     if (!el) return;
+90     return dropTargetForElements({
+91       element: el,
+92       getData: () => ({ zoneIndex: index }),
+93       onDrop: ({ source }) => {
+94         // Slot-tile drags (sourceZoneIndex present) handle their own
+95         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+96         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+97         const sourceTileId = source.data['tileId'];
+98         if (typeof sourceTileId === 'string') {
+99           handleDrop(sourceTileId, index);
+100           // Clear drag active state here — the draggable component (bank tile)
+101           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+102           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+103         }
+104       },
+105     });
+106   }, [index, handleDrop, dispatch]);
+107 
+108   // Drag source for filled slots
+109   const {
+110     dragRef,
+111     onPointerDown,
+112     onPointerMove,
+113     onPointerUp,
+114     onPointerCancel,
+115   } = useSlotTileDrag({
+116     tileId,
+117     label,
+118     zoneIndex: index,
+119     onDrop: handleDrop,
+120   });
+121 
+122   // Click handler: remove tile from slot (returns to bank)
+123   const handleClick = useCallback(() => {
+124     if (isEmpty) return;
+125     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+126   }, [isEmpty, dispatch, index]);
+127 
+128   // Feedback animations: trigger on state transitions
+129   useEffect(() => {
+130     const el = slotRef.current;
+131     if (!el) return;
+132 
+133     const wasWrong = prevIsWrongRef.current;
+134     prevIsWrongRef.current = isWrong;
+135 
+136     const prevTileId = prevTileIdRef.current;
+137     prevTileIdRef.current = tileId;
+138     const freshlyPlaced = tileId !== null && prevTileId === null;
+139 
+140     if (isWrong && !wasWrong) {
+141       triggerShake(el);
+142 
+143       if (config.wrongTileBehavior === 'lock-auto-eject') {
+144         // After the shake settles, start the fly animation. The ghost parks at
+145         // the hole and waits; startFadeRef.current() is called below when
+146         // EJECT_TILE fires and the tile is visible in the bank.
+147         const timerId = setTimeout(() => {
+148           const tileEl = dragRef.current;
+149           if (!tileEl) return;
+150           const { startFade } = triggerEjectReturn(
+151             tileEl,
+152             tileId,
+153             () => {},
+154           );
+155           startFadeRef.current = startFade;
+156         }, 350);
+157         return () => clearTimeout(timerId);
+158       }
+159     } else if (!isWrong && wasWrong && tileId === null) {
+160       // EJECT_TILE fired: tile is now back in the bank — fade the ghost out.
+161       startFadeRef.current?.();
+162       startFadeRef.current = null;
+163     } else if (freshlyPlaced && !isWrong) {
+164       triggerPop(el);
+165     }
+166   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+167 
+168   return {
+169     renderProps: {
+170       label,
+171       tileId,
+172       isActive,
+173       isWrong,
+174       isLocked,
+175       isEmpty,
+176       showCursor,
+177     },
+178     slotRef,
+179     dragRef,
+180     handleClick,
+181     isBeingDragged,
+182     pointerHandlers: {
+183       onPointerDown,
+184       onPointerMove,
+185       onPointerUp,
+186       onPointerCancel,
+187     },
+188   };
+189 };
 190
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:35Z)**_
@@ -1292,99 +1310,100 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-5	
-6	const LetterTile = ({ tile }: { tile: TileItem }) => {
-7	  const {
-8	    ref,
-9	    handleClick,
-10	    onPointerDown,
-11	    onPointerMove,
-12	    onPointerUp,
-13	    onPointerCancel,
-14	  } = useDraggableTile(tile);
-15	
-16	  return (
-17	    <button
-18	      ref={ref}
-19	      type="button"
-20	      aria-label={`Letter ${tile.label}`}
-21	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-22	      style={skeuoStyle}
-23	      onClick={handleClick}
-24	      onPointerDown={onPointerDown}
-25	      onPointerMove={onPointerMove}
-26	      onPointerUp={onPointerUp}
-27	      onPointerCancel={onPointerCancel}
-28	    >
-29	      {tile.label}
-30	    </button>
-31	  );
-32	};
-33	
-34	export const LetterTileBank = () => {
-35	  const { allTiles, bankTileIds, config, dragActiveTileId } =
-36	    useAnswerGameContext();
-37	
-38	  if (config.inputMethod === 'type') {
-39	    const isTouch = navigator.maxTouchPoints > 0;
-40	    return (
-41	      <p className="text-sm text-muted-foreground" aria-live="polite">
-42	        {isTouch
-43	          ? 'Tap a slot to type'
-44	          : '⌨️ Type the letters on your keyboard'}
-45	      </p>
-46	    );
-47	  }
-48	
-49	  return (
-50	    <div
-51	      data-tile-bank=""
-52	      className="flex flex-wrap justify-center gap-3"
-53	    >
-54	      {allTiles.map((tile) => {
-55	        const inBank = bankTileIds.includes(tile.id);
-56	        const isDragging = tile.id === dragActiveTileId;
-57	
-58	        if (inBank && isDragging) {
-59	          return (
-60	            <div key={tile.id} className="relative size-14">
-61	              <div
-62	                data-tile-bank-hole={tile.id}
-63	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-64	                aria-hidden="true"
-65	              />
-66	              <div
-67	                className="absolute inset-0 invisible"
-68	                aria-hidden="true"
-69	              >
-70	                <LetterTile tile={tile} />
-71	              </div>
-72	            </div>
-73	          );
-74	        }
-75	
-76	        if (inBank) {
-77	          return <LetterTile key={tile.id} tile={tile} />;
-78	        }
-79	
-80	        return (
-81	          <div
-82	            key={tile.id}
-83	            data-tile-bank-hole={tile.id}
-84	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-85	            aria-hidden="true"
-86	          />
-87	        );
-88	      })}
-89	    </div>
-90	  );
-91	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+5 
+6 const LetterTile = ({ tile }: { tile: TileItem }) => {
+7   const {
+8     ref,
+9     handleClick,
+10     onPointerDown,
+11     onPointerMove,
+12     onPointerUp,
+13     onPointerCancel,
+14   } = useDraggableTile(tile);
+15 
+16   return (
+17     <button
+18       ref={ref}
+19       type="button"
+20       aria-label={`Letter ${tile.label}`}
+21       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+22       style={skeuoStyle}
+23       onClick={handleClick}
+24       onPointerDown={onPointerDown}
+25       onPointerMove={onPointerMove}
+26       onPointerUp={onPointerUp}
+27       onPointerCancel={onPointerCancel}
+28     >
+29       {tile.label}
+30     </button>
+31   );
+32 };
+33 
+34 export const LetterTileBank = () => {
+35   const { allTiles, bankTileIds, config, dragActiveTileId } =
+36     useAnswerGameContext();
+37 
+38   if (config.inputMethod === 'type') {
+39     const isTouch = navigator.maxTouchPoints > 0;
+40     return (
+41       <p className="text-sm text-muted-foreground" aria-live="polite">
+42         {isTouch
+43           ? 'Tap a slot to type'
+44           : '⌨️ Type the letters on your keyboard'}
+45       </p>
+46     );
+47   }
+48 
+49   return (
+50     <div
+51       data-tile-bank=""
+52       className="flex flex-wrap justify-center gap-3"
+53     >
+54       {allTiles.map((tile) => {
+55         const inBank = bankTileIds.includes(tile.id);
+56         const isDragging = tile.id === dragActiveTileId;
+57 
+58         if (inBank && isDragging) {
+59           return (
+60             <div key={tile.id} className="relative size-14">
+61               <div
+62                 data-tile-bank-hole={tile.id}
+63                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+64                 aria-hidden="true"
+65               />
+66               <div
+67                 className="absolute inset-0 invisible"
+68                 aria-hidden="true"
+69               >
+70                 <LetterTile tile={tile} />
+71               </div>
+72             </div>
+73           );
+74         }
+75 
+76         if (inBank) {
+77           return <LetterTile key={tile.id} tile={tile} />;
+78         }
+79 
+80         return (
+81           <div
+82             key={tile.id}
+83             data-tile-bank-hole={tile.id}
+84             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+85             aria-hidden="true"
+86           />
+87         );
+88       })}
+89     </div>
+90   );
+91 };
 92
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:37Z)**_
@@ -1394,257 +1413,258 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	}
-65	
-66	export const useTouchDrag = ({
-67	  tileId,
-68	  label,
-69	  onDragStart,
-70	  onDragCancel,
-71	  onDrop,
-72	}: UseTouchDragOptions): TouchDragHandlers => {
-73	  const onDragCancelRef = useRef(onDragCancel);
-74	  useEffect(() => {
-75	    onDragCancelRef.current = onDragCancel;
-76	  }, [onDragCancel]);
-77	
-78	  const ghostRef = useRef<GhostInfo | null>(null);
-79	  const isDragging = useRef(false);
-80	  const startPos = useRef<{ x: number; y: number } | null>(null);
-81	  const capturedElRef = useRef<HTMLElement | null>(null);
-82	  const capturedPointerIdRef = useRef<number | null>(null);
-83	  const safetyTimerRef = useRef<ReturnType<
-84	    typeof globalThis.setTimeout
-85	  > | null>(null);
-86	
-87	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-88	  // → cleanupGhost re-entry.
-89	  const cleanupInProgressRef = useRef(false);
-90	
-91	  const cleanupGhost = useCallback(() => {
-92	    if (cleanupInProgressRef.current) return;
-93	    cleanupInProgressRef.current = true;
-94	
-95	    if (safetyTimerRef.current !== null) {
-96	      globalThis.clearTimeout(safetyTimerRef.current);
-97	      safetyTimerRef.current = null;
-98	    }
-99	
-100	    ghostRef.current?.el.remove();
-101	    ghostRef.current = null;
-102	
-103	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-104	    // lostpointercapture event triggered by it sees null refs and bails out.
-105	    const el = capturedElRef.current;
-106	    const pointerId = capturedPointerIdRef.current;
-107	    capturedElRef.current = null;
-108	    capturedPointerIdRef.current = null;
-109	
-110	    if (el !== null && pointerId !== null) {
-111	      try {
-112	        el.releasePointerCapture(pointerId);
-113	      } catch {
-114	        // Element may no longer be in the DOM — ignore.
-115	      }
-116	    }
-117	
-118	    isDragging.current = false;
-119	    startPos.current = null;
-120	    cleanupInProgressRef.current = false;
-121	  }, []);
-122	
-123	  const cleanup = useCallback(() => {
-124	    cleanupGhost();
-125	  }, [cleanupGhost]);
-126	
-127	  const onPointerDown = useCallback(
-128	    (e: PointerEvent<HTMLElement>) => {
-129	      if (e.pointerType === 'mouse' || !tileId) return;
-130	      e.currentTarget.setPointerCapture(e.pointerId);
-131	      capturedElRef.current = e.currentTarget;
-132	      capturedPointerIdRef.current = e.pointerId;
-133	      startPos.current = { x: e.clientX, y: e.clientY };
-134	      isDragging.current = false;
-135	
-136	      // When the captured element is removed from the DOM (e.g. a slot tile
-137	      // gets auto-ejected while the user is dragging it), the browser fires
-138	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-139	      // ghost doesn't float for 5 seconds.
-140	      e.currentTarget.addEventListener(
-141	        'lostpointercapture',
-142	        () => {
-143	          if (!cleanupInProgressRef.current && isDragging.current) {
-144	            cleanupGhost();
-145	            onDragCancelRef.current?.();
-146	          }
-147	        },
-148	        { once: true },
-149	      );
-150	    },
-151	    [tileId, cleanupGhost],
-152	  );
-153	
-154	  const onPointerMove = useCallback(
-155	    (e: PointerEvent<HTMLElement>) => {
-156	      if (e.pointerType === 'mouse' || !startPos.current) return;
-157	
-158	      if (!isDragging.current) {
-159	        const dx = e.clientX - startPos.current.x;
-160	        const dy = e.clientY - startPos.current.y;
-161	        if (
-162	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-163	          Math.abs(dy) > DRAG_THRESHOLD_PX
-164	        ) {
-165	          isDragging.current = true;
-166	          ghostRef.current = buildGhost(
-167	            e.currentTarget,
-168	            label,
-169	            e.clientX,
-170	            e.clientY,
-171	          );
-172	          onDragStart?.();
-173	
-174	          safetyTimerRef.current = globalThis.setTimeout(() => {
-175	            cleanupGhost();
-176	            onDragCancelRef.current?.();
-177	          }, 5000);
-178	
-179	          document.addEventListener('contextmenu', cleanupGhost, {
-180	            once: true,
-181	          });
-182	          document.addEventListener('visibilitychange', cleanupGhost, {
-183	            once: true,
-184	          });
-185	        }
-186	      }
-187	
-188	      if (isDragging.current && ghostRef.current) {
-189	        const { el, halfW, halfH } = ghostRef.current;
-190	        el.style.left = `${e.clientX - halfW}px`;
-191	        el.style.top = `${e.clientY - halfH}px`;
-192	      }
-193	    },
-194	    [label, onDragStart, cleanupGhost],
-195	  );
-196	
-197	  const onPointerUp = useCallback(
-198	    (e: PointerEvent<HTMLElement>) => {
-199	      if (e.pointerType === 'mouse' || !startPos.current) return;
-200	
-201	      if (isDragging.current) {
-202	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-203	        ghostRef.current?.el.remove();
-204	        ghostRef.current = null;
-205	
-206	        const elements = document.elementsFromPoint(
-207	          e.clientX,
-208	          e.clientY,
-209	        );
-210	        let dropped = false;
-211	        for (const el of elements) {
-212	          if (
-213	            el instanceof HTMLElement &&
-214	            el.dataset['zoneIndex'] !== undefined
-215	          ) {
-216	            const zoneIndex = Number.parseInt(
-217	              el.dataset['zoneIndex'],
-218	              10,
-219	            );
-220	            if (!Number.isNaN(zoneIndex)) {
-221	              onDrop(tileId, zoneIndex);
-222	              dropped = true;
-223	              break;
-224	            }
-225	          }
-226	        }
-227	        if (!dropped) {
-228	          onDragCancelRef.current?.();
-229	        }
-230	      }
-231	
-232	      cleanup();
-233	    },
-234	    [tileId, onDrop, cleanup],
-235	  );
-236	
-237	  const onPointerCancel = useCallback(
-238	    (e: PointerEvent<HTMLElement>) => {
-239	      if (e.pointerType === 'mouse') return;
-240	      if (isDragging.current) {
-241	        onDragCancelRef.current?.();
-242	      }
-243	      cleanupGhost();
-244	    },
-245	    [cleanupGhost],
-246	  );
-247	
-248	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-249	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64 }
+65 
+66 export const useTouchDrag = ({
+67   tileId,
+68   label,
+69   onDragStart,
+70   onDragCancel,
+71   onDrop,
+72 }: UseTouchDragOptions): TouchDragHandlers => {
+73   const onDragCancelRef = useRef(onDragCancel);
+74   useEffect(() => {
+75     onDragCancelRef.current = onDragCancel;
+76   }, [onDragCancel]);
+77 
+78   const ghostRef = useRef<GhostInfo | null>(null);
+79   const isDragging = useRef(false);
+80   const startPos = useRef<{ x: number; y: number } | null>(null);
+81   const capturedElRef = useRef<HTMLElement | null>(null);
+82   const capturedPointerIdRef = useRef<number | null>(null);
+83   const safetyTimerRef = useRef<ReturnType<
+84     typeof globalThis.setTimeout
+85   > | null>(null);
+86 
+87   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+88   // → cleanupGhost re-entry.
+89   const cleanupInProgressRef = useRef(false);
+90 
+91   const cleanupGhost = useCallback(() => {
+92     if (cleanupInProgressRef.current) return;
+93     cleanupInProgressRef.current = true;
+94 
+95     if (safetyTimerRef.current !== null) {
+96       globalThis.clearTimeout(safetyTimerRef.current);
+97       safetyTimerRef.current = null;
+98     }
+99 
+100     ghostRef.current?.el.remove();
+101     ghostRef.current = null;
+102 
+103     // Clear refs BEFORE releasePointerCapture so that any synchronous
+104     // lostpointercapture event triggered by it sees null refs and bails out.
+105     const el = capturedElRef.current;
+106     const pointerId = capturedPointerIdRef.current;
+107     capturedElRef.current = null;
+108     capturedPointerIdRef.current = null;
+109 
+110     if (el !== null && pointerId !== null) {
+111       try {
+112         el.releasePointerCapture(pointerId);
+113       } catch {
+114         // Element may no longer be in the DOM — ignore.
+115       }
+116     }
+117 
+118     isDragging.current = false;
+119     startPos.current = null;
+120     cleanupInProgressRef.current = false;
+121   }, []);
+122 
+123   const cleanup = useCallback(() => {
+124     cleanupGhost();
+125   }, [cleanupGhost]);
+126 
+127   const onPointerDown = useCallback(
+128     (e: PointerEvent<HTMLElement>) => {
+129       if (e.pointerType === 'mouse' || !tileId) return;
+130       e.currentTarget.setPointerCapture(e.pointerId);
+131       capturedElRef.current = e.currentTarget;
+132       capturedPointerIdRef.current = e.pointerId;
+133       startPos.current = { x: e.clientX, y: e.clientY };
+134       isDragging.current = false;
+135 
+136       // When the captured element is removed from the DOM (e.g. a slot tile
+137       // gets auto-ejected while the user is dragging it), the browser fires
+138       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+139       // ghost doesn't float for 5 seconds.
+140       e.currentTarget.addEventListener(
+141         'lostpointercapture',
+142         () => {
+143           if (!cleanupInProgressRef.current && isDragging.current) {
+144             cleanupGhost();
+145             onDragCancelRef.current?.();
+146           }
+147         },
+148         { once: true },
+149       );
+150     },
+151     [tileId, cleanupGhost],
+152   );
+153 
+154   const onPointerMove = useCallback(
+155     (e: PointerEvent<HTMLElement>) => {
+156       if (e.pointerType === 'mouse' || !startPos.current) return;
+157 
+158       if (!isDragging.current) {
+159         const dx = e.clientX - startPos.current.x;
+160         const dy = e.clientY - startPos.current.y;
+161         if (
+162           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+163           Math.abs(dy) > DRAG_THRESHOLD_PX
+164         ) {
+165           isDragging.current = true;
+166           ghostRef.current = buildGhost(
+167             e.currentTarget,
+168             label,
+169             e.clientX,
+170             e.clientY,
+171           );
+172           onDragStart?.();
+173 
+174           safetyTimerRef.current = globalThis.setTimeout(() => {
+175             cleanupGhost();
+176             onDragCancelRef.current?.();
+177           }, 5000);
+178 
+179           document.addEventListener('contextmenu', cleanupGhost, {
+180             once: true,
+181           });
+182           document.addEventListener('visibilitychange', cleanupGhost, {
+183             once: true,
+184           });
+185         }
+186       }
+187 
+188       if (isDragging.current && ghostRef.current) {
+189         const { el, halfW, halfH } = ghostRef.current;
+190         el.style.left = `${e.clientX - halfW}px`;
+191         el.style.top = `${e.clientY - halfH}px`;
+192       }
+193     },
+194     [label, onDragStart, cleanupGhost],
+195   );
+196 
+197   const onPointerUp = useCallback(
+198     (e: PointerEvent<HTMLElement>) => {
+199       if (e.pointerType === 'mouse' || !startPos.current) return;
+200 
+201       if (isDragging.current) {
+202         // Remove ghost before elementsFromPoint so it doesn't interfere.
+203         ghostRef.current?.el.remove();
+204         ghostRef.current = null;
+205 
+206         const elements = document.elementsFromPoint(
+207           e.clientX,
+208           e.clientY,
+209         );
+210         let dropped = false;
+211         for (const el of elements) {
+212           if (
+213             el instanceof HTMLElement &&
+214             el.dataset['zoneIndex'] !== undefined
+215           ) {
+216             const zoneIndex = Number.parseInt(
+217               el.dataset['zoneIndex'],
+218               10,
+219             );
+220             if (!Number.isNaN(zoneIndex)) {
+221               onDrop(tileId, zoneIndex);
+222               dropped = true;
+223               break;
+224             }
+225           }
+226         }
+227         if (!dropped) {
+228           onDragCancelRef.current?.();
+229         }
+230       }
+231 
+232       cleanup();
+233     },
+234     [tileId, onDrop, cleanup],
+235   );
+236 
+237   const onPointerCancel = useCallback(
+238     (e: PointerEvent<HTMLElement>) => {
+239       if (e.pointerType === 'mouse') return;
+240       if (isDragging.current) {
+241         onDragCancelRef.current?.();
+242       }
+243       cleanupGhost();
+244     },
+245     [cleanupGhost],
+246   );
+247 
+248   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+249 };
 250
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:40Z)**_
@@ -1660,28 +1680,29 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:41Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/magnetic-snap.ts`
 
 ```text
-1	export function lerp(a: number, b: number, t: number): number {
-2	  return a + (b - a) * t;
-3	}
-4	
-5	const MAGNETIC_RADIUS = 60;
-6	const MAGNETIC_STRENGTH = 0.3;
-7	
-8	export function magneticOffset(
-9	  distance: number,
-10	  currentPos: { x: number; y: number },
-11	  zoneCenter: { x: number; y: number },
-12	): { x: number; y: number } {
-13	  if (distance >= MAGNETIC_RADIUS) return { x: 0, y: 0 };
-14	
-15	  const t = (1 - distance / MAGNETIC_RADIUS) * MAGNETIC_STRENGTH;
-16	  return {
-17	    x: lerp(currentPos.x, zoneCenter.x, t) - currentPos.x,
-18	    y: lerp(currentPos.y, zoneCenter.y, t) - currentPos.y,
-19	  };
-20	}
+1 export function lerp(a: number, b: number, t: number): number {
+2   return a + (b - a) * t;
+3 }
+4 
+5 const MAGNETIC_RADIUS = 60;
+6 const MAGNETIC_STRENGTH = 0.3;
+7 
+8 export function magneticOffset(
+9   distance: number,
+10   currentPos: { x: number; y: number },
+11   zoneCenter: { x: number; y: number },
+12 ): { x: number; y: number } {
+13   if (distance >= MAGNETIC_RADIUS) return { x: 0, y: 0 };
+14 
+15   const t = (1 - distance / MAGNETIC_RADIUS) * MAGNETIC_STRENGTH;
+16   return {
+17     x: lerp(currentPos.x, zoneCenter.x, t) - currentPos.x,
+18     y: lerp(currentPos.y, zoneCenter.y, t) - currentPos.y,
+19   };
+20 }
 21
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:52:42Z)**_
@@ -1691,152 +1712,153 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:52:42Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile flying from its slot toward the tile bank.
-28	 *
-29	 * Phase 1: ghost flies to the hole (transform only, no opacity change).
-30	 * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
-31	 *          This lets the caller wait until the real tile has appeared in the
-32	 *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
-33	 *          preventing a visible gap between ghost disappearing and tile appearing.
-34	 *
-35	 * Returns { startFade } — call it when the bank tile is ready to be shown.
-36	 * If startFade is called before phase 1 completes, the fade starts immediately
-37	 * after the ghost arrives. Calling it multiple times is a no-op.
-38	 *
-39	 * el is the button inside the slot. We use its parent (the slot li) for
-40	 * accurate pixel dimensions and border-radius, then build a fresh fixed-
-41	 * position ghost div so the animation escapes overflow:hidden ancestors
-42	 * and avoids size-full / percentage class conflicts.
-43	 */
-44	export const triggerEjectReturn = (
-45	  el: HTMLElement,
-46	  tileId: string | null,
-47	  onComplete: () => void,
-48	): { startFade: () => void } => {
-49	  // Slot element gives us correct size + border-radius (button has size-full %).
-50	  const sourceEl = el.parentElement ?? el;
-51	  const sourceRect = sourceEl.getBoundingClientRect();
-52	  const { borderRadius } = globalThis.getComputedStyle(sourceEl);
-53	
-54	  // Fresh div — no inherited classes that could break fixed positioning.
-55	  const ghost = document.createElement('div');
-56	  ghost.innerHTML = el.innerHTML;
-57	  ghost.style.cssText = `
-58	    position: fixed;
-59	    top: ${sourceRect.top}px;
-60	    left: ${sourceRect.left}px;
-61	    width: ${sourceRect.width}px;
-62	    height: ${sourceRect.height}px;
-63	    border-radius: ${borderRadius};
-64	    display: flex;
-65	    align-items: center;
-66	    justify-content: center;
-67	    background: var(--card);
-68	    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-69	    z-index: 9999;
-70	    pointer-events: none;
-71	    margin: 0;
-72	  `;
-73	  document.body.append(ghost);
-74	
-75	  // Hide the original so only the ghost is visible during the flight.
-76	  el.style.opacity = '0';
-77	
-78	  const cleanup = () => {
-79	    ghost.remove();
-80	    el.style.opacity = '';
-81	    onComplete();
-82	  };
-83	
-84	  // Look up the specific hole for this tile, or fall back to the bank container.
-85	  const targetEl = tileId
-86	    ? document.querySelector<HTMLElement>(
-87	        `[data-tile-bank-hole="${tileId}"]`,
-88	      )
-89	    : document.querySelector<HTMLElement>('[data-tile-bank]');
-90	
-91	  // startFade state machine: phase-1 may complete before or after the caller
-92	  // triggers the fade, so we track both independently.
-93	  let fadeRequested = false;
-94	  let phaseOneDone = false;
-95	
-96	  const doFade = () => {
-97	    ghost.style.transition = 'opacity 200ms ease-out';
-98	    void ghost.offsetWidth;
-99	    ghost.style.opacity = '0';
-100	    ghost.addEventListener('transitionend', cleanup, { once: true });
-101	  };
-102	
-103	  const startFade = () => {
-104	    if (fadeRequested) return; // idempotent
-105	    fadeRequested = true;
-106	    if (phaseOneDone) doFade();
-107	  };
-108	
-109	  if (!targetEl) {
-110	    // No target — fade in place immediately (no hole to fly to).
-111	    ghost.style.transition = 'opacity 300ms ease-in';
-112	    void ghost.offsetWidth;
-113	    ghost.style.opacity = '0';
-114	    ghost.addEventListener('transitionend', cleanup, { once: true });
-115	    return { startFade };
-116	  }
-117	
-118	  const bankRect = targetEl.getBoundingClientRect();
-119	  const deltaX =
-120	    bankRect.left +
-121	    bankRect.width / 2 -
-122	    (sourceRect.left + sourceRect.width / 2);
-123	  const deltaY =
-124	    bankRect.top +
-125	    bankRect.height / 2 -
-126	    (sourceRect.top + sourceRect.height / 2);
-127	
-128	  // Phase 1: fly to the hole (no opacity change during flight).
-129	  ghost.style.transition = 'transform 300ms ease-in';
-130	  void ghost.offsetWidth;
-131	  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
-132	
-133	  ghost.addEventListener(
-134	    'transitionend',
-135	    () => {
-136	      phaseOneDone = true;
-137	      if (fadeRequested) doFade();
-138	      // Otherwise ghost waits at hole until startFade() is called.
-139	    },
-140	    { once: true },
-141	  );
-142	
-143	  return { startFade };
-144	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile flying from its slot toward the tile bank.
+28  *
+29  * Phase 1: ghost flies to the hole (transform only, no opacity change).
+30  * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
+31  *          This lets the caller wait until the real tile has appeared in the
+32  *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
+33  *          preventing a visible gap between ghost disappearing and tile appearing.
+34  *
+35  * Returns { startFade } — call it when the bank tile is ready to be shown.
+36  * If startFade is called before phase 1 completes, the fade starts immediately
+37  * after the ghost arrives. Calling it multiple times is a no-op.
+38  *
+39  * el is the button inside the slot. We use its parent (the slot li) for
+40  * accurate pixel dimensions and border-radius, then build a fresh fixed-
+41  * position ghost div so the animation escapes overflow:hidden ancestors
+42  * and avoids size-full / percentage class conflicts.
+43  */
+44 export const triggerEjectReturn = (
+45   el: HTMLElement,
+46   tileId: string | null,
+47   onComplete: () => void,
+48 ): { startFade: () => void } => {
+49   // Slot element gives us correct size + border-radius (button has size-full %).
+50   const sourceEl = el.parentElement ?? el;
+51   const sourceRect = sourceEl.getBoundingClientRect();
+52   const { borderRadius } = globalThis.getComputedStyle(sourceEl);
+53 
+54   // Fresh div — no inherited classes that could break fixed positioning.
+55   const ghost = document.createElement('div');
+56   ghost.innerHTML = el.innerHTML;
+57   ghost.style.cssText = `
+58     position: fixed;
+59     top: ${sourceRect.top}px;
+60     left: ${sourceRect.left}px;
+61     width: ${sourceRect.width}px;
+62     height: ${sourceRect.height}px;
+63     border-radius: ${borderRadius};
+64     display: flex;
+65     align-items: center;
+66     justify-content: center;
+67     background: var(--card);
+68     box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+69     z-index: 9999;
+70     pointer-events: none;
+71     margin: 0;
+72   `;
+73   document.body.append(ghost);
+74 
+75   // Hide the original so only the ghost is visible during the flight.
+76   el.style.opacity = '0';
+77 
+78   const cleanup = () => {
+79     ghost.remove();
+80     el.style.opacity = '';
+81     onComplete();
+82   };
+83 
+84   // Look up the specific hole for this tile, or fall back to the bank container.
+85   const targetEl = tileId
+86     ? document.querySelector<HTMLElement>(
+87         `[data-tile-bank-hole="${tileId}"]`,
+88       )
+89     : document.querySelector<HTMLElement>('[data-tile-bank]');
+90 
+91   // startFade state machine: phase-1 may complete before or after the caller
+92   // triggers the fade, so we track both independently.
+93   let fadeRequested = false;
+94   let phaseOneDone = false;
+95 
+96   const doFade = () => {
+97     ghost.style.transition = 'opacity 200ms ease-out';
+98     void ghost.offsetWidth;
+99     ghost.style.opacity = '0';
+100     ghost.addEventListener('transitionend', cleanup, { once: true });
+101   };
+102 
+103   const startFade = () => {
+104     if (fadeRequested) return; // idempotent
+105     fadeRequested = true;
+106     if (phaseOneDone) doFade();
+107   };
+108 
+109   if (!targetEl) {
+110     // No target — fade in place immediately (no hole to fly to).
+111     ghost.style.transition = 'opacity 300ms ease-in';
+112     void ghost.offsetWidth;
+113     ghost.style.opacity = '0';
+114     ghost.addEventListener('transitionend', cleanup, { once: true });
+115     return { startFade };
+116   }
+117 
+118   const bankRect = targetEl.getBoundingClientRect();
+119   const deltaX =
+120     bankRect.left +
+121     bankRect.width / 2 -
+122     (sourceRect.left + sourceRect.width / 2);
+123   const deltaY =
+124     bankRect.top +
+125     bankRect.height / 2 -
+126     (sourceRect.top + sourceRect.height / 2);
+127 
+128   // Phase 1: fly to the hole (no opacity change during flight).
+129   ghost.style.transition = 'transform 300ms ease-in';
+130   void ghost.offsetWidth;
+131   ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+132 
+133   ghost.addEventListener(
+134     'transitionend',
+135     () => {
+136       phaseOneDone = true;
+137       if (fadeRequested) doFade();
+138       // Otherwise ghost waits at hole until startFade() is called.
+139     },
+140     { once: true },
+141   );
+142 
+143   return { startFade };
+144 };
 145
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:53:37Z)**_
@@ -1847,6 +1869,7 @@ Now I have a good picture. Let me understand the issues:
 1. **Issue with "lock-manual"** - The user wasn't specific about what's broken here. This might be related to the `wrongTileBehavior === 'lock-auto-eject'` path but for manual mode.
 
 2. **Issue 3: weird corner color when dragging from slot to bank** - When dragging from slot to bank, the slot tile uses `useSlotBehavior`. Looking at [Slot.tsx line 75](src/components/answer-game/Slot/Slot.tsx):
+
    ```tsx
    className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
    ```
@@ -1877,201 +1900,202 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:53:37Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-5	
-6	type TileStyle = 'dots' | 'objects' | 'fingers';
-7	
-8	const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
-9	  tileStyle === 'dots' &&
-10	  !Number.isNaN(numericValue) &&
-11	  numericValue > 6 &&
-12	  numericValue <= 12;
-13	
-14	/** Pip positions (0–8) for each die value in a 3×3 grid. */
-15	const DICE_PIPS: Record<number, number[]> = {
-16	  1: [4],
-17	  2: [2, 6],
-18	  3: [2, 4, 6],
-19	  4: [0, 2, 6, 8],
-20	  5: [0, 2, 4, 6, 8],
-21	  6: [0, 2, 3, 5, 6, 8],
-22	};
-23	
-24	/** Which two die values add up to n for values 7–12. */
-25	const DOMINO_SPLIT: Record<number, [number, number]> = {
-26	  7: [4, 3],
-27	  8: [4, 4],
-28	  9: [5, 4],
-29	  10: [6, 4],
-30	  11: [6, 5],
-31	  12: [6, 6],
-32	};
-33	
-34	export const DiceFace = ({ value }: { value: number }) => {
-35	  const pips = DICE_PIPS[value] ?? [];
-36	  return (
-37	    <div
-38	      className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
-39	      aria-hidden="true"
-40	    >
-41	      {Array.from({ length: 9 }, (_, i) => (
-42	        <span
-43	          key={i}
-44	          data-cell=""
-45	          data-pip={pips.includes(i) ? '' : undefined}
-46	          className={[
-47	            'size-2.5 rounded-full',
-48	            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-49	          ].join(' ')}
-50	        />
-51	      ))}
-52	    </div>
-53	  );
-54	};
-55	
-56	export const DominoTile = ({ value }: { value: number }) => {
-57	  const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
-58	  return (
-59	    <div className="flex items-center gap-0" aria-hidden="true">
-60	      <DiceFace value={left} />
-61	      <span
-62	        data-divider=""
-63	        className="h-10 w-px shrink-0 bg-current opacity-30"
-64	      />
-65	      <DiceFace value={right} />
-66	    </div>
-67	  );
-68	};
-69	
-70	const NumeralTile = ({
-71	  tile,
-72	  tileStyle,
-73	}: {
-74	  tile: TileItem;
-75	  tileStyle: TileStyle;
-76	}) => {
-77	  const {
-78	    ref,
-79	    handleClick,
-80	    onPointerDown,
-81	    onPointerMove,
-82	    onPointerUp,
-83	    onPointerCancel,
-84	  } = useDraggableTile(tile);
-85	  const numericValue = Number.parseInt(tile.value, 10);
-86	
-87	  const isDomino = getIsDomino(tileStyle, numericValue);
-88	
-89	  return (
-90	    <button
-91	      ref={ref}
-92	      type="button"
-93	      aria-label={`Number ${tile.label}`}
-94	      className={[
-95	        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
-96	        isDomino ? 'h-[72px] w-32' : 'size-20',
-97	      ].join(' ')}
-98	      style={skeuoStyle}
-99	      onClick={handleClick}
-100	      onPointerDown={onPointerDown}
-101	      onPointerMove={onPointerMove}
-102	      onPointerUp={onPointerUp}
-103	      onPointerCancel={onPointerCancel}
-104	    >
-105	      {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-106	        numericValue <= 6 ? (
-107	          <DiceFace value={numericValue} />
-108	        ) : numericValue <= 12 ? (
-109	          <DominoTile value={numericValue} />
-110	        ) : (
-111	          <span className="text-3xl font-bold tabular-nums leading-none">
-112	            {tile.label}
-113	          </span>
-114	        )
-115	      ) : (
-116	        <span className="text-3xl font-bold tabular-nums leading-none">
-117	          {tile.label}
-118	        </span>
-119	      )}
-120	    </button>
-121	  );
-122	};
-123	
-124	export interface NumeralTileBankProps {
-125	  tileStyle: TileStyle;
-126	}
-127	
-128	export const NumeralTileBank = ({
-129	  tileStyle,
-130	}: NumeralTileBankProps) => {
-131	  const { allTiles, bankTileIds, dragActiveTileId } =
-132	    useAnswerGameContext();
-133	  return (
-134	    <div
-135	      data-tile-bank=""
-136	      className="flex flex-wrap justify-center gap-3"
-137	    >
-138	      {allTiles.map((tile) => {
-139	        const inBank = bankTileIds.includes(tile.id);
-140	        const isDragging = tile.id === dragActiveTileId;
-141	        const numericValue = Number.parseInt(tile.value, 10);
-142	        const isDomino = getIsDomino(tileStyle, numericValue);
-143	        const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
-144	
-145	        if (inBank && isDragging) {
-146	          return (
-147	            <div
-148	              key={tile.id}
-149	              className={['relative', holeSizeClass].join(' ')}
-150	            >
-151	              <div
-152	                data-tile-bank-hole={tile.id}
-153	                className={[
-154	                  'rounded-2xl bg-muted/60 shadow-inner',
-155	                  holeSizeClass,
-156	                ].join(' ')}
-157	                aria-hidden="true"
-158	              />
-159	              <div
-160	                className="absolute inset-0 invisible"
-161	                aria-hidden="true"
-162	              >
-163	                <NumeralTile tile={tile} tileStyle={tileStyle} />
-164	              </div>
-165	            </div>
-166	          );
-167	        }
-168	
-169	        if (inBank) {
-170	          return (
-171	            <NumeralTile
-172	              key={tile.id}
-173	              tile={tile}
-174	              tileStyle={tileStyle}
-175	            />
-176	          );
-177	        }
-178	
-179	        return (
-180	          <div
-181	            key={tile.id}
-182	            data-tile-bank-hole={tile.id}
-183	            className={[
-184	              'rounded-2xl bg-muted/60 shadow-inner',
-185	              holeSizeClass,
-186	            ].join(' ')}
-187	            aria-hidden="true"
-188	          />
-189	        );
-190	      })}
-191	    </div>
-192	  );
-193	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+5 
+6 type TileStyle = 'dots' | 'objects' | 'fingers';
+7 
+8 const getIsDomino = (tileStyle: TileStyle, numericValue: number) =>
+9   tileStyle === 'dots' &&
+10   !Number.isNaN(numericValue) &&
+11   numericValue > 6 &&
+12   numericValue <= 12;
+13 
+14 /** Pip positions (0–8) for each die value in a 3×3 grid. */
+15 const DICE_PIPS: Record<number, number[]> = {
+16   1: [4],
+17   2: [2, 6],
+18   3: [2, 4, 6],
+19   4: [0, 2, 6, 8],
+20   5: [0, 2, 4, 6, 8],
+21   6: [0, 2, 3, 5, 6, 8],
+22 };
+23 
+24 /** Which two die values add up to n for values 7–12. */
+25 const DOMINO_SPLIT: Record<number, [number, number]> = {
+26   7: [4, 3],
+27   8: [4, 4],
+28   9: [5, 4],
+29   10: [6, 4],
+30   11: [6, 5],
+31   12: [6, 6],
+32 };
+33 
+34 export const DiceFace = ({ value }: { value: number }) => {
+35   const pips = DICE_PIPS[value] ?? [];
+36   return (
+37     <div
+38       className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
+39       aria-hidden="true"
+40     >
+41       {Array.from({ length: 9 }, (_, i) => (
+42         <span
+43           key={i}
+44           data-cell=""
+45           data-pip={pips.includes(i) ? '' : undefined}
+46           className={[
+47             'size-2.5 rounded-full',
+48             pips.includes(i) ? 'bg-current' : 'bg-transparent',
+49           ].join(' ')}
+50         />
+51       ))}
+52     </div>
+53   );
+54 };
+55 
+56 export const DominoTile = ({ value }: { value: number }) => {
+57   const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
+58   return (
+59     <div className="flex items-center gap-0" aria-hidden="true">
+60       <DiceFace value={left} />
+61       <span
+62         data-divider=""
+63         className="h-10 w-px shrink-0 bg-current opacity-30"
+64       />
+65       <DiceFace value={right} />
+66     </div>
+67   );
+68 };
+69 
+70 const NumeralTile = ({
+71   tile,
+72   tileStyle,
+73 }: {
+74   tile: TileItem;
+75   tileStyle: TileStyle;
+76 }) => {
+77   const {
+78     ref,
+79     handleClick,
+80     onPointerDown,
+81     onPointerMove,
+82     onPointerUp,
+83     onPointerCancel,
+84   } = useDraggableTile(tile);
+85   const numericValue = Number.parseInt(tile.value, 10);
+86 
+87   const isDomino = getIsDomino(tileStyle, numericValue);
+88 
+89   return (
+90     <button
+91       ref={ref}
+92       type="button"
+93       aria-label={`Number ${tile.label}`}
+94       className={[
+95         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl p-2 transition-transform active:scale-95 active:cursor-grabbing',
+96         isDomino ? 'h-[72px] w-32' : 'size-20',
+97       ].join(' ')}
+98       style={skeuoStyle}
+99       onClick={handleClick}
+100       onPointerDown={onPointerDown}
+101       onPointerMove={onPointerMove}
+102       onPointerUp={onPointerUp}
+103       onPointerCancel={onPointerCancel}
+104     >
+105       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+106         numericValue <= 6 ? (
+107           <DiceFace value={numericValue} />
+108         ) : numericValue <= 12 ? (
+109           <DominoTile value={numericValue} />
+110         ) : (
+111           <span className="text-3xl font-bold tabular-nums leading-none">
+112             {tile.label}
+113           </span>
+114         )
+115       ) : (
+116         <span className="text-3xl font-bold tabular-nums leading-none">
+117           {tile.label}
+118         </span>
+119       )}
+120     </button>
+121   );
+122 };
+123 
+124 export interface NumeralTileBankProps {
+125   tileStyle: TileStyle;
+126 }
+127 
+128 export const NumeralTileBank = ({
+129   tileStyle,
+130 }: NumeralTileBankProps) => {
+131   const { allTiles, bankTileIds, dragActiveTileId } =
+132     useAnswerGameContext();
+133   return (
+134     <div
+135       data-tile-bank=""
+136       className="flex flex-wrap justify-center gap-3"
+137     >
+138       {allTiles.map((tile) => {
+139         const inBank = bankTileIds.includes(tile.id);
+140         const isDragging = tile.id === dragActiveTileId;
+141         const numericValue = Number.parseInt(tile.value, 10);
+142         const isDomino = getIsDomino(tileStyle, numericValue);
+143         const holeSizeClass = isDomino ? 'h-[72px] w-32' : 'size-20';
+144 
+145         if (inBank && isDragging) {
+146           return (
+147             <div
+148               key={tile.id}
+149               className={['relative', holeSizeClass].join(' ')}
+150             >
+151               <div
+152                 data-tile-bank-hole={tile.id}
+153                 className={[
+154                   'rounded-2xl bg-muted/60 shadow-inner',
+155                   holeSizeClass,
+156                 ].join(' ')}
+157                 aria-hidden="true"
+158               />
+159               <div
+160                 className="absolute inset-0 invisible"
+161                 aria-hidden="true"
+162               >
+163                 <NumeralTile tile={tile} tileStyle={tileStyle} />
+164               </div>
+165             </div>
+166           );
+167         }
+168 
+169         if (inBank) {
+170           return (
+171             <NumeralTile
+172               key={tile.id}
+173               tile={tile}
+174               tileStyle={tileStyle}
+175             />
+176           );
+177         }
+178 
+179         return (
+180           <div
+181             key={tile.id}
+182             data-tile-bank-hole={tile.id}
+183             className={[
+184               'rounded-2xl bg-muted/60 shadow-inner',
+185               holeSizeClass,
+186             ].join(' ')}
+187             aria-hidden="true"
+188           />
+189         );
+190       })}
+191     </div>
+192   );
+193 };
 194
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:53:38Z)**_
@@ -2081,18 +2105,19 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:53:38Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/styles.ts`
 
 ```text
-1	import type { CSSProperties } from 'react';
-2	
-3	/** Skeuomorphic tile button style — applied to all draggable tile buttons. */
-4	export const skeuoStyle: CSSProperties = {
-5	  background:
-6	    'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
-7	  boxShadow:
-8	    'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
-9	  textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
-10	};
+1 import type { CSSProperties } from 'react';
+2 
+3 /** Skeuomorphic tile button style — applied to all draggable tile buttons. */
+4 export const skeuoStyle: CSSProperties = {
+5   background:
+6     'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
+7   boxShadow:
+8     'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
+9   textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
+10 };
 11
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:55:17Z)**_
@@ -2104,8 +2129,7 @@ Now I have a comprehensive understanding of the codebase. Let me analyze the iss
 
 **Issue 3: Weird corner color when dragging from slot to bank**
 
-When a tile is in a slot and has been evaluated (correct=blue primary, wrong=red destructive), the slot container has background colors like `bg-primary/10` or `bg-destructive/10`. The inner button in the slot has `absolute inset-0 rounded-[inherit]` with `style={skeuoStyle}`. 
-
+When a tile is in a slot and has been evaluated (correct=blue primary, wrong=red destructive), the slot container has background colors like `bg-primary/10` or `bg-destructive/10`. The inner button in the slot has `absolute inset-0 rounded-[inherit]` with `style={skeuoStyle}`.
 
 The issue is that when the browser captures the drag ghost image, it's grabbing the button element itself, which doesn't actually have rounded corners applied to it visually—the rounding comes from the parent slot's `overflow-hidden` clipping. So the drag preview shows the button with sharp corners and the full background color instead of the rounded, tinted appearance. has, say, `rounded-xl` (no, it doesn't have any explicit rounded class), then the button inherits 0 radius. Actually looking at Slot.tsx, the Tag element (`li`/`span`/`div`) doesn't have any explicit rounded class itself - it just has `border-2` etc.
 
@@ -2122,8 +2146,9 @@ Unless... the issue is specifically with the slot's `border-2 border-primary` cl
 For absolutely positioned elements, `inset: 0` positions relative to the padding box of the nearest positioned ancestor, which means the button sits inside the border area and wouldn't cover it. So when they drag a slot tile that's been marked correct or wrong, the drag image shows a weird corner color because the rounded corners and border are still visible around the button's solid background. the primary/destructive color.
 
 Looking at Slot.tsx again:
+
 - The outer `Tag` element has `overflow-hidden`, the `stateClasses`, and border-2 with border-primary/border-destructive, plus `bg-primary/10` or `bg-destructive/10`
-- Inside: `<div className="absolute inset-0 bg-muted/60 shadow-inner" />` 
+- Inside: `<div className="absolute inset-0 bg-muted/60 shadow-inner" />`
 - Inside: `<button>` with `skeuoStyle` and `absolute inset-0 rounded-[inherit]`
 
 The `bg-muted/60 shadow-inner` div is ALSO absolute inset-0 - and it's rendered BEFORE the button in DOM order. The button is on top.
@@ -2162,256 +2187,257 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:55:17Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    phase: 'playing',
-20	    roundIndex: 0,
-21	    retryCount: 0,
-22	  };
-23	}
-24	
-25	export function answerGameReducer(
-26	  state: AnswerGameState,
-27	  action: AnswerGameAction,
-28	): AnswerGameState {
-29	  switch (action.type) {
-30	    case 'INIT_ROUND': {
-31	      return {
-32	        ...state,
-33	        allTiles: action.tiles,
-34	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-35	        zones: action.zones,
-36	        activeSlotIndex: 0,
-37	        phase: 'playing',
-38	        roundIndex: 0,
-39	        retryCount: 0,
-40	      };
-41	    }
-42	
-43	    case 'PLACE_TILE': {
-44	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-45	      const zone = state.zones[action.zoneIndex];
-46	      if (!tile || !zone) return state;
-47	
-48	      const correct = tile.value === zone.expectedValue;
-49	
-50	      // A tile placement always ends any active drag for that tile.
-51	      const dragActiveTileId =
-52	        state.dragActiveTileId === action.tileId
-53	          ? null
-54	          : state.dragActiveTileId;
-55	
-56	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-57	        return {
-58	          ...state,
-59	          dragActiveTileId,
-60	          retryCount: state.retryCount + 1,
-61	        };
-62	      }
-63	
-64	      if (correct) {
-65	        const previousId = zone.placedTileId;
-66	        let newBankTileIds = state.bankTileIds.filter(
-67	          (id) => id !== action.tileId,
-68	        );
-69	        if (previousId !== null && previousId !== action.tileId) {
-70	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-71	          newBankTileIds = [...newBankTileIds, previousId];
-72	        }
-73	        const newZone: AnswerZone = {
-74	          ...zone,
-75	          placedTileId: action.tileId,
-76	          isWrong: false,
-77	          isLocked: false,
-78	        };
-79	        const newZones = state.zones.map((z, i) =>
-80	          i === action.zoneIndex ? newZone : z,
-81	        );
-82	        const nextActiveSlot = newZones.findIndex(
-83	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-84	        );
-85	        const allFilledCorrectly = newZones.every(
-86	          (z) => z.placedTileId !== null && !z.isWrong,
-87	        );
-88	        const isLastRound =
-89	          state.roundIndex >= state.config.totalRounds - 1;
-90	        return {
-91	          ...state,
-92	          dragActiveTileId,
-93	          zones: newZones,
-94	          bankTileIds: newBankTileIds,
-95	          activeSlotIndex:
-96	            nextActiveSlot === -1
-97	              ? state.activeSlotIndex
-98	              : nextActiveSlot,
-99	          retryCount: state.retryCount,
-100	          phase: allFilledCorrectly
-101	            ? isLastRound
-102	              ? 'game-over'
-103	              : 'round-complete'
-104	            : 'playing',
-105	        };
-106	      }
-107	
-108	      const shouldLock =
-109	        state.config.wrongTileBehavior === 'lock-manual' ||
-110	        state.config.wrongTileBehavior === 'lock-auto-eject';
-111	      const newZone: AnswerZone = {
-112	        ...zone,
-113	        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
-114	        isWrong: true,
-115	        isLocked: true,
-116	      };
-117	      const newZones = state.zones.map((z, i) =>
-118	        i === action.zoneIndex ? newZone : z,
-119	      );
-120	      let newBankTileIds = shouldLock
-121	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-122	        : state.bankTileIds;
-123	      if (
-124	        shouldLock &&
-125	        zone.placedTileId &&
-126	        zone.placedTileId !== action.tileId
-127	      ) {
-128	        newBankTileIds = [...newBankTileIds, zone.placedTileId];
-129	      }
-130	
-131	      return {
-132	        ...state,
-133	        dragActiveTileId,
-134	        zones: newZones,
-135	        bankTileIds: newBankTileIds,
-136	        activeSlotIndex: state.activeSlotIndex,
-137	        retryCount: state.retryCount + 1,
-138	        phase: 'playing',
-139	      };
-140	    }
-141	
-142	    case 'REMOVE_TILE': {
-143	      const zone = state.zones[action.zoneIndex];
-144	      if (!zone?.placedTileId) return state;
-145	      return {
-146	        ...state,
-147	        zones: state.zones.map((z, i) =>
-148	          i === action.zoneIndex
-149	            ? {
-150	                ...z,
-151	                placedTileId: null,
-152	                isWrong: false,
-153	                isLocked: false,
-154	              }
-155	            : z,
-156	        ),
-157	        bankTileIds: [...state.bankTileIds, zone.placedTileId],
-158	      };
-159	    }
-160	
-161	    case 'SWAP_TILES': {
-162	      const fromZone = state.zones[action.fromZoneIndex];
-163	      const toZone = state.zones[action.toZoneIndex];
-164	      if (!fromZone || !toZone) return state;
-165	      return {
-166	        ...state,
-167	        zones: state.zones.map((z, i) => {
-168	          if (i === action.fromZoneIndex)
-169	            return { ...z, placedTileId: toZone.placedTileId };
-170	          if (i === action.toZoneIndex)
-171	            return { ...z, placedTileId: fromZone.placedTileId };
-172	          return z;
-173	        }),
-174	      };
-175	    }
-176	
-177	    case 'EJECT_TILE': {
-178	      const zone = state.zones[action.zoneIndex];
-179	      if (!zone) return state;
-180	
-181	      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
-182	      if (!zone.isWrong && !zone.isLocked) return state;
-183	
-184	      if (zone.placedTileId) {
-185	        const ejectedTileId = zone.placedTileId;
-186	        return {
-187	          ...state,
-188	          // If the ejected tile was mid-drag, clear drag state so the bank
-189	          // hole disappears immediately rather than waiting for the drag to end.
-190	          dragActiveTileId:
-191	            state.dragActiveTileId === ejectedTileId
-192	              ? null
-193	              : state.dragActiveTileId,
-194	          zones: state.zones.map((z, i) =>
-195	            i === action.zoneIndex
-196	              ? {
-197	                  ...z,
-198	                  placedTileId: null,
-199	                  isWrong: false,
-200	                  isLocked: false,
-201	                }
-202	              : z,
-203	          ),
-204	          bankTileIds: [...state.bankTileIds, ejectedTileId],
-205	        };
-206	      }
-207	
-208	      return {
-209	        ...state,
-210	        zones: state.zones.map((z, i) =>
-211	          i === action.zoneIndex
-212	            ? {
-213	                ...z,
-214	                placedTileId: null,
-215	                isWrong: false,
-216	                isLocked: false,
-217	              }
-218	            : z,
-219	        ),
-220	      };
-221	    }
-222	
-223	    case 'ADVANCE_ROUND': {
-224	      return {
-225	        ...state,
-226	        allTiles: action.tiles,
-227	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-228	        zones: action.zones,
-229	        activeSlotIndex: 0,
-230	        phase: 'playing',
-231	        roundIndex: state.roundIndex + 1,
-232	        retryCount: 0,
-233	      };
-234	    }
-235	
-236	    case 'COMPLETE_GAME': {
-237	      return { ...state, phase: 'game-over' };
-238	    }
-239	
-240	    case 'SET_DRAG_ACTIVE': {
-241	      return { ...state, dragActiveTileId: action.tileId };
-242	    }
-243	
-244	    default: {
-245	      return state;
-246	    }
-247	  }
-248	}
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     phase: 'playing',
+20     roundIndex: 0,
+21     retryCount: 0,
+22   };
+23 }
+24 
+25 export function answerGameReducer(
+26   state: AnswerGameState,
+27   action: AnswerGameAction,
+28 ): AnswerGameState {
+29   switch (action.type) {
+30     case 'INIT_ROUND': {
+31       return {
+32         ...state,
+33         allTiles: action.tiles,
+34         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+35         zones: action.zones,
+36         activeSlotIndex: 0,
+37         phase: 'playing',
+38         roundIndex: 0,
+39         retryCount: 0,
+40       };
+41     }
+42 
+43     case 'PLACE_TILE': {
+44       const tile = state.allTiles.find((t) => t.id === action.tileId);
+45       const zone = state.zones[action.zoneIndex];
+46       if (!tile || !zone) return state;
+47 
+48       const correct = tile.value === zone.expectedValue;
+49 
+50       // A tile placement always ends any active drag for that tile.
+51       const dragActiveTileId =
+52         state.dragActiveTileId === action.tileId
+53           ? null
+54           : state.dragActiveTileId;
+55 
+56       if (!correct && state.config.wrongTileBehavior === 'reject') {
+57         return {
+58           ...state,
+59           dragActiveTileId,
+60           retryCount: state.retryCount + 1,
+61         };
+62       }
+63 
+64       if (correct) {
+65         const previousId = zone.placedTileId;
+66         let newBankTileIds = state.bankTileIds.filter(
+67           (id) => id !== action.tileId,
+68         );
+69         if (previousId !== null && previousId !== action.tileId) {
+70           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+71           newBankTileIds = [...newBankTileIds, previousId];
+72         }
+73         const newZone: AnswerZone = {
+74           ...zone,
+75           placedTileId: action.tileId,
+76           isWrong: false,
+77           isLocked: false,
+78         };
+79         const newZones = state.zones.map((z, i) =>
+80           i === action.zoneIndex ? newZone : z,
+81         );
+82         const nextActiveSlot = newZones.findIndex(
+83           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+84         );
+85         const allFilledCorrectly = newZones.every(
+86           (z) => z.placedTileId !== null && !z.isWrong,
+87         );
+88         const isLastRound =
+89           state.roundIndex >= state.config.totalRounds - 1;
+90         return {
+91           ...state,
+92           dragActiveTileId,
+93           zones: newZones,
+94           bankTileIds: newBankTileIds,
+95           activeSlotIndex:
+96             nextActiveSlot === -1
+97               ? state.activeSlotIndex
+98               : nextActiveSlot,
+99           retryCount: state.retryCount,
+100           phase: allFilledCorrectly
+101             ? isLastRound
+102               ? 'game-over'
+103               : 'round-complete'
+104             : 'playing',
+105         };
+106       }
+107 
+108       const shouldLock =
+109         state.config.wrongTileBehavior === 'lock-manual' ||
+110         state.config.wrongTileBehavior === 'lock-auto-eject';
+111       const newZone: AnswerZone = {
+112         ...zone,
+113         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
+114         isWrong: true,
+115         isLocked: true,
+116       };
+117       const newZones = state.zones.map((z, i) =>
+118         i === action.zoneIndex ? newZone : z,
+119       );
+120       let newBankTileIds = shouldLock
+121         ? state.bankTileIds.filter((id) => id !== action.tileId)
+122         : state.bankTileIds;
+123       if (
+124         shouldLock &&
+125         zone.placedTileId &&
+126         zone.placedTileId !== action.tileId
+127       ) {
+128         newBankTileIds = [...newBankTileIds, zone.placedTileId];
+129       }
+130 
+131       return {
+132         ...state,
+133         dragActiveTileId,
+134         zones: newZones,
+135         bankTileIds: newBankTileIds,
+136         activeSlotIndex: state.activeSlotIndex,
+137         retryCount: state.retryCount + 1,
+138         phase: 'playing',
+139       };
+140     }
+141 
+142     case 'REMOVE_TILE': {
+143       const zone = state.zones[action.zoneIndex];
+144       if (!zone?.placedTileId) return state;
+145       return {
+146         ...state,
+147         zones: state.zones.map((z, i) =>
+148           i === action.zoneIndex
+149             ? {
+150                 ...z,
+151                 placedTileId: null,
+152                 isWrong: false,
+153                 isLocked: false,
+154               }
+155             : z,
+156         ),
+157         bankTileIds: [...state.bankTileIds, zone.placedTileId],
+158       };
+159     }
+160 
+161     case 'SWAP_TILES': {
+162       const fromZone = state.zones[action.fromZoneIndex];
+163       const toZone = state.zones[action.toZoneIndex];
+164       if (!fromZone || !toZone) return state;
+165       return {
+166         ...state,
+167         zones: state.zones.map((z, i) => {
+168           if (i === action.fromZoneIndex)
+169             return { ...z, placedTileId: toZone.placedTileId };
+170           if (i === action.toZoneIndex)
+171             return { ...z, placedTileId: fromZone.placedTileId };
+172           return z;
+173         }),
+174       };
+175     }
+176 
+177     case 'EJECT_TILE': {
+178       const zone = state.zones[action.zoneIndex];
+179       if (!zone) return state;
+180 
+181       // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+182       if (!zone.isWrong && !zone.isLocked) return state;
+183 
+184       if (zone.placedTileId) {
+185         const ejectedTileId = zone.placedTileId;
+186         return {
+187           ...state,
+188           // If the ejected tile was mid-drag, clear drag state so the bank
+189           // hole disappears immediately rather than waiting for the drag to end.
+190           dragActiveTileId:
+191             state.dragActiveTileId === ejectedTileId
+192               ? null
+193               : state.dragActiveTileId,
+194           zones: state.zones.map((z, i) =>
+195             i === action.zoneIndex
+196               ? {
+197                   ...z,
+198                   placedTileId: null,
+199                   isWrong: false,
+200                   isLocked: false,
+201                 }
+202               : z,
+203           ),
+204           bankTileIds: [...state.bankTileIds, ejectedTileId],
+205         };
+206       }
+207 
+208       return {
+209         ...state,
+210         zones: state.zones.map((z, i) =>
+211           i === action.zoneIndex
+212             ? {
+213                 ...z,
+214                 placedTileId: null,
+215                 isWrong: false,
+216                 isLocked: false,
+217               }
+218             : z,
+219         ),
+220       };
+221     }
+222 
+223     case 'ADVANCE_ROUND': {
+224       return {
+225         ...state,
+226         allTiles: action.tiles,
+227         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+228         zones: action.zones,
+229         activeSlotIndex: 0,
+230         phase: 'playing',
+231         roundIndex: state.roundIndex + 1,
+232         retryCount: 0,
+233       };
+234     }
+235 
+236     case 'COMPLETE_GAME': {
+237       return { ...state, phase: 'game-over' };
+238     }
+239 
+240     case 'SET_DRAG_ACTIVE': {
+241       return { ...state, dragActiveTileId: action.tileId };
+242     }
+243 
+244     default: {
+245       return state;
+246     }
+247   }
+248 }
 249
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:55:18Z)**_
@@ -2421,107 +2447,108 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:55:18Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/plans/2026-04-07-unified-slot-component.md`
 
 ```text
-0	# Unified Slot Component Implementation Plan
-1	
-2	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-3	
-4	**Goal:** Replace `OrderedSlots` and `MatchingPairZones` with a single `<Slot>` compound component, add feedback animations, fix the mobile drag bug, and support sentence-gap inline slots.
-5	
-6	**Architecture:** New `<Slot>` component built alongside existing components (parallel migration). A `useSlotBehavior` hook consolidates all drag/drop/click/keyboard logic and reads `slotInteraction` from config to choose between ordered evaluation and free-swap modes. Games migrate one at a time, old components are deleted last.
-7	
-8	**Tech Stack:** React 19, TypeScript, Tailwind CSS v4, @atlaskit/pragmatic-drag-and-drop, Vitest + React Testing Library
-9	
-10	**Spec:** `docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
-11	
-12	---
-13	
-14	## File Structure
-15	
-16	### New Files
-17	| File | Responsibility |
-18	|------|---------------|
-19	| `src/components/answer-game/Slot/Slot.tsx` | Unified slot component with render prop |
-20	| `src/components/answer-game/Slot/Slot.test.tsx` | Unit tests for Slot |
-21	| `src/components/answer-game/Slot/SlotRow.tsx` | Layout wrapper (`<ol>` with flex) |
-22	| `src/components/answer-game/Slot/SlotRow.test.tsx` | Unit tests for SlotRow |
-23	| `src/components/answer-game/Slot/useSlotBehavior.ts` | Hook: drag/drop/click/keyboard/animation logic |
-24	| `src/components/answer-game/Slot/useSlotBehavior.test.ts` | Hook tests |
-25	| `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject animation helpers |
-26	| `src/components/answer-game/Slot/slot-animations.test.ts` | Animation helper tests |
-27	| `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
-28	| `src/components/answer-game/Slot/SentenceWithGaps.test.tsx` | Parser + rendering tests |
-29	| `src/components/answer-game/Slot/parse-sentence-template.ts` | Pure function: `"The {0} sat"` → segments |
-30	| `src/components/answer-game/Slot/parse-sentence-template.test.ts` | Parser unit tests |
-31	| `src/games/word-spell/build-sentence-gap-round.ts` | Zone/tile generation from `GapDefinition[]` |
-32	| `src/games/word-spell/build-sentence-gap-round.test.ts` | Round builder tests |
-33	
-34	### Modified Files
-35	| File | Change |
-36	|------|--------|
-37	| `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` type |
-38	| `src/components/answer-game/useTouchDrag.ts` | Ghost cleanup on all terminal events, safety timeout |
-39	| `src/components/answer-game/useSlotTileDrag.ts` | Deferred removal (SET_DRAG_ACTIVE on start, REMOVE_TILE on end) |
-40	| `src/styles.css` | Add `shake`, `pop` keyframes and `--animate-shake`, `--animate-pop` |
-41	| `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to `WordSpellRound` |
-42	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Use `<SlotRow>` + `<Slot>` instead of `<NumberSequenceSlots>` |
-43	| `src/games/word-spell/WordSpell/WordSpell.tsx` | Use `<SlotRow>` + `<Slot>` + `<SentenceWithGaps>` |
-44	| `src/games/number-match/NumberMatch/NumberMatch.tsx` | Use `<SlotRow>` + `<Slot>` with dynamic sizing |
-45	
-46	### Deleted Files (after migration)
-47	| File | Reason |
-48	|------|--------|
-49	| `src/components/answer-game/OrderedSlots/` | Replaced by `Slot/` |
-50	| `src/games/word-spell/OrderedLetterSlots/` | No longer needed |
-51	| `src/games/sort-numbers/NumberSequenceSlots/` | No longer needed |
-52	| `src/games/number-match/MatchingPairZones/` | No longer needed |
-53	
-54	---
-55	
-56	## Phase 0: Foundation
-57	
-58	### Task 1: Add `slotInteraction` to AnswerGameConfig and `GapDefinition` type
-59	
-60	**Files:**
-61	- Modify: `src/components/answer-game/types.ts`
-62	- Modify: `src/games/word-spell/types.ts`
-63	
-64	- [ ] **Step 1: Add `slotInteraction` to `AnswerGameConfig`**
-65	
-66	In `src/components/answer-game/types.ts`, add the new field to the config interface:
-67	
-68	```typescript
-69	export interface AnswerGameConfig {
-70	  gameId: string;
-71	  inputMethod: 'drag' | 'type' | 'both';
-72	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-73	  tileBankMode: 'exact' | 'distractors';
-74	  distractorCount?: number;
-75	  totalRounds: number;
-76	  roundsInOrder?: boolean;
-77	  ttsEnabled: boolean;
-78	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-79	  initialTiles?: TileItem[];
-80	  initialZones?: AnswerZone[];
-81	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
-82	  slotInteraction?: 'ordered' | 'free-swap';
-83	}
-84	```
-85	
-86	- [ ] **Step 2: Add `GapDefinition` to word-spell types**
-87	
-88	In `src/games/word-spell/types.ts`, add:
-89	
-90	```typescript
-91	export interface GapDefinition {
-92	  word: string;
-93	  distractors?: string[];
-94	}
-95	
-96	export interface WordSpellRound {
-97	  word: string;
-98	  emoji?: string;
-99	  image?: string;
+0 # Unified Slot Component Implementation Plan
+1 
+2 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+3 
+4 **Goal:** Replace `OrderedSlots` and `MatchingPairZones` with a single `<Slot>` compound component, add feedback animations, fix the mobile drag bug, and support sentence-gap inline slots.
+5 
+6 **Architecture:** New `<Slot>` component built alongside existing components (parallel migration). A `useSlotBehavior` hook consolidates all drag/drop/click/keyboard logic and reads `slotInteraction` from config to choose between ordered evaluation and free-swap modes. Games migrate one at a time, old components are deleted last.
+7 
+8 **Tech Stack:** React 19, TypeScript, Tailwind CSS v4, @atlaskit/pragmatic-drag-and-drop, Vitest + React Testing Library
+9 
+10 **Spec:** `docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
+11 
+12 ---
+13 
+14 ## File Structure
+15 
+16 ### New Files
+17 | File | Responsibility |
+18 |------|---------------|
+19 | `src/components/answer-game/Slot/Slot.tsx` | Unified slot component with render prop |
+20 | `src/components/answer-game/Slot/Slot.test.tsx` | Unit tests for Slot |
+21 | `src/components/answer-game/Slot/SlotRow.tsx` | Layout wrapper (`<ol>` with flex) |
+22 | `src/components/answer-game/Slot/SlotRow.test.tsx` | Unit tests for SlotRow |
+23 | `src/components/answer-game/Slot/useSlotBehavior.ts` | Hook: drag/drop/click/keyboard/animation logic |
+24 | `src/components/answer-game/Slot/useSlotBehavior.test.ts` | Hook tests |
+25 | `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject animation helpers |
+26 | `src/components/answer-game/Slot/slot-animations.test.ts` | Animation helper tests |
+27 | `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
+28 | `src/components/answer-game/Slot/SentenceWithGaps.test.tsx` | Parser + rendering tests |
+29 | `src/components/answer-game/Slot/parse-sentence-template.ts` | Pure function: `"The {0} sat"` → segments |
+30 | `src/components/answer-game/Slot/parse-sentence-template.test.ts` | Parser unit tests |
+31 | `src/games/word-spell/build-sentence-gap-round.ts` | Zone/tile generation from `GapDefinition[]` |
+32 | `src/games/word-spell/build-sentence-gap-round.test.ts` | Round builder tests |
+33 
+34 ### Modified Files
+35 | File | Change |
+36 |------|--------|
+37 | `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` type |
+38 | `src/components/answer-game/useTouchDrag.ts` | Ghost cleanup on all terminal events, safety timeout |
+39 | `src/components/answer-game/useSlotTileDrag.ts` | Deferred removal (SET_DRAG_ACTIVE on start, REMOVE_TILE on end) |
+40 | `src/styles.css` | Add `shake`, `pop` keyframes and `--animate-shake`, `--animate-pop` |
+41 | `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to `WordSpellRound` |
+42 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Use `<SlotRow>` + `<Slot>` instead of `<NumberSequenceSlots>` |
+43 | `src/games/word-spell/WordSpell/WordSpell.tsx` | Use `<SlotRow>` + `<Slot>` + `<SentenceWithGaps>` |
+44 | `src/games/number-match/NumberMatch/NumberMatch.tsx` | Use `<SlotRow>` + `<Slot>` with dynamic sizing |
+45 
+46 ### Deleted Files (after migration)
+47 | File | Reason |
+48 |------|--------|
+49 | `src/components/answer-game/OrderedSlots/` | Replaced by `Slot/` |
+50 | `src/games/word-spell/OrderedLetterSlots/` | No longer needed |
+51 | `src/games/sort-numbers/NumberSequenceSlots/` | No longer needed |
+52 | `src/games/number-match/MatchingPairZones/` | No longer needed |
+53 
+54 ---
+55 
+56 ## Phase 0: Foundation
+57 
+58 ### Task 1: Add `slotInteraction` to AnswerGameConfig and `GapDefinition` type
+59 
+60 **Files:**
+61 - Modify: `src/components/answer-game/types.ts`
+62 - Modify: `src/games/word-spell/types.ts`
+63 
+64 - [ ] **Step 1: Add `slotInteraction` to `AnswerGameConfig`**
+65 
+66 In `src/components/answer-game/types.ts`, add the new field to the config interface:
+67 
+68 ```typescript
+69 export interface AnswerGameConfig {
+70   gameId: string;
+71   inputMethod: 'drag' | 'type' | 'both';
+72   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+73   tileBankMode: 'exact' | 'distractors';
+74   distractorCount?: number;
+75   totalRounds: number;
+76   roundsInOrder?: boolean;
+77   ttsEnabled: boolean;
+78   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+79   initialTiles?: TileItem[];
+80   initialZones?: AnswerZone[];
+81   /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+82   slotInteraction?: 'ordered' | 'free-swap';
+83 }
+84 ```
+85 
+86 - [ ] **Step 2: Add `GapDefinition` to word-spell types**
+87 
+88 In `src/games/word-spell/types.ts`, add:
+89 
+90 ```typescript
+91 export interface GapDefinition {
+92   word: string;
+93   distractors?: string[];
+94 }
+95 
+96 export interface WordSpellRound {
+97   word: string;
+98   emoji?: string;
+99   image?: string;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:57:42Z)**_
@@ -2533,9 +2560,9 @@ Now I have enough context. Let me analyze the issues:
 
 **Issue 3: Weird corner color when dragging from slot to bank**
 
-The slot tile button in `Slot.tsx` (lines 72-85) has `rounded-[inherit]` and uses `skeuoStyle` for background. The slot container has `overflow-hidden` which clips the corners. 
+The slot tile button in `Slot.tsx` (lines 72-85) has `rounded-[inherit]` and uses `skeuoStyle` for background. The slot container has `overflow-hidden` which clips the corners.
 
-When you start an HTML5 drag, the browser creates a drag ghost (screenshot of the element). 
+When you start an HTML5 drag, the browser creates a drag ghost (screenshot of the element).
 
 The button renders in isolation during the drag, so it's no longer clipped by the parent's `overflow-hidden`. The button's `skeuoStyle` background should cover the full area, but I'm realizing the button uses `absolute inset-0` to fill the parent, so the parent's background shouldn't be visible at the corners anyway. Let me reconsider what's actually causing the color issue. The drag ghost image is rendered without the parent's overflow clipping, so the button appears as a full rectangle in the drag preview rather than with rounded corners. The user is seeing a colored corner in the drag ghost that matches the tile's color (red or blue), which suggests the issue might be related to how the button's background or the parent's background color is being captured in the drag image. I think atlaskit's draggable adapter might be manipulating the drag image through custom attributes or classes, though I'm not certain of the exact mechanism. The touch path should render cleanly since `buildGhost` creates a fresh div with a white card background and rounded corners, but the HTML5 drag preview is pulling from the actual button element with its absolute positioning, which might be causing the slot container's background to show through instead. So the button's background is clipped to its border-radius, leaving the corners transparent—and those transparent corners reveal the parent's background on the rendered page because the parent has `overflow-hidden`. But when the browser captures the drag ghost, it's grabbing the button's full rectangular bounding box, including those transparent corners, which then show the parent's colored slot background instead of being clipped.
 
@@ -2600,9 +2627,9 @@ Now I have enough information to understand the issues. Let me also look at the 
 Let me read the specific parts of the plan that deal with issues 3, 4, and 5.
 
 For issue 3 (weird corner color when dragging from slot), I think I understand it now:
-- The slot has `overflow-hidden` and is colored with `bg-primary/10` or `bg-destructive/10` 
-- The inner button has `rounded-[inherit]` and `absolute inset-0`
 
+- The slot has `overflow-hidden` and is colored with `bg-primary/10` or `bg-destructive/10`
+- The inner button has `rounded-[inherit]` and `absolute inset-0`
 
 - When the browser creates the HTML5 drag ghost, it captures the button element, but since the button inherits rounded corners from its parent, the corners become transparent and expose the slot's background color showing through those transparent areas.
 - The real issue is that when the drag image is rendered, it captures the button with its rounded corners clipped against the parent's colored background, so the drag preview ends up showing the primary/destructive color at the corners instead of a clean card appearance.
@@ -2614,13 +2641,15 @@ The button element itself has `rounded-[inherit]` styling and sits absolutely po
 Looking at the slot styling, it has a border and background color, while the button is absolutely positioned inside it. The drag image might be picking up some parent background or border styling depending on how the browser captures it. Rather than continuing to trace through the CSS, let me focus on what the user actually reported seeing—a weird corner color in the drag image.
 
 The slot uses `bg-primary/10` or `bg-destructive/10` depending on state, and those exact colors are showing up in the corners of the drag image. The button has `rounded-[inherit]` but no `overflow-hidden`, while the slot does have `overflow-hidden`. When the browser captures the drag image, the button's rounded corners are transparent due to the border-radius, so those transparent areas are revealing the parent slot's background color underneath. drag image, those transparent corners would either:
+
 1. Show as white/default (browser-specific)
 2. Or show whatever is "behind" the button in the drag image, which might be the parent's background
 
 Actually in CSS, `border-radius` on an element DOES clip the background paint area. So if the button has `rounded-[inherit]` and `background: #FAFAFA` (from skeuoStyle), the button's background is painted within the rounded rect. The corners OUTSIDE the rounded rect are transparent for the button element.
 
 So the drag image of the button:
-- Center area: `#FAFAFA` (skeuoStyle) 
+
+- Center area: `#FAFAFA` (skeuoStyle)
 - Corners: TRANSPARENT (because border-radius clips the background)
 
 In the drag image, the transparent corners would... typically show as white or the default drag image background. But some browsers might include parent context.
@@ -2663,314 +2692,315 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:00:21Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { buildSentenceGapRound } from '../build-sentence-gap-round';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import type { WordSpellConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
-16	import { Slot } from '@/components/answer-game/Slot/Slot';
-17	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-18	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-19	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-20	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-21	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-22	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-23	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-24	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-25	import { buildRoundOrder } from '@/games/build-round-order';
-26	
-27	function segmentsForWord(
-28	  word: string,
-29	  tileUnit: WordSpellConfig['tileUnit'],
-30	): string[] {
-31	  const trimmed = word.trim();
-32	  if (tileUnit === 'word') return [trimmed];
-33	  if (tileUnit === 'syllable') {
-34	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-35	    return parts.length > 0 ? parts : [trimmed];
-36	  }
-37	  return [...trimmed.toLowerCase()];
-38	}
-39	
-40	function buildTilesAndZones(
-41	  word: string,
-42	  tileUnit: WordSpellConfig['tileUnit'],
-43	): {
-44	  tiles: TileItem[];
-45	  zones: AnswerZone[];
-46	} {
-47	  const segments = segmentsForWord(word, tileUnit);
-48	  const values = segments.map((s) =>
-49	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-50	  );
-51	  const zones: AnswerZone[] = values.map((value, i) => ({
-52	    id: `z${i}`,
-53	    index: i,
-54	    expectedValue: value,
-55	    placedTileId: null,
-56	    isWrong: false,
-57	    isLocked: false,
-58	  }));
-59	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-60	  const tiles: TileItem[] = shuffled.map((value) => ({
-61	    id: nanoid(),
-62	    label: value,
-63	    value,
-64	  }));
-65	  return { tiles, zones };
-66	}
-67	
-68	interface WordSpellProps {
-69	  config: WordSpellConfig;
-70	}
-71	
-72	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-73	const WordSpellSession = ({
-74	  wordSpellConfig,
-75	  roundOrder,
-76	  onRestartSession,
-77	}: {
-78	  wordSpellConfig: WordSpellConfig;
-79	  roundOrder: readonly number[];
-80	  onRestartSession: () => void;
-81	}) => {
-82	  const { phase, roundIndex, retryCount, zones } =
-83	    useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  const { confettiReady, gameOverReady } = useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete' || !confettiReady) return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      if (nextRound?.gaps && nextRound.gaps.length > 0) {
-133	        const { tiles: nextTiles, zones: nextZones } =
-134	          buildSentenceGapRound(nextRound.gaps);
-135	        dispatch({
-136	          type: 'ADVANCE_ROUND',
-137	          tiles: nextTiles,
-138	          zones: nextZones,
-139	        });
-140	      } else {
-141	        const { tiles: nextTiles, zones: nextZones } =
-142	          buildTilesAndZones(word, wordSpellConfig.tileUnit);
-143	        dispatch({
-144	          type: 'ADVANCE_ROUND',
-145	          tiles: nextTiles,
-146	          zones: nextZones,
-147	        });
-148	      }
-149	    }, delayMs);
-150	
-151	    return () => {
-152	      globalThis.clearTimeout(timer);
-153	    };
-154	  }, [
-155	    phase,
-156	    confettiReady,
-157	    roundIndex,
-158	    dispatch,
-159	    roundOrder,
-160	    wordSpellConfig.rounds,
-161	    wordSpellConfig.tileUnit,
-162	  ]);
-163	
-164	  if (!round) return null;
-165	
-166	  const hasEmoji =
-167	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-168	  const imageSrc = round.sceneImage ?? round.image;
-169	  const hasImageUrl =
-170	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-171	
-172	  return (
-173	    <>
-174	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-175	        <AnswerGame.Question>
-176	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-177	            round.gaps && round.gaps.length > 0 ? (
-178	              <SentenceWithGaps
-179	                sentence={round.sentence}
-180	                className="max-w-md text-center text-foreground"
-181	              />
-182	            ) : (
-183	              <p className="max-w-md text-center text-lg text-foreground">
-184	                {round.sentence}
-185	              </p>
-186	            )
-187	          ) : null}
-188	          {hasEmoji ? (
-189	            <EmojiQuestion
-190	              emoji={round.emoji!.trim()}
-191	              prompt={round.word}
-192	            />
-193	          ) : hasImageUrl ? (
-194	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-195	          ) : null}
-196	          <AudioButton prompt={round.word} />
-197	        </AnswerGame.Question>
-198	        <AnswerGame.Answer>
-199	          {round.gaps && round.gaps.length > 0 ? null : (
-200	            <SlotRow className="gap-2">
-201	              {zones.map((zone, i) => (
-202	                <Slot
-203	                  key={zone.id}
-204	                  index={i}
-205	                  className="size-14 rounded-lg"
-206	                >
-207	                  {({ label }) => (
-208	                    <span className="text-2xl font-bold">{label}</span>
-209	                  )}
-210	                </Slot>
-211	              ))}
-212	            </SlotRow>
-213	          )}
-214	        </AnswerGame.Answer>
-215	        <AnswerGame.Choices>
-216	          <LetterTileBank />
-217	        </AnswerGame.Choices>
-218	      </div>
-219	      <ScoreAnimation visible={confettiReady} />
-220	      {gameOverReady ? (
-221	        <GameOverOverlay
-222	          retryCount={retryCount}
-223	          onPlayAgain={handlePlayAgain}
-224	          onHome={handleHome}
-225	        />
-226	      ) : null}
-227	    </>
-228	  );
-229	};
-230	
-231	export const WordSpell = ({ config }: WordSpellProps) => {
-232	  const roundsInOrder = config.roundsInOrder === true;
-233	  const [sessionEpoch, setSessionEpoch] = useState(0);
-234	
-235	  const roundOrder = useMemo(() => {
-236	    void sessionEpoch;
-237	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-238	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-239	
-240	  const firstConfigIndex = roundOrder[0];
-241	  const round0 =
-242	    firstConfigIndex === undefined
-243	      ? undefined
-244	      : config.rounds[firstConfigIndex];
-245	  const roundWord = round0?.word.trim() ? round0.word : '';
-246	
-247	  const { tiles, zones } = useMemo(() => {
-248	    if (!roundWord)
-249	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-250	
-251	    // Sentence-gap with gaps array
-252	    if (round0?.gaps && round0.gaps.length > 0) {
-253	      return buildSentenceGapRound(round0.gaps);
-254	    }
-255	
-256	    // Default: letter/syllable/word spelling
-257	    return buildTilesAndZones(roundWord, config.tileUnit);
-258	  }, [roundWord, config.tileUnit, round0]);
-259	
-260	  const answerGameConfig = useMemo(
-261	    (): AnswerGameConfig => ({
-262	      gameId: config.gameId,
-263	      inputMethod: config.inputMethod,
-264	      wrongTileBehavior: config.wrongTileBehavior,
-265	      tileBankMode: config.tileBankMode,
-266	      distractorCount: config.distractorCount,
-267	      totalRounds: config.rounds.length,
-268	      roundsInOrder: config.roundsInOrder,
-269	      ttsEnabled: config.ttsEnabled,
-270	      touchKeyboardInputMode: 'text',
-271	      initialTiles: tiles,
-272	      initialZones: zones,
-273	      slotInteraction:
-274	        config.mode === 'scramble' || config.mode === 'sentence-gap'
-275	          ? 'free-swap'
-276	          : 'ordered',
-277	    }),
-278	    [
-279	      config.gameId,
-280	      config.inputMethod,
-281	      config.wrongTileBehavior,
-282	      config.tileBankMode,
-283	      config.distractorCount,
-284	      config.rounds.length,
-285	      config.roundsInOrder,
-286	      config.ttsEnabled,
-287	      config.mode,
-288	      tiles,
-289	      zones,
-290	    ],
-291	  );
-292	
-293	  if (!round0) return null;
-294	
-295	  return (
-296	    <AnswerGame config={answerGameConfig}>
-297	      <WordSpellSession
-298	        wordSpellConfig={config}
-299	        roundOrder={roundOrder}
-300	        onRestartSession={() => {
-301	          setSessionEpoch((e) => e + 1);
-302	        }}
-303	      />
-304	    </AnswerGame>
-305	  );
-306	};
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { buildSentenceGapRound } from '../build-sentence-gap-round';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import type { WordSpellConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
+16 import { Slot } from '@/components/answer-game/Slot/Slot';
+17 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+18 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+19 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+20 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+21 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+22 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+23 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+24 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+25 import { buildRoundOrder } from '@/games/build-round-order';
+26 
+27 function segmentsForWord(
+28   word: string,
+29   tileUnit: WordSpellConfig['tileUnit'],
+30 ): string[] {
+31   const trimmed = word.trim();
+32   if (tileUnit === 'word') return [trimmed];
+33   if (tileUnit === 'syllable') {
+34     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+35     return parts.length > 0 ? parts : [trimmed];
+36   }
+37   return [...trimmed.toLowerCase()];
+38 }
+39 
+40 function buildTilesAndZones(
+41   word: string,
+42   tileUnit: WordSpellConfig['tileUnit'],
+43 ): {
+44   tiles: TileItem[];
+45   zones: AnswerZone[];
+46 } {
+47   const segments = segmentsForWord(word, tileUnit);
+48   const values = segments.map((s) =>
+49     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+50   );
+51   const zones: AnswerZone[] = values.map((value, i) => ({
+52     id: `z${i}`,
+53     index: i,
+54     expectedValue: value,
+55     placedTileId: null,
+56     isWrong: false,
+57     isLocked: false,
+58   }));
+59   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+60   const tiles: TileItem[] = shuffled.map((value) => ({
+61     id: nanoid(),
+62     label: value,
+63     value,
+64   }));
+65   return { tiles, zones };
+66 }
+67 
+68 interface WordSpellProps {
+69   config: WordSpellConfig;
+70 }
+71 
+72 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+73 const WordSpellSession = ({
+74   wordSpellConfig,
+75   roundOrder,
+76   onRestartSession,
+77 }: {
+78   wordSpellConfig: WordSpellConfig;
+79   roundOrder: readonly number[];
+80   onRestartSession: () => void;
+81 }) => {
+82   const { phase, roundIndex, retryCount, zones } =
+83     useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   const { confettiReady, gameOverReady } = useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete' || !confettiReady) return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       if (nextRound?.gaps && nextRound.gaps.length > 0) {
+133         const { tiles: nextTiles, zones: nextZones } =
+134           buildSentenceGapRound(nextRound.gaps);
+135         dispatch({
+136           type: 'ADVANCE_ROUND',
+137           tiles: nextTiles,
+138           zones: nextZones,
+139         });
+140       } else {
+141         const { tiles: nextTiles, zones: nextZones } =
+142           buildTilesAndZones(word, wordSpellConfig.tileUnit);
+143         dispatch({
+144           type: 'ADVANCE_ROUND',
+145           tiles: nextTiles,
+146           zones: nextZones,
+147         });
+148       }
+149     }, delayMs);
+150 
+151     return () => {
+152       globalThis.clearTimeout(timer);
+153     };
+154   }, [
+155     phase,
+156     confettiReady,
+157     roundIndex,
+158     dispatch,
+159     roundOrder,
+160     wordSpellConfig.rounds,
+161     wordSpellConfig.tileUnit,
+162   ]);
+163 
+164   if (!round) return null;
+165 
+166   const hasEmoji =
+167     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+168   const imageSrc = round.sceneImage ?? round.image;
+169   const hasImageUrl =
+170     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+171 
+172   return (
+173     <>
+174       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+175         <AnswerGame.Question>
+176           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+177             round.gaps && round.gaps.length > 0 ? (
+178               <SentenceWithGaps
+179                 sentence={round.sentence}
+180                 className="max-w-md text-center text-foreground"
+181               />
+182             ) : (
+183               <p className="max-w-md text-center text-lg text-foreground">
+184                 {round.sentence}
+185               </p>
+186             )
+187           ) : null}
+188           {hasEmoji ? (
+189             <EmojiQuestion
+190               emoji={round.emoji!.trim()}
+191               prompt={round.word}
+192             />
+193           ) : hasImageUrl ? (
+194             <ImageQuestion src={imageSrc!} prompt={round.word} />
+195           ) : null}
+196           <AudioButton prompt={round.word} />
+197         </AnswerGame.Question>
+198         <AnswerGame.Answer>
+199           {round.gaps && round.gaps.length > 0 ? null : (
+200             <SlotRow className="gap-2">
+201               {zones.map((zone, i) => (
+202                 <Slot
+203                   key={zone.id}
+204                   index={i}
+205                   className="size-14 rounded-lg"
+206                 >
+207                   {({ label }) => (
+208                     <span className="text-2xl font-bold">{label}</span>
+209                   )}
+210                 </Slot>
+211               ))}
+212             </SlotRow>
+213           )}
+214         </AnswerGame.Answer>
+215         <AnswerGame.Choices>
+216           <LetterTileBank />
+217         </AnswerGame.Choices>
+218       </div>
+219       <ScoreAnimation visible={confettiReady} />
+220       {gameOverReady ? (
+221         <GameOverOverlay
+222           retryCount={retryCount}
+223           onPlayAgain={handlePlayAgain}
+224           onHome={handleHome}
+225         />
+226       ) : null}
+227     </>
+228   );
+229 };
+230 
+231 export const WordSpell = ({ config }: WordSpellProps) => {
+232   const roundsInOrder = config.roundsInOrder === true;
+233   const [sessionEpoch, setSessionEpoch] = useState(0);
+234 
+235   const roundOrder = useMemo(() => {
+236     void sessionEpoch;
+237     return buildRoundOrder(config.rounds.length, roundsInOrder);
+238   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+239 
+240   const firstConfigIndex = roundOrder[0];
+241   const round0 =
+242     firstConfigIndex === undefined
+243       ? undefined
+244       : config.rounds[firstConfigIndex];
+245   const roundWord = round0?.word.trim() ? round0.word : '';
+246 
+247   const { tiles, zones } = useMemo(() => {
+248     if (!roundWord)
+249       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+250 
+251     // Sentence-gap with gaps array
+252     if (round0?.gaps && round0.gaps.length > 0) {
+253       return buildSentenceGapRound(round0.gaps);
+254     }
+255 
+256     // Default: letter/syllable/word spelling
+257     return buildTilesAndZones(roundWord, config.tileUnit);
+258   }, [roundWord, config.tileUnit, round0]);
+259 
+260   const answerGameConfig = useMemo(
+261     (): AnswerGameConfig => ({
+262       gameId: config.gameId,
+263       inputMethod: config.inputMethod,
+264       wrongTileBehavior: config.wrongTileBehavior,
+265       tileBankMode: config.tileBankMode,
+266       distractorCount: config.distractorCount,
+267       totalRounds: config.rounds.length,
+268       roundsInOrder: config.roundsInOrder,
+269       ttsEnabled: config.ttsEnabled,
+270       touchKeyboardInputMode: 'text',
+271       initialTiles: tiles,
+272       initialZones: zones,
+273       slotInteraction:
+274         config.mode === 'scramble' || config.mode === 'sentence-gap'
+275           ? 'free-swap'
+276           : 'ordered',
+277     }),
+278     [
+279       config.gameId,
+280       config.inputMethod,
+281       config.wrongTileBehavior,
+282       config.tileBankMode,
+283       config.distractorCount,
+284       config.rounds.length,
+285       config.roundsInOrder,
+286       config.ttsEnabled,
+287       config.mode,
+288       tiles,
+289       zones,
+290     ],
+291   );
+292 
+293   if (!round0) return null;
+294 
+295   return (
+296     <AnswerGame config={answerGameConfig}>
+297       <WordSpellSession
+298         wordSpellConfig={config}
+299         roundOrder={roundOrder}
+300         onRestartSession={() => {
+301           setSessionEpoch((e) => e + 1);
+302         }}
+303       />
+304     </AnswerGame>
+305   );
+306 };
 307
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:00:21Z)**_
@@ -2980,226 +3010,227 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:00:21Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { Slot } from '@/components/answer-game/Slot/Slot';
-16	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { buildRoundOrder } from '@/games/build-round-order';
-22	
-23	interface SortNumbersProps {
-24	  config: SortNumbersConfig;
-25	}
-26	
-27	const SortNumbersSession = ({
-28	  sortNumbersConfig,
-29	  roundOrder,
-30	  onRestartSession,
-31	}: {
-32	  sortNumbersConfig: SortNumbersConfig;
-33	  roundOrder: readonly number[];
-34	  onRestartSession: () => void;
-35	}) => {
-36	  const { t } = useTranslation('games');
-37	  const { phase, roundIndex, retryCount, zones } =
-38	    useAnswerGameContext();
-39	  const dispatch = useAnswerGameDispatch();
-40	  const { confettiReady, gameOverReady } = useGameSounds();
-41	  const navigate = useNavigate();
-42	  const { locale } = useParams({ from: '/$locale' });
-43	  const completionToken = useRef(0);
-44	
-45	  const configRoundIndex = roundOrder[roundIndex];
-46	  const round =
-47	    configRoundIndex === undefined
-48	      ? undefined
-49	      : sortNumbersConfig.rounds[configRoundIndex];
-50	
-51	  const directionLabel =
-52	    sortNumbersConfig.direction === 'ascending'
-53	      ? t('sort-numbers-ui.ascending-label')
-54	      : t('sort-numbers-ui.descending-label');
-55	
-56	  useRoundTTS(directionLabel);
-57	
-58	  const handleHome = () => {
-59	    void navigate({ to: '/$locale', params: { locale } });
-60	  };
-61	
-62	  const handlePlayAgain = () => {
-63	    onRestartSession();
-64	  };
-65	
-66	  useEffect(() => {
-67	    if (phase !== 'round-complete' || !confettiReady) return;
-68	
-69	    const token = ++completionToken.current;
-70	    const delayMs = 750;
-71	    const timer = globalThis.setTimeout(() => {
-72	      if (completionToken.current !== token) return;
-73	
-74	      const isLastRound = roundIndex >= roundOrder.length - 1;
-75	      if (isLastRound) {
-76	        dispatch({ type: 'COMPLETE_GAME' });
-77	        return;
-78	      }
-79	
-80	      const nextConfigIndex = roundOrder[roundIndex + 1];
-81	      const nextRound =
-82	        nextConfigIndex === undefined
-83	          ? undefined
-84	          : sortNumbersConfig.rounds[nextConfigIndex];
-85	
-86	      if (!nextRound) {
-87	        dispatch({ type: 'COMPLETE_GAME' });
-88	        return;
-89	      }
-90	
-91	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-92	        nextRound.sequence,
-93	        sortNumbersConfig.direction,
-94	      );
-95	      dispatch({
-96	        type: 'ADVANCE_ROUND',
-97	        tiles: nextTiles,
-98	        zones: nextZones,
-99	      });
-100	    }, delayMs);
-101	
-102	    return () => {
-103	      globalThis.clearTimeout(timer);
-104	    };
-105	  }, [
-106	    phase,
-107	    confettiReady,
-108	    roundIndex,
-109	    dispatch,
-110	    roundOrder,
-111	    sortNumbersConfig.rounds,
-112	    sortNumbersConfig.direction,
-113	  ]);
-114	
-115	  if (!round) return null;
-116	
-117	  return (
-118	    <>
-119	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-120	        <AnswerGame.Question>
-121	          <p className="text-center text-lg font-semibold text-foreground">
-122	            {directionLabel}
-123	          </p>
-124	        </AnswerGame.Question>
-125	        <AnswerGame.Answer>
-126	          <SlotRow className="gap-2">
-127	            {zones.map((zone, i) => (
-128	              <Slot
-129	                key={zone.id}
-130	                index={i}
-131	                className="size-14 rounded-lg"
-132	              >
-133	                {({ label }) => (
-134	                  <span className="text-2xl font-bold">{label}</span>
-135	                )}
-136	              </Slot>
-137	            ))}
-138	          </SlotRow>
-139	        </AnswerGame.Answer>
-140	        <AnswerGame.Choices>
-141	          <SortNumbersTileBank />
-142	        </AnswerGame.Choices>
-143	      </div>
-144	      <ScoreAnimation visible={confettiReady} />
-145	      {gameOverReady ? (
-146	        <GameOverOverlay
-147	          retryCount={retryCount}
-148	          onPlayAgain={handlePlayAgain}
-149	          onHome={handleHome}
-150	        />
-151	      ) : null}
-152	    </>
-153	  );
-154	};
-155	
-156	export const SortNumbers = ({ config }: SortNumbersProps) => {
-157	  const roundsInOrder = config.roundsInOrder === true;
-158	  const [sessionEpoch, setSessionEpoch] = useState(0);
-159	
-160	  const roundOrder = useMemo(() => {
-161	    void sessionEpoch;
-162	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-163	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-164	
-165	  const firstConfigIndex = roundOrder[0];
-166	  const round0 =
-167	    firstConfigIndex === undefined
-168	      ? undefined
-169	      : config.rounds[firstConfigIndex];
-170	
-171	  const { tiles, zones } = useMemo(() => {
-172	    if (!round0) {
-173	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-174	    }
-175	    return buildSortRound(round0.sequence, config.direction);
-176	  }, [round0, config.direction]);
-177	
-178	  const answerGameConfig = useMemo(
-179	    (): AnswerGameConfig => ({
-180	      gameId: config.gameId,
-181	      inputMethod: config.inputMethod,
-182	      wrongTileBehavior: config.wrongTileBehavior,
-183	      tileBankMode: config.tileBankMode,
-184	      totalRounds: config.rounds.length,
-185	      roundsInOrder: config.roundsInOrder,
-186	      ttsEnabled: config.ttsEnabled,
-187	      touchKeyboardInputMode: 'numeric',
-188	      initialTiles: tiles,
-189	      initialZones: zones,
-190	      slotInteraction: 'free-swap' as const,
-191	    }),
-192	    [
-193	      config.gameId,
-194	      config.inputMethod,
-195	      config.wrongTileBehavior,
-196	      config.tileBankMode,
-197	      config.rounds.length,
-198	      config.roundsInOrder,
-199	      config.ttsEnabled,
-200	      tiles,
-201	      zones,
-202	    ],
-203	  );
-204	
-205	  if (!round0) return null;
-206	
-207	  return (
-208	    <AnswerGame config={answerGameConfig}>
-209	      <SortNumbersSession
-210	        sortNumbersConfig={config}
-211	        roundOrder={roundOrder}
-212	        onRestartSession={() => {
-213	          setSessionEpoch((e) => e + 1);
-214	        }}
-215	      />
-216	    </AnswerGame>
-217	  );
-218	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { Slot } from '@/components/answer-game/Slot/Slot';
+16 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { buildRoundOrder } from '@/games/build-round-order';
+22 
+23 interface SortNumbersProps {
+24   config: SortNumbersConfig;
+25 }
+26 
+27 const SortNumbersSession = ({
+28   sortNumbersConfig,
+29   roundOrder,
+30   onRestartSession,
+31 }: {
+32   sortNumbersConfig: SortNumbersConfig;
+33   roundOrder: readonly number[];
+34   onRestartSession: () => void;
+35 }) => {
+36   const { t } = useTranslation('games');
+37   const { phase, roundIndex, retryCount, zones } =
+38     useAnswerGameContext();
+39   const dispatch = useAnswerGameDispatch();
+40   const { confettiReady, gameOverReady } = useGameSounds();
+41   const navigate = useNavigate();
+42   const { locale } = useParams({ from: '/$locale' });
+43   const completionToken = useRef(0);
+44 
+45   const configRoundIndex = roundOrder[roundIndex];
+46   const round =
+47     configRoundIndex === undefined
+48       ? undefined
+49       : sortNumbersConfig.rounds[configRoundIndex];
+50 
+51   const directionLabel =
+52     sortNumbersConfig.direction === 'ascending'
+53       ? t('sort-numbers-ui.ascending-label')
+54       : t('sort-numbers-ui.descending-label');
+55 
+56   useRoundTTS(directionLabel);
+57 
+58   const handleHome = () => {
+59     void navigate({ to: '/$locale', params: { locale } });
+60   };
+61 
+62   const handlePlayAgain = () => {
+63     onRestartSession();
+64   };
+65 
+66   useEffect(() => {
+67     if (phase !== 'round-complete' || !confettiReady) return;
+68 
+69     const token = ++completionToken.current;
+70     const delayMs = 750;
+71     const timer = globalThis.setTimeout(() => {
+72       if (completionToken.current !== token) return;
+73 
+74       const isLastRound = roundIndex >= roundOrder.length - 1;
+75       if (isLastRound) {
+76         dispatch({ type: 'COMPLETE_GAME' });
+77         return;
+78       }
+79 
+80       const nextConfigIndex = roundOrder[roundIndex + 1];
+81       const nextRound =
+82         nextConfigIndex === undefined
+83           ? undefined
+84           : sortNumbersConfig.rounds[nextConfigIndex];
+85 
+86       if (!nextRound) {
+87         dispatch({ type: 'COMPLETE_GAME' });
+88         return;
+89       }
+90 
+91       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+92         nextRound.sequence,
+93         sortNumbersConfig.direction,
+94       );
+95       dispatch({
+96         type: 'ADVANCE_ROUND',
+97         tiles: nextTiles,
+98         zones: nextZones,
+99       });
+100     }, delayMs);
+101 
+102     return () => {
+103       globalThis.clearTimeout(timer);
+104     };
+105   }, [
+106     phase,
+107     confettiReady,
+108     roundIndex,
+109     dispatch,
+110     roundOrder,
+111     sortNumbersConfig.rounds,
+112     sortNumbersConfig.direction,
+113   ]);
+114 
+115   if (!round) return null;
+116 
+117   return (
+118     <>
+119       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+120         <AnswerGame.Question>
+121           <p className="text-center text-lg font-semibold text-foreground">
+122             {directionLabel}
+123           </p>
+124         </AnswerGame.Question>
+125         <AnswerGame.Answer>
+126           <SlotRow className="gap-2">
+127             {zones.map((zone, i) => (
+128               <Slot
+129                 key={zone.id}
+130                 index={i}
+131                 className="size-14 rounded-lg"
+132               >
+133                 {({ label }) => (
+134                   <span className="text-2xl font-bold">{label}</span>
+135                 )}
+136               </Slot>
+137             ))}
+138           </SlotRow>
+139         </AnswerGame.Answer>
+140         <AnswerGame.Choices>
+141           <SortNumbersTileBank />
+142         </AnswerGame.Choices>
+143       </div>
+144       <ScoreAnimation visible={confettiReady} />
+145       {gameOverReady ? (
+146         <GameOverOverlay
+147           retryCount={retryCount}
+148           onPlayAgain={handlePlayAgain}
+149           onHome={handleHome}
+150         />
+151       ) : null}
+152     </>
+153   );
+154 };
+155 
+156 export const SortNumbers = ({ config }: SortNumbersProps) => {
+157   const roundsInOrder = config.roundsInOrder === true;
+158   const [sessionEpoch, setSessionEpoch] = useState(0);
+159 
+160   const roundOrder = useMemo(() => {
+161     void sessionEpoch;
+162     return buildRoundOrder(config.rounds.length, roundsInOrder);
+163   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+164 
+165   const firstConfigIndex = roundOrder[0];
+166   const round0 =
+167     firstConfigIndex === undefined
+168       ? undefined
+169       : config.rounds[firstConfigIndex];
+170 
+171   const { tiles, zones } = useMemo(() => {
+172     if (!round0) {
+173       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+174     }
+175     return buildSortRound(round0.sequence, config.direction);
+176   }, [round0, config.direction]);
+177 
+178   const answerGameConfig = useMemo(
+179     (): AnswerGameConfig => ({
+180       gameId: config.gameId,
+181       inputMethod: config.inputMethod,
+182       wrongTileBehavior: config.wrongTileBehavior,
+183       tileBankMode: config.tileBankMode,
+184       totalRounds: config.rounds.length,
+185       roundsInOrder: config.roundsInOrder,
+186       ttsEnabled: config.ttsEnabled,
+187       touchKeyboardInputMode: 'numeric',
+188       initialTiles: tiles,
+189       initialZones: zones,
+190       slotInteraction: 'free-swap' as const,
+191     }),
+192     [
+193       config.gameId,
+194       config.inputMethod,
+195       config.wrongTileBehavior,
+196       config.tileBankMode,
+197       config.rounds.length,
+198       config.roundsInOrder,
+199       config.ttsEnabled,
+200       tiles,
+201       zones,
+202     ],
+203   );
+204 
+205   if (!round0) return null;
+206 
+207   return (
+208     <AnswerGame config={answerGameConfig}>
+209       <SortNumbersSession
+210         sortNumbersConfig={config}
+211         roundOrder={roundOrder}
+212         onRestartSession={() => {
+213           setSessionEpoch((e) => e + 1);
+214         }}
+215       />
+216     </AnswerGame>
+217   );
+218 };
 219
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:00:25Z)**_
@@ -3219,399 +3250,400 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:00:27Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/specs/2026-04-07-unified-slot-component-design.md`
 
 ```text
-1	# Unified Slot Component Design
-2	
-3	**Date:** 2026-04-07
-4	**Status:** Approved
-5	**Approach:** New component, parallel migration (Approach A)
-6	
-7	## Context
-8	
-9	The answer-game framework has two slot components that serve nearly identical purposes:
-10	
-11	- `OrderedSlots` (used by WordSpell and SortNumbers) — auto-advancing sequential slots with keyboard input support
-12	- `MatchingPairZones` (used by NumberMatch) — free-swap slots, drag-only
-13	
-14	These components share ~80% of their code (drag source, drop target, click-to-remove, state styling) but diverge on interaction mode and sizing. This duplication blocks reuse for upcoming features (scramble mode, sentence-gap) and makes it harder to deliver consistent animations and drag behavior across games.
-15	
-16	Additionally, the current drag system has a mobile bug (frozen ghost tiles) and lacks visual polish (no feedback animations, inconsistent drag effects between bank↔slot directions).
-17	
-18	## Goals
-19	
-20	1. **Unify** `OrderedSlots` and `MatchingPairZones` into a single `<Slot>` compound component
-21	2. **Add feedback animations** — shake on wrong, pop/bounce on correct, animated auto-eject return
-22	3. **Fix mobile drag bug** — frozen ghost tiles when touch gestures are interrupted
-23	4. **Skeuomorphic drag** — consistent "lift + hole" effect in both directions (bank→slot, slot→bank)
-24	5. **Dynamic slot sizing** — slots adapt to content (letters, dice, dominoes, words)
-25	6. **Sentence-gap support** — inline droppable gaps within sentence text, with multi-gap support
-26	
-27	## 1. Unified Slot Component
-28	
-29	### Location
-30	
-31	`src/components/answer-game/Slot/`
-32	
-33	### Pattern: Compound Component with Render Prop
-34	
-35	The `<Slot>` component owns all behavior; the consumer controls visual content via a render function.
-36	
-37	```tsx
-38	// WordSpell — small square letter slots
-39	<SlotRow className="gap-2">
-40	  {zones.map((zone, i) => (
-41	    <Slot key={zone.id} index={i} className="size-14 rounded-lg">
-42	      {({ label }) => <span className="text-2xl font-bold">{label}</span>}
-43	    </Slot>
-44	  ))}
-45	</SlotRow>
-46	
-47	// NumberMatch — dice content inside larger slots
-48	<SlotRow className="gap-4">
-49	  {zones.map((zone, i) => (
-50	    <Slot key={zone.id} index={i} className="size-20 rounded-2xl">
-51	      {({ label }) =>
-52	        label ? <DiceFace value={Number(label)} /> : null
-53	      }
-54	    </Slot>
-55	  ))}
-56	</SlotRow>
-57	
-58	// Sentence-gap — inline slots within text
-59	<p className="text-lg leading-relaxed">
-60	  The{' '}
-61	  <Slot index={0} as="span" className="inline-block min-w-16 border-b-2 border-dashed mx-1">
-62	    {({ label }) => <span className="text-lg font-bold">{label ?? '\u00A0'}</span>}
-63	  </Slot>
-64	  {' '}sat on the mat.
-65	</p>
-66	```
-67	
-68	### What `<Slot>` Owns (Behavior)
-69	
-70	- Drop target registration (pragmatic DnD + touch via `useTouchDrag`)
-71	- Drag source when filled (for removing/swapping)
-72	- Click-to-remove handler
-73	- Keyboard input focus (when `inputMethod` includes `'type'`)
-74	- Correct/wrong state styling (border + background colors)
-75	- Feedback animations (shake, pop, auto-eject return)
-76	- Active slot cursor (blinking underline, only in `ordered` interaction mode)
-77	- Accessibility (aria-labels, roles)
-78	
-79	### What the Consumer Owns (Rendering)
-80	
-81	- Inner content (letter, number, dice face, word, image) via render prop
-82	- Size and shape via `className` (`size-14`, `size-20`, `h-[72px] w-32`, inline)
-83	- HTML element via `as` prop (`li` default, `span` for inline gaps)
-84	
-85	### Render Prop Signature
-86	
-87	```tsx
-88	interface SlotRenderProps {
-89	  label: string | null;       // placed tile's label, or null if empty
-90	  tileId: string | null;      // placed tile's ID
-91	  isActive: boolean;          // this slot is the current auto-advance target
-92	  isWrong: boolean;           // placed tile is incorrect
-93	  isLocked: boolean;          // tile is locked (wrong + lock mode)
-94	  isEmpty: boolean;           // no tile placed
-95	  showCursor: boolean;        // should show blinking cursor (type/both mode + ordered)
-96	}
-97	
-98	interface SlotProps {
-99	  index: number;
-100	  as?: 'li' | 'span' | 'div';
-101	  className?: string;
-102	  children: (props: SlotRenderProps) => React.ReactNode;
-103	}
-104	```
-105	
-106	### `SlotRow` Wrapper
-107	
-108	Optional layout wrapper for row-based slot arrangements:
-109	
-110	```tsx
-111	interface SlotRowProps {
-112	  className?: string;
-113	  children: React.ReactNode;
-114	}
-115	
-116	// Renders <ol> with flex layout, role="list"
-117	```
-118	
-119	### Config: `slotInteraction` (New Field)
-120	
-121	Added to `AnswerGameConfig`:
-122	
-123	```typescript
-124	interface AnswerGameConfig {
-125	  // ... existing fields ...
-126	  slotInteraction: 'ordered' | 'free-swap';
-127	}
-128	```
-129	
-130	- **`ordered`**: Active slot highlighted, auto-advances on placement. Used for letter-spelling (picture, recall modes).
-131	- **`free-swap`**: No active slot, tiles can be swapped between any slots. Used for scramble, NumberMatch, SortNumbers.
-132	- **Default**: `'free-swap'` when `inputMethod` is `'drag'` or `'both'`; `'ordered'` when `inputMethod` is `'type'`.
-133	
-134	## 2. Feedback Animations
-135	
-136	### Wrong Placement — Shake + Red Flash (~400ms)
-137	
-138	1. Tile lands in slot → `wrong.mp3` plays
-139	2. Slot border/bg turns `border-destructive bg-destructive/10 text-destructive`
-140	3. CSS `animate-shake`: horizontal oscillation (±4px, 3 cycles, 300ms)
-141	4. Brief red flash overlay fades out (100ms)
-142	5. Behavior continues per `wrongTileBehavior` setting
-143	
-144	### Correct Placement — Pop/Bounce (~250ms)
-145	
-146	1. Tile lands in slot → `correct.mp3` plays
-147	2. Slot scales up (`scale(1.08)`) then settles back (`scale(1)`) — spring-like ease
-148	3. Border/bg transitions to `border-primary bg-primary/10 text-primary`
-149	
-150	### CSS Keyframes
-151	
-152	```css
-153	@keyframes shake {
-154	  0%, 100% { transform: translateX(0); }
-155	  20%      { transform: translateX(-4px); }
-156	  40%      { transform: translateX(4px); }
-157	  60%      { transform: translateX(-3px); }
-158	  80%      { transform: translateX(2px); }
-159	}
-160	
-161	@keyframes pop {
-162	  0%   { transform: scale(1); }
-163	  50%  { transform: scale(1.08); }
-164	  100% { transform: scale(1); }
-165	}
-166	```
-167	
-168	Added to `src/styles.css` alongside existing `animate-blink`.
-169	
-170	## 3. Skeuomorphic Drag Effect
-171	
-172	### Lift Effect (Both Directions)
-173	
-174	When drag starts (from bank OR slot):
-175	- **Touch ghost**: `boxShadow: 0 12px 32px rgba(0,0,0,0.3)`, `transform: scale(1.08)`, `opacity: 0.95`
-176	- **Desktop**: Custom drag preview via pragmatic DnD `setCustomNativeDragPreview` with matching shadow/scale
-177	
-178	### "Hole" Left Behind
-179	
-180	Where the tile was picked up from:
-181	- **In bank**: tile spot shows `bg-muted/30` + `shadow-inner` + `rounded-xl` — an indent/depression. Uses existing `dragActiveTileId` state (via `SET_DRAG_ACTIVE` action) to keep the tile's spot visible in the bank instead of removing it from the list.
-182	- **In slot**: slot shows dashed border + `bg-muted/20` — slightly darker than normal empty to suggest "something was here"
-183	- Hole disappears when tile is dropped (placed or returned)
-184	
-185	### Consistency
-186	
-187	Same lifted styling regardless of drag direction (bank→slot or slot→bank), same on desktop and mobile.
-188	
-189	## 4. Auto-Eject Return Animation
-190	
-191	### Sequence (~1300ms total)
-192	
-193	| Time | What happens |
-194	|------|-------------|
-195	| 0–300ms | Shake animation plays (wrong feedback from Section 2) |
-196	| 300–1000ms | Tile sits locked in slot with red styling (existing `AUTO_EJECT_DELAY_MS`) |
-197	| 1000–1300ms | Tile animates back: slides toward tile bank center, `scale(0.8)`, `opacity: 0.7`, `ease-in` |
-198	| 1300ms | `EJECT_TILE` dispatched, tile reappears in bank at normal size |
-199	
-200	### Implementation
-201	
-202	- Before ejecting, measure slot position and bank container center
-203	- Apply CSS transition with calculated `translate(deltaX, deltaY)` + scale + opacity
-204	- On `transitionend` event, dispatch `EJECT_TILE`
-205	- **Fallback**: if DOM measurement fails, fade out in place (graceful degradation)
-206	
-207	## 5. Mobile Drag Bug Fix
-208	
-209	### Root Cause
-210	
-211	In `useSlotTileDrag.ts`, `REMOVE_TILE` dispatches immediately on drag start. If the touch gesture is interrupted (cancelled, leaves viewport, multi-touch conflict), the tile is removed from state but the ghost element lingers — creating frozen overlays (visible in the reported iPhone 17 screenshot with tiles 51 and 58).
-212	
-213	### Fix (Three-Part)
-214	
-215	1. **Ghost cleanup on all terminal events**: Register handlers for `pointercancel`, `pointerup`, `contextmenu`, `visibilitychange`, and `touchend` — all trigger ghost removal + pointer capture release.
-216	
-217	2. **Deferred removal**: Instead of dispatching `REMOVE_TILE` on drag start, hold the tile in a visual "dragging" state. Only dispatch removal on successful drop or confirmed drag-end. If cancelled, tile snaps back to its original slot position.
-218	
-219	3. **Safety net timeout**: If ghost element still exists after 5 seconds, force-clean it and restore tile to its slot. Prevents permanent frozen states from edge cases.
-220	
-221	### Files Affected
-222	
-223	- `src/components/answer-game/useTouchDrag.ts` — ghost lifecycle, event cleanup
-224	- `src/components/answer-game/useSlotTileDrag.ts` — deferred removal logic
-225	
-226	## 6. Dynamic Slot Sizing
-227	
-228	Slot sizing is fully controlled by the consumer via `className`. The `<Slot>` component has no internal size opinions.
-229	
-230	### Per-Game Sizing
-231	
-232	| Game | Slot className | When |
-233	|------|---------------|------|
-234	| WordSpell (letters) | `size-14 rounded-lg` | Always |
-235	| WordSpell (syllables/words) | `min-w-14 h-14 px-2 rounded-lg` | Auto-width for longer content |
-236	| SortNumbers | `size-14 rounded-lg` | Always |
-237	| NumberMatch (dice, all ≤ 6) | `size-20 rounded-2xl` | `round.numbers.every(n => n <= 6)` |
-238	| NumberMatch (domino, any > 6) | `h-[72px] w-32 rounded-2xl` | `round.numbers.some(n => n > 6)` |
-239	| Sentence-gap | `inline-block min-w-16 px-2 border-b-2` | Always inline |
-240	
-241	### NumberMatch Dice/Domino Rule
-242	
-243	When **any** number in the round exceeds 6, **all** slots and tiles render in domino (rectangle) format for visual consistency. When all numbers are ≤ 6, all render as dice (square).
-244	
-245	```tsx
-246	const allDice = round.numbers.every(n => n <= 6);
-247	const slotClass = allDice ? 'size-20 rounded-2xl' : 'h-[72px] w-32 rounded-2xl';
-248	```
-249	
-250	## 7. Sentence-Gap Schema
-251	
-252	### Template Syntax
-253	
-254	Numbered placeholders `{0}`, `{1}`, etc. in the sentence string, mapped to a `gaps` array.
-255	
-256	### Types
-257	
-258	```typescript
-259	interface GapDefinition {
-260	  word: string;           // expected answer for this gap
-261	  distractors?: string[]; // extra wrong tile choices, per-gap
-262	}
-263	
-264	interface WordSpellRound {
-265	  word: string;
-266	  emoji?: string;
-267	  image?: string;
-268	  sceneImage?: string;
-269	  sentence?: string;      // "The {0} sat on the {1}."
-270	  gaps?: GapDefinition[]; // one entry per numbered placeholder
-271	  audioOverride?: string;
-272	}
-273	```
-274	
-275	### Single Gap
-276	
-277	```typescript
-278	{
-279	  sentence: "The {0} sat on the mat.",
-280	  gaps: [{ word: "cat", distractors: ["dog", "bat"] }],
-281	}
-282	// → 1 zone (expectedValue: "cat")
-283	// → 3 tiles: ["cat", "dog", "bat"] shuffled
-284	```
-285	
-286	### Multiple Gaps
-287	
-288	```typescript
-289	{
-290	  sentence: "The {0} sat on the {1}.",
-291	  gaps: [
-292	    { word: "cat", distractors: ["dog"] },
-293	    { word: "mat", distractors: ["hat"] },
-294	  ],
-295	}
-296	// → 2 zones (expectedValue: "cat", expectedValue: "mat")
-297	// → 4 tiles: ["cat", "mat", "dog", "hat"] shuffled
-298	```
-299	
-300	### Rendering
-301	
-302	A `<SentenceWithGaps>` helper component parses the template and injects `<Slot>` components:
-303	
-304	```tsx
-305	const SentenceWithGaps = ({ sentence }: { sentence: string }) => {
-306	  const segments = parseSentenceTemplate(sentence);
-307	  // Splits "The {0} sat on the {1}." into:
-308	  // [{ type:'text', value:'The ' }, { type:'gap', index:0 }, ...]
-309	
-310	  return (
-311	    <p className="text-lg leading-relaxed">
-312	      {segments.map((seg, i) =>
-313	        seg.type === 'text' ? (
-314	          <span key={i}>{seg.value}</span>
-315	        ) : (
-316	          <Slot
-317	            key={seg.index}
-318	            index={seg.index}
-319	            as="span"
-320	            className="inline-block min-w-16 border-b-2 border-dashed mx-1"
-321	          >
-322	            {({ label }) => (
-323	              <span className="text-lg font-bold">{label ?? '\u00A0'}</span>
-324	            )}
-325	          </Slot>
-326	        )
-327	      )}
-328	    </p>
-329	  );
-330	};
-331	```
-332	
-333	### Zone Generation
-334	
-335	```typescript
-336	const buildSentenceGapRound = (gaps: GapDefinition[]) => {
-337	  const zones = gaps.map((gap, i) => ({
-338	    id: `z${i}`,
-339	    index: i,
-340	    expectedValue: gap.word,
-341	    placedTileId: null,
-342	    isWrong: false,
-343	    isLocked: false,
-344	  }));
-345	
-346	  const allWords = [
-347	    ...gaps.map(g => g.word),
-348	    ...gaps.flatMap(g => g.distractors ?? []),
-349	  ];
-350	  const tiles = shuffle(allWords).map(word => ({
-351	    id: nanoid(),
-352	    label: word,
-353	    value: word,
-354	  }));
-355	
-356	  return { tiles, zones };
-357	};
-358	```
-359	
-360	### Backward Compatibility
-361	
-362	When `gaps` is undefined, fall back to existing behavior: generate zones from `round.word` and render letter-spelling slots below the sentence text.
-363	
-364	## Migration Strategy
-365	
-366	**Approach A: New component, parallel migration.**
-367	
-368	1. Build `<Slot>`, `<SlotRow>`, and `<SentenceWithGaps>` in `src/components/answer-game/Slot/`
-369	2. Add `slotInteraction` to `AnswerGameConfig` with backward-compatible defaults
-370	3. Migrate games one at a time:
-371	   - SortNumbers first (simplest — same as current OrderedSlots)
-372	   - WordSpell second (adds keyboard/cursor support)
-373	   - NumberMatch third (validates free-swap + dynamic sizing)
-374	   - Sentence-gap last (new feature, validates inline rendering)
-375	4. After all games migrated, delete `OrderedSlots/` and `MatchingPairZones/`
-376	5. Update game-specific re-exports (`OrderedLetterSlots`, `NumberSequenceSlots`) to point to new component or remove
-377	
-378	## Key Files
-379	
-380	| File | Role |
-381	|------|------|
-382	| `src/components/answer-game/Slot/Slot.tsx` | New unified slot component |
-383	| `src/components/answer-game/Slot/SlotRow.tsx` | Row layout wrapper |
-384	| `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
-385	| `src/components/answer-game/Slot/useSlotBehavior.ts` | Drag/drop/click/keyboard logic hook |
-386	| `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject return animation helpers |
-387	| `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` |
-388	| `src/components/answer-game/useTouchDrag.ts` | Bug fix: ghost cleanup + deferred removal |
-389	| `src/components/answer-game/useSlotTileDrag.ts` | Bug fix: deferred removal logic |
-390	| `src/styles.css` | New keyframes: `shake`, `pop` |
-391	| `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to round type |
+1 # Unified Slot Component Design
+2 
+3 **Date:** 2026-04-07
+4 **Status:** Approved
+5 **Approach:** New component, parallel migration (Approach A)
+6 
+7 ## Context
+8 
+9 The answer-game framework has two slot components that serve nearly identical purposes:
+10 
+11 - `OrderedSlots` (used by WordSpell and SortNumbers) — auto-advancing sequential slots with keyboard input support
+12 - `MatchingPairZones` (used by NumberMatch) — free-swap slots, drag-only
+13 
+14 These components share ~80% of their code (drag source, drop target, click-to-remove, state styling) but diverge on interaction mode and sizing. This duplication blocks reuse for upcoming features (scramble mode, sentence-gap) and makes it harder to deliver consistent animations and drag behavior across games.
+15 
+16 Additionally, the current drag system has a mobile bug (frozen ghost tiles) and lacks visual polish (no feedback animations, inconsistent drag effects between bank↔slot directions).
+17 
+18 ## Goals
+19 
+20 1. **Unify** `OrderedSlots` and `MatchingPairZones` into a single `<Slot>` compound component
+21 2. **Add feedback animations** — shake on wrong, pop/bounce on correct, animated auto-eject return
+22 3. **Fix mobile drag bug** — frozen ghost tiles when touch gestures are interrupted
+23 4. **Skeuomorphic drag** — consistent "lift + hole" effect in both directions (bank→slot, slot→bank)
+24 5. **Dynamic slot sizing** — slots adapt to content (letters, dice, dominoes, words)
+25 6. **Sentence-gap support** — inline droppable gaps within sentence text, with multi-gap support
+26 
+27 ## 1. Unified Slot Component
+28 
+29 ### Location
+30 
+31 `src/components/answer-game/Slot/`
+32 
+33 ### Pattern: Compound Component with Render Prop
+34 
+35 The `<Slot>` component owns all behavior; the consumer controls visual content via a render function.
+36 
+37 ```tsx
+38 // WordSpell — small square letter slots
+39 <SlotRow className="gap-2">
+40   {zones.map((zone, i) => (
+41     <Slot key={zone.id} index={i} className="size-14 rounded-lg">
+42       {({ label }) => <span className="text-2xl font-bold">{label}</span>}
+43     </Slot>
+44   ))}
+45 </SlotRow>
+46 
+47 // NumberMatch — dice content inside larger slots
+48 <SlotRow className="gap-4">
+49   {zones.map((zone, i) => (
+50     <Slot key={zone.id} index={i} className="size-20 rounded-2xl">
+51       {({ label }) =>
+52         label ? <DiceFace value={Number(label)} /> : null
+53       }
+54     </Slot>
+55   ))}
+56 </SlotRow>
+57 
+58 // Sentence-gap — inline slots within text
+59 <p className="text-lg leading-relaxed">
+60   The{' '}
+61   <Slot index={0} as="span" className="inline-block min-w-16 border-b-2 border-dashed mx-1">
+62     {({ label }) => <span className="text-lg font-bold">{label ?? '\u00A0'}</span>}
+63   </Slot>
+64   {' '}sat on the mat.
+65 </p>
+66 ```
+67 
+68 ### What `<Slot>` Owns (Behavior)
+69 
+70 - Drop target registration (pragmatic DnD + touch via `useTouchDrag`)
+71 - Drag source when filled (for removing/swapping)
+72 - Click-to-remove handler
+73 - Keyboard input focus (when `inputMethod` includes `'type'`)
+74 - Correct/wrong state styling (border + background colors)
+75 - Feedback animations (shake, pop, auto-eject return)
+76 - Active slot cursor (blinking underline, only in `ordered` interaction mode)
+77 - Accessibility (aria-labels, roles)
+78 
+79 ### What the Consumer Owns (Rendering)
+80 
+81 - Inner content (letter, number, dice face, word, image) via render prop
+82 - Size and shape via `className` (`size-14`, `size-20`, `h-[72px] w-32`, inline)
+83 - HTML element via `as` prop (`li` default, `span` for inline gaps)
+84 
+85 ### Render Prop Signature
+86 
+87 ```tsx
+88 interface SlotRenderProps {
+89   label: string | null;       // placed tile's label, or null if empty
+90   tileId: string | null;      // placed tile's ID
+91   isActive: boolean;          // this slot is the current auto-advance target
+92   isWrong: boolean;           // placed tile is incorrect
+93   isLocked: boolean;          // tile is locked (wrong + lock mode)
+94   isEmpty: boolean;           // no tile placed
+95   showCursor: boolean;        // should show blinking cursor (type/both mode + ordered)
+96 }
+97 
+98 interface SlotProps {
+99   index: number;
+100   as?: 'li' | 'span' | 'div';
+101   className?: string;
+102   children: (props: SlotRenderProps) => React.ReactNode;
+103 }
+104 ```
+105 
+106 ### `SlotRow` Wrapper
+107 
+108 Optional layout wrapper for row-based slot arrangements:
+109 
+110 ```tsx
+111 interface SlotRowProps {
+112   className?: string;
+113   children: React.ReactNode;
+114 }
+115 
+116 // Renders <ol> with flex layout, role="list"
+117 ```
+118 
+119 ### Config: `slotInteraction` (New Field)
+120 
+121 Added to `AnswerGameConfig`:
+122 
+123 ```typescript
+124 interface AnswerGameConfig {
+125   // ... existing fields ...
+126   slotInteraction: 'ordered' | 'free-swap';
+127 }
+128 ```
+129 
+130 - **`ordered`**: Active slot highlighted, auto-advances on placement. Used for letter-spelling (picture, recall modes).
+131 - **`free-swap`**: No active slot, tiles can be swapped between any slots. Used for scramble, NumberMatch, SortNumbers.
+132 - **Default**: `'free-swap'` when `inputMethod` is `'drag'` or `'both'`; `'ordered'` when `inputMethod` is `'type'`.
+133 
+134 ## 2. Feedback Animations
+135 
+136 ### Wrong Placement — Shake + Red Flash (~400ms)
+137 
+138 1. Tile lands in slot → `wrong.mp3` plays
+139 2. Slot border/bg turns `border-destructive bg-destructive/10 text-destructive`
+140 3. CSS `animate-shake`: horizontal oscillation (±4px, 3 cycles, 300ms)
+141 4. Brief red flash overlay fades out (100ms)
+142 5. Behavior continues per `wrongTileBehavior` setting
+143 
+144 ### Correct Placement — Pop/Bounce (~250ms)
+145 
+146 1. Tile lands in slot → `correct.mp3` plays
+147 2. Slot scales up (`scale(1.08)`) then settles back (`scale(1)`) — spring-like ease
+148 3. Border/bg transitions to `border-primary bg-primary/10 text-primary`
+149 
+150 ### CSS Keyframes
+151 
+152 ```css
+153 @keyframes shake {
+154   0%, 100% { transform: translateX(0); }
+155   20%      { transform: translateX(-4px); }
+156   40%      { transform: translateX(4px); }
+157   60%      { transform: translateX(-3px); }
+158   80%      { transform: translateX(2px); }
+159 }
+160 
+161 @keyframes pop {
+162   0%   { transform: scale(1); }
+163   50%  { transform: scale(1.08); }
+164   100% { transform: scale(1); }
+165 }
+166 ```
+167 
+168 Added to `src/styles.css` alongside existing `animate-blink`.
+169 
+170 ## 3. Skeuomorphic Drag Effect
+171 
+172 ### Lift Effect (Both Directions)
+173 
+174 When drag starts (from bank OR slot):
+175 - **Touch ghost**: `boxShadow: 0 12px 32px rgba(0,0,0,0.3)`, `transform: scale(1.08)`, `opacity: 0.95`
+176 - **Desktop**: Custom drag preview via pragmatic DnD `setCustomNativeDragPreview` with matching shadow/scale
+177 
+178 ### "Hole" Left Behind
+179 
+180 Where the tile was picked up from:
+181 - **In bank**: tile spot shows `bg-muted/30` + `shadow-inner` + `rounded-xl` — an indent/depression. Uses existing `dragActiveTileId` state (via `SET_DRAG_ACTIVE` action) to keep the tile's spot visible in the bank instead of removing it from the list.
+182 - **In slot**: slot shows dashed border + `bg-muted/20` — slightly darker than normal empty to suggest "something was here"
+183 - Hole disappears when tile is dropped (placed or returned)
+184 
+185 ### Consistency
+186 
+187 Same lifted styling regardless of drag direction (bank→slot or slot→bank), same on desktop and mobile.
+188 
+189 ## 4. Auto-Eject Return Animation
+190 
+191 ### Sequence (~1300ms total)
+192 
+193 | Time | What happens |
+194 |------|-------------|
+195 | 0–300ms | Shake animation plays (wrong feedback from Section 2) |
+196 | 300–1000ms | Tile sits locked in slot with red styling (existing `AUTO_EJECT_DELAY_MS`) |
+197 | 1000–1300ms | Tile animates back: slides toward tile bank center, `scale(0.8)`, `opacity: 0.7`, `ease-in` |
+198 | 1300ms | `EJECT_TILE` dispatched, tile reappears in bank at normal size |
+199 
+200 ### Implementation
+201 
+202 - Before ejecting, measure slot position and bank container center
+203 - Apply CSS transition with calculated `translate(deltaX, deltaY)` + scale + opacity
+204 - On `transitionend` event, dispatch `EJECT_TILE`
+205 - **Fallback**: if DOM measurement fails, fade out in place (graceful degradation)
+206 
+207 ## 5. Mobile Drag Bug Fix
+208 
+209 ### Root Cause
+210 
+211 In `useSlotTileDrag.ts`, `REMOVE_TILE` dispatches immediately on drag start. If the touch gesture is interrupted (cancelled, leaves viewport, multi-touch conflict), the tile is removed from state but the ghost element lingers — creating frozen overlays (visible in the reported iPhone 17 screenshot with tiles 51 and 58).
+212 
+213 ### Fix (Three-Part)
+214 
+215 1. **Ghost cleanup on all terminal events**: Register handlers for `pointercancel`, `pointerup`, `contextmenu`, `visibilitychange`, and `touchend` — all trigger ghost removal + pointer capture release.
+216 
+217 2. **Deferred removal**: Instead of dispatching `REMOVE_TILE` on drag start, hold the tile in a visual "dragging" state. Only dispatch removal on successful drop or confirmed drag-end. If cancelled, tile snaps back to its original slot position.
+218 
+219 3. **Safety net timeout**: If ghost element still exists after 5 seconds, force-clean it and restore tile to its slot. Prevents permanent frozen states from edge cases.
+220 
+221 ### Files Affected
+222 
+223 - `src/components/answer-game/useTouchDrag.ts` — ghost lifecycle, event cleanup
+224 - `src/components/answer-game/useSlotTileDrag.ts` — deferred removal logic
+225 
+226 ## 6. Dynamic Slot Sizing
+227 
+228 Slot sizing is fully controlled by the consumer via `className`. The `<Slot>` component has no internal size opinions.
+229 
+230 ### Per-Game Sizing
+231 
+232 | Game | Slot className | When |
+233 |------|---------------|------|
+234 | WordSpell (letters) | `size-14 rounded-lg` | Always |
+235 | WordSpell (syllables/words) | `min-w-14 h-14 px-2 rounded-lg` | Auto-width for longer content |
+236 | SortNumbers | `size-14 rounded-lg` | Always |
+237 | NumberMatch (dice, all ≤ 6) | `size-20 rounded-2xl` | `round.numbers.every(n => n <= 6)` |
+238 | NumberMatch (domino, any > 6) | `h-[72px] w-32 rounded-2xl` | `round.numbers.some(n => n > 6)` |
+239 | Sentence-gap | `inline-block min-w-16 px-2 border-b-2` | Always inline |
+240 
+241 ### NumberMatch Dice/Domino Rule
+242 
+243 When **any** number in the round exceeds 6, **all** slots and tiles render in domino (rectangle) format for visual consistency. When all numbers are ≤ 6, all render as dice (square).
+244 
+245 ```tsx
+246 const allDice = round.numbers.every(n => n <= 6);
+247 const slotClass = allDice ? 'size-20 rounded-2xl' : 'h-[72px] w-32 rounded-2xl';
+248 ```
+249 
+250 ## 7. Sentence-Gap Schema
+251 
+252 ### Template Syntax
+253 
+254 Numbered placeholders `{0}`, `{1}`, etc. in the sentence string, mapped to a `gaps` array.
+255 
+256 ### Types
+257 
+258 ```typescript
+259 interface GapDefinition {
+260   word: string;           // expected answer for this gap
+261   distractors?: string[]; // extra wrong tile choices, per-gap
+262 }
+263 
+264 interface WordSpellRound {
+265   word: string;
+266   emoji?: string;
+267   image?: string;
+268   sceneImage?: string;
+269   sentence?: string;      // "The {0} sat on the {1}."
+270   gaps?: GapDefinition[]; // one entry per numbered placeholder
+271   audioOverride?: string;
+272 }
+273 ```
+274 
+275 ### Single Gap
+276 
+277 ```typescript
+278 {
+279   sentence: "The {0} sat on the mat.",
+280   gaps: [{ word: "cat", distractors: ["dog", "bat"] }],
+281 }
+282 // → 1 zone (expectedValue: "cat")
+283 // → 3 tiles: ["cat", "dog", "bat"] shuffled
+284 ```
+285 
+286 ### Multiple Gaps
+287 
+288 ```typescript
+289 {
+290   sentence: "The {0} sat on the {1}.",
+291   gaps: [
+292     { word: "cat", distractors: ["dog"] },
+293     { word: "mat", distractors: ["hat"] },
+294   ],
+295 }
+296 // → 2 zones (expectedValue: "cat", expectedValue: "mat")
+297 // → 4 tiles: ["cat", "mat", "dog", "hat"] shuffled
+298 ```
+299 
+300 ### Rendering
+301 
+302 A `<SentenceWithGaps>` helper component parses the template and injects `<Slot>` components:
+303 
+304 ```tsx
+305 const SentenceWithGaps = ({ sentence }: { sentence: string }) => {
+306   const segments = parseSentenceTemplate(sentence);
+307   // Splits "The {0} sat on the {1}." into:
+308   // [{ type:'text', value:'The ' }, { type:'gap', index:0 }, ...]
+309 
+310   return (
+311     <p className="text-lg leading-relaxed">
+312       {segments.map((seg, i) =>
+313         seg.type === 'text' ? (
+314           <span key={i}>{seg.value}</span>
+315         ) : (
+316           <Slot
+317             key={seg.index}
+318             index={seg.index}
+319             as="span"
+320             className="inline-block min-w-16 border-b-2 border-dashed mx-1"
+321           >
+322             {({ label }) => (
+323               <span className="text-lg font-bold">{label ?? '\u00A0'}</span>
+324             )}
+325           </Slot>
+326         )
+327       )}
+328     </p>
+329   );
+330 };
+331 ```
+332 
+333 ### Zone Generation
+334 
+335 ```typescript
+336 const buildSentenceGapRound = (gaps: GapDefinition[]) => {
+337   const zones = gaps.map((gap, i) => ({
+338     id: `z${i}`,
+339     index: i,
+340     expectedValue: gap.word,
+341     placedTileId: null,
+342     isWrong: false,
+343     isLocked: false,
+344   }));
+345 
+346   const allWords = [
+347     ...gaps.map(g => g.word),
+348     ...gaps.flatMap(g => g.distractors ?? []),
+349   ];
+350   const tiles = shuffle(allWords).map(word => ({
+351     id: nanoid(),
+352     label: word,
+353     value: word,
+354   }));
+355 
+356   return { tiles, zones };
+357 };
+358 ```
+359 
+360 ### Backward Compatibility
+361 
+362 When `gaps` is undefined, fall back to existing behavior: generate zones from `round.word` and render letter-spelling slots below the sentence text.
+363 
+364 ## Migration Strategy
+365 
+366 **Approach A: New component, parallel migration.**
+367 
+368 1. Build `<Slot>`, `<SlotRow>`, and `<SentenceWithGaps>` in `src/components/answer-game/Slot/`
+369 2. Add `slotInteraction` to `AnswerGameConfig` with backward-compatible defaults
+370 3. Migrate games one at a time:
+371    - SortNumbers first (simplest — same as current OrderedSlots)
+372    - WordSpell second (adds keyboard/cursor support)
+373    - NumberMatch third (validates free-swap + dynamic sizing)
+374    - Sentence-gap last (new feature, validates inline rendering)
+375 4. After all games migrated, delete `OrderedSlots/` and `MatchingPairZones/`
+376 5. Update game-specific re-exports (`OrderedLetterSlots`, `NumberSequenceSlots`) to point to new component or remove
+377 
+378 ## Key Files
+379 
+380 | File | Role |
+381 |------|------|
+382 | `src/components/answer-game/Slot/Slot.tsx` | New unified slot component |
+383 | `src/components/answer-game/Slot/SlotRow.tsx` | Row layout wrapper |
+384 | `src/components/answer-game/Slot/SentenceWithGaps.tsx` | Template parser + inline slot renderer |
+385 | `src/components/answer-game/Slot/useSlotBehavior.ts` | Drag/drop/click/keyboard logic hook |
+386 | `src/components/answer-game/Slot/slot-animations.ts` | Shake, pop, auto-eject return animation helpers |
+387 | `src/components/answer-game/types.ts` | Add `slotInteraction` to config, add `GapDefinition` |
+388 | `src/components/answer-game/useTouchDrag.ts` | Bug fix: ghost cleanup + deferred removal |
+389 | `src/components/answer-game/useSlotTileDrag.ts` | Bug fix: deferred removal logic |
+390 | `src/styles.css` | New keyframes: `shake`, `pop` |
+391 | `src/games/word-spell/types.ts` | Add `gaps?: GapDefinition[]` to round type |
 392
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:02:48Z)**_
@@ -3620,9 +3652,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:02:48Z)**_
 Now I have the full picture. Let me analyze each issue against the spec:
 
 **Issue 1: "in the lock-manual"** - The user started describing this but then moved on to describe the drag/drop issues. Looking at the spec, I can see:
+
 - Section 2: "Behavior continues per `wrongTileBehavior` setting"
 - For `lock-manual`: The tile gets locked in the slot when wrong. The user should be able to manually drag it away.
-- Issue could be: when tile is locked (wrong+locked), something in the drag behavior doesn't work. 
+- Issue could be: when tile is locked (wrong+locked), something in the drag behavior doesn't work.
 
 Actually, I think the user was just providing context—they meant "in the lock-manual mode" as a setup for the drag and disappearing tile issues they're about to describe. Let me focus on the actual problems.
 
@@ -3645,6 +3678,7 @@ When the pointer lifts, it checks what's under the cursor to find a drop zone. I
 For touch releases over the bank, since there's no `data-zone-index` attribute, `dropped` stays false, `onDragCancel` fires to remove the tile and clear the drag state, and the tile should end up back in the bank. But the user is saying the tile disappears entirely, and they're also confused about styling—they want the dragged tile to look exactly like the original bank tile. Let me re-read what they actually said: they can't drop from slot to bank, and the tile vanishes. Maybe the issue is that the tile is being removed but not actually placed back in the bank. in the bank area doesn't work? Like, the bank area doesn't accept drops?
 
 If the user PHYSICALLY tries to DROP the tile over the bank:
+
 - On desktop: they drag with HTML5 DnD over the bank. The bank has no `ondragover` handler. The browser shows a "no drop" cursor. When they release, the browser shows the "rejected drop" animation (drag ghost flies back). After this animation, `dragend` fires. Then `useSlotTileDrag.onDrop` fires with no drop targets. REMOVE_TILE dispatches. Tile goes to bank.
 
 But the user experiences this as: the tile "disappears" because the ghost flies away (rejected drop animation) and then... the tile appears in bank. Maybe the user is saying the intermediate "rejected drop" animation (the ghost flying back) doesn't look good, and the final state shows the tile in bank but without the expected snap/magnetic effect?
@@ -3654,6 +3688,7 @@ Or maybe the issue is that when releasing over a non-droppable area like the ban
 Oh wait! I just realized something important. Looking at `useSlotTileDrag` more carefully:
 
 When the user drags from slot to bank in HTML5 DnD:
+
 1. `onDragStart` fires → `SET_DRAG_ACTIVE { tileId }`
 2. Slot button becomes `invisible` (isBeingDragged=true)
 3. User moves over bank (no drop target)
@@ -3688,7 +3723,7 @@ Actually, this doesn't explain the issue directly.
 Let me try ANOTHER angle. What if the issue happens like this:
 
 1. Slot tile is being dragged (touch)
-2. `isBeingDragged=true` → button has `pointer-events-none` 
+2. `isBeingDragged=true` → button has `pointer-events-none`
 3. BUT the slot CONTAINER still has `data-zone-index={index}`
 4. When user releases touch over the bank area, `elementsFromPoint` at that position finds elements
 5. If the bank area is positioned UNDER the slot row, or if there are slots that overlap, the slot's container might be in `elementsFromPoint` results
@@ -3727,10 +3762,11 @@ Now I have a complete picture. The spec is very clear about what should be imple
 Looking at section 3 "Skeuomorphic Drag Effect":
 
 > ### "Hole" Left Behind
+>
 > - **In bank**: tile spot shows `bg-muted/30` + `shadow-inner` + `rounded-xl` — an indent/depression
 > - **In slot**: slot shows dashed border + `bg-muted/20` — slightly darker than normal empty to suggest "something was here"
 
-Currently, the slot implementation in `Slot.tsx` does NOT show a "dashed border + bg-muted/20" when `isBeingDragged`. 
+Currently, the slot implementation in `Slot.tsx` does NOT show a "dashed border + bg-muted/20" when `isBeingDragged`.
 
 The slot just hides the button while keeping its evaluated state styling (primary or destructive colors), so the drag ghost captures those colors instead of the muted appearance the spec requires. I need to update the slot to switch to dashed border + `bg-muted/20` styling when a tile is being dragged from it.
 
@@ -3925,6 +3961,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:04:21Z)**_
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.test.ts-91-    bank.dataset.tileBank = '';
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.test.ts-92-    document.body.append(bank);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:04:22Z)**_
@@ -3934,88 +3971,89 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:04:22Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-5	
-6	const NumberTile = ({ tile }: { tile: TileItem }) => {
-7	  const {
-8	    ref,
-9	    handleClick,
-10	    onPointerDown,
-11	    onPointerMove,
-12	    onPointerUp,
-13	    onPointerCancel,
-14	  } = useDraggableTile(tile);
-15	
-16	  return (
-17	    <button
-18	      ref={ref}
-19	      type="button"
-20	      aria-label={`Number ${tile.label}`}
-21	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-22	      style={skeuoStyle}
-23	      onClick={handleClick}
-24	      onPointerDown={onPointerDown}
-25	      onPointerMove={onPointerMove}
-26	      onPointerUp={onPointerUp}
-27	      onPointerCancel={onPointerCancel}
-28	    >
-29	      {tile.label}
-30	    </button>
-31	  );
-32	};
-33	
-34	export const SortNumbersTileBank = () => {
-35	  const { allTiles, bankTileIds, dragActiveTileId } =
-36	    useAnswerGameContext();
-37	
-38	  return (
-39	    <div
-40	      data-tile-bank=""
-41	      className="flex flex-wrap justify-center gap-3"
-42	    >
-43	      {allTiles.map((tile) => {
-44	        const inBank = bankTileIds.includes(tile.id);
-45	        const isDragging = tile.id === dragActiveTileId;
-46	
-47	        if (inBank && isDragging) {
-48	          return (
-49	            <div key={tile.id} className="relative size-14">
-50	              <div
-51	                data-tile-bank-hole={tile.id}
-52	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-53	                aria-hidden="true"
-54	              />
-55	              <div
-56	                className="absolute inset-0 invisible"
-57	                aria-hidden="true"
-58	              >
-59	                <NumberTile tile={tile} />
-60	              </div>
-61	            </div>
-62	          );
-63	        }
-64	
-65	        if (inBank) {
-66	          return <NumberTile key={tile.id} tile={tile} />;
-67	        }
-68	
-69	        return (
-70	          <div
-71	            key={tile.id}
-72	            data-tile-bank-hole={tile.id}
-73	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-74	            aria-hidden="true"
-75	          />
-76	        );
-77	      })}
-78	    </div>
-79	  );
-80	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+5 
+6 const NumberTile = ({ tile }: { tile: TileItem }) => {
+7   const {
+8     ref,
+9     handleClick,
+10     onPointerDown,
+11     onPointerMove,
+12     onPointerUp,
+13     onPointerCancel,
+14   } = useDraggableTile(tile);
+15 
+16   return (
+17     <button
+18       ref={ref}
+19       type="button"
+20       aria-label={`Number ${tile.label}`}
+21       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+22       style={skeuoStyle}
+23       onClick={handleClick}
+24       onPointerDown={onPointerDown}
+25       onPointerMove={onPointerMove}
+26       onPointerUp={onPointerUp}
+27       onPointerCancel={onPointerCancel}
+28     >
+29       {tile.label}
+30     </button>
+31   );
+32 };
+33 
+34 export const SortNumbersTileBank = () => {
+35   const { allTiles, bankTileIds, dragActiveTileId } =
+36     useAnswerGameContext();
+37 
+38   return (
+39     <div
+40       data-tile-bank=""
+41       className="flex flex-wrap justify-center gap-3"
+42     >
+43       {allTiles.map((tile) => {
+44         const inBank = bankTileIds.includes(tile.id);
+45         const isDragging = tile.id === dragActiveTileId;
+46 
+47         if (inBank && isDragging) {
+48           return (
+49             <div key={tile.id} className="relative size-14">
+50               <div
+51                 data-tile-bank-hole={tile.id}
+52                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+53                 aria-hidden="true"
+54               />
+55               <div
+56                 className="absolute inset-0 invisible"
+57                 aria-hidden="true"
+58               >
+59                 <NumberTile tile={tile} />
+60               </div>
+61             </div>
+62           );
+63         }
+64 
+65         if (inBank) {
+66           return <NumberTile key={tile.id} tile={tile} />;
+67         }
+68 
+69         return (
+70           <div
+71             key={tile.id}
+72             data-tile-bank-hole={tile.id}
+73             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+74             aria-hidden="true"
+75           />
+76         );
+77       })}
+78     </div>
+79   );
+80 };
 81
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:04:26Z)**_
@@ -4045,6 +4083,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:04:28Z)**_
 .claude/worktrees/bold-chatelet/src/components/answer-game/magnetic-snap.test.ts:39:    const result = magneticOffset(0, currentPos, zoneCenter);
 .claude/worktrees/bold-chatelet/src/components/answer-game/magnetic-snap.ts:8:export function magneticOffset(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:04:29Z)**_
@@ -4054,236 +4093,237 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:04:29Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.test.tsx`
 
 ```text
-1	import { renderHook } from '@testing-library/react';
-2	import { useEffect } from 'react';
-3	import { describe, expect, it, vi } from 'vitest';
-4	import { AnswerGameProvider } from '../AnswerGameProvider';
-5	import { useAnswerGameContext } from '../useAnswerGameContext';
-6	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-7	import { useSlotBehavior } from './useSlotBehavior';
-8	import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
-9	import type { ReactNode } from 'react';
-10	
-11	vi.mock('@/lib/game-event-bus', () => ({
-12	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-13	}));
-14	
-15	vi.mock('@/lib/audio/AudioFeedback', () => ({
-16	  playSound: vi.fn(),
-17	  queueSound: vi.fn(),
-18	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-19	}));
-20	
-21	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-22	  dropTargetForElements: vi.fn().mockReturnValue(() => {}),
-23	  draggable: vi.fn().mockReturnValue(() => {}),
-24	}));
-25	
-26	const tiles: TileItem[] = [
-27	  { id: 'tile-1', label: 'A', value: 'A' },
-28	  { id: 'tile-2', label: 'B', value: 'B' },
-29	];
-30	
-31	const emptyZones: AnswerZone[] = [
-32	  {
-33	    id: 'z0',
-34	    index: 0,
-35	    expectedValue: 'A',
-36	    placedTileId: null,
-37	    isWrong: false,
-38	    isLocked: false,
-39	  },
-40	  {
-41	    id: 'z1',
-42	    index: 1,
-43	    expectedValue: 'B',
-44	    placedTileId: null,
-45	    isWrong: false,
-46	    isLocked: false,
-47	  },
-48	];
-49	
-50	const baseConfig: AnswerGameConfig = {
-51	  gameId: 'test',
-52	  inputMethod: 'drag',
-53	  wrongTileBehavior: 'lock-auto-eject',
-54	  tileBankMode: 'exact',
-55	  totalRounds: 1,
-56	  ttsEnabled: false,
-57	};
-58	
-59	function createWrapper(config: AnswerGameConfig) {
-60	  const Wrapper = ({ children }: { children: ReactNode }) => (
-61	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-62	  );
-63	  Wrapper.displayName = 'AnswerGameTestWrapper';
-64	  return Wrapper;
-65	}
-66	
-67	function useHarness(index: number, zones: AnswerZone[] = emptyZones) {
-68	  const dispatch = useAnswerGameDispatch();
-69	  const state = useAnswerGameContext();
-70	  useEffect(() => {
-71	    if (state.zones.length === 0) {
-72	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-73	    }
-74	    // eslint-disable-next-line react-hooks/exhaustive-deps -- tiles/zones are stable test fixtures; empty deps intentional
-75	  }, []);
-76	  const result = useSlotBehavior(index);
-77	  return { state, result };
-78	}
-79	
-80	describe('useSlotBehavior', () => {
-81	  it('returns empty state for an unfilled slot', () => {
-82	    const { result } = renderHook(() => useHarness(0), {
-83	      wrapper: createWrapper(baseConfig),
-84	    });
-85	    expect(result.current.result.renderProps.isEmpty).toBe(true);
-86	    expect(result.current.result.renderProps.label).toBeNull();
-87	  });
-88	
-89	  it('returns filled state for a slot with a placed tile', () => {
-90	    const filledZones: AnswerZone[] = [
-91	      {
-92	        id: 'z0',
-93	        index: 0,
-94	        expectedValue: 'A',
-95	        placedTileId: 'tile-1',
-96	        isWrong: false,
-97	        isLocked: false,
-98	      },
-99	      {
-100	        id: 'z1',
-101	        index: 1,
-102	        expectedValue: 'B',
-103	        placedTileId: null,
-104	        isWrong: false,
-105	        isLocked: false,
-106	      },
-107	    ];
-108	
-109	    const { result } = renderHook(() => useHarness(0, filledZones), {
-110	      wrapper: createWrapper(baseConfig),
-111	    });
-112	
-113	    expect(result.current.result.renderProps.label).toBe('A');
-114	    expect(result.current.result.renderProps.isEmpty).toBe(false);
-115	  });
-116	
-117	  it('marks slot as active when index matches activeSlotIndex in ordered mode', () => {
-118	    const orderedConfig: AnswerGameConfig = {
-119	      ...baseConfig,
-120	      slotInteraction: 'ordered',
-121	    };
-122	
-123	    const { result } = renderHook(() => useHarness(0, emptyZones), {
-124	      wrapper: createWrapper(orderedConfig),
-125	    });
-126	
-127	    // activeSlotIndex starts at 0, index is 0, ordered mode
-128	    expect(result.current.result.renderProps.isActive).toBe(true);
-129	  });
-130	
-131	  it('never marks slot as active in free-swap mode', () => {
-132	    const freeSwapConfig: AnswerGameConfig = {
-133	      ...baseConfig,
-134	      slotInteraction: 'free-swap',
-135	    };
-136	
-137	    const { result } = renderHook(() => useHarness(0, emptyZones), {
-138	      wrapper: createWrapper(freeSwapConfig),
-139	    });
-140	
-141	    // Even though activeSlotIndex is 0 and index is 0, free-swap never marks active
-142	    expect(result.current.result.renderProps.isActive).toBe(false);
-143	  });
-144	
-145	  it('shows cursor only in ordered mode with non-drag input method', () => {
-146	    const orderedBothConfig: AnswerGameConfig = {
-147	      ...baseConfig,
-148	      slotInteraction: 'ordered',
-149	      inputMethod: 'both',
-150	    };
-151	
-152	    const { result } = renderHook(() => useHarness(0, emptyZones), {
-153	      wrapper: createWrapper(orderedBothConfig),
-154	    });
-155	
-156	    // Ordered, inputMethod !== 'drag', slot is empty, isActive === true
-157	    expect(result.current.result.renderProps.showCursor).toBe(true);
-158	  });
-159	
-160	  it('does not show cursor when inputMethod is drag', () => {
-161	    const orderedDragConfig: AnswerGameConfig = {
-162	      ...baseConfig,
-163	      slotInteraction: 'ordered',
-164	      inputMethod: 'drag',
-165	    };
-166	
-167	    const { result } = renderHook(() => useHarness(0, emptyZones), {
-168	      wrapper: createWrapper(orderedDragConfig),
-169	    });
-170	
-171	    expect(result.current.result.renderProps.showCursor).toBe(false);
-172	  });
-173	
-174	  it('returns correct tileId for filled slot', () => {
-175	    const filledZones: AnswerZone[] = [
-176	      {
-177	        id: 'z0',
-178	        index: 0,
-179	        expectedValue: 'A',
-180	        placedTileId: 'tile-1',
-181	        isWrong: false,
-182	        isLocked: false,
-183	      },
-184	      {
-185	        id: 'z1',
-186	        index: 1,
-187	        expectedValue: 'B',
-188	        placedTileId: null,
-189	        isWrong: false,
-190	        isLocked: false,
-191	      },
-192	    ];
-193	
-194	    const { result } = renderHook(() => useHarness(0, filledZones), {
-195	      wrapper: createWrapper(baseConfig),
-196	    });
-197	
-198	    expect(result.current.result.renderProps.tileId).toBe('tile-1');
-199	  });
-200	
-201	  it('returns isWrong and isLocked from zone state', () => {
-202	    const wrongZones: AnswerZone[] = [
-203	      {
-204	        id: 'z0',
-205	        index: 0,
-206	        expectedValue: 'A',
-207	        placedTileId: 'tile-1',
-208	        isWrong: true,
-209	        isLocked: true,
-210	      },
-211	      {
-212	        id: 'z1',
-213	        index: 1,
-214	        expectedValue: 'B',
-215	        placedTileId: null,
-216	        isWrong: false,
-217	        isLocked: false,
-218	      },
-219	    ];
-220	
-221	    const { result } = renderHook(() => useHarness(0, wrongZones), {
-222	      wrapper: createWrapper(baseConfig),
-223	    });
-224	
-225	    expect(result.current.result.renderProps.isWrong).toBe(true);
-226	    expect(result.current.result.renderProps.isLocked).toBe(true);
-227	  });
-228	});
+1 import { renderHook } from '@testing-library/react';
+2 import { useEffect } from 'react';
+3 import { describe, expect, it, vi } from 'vitest';
+4 import { AnswerGameProvider } from '../AnswerGameProvider';
+5 import { useAnswerGameContext } from '../useAnswerGameContext';
+6 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+7 import { useSlotBehavior } from './useSlotBehavior';
+8 import type { AnswerGameConfig, AnswerZone, TileItem } from '../types';
+9 import type { ReactNode } from 'react';
+10 
+11 vi.mock('@/lib/game-event-bus', () => ({
+12   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+13 }));
+14 
+15 vi.mock('@/lib/audio/AudioFeedback', () => ({
+16   playSound: vi.fn(),
+17   queueSound: vi.fn(),
+18   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+19 }));
+20 
+21 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+22   dropTargetForElements: vi.fn().mockReturnValue(() => {}),
+23   draggable: vi.fn().mockReturnValue(() => {}),
+24 }));
+25 
+26 const tiles: TileItem[] = [
+27   { id: 'tile-1', label: 'A', value: 'A' },
+28   { id: 'tile-2', label: 'B', value: 'B' },
+29 ];
+30 
+31 const emptyZones: AnswerZone[] = [
+32   {
+33     id: 'z0',
+34     index: 0,
+35     expectedValue: 'A',
+36     placedTileId: null,
+37     isWrong: false,
+38     isLocked: false,
+39   },
+40   {
+41     id: 'z1',
+42     index: 1,
+43     expectedValue: 'B',
+44     placedTileId: null,
+45     isWrong: false,
+46     isLocked: false,
+47   },
+48 ];
+49 
+50 const baseConfig: AnswerGameConfig = {
+51   gameId: 'test',
+52   inputMethod: 'drag',
+53   wrongTileBehavior: 'lock-auto-eject',
+54   tileBankMode: 'exact',
+55   totalRounds: 1,
+56   ttsEnabled: false,
+57 };
+58 
+59 function createWrapper(config: AnswerGameConfig) {
+60   const Wrapper = ({ children }: { children: ReactNode }) => (
+61     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+62   );
+63   Wrapper.displayName = 'AnswerGameTestWrapper';
+64   return Wrapper;
+65 }
+66 
+67 function useHarness(index: number, zones: AnswerZone[] = emptyZones) {
+68   const dispatch = useAnswerGameDispatch();
+69   const state = useAnswerGameContext();
+70   useEffect(() => {
+71     if (state.zones.length === 0) {
+72       dispatch({ type: 'INIT_ROUND', tiles, zones });
+73     }
+74     // eslint-disable-next-line react-hooks/exhaustive-deps -- tiles/zones are stable test fixtures; empty deps intentional
+75   }, []);
+76   const result = useSlotBehavior(index);
+77   return { state, result };
+78 }
+79 
+80 describe('useSlotBehavior', () => {
+81   it('returns empty state for an unfilled slot', () => {
+82     const { result } = renderHook(() => useHarness(0), {
+83       wrapper: createWrapper(baseConfig),
+84     });
+85     expect(result.current.result.renderProps.isEmpty).toBe(true);
+86     expect(result.current.result.renderProps.label).toBeNull();
+87   });
+88 
+89   it('returns filled state for a slot with a placed tile', () => {
+90     const filledZones: AnswerZone[] = [
+91       {
+92         id: 'z0',
+93         index: 0,
+94         expectedValue: 'A',
+95         placedTileId: 'tile-1',
+96         isWrong: false,
+97         isLocked: false,
+98       },
+99       {
+100         id: 'z1',
+101         index: 1,
+102         expectedValue: 'B',
+103         placedTileId: null,
+104         isWrong: false,
+105         isLocked: false,
+106       },
+107     ];
+108 
+109     const { result } = renderHook(() => useHarness(0, filledZones), {
+110       wrapper: createWrapper(baseConfig),
+111     });
+112 
+113     expect(result.current.result.renderProps.label).toBe('A');
+114     expect(result.current.result.renderProps.isEmpty).toBe(false);
+115   });
+116 
+117   it('marks slot as active when index matches activeSlotIndex in ordered mode', () => {
+118     const orderedConfig: AnswerGameConfig = {
+119       ...baseConfig,
+120       slotInteraction: 'ordered',
+121     };
+122 
+123     const { result } = renderHook(() => useHarness(0, emptyZones), {
+124       wrapper: createWrapper(orderedConfig),
+125     });
+126 
+127     // activeSlotIndex starts at 0, index is 0, ordered mode
+128     expect(result.current.result.renderProps.isActive).toBe(true);
+129   });
+130 
+131   it('never marks slot as active in free-swap mode', () => {
+132     const freeSwapConfig: AnswerGameConfig = {
+133       ...baseConfig,
+134       slotInteraction: 'free-swap',
+135     };
+136 
+137     const { result } = renderHook(() => useHarness(0, emptyZones), {
+138       wrapper: createWrapper(freeSwapConfig),
+139     });
+140 
+141     // Even though activeSlotIndex is 0 and index is 0, free-swap never marks active
+142     expect(result.current.result.renderProps.isActive).toBe(false);
+143   });
+144 
+145   it('shows cursor only in ordered mode with non-drag input method', () => {
+146     const orderedBothConfig: AnswerGameConfig = {
+147       ...baseConfig,
+148       slotInteraction: 'ordered',
+149       inputMethod: 'both',
+150     };
+151 
+152     const { result } = renderHook(() => useHarness(0, emptyZones), {
+153       wrapper: createWrapper(orderedBothConfig),
+154     });
+155 
+156     // Ordered, inputMethod !== 'drag', slot is empty, isActive === true
+157     expect(result.current.result.renderProps.showCursor).toBe(true);
+158   });
+159 
+160   it('does not show cursor when inputMethod is drag', () => {
+161     const orderedDragConfig: AnswerGameConfig = {
+162       ...baseConfig,
+163       slotInteraction: 'ordered',
+164       inputMethod: 'drag',
+165     };
+166 
+167     const { result } = renderHook(() => useHarness(0, emptyZones), {
+168       wrapper: createWrapper(orderedDragConfig),
+169     });
+170 
+171     expect(result.current.result.renderProps.showCursor).toBe(false);
+172   });
+173 
+174   it('returns correct tileId for filled slot', () => {
+175     const filledZones: AnswerZone[] = [
+176       {
+177         id: 'z0',
+178         index: 0,
+179         expectedValue: 'A',
+180         placedTileId: 'tile-1',
+181         isWrong: false,
+182         isLocked: false,
+183       },
+184       {
+185         id: 'z1',
+186         index: 1,
+187         expectedValue: 'B',
+188         placedTileId: null,
+189         isWrong: false,
+190         isLocked: false,
+191       },
+192     ];
+193 
+194     const { result } = renderHook(() => useHarness(0, filledZones), {
+195       wrapper: createWrapper(baseConfig),
+196     });
+197 
+198     expect(result.current.result.renderProps.tileId).toBe('tile-1');
+199   });
+200 
+201   it('returns isWrong and isLocked from zone state', () => {
+202     const wrongZones: AnswerZone[] = [
+203       {
+204         id: 'z0',
+205         index: 0,
+206         expectedValue: 'A',
+207         placedTileId: 'tile-1',
+208         isWrong: true,
+209         isLocked: true,
+210       },
+211       {
+212         id: 'z1',
+213         index: 1,
+214         expectedValue: 'B',
+215         placedTileId: null,
+216         isWrong: false,
+217         isLocked: false,
+218       },
+219     ];
+220 
+221     const { result } = renderHook(() => useHarness(0, wrongZones), {
+222       wrapper: createWrapper(baseConfig),
+223     });
+224 
+225     expect(result.current.result.renderProps.isWrong).toBe(true);
+226     expect(result.current.result.renderProps.isLocked).toBe(true);
+227   });
+228 });
 229
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:13Z)**_
@@ -4293,8 +4333,7 @@ Now I have a comprehensive view of the codebase. Let me summarize my findings an
 
 **Issue 1: lock-manual** - The user said something about lock-manual but didn't complete the sentence. Looking at the issues they described (3, 4, 5), they're all related to drag from slot to bank. In lock-manual mode, tiles get locked in slots. The user might be saying: in lock-manual mode, when a wrong tile is placed and locked, they can't drag it to the bank. OR there's something else going on.
 
-Actually looking at the reducer: 
-
+Actually looking at the reducer:
 
 Examining the REMOVE_TILE action, I notice it doesn't check whether a tile is locked before removing it. The drag and click handlers both dispatch REMOVE_TILE, so locked tiles should theoretically be removable. But looking at the spec for the "hole" state during drag—where a slot shows a dashed border and slightly darker background—I'm realizing the current implementation might not be handling this visual state correctly when tiles are being dragged.
 
@@ -4344,6 +4383,7 @@ Check atlaskit pragmatic-drag-and-drop version
 ```text
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.10",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:13Z)**_
@@ -4365,6 +4405,7 @@ preserve-offset-on-source
 scroll-just-enough-into-view
 set-custom-native-drag-preview
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:17Z)**_
@@ -4388,6 +4429,7 @@ Check setCustomNativeDragPreview API signature
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:22Z)**_
@@ -4404,6 +4446,7 @@ Find type definitions for setCustomNativeDragPreview
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/types-ts4.5/entry-point/element/set-custom-native-drag-preview.d.ts
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/types-ts4.5/public-utils/element/custom-native-drag-preview/set-custom-native-drag-preview.d.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:25Z)**_
@@ -4413,43 +4456,44 @@ _**Agent (claude-sonnet-4-6 2026-04-07 11:06:25Z)**_
  `./.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/types/public-utils/element/custom-native-drag-preview/set-custom-native-drag-preview.d.ts`
 
 ```text
-1	import { type ElementEventPayloadMap } from '../../../adapter/element-adapter';
-2	import type { GetOffsetFn } from './types';
-3	/** A function to remove the element that has been added to the `container`.
-4	 * @example () => ReactDOM.unmountComponentAtNode(container)
-5	 */
-6	type CleanupFn = () => void;
-7	/** A function that will render a preview element into a `container` `HTMLElement` */
-8	type RenderFn = ({ container, }: {
-9	    /** The `HTMLElement` that you need to render your preview element into.
-10	  `container` will be appended to the `document.body` and will be removed
-11	  after your `CleanupFn` is called
-12	  */
-13	    container: HTMLElement;
-14	}) => CleanupFn | void;
-15	/** This function provides the ability to mount an element for it to be used as the native drag preview
-16	 *
-17	 * @example
-18	 * draggable({
-19	 *  onGenerateDragPreview: ({ nativeSetDragImage }) => {
-20	 *    setCustomNativeDragPreview({
-21	 *      render: ({ container }) => {
-22	 *        ReactDOM.render(<Preview item={item} />, container);
-23	 *        return () => ReactDOM.unmountComponentAtNode(container);
-24	 *      },
-25	 *      nativeSetDragImage,
-26	 *    });
-27	 *    },
-28	 * });
-29	 */
-30	export declare function setCustomNativeDragPreview({ render, nativeSetDragImage, getOffset, }: {
-31	    getOffset?: GetOffsetFn;
-32	    render: RenderFn;
-33	    nativeSetDragImage: ElementEventPayloadMap['onGenerateDragPreview']['nativeSetDragImage'];
-34	}): void;
-35	export {};
+1 import { type ElementEventPayloadMap } from '../../../adapter/element-adapter';
+2 import type { GetOffsetFn } from './types';
+3 /** A function to remove the element that has been added to the `container`.
+4  * @example () => ReactDOM.unmountComponentAtNode(container)
+5  */
+6 type CleanupFn = () => void;
+7 /** A function that will render a preview element into a `container` `HTMLElement` */
+8 type RenderFn = ({ container, }: {
+9     /** The `HTMLElement` that you need to render your preview element into.
+10   `container` will be appended to the `document.body` and will be removed
+11   after your `CleanupFn` is called
+12   */
+13     container: HTMLElement;
+14 }) => CleanupFn | void;
+15 /** This function provides the ability to mount an element for it to be used as the native drag preview
+16  *
+17  * @example
+18  * draggable({
+19  *  onGenerateDragPreview: ({ nativeSetDragImage }) => {
+20  *    setCustomNativeDragPreview({
+21  *      render: ({ container }) => {
+22  *        ReactDOM.render(<Preview item={item} />, container);
+23  *        return () => ReactDOM.unmountComponentAtNode(container);
+24  *      },
+25  *      nativeSetDragImage,
+26  *    });
+27  *    },
+28  * });
+29  */
+30 export declare function setCustomNativeDragPreview({ render, nativeSetDragImage, getOffset, }: {
+31     getOffset?: GetOffsetFn;
+32     render: RenderFn;
+33     nativeSetDragImage: ElementEventPayloadMap['onGenerateDragPreview']['nativeSetDragImage'];
+34 }): void;
+35 export {};
 36
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:06:30Z)**_
@@ -4477,6 +4521,7 @@ Here's what I found:
 Before I propose solutions for all issues, I need clarification on issue 1:
 
 **Question**: When you wrote "1. in the lock-manual" — what specifically is the issue? Did you mean:
+
 - (a) When a tile is locked in a slot (wrong + lock-manual), you can't drag it away
 - (b) Something about the visual state of a locked slot during drag
 - (c) Something else entirely?
@@ -4489,7 +4534,7 @@ _**User (2026-04-07 11:11:40Z)**_
 
 <ide_opened_file>The user opened the file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/docs/superpowers/specs/2026-04-07-unified-slot-component-design.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
 
-> Question: When you wrote "1. in the lock-manual" — what specifically is the issue? 
+> Question: When you wrote "1. in the lock-manual" — what specifically is the issue?
 
 The lock-manual is a game mode that the user have to manually eject the tile from the slot. We are currently able to drag the tile from the slot, but we can't bring it back to the bank. The reason is because it seems that the bank is not a "droppable" element, so we ended-up with issue n4 (tile disappears).
 
@@ -4504,17 +4549,18 @@ Now I understand much better:
 
 1. **Issue 1 (lock-manual)** = same as issue 4. In lock-manual mode, the tile can be dragged from slot, but can't be dropped to bank. So issue 1 = issue 4 essentially.
 
-2. **Issue 4 root cause clarified**: When dropping over a non-droppable element (like the bank), the HTML5 DnD browser behavior shows an animation where the drag ghost "flies back" to its origin and fades out. This is the native "reject drop" animation that browsers do when you drop on a non-drop-target area. 
+2. **Issue 4 root cause clarified**: When dropping over a non-droppable element (like the bank), the HTML5 DnD browser behavior shows an animation where the drag ghost "flies back" to its origin and fades out. This is the native "reject drop" animation that browsers do when you drop on a non-drop-target area.
 
 So the tile is actually being removed from the bank via `REMOVE_TILE` when `onDrop` fires with no valid targets, but the browser's visual animation makes it appear as though the tile flew back to the slot and disappeared. The user is seeing the drag ghost animate back to its source and fade out, which creates the illusion that the tile is gone or transparent in the DOM, when really the state has already changed.
 
 In atlaskit's drag-and-drop library, when `dragend` fires, the `onDrop` callback gets triggered, which dispatches `REMOVE_TILE` to move the tile to the bank and resets the drag state. The problem is in the `Slot` component—when `isBeingDragged` becomes false after the tile is removed, the slot's button still has the `invisible` class applied...
 
-Checking the visibility logic... gged=true`, the button is `invisible`. When `SET_DRAG_ACTIVE null` fires and REMOVE_TILE fires, `isBeingDragged` becomes false AND `isEmpty` becomes true. The slot now renders the empty state (no button).
+Checking the visibility logic... gged=true`, the button is`invisible`. When`SET_DRAG_ACTIVE null` fires and REMOVE_TILE fires, `isBeingDragged` becomes false AND `isEmpty` becomes true. The slot now renders the empty state (no button).
 
 But wait - before those dispatches, when drag started, `SET_DRAG_ACTIVE { tileId }` was dispatched, making `isBeingDragged=true`. The button is invisible. The drag ghost (HTML5 native) is the captured image of the button.
 
 When drag ends on non-drop-target:
+
 1. Browser shows "fly back" animation (native behavior)
 2. `dragend` fires
 3. atlaskit calls `onDrop`
@@ -4543,6 +4589,7 @@ Find atlaskit source files with dragend handling
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/esm/util/detect-broken-drag.js
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/esm/make-adapter/make-drop-target.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:12:15Z)**_
@@ -4570,6 +4617,7 @@ Check how atlaskit handles dragend and drop events
 304:  var innerMost = (_current$ = current[0]) === null || _current$ === void 0 ? void 0 : _current$.dropEffect;
 306:    event.dataTransfer.dropEffect = innerMost;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:12:25Z)**_
@@ -4584,7 +4632,6 @@ CRITICAL FINDING at line 270:
 This means atlaskit's `dragend` handler (which fires the draggable's `onDrop`) fires ONLY when there is NO successful drop. When there IS a successful drop (the element was dropped on a registered drop target), `dragend` fires AFTER `drop`, but atlaskit has already processed the drop via the `drop` event.
 
 Wait, let me re-read line 266-270:
-
 
 The comments say `dragend` fires on the drag source and will fire after `drop` if there was a successful drop, but then the comment at line 270 says atlaskit's own `dragend` listener won't fire if there was a successful drop. That's contradictory—`dragend` definitely fires on the source element even after a successful drop, so maybe the comment is referring to something specific about atlaskit's internal handling or a particular condition I'm missing.
 
@@ -4662,6 +4709,7 @@ function getStartLocation(_ref4) {
       input: input,
       dropTargets: []
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:12:54Z)**_
@@ -4694,10 +4742,12 @@ So the tile made it to the bank and `isDragging` is still true, which means the 
 Looking back at the `onDrop` handler, both the `REMOVE_TILE` and `SET_DRAG_ACTIVE` dispatches should fire to clean up the state. But the DOM is showing `isDragging=true`, so something's preventing that reset from happening. I'm noticing the atlaskit drag library has some lifecycle nuances around when event listeners fire during successful drops versus cancellations.
 
 The key difference is that when a drop lands on a valid drop target, `finish()` gets called and triggers the `onDrop` callback. But when the user drops outside a drop target area, `cancel()` fires instead, and that might not invoke `onDrop` at all. So if the tile is being dropped back to the bank (which might not be registered as a proper drop target), the cleanup dispatches never execute, leaving `dragActiveTileId` still set and the UI stuck in the dragging state. ACTIVE null` is NOT dispatched
+
 - The tile stays in the slot
 - But... wait, the user said the tile IS in the bank (`inBank=true`). How did it get there?
 
 Hmm, let me re-read. The DOM the user found:
+
 ```html
 <div class="relative size-14">
   <div data-tile-bank-hole="sVnb6Htq0n8MO8jdncWK6" class="size-14 rounded-xl bg-muted/60 shadow-inner" />
@@ -4732,6 +4782,7 @@ Check how cancel vs finish dispatch consumer events
 110:      scheduleOnDrag.cancel();
 112:        eventName: 'onDrop',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:13:00Z)**_
@@ -4770,6 +4821,7 @@ Read the finish/cancel dispatch logic
   return dispatch;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:13:04Z)**_
@@ -4793,6 +4845,7 @@ Find cancel and finish function definitions
 283:      cancel();
 286:    onDragEnd: cancel
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:13:09Z)**_
@@ -4860,6 +4913,7 @@ Read cancel and finish implementations
   }, {
     type: 'dragleave',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:14:57Z)**_
@@ -4881,7 +4935,6 @@ function cancel() {
 And `dispatch.drop()` calls `safeDispatch` with `eventName: 'onDrop'`.
 
 So `onDrop` IS called even when cancelling! So `useSlotTileDrag.onDrop` should fire when the drag is cancelled/dropped on non-target.
-
 
 But the DOM still shows `isDragging=true` after the drag, which means `SET_DRAG_ACTIVE null` wasn't dispatched even though it should be in the `onDrop` handler. Let me look back at the actual DOM the user showed me to see what's happening.
 
@@ -4957,6 +5010,7 @@ Check safeDispatch implementation
 111:      safeDispatch({
 112:        eventName: 'onDrop',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:15:00Z)**_
@@ -5019,6 +5073,7 @@ export function makeDispatch(_ref) {
         previous: previous,
         initial: initial
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:15:04Z)**_
@@ -5054,6 +5109,7 @@ Find element adapter source
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/esm/public-utils/element/format-urls-for-external.js
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@atlaskit/pragmatic-drag-and-drop/dist/esm/public-utils/prevent-unhandled.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:15:10Z)**_
@@ -5068,6 +5124,7 @@ Check element adapter onDrop handling
 121:          // cancel drag operation if we cannot drag
 137:          // then we will cancel the active drag
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:15:13Z)**_
@@ -5083,6 +5140,7 @@ Find consumer onDrop registration in element adapter
 235:    (_draggableRegistry$ge = draggableRegistry.get(payload.source.element)) === null || _draggableRegistry$ge === void 0 || (_draggableRegistry$ge2 = _draggableRegistry$ge[eventName]) === null || _draggableRegistry$ge2 === void 0 || _draggableRegistry$ge2.call(_draggableRegistry$ge,
 277:  // Wrapping in `once` to prevent unexpected side effects if consumers call
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:15:18Z)**_
@@ -5131,6 +5189,7 @@ export function draggable(args) {
     if (existing) {
       // eslint-disable-next-line no-console
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 11:17:22Z)**_
@@ -5150,7 +5209,6 @@ dispatchEventToSource: function dispatchEventToSource({ eventName, payload }) {
 ```
 
 The event is dispatched to `draggableRegistry.get(payload.source.element)`. This looks up the draggable element in the registry.
-
 
 The source element is the original button being dragged, and when `cancel()` triggers the drop event, I need to trace what's actually in the registry at that moment—whether the element is still registered or if the cleanup function has already unregistered it. I'm trying to figure out whether the state updates from the dispatch calls happen synchronously and trigger the useEffect cleanup before the onDrop callback finishes executing. In React 18, useReducer dispatch is synchronous in queuing the action, but the actual re-render happens asynchronously, so the cleanup shouldn't fire mid-dispatch—though I need to verify whether non-React event handlers behave differently.
 
@@ -5276,7 +5334,6 @@ The user is raising new issues/clarifications:
 
 2. Swap tiles in slots: when dragging from one slot to another slot, instead of the displaced tile going back to bank, it should SWAP positions with the dragged tile. This is the `free-swap` / `swapOrPlace` functionality that's supposed to work via `useFreeSwap`.
 
-
 Let me trace through the `useFreeSwap` hook to see how the swap logic currently works, and then I need to address all the reported issues systematically. The user interrupted my investigation into the invisible tile problem in the bank, so I should refocus on the full list of bugs they've identified: the corner color artifact in the drag ghost, the animation behavior for ejected tiles, and the swap functionality not working as expected.
 
 Looking at the invisible tile issue more carefully—when a tile is dropped on a non-drop-target like the bank, `REMOVE_TILE` fires but `SET_DRAG_ACTIVE` never gets cleared because the `onDrop` callback isn't being triggered. The root cause is a race condition: once the tile is removed from the DOM (making the slot empty), atlaskit can't find the draggable element in its registry anymore, so the drop handler never fires and the drag state stays active.
@@ -5315,49 +5372,50 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:01:15Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useFreeSwap.ts`
 
 ```text
-1	import { useCallback } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTileEvaluation } from './useTileEvaluation';
-5	
-6	export interface FreeSwap {
-7	  swapOrPlace: (tileId: string, targetZoneIndex: number) => void;
-8	}
-9	
-10	export function useFreeSwap(): FreeSwap {
-11	  const { zones } = useAnswerGameContext();
-12	  const dispatch = useAnswerGameDispatch();
-13	  const { placeTile } = useTileEvaluation();
-14	
-15	  const swapOrPlace = useCallback(
-16	    (tileId: string, targetZoneIndex: number) => {
-17	      const targetZone = zones[targetZoneIndex];
-18	      if (!targetZone) return;
-19	
-20	      if (targetZone.placedTileId === null) {
-21	        placeTile(tileId, targetZoneIndex);
-22	      } else {
-23	        const sourceZoneIndex = zones.findIndex(
-24	          (z) => z.placedTileId === tileId,
-25	        );
-26	        if (sourceZoneIndex === -1) {
-27	          placeTile(tileId, targetZoneIndex);
-28	        } else {
-29	          dispatch({
-30	            type: 'SWAP_TILES',
-31	            fromZoneIndex: sourceZoneIndex,
-32	            toZoneIndex: targetZoneIndex,
-33	          });
-34	        }
-35	      }
-36	    },
-37	    [zones, dispatch, placeTile],
-38	  );
-39	
-40	  return { swapOrPlace };
-41	}
+1 import { useCallback } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTileEvaluation } from './useTileEvaluation';
+5 
+6 export interface FreeSwap {
+7   swapOrPlace: (tileId: string, targetZoneIndex: number) => void;
+8 }
+9 
+10 export function useFreeSwap(): FreeSwap {
+11   const { zones } = useAnswerGameContext();
+12   const dispatch = useAnswerGameDispatch();
+13   const { placeTile } = useTileEvaluation();
+14 
+15   const swapOrPlace = useCallback(
+16     (tileId: string, targetZoneIndex: number) => {
+17       const targetZone = zones[targetZoneIndex];
+18       if (!targetZone) return;
+19 
+20       if (targetZone.placedTileId === null) {
+21         placeTile(tileId, targetZoneIndex);
+22       } else {
+23         const sourceZoneIndex = zones.findIndex(
+24           (z) => z.placedTileId === tileId,
+25         );
+26         if (sourceZoneIndex === -1) {
+27           placeTile(tileId, targetZoneIndex);
+28         } else {
+29           dispatch({
+30             type: 'SWAP_TILES',
+31             fromZoneIndex: sourceZoneIndex,
+32             toZoneIndex: targetZoneIndex,
+33           });
+34         }
+35       }
+36     },
+37     [zones, dispatch, placeTile],
+38   );
+39 
+40   return { swapOrPlace };
+41 }
 42
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:01:16Z)**_
@@ -5367,75 +5425,76 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:01:16Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTileEvaluation.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { playSound } from '@/lib/audio/AudioFeedback';
-5	import { getGameEventBus } from '@/lib/game-event-bus';
-6	
-7	const AUTO_EJECT_DELAY_MS = 1000;
-8	
-9	export interface TileEvaluation {
-10	  placeTile: (tileId: string, zoneIndex: number) => void;
-11	}
-12	
-13	export function useTileEvaluation(): TileEvaluation {
-14	  const state = useAnswerGameContext();
-15	  const dispatch = useAnswerGameDispatch();
-16	  const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-17	    null,
-18	  );
-19	
-20	  const clearEjectionTimer = useCallback(() => {
-21	    if (ejectionTimerRef.current !== null) {
-22	      clearTimeout(ejectionTimerRef.current);
-23	      ejectionTimerRef.current = null;
-24	    }
-25	  }, []);
-26	
-27	  useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
-28	
-29	  const placeTile = useCallback(
-30	    (tileId: string, zoneIndex: number) => {
-31	      clearEjectionTimer();
-32	
-33	      const tile = state.allTiles.find((t) => t.id === tileId);
-34	      const zone = state.zones[zoneIndex];
-35	      if (!tile || !zone) return;
-36	
-37	      const correct = tile.value === zone.expectedValue;
-38	      playSound(correct ? 'correct' : 'wrong', 0.8);
-39	      dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
-40	
-41	      getGameEventBus().emit({
-42	        type: 'game:evaluate',
-43	        gameId: state.config.gameId,
-44	        sessionId: '',
-45	        profileId: '',
-46	        timestamp: Date.now(),
-47	        roundIndex: state.roundIndex,
-48	        answer: tileId,
-49	        correct,
-50	        nearMiss: false,
-51	      });
-52	
-53	      if (
-54	        !correct &&
-55	        state.config.wrongTileBehavior === 'lock-auto-eject'
-56	      ) {
-57	        ejectionTimerRef.current = setTimeout(() => {
-58	          dispatch({ type: 'EJECT_TILE', zoneIndex });
-59	          ejectionTimerRef.current = null;
-60	        }, AUTO_EJECT_DELAY_MS);
-61	      }
-62	    },
-63	    [state, dispatch, clearEjectionTimer],
-64	  );
-65	
-66	  return { placeTile };
-67	}
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { playSound } from '@/lib/audio/AudioFeedback';
+5 import { getGameEventBus } from '@/lib/game-event-bus';
+6 
+7 const AUTO_EJECT_DELAY_MS = 1000;
+8 
+9 export interface TileEvaluation {
+10   placeTile: (tileId: string, zoneIndex: number) => void;
+11 }
+12 
+13 export function useTileEvaluation(): TileEvaluation {
+14   const state = useAnswerGameContext();
+15   const dispatch = useAnswerGameDispatch();
+16   const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+17     null,
+18   );
+19 
+20   const clearEjectionTimer = useCallback(() => {
+21     if (ejectionTimerRef.current !== null) {
+22       clearTimeout(ejectionTimerRef.current);
+23       ejectionTimerRef.current = null;
+24     }
+25   }, []);
+26 
+27   useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
+28 
+29   const placeTile = useCallback(
+30     (tileId: string, zoneIndex: number) => {
+31       clearEjectionTimer();
+32 
+33       const tile = state.allTiles.find((t) => t.id === tileId);
+34       const zone = state.zones[zoneIndex];
+35       if (!tile || !zone) return;
+36 
+37       const correct = tile.value === zone.expectedValue;
+38       playSound(correct ? 'correct' : 'wrong', 0.8);
+39       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
+40 
+41       getGameEventBus().emit({
+42         type: 'game:evaluate',
+43         gameId: state.config.gameId,
+44         sessionId: '',
+45         profileId: '',
+46         timestamp: Date.now(),
+47         roundIndex: state.roundIndex,
+48         answer: tileId,
+49         correct,
+50         nearMiss: false,
+51       });
+52 
+53       if (
+54         !correct &&
+55         state.config.wrongTileBehavior === 'lock-auto-eject'
+56       ) {
+57         ejectionTimerRef.current = setTimeout(() => {
+58           dispatch({ type: 'EJECT_TILE', zoneIndex });
+59           ejectionTimerRef.current = null;
+60         }, AUTO_EJECT_DELAY_MS);
+61       }
+62     },
+63     [state, dispatch, clearEjectionTimer],
+64   );
+65 
+66   return { placeTile };
+67 }
 68
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:03:05Z)**_
@@ -5444,12 +5503,13 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:03:05Z)**_
 Now I have a clear picture of the swap behavior:
 
 `useFreeSwap.swapOrPlace`:
+
 1. If target slot is EMPTY: call `placeTile(tileId, targetZoneIndex)` → PLACE_TILE
 2. If target slot is OCCUPIED:
    - Find source zone (where the tile is currently placed)
    - If source zone found: dispatch `SWAP_TILES` from source to target
    - If source zone NOT found (tile came from bank): call `placeTile(tileId, targetZoneIndex)` → PLACE_TILE
-   
+
 But the user is reporting that slot-to-slot drags aren't working. Let me trace through what happens when a tile from one slot is dragged onto another slot—the drop handler should be checking if the source is a slot tile and handling the swap appropriately, but something in that flow seems to be breaking down. Writing the drop handler... I see the issue now—when `swapOrPlace` gets called, the tile has already been removed from its source zone by the `REMOVE_TILE` dispatch, so the function can't find it in any zone and falls back to placing it instead of swapping. The `SWAP_TILES` action never gets triggered because the precondition for finding the source zone fails. The issue is that `REMOVE_TILE` gets dispatched before `swapOrPlace` runs, so when it tries to find the source zone, the tile's already in the bank and it falls back to placing instead of swapping. I need to restructure the drop handler so it doesn't remove the tile upfront—instead, let the swap logic decide whether to swap tiles between slots, place from bank to slot, or only remove when dropping into the bank with no valid target.
 
 Refactoring the drop handler logic...
@@ -5469,15 +5529,18 @@ Refining the handler...
 I'm realizing the empty slot case is tricky—I need to figure out whether PLACE_TILE evaluates the tile or if there's a separate move action for slot-to-slot transfers in free-swap mode, since moving between slots shouldn't trigger evaluation like placing from the bank would. I see the core issue now—after REMOVE_TILE sends the tile to the bank, the sourceZoneIndex lookup fails because the tile is no longer in any zone, so it defaults to treating every placement as if the tile came from the bank, which breaks the swap logic for occupied slots.
 
 The cleanest approach is to pass the source zone index directly from `useSlotTileDrag` to the drop handler, since we already know which slot initiated the drag, and use that to determine whether we're doing a swap or a placement rather than trying to reconstruct it after the tile has moved to the bank. The cleanest approach is to pass the source zone index directly to the `onDrop` callback, so the consumer can decide how to handle the operation based on whether it's a swap, a move to an empty slot, or a move to the bank. Looking at the `PLACE_TILE` action more carefully, I see it removes the tile from the bank when placing it in a zone, but it doesn't handle removing the tile from its source zone when dragging from one zone to another. I need to update `PLACE_TILE` to also remove the tile from the source zone if it came from there, not just from the bank. - Source zone: tile still there (now duplicated!)
+
 - Bank: tile filtered out (but it wasn't there to begin with, so no-op)
 
-This creates a DUPLICATE tile situation. 
+This creates a DUPLICATE tile situation.
 
 For slot→slot without REMOVE_TILE:
+
 - `SWAP_TILES`: works perfectly, just swaps the placedTileId between zones
 - `PLACE_TILE` (for empty target): would duplicate the tile
 
 So for slot→slot drag:
+
 - Target occupied: SWAP_TILES ✓ (no REMOVE_TILE needed)
 - Target empty: Need a different action, like a combined "MOVE_TILE from source to target"
 
@@ -5486,6 +5549,7 @@ I'm realizing I need either a new `MOVE_TILE` action that handles both removal a
 Fixing `swapOrPlace` in `useFreeSwap`...
 
 I'm realizing there's a timing issue with how React batches the REMOVE_TILE dispatch and the subsequent `placeTile` call—the state captured in the closure won't reflect the removal, so the placement logic might operate on stale data. eTile` calls `dispatch({ type: 'PLACE_TILE', tileId, zoneIndex })`. Both REMOVE_TILE and PLACE_TILE dispatches would be batched by React 18. The reducer processes them sequentially:
+
 1. REMOVE_TILE(sourceZoneIndex) → tile goes to bank, source zone cleared
 2. PLACE_TILE(tileId, targetZoneIndex) → tile placed in target zone (from bank)
 
@@ -5508,16 +5572,17 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:10:59Z)**_
 Now I understand the swap behavior:
 
 In `useFreeSwap.swapOrPlace`:
+
 - If target zone is empty → `placeTile(tileId, targetZoneIndex)` → evaluates and places
 - If target zone is occupied AND source tile is in a slot → `SWAP_TILES` (swaps positions)
 - If target zone is occupied AND source tile is NOT in a slot (came from bank) → `placeTile(tileId, targetZoneIndex)` (places it, displaced tile goes to bank)
-
 
 - The user's issue is that when dragging a slot tile onto another, the displaced tile goes back to the bank instead of swapping. This happens because `useFreeSwap` might be receiving the tile after `REMOVE_TILE` has already been dispatched, so it can't find the source zone and falls through to `placeTile` instead of triggering the swap logic.
 
 Looking at the `onDrop` handler, I see the problem: the tile is removed from its source slot first, then the drop callback is invoked. By the time `handleDrop` runs and calls `useFreeSwap`, the tile is already in the bank, so `swapOrPlace` can't locate it in any zone to perform the swap. → `swapOrPlace(currentTileId, targetZoneIndex)`
 
 In `swapOrPlace`:
+
 - `zones` is from `useAnswerGameContext()` - but this is the CURRENT state from context, which is the state BEFORE the dispatches (React hasn't re-rendered yet since we're still in the same event handler)
 - `state.zones[targetZoneIndex].placedTileId` might still have the displaced tile's ID
 - `state.zones[targetZoneIndex].placedTileId === null`? No, it has the displaced tile.
@@ -5579,6 +5644,7 @@ Now I'm reviewing the main issues the user wants addressed: invisible tiles afte
 Actually wait - given the complexity of all these changes, I should ask for clarification before doing anything. Let me confirm what I understand and ask if my understanding of the swap behavior is correct.
 
 The swap behavior:
+
 - Currently: drag tile A from slot 1 to slot 2 (which has tile B) → B goes to bank, A goes to slot 2
 - Desired: drag tile A from slot 1 to slot 2 (which has tile B) → A goes to slot 2, B goes to slot 1 (they swap)
 
@@ -5592,7 +5658,7 @@ To make that work, I'd need to track the previous tile ID in a ref so I can dete
 
 Or I could go even simpler: have a `triggerEjectReturn` function that takes the button element and tile ID, creates a ghost based on the button's current state, and animates it to the bank hole.
 
-The key insight is that for the displacement case, I should trigger the eject animation *before* dispatching PLACE_TILE, not after. For swaps though, neither tile goes to the bank—they just exchange positions, so no eject animation is needed there.
+The key insight is that for the displacement case, I should trigger the eject animation _before_ dispatching PLACE_TILE, not after. For swaps though, neither tile goes to the bank—they just exchange positions, so no eject animation is needed there.
 
 In ordered mode, displacement only happens when placing on an occupied slot, which is rare but possible. The old tile needs to animate from its current slot position to the bank. I'm thinking through how to handle the drag case specifically in ordered mode where this displacement might occur.
 
@@ -5605,11 +5671,13 @@ Now for the drag hook, I need to remove the `REMOVE_TILE` dispatch from the drop
 Actually wait. Let me re-think the interface between `useSlotTileDrag` and `useSlotBehavior`:
 
 Currently:
+
 ```
 useSlotTileDrag.onDrop → dispatch REMOVE_TILE → dispatch SET_DRAG_ACTIVE null → call handleDrop(tileId, targetZoneIndex)
 ```
 
 The problem with this: handleDrop (= `swapOrPlace`) reads zones BEFORE the dispatches are processed, but then `SWAP_TILES` is dispatched AFTER REMOVE_TILE. When all 3 actions are batched, the final state has:
+
 - REMOVE_TILE: source zone empty, tile in bank
 - SET_DRAG_ACTIVE null: drag cleared
 - SWAP_TILES: source zone gets target zone's tile, target zone gets source zone's tile (which is now null after REMOVE_TILE)
@@ -5649,9 +5717,11 @@ Actually, a cleaner solution would be to keep a "leaving tile" state that persis
 I'm planning the actual code changes across a few files. In the reducer, I need to clear the drag active tile ID when a tile is removed. In the drag hook, I should only dispatch the drag state reset and call the drop callback without prematurely removing the tile—let the callback handler decide what happens. I'll also add the eject return animation trigger for...
 
 Writing implementation changes... no target" case (bank return animation)
+
 - Add `setCustomNativeDragPreview` for clean drag ghost
 
 **3. `useSlotBehavior.ts`**:
+
 - Update `handleDrop` to handle SWAP_TILES vs REMOVE_TILE+PLACE_TILE
 - Also need to handle "return to bank" case (when no target → handleDrop isn't called, useSlotTileDrag handles it directly)
 - Add animation trigger for "no target" case and "click" case
@@ -5761,6 +5831,7 @@ Now I have complete clarity on all issues. Let me summarize my findings and prop
 5. **Eject animation always**: Currently only fires for `lock-auto-eject`. Fix: trigger `triggerEjectReturn` before any REMOVE_TILE dispatch (click, drag-to-bank, displaced by PLACE_TILE).
 
 **Proposed changes:**
+
 - `answer-game-reducer.ts`: REMOVE_TILE clears `dragActiveTileId`
 - `useSlotTileDrag.ts`: restructure `onDrop` (don't auto REMOVE_TILE for target drops; only for no-target); add `onBankReturn` callback; add `setCustomNativeDragPreview`
 - `useSlotBehavior.ts`: new `handleDrop` using SWAP_TILES for free-swap+occupied, REMOVE_TILE+placeTile for others; trigger `triggerEjectReturn` in `handleClick` and via `onBankReturn`
@@ -5783,6 +5854,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:22:40Z)**_
 The user is sharing a screenshot showing the word-spell game. There's a tile "n" in the first slot with an orange/wrong border. The user wants to fix an issue where the tile appears to get smaller during animation.
 
 Looking at the screenshot, I can see:
+
 - First slot has "n" with an orange border (wrong placement)
 - Two other slots are empty with orange borders
 - The bank below shows "a" and "t" tiles (one hole where another tile was)
@@ -5790,7 +5862,6 @@ Looking at the screenshot, I can see:
 The user says "the tile is getting smaller" and mentions a GIF - but I only see a static image. The GIF would show the animation where the tile shrinks.
 
 Looking at `triggerEjectReturn` in `slot-animations.ts`:
-
 
 I found the culprit - the animation applies a scale of 0.8 during the eject return, which shrinks the tile to 80% of its size. That's the unwanted shrinking effect. The fix is straightforward: I need to remove the scale transformation or change it to 1.0 so the tile maintains its size while animating back to the bank. So the user is specifically talking about the auto-eject animation when a tile is placed incorrectly in lock mode—that's what the orange border indicates. I need to remove the scale from the eject return animation, then work through the full implementation plan: fixing the reducer, restructuring the drag handler, and updating the related logic.
 
@@ -5826,6 +5897,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:22:41Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:22:42Z)**_
@@ -5844,6 +5916,7 @@ Check knip config for unused export handling
     "rehype-format": "^5.0.1",
     "rehype-raw": "^7.0.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:23:00Z)**_
@@ -5863,6 +5936,7 @@ Find knip config file
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:23:08Z)**_
@@ -5876,6 +5950,7 @@ Get knip config from package.json
 ```text
 {}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:23:15Z)**_
@@ -5884,7 +5959,6 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:23:15Z)**_
 No knip config found. Knip will use defaults which means it'll likely flag `useFreeSwap` as unused if we remove its import. Let me just delete `useFreeSwap.ts` and its test when the time comes, or keep the import but not use the hook (which would be dead code too).
 
 Actually, the cleanest solution: inline the swap logic directly in `handleDrop` and delete `useFreeSwap.ts` along with its test `useFreeSwap.test.tsx`. The logic is simple enough that it doesn't need a separate hook.
-
 
 Deleting both files together should avoid any knip issues from orphaned imports. Now I'll start implementing these changes and track my progress.
 </details></think>
@@ -5927,6 +6001,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:23:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:23:42Z)**_
@@ -5952,6 +6027,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:23:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:23:57Z)**_
@@ -6014,6 +6090,7 @@ export const useBankDropTarget = (): {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useBankDropTarget.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:15Z)**_
@@ -6028,6 +6105,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:29Z)**_
@@ -6038,6 +6116,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:35Z)**_
@@ -6048,6 +6127,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:42Z)**_
@@ -6058,6 +6138,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:47Z)**_
@@ -6068,6 +6149,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:24:55Z)**_
@@ -6078,6 +6160,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 12:24:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 12:25:14Z)**_
@@ -6274,4 +6357,5 @@ export const useSlotTileDrag = ({
 };
 
 ```
+
 </details></tool-use>

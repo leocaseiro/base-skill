@@ -21,6 +21,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:04Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants me to:
+
 1. First refresh from the remote origin master branch
 2. Fix an issue where touch screen devices can't play "type mode" because the keyboard isn't showing
 3. Get suggestions for how to display both the keyboard and UI on smaller screens
@@ -28,7 +29,6 @@ The user wants me to:
 Let me start by checking for relevant skills, then refresh from remote, and explore the codebase.
 
 Let me first check if there are any applicable skills here. The user wants to fix a bug/feature and is asking for suggestions - this seems like it might need the brainstorming skill before implementation.
-
 
 I should pull the latest changes first, then examine the codebase to understand the issue before brainstorming solutions. The brainstorming skill would be useful for the design suggestions part, but I need to see the code and understand the problem first.
 </details></think>
@@ -41,6 +41,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:04Z)**_
 ```text
 Launching skill: superpowers:brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -209,13 +210,13 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:07Z)**_
 
 <think><details><summary>Thought Process</summary>
 Using the brainstorming skill. I need to:
+
 1. Explore project context first
 2. Then proceed with the brainstorming flow
 
@@ -237,12 +238,14 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:07Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:10Z)**_
 
 <think><details><summary>Thought Process</summary>
 Let me set up todos and start working through the brainstorming process. First, I need to:
+
 1. Pull the latest from remote origin master
 2. Explore the project context to understand the touch keyboard issue
 3. Then brainstorm solutions
@@ -297,6 +300,7 @@ a60af01 fix(db): make SaveInput.color required, remove default fallback
 c341165 feat(db): add color field to saved_game_configs, add updateConfig hook method
 8021324 feat: add ConfigField type, bookmark color palette, and configToTags utility
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:22Z)**_
@@ -371,6 +375,7 @@ Fast-forward
  create mode 100644 src/lib/config-tags.test.ts
  create mode 100644 src/lib/config-tags.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:28Z)**_
@@ -399,264 +404,265 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:31Z)**_
  `./src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-5	import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
-6	import type { WordSpellConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-16	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-17	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-18	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-19	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-20	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-21	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-22	import { buildRoundOrder } from '@/games/build-round-order';
-23	
-24	function segmentsForWord(
-25	  word: string,
-26	  tileUnit: WordSpellConfig['tileUnit'],
-27	): string[] {
-28	  const trimmed = word.trim();
-29	  if (tileUnit === 'word') return [trimmed];
-30	  if (tileUnit === 'syllable') {
-31	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-32	    return parts.length > 0 ? parts : [trimmed];
-33	  }
-34	  return [...trimmed.toLowerCase()];
-35	}
-36	
-37	function buildTilesAndZones(
-38	  word: string,
-39	  tileUnit: WordSpellConfig['tileUnit'],
-40	): {
-41	  tiles: TileItem[];
-42	  zones: AnswerZone[];
-43	} {
-44	  const segments = segmentsForWord(word, tileUnit);
-45	  const values = segments.map((s) =>
-46	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-47	  );
-48	  const zones: AnswerZone[] = values.map((value, i) => ({
-49	    id: `z${i}`,
-50	    index: i,
-51	    expectedValue: value,
-52	    placedTileId: null,
-53	    isWrong: false,
-54	    isLocked: false,
-55	  }));
-56	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-57	  const tiles: TileItem[] = shuffled.map((value) => ({
-58	    id: nanoid(),
-59	    label: value,
-60	    value,
-61	  }));
-62	  return { tiles, zones };
-63	}
-64	
-65	interface WordSpellProps {
-66	  config: WordSpellConfig;
-67	}
-68	
-69	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-70	const WordSpellSession = ({
-71	  wordSpellConfig,
-72	  roundOrder,
-73	  onRestartSession,
-74	}: {
-75	  wordSpellConfig: WordSpellConfig;
-76	  roundOrder: readonly number[];
-77	  onRestartSession: () => void;
-78	}) => {
-79	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-80	  const dispatch = useAnswerGameDispatch();
-81	  const { confettiReady, gameOverReady } = useGameSounds();
-82	  const navigate = useNavigate();
-83	  const completionToken = useRef(0);
-84	
-85	  const configRoundIndex = roundOrder[roundIndex];
-86	  const round =
-87	    configRoundIndex === undefined
-88	      ? undefined
-89	      : wordSpellConfig.rounds[configRoundIndex];
-90	
-91	  useRoundTTS(round?.word ?? '');
-92	
-93	  const handleHome = () => {
-94	    void navigate({
-95	      to: '/$locale',
-96	      params: { locale: 'en' },
-97	    });
-98	  };
-99	
-100	  const handlePlayAgain = () => {
-101	    onRestartSession();
-102	  };
-103	
-104	  useEffect(() => {
-105	    if (phase !== 'round-complete' || !confettiReady) return;
-106	
-107	    const token = ++completionToken.current;
-108	    const delayMs = 750;
-109	    const timer = globalThis.setTimeout(() => {
-110	      if (completionToken.current !== token) return;
-111	
-112	      const isLastRound = roundIndex >= roundOrder.length - 1;
-113	      if (isLastRound) {
-114	        dispatch({ type: 'COMPLETE_GAME' });
-115	        return;
-116	      }
-117	
-118	      const nextConfigIndex = roundOrder[roundIndex + 1];
-119	      const nextRound =
-120	        nextConfigIndex === undefined
-121	          ? undefined
-122	          : wordSpellConfig.rounds[nextConfigIndex];
-123	      const word = nextRound?.word.trim() ?? '';
-124	      if (!word) {
-125	        dispatch({ type: 'COMPLETE_GAME' });
-126	        return;
-127	      }
-128	      const { tiles, zones } = buildTilesAndZones(
-129	        word,
-130	        wordSpellConfig.tileUnit,
-131	      );
-132	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-133	    }, delayMs);
-134	
-135	    return () => {
-136	      globalThis.clearTimeout(timer);
-137	    };
-138	  }, [
-139	    phase,
-140	    confettiReady,
-141	    roundIndex,
-142	    dispatch,
-143	    roundOrder,
-144	    wordSpellConfig.rounds,
-145	    wordSpellConfig.tileUnit,
-146	  ]);
-147	
-148	  if (!round) return null;
-149	
-150	  const hasEmoji =
-151	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-152	  const imageSrc = round.sceneImage ?? round.image;
-153	  const hasImageUrl =
-154	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-155	
-156	  return (
-157	    <>
-158	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-159	        <AnswerGame.Question>
-160	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-161	            <p className="max-w-md text-center text-lg text-foreground">
-162	              {round.sentence}
-163	            </p>
-164	          ) : null}
-165	          {hasEmoji ? (
-166	            <EmojiQuestion
-167	              emoji={round.emoji!.trim()}
-168	              prompt={round.word}
-169	            />
-170	          ) : hasImageUrl ? (
-171	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-172	          ) : null}
-173	          <AudioButton prompt={round.word} />
-174	        </AnswerGame.Question>
-175	        <AnswerGame.Answer>
-176	          <OrderedLetterSlots />
-177	        </AnswerGame.Answer>
-178	        <AnswerGame.Choices>
-179	          <LetterTileBank />
-180	        </AnswerGame.Choices>
-181	      </div>
-182	      <ScoreAnimation visible={confettiReady} />
-183	      {gameOverReady ? (
-184	        <GameOverOverlay
-185	          retryCount={retryCount}
-186	          onPlayAgain={handlePlayAgain}
-187	          onHome={handleHome}
-188	        />
-189	      ) : null}
-190	    </>
-191	  );
-192	};
-193	
-194	export const WordSpell = ({ config }: WordSpellProps) => {
-195	  const roundsInOrder = config.roundsInOrder === true;
-196	  const [sessionEpoch, setSessionEpoch] = useState(0);
-197	
-198	  const roundOrder = useMemo(() => {
-199	    void sessionEpoch;
-200	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-201	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-202	
-203	  const firstConfigIndex = roundOrder[0];
-204	  const round0 =
-205	    firstConfigIndex === undefined
-206	      ? undefined
-207	      : config.rounds[firstConfigIndex];
-208	  const roundWord = round0?.word.trim() ? round0.word : '';
-209	
-210	  const { tiles, zones } = useMemo(() => {
-211	    if (!roundWord)
-212	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-213	    return buildTilesAndZones(roundWord, config.tileUnit);
-214	  }, [roundWord, config.tileUnit]);
-215	
-216	  const answerGameConfig = useMemo(
-217	    (): AnswerGameConfig => ({
-218	      gameId: config.gameId,
-219	      inputMethod: config.inputMethod,
-220	      wrongTileBehavior: config.wrongTileBehavior,
-221	      tileBankMode: config.tileBankMode,
-222	      distractorCount: config.distractorCount,
-223	      totalRounds: config.rounds.length,
-224	      roundsInOrder: config.roundsInOrder,
-225	      ttsEnabled: config.ttsEnabled,
-226	      initialTiles: tiles,
-227	      initialZones: zones,
-228	    }),
-229	    [
-230	      config.gameId,
-231	      config.inputMethod,
-232	      config.wrongTileBehavior,
-233	      config.tileBankMode,
-234	      config.distractorCount,
-235	      config.rounds.length,
-236	      config.roundsInOrder,
-237	      config.ttsEnabled,
-238	      tiles,
-239	      zones,
-240	    ],
-241	  );
-242	
-243	  if (!round0) return null;
-244	
-245	  return (
-246	    <AnswerGame config={answerGameConfig}>
-247	      <WordSpellSession
-248	        wordSpellConfig={config}
-249	        roundOrder={roundOrder}
-250	        onRestartSession={() => {
-251	          setSessionEpoch((e) => e + 1);
-252	        }}
-253	      />
-254	    </AnswerGame>
-255	  );
-256	};
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+5 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
+6 import type { WordSpellConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+16 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+17 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+18 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+19 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+20 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+21 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+22 import { buildRoundOrder } from '@/games/build-round-order';
+23 
+24 function segmentsForWord(
+25   word: string,
+26   tileUnit: WordSpellConfig['tileUnit'],
+27 ): string[] {
+28   const trimmed = word.trim();
+29   if (tileUnit === 'word') return [trimmed];
+30   if (tileUnit === 'syllable') {
+31     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+32     return parts.length > 0 ? parts : [trimmed];
+33   }
+34   return [...trimmed.toLowerCase()];
+35 }
+36 
+37 function buildTilesAndZones(
+38   word: string,
+39   tileUnit: WordSpellConfig['tileUnit'],
+40 ): {
+41   tiles: TileItem[];
+42   zones: AnswerZone[];
+43 } {
+44   const segments = segmentsForWord(word, tileUnit);
+45   const values = segments.map((s) =>
+46     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+47   );
+48   const zones: AnswerZone[] = values.map((value, i) => ({
+49     id: `z${i}`,
+50     index: i,
+51     expectedValue: value,
+52     placedTileId: null,
+53     isWrong: false,
+54     isLocked: false,
+55   }));
+56   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+57   const tiles: TileItem[] = shuffled.map((value) => ({
+58     id: nanoid(),
+59     label: value,
+60     value,
+61   }));
+62   return { tiles, zones };
+63 }
+64 
+65 interface WordSpellProps {
+66   config: WordSpellConfig;
+67 }
+68 
+69 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+70 const WordSpellSession = ({
+71   wordSpellConfig,
+72   roundOrder,
+73   onRestartSession,
+74 }: {
+75   wordSpellConfig: WordSpellConfig;
+76   roundOrder: readonly number[];
+77   onRestartSession: () => void;
+78 }) => {
+79   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+80   const dispatch = useAnswerGameDispatch();
+81   const { confettiReady, gameOverReady } = useGameSounds();
+82   const navigate = useNavigate();
+83   const completionToken = useRef(0);
+84 
+85   const configRoundIndex = roundOrder[roundIndex];
+86   const round =
+87     configRoundIndex === undefined
+88       ? undefined
+89       : wordSpellConfig.rounds[configRoundIndex];
+90 
+91   useRoundTTS(round?.word ?? '');
+92 
+93   const handleHome = () => {
+94     void navigate({
+95       to: '/$locale',
+96       params: { locale: 'en' },
+97     });
+98   };
+99 
+100   const handlePlayAgain = () => {
+101     onRestartSession();
+102   };
+103 
+104   useEffect(() => {
+105     if (phase !== 'round-complete' || !confettiReady) return;
+106 
+107     const token = ++completionToken.current;
+108     const delayMs = 750;
+109     const timer = globalThis.setTimeout(() => {
+110       if (completionToken.current !== token) return;
+111 
+112       const isLastRound = roundIndex >= roundOrder.length - 1;
+113       if (isLastRound) {
+114         dispatch({ type: 'COMPLETE_GAME' });
+115         return;
+116       }
+117 
+118       const nextConfigIndex = roundOrder[roundIndex + 1];
+119       const nextRound =
+120         nextConfigIndex === undefined
+121           ? undefined
+122           : wordSpellConfig.rounds[nextConfigIndex];
+123       const word = nextRound?.word.trim() ?? '';
+124       if (!word) {
+125         dispatch({ type: 'COMPLETE_GAME' });
+126         return;
+127       }
+128       const { tiles, zones } = buildTilesAndZones(
+129         word,
+130         wordSpellConfig.tileUnit,
+131       );
+132       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+133     }, delayMs);
+134 
+135     return () => {
+136       globalThis.clearTimeout(timer);
+137     };
+138   }, [
+139     phase,
+140     confettiReady,
+141     roundIndex,
+142     dispatch,
+143     roundOrder,
+144     wordSpellConfig.rounds,
+145     wordSpellConfig.tileUnit,
+146   ]);
+147 
+148   if (!round) return null;
+149 
+150   const hasEmoji =
+151     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+152   const imageSrc = round.sceneImage ?? round.image;
+153   const hasImageUrl =
+154     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+155 
+156   return (
+157     <>
+158       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+159         <AnswerGame.Question>
+160           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+161             <p className="max-w-md text-center text-lg text-foreground">
+162               {round.sentence}
+163             </p>
+164           ) : null}
+165           {hasEmoji ? (
+166             <EmojiQuestion
+167               emoji={round.emoji!.trim()}
+168               prompt={round.word}
+169             />
+170           ) : hasImageUrl ? (
+171             <ImageQuestion src={imageSrc!} prompt={round.word} />
+172           ) : null}
+173           <AudioButton prompt={round.word} />
+174         </AnswerGame.Question>
+175         <AnswerGame.Answer>
+176           <OrderedLetterSlots />
+177         </AnswerGame.Answer>
+178         <AnswerGame.Choices>
+179           <LetterTileBank />
+180         </AnswerGame.Choices>
+181       </div>
+182       <ScoreAnimation visible={confettiReady} />
+183       {gameOverReady ? (
+184         <GameOverOverlay
+185           retryCount={retryCount}
+186           onPlayAgain={handlePlayAgain}
+187           onHome={handleHome}
+188         />
+189       ) : null}
+190     </>
+191   );
+192 };
+193 
+194 export const WordSpell = ({ config }: WordSpellProps) => {
+195   const roundsInOrder = config.roundsInOrder === true;
+196   const [sessionEpoch, setSessionEpoch] = useState(0);
+197 
+198   const roundOrder = useMemo(() => {
+199     void sessionEpoch;
+200     return buildRoundOrder(config.rounds.length, roundsInOrder);
+201   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+202 
+203   const firstConfigIndex = roundOrder[0];
+204   const round0 =
+205     firstConfigIndex === undefined
+206       ? undefined
+207       : config.rounds[firstConfigIndex];
+208   const roundWord = round0?.word.trim() ? round0.word : '';
+209 
+210   const { tiles, zones } = useMemo(() => {
+211     if (!roundWord)
+212       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+213     return buildTilesAndZones(roundWord, config.tileUnit);
+214   }, [roundWord, config.tileUnit]);
+215 
+216   const answerGameConfig = useMemo(
+217     (): AnswerGameConfig => ({
+218       gameId: config.gameId,
+219       inputMethod: config.inputMethod,
+220       wrongTileBehavior: config.wrongTileBehavior,
+221       tileBankMode: config.tileBankMode,
+222       distractorCount: config.distractorCount,
+223       totalRounds: config.rounds.length,
+224       roundsInOrder: config.roundsInOrder,
+225       ttsEnabled: config.ttsEnabled,
+226       initialTiles: tiles,
+227       initialZones: zones,
+228     }),
+229     [
+230       config.gameId,
+231       config.inputMethod,
+232       config.wrongTileBehavior,
+233       config.tileBankMode,
+234       config.distractorCount,
+235       config.rounds.length,
+236       config.roundsInOrder,
+237       config.ttsEnabled,
+238       tiles,
+239       zones,
+240     ],
+241   );
+242 
+243   if (!round0) return null;
+244 
+245   return (
+246     <AnswerGame config={answerGameConfig}>
+247       <WordSpellSession
+248         wordSpellConfig={config}
+249         roundOrder={roundOrder}
+250         onRestartSession={() => {
+251           setSessionEpoch((e) => e + 1);
+252         }}
+253       />
+254     </AnswerGame>
+255   );
+256 };
 257
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:31Z)**_
@@ -666,206 +672,207 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:31Z)**_
  `./src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
-6	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-7	import type { SortNumbersConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-16	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-17	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-18	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-19	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-20	import { buildRoundOrder } from '@/games/build-round-order';
-21	
-22	interface SortNumbersProps {
-23	  config: SortNumbersConfig;
-24	}
-25	
-26	const SortNumbersSession = ({
-27	  sortNumbersConfig,
-28	  roundOrder,
-29	  onRestartSession,
-30	}: {
-31	  sortNumbersConfig: SortNumbersConfig;
-32	  roundOrder: readonly number[];
-33	  onRestartSession: () => void;
-34	}) => {
-35	  const { t } = useTranslation('games');
-36	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-37	  const dispatch = useAnswerGameDispatch();
-38	  const { confettiReady, gameOverReady } = useGameSounds();
-39	  const navigate = useNavigate();
-40	  const { locale } = useParams({ from: '/$locale' });
-41	  const completionToken = useRef(0);
-42	
-43	  const configRoundIndex = roundOrder[roundIndex];
-44	  const round =
-45	    configRoundIndex === undefined
-46	      ? undefined
-47	      : sortNumbersConfig.rounds[configRoundIndex];
-48	
-49	  const directionLabel =
-50	    sortNumbersConfig.direction === 'ascending'
-51	      ? t('sort-numbers-ui.ascending-label')
-52	      : t('sort-numbers-ui.descending-label');
-53	
-54	  useRoundTTS(directionLabel);
-55	
-56	  const handleHome = () => {
-57	    void navigate({ to: '/$locale', params: { locale } });
-58	  };
-59	
-60	  const handlePlayAgain = () => {
-61	    onRestartSession();
-62	  };
-63	
-64	  useEffect(() => {
-65	    if (phase !== 'round-complete' || !confettiReady) return;
-66	
-67	    const token = ++completionToken.current;
-68	    const delayMs = 750;
-69	    const timer = globalThis.setTimeout(() => {
-70	      if (completionToken.current !== token) return;
-71	
-72	      const isLastRound = roundIndex >= roundOrder.length - 1;
-73	      if (isLastRound) {
-74	        dispatch({ type: 'COMPLETE_GAME' });
-75	        return;
-76	      }
-77	
-78	      const nextConfigIndex = roundOrder[roundIndex + 1];
-79	      const nextRound =
-80	        nextConfigIndex === undefined
-81	          ? undefined
-82	          : sortNumbersConfig.rounds[nextConfigIndex];
-83	
-84	      if (!nextRound) {
-85	        dispatch({ type: 'COMPLETE_GAME' });
-86	        return;
-87	      }
-88	
-89	      const { tiles, zones } = buildSortRound(
-90	        nextRound.sequence,
-91	        sortNumbersConfig.direction,
-92	      );
-93	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-94	    }, delayMs);
-95	
-96	    return () => {
-97	      globalThis.clearTimeout(timer);
-98	    };
-99	  }, [
-100	    phase,
-101	    confettiReady,
-102	    roundIndex,
-103	    dispatch,
-104	    roundOrder,
-105	    sortNumbersConfig.rounds,
-106	    sortNumbersConfig.direction,
-107	  ]);
-108	
-109	  if (!round) return null;
-110	
-111	  return (
-112	    <>
-113	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-114	        <AnswerGame.Question>
-115	          <p className="text-center text-lg font-semibold text-foreground">
-116	            {directionLabel}
-117	          </p>
-118	        </AnswerGame.Question>
-119	        <AnswerGame.Answer>
-120	          <NumberSequenceSlots />
-121	        </AnswerGame.Answer>
-122	        <AnswerGame.Choices>
-123	          <SortNumbersTileBank />
-124	        </AnswerGame.Choices>
-125	      </div>
-126	      <ScoreAnimation visible={confettiReady} />
-127	      {gameOverReady ? (
-128	        <GameOverOverlay
-129	          retryCount={retryCount}
-130	          onPlayAgain={handlePlayAgain}
-131	          onHome={handleHome}
-132	        />
-133	      ) : null}
-134	    </>
-135	  );
-136	};
-137	
-138	export const SortNumbers = ({ config }: SortNumbersProps) => {
-139	  const roundsInOrder = config.roundsInOrder === true;
-140	  const [sessionEpoch, setSessionEpoch] = useState(0);
-141	
-142	  const roundOrder = useMemo(() => {
-143	    void sessionEpoch;
-144	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-145	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-146	
-147	  const firstConfigIndex = roundOrder[0];
-148	  const round0 =
-149	    firstConfigIndex === undefined
-150	      ? undefined
-151	      : config.rounds[firstConfigIndex];
-152	
-153	  const { tiles, zones } = useMemo(() => {
-154	    if (!round0) {
-155	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-156	    }
-157	    return buildSortRound(round0.sequence, config.direction);
-158	  }, [round0, config.direction]);
-159	
-160	  const answerGameConfig = useMemo(
-161	    (): AnswerGameConfig => ({
-162	      gameId: config.gameId,
-163	      inputMethod: config.inputMethod,
-164	      wrongTileBehavior: config.wrongTileBehavior,
-165	      tileBankMode: config.tileBankMode,
-166	      totalRounds: config.rounds.length,
-167	      roundsInOrder: config.roundsInOrder,
-168	      ttsEnabled: config.ttsEnabled,
-169	      initialTiles: tiles,
-170	      initialZones: zones,
-171	    }),
-172	    [
-173	      config.gameId,
-174	      config.inputMethod,
-175	      config.wrongTileBehavior,
-176	      config.tileBankMode,
-177	      config.rounds.length,
-178	      config.roundsInOrder,
-179	      config.ttsEnabled,
-180	      tiles,
-181	      zones,
-182	    ],
-183	  );
-184	
-185	  if (!round0) return null;
-186	
-187	  return (
-188	    <AnswerGame config={answerGameConfig}>
-189	      <SortNumbersSession
-190	        sortNumbersConfig={config}
-191	        roundOrder={roundOrder}
-192	        onRestartSession={() => {
-193	          setSessionEpoch((e) => e + 1);
-194	        }}
-195	      />
-196	    </AnswerGame>
-197	  );
-198	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
+6 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+7 import type { SortNumbersConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+16 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+17 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+18 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+19 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+20 import { buildRoundOrder } from '@/games/build-round-order';
+21 
+22 interface SortNumbersProps {
+23   config: SortNumbersConfig;
+24 }
+25 
+26 const SortNumbersSession = ({
+27   sortNumbersConfig,
+28   roundOrder,
+29   onRestartSession,
+30 }: {
+31   sortNumbersConfig: SortNumbersConfig;
+32   roundOrder: readonly number[];
+33   onRestartSession: () => void;
+34 }) => {
+35   const { t } = useTranslation('games');
+36   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+37   const dispatch = useAnswerGameDispatch();
+38   const { confettiReady, gameOverReady } = useGameSounds();
+39   const navigate = useNavigate();
+40   const { locale } = useParams({ from: '/$locale' });
+41   const completionToken = useRef(0);
+42 
+43   const configRoundIndex = roundOrder[roundIndex];
+44   const round =
+45     configRoundIndex === undefined
+46       ? undefined
+47       : sortNumbersConfig.rounds[configRoundIndex];
+48 
+49   const directionLabel =
+50     sortNumbersConfig.direction === 'ascending'
+51       ? t('sort-numbers-ui.ascending-label')
+52       : t('sort-numbers-ui.descending-label');
+53 
+54   useRoundTTS(directionLabel);
+55 
+56   const handleHome = () => {
+57     void navigate({ to: '/$locale', params: { locale } });
+58   };
+59 
+60   const handlePlayAgain = () => {
+61     onRestartSession();
+62   };
+63 
+64   useEffect(() => {
+65     if (phase !== 'round-complete' || !confettiReady) return;
+66 
+67     const token = ++completionToken.current;
+68     const delayMs = 750;
+69     const timer = globalThis.setTimeout(() => {
+70       if (completionToken.current !== token) return;
+71 
+72       const isLastRound = roundIndex >= roundOrder.length - 1;
+73       if (isLastRound) {
+74         dispatch({ type: 'COMPLETE_GAME' });
+75         return;
+76       }
+77 
+78       const nextConfigIndex = roundOrder[roundIndex + 1];
+79       const nextRound =
+80         nextConfigIndex === undefined
+81           ? undefined
+82           : sortNumbersConfig.rounds[nextConfigIndex];
+83 
+84       if (!nextRound) {
+85         dispatch({ type: 'COMPLETE_GAME' });
+86         return;
+87       }
+88 
+89       const { tiles, zones } = buildSortRound(
+90         nextRound.sequence,
+91         sortNumbersConfig.direction,
+92       );
+93       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+94     }, delayMs);
+95 
+96     return () => {
+97       globalThis.clearTimeout(timer);
+98     };
+99   }, [
+100     phase,
+101     confettiReady,
+102     roundIndex,
+103     dispatch,
+104     roundOrder,
+105     sortNumbersConfig.rounds,
+106     sortNumbersConfig.direction,
+107   ]);
+108 
+109   if (!round) return null;
+110 
+111   return (
+112     <>
+113       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+114         <AnswerGame.Question>
+115           <p className="text-center text-lg font-semibold text-foreground">
+116             {directionLabel}
+117           </p>
+118         </AnswerGame.Question>
+119         <AnswerGame.Answer>
+120           <NumberSequenceSlots />
+121         </AnswerGame.Answer>
+122         <AnswerGame.Choices>
+123           <SortNumbersTileBank />
+124         </AnswerGame.Choices>
+125       </div>
+126       <ScoreAnimation visible={confettiReady} />
+127       {gameOverReady ? (
+128         <GameOverOverlay
+129           retryCount={retryCount}
+130           onPlayAgain={handlePlayAgain}
+131           onHome={handleHome}
+132         />
+133       ) : null}
+134     </>
+135   );
+136 };
+137 
+138 export const SortNumbers = ({ config }: SortNumbersProps) => {
+139   const roundsInOrder = config.roundsInOrder === true;
+140   const [sessionEpoch, setSessionEpoch] = useState(0);
+141 
+142   const roundOrder = useMemo(() => {
+143     void sessionEpoch;
+144     return buildRoundOrder(config.rounds.length, roundsInOrder);
+145   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+146 
+147   const firstConfigIndex = roundOrder[0];
+148   const round0 =
+149     firstConfigIndex === undefined
+150       ? undefined
+151       : config.rounds[firstConfigIndex];
+152 
+153   const { tiles, zones } = useMemo(() => {
+154     if (!round0) {
+155       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+156     }
+157     return buildSortRound(round0.sequence, config.direction);
+158   }, [round0, config.direction]);
+159 
+160   const answerGameConfig = useMemo(
+161     (): AnswerGameConfig => ({
+162       gameId: config.gameId,
+163       inputMethod: config.inputMethod,
+164       wrongTileBehavior: config.wrongTileBehavior,
+165       tileBankMode: config.tileBankMode,
+166       totalRounds: config.rounds.length,
+167       roundsInOrder: config.roundsInOrder,
+168       ttsEnabled: config.ttsEnabled,
+169       initialTiles: tiles,
+170       initialZones: zones,
+171     }),
+172     [
+173       config.gameId,
+174       config.inputMethod,
+175       config.wrongTileBehavior,
+176       config.tileBankMode,
+177       config.rounds.length,
+178       config.roundsInOrder,
+179       config.ttsEnabled,
+180       tiles,
+181       zones,
+182     ],
+183   );
+184 
+185   if (!round0) return null;
+186 
+187   return (
+188     <AnswerGame config={answerGameConfig}>
+189       <SortNumbersSession
+190         sortNumbersConfig={config}
+191         roundOrder={roundOrder}
+192         onRestartSession={() => {
+193           setSessionEpoch((e) => e + 1);
+194         }}
+195       />
+196     </AnswerGame>
+197   );
+198 };
 199
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:32Z)**_
@@ -875,107 +882,108 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:32Z)**_
  `./src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import type {
-6	  NumberMatchConfig,
-7	  NumberMatchRound,
-8	} from '@/games/number-match/types';
-9	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-10	import type {
-11	  WordSpellConfig,
-12	  WordSpellRound,
-13	} from '@/games/word-spell/types';
-14	import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-15	import type {
-16	  GameEngineState,
-17	  MoveLog,
-18	  ResolvedContent,
-19	  ResolvedGameConfig,
-20	  SessionMeta,
-21	} from '@/lib/game-engine/types';
-22	import type { JSX } from 'react';
-23	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-24	import { GameShell } from '@/components/game/GameShell';
-25	import { getOrCreateDatabase } from '@/db/create-database';
-26	import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-27	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-28	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-29	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-30	import { numberMatchConfigFields } from '@/games/number-match/types';
-31	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-32	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-33	import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
-34	import { wordSpellConfigFields } from '@/games/word-spell/types';
-35	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-36	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-37	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-38	
-39	const STUB_CONTENT: ResolvedContent = {
-40	  rounds: [
-41	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-42	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-43	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-44	  ],
-45	};
-46	
-47	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-48	  gameId,
-49	  title: { en: gameId },
-50	  gradeBand: 'year1-2',
-51	  maxRounds: 3,
-52	  maxRetries: 1,
-53	  maxUndoDepth: 3,
-54	  timerVisible: false,
-55	  timerDurationSeconds: null,
-56	  difficulty: 'medium',
-57	});
-58	
-59	interface GameRouteLoaderData {
-60	  config: ResolvedGameConfig;
-61	  initialLog: MoveLog | null;
-62	  sessionId: string;
-63	  meta: SessionMeta;
-64	  gameSpecificConfig: Record<string, unknown> | null;
-65	  bookmarkId: string | null;
-66	  bookmarkName: string | null;
-67	  bookmarkColor: string | null;
-68	}
-69	
-70	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-71	  { word: 'cat', emoji: '🐱' },
-72	  { word: 'dog', emoji: '🐶' },
-73	  { word: 'sun', emoji: '☀️' },
-74	  { word: 'pin', emoji: '📌' },
-75	  { word: 'sad', emoji: '☹️' },
-76	  { word: 'ant', emoji: '🐜' },
-77	  { word: 'can', emoji: '🥫' },
-78	  { word: 'mum', emoji: '🤱' },
-79	];
-80	
-81	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-82	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-83	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-84	};
-85	
-86	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-87	  gameId: 'word-spell',
-88	  component: 'WordSpell',
-89	  inputMethod: 'drag',
-90	  wrongTileBehavior: 'lock-auto-eject',
-91	  tileBankMode: 'exact',
-92	  totalRounds: 8,
-93	  roundsInOrder: false,
-94	  ttsEnabled: true,
-95	  mode: 'picture',
-96	  tileUnit: 'letter',
-97	  rounds: sliceWordSpellRounds(8),
-98	};
-99	
-100	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import type {
+6   NumberMatchConfig,
+7   NumberMatchRound,
+8 } from '@/games/number-match/types';
+9 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+10 import type {
+11   WordSpellConfig,
+12   WordSpellRound,
+13 } from '@/games/word-spell/types';
+14 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+15 import type {
+16   GameEngineState,
+17   MoveLog,
+18   ResolvedContent,
+19   ResolvedGameConfig,
+20   SessionMeta,
+21 } from '@/lib/game-engine/types';
+22 import type { JSX } from 'react';
+23 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+24 import { GameShell } from '@/components/game/GameShell';
+25 import { getOrCreateDatabase } from '@/db/create-database';
+26 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+27 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+28 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+29 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+30 import { numberMatchConfigFields } from '@/games/number-match/types';
+31 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+32 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+33 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+34 import { wordSpellConfigFields } from '@/games/word-spell/types';
+35 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+36 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+37 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+38 
+39 const STUB_CONTENT: ResolvedContent = {
+40   rounds: [
+41     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+42     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+43     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+44   ],
+45 };
+46 
+47 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+48   gameId,
+49   title: { en: gameId },
+50   gradeBand: 'year1-2',
+51   maxRounds: 3,
+52   maxRetries: 1,
+53   maxUndoDepth: 3,
+54   timerVisible: false,
+55   timerDurationSeconds: null,
+56   difficulty: 'medium',
+57 });
+58 
+59 interface GameRouteLoaderData {
+60   config: ResolvedGameConfig;
+61   initialLog: MoveLog | null;
+62   sessionId: string;
+63   meta: SessionMeta;
+64   gameSpecificConfig: Record<string, unknown> | null;
+65   bookmarkId: string | null;
+66   bookmarkName: string | null;
+67   bookmarkColor: string | null;
+68 }
+69 
+70 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+71   { word: 'cat', emoji: '🐱' },
+72   { word: 'dog', emoji: '🐶' },
+73   { word: 'sun', emoji: '☀️' },
+74   { word: 'pin', emoji: '📌' },
+75   { word: 'sad', emoji: '☹️' },
+76   { word: 'ant', emoji: '🐜' },
+77   { word: 'can', emoji: '🥫' },
+78   { word: 'mum', emoji: '🤱' },
+79 ];
+80 
+81 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+82   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+83   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+84 };
+85 
+86 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+87   gameId: 'word-spell',
+88   component: 'WordSpell',
+89   inputMethod: 'drag',
+90   wrongTileBehavior: 'lock-auto-eject',
+91   tileBankMode: 'exact',
+92   totalRounds: 8,
+93   roundsInOrder: false,
+94   ttsEnabled: true,
+95   mode: 'picture',
+96   tileUnit: 'letter',
+97   rounds: sliceWordSpellRounds(8),
+98 };
+99 
+100 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:35Z)**_
@@ -1015,6 +1023,7 @@ src/components/answer-game/useDraggableTile.test.tsx
 src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
 src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:36Z)**_
@@ -1024,96 +1033,97 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:36Z)**_
  `./src/games/word-spell/types.ts`
 
 ```text
-1	import type { AnswerGameConfig } from '@/components/answer-game/types';
-2	import type { ConfigField } from '@/lib/config-fields';
-3	
-4	export interface WordSpellRound {
-5	  word: string;
-6	  /**
-7	   * Native emoji (or ZWJ sequence) for picture mode. When set, this is shown instead of `image` / `sceneImage`.
-8	   */
-9	  emoji?: string;
-10	  /** Fluent Emoji SVG path, URL, or `/public` asset path (picture/sentence-gap modes) */
-11	  image?: string;
-12	  /** Sentence with a blank for sentence-gap mode: "The ___ sat on the mat." */
-13	  sentence?: string;
-14	  /** Scene illustration for sentence-gap mode */
-15	  sceneImage?: string;
-16	  /** Optional custom audio override instead of TTS */
-17	  audioOverride?: string;
-18	}
-19	
-20	export interface WordSpellConfig extends AnswerGameConfig {
-21	  component: 'WordSpell';
-22	  mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
-23	  /** @default 'letter' */
-24	  tileUnit: 'letter' | 'syllable' | 'word';
-25	  rounds: WordSpellRound[];
-26	}
-27	
-28	export const wordSpellConfigFields: ConfigField[] = [
-29	  {
-30	    type: 'select',
-31	    key: 'inputMethod',
-32	    label: 'Input method',
-33	    options: [
-34	      { value: 'drag', label: 'drag' },
-35	      { value: 'type', label: 'type' },
-36	      { value: 'both', label: 'both' },
-37	    ],
-38	  },
-39	  {
-40	    type: 'select',
-41	    key: 'wrongTileBehavior',
-42	    label: 'Wrong tile behaviour',
-43	    options: [
-44	      { value: 'reject', label: 'reject' },
-45	      { value: 'lock-manual', label: 'lock-manual' },
-46	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-47	    ],
-48	  },
-49	  {
-50	    type: 'select',
-51	    key: 'tileBankMode',
-52	    label: 'Tile bank mode',
-53	    options: [
-54	      { value: 'exact', label: 'exact' },
-55	      { value: 'distractors', label: 'distractors' },
-56	    ],
-57	  },
-58	  {
-59	    type: 'number',
-60	    key: 'totalRounds',
-61	    label: 'Total rounds',
-62	    min: 1,
-63	    max: 8,
-64	  },
-65	  {
-66	    type: 'select',
-67	    key: 'mode',
-68	    label: 'Mode',
-69	    options: [
-70	      { value: 'picture', label: 'picture' },
-71	      { value: 'scramble', label: 'scramble' },
-72	      { value: 'recall', label: 'recall' },
-73	      { value: 'sentence-gap', label: 'sentence-gap' },
-74	    ],
-75	  },
-76	  {
-77	    type: 'select',
-78	    key: 'tileUnit',
-79	    label: 'Tile unit',
-80	    options: [
-81	      { value: 'letter', label: 'letter' },
-82	      { value: 'syllable', label: 'syllable' },
-83	      { value: 'word', label: 'word' },
-84	    ],
-85	  },
-86	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-87	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-88	];
+1 import type { AnswerGameConfig } from '@/components/answer-game/types';
+2 import type { ConfigField } from '@/lib/config-fields';
+3 
+4 export interface WordSpellRound {
+5   word: string;
+6   /**
+7    * Native emoji (or ZWJ sequence) for picture mode. When set, this is shown instead of `image` / `sceneImage`.
+8    */
+9   emoji?: string;
+10   /** Fluent Emoji SVG path, URL, or `/public` asset path (picture/sentence-gap modes) */
+11   image?: string;
+12   /** Sentence with a blank for sentence-gap mode: "The ___ sat on the mat." */
+13   sentence?: string;
+14   /** Scene illustration for sentence-gap mode */
+15   sceneImage?: string;
+16   /** Optional custom audio override instead of TTS */
+17   audioOverride?: string;
+18 }
+19 
+20 export interface WordSpellConfig extends AnswerGameConfig {
+21   component: 'WordSpell';
+22   mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
+23   /** @default 'letter' */
+24   tileUnit: 'letter' | 'syllable' | 'word';
+25   rounds: WordSpellRound[];
+26 }
+27 
+28 export const wordSpellConfigFields: ConfigField[] = [
+29   {
+30     type: 'select',
+31     key: 'inputMethod',
+32     label: 'Input method',
+33     options: [
+34       { value: 'drag', label: 'drag' },
+35       { value: 'type', label: 'type' },
+36       { value: 'both', label: 'both' },
+37     ],
+38   },
+39   {
+40     type: 'select',
+41     key: 'wrongTileBehavior',
+42     label: 'Wrong tile behaviour',
+43     options: [
+44       { value: 'reject', label: 'reject' },
+45       { value: 'lock-manual', label: 'lock-manual' },
+46       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+47     ],
+48   },
+49   {
+50     type: 'select',
+51     key: 'tileBankMode',
+52     label: 'Tile bank mode',
+53     options: [
+54       { value: 'exact', label: 'exact' },
+55       { value: 'distractors', label: 'distractors' },
+56     ],
+57   },
+58   {
+59     type: 'number',
+60     key: 'totalRounds',
+61     label: 'Total rounds',
+62     min: 1,
+63     max: 8,
+64   },
+65   {
+66     type: 'select',
+67     key: 'mode',
+68     label: 'Mode',
+69     options: [
+70       { value: 'picture', label: 'picture' },
+71       { value: 'scramble', label: 'scramble' },
+72       { value: 'recall', label: 'recall' },
+73       { value: 'sentence-gap', label: 'sentence-gap' },
+74     ],
+75   },
+76   {
+77     type: 'select',
+78     key: 'tileUnit',
+79     label: 'Tile unit',
+80     options: [
+81       { value: 'letter', label: 'letter' },
+82       { value: 'syllable', label: 'syllable' },
+83       { value: 'word', label: 'word' },
+84     ],
+85   },
+86   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+87   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+88 ];
 89
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:42Z)**_
@@ -1123,77 +1133,78 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:42Z)**_
  `./src/components/answer-game/types.ts`
 
 ```text
-1	export interface AnswerGameConfig {
-2	  gameId: string;
-3	  /** @default 'drag' */
-4	  inputMethod: 'drag' | 'type' | 'both';
-5	  /** @default 'lock-auto-eject' */
-6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-7	  tileBankMode: 'exact' | 'distractors';
-8	  distractorCount?: number;
-9	  /** Total number of rounds in this session */
-10	  totalRounds: number;
-11	  /**
-12	   * When `true`, rounds follow the order of `rounds` in config.
-13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
-14	   */
-15	  roundsInOrder?: boolean;
-16	  /** Whether TTS is enabled for this profile */
-17	  ttsEnabled: boolean;
-18	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
-19	  initialTiles?: TileItem[];
-20	  initialZones?: AnswerZone[];
-21	}
-22	
-23	export interface TileItem {
-24	  id: string;
-25	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
-26	  label: string;
-27	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
-28	  value: string;
-29	}
-30	
-31	export interface AnswerZone {
-32	  id: string;
-33	  index: number;
-34	  /** Correct tile value for this slot; matched against `TileItem.value` */
-35	  expectedValue: string;
-36	  placedTileId: string | null;
-37	  isWrong: boolean;
-38	  isLocked: boolean;
-39	}
-40	
-41	export type AnswerGamePhase =
-42	  | 'playing'
-43	  | 'round-complete'
-44	  | 'game-over';
-45	
-46	export interface AnswerGameState {
-47	  config: AnswerGameConfig;
-48	  /** Full tile list for the current round — never mutated mid-round */
-49	  allTiles: TileItem[];
-50	  /** IDs of tiles currently visible in the choice bank */
-51	  bankTileIds: string[];
-52	  zones: AnswerZone[];
-53	  /** Index of next slot to fill in auto-next-slot mode */
-54	  activeSlotIndex: number;
-55	  dragActiveTileId: string | null;
-56	  phase: AnswerGamePhase;
-57	  roundIndex: number;
-58	  retryCount: number;
-59	}
-60	
-61	export type AnswerGameAction =
-62	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-63	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-64	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-65	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-66	  | { type: 'EJECT_TILE'; zoneIndex: number }
-67	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-68	  | { type: 'COMPLETE_GAME' }
-69	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+1 export interface AnswerGameConfig {
+2   gameId: string;
+3   /** @default 'drag' */
+4   inputMethod: 'drag' | 'type' | 'both';
+5   /** @default 'lock-auto-eject' */
+6   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7   tileBankMode: 'exact' | 'distractors';
+8   distractorCount?: number;
+9   /** Total number of rounds in this session */
+10   totalRounds: number;
+11   /**
+12    * When `true`, rounds follow the order of `rounds` in config.
+13    * When `false` or omitted, order is shuffled once per session (again after Play again).
+14    */
+15   roundsInOrder?: boolean;
+16   /** Whether TTS is enabled for this profile */
+17   ttsEnabled: boolean;
+18   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+19   initialTiles?: TileItem[];
+20   initialZones?: AnswerZone[];
+21 }
+22 
+23 export interface TileItem {
+24   id: string;
+25   /** Display label shown on the tile (e.g. "A", "cat", "3") */
+26   label: string;
+27   /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+28   value: string;
+29 }
+30 
+31 export interface AnswerZone {
+32   id: string;
+33   index: number;
+34   /** Correct tile value for this slot; matched against `TileItem.value` */
+35   expectedValue: string;
+36   placedTileId: string | null;
+37   isWrong: boolean;
+38   isLocked: boolean;
+39 }
+40 
+41 export type AnswerGamePhase =
+42   | 'playing'
+43   | 'round-complete'
+44   | 'game-over';
+45 
+46 export interface AnswerGameState {
+47   config: AnswerGameConfig;
+48   /** Full tile list for the current round — never mutated mid-round */
+49   allTiles: TileItem[];
+50   /** IDs of tiles currently visible in the choice bank */
+51   bankTileIds: string[];
+52   zones: AnswerZone[];
+53   /** Index of next slot to fill in auto-next-slot mode */
+54   activeSlotIndex: number;
+55   dragActiveTileId: string | null;
+56   phase: AnswerGamePhase;
+57   roundIndex: number;
+58   retryCount: number;
+59 }
+60 
+61 export type AnswerGameAction =
+62   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+63   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+64   | { type: 'REMOVE_TILE'; zoneIndex: number }
+65   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+66   | { type: 'EJECT_TILE'; zoneIndex: number }
+67   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+68   | { type: 'COMPLETE_GAME' }
+69   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:42Z)**_
@@ -1222,6 +1233,7 @@ src/components/answer-game/types.ts
 src/components/answer-game/AnswerGameProvider.test.tsx
 src/components/answer-game/AnswerGame/AnswerGame.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:45Z)**_
@@ -1231,51 +1243,52 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:45Z)**_
  `./src/components/answer-game/useKeyboardInput.ts`
 
 ```text
-1	import { useEffect } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	
-5	export const useKeyboardInput = (): void => {
-6	  const state = useAnswerGameContext();
-7	  const dispatch = useAnswerGameDispatch();
-8	
-9	  useEffect(() => {
-10	    if (state.config.inputMethod !== 'type') return;
-11	
-12	    const handleKeyDown = (event: KeyboardEvent) => {
-13	      if (event.target instanceof HTMLInputElement) return;
-14	      if (event.target instanceof HTMLTextAreaElement) return;
-15	
-16	      const char = event.key.toLowerCase();
-17	      if (char.length !== 1) return;
-18	
-19	      const matchingTile = state.allTiles.find(
-20	        (t) =>
-21	          state.bankTileIds.includes(t.id) &&
-22	          t.value.toLowerCase() === char,
-23	      );
-24	      if (!matchingTile) return;
-25	
-26	      dispatch({
-27	        type: 'PLACE_TILE',
-28	        tileId: matchingTile.id,
-29	        zoneIndex: state.activeSlotIndex,
-30	      });
-31	    };
-32	
-33	    globalThis.addEventListener('keydown', handleKeyDown);
-34	    return () =>
-35	      globalThis.removeEventListener('keydown', handleKeyDown);
-36	  }, [
-37	    state.config.inputMethod,
-38	    state.allTiles,
-39	    state.bankTileIds,
-40	    state.activeSlotIndex,
-41	    dispatch,
-42	  ]);
-43	};
+1 import { useEffect } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 
+5 export const useKeyboardInput = (): void => {
+6   const state = useAnswerGameContext();
+7   const dispatch = useAnswerGameDispatch();
+8 
+9   useEffect(() => {
+10     if (state.config.inputMethod !== 'type') return;
+11 
+12     const handleKeyDown = (event: KeyboardEvent) => {
+13       if (event.target instanceof HTMLInputElement) return;
+14       if (event.target instanceof HTMLTextAreaElement) return;
+15 
+16       const char = event.key.toLowerCase();
+17       if (char.length !== 1) return;
+18 
+19       const matchingTile = state.allTiles.find(
+20         (t) =>
+21           state.bankTileIds.includes(t.id) &&
+22           t.value.toLowerCase() === char,
+23       );
+24       if (!matchingTile) return;
+25 
+26       dispatch({
+27         type: 'PLACE_TILE',
+28         tileId: matchingTile.id,
+29         zoneIndex: state.activeSlotIndex,
+30       });
+31     };
+32 
+33     globalThis.addEventListener('keydown', handleKeyDown);
+34     return () =>
+35       globalThis.removeEventListener('keydown', handleKeyDown);
+36   }, [
+37     state.config.inputMethod,
+38     state.allTiles,
+39     state.bankTileIds,
+40     state.activeSlotIndex,
+41     dispatch,
+42   ]);
+43 };
 44
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:45Z)**_
@@ -1285,48 +1298,49 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:45Z)**_
  `./src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:50Z)**_
@@ -1346,75 +1360,76 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:52Z)**_
  `./src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { useKeyboardInput } from './useKeyboardInput';
-7	import type {
-8	  AnswerGameAction,
-9	  AnswerGameConfig,
-10	  AnswerGameState,
-11	} from './types';
-12	import type { Dispatch, ReactNode } from 'react';
-13	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-14	
-15	export const AnswerGameStateContext =
-16	  createContext<AnswerGameState | null>(null);
-17	export const AnswerGameDispatchContext =
-18	  createContext<Dispatch<AnswerGameAction> | null>(null);
-19	
-20	const KeyboardInputAdapter = () => {
-21	  useKeyboardInput();
-22	  return null;
-23	};
-24	
-25	interface AnswerGameProviderProps {
-26	  config: AnswerGameConfig;
-27	  children: ReactNode;
-28	}
-29	
-30	export const AnswerGameProvider = ({
-31	  config,
-32	  children,
-33	}: AnswerGameProviderProps) => {
-34	  const [state, dispatch] = useReducer(
-35	    answerGameReducer,
-36	    config,
-37	    makeInitialState,
-38	  );
-39	
-40	  useEffect(() => {
-41	    const tiles = config.initialTiles;
-42	    const zones = config.initialZones;
-43	    if (tiles?.length && zones?.length) {
-44	      dispatch({
-45	        type: 'INIT_ROUND',
-46	        tiles,
-47	        zones,
-48	      });
-49	    }
-50	  }, [config.gameId, config.initialTiles, config.initialZones]);
-51	
-52	  const roundProgress = {
-53	    current: state.roundIndex + 1,
-54	    total: config.totalRounds,
-55	  };
-56	
-57	  return (
-58	    <GameRoundContext.Provider value={roundProgress}>
-59	      <AnswerGameStateContext.Provider value={state}>
-60	        <AnswerGameDispatchContext.Provider value={dispatch}>
-61	          <KeyboardInputAdapter />
-62	          {children}
-63	        </AnswerGameDispatchContext.Provider>
-64	      </AnswerGameStateContext.Provider>
-65	    </GameRoundContext.Provider>
-66	  );
-67	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { useKeyboardInput } from './useKeyboardInput';
+7 import type {
+8   AnswerGameAction,
+9   AnswerGameConfig,
+10   AnswerGameState,
+11 } from './types';
+12 import type { Dispatch, ReactNode } from 'react';
+13 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+14 
+15 export const AnswerGameStateContext =
+16   createContext<AnswerGameState | null>(null);
+17 export const AnswerGameDispatchContext =
+18   createContext<Dispatch<AnswerGameAction> | null>(null);
+19 
+20 const KeyboardInputAdapter = () => {
+21   useKeyboardInput();
+22   return null;
+23 };
+24 
+25 interface AnswerGameProviderProps {
+26   config: AnswerGameConfig;
+27   children: ReactNode;
+28 }
+29 
+30 export const AnswerGameProvider = ({
+31   config,
+32   children,
+33 }: AnswerGameProviderProps) => {
+34   const [state, dispatch] = useReducer(
+35     answerGameReducer,
+36     config,
+37     makeInitialState,
+38   );
+39 
+40   useEffect(() => {
+41     const tiles = config.initialTiles;
+42     const zones = config.initialZones;
+43     if (tiles?.length && zones?.length) {
+44       dispatch({
+45         type: 'INIT_ROUND',
+46         tiles,
+47         zones,
+48       });
+49     }
+50   }, [config.gameId, config.initialTiles, config.initialZones]);
+51 
+52   const roundProgress = {
+53     current: state.roundIndex + 1,
+54     total: config.totalRounds,
+55   };
+56 
+57   return (
+58     <GameRoundContext.Provider value={roundProgress}>
+59       <AnswerGameStateContext.Provider value={state}>
+60         <AnswerGameDispatchContext.Provider value={dispatch}>
+61           <KeyboardInputAdapter />
+62           {children}
+63         </AnswerGameDispatchContext.Provider>
+64       </AnswerGameStateContext.Provider>
+65     </GameRoundContext.Provider>
+66   );
+67 };
 68
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:54Z)**_
@@ -1428,6 +1443,7 @@ src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx
 src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
 src/games/word-spell/LetterTileBank/LetterTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:26:55Z)**_
@@ -1437,60 +1453,61 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:26:55Z)**_
  `./src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-3	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-4	
-5	const LetterTile = ({ tile }: { tile: TileItem }) => {
-6	  const {
-7	    ref,
-8	    handleClick,
-9	    onPointerDown,
-10	    onPointerMove,
-11	    onPointerUp,
-12	    onPointerCancel,
-13	  } = useDraggableTile(tile);
-14	
-15	  return (
-16	    <button
-17	      ref={ref}
-18	      type="button"
-19	      aria-label={`Letter ${tile.label}`}
-20	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
-21	      onClick={handleClick}
-22	      onPointerDown={onPointerDown}
-23	      onPointerMove={onPointerMove}
-24	      onPointerUp={onPointerUp}
-25	      onPointerCancel={onPointerCancel}
-26	    >
-27	      {tile.label}
-28	    </button>
-29	  );
-30	};
-31	
-32	export const LetterTileBank = () => {
-33	  const { allTiles, bankTileIds, config } = useAnswerGameContext();
-34	
-35	  if (config.inputMethod === 'type') {
-36	    return (
-37	      <p className="text-sm text-muted-foreground" aria-live="polite">
-38	        ⌨️ Type the letters on your keyboard
-39	      </p>
-40	    );
-41	  }
-42	
-43	  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-44	
-45	  return (
-46	    <div className="flex flex-wrap justify-center gap-3">
-47	      {bankTiles.map((tile) => (
-48	        <LetterTile key={tile.id} tile={tile} />
-49	      ))}
-50	    </div>
-51	  );
-52	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+3 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+4 
+5 const LetterTile = ({ tile }: { tile: TileItem }) => {
+6   const {
+7     ref,
+8     handleClick,
+9     onPointerDown,
+10     onPointerMove,
+11     onPointerUp,
+12     onPointerCancel,
+13   } = useDraggableTile(tile);
+14 
+15   return (
+16     <button
+17       ref={ref}
+18       type="button"
+19       aria-label={`Letter ${tile.label}`}
+20       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+21       onClick={handleClick}
+22       onPointerDown={onPointerDown}
+23       onPointerMove={onPointerMove}
+24       onPointerUp={onPointerUp}
+25       onPointerCancel={onPointerCancel}
+26     >
+27       {tile.label}
+28     </button>
+29   );
+30 };
+31 
+32 export const LetterTileBank = () => {
+33   const { allTiles, bankTileIds, config } = useAnswerGameContext();
+34 
+35   if (config.inputMethod === 'type') {
+36     return (
+37       <p className="text-sm text-muted-foreground" aria-live="polite">
+38         ⌨️ Type the letters on your keyboard
+39       </p>
+40     );
+41   }
+42 
+43   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+44 
+45   return (
+46     <div className="flex flex-wrap justify-center gap-3">
+47       {bankTiles.map((tile) => (
+48         <LetterTile key={tile.id} tile={tile} />
+49       ))}
+50     </div>
+51   );
+52 };
 53
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:21Z)**_
@@ -1502,7 +1519,6 @@ Now I have a clear picture of the issue:
 2. When `inputMethod === 'type'`, the `LetterTileBank` shows only a text message "⌨️ Type the letters on your keyboard" - no tiles to tap
 3. On touch screen devices (tablets, phones), there's no physical keyboard, so users can't type anything
 4. The `useKeyboardInput` hook listens to `globalThis.addEventListener('keydown', ...)` which works fine for hardware keyboards but not for touch devices
-
 
 5. The real challenge is fitting both a virtual keyboard and the game UI on small screens, so I'm exploring whether a bottom sheet overlay for the keyboard would work, and checking if `SortNumbers` has the same issue or if there's already a virtual keyboard component I can reuse. I'm weighing the tradeoffs between these approaches—Approach 3 gives me the most control and consistency across devices, which matters for an educational game, though I'll need to be thoughtful about screen space. The hybrid "both" mode could let users choose between dragging tiles or using the virtual keyboard depending on their preference.
 
@@ -1518,143 +1534,144 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:27:21Z)**_
  `./src/components/answer-game/useKeyboardInput.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useKeyboardInput } from './useKeyboardInput';
-5	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-6	import type { ReactNode } from 'react';
-7	
-8	vi.mock('@/lib/game-event-bus', () => ({
-9	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-10	}));
-11	
-12	vi.mock('@/lib/audio/AudioFeedback', () => ({
-13	  playSound: vi.fn(),
-14	}));
-15	
-16	const mockDispatch = vi.fn();
-17	
-18	vi.mock('./useAnswerGameDispatch', () => ({
-19	  useAnswerGameDispatch: () => mockDispatch,
-20	}));
-21	
-22	const makeTileItems = (): TileItem[] => [
-23	  { id: 't1', label: 'C', value: 'c' },
-24	];
-25	
-26	const makeAnswerZones = (): AnswerZone[] => [
-27	  {
-28	    id: 'z0',
-29	    index: 0,
-30	    expectedValue: 'c',
-31	    placedTileId: null,
-32	    isWrong: false,
-33	    isLocked: false,
-34	  },
-35	];
-36	
-37	const makeConfig = (
-38	  inputMethod: AnswerGameConfig['inputMethod'],
-39	): AnswerGameConfig => ({
-40	  gameId: 'test',
-41	  inputMethod,
-42	  wrongTileBehavior: 'lock-auto-eject',
-43	  tileBankMode: 'exact',
-44	  totalRounds: 1,
-45	  ttsEnabled: false,
-46	  initialTiles: makeTileItems(),
-47	  initialZones: makeAnswerZones(),
-48	});
-49	
-50	const makeWrapper = (inputMethod: AnswerGameConfig['inputMethod']) => {
-51	  const Wrapper = ({ children }: { children: ReactNode }) => (
-52	    <AnswerGameProvider config={makeConfig(inputMethod)}>
-53	      {children}
-54	    </AnswerGameProvider>
-55	  );
-56	  return Wrapper;
-57	};
-58	
-59	describe('useKeyboardInput', () => {
-60	  beforeEach(() => {
-61	    mockDispatch.mockClear();
-62	  });
-63	
-64	  it('dispatches PLACE_TILE for the matching bank tile when a key is pressed in type mode', () => {
-65	    const { unmount } = renderHook(() => useKeyboardInput(), {
-66	      wrapper: makeWrapper('type'),
-67	    });
-68	
-69	    act(() => {
-70	      globalThis.dispatchEvent(
-71	        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
-72	      );
-73	    });
-74	
-75	    expect(mockDispatch).toHaveBeenCalledWith({
-76	      type: 'PLACE_TILE',
-77	      tileId: 't1',
-78	      zoneIndex: 0,
-79	    });
-80	
-81	    unmount();
-82	  });
-83	
-84	  it('does nothing when config.inputMethod is not "type"', () => {
-85	    const { unmount } = renderHook(() => useKeyboardInput(), {
-86	      wrapper: makeWrapper('drag'),
-87	    });
-88	
-89	    act(() => {
-90	      globalThis.dispatchEvent(
-91	        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
-92	      );
-93	    });
-94	
-95	    expect(mockDispatch).not.toHaveBeenCalled();
-96	
-97	    unmount();
-98	  });
-99	
-100	  it('does nothing when no bank tile matches the pressed key', () => {
-101	    const { unmount } = renderHook(() => useKeyboardInput(), {
-102	      wrapper: makeWrapper('type'),
-103	    });
-104	
-105	    act(() => {
-106	      globalThis.dispatchEvent(
-107	        new KeyboardEvent('keydown', { key: 'x', bubbles: true }),
-108	      );
-109	    });
-110	
-111	    expect(mockDispatch).not.toHaveBeenCalled();
-112	
-113	    unmount();
-114	  });
-115	
-116	  it('is case-insensitive — pressing uppercase key finds lowercase tile', () => {
-117	    const { unmount } = renderHook(() => useKeyboardInput(), {
-118	      wrapper: makeWrapper('type'),
-119	    });
-120	
-121	    act(() => {
-122	      globalThis.dispatchEvent(
-123	        new KeyboardEvent('keydown', { key: 'C', bubbles: true }),
-124	      );
-125	    });
-126	
-127	    expect(mockDispatch).toHaveBeenCalledWith({
-128	      type: 'PLACE_TILE',
-129	      tileId: 't1',
-130	      zoneIndex: 0,
-131	    });
-132	
-133	    unmount();
-134	  });
-135	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useKeyboardInput } from './useKeyboardInput';
+5 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+6 import type { ReactNode } from 'react';
+7 
+8 vi.mock('@/lib/game-event-bus', () => ({
+9   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+10 }));
+11 
+12 vi.mock('@/lib/audio/AudioFeedback', () => ({
+13   playSound: vi.fn(),
+14 }));
+15 
+16 const mockDispatch = vi.fn();
+17 
+18 vi.mock('./useAnswerGameDispatch', () => ({
+19   useAnswerGameDispatch: () => mockDispatch,
+20 }));
+21 
+22 const makeTileItems = (): TileItem[] => [
+23   { id: 't1', label: 'C', value: 'c' },
+24 ];
+25 
+26 const makeAnswerZones = (): AnswerZone[] => [
+27   {
+28     id: 'z0',
+29     index: 0,
+30     expectedValue: 'c',
+31     placedTileId: null,
+32     isWrong: false,
+33     isLocked: false,
+34   },
+35 ];
+36 
+37 const makeConfig = (
+38   inputMethod: AnswerGameConfig['inputMethod'],
+39 ): AnswerGameConfig => ({
+40   gameId: 'test',
+41   inputMethod,
+42   wrongTileBehavior: 'lock-auto-eject',
+43   tileBankMode: 'exact',
+44   totalRounds: 1,
+45   ttsEnabled: false,
+46   initialTiles: makeTileItems(),
+47   initialZones: makeAnswerZones(),
+48 });
+49 
+50 const makeWrapper = (inputMethod: AnswerGameConfig['inputMethod']) => {
+51   const Wrapper = ({ children }: { children: ReactNode }) => (
+52     <AnswerGameProvider config={makeConfig(inputMethod)}>
+53       {children}
+54     </AnswerGameProvider>
+55   );
+56   return Wrapper;
+57 };
+58 
+59 describe('useKeyboardInput', () => {
+60   beforeEach(() => {
+61     mockDispatch.mockClear();
+62   });
+63 
+64   it('dispatches PLACE_TILE for the matching bank tile when a key is pressed in type mode', () => {
+65     const { unmount } = renderHook(() => useKeyboardInput(), {
+66       wrapper: makeWrapper('type'),
+67     });
+68 
+69     act(() => {
+70       globalThis.dispatchEvent(
+71         new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+72       );
+73     });
+74 
+75     expect(mockDispatch).toHaveBeenCalledWith({
+76       type: 'PLACE_TILE',
+77       tileId: 't1',
+78       zoneIndex: 0,
+79     });
+80 
+81     unmount();
+82   });
+83 
+84   it('does nothing when config.inputMethod is not "type"', () => {
+85     const { unmount } = renderHook(() => useKeyboardInput(), {
+86       wrapper: makeWrapper('drag'),
+87     });
+88 
+89     act(() => {
+90       globalThis.dispatchEvent(
+91         new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+92       );
+93     });
+94 
+95     expect(mockDispatch).not.toHaveBeenCalled();
+96 
+97     unmount();
+98   });
+99 
+100   it('does nothing when no bank tile matches the pressed key', () => {
+101     const { unmount } = renderHook(() => useKeyboardInput(), {
+102       wrapper: makeWrapper('type'),
+103     });
+104 
+105     act(() => {
+106       globalThis.dispatchEvent(
+107         new KeyboardEvent('keydown', { key: 'x', bubbles: true }),
+108       );
+109     });
+110 
+111     expect(mockDispatch).not.toHaveBeenCalled();
+112 
+113     unmount();
+114   });
+115 
+116   it('is case-insensitive — pressing uppercase key finds lowercase tile', () => {
+117     const { unmount } = renderHook(() => useKeyboardInput(), {
+118       wrapper: makeWrapper('type'),
+119     });
+120 
+121     act(() => {
+122       globalThis.dispatchEvent(
+123         new KeyboardEvent('keydown', { key: 'C', bubbles: true }),
+124       );
+125     });
+126 
+127     expect(mockDispatch).toHaveBeenCalledWith({
+128       type: 'PLACE_TILE',
+129       tileId: 't1',
+130       zoneIndex: 0,
+131     });
+132 
+133     unmount();
+134   });
+135 });
 136
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:23Z)**_
@@ -1667,6 +1684,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:27:23Z)**_
 src/components/answer-game/useKeyboardDrag.test.tsx
 src/components/answer-game/useKeyboardDrag.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:27Z)**_
@@ -1676,58 +1694,59 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:27:27Z)**_
  `./src/components/answer-game/useKeyboardDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef, useState } from 'react';
-2	import type { RefObject } from 'react';
-3	
-4	export interface KeyboardDrag {
-5	  pickedUpTileId: string | null;
-6	  keyboardDragRef: RefObject<HTMLDivElement | null>;
-7	}
-8	
-9	export function useKeyboardDrag(): KeyboardDrag {
-10	  const [pickedUpTileId, setPickedUpTileId] = useState<string | null>(
-11	    null,
-12	  );
-13	  const pickedUpRef = useRef<string | null>(null);
-14	  const keyboardDragRef = useRef<HTMLDivElement | null>(null);
-15	
-16	  const syncPickedUp = useCallback((id: string | null) => {
-17	    pickedUpRef.current = id;
-18	    setPickedUpTileId(id);
-19	  }, []);
-20	
-21	  useEffect(() => {
-22	    const node = keyboardDragRef.current;
-23	    if (!node) return;
-24	
-25	    const handleKeyDown = (event: KeyboardEvent) => {
-26	      const target = event.target as HTMLElement;
-27	      if (event.key === ' ' || event.key === 'Enter') {
-28	        event.preventDefault();
-29	        const tileId = target.dataset['tileId'];
-30	        if (tileId && !pickedUpRef.current) {
-31	          syncPickedUp(tileId);
-32	          return;
-33	        }
-34	        if (pickedUpRef.current) {
-35	          syncPickedUp(null);
-36	        }
-37	      } else if (event.key === 'Escape' && pickedUpRef.current) {
-38	        syncPickedUp(null);
-39	      }
-40	    };
-41	
-42	    node.addEventListener('keydown', handleKeyDown);
-43	    return () => node.removeEventListener('keydown', handleKeyDown);
-44	  }, [syncPickedUp]);
-45	
-46	  return {
-47	    pickedUpTileId,
-48	    keyboardDragRef,
-49	  };
-50	}
+1 import { useCallback, useEffect, useRef, useState } from 'react';
+2 import type { RefObject } from 'react';
+3 
+4 export interface KeyboardDrag {
+5   pickedUpTileId: string | null;
+6   keyboardDragRef: RefObject<HTMLDivElement | null>;
+7 }
+8 
+9 export function useKeyboardDrag(): KeyboardDrag {
+10   const [pickedUpTileId, setPickedUpTileId] = useState<string | null>(
+11     null,
+12   );
+13   const pickedUpRef = useRef<string | null>(null);
+14   const keyboardDragRef = useRef<HTMLDivElement | null>(null);
+15 
+16   const syncPickedUp = useCallback((id: string | null) => {
+17     pickedUpRef.current = id;
+18     setPickedUpTileId(id);
+19   }, []);
+20 
+21   useEffect(() => {
+22     const node = keyboardDragRef.current;
+23     if (!node) return;
+24 
+25     const handleKeyDown = (event: KeyboardEvent) => {
+26       const target = event.target as HTMLElement;
+27       if (event.key === ' ' || event.key === 'Enter') {
+28         event.preventDefault();
+29         const tileId = target.dataset['tileId'];
+30         if (tileId && !pickedUpRef.current) {
+31           syncPickedUp(tileId);
+32           return;
+33         }
+34         if (pickedUpRef.current) {
+35           syncPickedUp(null);
+36         }
+37       } else if (event.key === 'Escape' && pickedUpRef.current) {
+38         syncPickedUp(null);
+39       }
+40     };
+41 
+42     node.addEventListener('keydown', handleKeyDown);
+43     return () => node.removeEventListener('keydown', handleKeyDown);
+44   }, [syncPickedUp]);
+45 
+46   return {
+47     pickedUpTileId,
+48     keyboardDragRef,
+49   };
+50 }
 51
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:29Z)**_
@@ -1746,6 +1765,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:27:32Z)**_
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:33Z)**_
@@ -1755,52 +1775,53 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:27:33Z)**_
  `./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-3	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-4	
-5	const NumberTile = ({ tile }: { tile: TileItem }) => {
-6	  const {
-7	    ref,
-8	    handleClick,
-9	    onPointerDown,
-10	    onPointerMove,
-11	    onPointerUp,
-12	    onPointerCancel,
-13	  } = useDraggableTile(tile);
-14	
-15	  return (
-16	    <button
-17	      ref={ref}
-18	      type="button"
-19	      aria-label={`Number ${tile.label}`}
-20	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
-21	      onClick={handleClick}
-22	      onPointerDown={onPointerDown}
-23	      onPointerMove={onPointerMove}
-24	      onPointerUp={onPointerUp}
-25	      onPointerCancel={onPointerCancel}
-26	    >
-27	      {tile.label}
-28	    </button>
-29	  );
-30	};
-31	
-32	export const SortNumbersTileBank = () => {
-33	  const { allTiles, bankTileIds } = useAnswerGameContext();
-34	
-35	  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-36	
-37	  return (
-38	    <div className="flex flex-wrap justify-center gap-3">
-39	      {bankTiles.map((tile) => (
-40	        <NumberTile key={tile.id} tile={tile} />
-41	      ))}
-42	    </div>
-43	  );
-44	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+3 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+4 
+5 const NumberTile = ({ tile }: { tile: TileItem }) => {
+6   const {
+7     ref,
+8     handleClick,
+9     onPointerDown,
+10     onPointerMove,
+11     onPointerUp,
+12     onPointerCancel,
+13   } = useDraggableTile(tile);
+14 
+15   return (
+16     <button
+17       ref={ref}
+18       type="button"
+19       aria-label={`Number ${tile.label}`}
+20       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+21       onClick={handleClick}
+22       onPointerDown={onPointerDown}
+23       onPointerMove={onPointerMove}
+24       onPointerUp={onPointerUp}
+25       onPointerCancel={onPointerCancel}
+26     >
+27       {tile.label}
+28     </button>
+29   );
+30 };
+31 
+32 export const SortNumbersTileBank = () => {
+33   const { allTiles, bankTileIds } = useAnswerGameContext();
+34 
+35   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+36 
+37   return (
+38     <div className="flex flex-wrap justify-center gap-3">
+39       {bankTiles.map((tile) => (
+40         <NumberTile key={tile.id} tile={tile} />
+41       ))}
+42     </div>
+43   );
+44 };
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:27:49Z)**_
@@ -1812,7 +1833,6 @@ Now I have a complete understanding of the issue:
 2. `LetterTileBank` shows only a message "⌨️ Type the letters on your keyboard" when `inputMethod === 'type'` - no tappable tiles
 3. `SortNumbersTileBank` doesn't handle `inputMethod === 'type'` at all (no check), so it always shows tiles (for SortNumbers, type mode might not be commonly used)
 4. On touch screens, there's no physical keyboard, so type mode is broken
-
 
 5. The real constraint is fitting a question, answer slots, and a virtual keyboard all on a small touch screen, so I need to build a touch-aware virtual keyboard component that detects the device capability and displays a compact on-screen keyboard below the answer area when in type mode.
 
@@ -1871,295 +1891,296 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:31:49Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/visual-companion.md`
 
 ```text
-1	# Visual Companion Guide
-2	
-3	Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
-4	
-5	## When to Use
-6	
-7	Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
-8	
-9	**Use the browser** when the content itself is visual:
-10	
-11	- **UI mockups** — wireframes, layouts, navigation structures, component designs
-12	- **Architecture diagrams** — system components, data flow, relationship maps
-13	- **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
-14	- **Design polish** — when the question is about look and feel, spacing, visual hierarchy
-15	- **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
-16	
-17	**Use the terminal** when the content is text or tabular:
-18	
-19	- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-20	- **Conceptual A/B/C choices** — picking between approaches described in words
-21	- **Tradeoff lists** — pros/cons, comparison tables
-22	- **Technical decisions** — API design, data modeling, architectural approach selection
-23	- **Clarifying questions** — anything where the answer is words, not a visual preference
-24	
-25	A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
-26	
-27	## How It Works
-28	
-29	The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
-30	
-31	**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
-32	
-33	## Starting a Session
-34	
-35	```bash
-36	# Start server with persistence (mockups saved to project)
-37	scripts/start-server.sh --project-dir /path/to/project
-38	
-39	# Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
-40	#           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
-41	#           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
-42	```
-43	
-44	Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
-45	
-46	**Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
-47	
-48	**Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
-49	
-50	**Launching the server by platform:**
-51	
-52	**Claude Code (macOS / Linux):**
-53	```bash
-54	# Default mode works — the script backgrounds the server itself
-55	scripts/start-server.sh --project-dir /path/to/project
-56	```
-57	
-58	**Claude Code (Windows):**
-59	```bash
-60	# Windows auto-detects and uses foreground mode, which blocks the tool call.
-61	# Use run_in_background: true on the Bash tool call so the server survives
-62	# across conversation turns.
-63	scripts/start-server.sh --project-dir /path/to/project
-64	```
-65	When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
-66	
-67	**Codex:**
-68	```bash
-69	# Codex reaps background processes. The script auto-detects CODEX_CI and
-70	# switches to foreground mode. Run it normally — no extra flags needed.
-71	scripts/start-server.sh --project-dir /path/to/project
-72	```
-73	
-74	**Gemini CLI:**
-75	```bash
-76	# Use --foreground and set is_background: true on your shell tool call
-77	# so the process survives across turns
-78	scripts/start-server.sh --project-dir /path/to/project --foreground
-79	```
-80	
-81	**Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
-82	
-83	If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
-84	
-85	```bash
-86	scripts/start-server.sh \
-87	  --project-dir /path/to/project \
-88	  --host 0.0.0.0 \
-89	  --url-host localhost
-90	```
-91	
-92	Use `--url-host` to control what hostname is printed in the returned URL JSON.
-93	
-94	## The Loop
-95	
-96	1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
-97	   - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
-98	   - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
-99	   - **Never reuse filenames** — each screen gets a fresh file
-100	   - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
-101	   - Server automatically serves the newest file
-102	
-103	2. **Tell user what to expect and end your turn:**
-104	   - Remind them of the URL (every step, not just first)
-105	   - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
-106	   - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
-107	
-108	3. **On your next turn** — after the user responds in the terminal:
-109	   - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
-110	   - Merge with the user's terminal text to get the full picture
-111	   - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
-112	
-113	4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
-114	
-115	5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
-116	
-117	   ```html
-118	   <!-- filename: waiting.html (or waiting-2.html, etc.) -->
-119	   <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
-120	     <p class="subtitle">Continuing in terminal...</p>
-121	   </div>
-122	   ```
-123	
-124	   This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
-125	
-126	6. Repeat until done.
-127	
-128	## Writing Content Fragments
-129	
-130	Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
-131	
-132	**Minimal example:**
-133	
-134	```html
-135	<h2>Which layout works better?</h2>
-136	<p class="subtitle">Consider readability and visual hierarchy</p>
-137	
-138	<div class="options">
-139	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-140	    <div class="letter">A</div>
-141	    <div class="content">
-142	      <h3>Single Column</h3>
-143	      <p>Clean, focused reading experience</p>
-144	    </div>
-145	  </div>
-146	  <div class="option" data-choice="b" onclick="toggleSelect(this)">
-147	    <div class="letter">B</div>
-148	    <div class="content">
-149	      <h3>Two Column</h3>
-150	      <p>Sidebar navigation with main content</p>
-151	    </div>
-152	  </div>
-153	</div>
-154	```
-155	
-156	That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
-157	
-158	## CSS Classes Available
-159	
-160	The frame template provides these CSS classes for your content:
-161	
-162	### Options (A/B/C choices)
-163	
-164	```html
-165	<div class="options">
-166	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-167	    <div class="letter">A</div>
-168	    <div class="content">
-169	      <h3>Title</h3>
-170	      <p>Description</p>
-171	    </div>
-172	  </div>
-173	</div>
-174	```
-175	
-176	**Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
-177	
-178	```html
-179	<div class="options" data-multiselect>
-180	  <!-- same option markup — users can select/deselect multiple -->
-181	</div>
-182	```
-183	
-184	### Cards (visual designs)
-185	
-186	```html
-187	<div class="cards">
-188	  <div class="card" data-choice="design1" onclick="toggleSelect(this)">
-189	    <div class="card-image"><!-- mockup content --></div>
-190	    <div class="card-body">
-191	      <h3>Name</h3>
-192	      <p>Description</p>
-193	    </div>
-194	  </div>
-195	</div>
-196	```
-197	
-198	### Mockup container
-199	
-200	```html
-201	<div class="mockup">
-202	  <div class="mockup-header">Preview: Dashboard Layout</div>
-203	  <div class="mockup-body"><!-- your mockup HTML --></div>
-204	</div>
-205	```
-206	
-207	### Split view (side-by-side)
-208	
-209	```html
-210	<div class="split">
-211	  <div class="mockup"><!-- left --></div>
-212	  <div class="mockup"><!-- right --></div>
-213	</div>
-214	```
-215	
-216	### Pros/Cons
-217	
-218	```html
-219	<div class="pros-cons">
-220	  <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
-221	  <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
-222	</div>
-223	```
-224	
-225	### Mock elements (wireframe building blocks)
-226	
-227	```html
-228	<div class="mock-nav">Logo | Home | About | Contact</div>
-229	<div style="display: flex;">
-230	  <div class="mock-sidebar">Navigation</div>
-231	  <div class="mock-content">Main content area</div>
-232	</div>
-233	<button class="mock-button">Action Button</button>
-234	<input class="mock-input" placeholder="Input field">
-235	<div class="placeholder">Placeholder area</div>
-236	```
-237	
-238	### Typography and sections
-239	
-240	- `h2` — page title
-241	- `h3` — section heading
-242	- `.subtitle` — secondary text below title
-243	- `.section` — content block with bottom margin
-244	- `.label` — small uppercase label text
-245	
-246	## Browser Events Format
-247	
-248	When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
-249	
-250	```jsonl
-251	{"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
-252	{"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
-253	{"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
-254	```
-255	
-256	The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
-257	
-258	If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
-259	
-260	## Design Tips
-261	
-262	- **Scale fidelity to the question** — wireframes for layout, polish for polish questions
-263	- **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
-264	- **Iterate before advancing** — if feedback changes current screen, write a new version
-265	- **2-4 options max** per screen
-266	- **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
-267	- **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
-268	
-269	## File Naming
-270	
-271	- Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
-272	- Never reuse filenames — each screen must be a new file
-273	- For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
-274	- Server serves newest file by modification time
-275	
-276	## Cleaning Up
-277	
-278	```bash
-279	scripts/stop-server.sh $SESSION_DIR
-280	```
-281	
-282	If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
-283	
-284	## Reference
-285	
-286	- Frame template (CSS reference): `scripts/frame-template.html`
-287	- Helper script (client-side): `scripts/helper.js`
+1 # Visual Companion Guide
+2 
+3 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+4 
+5 ## When to Use
+6 
+7 Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+8 
+9 **Use the browser** when the content itself is visual:
+10 
+11 - **UI mockups** — wireframes, layouts, navigation structures, component designs
+12 - **Architecture diagrams** — system components, data flow, relationship maps
+13 - **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
+14 - **Design polish** — when the question is about look and feel, spacing, visual hierarchy
+15 - **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
+16 
+17 **Use the terminal** when the content is text or tabular:
+18 
+19 - **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
+20 - **Conceptual A/B/C choices** — picking between approaches described in words
+21 - **Tradeoff lists** — pros/cons, comparison tables
+22 - **Technical decisions** — API design, data modeling, architectural approach selection
+23 - **Clarifying questions** — anything where the answer is words, not a visual preference
+24 
+25 A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
+26 
+27 ## How It Works
+28 
+29 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
+30 
+31 **Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
+32 
+33 ## Starting a Session
+34 
+35 ```bash
+36 # Start server with persistence (mockups saved to project)
+37 scripts/start-server.sh --project-dir /path/to/project
+38 
+39 # Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
+40 #           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
+41 #           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
+42 ```
+43 
+44 Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
+45 
+46 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
+47 
+48 **Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
+49 
+50 **Launching the server by platform:**
+51 
+52 **Claude Code (macOS / Linux):**
+53 ```bash
+54 # Default mode works — the script backgrounds the server itself
+55 scripts/start-server.sh --project-dir /path/to/project
+56 ```
+57 
+58 **Claude Code (Windows):**
+59 ```bash
+60 # Windows auto-detects and uses foreground mode, which blocks the tool call.
+61 # Use run_in_background: true on the Bash tool call so the server survives
+62 # across conversation turns.
+63 scripts/start-server.sh --project-dir /path/to/project
+64 ```
+65 When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
+66 
+67 **Codex:**
+68 ```bash
+69 # Codex reaps background processes. The script auto-detects CODEX_CI and
+70 # switches to foreground mode. Run it normally — no extra flags needed.
+71 scripts/start-server.sh --project-dir /path/to/project
+72 ```
+73 
+74 **Gemini CLI:**
+75 ```bash
+76 # Use --foreground and set is_background: true on your shell tool call
+77 # so the process survives across turns
+78 scripts/start-server.sh --project-dir /path/to/project --foreground
+79 ```
+80 
+81 **Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
+82 
+83 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
+84 
+85 ```bash
+86 scripts/start-server.sh \
+87   --project-dir /path/to/project \
+88   --host 0.0.0.0 \
+89   --url-host localhost
+90 ```
+91 
+92 Use `--url-host` to control what hostname is printed in the returned URL JSON.
+93 
+94 ## The Loop
+95 
+96 1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
+97    - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
+98    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
+99    - **Never reuse filenames** — each screen gets a fresh file
+100    - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
+101    - Server automatically serves the newest file
+102 
+103 2. **Tell user what to expect and end your turn:**
+104    - Remind them of the URL (every step, not just first)
+105    - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
+106    - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
+107 
+108 3. **On your next turn** — after the user responds in the terminal:
+109    - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
+110    - Merge with the user's terminal text to get the full picture
+111    - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
+112 
+113 4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
+114 
+115 5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
+116 
+117    ```html
+118    <!-- filename: waiting.html (or waiting-2.html, etc.) -->
+119    <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+120      <p class="subtitle">Continuing in terminal...</p>
+121    </div>
+122    ```
+123 
+124    This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
+125 
+126 6. Repeat until done.
+127 
+128 ## Writing Content Fragments
+129 
+130 Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
+131 
+132 **Minimal example:**
+133 
+134 ```html
+135 <h2>Which layout works better?</h2>
+136 <p class="subtitle">Consider readability and visual hierarchy</p>
+137 
+138 <div class="options">
+139   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+140     <div class="letter">A</div>
+141     <div class="content">
+142       <h3>Single Column</h3>
+143       <p>Clean, focused reading experience</p>
+144     </div>
+145   </div>
+146   <div class="option" data-choice="b" onclick="toggleSelect(this)">
+147     <div class="letter">B</div>
+148     <div class="content">
+149       <h3>Two Column</h3>
+150       <p>Sidebar navigation with main content</p>
+151     </div>
+152   </div>
+153 </div>
+154 ```
+155 
+156 That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
+157 
+158 ## CSS Classes Available
+159 
+160 The frame template provides these CSS classes for your content:
+161 
+162 ### Options (A/B/C choices)
+163 
+164 ```html
+165 <div class="options">
+166   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+167     <div class="letter">A</div>
+168     <div class="content">
+169       <h3>Title</h3>
+170       <p>Description</p>
+171     </div>
+172   </div>
+173 </div>
+174 ```
+175 
+176 **Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
+177 
+178 ```html
+179 <div class="options" data-multiselect>
+180   <!-- same option markup — users can select/deselect multiple -->
+181 </div>
+182 ```
+183 
+184 ### Cards (visual designs)
+185 
+186 ```html
+187 <div class="cards">
+188   <div class="card" data-choice="design1" onclick="toggleSelect(this)">
+189     <div class="card-image"><!-- mockup content --></div>
+190     <div class="card-body">
+191       <h3>Name</h3>
+192       <p>Description</p>
+193     </div>
+194   </div>
+195 </div>
+196 ```
+197 
+198 ### Mockup container
+199 
+200 ```html
+201 <div class="mockup">
+202   <div class="mockup-header">Preview: Dashboard Layout</div>
+203   <div class="mockup-body"><!-- your mockup HTML --></div>
+204 </div>
+205 ```
+206 
+207 ### Split view (side-by-side)
+208 
+209 ```html
+210 <div class="split">
+211   <div class="mockup"><!-- left --></div>
+212   <div class="mockup"><!-- right --></div>
+213 </div>
+214 ```
+215 
+216 ### Pros/Cons
+217 
+218 ```html
+219 <div class="pros-cons">
+220   <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
+221   <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
+222 </div>
+223 ```
+224 
+225 ### Mock elements (wireframe building blocks)
+226 
+227 ```html
+228 <div class="mock-nav">Logo | Home | About | Contact</div>
+229 <div style="display: flex;">
+230   <div class="mock-sidebar">Navigation</div>
+231   <div class="mock-content">Main content area</div>
+232 </div>
+233 <button class="mock-button">Action Button</button>
+234 <input class="mock-input" placeholder="Input field">
+235 <div class="placeholder">Placeholder area</div>
+236 ```
+237 
+238 ### Typography and sections
+239 
+240 - `h2` — page title
+241 - `h3` — section heading
+242 - `.subtitle` — secondary text below title
+243 - `.section` — content block with bottom margin
+244 - `.label` — small uppercase label text
+245 
+246 ## Browser Events Format
+247 
+248 When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
+249 
+250 ```jsonl
+251 {"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
+252 {"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
+253 {"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
+254 ```
+255 
+256 The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
+257 
+258 If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
+259 
+260 ## Design Tips
+261 
+262 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
+263 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
+264 - **Iterate before advancing** — if feedback changes current screen, write a new version
+265 - **2-4 options max** per screen
+266 - **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
+267 - **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
+268 
+269 ## File Naming
+270 
+271 - Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
+272 - Never reuse filenames — each screen must be a new file
+273 - For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
+274 - Server serves newest file by modification time
+275 
+276 ## Cleaning Up
+277 
+278 ```bash
+279 scripts/stop-server.sh $SESSION_DIR
+280 ```
+281 
+282 If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
+283 
+284 ## Reference
+285 
+286 - Frame template (CSS reference): `scripts/frame-template.html`
+287 - Helper script (client-side): `scripts/helper.js`
 288
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:31:54Z)**_
@@ -2173,30 +2194,31 @@ Start visual companion server
 ```text
 {"type":"server-started","port":62307,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:62307","screen_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/66728-1775428312/content","state_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/66728-1775428312/state"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:32:03Z)**_
 
 <think><details><summary>Thought Process</summary>
 The server is started. Now let me:
+
 1. Tell the user to open the URL
 2. Write the first visual content - showing the current "type mode" problem and asking about approach preferences
 
-First, let me make the first clarifying question visual. The user said "Y" to the visual companion. 
+First, let me make the first clarifying question visual. The user said "Y" to the visual companion.
 
 Actually, the first question should be about the scope: should touch detection change the behavior automatically, or should this be a manual setting?
 
 But this is a conceptual/text question - I should use terminal. The visual companion should be used for actual layout mockups.
 
-Let me ask the first clarifying question via terminal: 
-
+Let me ask the first clarifying question via terminal:
 
 I need to figure out the scope of the virtual keyboard feature—specifically whether it should apply only when `inputMethod` is set to `'type'`, or if it should also work with `'both'` mode.
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:32:05Z)**_
 
-The server is running. Open **http://localhost:62307** in your browser — I'll push mockups there as we go.
+The server is running. Open **<http://localhost:62307>** in your browser — I'll push mockups there as we go.
 
 First clarifying question (terminal, conceptual):
 
@@ -2220,13 +2242,14 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:33:31Z)**_
 The user wants clarification on option B. Let me explain it more clearly.
 
 Currently:
+
 - `'drag'` = drag tiles around
 - `'type'` = use physical keyboard only (broken on touch)
 - `'both'` = drag tiles AND keyboard input both work simultaneously
 
-My question about B was: since drag is already natural on touch screens (pointer events work fine), should `'both'` mode on touch devices show drag tiles (as it does now) OR replace tiles with a virtual keyboard? 
+My question about B was: since drag is already natural on touch screens (pointer events work fine), should `'both'` mode on touch devices show drag tiles (as it does now) OR replace tiles with a virtual keyboard?
 
-Actually, I think B is confusing because `'both'` already means "drag AND type" - the drag part works fine on touch. 
+Actually, I think B is confusing because `'both'` already means "drag AND type" - the drag part works fine on touch.
 
 So the real issue is just the type part—`'both'` on touch currently works for dragging, it's just missing the keyboard input functionality.
 </details></think>
@@ -2259,6 +2282,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:34:43Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user is asking two things:
+
 1. `'both'` mode: show drag tiles AND virtual keyboard
 2. Should we use the native keyboard (i.e., focus an `<input>` to trigger the device's built-in keyboard)?
 3. What if the keyboard only appears when a slot is focused?
@@ -2266,8 +2290,9 @@ The user is asking two things:
 This is a great idea! Let me think about this:
 
 **Native keyboard approach:**
+
 - Pros: No custom keyboard to build, platform-native, works in all languages, familiar to users
-- Cons: On iOS/Android, the native keyboard takes up ~40-50% of the screen and pushes content up, which can cause layout shifts. Also requires user gesture (tap) to open. 
+- Cons: On iOS/Android, the native keyboard takes up ~40-50% of the screen and pushes content up, which can cause layout shifts. Also requires user gesture (tap) to open.
 
 The keyboard could also obscure the answer slots themselves. But using a hidden input field that triggers when a slot gets tapped is elegant—the native keyboard appears only when needed, and the browser handles the viewport adjustments automatically. On desktop, the physical keyboard just works. The main challenge is handling iOS Safari's viewport behavior when the keyboard appears.
 
@@ -2411,6 +2436,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:35:28Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/66728-1775428312/content/approaches.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:35:34Z)**_
@@ -2430,7 +2456,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:35:34Z)**_
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:35:38Z)**_
 
-Check **http://localhost:62307** — I've put 3 approaches there with mockups and trade-offs.
+Check **<http://localhost:62307>** — I've put 3 approaches there with mockups and trade-offs.
 
 **My recommendation is A** (native keyboard triggered on slot tap). It requires zero custom keyboard UI, feels native, and the slot-tap trigger avoids iOS's "must be user gesture" restriction. The main challenge (keyboard covering slots) is handled by the `visualViewport` API to scroll the focused slot into view.
 
@@ -2452,12 +2478,12 @@ The user chose approach A - native keyboard on slot focus. Now I need to present
 Let me think about what the design looks like for approach A:
 
 **Core concept:**
+
 - A hidden `<input type="text">` is always rendered when `inputMethod === 'type'` or `'both'`
 - When the user taps an answer slot, the hidden input gets focused programmatically (in the same tap handler)
 - The device keyboard slides up
 - Keystroke events from the hidden input are captured and mapped to the existing `PLACE_TILE` dispatch
 - After each character is placed, the input value is cleared so it's ready for the next key
-
 
 - Auto-advance to the next slot keeps the keyboard open since the hidden input remains focused, creating a seamless typing experience
 
@@ -2474,6 +2500,7 @@ I should detect touch devices using `navigator.maxTouchPoints` and switch to the
 Creating a new `useTouchKeyboardInput` hook...
 
 Actually, a cleaner approach would be a single `useVirtualKeyboard` hook that manages a hidden input element and exposes a function to focus it, then I can render this alongside the existing keyboard adapter in the provider and have slot taps trigger the keyboard focus. I'm realizing the existing `useKeyboardInput` hook has a guard that explicitly skips input elements, so a hidden input approach won't work with the current setup—I'd need to modify that guard or rethink the strategy entirely. elements! So we'd need to either:
+
 1. Remove/adjust that guard
 2. Listen to `input` events on the hidden input instead
 3. Make the hidden input a special case that's excluded from the guard
@@ -2634,13 +2661,15 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:37:47Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/66728-1775428312/content/design-a-layout.html
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:37:52Z)**_
 
-Check **http://localhost:62307** — showing the before/after layout and the 7-step technical sketch for how approach A works.
+Check **<http://localhost:62307>** — showing the before/after layout and the 7-step technical sketch for how approach A works.
 
 Key points:
+
 - Slot tap → focuses a hidden off-screen `<input>` in the same gesture (iOS-safe)
 - Captures `input` event (not `keydown`) — more reliable on mobile keyboards
 - `visualViewport` scroll keeps the active slot visible above the keyboard
@@ -2661,6 +2690,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:38:06Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user approved the design. Now I need to:
+
 1. Write the design doc to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 2. Do a spec self-review
 3. Ask user to review
@@ -2824,6 +2854,7 @@ Each game passes `inputMode` to `AnswerGameConfig` (or it is derived from existi
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:38:50Z)**_
@@ -2835,8 +2866,8 @@ Now let me do the spec self-review:
 
 2. **Internal consistency:** The architecture matches the feature. The `TouchKeyboardContext` provides `focusKeyboard` which is called from slot tap handlers. The `HiddenKeyboardInput` uses the `hiddenInputRef` from `useTouchKeyboardInput`. The `inputMode` flows from game config through `AnswerGameConfig`. Seems consistent.
 
-
 3. **Scope check:** This is focused on touch keyboard only, affects specific files, and stays well-bounded. Now I need to address a few remaining ambiguities - I should confirm the actual path for `OrderedLetterSlots`, decide on the hint text as "Tap a slot to type", and clarify how `useTouchKeyboardInput` gets a ref to the active slot DOM element since that's underspecified.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:38:50Z)**_
@@ -2854,6 +2885,7 @@ src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.stories.tsx
 src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx
 src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:38:57Z)**_
@@ -2863,141 +2895,142 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:38:57Z)**_
  `./src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '@/components/answer-game/useSlotTileDrag';
-6	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-7	
-8	const LetterSlot = ({
-9	  zoneIndex,
-10	  tileId,
-11	  label,
-12	  isActive,
-13	  isWrong,
-14	}: {
-15	  zoneIndex: number;
-16	  tileId: string | null;
-17	  label: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	}) => {
-21	  const ref = useRef<HTMLLIElement>(null);
-22	  const { placeTile } = useTileEvaluation();
-23	  const dispatch = useAnswerGameDispatch();
-24	
-25	  // Drop target for HTML5 DnD (bank tiles dragged in via desktop)
-26	  useEffect(() => {
-27	    const element = ref.current;
-28	    if (!element) return;
-29	    return dropTargetForElements({
-30	      element,
-31	      getData: () => ({ zoneIndex }),
-32	      onDrop: ({ source }) => {
-33	        const sourceTileId = source.data['tileId'];
-34	        if (typeof sourceTileId === 'string')
-35	          placeTile(sourceTileId, zoneIndex);
-36	      },
-37	    });
-38	  }, [zoneIndex, placeTile]);
-39	
-40	  // Drag source for placed tiles — touch drag & HTML5 DnD
-41	  const {
-42	    dragRef,
-43	    onPointerDown,
-44	    onPointerMove,
-45	    onPointerUp,
-46	    onPointerCancel,
-47	  } = useSlotTileDrag({
-48	    tileId,
-49	    label,
-50	    zoneIndex,
-51	    onDrop: (droppedTileId, targetZoneIndex) =>
-52	      placeTile(droppedTileId, targetZoneIndex),
-53	  });
-54	
-55	  const ariaLabel = label
-56	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-57	    : `Slot ${zoneIndex + 1}, empty`;
-58	
-59	  // Tap any placed tile to return it to the bank
-60	  const handleClick = () => {
-61	    if (tileId) dispatch({ type: 'REMOVE_TILE', zoneIndex });
-62	  };
-63	
-64	  return (
-65	    <li
-66	      ref={ref}
-67	      aria-label={ariaLabel}
-68	      data-zone-index={zoneIndex}
-69	      data-active={isActive || undefined}
-70	      data-wrong={isWrong || undefined}
-71	      className={[
-72	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-73	        'border-border',
-74	        isActive && !label
-75	          ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
-76	          : '',
-77	        isWrong
-78	          ? 'border-destructive bg-destructive/10 text-destructive'
-79	          : '',
-80	        label && !isWrong
-81	          ? 'border-primary bg-primary/10 text-primary'
-82	          : '',
-83	      ]
-84	        .filter(Boolean)
-85	        .join(' ')}
-86	    >
-87	      {label ? (
-88	        <button
-89	          ref={dragRef}
-90	          type="button"
-91	          aria-label={ariaLabel}
-92	          className="flex size-full touch-none select-none cursor-grab items-center justify-center"
-93	          onClick={handleClick}
-94	          onPointerDown={onPointerDown}
-95	          onPointerMove={onPointerMove}
-96	          onPointerUp={onPointerUp}
-97	          onPointerCancel={onPointerCancel}
-98	        >
-99	          {label}
-100	        </button>
-101	      ) : null}
-102	    </li>
-103	  );
-104	};
-105	
-106	export const OrderedLetterSlots = () => {
-107	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-108	
-109	  return (
-110	    <ol
-111	      aria-label="Answer slots"
-112	      className="flex flex-wrap justify-center gap-2"
-113	    >
-114	      {zones.map((zone, i) => {
-115	        const placedTile = zone.placedTileId
-116	          ? allTiles.find((t) => t.id === zone.placedTileId)
-117	          : null;
-118	        return (
-119	          <LetterSlot
-120	            key={zone.id}
-121	            zoneIndex={i}
-122	            tileId={zone.placedTileId}
-123	            label={placedTile?.label ?? null}
-124	            isActive={
-125	              i === activeSlotIndex && zone.placedTileId === null
-126	            }
-127	            isWrong={zone.isWrong}
-128	          />
-129	        );
-130	      })}
-131	    </ol>
-132	  );
-133	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '@/components/answer-game/useSlotTileDrag';
+6 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+7 
+8 const LetterSlot = ({
+9   zoneIndex,
+10   tileId,
+11   label,
+12   isActive,
+13   isWrong,
+14 }: {
+15   zoneIndex: number;
+16   tileId: string | null;
+17   label: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20 }) => {
+21   const ref = useRef<HTMLLIElement>(null);
+22   const { placeTile } = useTileEvaluation();
+23   const dispatch = useAnswerGameDispatch();
+24 
+25   // Drop target for HTML5 DnD (bank tiles dragged in via desktop)
+26   useEffect(() => {
+27     const element = ref.current;
+28     if (!element) return;
+29     return dropTargetForElements({
+30       element,
+31       getData: () => ({ zoneIndex }),
+32       onDrop: ({ source }) => {
+33         const sourceTileId = source.data['tileId'];
+34         if (typeof sourceTileId === 'string')
+35           placeTile(sourceTileId, zoneIndex);
+36       },
+37     });
+38   }, [zoneIndex, placeTile]);
+39 
+40   // Drag source for placed tiles — touch drag & HTML5 DnD
+41   const {
+42     dragRef,
+43     onPointerDown,
+44     onPointerMove,
+45     onPointerUp,
+46     onPointerCancel,
+47   } = useSlotTileDrag({
+48     tileId,
+49     label,
+50     zoneIndex,
+51     onDrop: (droppedTileId, targetZoneIndex) =>
+52       placeTile(droppedTileId, targetZoneIndex),
+53   });
+54 
+55   const ariaLabel = label
+56     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+57     : `Slot ${zoneIndex + 1}, empty`;
+58 
+59   // Tap any placed tile to return it to the bank
+60   const handleClick = () => {
+61     if (tileId) dispatch({ type: 'REMOVE_TILE', zoneIndex });
+62   };
+63 
+64   return (
+65     <li
+66       ref={ref}
+67       aria-label={ariaLabel}
+68       data-zone-index={zoneIndex}
+69       data-active={isActive || undefined}
+70       data-wrong={isWrong || undefined}
+71       className={[
+72         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+73         'border-border',
+74         isActive && !label
+75           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
+76           : '',
+77         isWrong
+78           ? 'border-destructive bg-destructive/10 text-destructive'
+79           : '',
+80         label && !isWrong
+81           ? 'border-primary bg-primary/10 text-primary'
+82           : '',
+83       ]
+84         .filter(Boolean)
+85         .join(' ')}
+86     >
+87       {label ? (
+88         <button
+89           ref={dragRef}
+90           type="button"
+91           aria-label={ariaLabel}
+92           className="flex size-full touch-none select-none cursor-grab items-center justify-center"
+93           onClick={handleClick}
+94           onPointerDown={onPointerDown}
+95           onPointerMove={onPointerMove}
+96           onPointerUp={onPointerUp}
+97           onPointerCancel={onPointerCancel}
+98         >
+99           {label}
+100         </button>
+101       ) : null}
+102     </li>
+103   );
+104 };
+105 
+106 export const OrderedLetterSlots = () => {
+107   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+108 
+109   return (
+110     <ol
+111       aria-label="Answer slots"
+112       className="flex flex-wrap justify-center gap-2"
+113     >
+114       {zones.map((zone, i) => {
+115         const placedTile = zone.placedTileId
+116           ? allTiles.find((t) => t.id === zone.placedTileId)
+117           : null;
+118         return (
+119           <LetterSlot
+120             key={zone.id}
+121             zoneIndex={i}
+122             tileId={zone.placedTileId}
+123             label={placedTile?.label ?? null}
+124             isActive={
+125               i === activeSlotIndex && zone.placedTileId === null
+126             }
+127             isWrong={zone.isWrong}
+128           />
+129         );
+130       })}
+131     </ol>
+132   );
+133 };
 134
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:06Z)**_
@@ -3005,16 +3038,16 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:06Z)**_
 <think><details><summary>Thought Process</summary>
 Good. Now I can see the `OrderedLetterSlots` structure. The `LetterSlot` component has a `handleClick` that currently only handles removing placed tiles. For touch keyboard, empty slots also need to trigger `focusKeyboard()` on tap.
 
-The `ref` on the `<li>` can also serve as the slot DOM ref for `scrollIntoView`. 
+The `ref` on the `<li>` can also serve as the slot DOM ref for `scrollIntoView`.
 
 Now let me fix the spec self-review issues:
 
 1. **"or remove the hint entirely — to be decided during implementation"** - Fix: pick "Tap a slot to type" as the text
 
-
 2. **`OrderedLetterSlots` path** - Correct to `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`
 3. **`activeSlotRef` mechanism** - The `LetterSlot` already has a `ref` on the `<li>`, so when `isActive` changes, it can call `scrollIntoView` directly via that ref through a `useEffect`. The `useTouchKeyboardInput` hook doesn't need its own ref since the slot handles its own viewport scrolling.
 4. **SortNumbers doesn't have letter slots** - It uses `NumberSequenceSlots` instead, so I need to check if that component exists and how it's structured.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:08Z)**_
@@ -3027,6 +3060,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:08Z)**_
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.test.tsx
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:10Z)**_
@@ -3036,154 +3070,156 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:10Z)**_
  `./src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '@/components/answer-game/useSlotTileDrag';
-6	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-7	
-8	const NumberSlot = ({
-9	  zoneIndex,
-10	  tileId,
-11	  label,
-12	  isActive,
-13	  isWrong,
-14	}: {
-15	  zoneIndex: number;
-16	  tileId: string | null;
-17	  label: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	}) => {
-21	  const ref = useRef<HTMLLIElement>(null);
-22	  const { placeTile } = useTileEvaluation();
-23	  const dispatch = useAnswerGameDispatch();
-24	
-25	  // Drop target for HTML5 DnD (bank tiles dragged in via desktop)
-26	  useEffect(() => {
-27	    const element = ref.current;
-28	    if (!element) return;
-29	    return dropTargetForElements({
-30	      element,
-31	      getData: () => ({ zoneIndex }),
-32	      onDrop: ({ source }) => {
-33	        const sourceTileId = source.data['tileId'];
-34	        if (typeof sourceTileId === 'string')
-35	          placeTile(sourceTileId, zoneIndex);
-36	      },
-37	    });
-38	  }, [zoneIndex, placeTile]);
-39	
-40	  // Drag source for placed tiles — touch drag & HTML5 DnD
-41	  const {
-42	    dragRef,
-43	    onPointerDown,
-44	    onPointerMove,
-45	    onPointerUp,
-46	    onPointerCancel,
-47	  } = useSlotTileDrag({
-48	    tileId,
-49	    label,
-50	    zoneIndex,
-51	    onDrop: (droppedTileId, targetZoneIndex) =>
-52	      placeTile(droppedTileId, targetZoneIndex),
-53	  });
-54	
-55	  const ariaLabel = label
-56	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-57	    : `Slot ${zoneIndex + 1}, empty`;
-58	
-59	  // Tap any placed tile to return it to the bank
-60	  const handleClick = () => {
-61	    if (tileId) dispatch({ type: 'REMOVE_TILE', zoneIndex });
-62	  };
-63	
-64	  return (
-65	    <li
-66	      ref={ref}
-67	      aria-label={ariaLabel}
-68	      data-zone-index={zoneIndex}
-69	      data-active={isActive || undefined}
-70	      data-wrong={isWrong || undefined}
-71	      className={[
-72	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-73	        'border-border',
-74	        isActive && !label
-75	          ? 'animate-pulse ring-2 ring-primary ring-offset-2'
-76	          : '',
-77	        isWrong
-78	          ? 'border-destructive bg-destructive/10 text-destructive'
-79	          : '',
-80	        label && !isWrong
-81	          ? 'border-primary bg-primary/10 text-primary'
-82	          : '',
-83	      ]
-84	        .filter(Boolean)
-85	        .join(' ')}
-86	    >
-87	      {label ? (
-88	        <button
-89	          ref={dragRef}
-90	          type="button"
-91	          aria-label={ariaLabel}
-92	          className="flex size-full touch-none select-none cursor-grab items-center justify-center"
-93	          onClick={handleClick}
-94	          onPointerDown={onPointerDown}
-95	          onPointerMove={onPointerMove}
-96	          onPointerUp={onPointerUp}
-97	          onPointerCancel={onPointerCancel}
-98	        >
-99	          {label}
-100	        </button>
-101	      ) : null}
-102	    </li>
-103	  );
-104	};
-105	
-106	export const NumberSequenceSlots = () => {
-107	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-108	
-109	  return (
-110	    <ol
-111	      aria-label="Answer slots"
-112	      className="flex flex-wrap justify-center gap-2"
-113	    >
-114	      {zones.map((zone, i) => {
-115	        const placedTile = zone.placedTileId
-116	          ? allTiles.find((t) => t.id === zone.placedTileId)
-117	          : null;
-118	        return (
-119	          <NumberSlot
-120	            key={zone.id}
-121	            zoneIndex={i}
-122	            tileId={zone.placedTileId}
-123	            label={placedTile?.label ?? null}
-124	            isActive={
-125	              i === activeSlotIndex && zone.placedTileId === null
-126	            }
-127	            isWrong={zone.isWrong}
-128	          />
-129	        );
-130	      })}
-131	    </ol>
-132	  );
-133	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '@/components/answer-game/useSlotTileDrag';
+6 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+7 
+8 const NumberSlot = ({
+9   zoneIndex,
+10   tileId,
+11   label,
+12   isActive,
+13   isWrong,
+14 }: {
+15   zoneIndex: number;
+16   tileId: string | null;
+17   label: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20 }) => {
+21   const ref = useRef<HTMLLIElement>(null);
+22   const { placeTile } = useTileEvaluation();
+23   const dispatch = useAnswerGameDispatch();
+24 
+25   // Drop target for HTML5 DnD (bank tiles dragged in via desktop)
+26   useEffect(() => {
+27     const element = ref.current;
+28     if (!element) return;
+29     return dropTargetForElements({
+30       element,
+31       getData: () => ({ zoneIndex }),
+32       onDrop: ({ source }) => {
+33         const sourceTileId = source.data['tileId'];
+34         if (typeof sourceTileId === 'string')
+35           placeTile(sourceTileId, zoneIndex);
+36       },
+37     });
+38   }, [zoneIndex, placeTile]);
+39 
+40   // Drag source for placed tiles — touch drag & HTML5 DnD
+41   const {
+42     dragRef,
+43     onPointerDown,
+44     onPointerMove,
+45     onPointerUp,
+46     onPointerCancel,
+47   } = useSlotTileDrag({
+48     tileId,
+49     label,
+50     zoneIndex,
+51     onDrop: (droppedTileId, targetZoneIndex) =>
+52       placeTile(droppedTileId, targetZoneIndex),
+53   });
+54 
+55   const ariaLabel = label
+56     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+57     : `Slot ${zoneIndex + 1}, empty`;
+58 
+59   // Tap any placed tile to return it to the bank
+60   const handleClick = () => {
+61     if (tileId) dispatch({ type: 'REMOVE_TILE', zoneIndex });
+62   };
+63 
+64   return (
+65     <li
+66       ref={ref}
+67       aria-label={ariaLabel}
+68       data-zone-index={zoneIndex}
+69       data-active={isActive || undefined}
+70       data-wrong={isWrong || undefined}
+71       className={[
+72         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+73         'border-border',
+74         isActive && !label
+75           ? 'animate-pulse ring-2 ring-primary ring-offset-2'
+76           : '',
+77         isWrong
+78           ? 'border-destructive bg-destructive/10 text-destructive'
+79           : '',
+80         label && !isWrong
+81           ? 'border-primary bg-primary/10 text-primary'
+82           : '',
+83       ]
+84         .filter(Boolean)
+85         .join(' ')}
+86     >
+87       {label ? (
+88         <button
+89           ref={dragRef}
+90           type="button"
+91           aria-label={ariaLabel}
+92           className="flex size-full touch-none select-none cursor-grab items-center justify-center"
+93           onClick={handleClick}
+94           onPointerDown={onPointerDown}
+95           onPointerMove={onPointerMove}
+96           onPointerUp={onPointerUp}
+97           onPointerCancel={onPointerCancel}
+98         >
+99           {label}
+100         </button>
+101       ) : null}
+102     </li>
+103   );
+104 };
+105 
+106 export const NumberSequenceSlots = () => {
+107   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+108 
+109   return (
+110     <ol
+111       aria-label="Answer slots"
+112       className="flex flex-wrap justify-center gap-2"
+113     >
+114       {zones.map((zone, i) => {
+115         const placedTile = zone.placedTileId
+116           ? allTiles.find((t) => t.id === zone.placedTileId)
+117           : null;
+118         return (
+119           <NumberSlot
+120             key={zone.id}
+121             zoneIndex={i}
+122             tileId={zone.placedTileId}
+123             label={placedTile?.label ?? null}
+124             isActive={
+125               i === activeSlotIndex && zone.placedTileId === null
+126             }
+127             isWrong={zone.isWrong}
+128           />
+129         );
+130       })}
+131     </ol>
+132   );
+133 };
 134
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:22Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a clear picture. `OrderedLetterSlots` and `NumberSequenceSlots` are nearly identical. Both:
+
 - Have an empty `<li>` with no click handler for empty slots (only filled slots have the `handleClick` that removes tiles)
 - Both have `isActive` prop
 
 For the touch keyboard, we need to:
+
 1. Add `onClick` to the empty slot `<li>` (or wrap it in a button) to call `focusKeyboard()`
 2. Use the existing `ref` on the `<li>` for `scrollIntoView` when `isActive` changes
-
 
 3. Each slot component can handle its own scroll behavior when active, without needing `useTouchKeyboardInput` to manage a ref to the DOM element
 
@@ -3210,6 +3246,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:40Z)**_
@@ -3232,6 +3269,7 @@ activeSlotRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 ```
 
 `activeSlotRef` is the DOM ref of whichever slot is currently `activeSlotIndex`.</tool_use_error>
+
 ```
 </details></tool-use>
 
@@ -3242,151 +3280,152 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:42Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-1	# Touch Keyboard for Type Mode
-2	
-3	**Date:** 2026-04-06
-4	**Status:** Approved
-5	**Affects:** WordSpell, SortNumbers (any game using `inputMethod: 'type'` or `'both'`)
-6	
-7	## Problem
-8	
-9	`inputMethod: 'type'` relies entirely on `useKeyboardInput`, which listens for hardware `keydown` events on `window`. On touch-only devices (tablets, phones) there is no physical keyboard, so the type mode is completely broken — nothing happens when the user taps a slot.
-10	
-11	## Approach: Native Keyboard on Slot Focus
-12	
-13	When the device is touch-capable, a visually hidden `<input>` element is rendered inside `AnswerGameProvider`. Tapping any answer slot focuses that input (in the same synchronous gesture handler, satisfying iOS's user-gesture requirement), which causes the device's native keyboard to slide up. Key presses are captured via the `input` event and dispatched into the existing game reducer.
-14	
-15	Desktop behaviour is unchanged — `useKeyboardInput` continues to listen to the global `keydown` event as before.
-16	
-17	## Scope
-18	
-19	- Applies when `inputMethod === 'type'` or `inputMethod === 'both'`
-20	- `'drag'` mode: no changes
-21	- `'both'` mode on touch: drag tiles remain visible AND the keyboard is available via slot tap (both input methods work)
-22	
-23	## Technical Design
-24	
-25	### Touch Detection
-26	
-27	```ts
-28	const isTouchDevice = navigator.maxTouchPoints > 0;
-29	```
-30	
-31	Checked once on mount inside the new hook. This gates the entire touch-keyboard path.
-32	
-33	### New Hook: `useTouchKeyboardInput`
-34	
-35	Lives alongside `useKeyboardInput` in `src/components/answer-game/`.
-36	
-37	Responsibilities:
-38	- Creates a `ref` for the hidden `<input>` element
-39	- Attaches an `input` event listener to the hidden input
-40	- On each `input` event: reads `event.data`, finds a matching bank tile, dispatches `PLACE_TILE`, clears the input value
-41	- Returns `{ hiddenInputRef, focusKeyboard }` — `focusKeyboard` is called by slot tap handlers
-42	
-43	Uses `input` event (not `keydown`) because many mobile virtual keyboards do not fire `keydown` reliably.
-44	
-45	```ts
-46	// inputmode drives the keyboard type shown by the OS
-47	// 'text' for WordSpell (letters), 'numeric' for SortNumbers (digits)
-48	```
-49	
-50	### `HiddenKeyboardInput` Component
-51	
-52	A thin wrapper rendered inside `AnswerGameProvider` when the touch-keyboard path is active:
-53	
-54	```tsx
-55	<input
-56	  ref={hiddenInputRef}
-57	  type="text"
-58	  inputMode={inputMode}       // 'text' | 'numeric'
-59	  data-touch-keyboard="true"
-60	  aria-hidden="true"
-61	  style={{ position: 'absolute', opacity: 0, pointerEvents: 'none',
-62	           width: 1, height: 1, top: 0, left: 0 }}
-63	/>
-64	```
-65	
-66	`opacity: 0` with a 1×1 pixel size (not `display:none` or `visibility:hidden`) keeps the element focusable on iOS.
-67	
-68	### `AnswerGameProvider` changes
-69	
-70	- Renders `<KeyboardInputAdapter />` (existing) on non-touch devices only
-71	- Renders `<HiddenKeyboardInput />` on touch devices when `inputMethod !== 'drag'`
-72	- Provides `focusKeyboard` via a new `TouchKeyboardContext` so slot components can call it
-73	
-74	### `useKeyboardInput` guard update
-75	
-76	The existing guard that ignores input elements:
-77	
-78	```ts
-79	if (event.target instanceof HTMLInputElement) return;
-80	```
-81	
-82	becomes:
-83	
-84	```ts
-85	if (
-86	  event.target instanceof HTMLInputElement &&
-87	  !(event.target as HTMLInputElement).dataset['touchKeyboard']
-88	) return;
-89	```
-90	
-91	This is a no-op on touch (the hook doesn't run), but protects desktop behaviour if someone ever tests with a touch device attached to a keyboard.
-92	
-93	### `OrderedLetterSlots` changes
-94	
-95	Each unfilled slot's click/tap handler additionally calls `focusKeyboard()` from `TouchKeyboardContext`. The call must happen inside the synchronous click handler (not in a `useEffect`) so iOS allows the programmatic focus.
-96	
-97	### `LetterTileBank` changes
-98	
-99	When `inputMethod === 'type'` on touch: replace the "⌨️ Type the letters on your keyboard" message with "Tap a slot to type".
-100	
-101	### Viewport Scroll
-102	
-103	A `useEffect` inside `useTouchKeyboardInput` listens to `visualViewport?.addEventListener('resize', ...)`. When the viewport shrinks (keyboard opened), the active slot element is scrolled into view:
-104	
-105	```ts
-106	activeSlotRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-107	```
-108	
-109	`activeSlotRef` is the DOM ref of whichever slot is currently `activeSlotIndex`.
-110	
-111	### `inputMode` per game
-112	
-113	Each game passes `inputMode` to `AnswerGameConfig` (or it is derived from existing config):
-114	
-115	| Game | `inputMode` value |
-116	|---|---|
-117	| WordSpell | `'text'` |
-118	| SortNumbers | `'numeric'` |
-119	| NumberMatch | `'numeric'` |
-120	
-121	`AnswerGameConfig` gains an optional `touchKeyboardInputMode?: 'text' \| 'numeric' \| 'none'` field (defaults to `'text'`).
-122	
-123	## Files Changed
-124	
-125	| File | Change |
-126	|---|---|
-127	| `src/components/answer-game/useTouchKeyboardInput.ts` | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch |
-128	| `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
-129	| `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
-130	| `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
-131	| `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
-132	| `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
-133	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
-134	| `src/games/word-spell/WordSpell/WordSpell.tsx` | Modified — pass `touchKeyboardInputMode: 'text'` |
-135	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Modified — pass `touchKeyboardInputMode: 'numeric'` |
-136	| `src/components/answer-game/OrderedLetterSlots` (wherever it lives) | Modified — slot tap calls `focusKeyboard()` |
-137	
-138	## Testing
-139	
-140	- Unit: `useTouchKeyboardInput` — mock hidden input, fire `input` events, assert `PLACE_TILE` dispatched
-141	- Unit: `useKeyboardInput` guard — assert `data-touch-keyboard` input is not silently swallowed
-142	- E2E (touch emulation): Playwright with `hasTouch: true` device — tap slot, type letter, assert slot fills
-143	- VR: screenshot of type-mode on a touch viewport to capture the hint text change
+1 # Touch Keyboard for Type Mode
+2 
+3 **Date:** 2026-04-06
+4 **Status:** Approved
+5 **Affects:** WordSpell, SortNumbers (any game using `inputMethod: 'type'` or `'both'`)
+6 
+7 ## Problem
+8 
+9 `inputMethod: 'type'` relies entirely on `useKeyboardInput`, which listens for hardware `keydown` events on `window`. On touch-only devices (tablets, phones) there is no physical keyboard, so the type mode is completely broken — nothing happens when the user taps a slot.
+10 
+11 ## Approach: Native Keyboard on Slot Focus
+12 
+13 When the device is touch-capable, a visually hidden `<input>` element is rendered inside `AnswerGameProvider`. Tapping any answer slot focuses that input (in the same synchronous gesture handler, satisfying iOS's user-gesture requirement), which causes the device's native keyboard to slide up. Key presses are captured via the `input` event and dispatched into the existing game reducer.
+14 
+15 Desktop behaviour is unchanged — `useKeyboardInput` continues to listen to the global `keydown` event as before.
+16 
+17 ## Scope
+18 
+19 - Applies when `inputMethod === 'type'` or `inputMethod === 'both'`
+20 - `'drag'` mode: no changes
+21 - `'both'` mode on touch: drag tiles remain visible AND the keyboard is available via slot tap (both input methods work)
+22 
+23 ## Technical Design
+24 
+25 ### Touch Detection
+26 
+27 ```ts
+28 const isTouchDevice = navigator.maxTouchPoints > 0;
+29 ```
+30 
+31 Checked once on mount inside the new hook. This gates the entire touch-keyboard path.
+32 
+33 ### New Hook: `useTouchKeyboardInput`
+34 
+35 Lives alongside `useKeyboardInput` in `src/components/answer-game/`.
+36 
+37 Responsibilities:
+38 - Creates a `ref` for the hidden `<input>` element
+39 - Attaches an `input` event listener to the hidden input
+40 - On each `input` event: reads `event.data`, finds a matching bank tile, dispatches `PLACE_TILE`, clears the input value
+41 - Returns `{ hiddenInputRef, focusKeyboard }` — `focusKeyboard` is called by slot tap handlers
+42 
+43 Uses `input` event (not `keydown`) because many mobile virtual keyboards do not fire `keydown` reliably.
+44 
+45 ```ts
+46 // inputmode drives the keyboard type shown by the OS
+47 // 'text' for WordSpell (letters), 'numeric' for SortNumbers (digits)
+48 ```
+49 
+50 ### `HiddenKeyboardInput` Component
+51 
+52 A thin wrapper rendered inside `AnswerGameProvider` when the touch-keyboard path is active:
+53 
+54 ```tsx
+55 <input
+56   ref={hiddenInputRef}
+57   type="text"
+58   inputMode={inputMode}       // 'text' | 'numeric'
+59   data-touch-keyboard="true"
+60   aria-hidden="true"
+61   style={{ position: 'absolute', opacity: 0, pointerEvents: 'none',
+62            width: 1, height: 1, top: 0, left: 0 }}
+63 />
+64 ```
+65 
+66 `opacity: 0` with a 1×1 pixel size (not `display:none` or `visibility:hidden`) keeps the element focusable on iOS.
+67 
+68 ### `AnswerGameProvider` changes
+69 
+70 - Renders `<KeyboardInputAdapter />` (existing) on non-touch devices only
+71 - Renders `<HiddenKeyboardInput />` on touch devices when `inputMethod !== 'drag'`
+72 - Provides `focusKeyboard` via a new `TouchKeyboardContext` so slot components can call it
+73 
+74 ### `useKeyboardInput` guard update
+75 
+76 The existing guard that ignores input elements:
+77 
+78 ```ts
+79 if (event.target instanceof HTMLInputElement) return;
+80 ```
+81 
+82 becomes:
+83 
+84 ```ts
+85 if (
+86   event.target instanceof HTMLInputElement &&
+87   !(event.target as HTMLInputElement).dataset['touchKeyboard']
+88 ) return;
+89 ```
+90 
+91 This is a no-op on touch (the hook doesn't run), but protects desktop behaviour if someone ever tests with a touch device attached to a keyboard.
+92 
+93 ### `OrderedLetterSlots` changes
+94 
+95 Each unfilled slot's click/tap handler additionally calls `focusKeyboard()` from `TouchKeyboardContext`. The call must happen inside the synchronous click handler (not in a `useEffect`) so iOS allows the programmatic focus.
+96 
+97 ### `LetterTileBank` changes
+98 
+99 When `inputMethod === 'type'` on touch: replace the "⌨️ Type the letters on your keyboard" message with "Tap a slot to type".
+100 
+101 ### Viewport Scroll
+102 
+103 A `useEffect` inside `useTouchKeyboardInput` listens to `visualViewport?.addEventListener('resize', ...)`. When the viewport shrinks (keyboard opened), the active slot element is scrolled into view:
+104 
+105 ```ts
+106 activeSlotRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+107 ```
+108 
+109 `activeSlotRef` is the DOM ref of whichever slot is currently `activeSlotIndex`.
+110 
+111 ### `inputMode` per game
+112 
+113 Each game passes `inputMode` to `AnswerGameConfig` (or it is derived from existing config):
+114 
+115 | Game | `inputMode` value |
+116 |---|---|
+117 | WordSpell | `'text'` |
+118 | SortNumbers | `'numeric'` |
+119 | NumberMatch | `'numeric'` |
+120 
+121 `AnswerGameConfig` gains an optional `touchKeyboardInputMode?: 'text' \| 'numeric' \| 'none'` field (defaults to `'text'`).
+122 
+123 ## Files Changed
+124 
+125 | File | Change |
+126 |---|---|
+127 | `src/components/answer-game/useTouchKeyboardInput.ts` | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch |
+128 | `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
+129 | `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
+130 | `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
+131 | `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
+132 | `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
+133 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
+134 | `src/games/word-spell/WordSpell/WordSpell.tsx` | Modified — pass `touchKeyboardInputMode: 'text'` |
+135 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Modified — pass `touchKeyboardInputMode: 'numeric'` |
+136 | `src/components/answer-game/OrderedLetterSlots` (wherever it lives) | Modified — slot tap calls `focusKeyboard()` |
+137 
+138 ## Testing
+139 
+140 - Unit: `useTouchKeyboardInput` — mock hidden input, fire `input` events, assert `PLACE_TILE` dispatched
+141 - Unit: `useKeyboardInput` guard — assert `data-touch-keyboard` input is not silently swallowed
+142 - E2E (touch emulation): Playwright with `hasTouch: true` device — tap slot, type letter, assert slot fills
+143 - VR: screenshot of type-mode on a touch viewport to capture the hint text change
 144
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:53Z)**_
@@ -3397,6 +3436,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:39:59Z)**_
@@ -3407,6 +3447,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:39:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:02Z)**_
@@ -3469,6 +3510,7 @@ docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:121:5 error
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:121:9 error MD060/table-column-style Table column style [Table pipe is missing space to the left for style "compact"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:08Z)**_
@@ -3478,27 +3520,28 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:08Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-108	
-109	| Game | `inputMode` value |
-110	|---|---|
-111	| WordSpell | `'text'` |
-112	| SortNumbers | `'numeric'` |
-113	| NumberMatch | `'numeric'` |
-114	
-115	`AnswerGameConfig` gains an optional `touchKeyboardInputMode?: 'text' \| 'numeric' \| 'none'` field (defaults to `'text'`).
-116	
-117	## Files Changed
-118	
-119	| File | Change |
-120	|---|---|
-121	| `src/components/answer-game/useTouchKeyboardInput.ts` | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch |
-122	| `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
-123	| `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
-124	| `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
-125	| `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
-126	| `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
-127	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
+108 
+109 | Game | `inputMode` value |
+110 |---|---|
+111 | WordSpell | `'text'` |
+112 | SortNumbers | `'numeric'` |
+113 | NumberMatch | `'numeric'` |
+114 
+115 `AnswerGameConfig` gains an optional `touchKeyboardInputMode?: 'text' \| 'numeric' \| 'none'` field (defaults to `'text'`).
+116 
+117 ## Files Changed
+118 
+119 | File | Change |
+120 |---|---|
+121 | `src/components/answer-game/useTouchKeyboardInput.ts` | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch |
+122 | `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
+123 | `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
+124 | `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
+125 | `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
+126 | `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
+127 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:11Z)**_
@@ -3509,6 +3552,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:16Z)**_
@@ -3519,6 +3563,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:19Z)**_
@@ -3528,27 +3573,28 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:19Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-117	## Files Changed
-118	
-119	| File                                                                       | Change                                                                              |
-120	| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-121	| `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
-122	| `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
-123	| `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
-124	| `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
-125	| `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
-126	| `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
-127	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
-128	| `src/games/word-spell/WordSpell/WordSpell.tsx` | Modified — pass `touchKeyboardInputMode: 'text'` |
-129	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Modified — pass `touchKeyboardInputMode: 'numeric'` |
-130	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx` | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view |
-131	| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified — same as above |
-132	
-133	## Testing
-134	
-135	- Unit: `useTouchKeyboardInput` — mock hidden input, fire `input` events, assert `PLACE_TILE` dispatched
-136	- Unit: `useKeyboardInput` guard — assert `data-touch-keyboard` input is not silently swallowed
+117 ## Files Changed
+118 
+119 | File                                                                       | Change                                                                              |
+120 | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+121 | `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
+122 | `src/components/answer-game/TouchKeyboardContext.ts` | **New** — context providing `focusKeyboard` function |
+123 | `src/components/answer-game/HiddenKeyboardInput.tsx` | **New** — the hidden `<input>` component |
+124 | `src/components/answer-game/AnswerGameProvider.tsx` | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
+125 | `src/components/answer-game/useKeyboardInput.ts` | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard` |
+126 | `src/components/answer-game/types.ts` | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig` |
+127 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` | Modified — update type-mode hint for touch |
+128 | `src/games/word-spell/WordSpell/WordSpell.tsx` | Modified — pass `touchKeyboardInputMode: 'text'` |
+129 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx` | Modified — pass `touchKeyboardInputMode: 'numeric'` |
+130 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx` | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view |
+131 | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified — same as above |
+132 
+133 ## Testing
+134 
+135 - Unit: `useTouchKeyboardInput` — mock hidden input, fire `input` events, assert `PLACE_TILE` dispatched
+136 - Unit: `useKeyboardInput` guard — assert `data-touch-keyboard` input is not silently swallowed
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:30Z)**_
@@ -3559,6 +3605,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:30Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:35Z)**_
@@ -3610,6 +3657,7 @@ Summary: 1 error(s)
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:125:166 error MD060/table-column-style Table column style [Table pipe does not align with header for style "aligned"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:37Z)**_
@@ -3619,22 +3667,23 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:37Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-119	| File                                                                       | Change                                                                              |
-120	| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-121	| `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
-122	| `src/components/answer-game/TouchKeyboardContext.ts`                       | **New** — context providing `focusKeyboard` function                                |
-123	| `src/components/answer-game/HiddenKeyboardInput.tsx`                       | **New** — the hidden `<input>` component                                            |
-124	| `src/components/answer-game/AnswerGameProvider.tsx`                        | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
-125	| `src/components/answer-game/useKeyboardInput.ts`                           | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard`           |
-126	| `src/components/answer-game/types.ts`                                      | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig`              |
-127	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`                   | Modified — update type-mode hint for touch                                          |
-128	| `src/games/word-spell/WordSpell/WordSpell.tsx`                             | Modified — pass `touchKeyboardInputMode: 'text'`                                    |
-129	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                       | Modified — pass `touchKeyboardInputMode: 'numeric'`                                 |
-130	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`           | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view    |
-131	| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`       | Modified — same as above                                                            |
-132	
-133	## Testing
+119 | File                                                                       | Change                                                                              |
+120 | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+121 | `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
+122 | `src/components/answer-game/TouchKeyboardContext.ts`                       | **New** — context providing `focusKeyboard` function                                |
+123 | `src/components/answer-game/HiddenKeyboardInput.tsx`                       | **New** — the hidden `<input>` component                                            |
+124 | `src/components/answer-game/AnswerGameProvider.tsx`                        | Modified — conditionally render `HiddenKeyboardInput`, provide `TouchKeyboardContext` |
+125 | `src/components/answer-game/useKeyboardInput.ts`                           | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard`           |
+126 | `src/components/answer-game/types.ts`                                      | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig`              |
+127 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`                   | Modified — update type-mode hint for touch                                          |
+128 | `src/games/word-spell/WordSpell/WordSpell.tsx`                             | Modified — pass `touchKeyboardInputMode: 'text'`                                    |
+129 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                       | Modified — pass `touchKeyboardInputMode: 'numeric'`                                 |
+130 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`           | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view    |
+131 | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`       | Modified — same as above                                                            |
+132 
+133 ## Testing
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:46Z)**_
@@ -3643,11 +3692,11 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:46Z)**_
 Line 124 has a longer content that doesn't fit within the column width. The issue is the `AnswerGameProvider.tsx` row - the change text `Modified — conditionally render \`HiddenKeyboardInput\`, provide \`TouchKeyboardContext\`` is longer than the column separator. Let me fix all the column widths to be consistent.
 
 The column widths are:
+
 - Column 1 separator: `--------------------------------------------------------------------------` = 74 chars
 - Column 2 separator: `-----------------------------------------------------------------------------------` = 85 chars
 
 The header has: `| File                                                                       | Change                                                                              |`
-
 
 Looking at line 124, the content in column 2 is 86 characters but the separator is only 85, so I need to either widen the separator or trim the text. I'll shorten the change description to fit within the 85-character limit.
 </details></think>
@@ -3660,6 +3709,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:52Z)**_
@@ -3711,6 +3761,7 @@ Summary: 1 error(s)
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:125:165 error MD060/table-column-style Table column style [Table pipe does not align with header for style "aligned"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:56Z)**_
@@ -3742,6 +3793,7 @@ docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:125:165 err
 exit: 1
 [This command modified 1 file you've previously read: docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:40:59Z)**_
@@ -3751,22 +3803,23 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:40:59Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-119	
-120	| File                                                                       | Change                                                                              |
-121	| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-122	| `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
-123	| `src/components/answer-game/TouchKeyboardContext.ts`                       | **New** — context providing `focusKeyboard` function                                |
-124	| `src/components/answer-game/HiddenKeyboardInput.tsx`                       | **New** — the hidden `<input>` component                                            |
-125	| `src/components/answer-game/AnswerGameProvider.tsx`                        | Modified — render `HiddenKeyboardInput`, provide `TouchKeyboardContext`              |
-126	| `src/components/answer-game/useKeyboardInput.ts`                           | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard`           |
-127	| `src/components/answer-game/types.ts`                                      | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig`              |
-128	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`                   | Modified — update type-mode hint for touch                                          |
-129	| `src/games/word-spell/WordSpell/WordSpell.tsx`                             | Modified — pass `touchKeyboardInputMode: 'text'`                                    |
-130	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                       | Modified — pass `touchKeyboardInputMode: 'numeric'`                                 |
-131	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`           | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view    |
-132	| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`       | Modified — same as above                                                            |
+119 
+120 | File                                                                       | Change                                                                              |
+121 | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+122 | `src/components/answer-game/useTouchKeyboardInput.ts`                      | **New** — hook managing hidden input, input-event capture, PLACE_TILE dispatch      |
+123 | `src/components/answer-game/TouchKeyboardContext.ts`                       | **New** — context providing `focusKeyboard` function                                |
+124 | `src/components/answer-game/HiddenKeyboardInput.tsx`                       | **New** — the hidden `<input>` component                                            |
+125 | `src/components/answer-game/AnswerGameProvider.tsx`                        | Modified — render `HiddenKeyboardInput`, provide `TouchKeyboardContext`              |
+126 | `src/components/answer-game/useKeyboardInput.ts`                           | Modified — update `HTMLInputElement` guard to allow `data-touch-keyboard`           |
+127 | `src/components/answer-game/types.ts`                                      | Modified — add optional `touchKeyboardInputMode` to `AnswerGameConfig`              |
+128 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`                   | Modified — update type-mode hint for touch                                          |
+129 | `src/games/word-spell/WordSpell/WordSpell.tsx`                             | Modified — pass `touchKeyboardInputMode: 'text'`                                    |
+130 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                       | Modified — pass `touchKeyboardInputMode: 'numeric'`                                 |
+131 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`           | Modified — empty slot tap calls `focusKeyboard()`; active slot scrolls into view    |
+132 | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`       | Modified — same as above                                                            |
 133
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:41:18Z)**_
@@ -3776,17 +3829,17 @@ The issue is with line 125. Looking at line 125:
 `| \`src/components/answer-game/AnswerGameProvider.tsx\`                        | Modified — render \`HiddenKeyboardInput\`, provide \`TouchKeyboardContext\`              |`
 
 The column 2 pipe position. Let me count:
-- `| ` = 2
+
+- `|` = 2
 - `` `src/components/answer-game/AnswerGameProvider.tsx` `` = 51 chars
 - spaces to fill to column width 74 = 23 spaces
-
 
 - ` | ` = 3
 Total up to column 2 pipe start = 2 + 51 + 23 + 1 = 77... hmm
 
-Looking at the header line to figure out the actual column widths: `| File                                                                       | Change                                                                              |`. The separator dashes are 74 characters, so column 1 content is 74 chars wide including the leading `| `. Let me recalculate where the pipe should actually fall.
+Looking at the header line to figure out the actual column widths: `| File                                                                       | Change                                                                              |`. The separator dashes are 74 characters, so column 1 content is 74 chars wide including the leading `|`. Let me recalculate where the pipe should actually fall.
 
-For line 125 with the file path, I'm counting the backticks around the filename (51 chars total), plus the leading `| ` (2 chars), plus the trailing spaces (24 chars), which puts the pipe at position 77. But when I count the header, the pipe appears to be at position 76, so there's a one-character discrepancy I need to resolve.
+For line 125 with the file path, I'm counting the backticks around the filename (51 chars total), plus the leading `|` (2 chars), plus the trailing spaces (24 chars), which puts the pipe at position 77. But when I count the header, the pipe appears to be at position 76, so there's a one-character discrepancy I need to resolve.
 
 Looking at the second column, the header shows `Change` with 79 spaces after it before the pipe, but when I count the actual content in line 125—the modified description with backticks around `HiddenKeyboardInput` and `TouchKeyboardContext`—I'm getting 86 characters instead of the expected 85 for the column separator.
 
@@ -3805,6 +3858,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:41:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:41:30Z)**_
@@ -3819,6 +3873,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:41:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:41:36Z)**_
@@ -3836,6 +3891,7 @@ Linting: 1 file(s)
 Summary: 0 error(s)
 exit: 0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:41:45Z)**_
@@ -4438,6 +4494,7 @@ Done in 5.16s.
  1 file changed, 147 insertions(+)
  create mode 100644 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:41:52Z)**_
@@ -4479,11 +4536,11 @@ The user is asking whether we should refactor `OrderedLetterSlots` and `NumberSe
 Let me look at both files more carefully to understand the similarities and differences.
 
 I already read both files and they are nearly identical:
+
 - Same `LetterSlot`/`NumberSlot` component structure
 - Same DnD setup
 - Same `useSlotTileDrag` usage
 - Same `useAnswerGameContext` usage
-
 
 - Only difference is component names and `aria-label` text ("Letter" vs "Number")
 
@@ -4501,6 +4558,7 @@ Yes, absolutely — they're nearly identical. The only difference between `Lette
 Since we're already touching both files for the touch keyboard work, this is the right time to consolidate. My recommendation:
 
 **Extract to `src/components/answer-game/`:**
+
 - `AnswerSlot` — the shared slot `<li>` (replaces both `LetterSlot` and `NumberSlot`)
 - `OrderedSlots` — the shared `<ol>` list (replaces both `OrderedLetterSlots` and `NumberSequenceSlots`)
 
@@ -4535,6 +4593,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:49:14Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:28Z)**_
@@ -4545,6 +4604,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:49:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:35Z)**_
@@ -4555,6 +4615,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:49:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:39Z)**_
@@ -4573,6 +4634,7 @@ Summary: 1 error(s)
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md:152:166 error MD060/table-column-style Table column style [Table pipe does not align with header for style "aligned"]
 exit: 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:42Z)**_
@@ -4582,15 +4644,16 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:49:42Z)**_
  `./docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md`
 
 ```text
-148	| `src/components/answer-game/types.ts`                                | Modified - add optional `touchKeyboardInputMode` to `AnswerGameConfig`           |
-149	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Modified - update type-mode hint for touch                                       |
-150	| `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Modified - pass `touchKeyboardInputMode: 'text'`                                 |
-151	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Modified - pass `touchKeyboardInputMode: 'numeric'`                              |
-152	| `src/components/answer-game/OrderedSlots/OrderedSlots.tsx`           | **New** - shared `AnswerSlot` + `OrderedSlots` replacing both game-specific slot components |
-153	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Modified - thin re-export of `OrderedSlots`                                      |
-154	| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified - thin re-export of `OrderedSlots`                                      |
+148 | `src/components/answer-game/types.ts`                                | Modified - add optional `touchKeyboardInputMode` to `AnswerGameConfig`           |
+149 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Modified - update type-mode hint for touch                                       |
+150 | `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Modified - pass `touchKeyboardInputMode: 'text'`                                 |
+151 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Modified - pass `touchKeyboardInputMode: 'numeric'`                              |
+152 | `src/components/answer-game/OrderedSlots/OrderedSlots.tsx`           | **New** - shared `AnswerSlot` + `OrderedSlots` replacing both game-specific slot components |
+153 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Modified - thin re-export of `OrderedSlots`                                      |
+154 | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Modified - thin re-export of `OrderedSlots`                                      |
 155
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:47Z)**_
@@ -4601,6 +4664,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:49:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:49:51Z)**_
@@ -4618,6 +4682,7 @@ Linting: 1 file(s)
 Summary: 0 error(s)
 exit: 0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:50:00Z)**_
@@ -5219,6 +5284,7 @@ Done in 4.77s.
 [master 5c71e3a] docs: add slot consolidation (AnswerSlot/OrderedSlots) to touch keyboard spec
  1 file changed, 31 insertions(+), 17 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:50:03Z)**_
@@ -5255,6 +5321,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -5275,6 +5342,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -5345,6 +5413,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -5353,6 +5422,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -5383,13 +5453,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -5399,13 +5470,13 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:52:04Z)**_
 I'm using the writing-plans skill to create the implementation plan. Let me write a comprehensive plan based on the spec we just wrote.
 
 The spec covers:
+
 1. Slot consolidation: `AnswerSlot` + `OrderedSlots` (shared components)
 2. `TouchKeyboardContext` - context providing `focusKeyboard`
 3. `useTouchKeyboardInput` - hook managing hidden input
 4. `HiddenKeyboardInput` - hidden input component
 5. `AnswerGameProvider` changes - conditionally render based on touch detection
 6. `useKeyboardInput` guard update
-
 
 7. `AnswerGameConfig` type update - add `touchKeyboardInputMode`
 8. `LetterTileBank` hint text update
@@ -5419,41 +5490,50 @@ Next comes the context infrastructure with `TouchKeyboardContext`, followed by t
 Actually, I should flip this around and write tests first for each piece. The context is straightforward to test—just verify it provides `focusKeyboard`. The hook needs a unit test with a mocked hidden input to fire input events and check that `PLACE_TILE` gets dispatched. For the slots component, I'll test that it renders correctly, that empty slots have the click handler, and that tapping calls `focusKeyboard`. The tile bank just needs to verify the touch-aware message appears on touch devices.
 
 Let me reorganize this for proper TDD flow. I should start with slot consolidation since that's a refactor with no new behavior—create `OrderedSlots` with identical behavior to the existing slot components and migrate their tests over. Then layer in the touch keyboard context and hook, wire up the provider, update the guard, add touch behavior to slots, update the tile bank message, and finally pass the config through the games. Add `touchKeyboardInputMode` to `AnswerGameConfig`**
+
 - Modify `src/components/answer-game/types.ts`
 - No test needed (TypeScript catches type errors)
 
 **Task 3: `TouchKeyboardContext`**
+
 - Create `src/components/answer-game/TouchKeyboardContext.ts`
 - Simple context with a no-op default
 - Quick test that it provides the expected shape
 
 **Task 4: `useTouchKeyboardInput`**
+
 - TDD: write test first (mock hidden input ref, fire `input` event, assert `PLACE_TILE`)
 - Implement hook
 - Test passes
 
 **Task 5: `HiddenKeyboardInput` component**
+
 - Simple wrapper, no unit test needed (just renders an input)
 
 **Task 6: `AnswerGameProvider`**
+
 - Wire up the touch keyboard context and render the hidden input component
 - Test that `focusKeyboard` is available from context on touch devices
 - Test that `KeyboardInputAdapter` only renders on non-touch
 
 **Task 7: `useKeyboardInput` guard update**
+
 - Modify guard
 - Update existing test for the guard behavior
 
 **Task 8: `AnswerSlot` touch behavior**
+
 - Add `onClick` to empty slots → `focusKeyboard()`
 - Add `useEffect` for scroll on active
 - TDD: write tests for these behaviors
 
 **Task 9: `LetterTileBank` touch-aware hint**
+
 - Modify existing component
 - Update existing test
 
 **Task 10: Pass `touchKeyboardInputMode` from games**
+
 - Update `WordSpell.tsx` and `SortNumbers.tsx`
 - Update their tests if needed
 
@@ -5492,12 +5572,12 @@ I'm using the writing-plans skill to create the implementation plan. Let me writ
 Let me re-read the spec to make sure I capture everything.
 
 Key things from the spec:
+
 1. Touch detection via `navigator.maxTouchPoints > 0`
 2. New hook: `useTouchKeyboardInput` - manages hidden input, captures `input` events, dispatches PLACE_TILE
 3. New context: `TouchKeyboardContext` - provides `focusKeyboard` function
 4. New component: `HiddenKeyboardInput` - the hidden `<input>` element
 5. Modified: `AnswerGameProvider` - conditionally render HiddenKeyboardInput, provide TouchKeyboardContext
-
 
 6. I also need to update the `useKeyboardInput` hook to handle the HTMLInputElement guard properly, add `touchKeyboardInputMode` to the config types, and consolidate the slot components into a shared `OrderedSlots` module that both letter and number variants can use as thin re-exports.
 7. The tile bank needs updated hint text for touch devices, and both `WordSpell` and `SortNumbers` need to pass the appropriate input mode configuration.
@@ -5550,82 +5630,83 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:53:42Z)**_
  `./src/components/answer-game/AnswerGameProvider.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { describe, expect, it } from 'vitest';
-4	import { AnswerGameProvider } from './AnswerGameProvider';
-5	import { useAnswerGameContext } from './useAnswerGameContext';
-6	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-7	import type { AnswerGameConfig } from './types';
-8	
-9	const gameConfig: AnswerGameConfig = {
-10	  gameId: 'test',
-11	  inputMethod: 'drag',
-12	  wrongTileBehavior: 'lock-auto-eject',
-13	  tileBankMode: 'exact',
-14	  totalRounds: 1,
-15	  ttsEnabled: true,
-16	};
-17	
-18	const StateReader = () => {
-19	  const state = useAnswerGameContext();
-20	  return <div data-testid="phase">{state.phase}</div>;
-21	};
-22	
-23	const Dispatcher = () => {
-24	  const dispatch = useAnswerGameDispatch();
-25	  return (
-26	    <button
-27	      type="button"
-28	      onClick={() => dispatch({ type: 'COMPLETE_GAME' })}
-29	    >
-30	      end
-31	    </button>
-32	  );
-33	};
-34	
-35	describe('AnswerGameProvider', () => {
-36	  it('provides initial state to children', () => {
-37	    render(
-38	      <AnswerGameProvider config={gameConfig}>
-39	        <StateReader />
-40	      </AnswerGameProvider>,
-41	    );
-42	    expect(screen.getByTestId('phase')).toHaveTextContent('playing');
-43	  });
-44	
-45	  it('dispatch updates state', async () => {
-46	    const user = userEvent.setup();
-47	    render(
-48	      <AnswerGameProvider config={gameConfig}>
-49	        <StateReader />
-50	        <Dispatcher />
-51	      </AnswerGameProvider>,
-52	    );
-53	    await user.click(screen.getByRole('button', { name: 'end' }));
-54	    expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
-55	  });
-56	
-57	  it('useAnswerGameContext throws outside provider', () => {
-58	    const consoleError = console.error;
-59	    console.error = () => {};
-60	    expect(() => render(<StateReader />)).toThrow(
-61	      'useAnswerGameContext must be used inside AnswerGameProvider',
-62	    );
-63	    console.error = consoleError;
-64	  });
-65	
-66	  it('useAnswerGameDispatch throws outside provider', () => {
-67	    const consoleError = console.error;
-68	    console.error = () => {};
-69	    expect(() => render(<Dispatcher />)).toThrow(
-70	      'useAnswerGameDispatch must be used inside AnswerGameProvider',
-71	    );
-72	    console.error = consoleError;
-73	  });
-74	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { describe, expect, it } from 'vitest';
+4 import { AnswerGameProvider } from './AnswerGameProvider';
+5 import { useAnswerGameContext } from './useAnswerGameContext';
+6 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+7 import type { AnswerGameConfig } from './types';
+8 
+9 const gameConfig: AnswerGameConfig = {
+10   gameId: 'test',
+11   inputMethod: 'drag',
+12   wrongTileBehavior: 'lock-auto-eject',
+13   tileBankMode: 'exact',
+14   totalRounds: 1,
+15   ttsEnabled: true,
+16 };
+17 
+18 const StateReader = () => {
+19   const state = useAnswerGameContext();
+20   return <div data-testid="phase">{state.phase}</div>;
+21 };
+22 
+23 const Dispatcher = () => {
+24   const dispatch = useAnswerGameDispatch();
+25   return (
+26     <button
+27       type="button"
+28       onClick={() => dispatch({ type: 'COMPLETE_GAME' })}
+29     >
+30       end
+31     </button>
+32   );
+33 };
+34 
+35 describe('AnswerGameProvider', () => {
+36   it('provides initial state to children', () => {
+37     render(
+38       <AnswerGameProvider config={gameConfig}>
+39         <StateReader />
+40       </AnswerGameProvider>,
+41     );
+42     expect(screen.getByTestId('phase')).toHaveTextContent('playing');
+43   });
+44 
+45   it('dispatch updates state', async () => {
+46     const user = userEvent.setup();
+47     render(
+48       <AnswerGameProvider config={gameConfig}>
+49         <StateReader />
+50         <Dispatcher />
+51       </AnswerGameProvider>,
+52     );
+53     await user.click(screen.getByRole('button', { name: 'end' }));
+54     expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
+55   });
+56 
+57   it('useAnswerGameContext throws outside provider', () => {
+58     const consoleError = console.error;
+59     console.error = () => {};
+60     expect(() => render(<StateReader />)).toThrow(
+61       'useAnswerGameContext must be used inside AnswerGameProvider',
+62     );
+63     console.error = consoleError;
+64   });
+65 
+66   it('useAnswerGameDispatch throws outside provider', () => {
+67     const consoleError = console.error;
+68     console.error = () => {};
+69     expect(() => render(<Dispatcher />)).toThrow(
+70       'useAnswerGameDispatch must be used inside AnswerGameProvider',
+71     );
+72     console.error = consoleError;
+73   });
+74 });
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:53:46Z)**_
@@ -5635,106 +5716,107 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:53:46Z)**_
  `./src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import { describe, expect, it } from 'vitest';
-3	import { OrderedLetterSlots } from './OrderedLetterSlots';
-4	import type {
-5	  AnswerGameConfig,
-6	  AnswerZone,
-7	  TileItem,
-8	} from '@/components/answer-game/types';
-9	import type { ReactNode } from 'react';
-10	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-11	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-12	
-13	const config: AnswerGameConfig = {
-14	  gameId: 'test',
-15	  inputMethod: 'drag',
-16	  wrongTileBehavior: 'lock-auto-eject',
-17	  tileBankMode: 'exact',
-18	  totalRounds: 1,
-19	  ttsEnabled: false,
-20	};
-21	
-22	const tiles: TileItem[] = [
-23	  { id: 't1', label: 'c', value: 'c' },
-24	  { id: 't2', label: 'a', value: 'a' },
-25	  { id: 't3', label: 't', value: 't' },
-26	];
-27	
-28	const zones: AnswerZone[] = [
-29	  {
-30	    id: 'z0',
-31	    index: 0,
-32	    expectedValue: 'c',
-33	    placedTileId: null,
-34	    isWrong: false,
-35	    isLocked: false,
-36	  },
-37	  {
-38	    id: 'z1',
-39	    index: 1,
-40	    expectedValue: 'a',
-41	    placedTileId: null,
-42	    isWrong: false,
-43	    isLocked: false,
-44	  },
-45	  {
-46	    id: 'z2',
-47	    index: 2,
-48	    expectedValue: 't',
-49	    placedTileId: null,
-50	    isWrong: false,
-51	    isLocked: false,
-52	  },
-53	];
-54	
-55	const Initialiser = ({ children }: { children: ReactNode }) => {
-56	  const dispatch = useAnswerGameDispatch();
-57	  dispatch({ type: 'INIT_ROUND', tiles, zones });
-58	  return <>{children}</>;
-59	};
-60	
-61	function wrapper({ children }: { children: ReactNode }) {
-62	  return (
-63	    <AnswerGameProvider config={config}>
-64	      <Initialiser>{children}</Initialiser>
-65	    </AnswerGameProvider>
-66	  );
-67	}
-68	
-69	describe('OrderedLetterSlots', () => {
-70	  it('renders one slot per zone', () => {
-71	    render(<OrderedLetterSlots />, { wrapper });
-72	    expect(screen.getAllByRole('listitem')).toHaveLength(3);
-73	  });
-74	
-75	  it('slot 1 has aria-label "Slot 1, empty"', () => {
-76	    render(<OrderedLetterSlots />, { wrapper });
-77	    expect(
-78	      screen.getByRole('listitem', { name: 'Slot 1, empty' }),
-79	    ).toBeInTheDocument();
-80	  });
-81	
-82	  it('filled slot shows placed tile label', () => {
-83	    const TestWithPlacement = () => {
-84	      const dispatch = useAnswerGameDispatch();
-85	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-86	      dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
-87	      return <OrderedLetterSlots />;
-88	    };
-89	    render(
-90	      <AnswerGameProvider config={config}>
-91	        <TestWithPlacement />
-92	      </AnswerGameProvider>,
-93	    );
-94	    expect(
-95	      screen.getByRole('listitem', { name: 'Slot 1, filled with c' }),
-96	    ).toBeInTheDocument();
-97	  });
-98	});
+1 import { render, screen } from '@testing-library/react';
+2 import { describe, expect, it } from 'vitest';
+3 import { OrderedLetterSlots } from './OrderedLetterSlots';
+4 import type {
+5   AnswerGameConfig,
+6   AnswerZone,
+7   TileItem,
+8 } from '@/components/answer-game/types';
+9 import type { ReactNode } from 'react';
+10 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+11 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+12 
+13 const config: AnswerGameConfig = {
+14   gameId: 'test',
+15   inputMethod: 'drag',
+16   wrongTileBehavior: 'lock-auto-eject',
+17   tileBankMode: 'exact',
+18   totalRounds: 1,
+19   ttsEnabled: false,
+20 };
+21 
+22 const tiles: TileItem[] = [
+23   { id: 't1', label: 'c', value: 'c' },
+24   { id: 't2', label: 'a', value: 'a' },
+25   { id: 't3', label: 't', value: 't' },
+26 ];
+27 
+28 const zones: AnswerZone[] = [
+29   {
+30     id: 'z0',
+31     index: 0,
+32     expectedValue: 'c',
+33     placedTileId: null,
+34     isWrong: false,
+35     isLocked: false,
+36   },
+37   {
+38     id: 'z1',
+39     index: 1,
+40     expectedValue: 'a',
+41     placedTileId: null,
+42     isWrong: false,
+43     isLocked: false,
+44   },
+45   {
+46     id: 'z2',
+47     index: 2,
+48     expectedValue: 't',
+49     placedTileId: null,
+50     isWrong: false,
+51     isLocked: false,
+52   },
+53 ];
+54 
+55 const Initialiser = ({ children }: { children: ReactNode }) => {
+56   const dispatch = useAnswerGameDispatch();
+57   dispatch({ type: 'INIT_ROUND', tiles, zones });
+58   return <>{children}</>;
+59 };
+60 
+61 function wrapper({ children }: { children: ReactNode }) {
+62   return (
+63     <AnswerGameProvider config={config}>
+64       <Initialiser>{children}</Initialiser>
+65     </AnswerGameProvider>
+66   );
+67 }
+68 
+69 describe('OrderedLetterSlots', () => {
+70   it('renders one slot per zone', () => {
+71     render(<OrderedLetterSlots />, { wrapper });
+72     expect(screen.getAllByRole('listitem')).toHaveLength(3);
+73   });
+74 
+75   it('slot 1 has aria-label "Slot 1, empty"', () => {
+76     render(<OrderedLetterSlots />, { wrapper });
+77     expect(
+78       screen.getByRole('listitem', { name: 'Slot 1, empty' }),
+79     ).toBeInTheDocument();
+80   });
+81 
+82   it('filled slot shows placed tile label', () => {
+83     const TestWithPlacement = () => {
+84       const dispatch = useAnswerGameDispatch();
+85       dispatch({ type: 'INIT_ROUND', tiles, zones });
+86       dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+87       return <OrderedLetterSlots />;
+88     };
+89     render(
+90       <AnswerGameProvider config={config}>
+91         <TestWithPlacement />
+92       </AnswerGameProvider>,
+93     );
+94     expect(
+95       screen.getByRole('listitem', { name: 'Slot 1, filled with c' }),
+96     ).toBeInTheDocument();
+97   });
+98 });
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:53:52Z)**_
@@ -5743,13 +5825,13 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:53:52Z)**_
 Now I have all the context I need. Let me write the complete implementation plan.
 
 Key patterns I've observed:
+
 - Tests use `describe`/`it` with `vitest`
 - Tests use `render` from `@testing-library/react`
 - Named exports (no default exports, per the memory)
 - ESLint config says `const` not `function` for React components
 - The `AnswerGameProvider` tests use a `gameConfig` object
 - The `OrderedLetterSlots` tests have an `Initialiser` component that calls dispatch during render (antipattern but it's what the codebase uses)
-
 
 - I'll follow the mocking pattern with `vi.mock()` for module dependencies like `useAnswerGameContext`
 
@@ -5766,12 +5848,12 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:56:00Z)**_
 Now I have enough context to write the full plan. Let me draft it carefully.
 
 Key implementation decisions:
+
 1. `TouchKeyboardContext` provides `(() => void) | null` - null on non-touch/drag modes
 2. `useTouchKeyboardInput` returns `{ hiddenInputRef, focusKeyboard }`
 3. `HiddenKeyboardInput` renders the hidden input
 4. `AnswerGameProvider` conditionally renders either `TouchKeyboardAdapter` or `KeyboardInputAdapter`
 5. `OrderedSlots` is the new shared component
-
 
 6. The `handleClick` in `AnswerSlot` handles both filled (remove) and empty (focus keyboard)
 
@@ -7029,6 +7111,7 @@ Then open a PR from `feat/touch-keyboard` → `master`. Title: `fix: touch keybo
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:58:20Z)**_
@@ -7057,6 +7140,7 @@ docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md:1024 error MD032/b
 docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md:1065 error MD032/blanks-around-lists Lists should be surrounded by blank lines [Context: "- Modify: `src/games/word-spel..."]
 exit: 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:58:22Z)**_
@@ -7075,6 +7159,7 @@ Summary: 0 error(s)
 exit: 0
 [This command modified 1 file you've previously read: docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:58:31Z)**_
@@ -7677,6 +7762,7 @@ Done in 4.79s.
  1 file changed, 1301 insertions(+)
  create mode 100644 docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 22:58:37Z)**_
@@ -7699,6 +7785,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 22:58:48Z)**_
 Plan complete and saved to [docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md](docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md). All 319 tests still passing.
 
 The plan has **13 tasks** covering:
+
 - `TouchKeyboardContext` → `useTouchKeyboardInput` → `HiddenKeyboardInput` → updated `AnswerGameProvider`
 - New shared `OrderedSlots` (consolidates the two identical slot components) with slot-tap → `focusKeyboard` + `visualViewport` scroll
 - Re-export wrappers for `OrderedLetterSlots` and `NumberSequenceSlots`
@@ -7775,6 +7862,7 @@ digraph when_to_use {
 ```
 
 **vs. Executing Plans (parallel session):**
+
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
 - Two-stage review after each task: spec compliance first, then code quality
@@ -7838,6 +7926,7 @@ Use the least powerful model that can handle each role to conserve cost and incr
 **Architecture, design, and review tasks**: use the most capable available model.
 
 **Task complexity signals:**
+
 - Touches 1-2 files with a complete spec → cheap model
 - Touches multiple files with integration concerns → standard model
 - Requires design judgment or broad codebase understanding → most capable model
@@ -7853,6 +7942,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
+
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
@@ -7945,23 +8035,27 @@ Done!
 ## Advantages
 
 **vs. Manual execution:**
+
 - Subagents follow TDD naturally
 - Fresh context per task (no confusion)
 - Parallel-safe (subagents don't interfere)
 - Subagent can ask questions (before AND during work)
 
 **vs. Executing Plans:**
+
 - Same session (no handoff)
 - Continuous progress (no waiting)
 - Review checkpoints automatic
 
 **Efficiency gains:**
+
 - No file reading overhead (controller provides full text)
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
 
 **Quality gates:**
+
 - Self-review catches issues before handoff
 - Two-stage review: spec compliance, then code quality
 - Review loops ensure fixes actually work
@@ -7969,6 +8063,7 @@ Done!
 - Code quality ensures implementation is well-built
 
 **Cost:**
+
 - More subagent invocations (implementer + 2 reviewers per task)
 - Controller does more prep work (extracting all tasks upfront)
 - Review loops add iterations
@@ -7977,6 +8072,7 @@ Done!
 ## Red Flags
 
 **Never:**
+
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
@@ -7991,34 +8087,39 @@ Done!
 - Move to next task while either review has open issues
 
 **If subagent asks questions:**
+
 - Answer clearly and completely
 - Provide additional context if needed
 - Don't rush them into implementation
 
 **If reviewer finds issues:**
+
 - Implementer (same subagent) fixes them
 - Reviewer reviews again
 - Repeat until approved
 - Don't skip the re-review
 
 **If subagent fails task:**
+
 - Dispatch fix subagent with specific instructions
 - Don't try to fix manually (context pollution)
 
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for reviewer subagents
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
+
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
+- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
 ---
 
@@ -8047,121 +8148,122 @@ _**Agent (claude-sonnet-4-6 2026-04-05 23:15:55Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/subagent-driven-development/implementer-prompt.md`
 
 ```text
-1	# Implementer Subagent Prompt Template
-2	
-3	Use this template when dispatching an implementer subagent.
-4	
-5	```
-6	Task tool (general-purpose):
-7	  description: "Implement Task N: [task name]"
-8	  prompt: |
-9	    You are implementing Task N: [task name]
-10	
-11	    ## Task Description
-12	
-13	    [FULL TEXT of task from plan - paste it here, don't make subagent read file]
-14	
-15	    ## Context
-16	
-17	    [Scene-setting: where this fits, dependencies, architectural context]
-18	
-19	    ## Before You Begin
-20	
-21	    If you have questions about:
-22	    - The requirements or acceptance criteria
-23	    - The approach or implementation strategy
-24	    - Dependencies or assumptions
-25	    - Anything unclear in the task description
-26	
-27	    **Ask them now.** Raise any concerns before starting work.
-28	
-29	    ## Your Job
-30	
-31	    Once you're clear on requirements:
-32	    1. Implement exactly what the task specifies
-33	    2. Write tests (following TDD if task says to)
-34	    3. Verify implementation works
-35	    4. Commit your work
-36	    5. Self-review (see below)
-37	    6. Report back
-38	
-39	    Work from: [directory]
-40	
-41	    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
-42	    It's always OK to pause and clarify. Don't guess or make assumptions.
-43	
-44	    ## Code Organization
-45	
-46	    You reason best about code you can hold in context at once, and your edits are more
-47	    reliable when files are focused. Keep this in mind:
-48	    - Follow the file structure defined in the plan
-49	    - Each file should have one clear responsibility with a well-defined interface
-50	    - If a file you're creating is growing beyond the plan's intent, stop and report
-51	      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-52	    - If an existing file you're modifying is already large or tangled, work carefully
-53	      and note it as a concern in your report
-54	    - In existing codebases, follow established patterns. Improve code you're touching
-55	      the way a good developer would, but don't restructure things outside your task.
-56	
-57	    ## When You're in Over Your Head
-58	
-59	    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-60	    no work. You will not be penalized for escalating.
-61	
-62	    **STOP and escalate when:**
-63	    - The task requires architectural decisions with multiple valid approaches
-64	    - You need to understand code beyond what was provided and can't find clarity
-65	    - You feel uncertain about whether your approach is correct
-66	    - The task involves restructuring existing code in ways the plan didn't anticipate
-67	    - You've been reading file after file trying to understand the system without progress
-68	
-69	    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-70	    specifically what you're stuck on, what you've tried, and what kind of help you need.
-71	    The controller can provide more context, re-dispatch with a more capable model,
-72	    or break the task into smaller pieces.
-73	
-74	    ## Before Reporting Back: Self-Review
-75	
-76	    Review your work with fresh eyes. Ask yourself:
-77	
-78	    **Completeness:**
-79	    - Did I fully implement everything in the spec?
-80	    - Did I miss any requirements?
-81	    - Are there edge cases I didn't handle?
-82	
-83	    **Quality:**
-84	    - Is this my best work?
-85	    - Are names clear and accurate (match what things do, not how they work)?
-86	    - Is the code clean and maintainable?
-87	
-88	    **Discipline:**
-89	    - Did I avoid overbuilding (YAGNI)?
-90	    - Did I only build what was requested?
-91	    - Did I follow existing patterns in the codebase?
-92	
-93	    **Testing:**
-94	    - Do tests actually verify behavior (not just mock behavior)?
-95	    - Did I follow TDD if required?
-96	    - Are tests comprehensive?
-97	
-98	    If you find issues during self-review, fix them now before reporting.
-99	
-100	    ## Report Format
-101	
-102	    When done, report:
-103	    - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-104	    - What you implemented (or what you attempted, if blocked)
-105	    - What you tested and test results
-106	    - Files changed
-107	    - Self-review findings (if any)
-108	    - Any issues or concerns
-109	
-110	    Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
-111	    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
-112	    information that wasn't provided. Never silently produce work you're unsure about.
-113	```
+1 # Implementer Subagent Prompt Template
+2 
+3 Use this template when dispatching an implementer subagent.
+4 
+5 ```
+6 Task tool (general-purpose):
+7   description: "Implement Task N: [task name]"
+8   prompt: |
+9     You are implementing Task N: [task name]
+10 
+11     ## Task Description
+12 
+13     [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+14 
+15     ## Context
+16 
+17     [Scene-setting: where this fits, dependencies, architectural context]
+18 
+19     ## Before You Begin
+20 
+21     If you have questions about:
+22     - The requirements or acceptance criteria
+23     - The approach or implementation strategy
+24     - Dependencies or assumptions
+25     - Anything unclear in the task description
+26 
+27     **Ask them now.** Raise any concerns before starting work.
+28 
+29     ## Your Job
+30 
+31     Once you're clear on requirements:
+32     1. Implement exactly what the task specifies
+33     2. Write tests (following TDD if task says to)
+34     3. Verify implementation works
+35     4. Commit your work
+36     5. Self-review (see below)
+37     6. Report back
+38 
+39     Work from: [directory]
+40 
+41     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
+42     It's always OK to pause and clarify. Don't guess or make assumptions.
+43 
+44     ## Code Organization
+45 
+46     You reason best about code you can hold in context at once, and your edits are more
+47     reliable when files are focused. Keep this in mind:
+48     - Follow the file structure defined in the plan
+49     - Each file should have one clear responsibility with a well-defined interface
+50     - If a file you're creating is growing beyond the plan's intent, stop and report
+51       it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
+52     - If an existing file you're modifying is already large or tangled, work carefully
+53       and note it as a concern in your report
+54     - In existing codebases, follow established patterns. Improve code you're touching
+55       the way a good developer would, but don't restructure things outside your task.
+56 
+57     ## When You're in Over Your Head
+58 
+59     It is always OK to stop and say "this is too hard for me." Bad work is worse than
+60     no work. You will not be penalized for escalating.
+61 
+62     **STOP and escalate when:**
+63     - The task requires architectural decisions with multiple valid approaches
+64     - You need to understand code beyond what was provided and can't find clarity
+65     - You feel uncertain about whether your approach is correct
+66     - The task involves restructuring existing code in ways the plan didn't anticipate
+67     - You've been reading file after file trying to understand the system without progress
+68 
+69     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
+70     specifically what you're stuck on, what you've tried, and what kind of help you need.
+71     The controller can provide more context, re-dispatch with a more capable model,
+72     or break the task into smaller pieces.
+73 
+74     ## Before Reporting Back: Self-Review
+75 
+76     Review your work with fresh eyes. Ask yourself:
+77 
+78     **Completeness:**
+79     - Did I fully implement everything in the spec?
+80     - Did I miss any requirements?
+81     - Are there edge cases I didn't handle?
+82 
+83     **Quality:**
+84     - Is this my best work?
+85     - Are names clear and accurate (match what things do, not how they work)?
+86     - Is the code clean and maintainable?
+87 
+88     **Discipline:**
+89     - Did I avoid overbuilding (YAGNI)?
+90     - Did I only build what was requested?
+91     - Did I follow existing patterns in the codebase?
+92 
+93     **Testing:**
+94     - Do tests actually verify behavior (not just mock behavior)?
+95     - Did I follow TDD if required?
+96     - Are tests comprehensive?
+97 
+98     If you find issues during self-review, fix them now before reporting.
+99 
+100     ## Report Format
+101 
+102     When done, report:
+103     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+104     - What you implemented (or what you attempted, if blocked)
+105     - What you tested and test results
+106     - Files changed
+107     - Self-review findings (if any)
+108     - Any issues or concerns
+109 
+110     Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
+111     Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
+112     information that wasn't provided. Never silently produce work you're unsure about.
+113 ```
 114
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 23:15:57Z)**_
@@ -8173,6 +8275,7 @@ _**Agent (claude-sonnet-4-6 2026-04-05 23:15:57Z)**_
 ```text
 File content (11576 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 23:16:00Z)**_
@@ -8182,107 +8285,108 @@ _**Agent (claude-sonnet-4-6 2026-04-05 23:16:00Z)**_
  `./docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md`
 
 ```text
-1	# Touch Keyboard for Type Mode — Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Fix type mode on touch devices by focusing a hidden native `<input>` when a slot is tapped, triggering the device keyboard, and capturing typed characters via the `input` event.
-6	
-7	**Architecture:** A `TouchKeyboardContext` provides `focusKeyboard` to slot components. `AnswerGameProvider` conditionally renders either a `TouchKeyboardAdapter` (touch) or the existing `KeyboardInputAdapter` (desktop). Slot components are consolidated into a shared `OrderedSlots` component that handles both the tap-to-focus and scroll-into-view behaviours once.
-8	
-9	**Tech Stack:** React, TypeScript, Vitest + @testing-library/react, TailwindCSS, @atlaskit/pragmatic-drag-and-drop
-10	
-11	---
-12	
-13	## File Map
-14	
-15	| File                                                                 | Action                                                        |
-16	| -------------------------------------------------------------------- | ------------------------------------------------------------- |
-17	| `src/components/answer-game/types.ts`                                | Add `touchKeyboardInputMode` to `AnswerGameConfig`            |
-18	| `src/components/answer-game/useKeyboardInput.ts`                     | Update `HTMLInputElement` guard for `data-touch-keyboard`     |
-19	| `src/components/answer-game/useKeyboardInput.test.tsx`               | Add guard test                                                |
-20	| `src/components/answer-game/TouchKeyboardContext.ts`                 | **New** — context providing `focusKeyboard \| null`           |
-21	| `src/components/answer-game/useTouchKeyboardInput.ts`                | **New** — hook: hidden input ref + `input`-event → PLACE_TILE |
-22	| `src/components/answer-game/useTouchKeyboardInput.test.tsx`          | **New**                                                       |
-23	| `src/components/answer-game/HiddenKeyboardInput.tsx`                 | **New** — the off-screen `<input>` element                    |
-24	| `src/components/answer-game/AnswerGameProvider.tsx`                  | Conditionally render touch vs desktop adapter                 |
-25	| `src/components/answer-game/AnswerGameProvider.test.tsx`             | Add touch-path test                                           |
-26	| `src/components/answer-game/OrderedSlots/OrderedSlots.tsx`           | **New** — shared `AnswerSlot` + `OrderedSlots`                |
-27	| `src/components/answer-game/OrderedSlots/OrderedSlots.test.tsx`      | **New**                                                       |
-28	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Re-export `OrderedSlots`                                      |
-29	| `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Re-export `OrderedSlots`                                      |
-30	| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Update type-mode hint for touch vs desktop                    |
-31	| `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Pass `touchKeyboardInputMode: 'text'`                         |
-32	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Pass `touchKeyboardInputMode: 'numeric'`                      |
-33	
-34	---
-35	
-36	## Task 1 — Worktree Setup
-37	
-38	- [ ] **Create worktree and install deps**
-39	
-40	```bash
-41	git worktree add ./worktrees/feat/touch-keyboard -b feat/touch-keyboard
-42	cd ./worktrees/feat/touch-keyboard && yarn install
-43	```
-44	
-45	---
-46	
-47	## Task 2 — Add `touchKeyboardInputMode` to `AnswerGameConfig`
-48	
-49	**Files:**
-50	
-51	- Modify: `src/components/answer-game/types.ts`
-52	
-53	- [ ] **Open `src/components/answer-game/types.ts` and add the field after `ttsEnabled`**
-54	
-55	```ts
-56	export interface AnswerGameConfig {
-57	  gameId: string;
-58	  /** @default 'drag' */
-59	  inputMethod: 'drag' | 'type' | 'both';
-60	  /** @default 'lock-auto-eject' */
-61	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-62	  tileBankMode: 'exact' | 'distractors';
-63	  distractorCount?: number;
-64	  totalRounds: number;
-65	  roundsInOrder?: boolean;
-66	  ttsEnabled: boolean;
-67	  /**
-68	   * Controls the OS keyboard type shown on touch devices in type/both mode.
-69	   * @default 'text'
-70	   */
-71	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-72	  initialTiles?: TileItem[];
-73	  initialZones?: AnswerZone[];
-74	}
-75	```
-76	
-77	- [ ] **Run the full test suite to verify no regressions**
-78	
-79	```bash
-80	yarn test
-81	```
-82	
-83	Expected: all existing tests pass (field is optional, no consumers need updating yet).
-84	
-85	- [ ] **Commit**
-86	
-87	```bash
-88	git add src/components/answer-game/types.ts
-89	git commit -m "feat(types): add touchKeyboardInputMode to AnswerGameConfig"
-90	```
-91	
-92	---
-93	
-94	## Task 3 — Update `useKeyboardInput` Guard
-95	
-96	**Files:**
-97	
-98	- Modify: `src/components/answer-game/useKeyboardInput.ts`
-99	- Modify: `src/components/answer-game/useKeyboardInput.test.tsx`
+1 # Touch Keyboard for Type Mode — Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Fix type mode on touch devices by focusing a hidden native `<input>` when a slot is tapped, triggering the device keyboard, and capturing typed characters via the `input` event.
+6 
+7 **Architecture:** A `TouchKeyboardContext` provides `focusKeyboard` to slot components. `AnswerGameProvider` conditionally renders either a `TouchKeyboardAdapter` (touch) or the existing `KeyboardInputAdapter` (desktop). Slot components are consolidated into a shared `OrderedSlots` component that handles both the tap-to-focus and scroll-into-view behaviours once.
+8 
+9 **Tech Stack:** React, TypeScript, Vitest + @testing-library/react, TailwindCSS, @atlaskit/pragmatic-drag-and-drop
+10 
+11 ---
+12 
+13 ## File Map
+14 
+15 | File                                                                 | Action                                                        |
+16 | -------------------------------------------------------------------- | ------------------------------------------------------------- |
+17 | `src/components/answer-game/types.ts`                                | Add `touchKeyboardInputMode` to `AnswerGameConfig`            |
+18 | `src/components/answer-game/useKeyboardInput.ts`                     | Update `HTMLInputElement` guard for `data-touch-keyboard`     |
+19 | `src/components/answer-game/useKeyboardInput.test.tsx`               | Add guard test                                                |
+20 | `src/components/answer-game/TouchKeyboardContext.ts`                 | **New** — context providing `focusKeyboard \| null`           |
+21 | `src/components/answer-game/useTouchKeyboardInput.ts`                | **New** — hook: hidden input ref + `input`-event → PLACE_TILE |
+22 | `src/components/answer-game/useTouchKeyboardInput.test.tsx`          | **New**                                                       |
+23 | `src/components/answer-game/HiddenKeyboardInput.tsx`                 | **New** — the off-screen `<input>` element                    |
+24 | `src/components/answer-game/AnswerGameProvider.tsx`                  | Conditionally render touch vs desktop adapter                 |
+25 | `src/components/answer-game/AnswerGameProvider.test.tsx`             | Add touch-path test                                           |
+26 | `src/components/answer-game/OrderedSlots/OrderedSlots.tsx`           | **New** — shared `AnswerSlot` + `OrderedSlots`                |
+27 | `src/components/answer-game/OrderedSlots/OrderedSlots.test.tsx`      | **New**                                                       |
+28 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`     | Re-export `OrderedSlots`                                      |
+29 | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx` | Re-export `OrderedSlots`                                      |
+30 | `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`             | Update type-mode hint for touch vs desktop                    |
+31 | `src/games/word-spell/WordSpell/WordSpell.tsx`                       | Pass `touchKeyboardInputMode: 'text'`                         |
+32 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`                 | Pass `touchKeyboardInputMode: 'numeric'`                      |
+33 
+34 ---
+35 
+36 ## Task 1 — Worktree Setup
+37 
+38 - [ ] **Create worktree and install deps**
+39 
+40 ```bash
+41 git worktree add ./worktrees/feat/touch-keyboard -b feat/touch-keyboard
+42 cd ./worktrees/feat/touch-keyboard && yarn install
+43 ```
+44 
+45 ---
+46 
+47 ## Task 2 — Add `touchKeyboardInputMode` to `AnswerGameConfig`
+48 
+49 **Files:**
+50 
+51 - Modify: `src/components/answer-game/types.ts`
+52 
+53 - [ ] **Open `src/components/answer-game/types.ts` and add the field after `ttsEnabled`**
+54 
+55 ```ts
+56 export interface AnswerGameConfig {
+57   gameId: string;
+58   /** @default 'drag' */
+59   inputMethod: 'drag' | 'type' | 'both';
+60   /** @default 'lock-auto-eject' */
+61   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+62   tileBankMode: 'exact' | 'distractors';
+63   distractorCount?: number;
+64   totalRounds: number;
+65   roundsInOrder?: boolean;
+66   ttsEnabled: boolean;
+67   /**
+68    * Controls the OS keyboard type shown on touch devices in type/both mode.
+69    * @default 'text'
+70    */
+71   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+72   initialTiles?: TileItem[];
+73   initialZones?: AnswerZone[];
+74 }
+75 ```
+76 
+77 - [ ] **Run the full test suite to verify no regressions**
+78 
+79 ```bash
+80 yarn test
+81 ```
+82 
+83 Expected: all existing tests pass (field is optional, no consumers need updating yet).
+84 
+85 - [ ] **Commit**
+86 
+87 ```bash
+88 git add src/components/answer-game/types.ts
+89 git commit -m "feat(types): add touchKeyboardInputMode to AnswerGameConfig"
+90 ```
+91 
+92 ---
+93 
+94 ## Task 3 — Update `useKeyboardInput` Guard
+95 
+96 **Files:**
+97 
+98 - Modify: `src/components/answer-game/useKeyboardInput.ts`
+99 - Modify: `src/components/answer-game/useKeyboardInput.test.tsx`
 100
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 23:16:01Z)**_
@@ -8292,69 +8396,70 @@ _**Agent (claude-sonnet-4-6 2026-04-05 23:16:01Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/subagent-driven-development/spec-reviewer-prompt.md`
 
 ```text
-1	# Spec Compliance Reviewer Prompt Template
-2	
-3	Use this template when dispatching a spec compliance reviewer subagent.
-4	
-5	**Purpose:** Verify implementer built what was requested (nothing more, nothing less)
-6	
-7	```
-8	Task tool (general-purpose):
-9	  description: "Review spec compliance for Task N"
-10	  prompt: |
-11	    You are reviewing whether an implementation matches its specification.
-12	
-13	    ## What Was Requested
-14	
-15	    [FULL TEXT of task requirements]
-16	
-17	    ## What Implementer Claims They Built
-18	
-19	    [From implementer's report]
-20	
-21	    ## CRITICAL: Do Not Trust the Report
-22	
-23	    The implementer finished suspiciously quickly. Their report may be incomplete,
-24	    inaccurate, or optimistic. You MUST verify everything independently.
-25	
-26	    **DO NOT:**
-27	    - Take their word for what they implemented
-28	    - Trust their claims about completeness
-29	    - Accept their interpretation of requirements
-30	
-31	    **DO:**
-32	    - Read the actual code they wrote
-33	    - Compare actual implementation to requirements line by line
-34	    - Check for missing pieces they claimed to implement
-35	    - Look for extra features they didn't mention
-36	
-37	    ## Your Job
-38	
-39	    Read the implementation code and verify:
-40	
-41	    **Missing requirements:**
-42	    - Did they implement everything that was requested?
-43	    - Are there requirements they skipped or missed?
-44	    - Did they claim something works but didn't actually implement it?
-45	
-46	    **Extra/unneeded work:**
-47	    - Did they build things that weren't requested?
-48	    - Did they over-engineer or add unnecessary features?
-49	    - Did they add "nice to haves" that weren't in spec?
-50	
-51	    **Misunderstandings:**
-52	    - Did they interpret requirements differently than intended?
-53	    - Did they solve the wrong problem?
-54	    - Did they implement the right feature but wrong way?
-55	
-56	    **Verify by reading code, not by trusting report.**
-57	
-58	    Report:
-59	    - ✅ Spec compliant (if everything matches after code inspection)
-60	    - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
-61	```
+1 # Spec Compliance Reviewer Prompt Template
+2 
+3 Use this template when dispatching a spec compliance reviewer subagent.
+4 
+5 **Purpose:** Verify implementer built what was requested (nothing more, nothing less)
+6 
+7 ```
+8 Task tool (general-purpose):
+9   description: "Review spec compliance for Task N"
+10   prompt: |
+11     You are reviewing whether an implementation matches its specification.
+12 
+13     ## What Was Requested
+14 
+15     [FULL TEXT of task requirements]
+16 
+17     ## What Implementer Claims They Built
+18 
+19     [From implementer's report]
+20 
+21     ## CRITICAL: Do Not Trust the Report
+22 
+23     The implementer finished suspiciously quickly. Their report may be incomplete,
+24     inaccurate, or optimistic. You MUST verify everything independently.
+25 
+26     **DO NOT:**
+27     - Take their word for what they implemented
+28     - Trust their claims about completeness
+29     - Accept their interpretation of requirements
+30 
+31     **DO:**
+32     - Read the actual code they wrote
+33     - Compare actual implementation to requirements line by line
+34     - Check for missing pieces they claimed to implement
+35     - Look for extra features they didn't mention
+36 
+37     ## Your Job
+38 
+39     Read the implementation code and verify:
+40 
+41     **Missing requirements:**
+42     - Did they implement everything that was requested?
+43     - Are there requirements they skipped or missed?
+44     - Did they claim something works but didn't actually implement it?
+45 
+46     **Extra/unneeded work:**
+47     - Did they build things that weren't requested?
+48     - Did they over-engineer or add unnecessary features?
+49     - Did they add "nice to haves" that weren't in spec?
+50 
+51     **Misunderstandings:**
+52     - Did they interpret requirements differently than intended?
+53     - Did they solve the wrong problem?
+54     - Did they implement the right feature but wrong way?
+55 
+56     **Verify by reading code, not by trusting report.**
+57 
+58     Report:
+59     - ✅ Spec compliant (if everything matches after code inspection)
+60     - ❌ Issues found: [list specifically what's missing or extra, with file:line references]
+61 ```
 62
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 23:16:08Z)**_
@@ -8363,11 +8468,12 @@ _**Agent (claude-sonnet-4-6 2026-04-05 23:16:08Z)**_
 The user is asking if we should start a new session. Given the subagent-driven development approach, and given that we need to execute tasks in a worktree (separate from master), starting a new session makes sense. The plan should be executed in a worktree, and the subagent-driven development skill recommends using superpowers:using-git-worktrees first.
 
 Yes, we should start a new session because:
+
 1. The subagent-driven development skill says: "Required: Set up isolated workspace before starting" with using-git-worktrees
 2. The plan itself has Task 1 as worktree setup
 
-
 3. CLAUDE.md mandates all work happens on a branch via git worktree, and a fresh session gives us the clean context we need for this pattern to work effectively.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-05 23:16:10Z)**_

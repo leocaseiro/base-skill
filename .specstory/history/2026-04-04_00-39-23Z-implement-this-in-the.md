@@ -31,95 +31,96 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:27Z)**_
  `./docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md`
 
 ```text
-1	# Confetti / Audio Sync Design
-2	
-3	**Date:** 2026-04-04  
-4	**Branch:** `feat-word-spell-number-match`  
-5	**Status:** Approved
-6	
-7	## Problem
-8	
-9	When a round completes, `phase` transitions to `'round-complete'` and two things happen simultaneously:
-10	
-11	1. `queueSound('round-complete')` is called — queues `round-complete.mp3` behind the already-playing `correct.mp3`
-12	2. `ScoreAnimation` receives `visible={true}` — fires confetti immediately
-13	
-14	Confetti fires before `correct.mp3` has finished, and well before `round-complete.mp3` starts. The desired timing is: confetti and `round-complete.mp3` fire together, after `correct.mp3` ends.
-15	
-16	The same problem applies to `game-over`: `GameOverOverlay` mounts immediately on `phase === 'game-over'` and starts its own confetti animation before `game-complete.mp3` has started playing.
-17	
-18	## Approach
-19	
-20	**Approach A** — `queueSound` returns a "starts" promise; `useGameSounds` exposes `confettiReady`.
-21	
-22	`queueSound` snapshots `queueTail` before appending the new sound. That snapshot resolves exactly when the queued sound starts. `useGameSounds` awaits this promise and sets `confettiReady = true` when it resolves. Game components pass `confettiReady` to `ScoreAnimation` instead of `phase === 'round-complete'`. `ScoreAnimation` is unchanged.
-23	
-24	## Changes
-25	
-26	### 1. `AudioFeedback.ts`
-27	
-28	`queueSound` returns `Promise<void>` that resolves when the queued sound **starts** (not ends).
-29	
-30	```ts
-31	export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
-32	  const startsAt = queueTail;
-33	  queueTail = startsAt.then(() => playSoundInternal(key, volume));
-34	  return startsAt;
-35	}
-36	```
-37	
-38	- `whenSoundEnds()` is unchanged.
-39	- All callers that ignore the return value are unaffected.
-40	
-41	### 2. `useGameSounds.ts`
-42	
-43	Returns `{ confettiReady: boolean; gameOverReady: boolean }` instead of `void`.
-44	
-45	- On `phase === 'round-complete'`: calls `queueSound('round-complete')`, awaits the returned "starts" promise, then sets `confettiReady = true`.
-46	- On `phase === 'game-over'`: calls `queueSound('game-complete')`, awaits the returned "starts" promise, then sets `gameOverReady = true`.
-47	- On any other phase: resets both flags to `false`.
-48	
-49	### 3. Game components (NumberMatch, WordSpell, SortNumbers)
-50	
-51	Each component already calls `useGameSounds()`. They destructure both values and use them in place of the raw phase checks:
-52	
-53	```tsx
-54	const { confettiReady, gameOverReady } = useGameSounds();
-55	// ...
-56	<ScoreAnimation visible={confettiReady} />;
-57	{gameOverReady ? <GameOverOverlay ... /> : null}
-58	```
-59	
-60	### 4. `ScoreAnimation.tsx`
-61	
-62	No changes. The component fires confetti when `visible` flips `false → true`, regardless of what controls that prop.
-63	
-64	## Tests
-65	
-66	### `useGameSounds.test.tsx` — new cases
-67	
-68	1. `confettiReady` is `false` initially and before the "starts" promise resolves.
-69	2. `confettiReady` becomes `true` after the "starts" promise resolves.
-70	3. `confettiReady` resets to `false` when phase leaves `round-complete`.
-71	4. `gameOverReady` is `false` initially and before the `game-complete` "starts" promise resolves.
-72	5. `gameOverReady` becomes `true` after the `game-complete` "starts" promise resolves.
-73	
-74	The existing mock `queueSound: vi.fn()` must return `Promise.resolve()` by default (currently returns `undefined`). One-line fix in the mock setup.
-75	
-76	### `ScoreAnimation.test.tsx`
-77	
-78	No changes — the `visible` bool contract is unchanged.
-79	
-80	### `AudioFeedback.ts`
-81	
-82	No dedicated unit tests today. The new return value is covered via the `useGameSounds` mock. No new test file needed.
-83	
-84	## Out of Scope
-85	
-86	- Changes to `ScoreAnimation` or `GameOverOverlay` internals.
-87	- Any new animation or visual design for the round-complete or game-over transitions.
+1 # Confetti / Audio Sync Design
+2 
+3 **Date:** 2026-04-04  
+4 **Branch:** `feat-word-spell-number-match`  
+5 **Status:** Approved
+6 
+7 ## Problem
+8 
+9 When a round completes, `phase` transitions to `'round-complete'` and two things happen simultaneously:
+10 
+11 1. `queueSound('round-complete')` is called — queues `round-complete.mp3` behind the already-playing `correct.mp3`
+12 2. `ScoreAnimation` receives `visible={true}` — fires confetti immediately
+13 
+14 Confetti fires before `correct.mp3` has finished, and well before `round-complete.mp3` starts. The desired timing is: confetti and `round-complete.mp3` fire together, after `correct.mp3` ends.
+15 
+16 The same problem applies to `game-over`: `GameOverOverlay` mounts immediately on `phase === 'game-over'` and starts its own confetti animation before `game-complete.mp3` has started playing.
+17 
+18 ## Approach
+19 
+20 **Approach A** — `queueSound` returns a "starts" promise; `useGameSounds` exposes `confettiReady`.
+21 
+22 `queueSound` snapshots `queueTail` before appending the new sound. That snapshot resolves exactly when the queued sound starts. `useGameSounds` awaits this promise and sets `confettiReady = true` when it resolves. Game components pass `confettiReady` to `ScoreAnimation` instead of `phase === 'round-complete'`. `ScoreAnimation` is unchanged.
+23 
+24 ## Changes
+25 
+26 ### 1. `AudioFeedback.ts`
+27 
+28 `queueSound` returns `Promise<void>` that resolves when the queued sound **starts** (not ends).
+29 
+30 ```ts
+31 export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
+32   const startsAt = queueTail;
+33   queueTail = startsAt.then(() => playSoundInternal(key, volume));
+34   return startsAt;
+35 }
+36 ```
+37 
+38 - `whenSoundEnds()` is unchanged.
+39 - All callers that ignore the return value are unaffected.
+40 
+41 ### 2. `useGameSounds.ts`
+42 
+43 Returns `{ confettiReady: boolean; gameOverReady: boolean }` instead of `void`.
+44 
+45 - On `phase === 'round-complete'`: calls `queueSound('round-complete')`, awaits the returned "starts" promise, then sets `confettiReady = true`.
+46 - On `phase === 'game-over'`: calls `queueSound('game-complete')`, awaits the returned "starts" promise, then sets `gameOverReady = true`.
+47 - On any other phase: resets both flags to `false`.
+48 
+49 ### 3. Game components (NumberMatch, WordSpell, SortNumbers)
+50 
+51 Each component already calls `useGameSounds()`. They destructure both values and use them in place of the raw phase checks:
+52 
+53 ```tsx
+54 const { confettiReady, gameOverReady } = useGameSounds();
+55 // ...
+56 <ScoreAnimation visible={confettiReady} />;
+57 {gameOverReady ? <GameOverOverlay ... /> : null}
+58 ```
+59 
+60 ### 4. `ScoreAnimation.tsx`
+61 
+62 No changes. The component fires confetti when `visible` flips `false → true`, regardless of what controls that prop.
+63 
+64 ## Tests
+65 
+66 ### `useGameSounds.test.tsx` — new cases
+67 
+68 1. `confettiReady` is `false` initially and before the "starts" promise resolves.
+69 2. `confettiReady` becomes `true` after the "starts" promise resolves.
+70 3. `confettiReady` resets to `false` when phase leaves `round-complete`.
+71 4. `gameOverReady` is `false` initially and before the `game-complete` "starts" promise resolves.
+72 5. `gameOverReady` becomes `true` after the `game-complete` "starts" promise resolves.
+73 
+74 The existing mock `queueSound: vi.fn()` must return `Promise.resolve()` by default (currently returns `undefined`). One-line fix in the mock setup.
+75 
+76 ### `ScoreAnimation.test.tsx`
+77 
+78 No changes — the `visible` bool contract is unchanged.
+79 
+80 ### `AudioFeedback.ts`
+81 
+82 No dedicated unit tests today. The new return value is covered via the `useGameSounds` mock. No new test file needed.
+83 
+84 ## Out of Scope
+85 
+86 - Changes to `ScoreAnimation` or `GameOverOverlay` internals.
+87 - Any new animation or visual design for the round-complete or game-over transitions.
 88
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:29Z)**_
@@ -144,6 +145,7 @@ test-setup.ts
 types
 vite-env.d.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:31Z)**_
@@ -161,6 +163,7 @@ Find relevant files
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:33Z)**_
@@ -170,82 +173,83 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:33Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts`
 
 ```text
-1	type SoundKey =
-2	  | 'correct'
-3	  | 'wrong'
-4	  | 'round-complete'
-5	  | 'game-complete';
-6	
-7	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-8	
-9	const SOUND_PATHS: Record<SoundKey, string> = {
-10	  correct: `${base}/sounds/correct.mp3`,
-11	  wrong: `${base}/sounds/wrong.mp3`,
-12	  'round-complete': `${base}/sounds/round-complete.mp3`,
-13	  'game-complete': `${base}/sounds/game-complete.mp3`,
-14	};
-15	
-16	let currentAudio: HTMLAudioElement | null = null;
-17	let currentResolve: (() => void) | null = null;
-18	let queueTail: Promise<void> = Promise.resolve();
-19	
-20	function playSoundInternal(
-21	  key: SoundKey,
-22	  volume: number,
-23	): Promise<void> {
-24	  currentAudio?.pause();
-25	  currentAudio = null;
-26	
-27	  const audio = new Audio(SOUND_PATHS[key]);
-28	  audio.volume = volume;
-29	  currentAudio = audio;
-30	
-31	  return new Promise<void>((resolve) => {
-32	    currentResolve = resolve;
-33	
-34	    const cleanup = () => {
-35	      if (currentResolve === resolve) currentResolve = null;
-36	      if (currentAudio === audio) currentAudio = null;
-37	      resolve();
-38	    };
-39	
-40	    audio.addEventListener('ended', cleanup, { once: true });
-41	    audio.addEventListener('error', cleanup, { once: true });
-42	
-43	    void audio.play().catch(() => {
-44	      console.error(`Failed to play sound ${key}`);
-45	      cleanup();
-46	    });
-47	  });
-48	}
-49	
-50	/**
-51	 * Plays immediately, cancelling any current audio and resetting the queue.
-52	 * Use for tile feedback (correct/wrong) where the latest sound always wins.
-53	 */
-54	export function playSound(key: SoundKey, volume = 0.8): void {
-55	  currentResolve?.();
-56	  currentResolve = null;
-57	  queueTail = playSoundInternal(key, volume);
-58	}
-59	
-60	/**
-61	 * Queues a sound to play after the current queue drains.
-62	 * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
-63	 */
-64	export function queueSound(key: SoundKey, volume = 0.8): void {
-65	  queueTail = queueTail.then(() => playSoundInternal(key, volume));
-66	}
-67	
-68	/**
-69	 * Returns a promise that resolves when all pending audio (current + queued) finishes.
-70	 * Use to delay TTS until the audio queue is empty.
-71	 */
-72	export function whenSoundEnds(): Promise<void> {
-73	  return queueTail;
-74	}
+1 type SoundKey =
+2   | 'correct'
+3   | 'wrong'
+4   | 'round-complete'
+5   | 'game-complete';
+6 
+7 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+8 
+9 const SOUND_PATHS: Record<SoundKey, string> = {
+10   correct: `${base}/sounds/correct.mp3`,
+11   wrong: `${base}/sounds/wrong.mp3`,
+12   'round-complete': `${base}/sounds/round-complete.mp3`,
+13   'game-complete': `${base}/sounds/game-complete.mp3`,
+14 };
+15 
+16 let currentAudio: HTMLAudioElement | null = null;
+17 let currentResolve: (() => void) | null = null;
+18 let queueTail: Promise<void> = Promise.resolve();
+19 
+20 function playSoundInternal(
+21   key: SoundKey,
+22   volume: number,
+23 ): Promise<void> {
+24   currentAudio?.pause();
+25   currentAudio = null;
+26 
+27   const audio = new Audio(SOUND_PATHS[key]);
+28   audio.volume = volume;
+29   currentAudio = audio;
+30 
+31   return new Promise<void>((resolve) => {
+32     currentResolve = resolve;
+33 
+34     const cleanup = () => {
+35       if (currentResolve === resolve) currentResolve = null;
+36       if (currentAudio === audio) currentAudio = null;
+37       resolve();
+38     };
+39 
+40     audio.addEventListener('ended', cleanup, { once: true });
+41     audio.addEventListener('error', cleanup, { once: true });
+42 
+43     void audio.play().catch(() => {
+44       console.error(`Failed to play sound ${key}`);
+45       cleanup();
+46     });
+47   });
+48 }
+49 
+50 /**
+51  * Plays immediately, cancelling any current audio and resetting the queue.
+52  * Use for tile feedback (correct/wrong) where the latest sound always wins.
+53  */
+54 export function playSound(key: SoundKey, volume = 0.8): void {
+55   currentResolve?.();
+56   currentResolve = null;
+57   queueTail = playSoundInternal(key, volume);
+58 }
+59 
+60 /**
+61  * Queues a sound to play after the current queue drains.
+62  * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
+63  */
+64 export function queueSound(key: SoundKey, volume = 0.8): void {
+65   queueTail = queueTail.then(() => playSoundInternal(key, volume));
+66 }
+67 
+68 /**
+69  * Returns a promise that resolves when all pending audio (current + queued) finishes.
+70  * Use to delay TTS until the audio queue is empty.
+71  */
+72 export function whenSoundEnds(): Promise<void> {
+73   return queueTail;
+74 }
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:34Z)**_
@@ -255,30 +259,31 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:34Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts`
 
 ```text
-1	import { useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import type { AnswerGamePhase } from './types';
-4	import { queueSound } from '@/lib/audio/AudioFeedback';
-5	
-6	export const useGameSounds = (): void => {
-7	  const { phase } = useAnswerGameContext();
-8	  const prevPhaseRef = useRef<AnswerGamePhase>(phase);
-9	
-10	  useEffect(() => {
-11	    const prev = prevPhaseRef.current;
-12	    prevPhaseRef.current = phase;
-13	
-14	    if (phase === prev) return;
-15	
-16	    if (phase === 'round-complete') {
-17	      queueSound('round-complete');
-18	    } else if (phase === 'game-over') {
-19	      queueSound('game-complete');
-20	    }
-21	  }, [phase]);
-22	};
+1 import { useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import type { AnswerGamePhase } from './types';
+4 import { queueSound } from '@/lib/audio/AudioFeedback';
+5 
+6 export const useGameSounds = (): void => {
+7   const { phase } = useAnswerGameContext();
+8   const prevPhaseRef = useRef<AnswerGamePhase>(phase);
+9 
+10   useEffect(() => {
+11     const prev = prevPhaseRef.current;
+12     prevPhaseRef.current = phase;
+13 
+14     if (phase === prev) return;
+15 
+16     if (phase === 'round-complete') {
+17       queueSound('round-complete');
+18     } else if (phase === 'game-over') {
+19       queueSound('game-complete');
+20     }
+21   }, [phase]);
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:34Z)**_
@@ -288,109 +293,110 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:34Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useGameSounds } from './useGameSounds';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	import { queueSound } from '@/lib/audio/AudioFeedback';
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	  queueSound: vi.fn(),
-14	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-15	}));
-16	
-17	vi.mock('@/lib/game-event-bus', () => ({
-18	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-19	}));
-20	
-21	const baseConfig: AnswerGameConfig = {
-22	  gameId: 'test',
-23	  inputMethod: 'drag',
-24	  wrongTileBehavior: 'lock-auto-eject',
-25	  tileBankMode: 'exact',
-26	  totalRounds: 1,
-27	  ttsEnabled: false,
-28	};
-29	
-30	const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
-31	const zones: AnswerZone[] = [
-32	  {
-33	    id: 'z0',
-34	    index: 0,
-35	    expectedValue: 'A',
-36	    placedTileId: null,
-37	    isWrong: false,
-38	    isLocked: false,
-39	  },
-40	];
-41	
-42	function createWrapper(config: AnswerGameConfig) {
-43	  const Wrapper = ({ children }: { children: ReactNode }) => (
-44	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-45	  );
-46	  Wrapper.displayName = 'TestWrapper';
-47	  return Wrapper;
-48	}
-49	
-50	describe('useGameSounds', () => {
-51	  beforeEach(() => vi.clearAllMocks());
-52	
-53	  it('does not play a sound on initial render', () => {
-54	    renderHook(() => useGameSounds(), {
-55	      wrapper: createWrapper(baseConfig),
-56	    });
-57	    expect(queueSound).not.toHaveBeenCalled();
-58	  });
-59	
-60	  it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
-61	    const { result } = renderHook(
-62	      () => {
-63	        const dispatch = useAnswerGameDispatch();
-64	        useGameSounds();
-65	        return dispatch;
-66	      },
-67	      { wrapper: createWrapper(baseConfig) },
-68	    );
-69	    act(() => {
-70	      result.current({ type: 'INIT_ROUND', tiles, zones });
-71	    });
-72	    vi.clearAllMocks();
-73	    act(() => {
-74	      result.current({ type: 'COMPLETE_GAME' });
-75	    });
-76	    expect(queueSound).toHaveBeenCalledWith('game-complete');
-77	  });
-78	
-79	  it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
-80	    const { result } = renderHook(
-81	      () => {
-82	        const dispatch = useAnswerGameDispatch();
-83	        useGameSounds();
-84	        return dispatch;
-85	      },
-86	      { wrapper: createWrapper(baseConfig) },
-87	    );
-88	    act(() => {
-89	      result.current({ type: 'INIT_ROUND', tiles, zones });
-90	    });
-91	    vi.clearAllMocks();
-92	    act(() => {
-93	      result.current({
-94	        type: 'PLACE_TILE',
-95	        tileId: 't1',
-96	        zoneIndex: 0,
-97	      });
-98	    });
-99	    expect(queueSound).toHaveBeenCalledWith('round-complete');
-100	  });
-101	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useGameSounds } from './useGameSounds';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 import { queueSound } from '@/lib/audio/AudioFeedback';
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13   queueSound: vi.fn(),
+14   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+15 }));
+16 
+17 vi.mock('@/lib/game-event-bus', () => ({
+18   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+19 }));
+20 
+21 const baseConfig: AnswerGameConfig = {
+22   gameId: 'test',
+23   inputMethod: 'drag',
+24   wrongTileBehavior: 'lock-auto-eject',
+25   tileBankMode: 'exact',
+26   totalRounds: 1,
+27   ttsEnabled: false,
+28 };
+29 
+30 const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
+31 const zones: AnswerZone[] = [
+32   {
+33     id: 'z0',
+34     index: 0,
+35     expectedValue: 'A',
+36     placedTileId: null,
+37     isWrong: false,
+38     isLocked: false,
+39   },
+40 ];
+41 
+42 function createWrapper(config: AnswerGameConfig) {
+43   const Wrapper = ({ children }: { children: ReactNode }) => (
+44     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+45   );
+46   Wrapper.displayName = 'TestWrapper';
+47   return Wrapper;
+48 }
+49 
+50 describe('useGameSounds', () => {
+51   beforeEach(() => vi.clearAllMocks());
+52 
+53   it('does not play a sound on initial render', () => {
+54     renderHook(() => useGameSounds(), {
+55       wrapper: createWrapper(baseConfig),
+56     });
+57     expect(queueSound).not.toHaveBeenCalled();
+58   });
+59 
+60   it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+61     const { result } = renderHook(
+62       () => {
+63         const dispatch = useAnswerGameDispatch();
+64         useGameSounds();
+65         return dispatch;
+66       },
+67       { wrapper: createWrapper(baseConfig) },
+68     );
+69     act(() => {
+70       result.current({ type: 'INIT_ROUND', tiles, zones });
+71     });
+72     vi.clearAllMocks();
+73     act(() => {
+74       result.current({ type: 'COMPLETE_GAME' });
+75     });
+76     expect(queueSound).toHaveBeenCalledWith('game-complete');
+77   });
+78 
+79   it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+80     const { result } = renderHook(
+81       () => {
+82         const dispatch = useAnswerGameDispatch();
+83         useGameSounds();
+84         return dispatch;
+85       },
+86       { wrapper: createWrapper(baseConfig) },
+87     );
+88     act(() => {
+89       result.current({ type: 'INIT_ROUND', tiles, zones });
+90     });
+91     vi.clearAllMocks();
+92     act(() => {
+93       result.current({
+94         type: 'PLACE_TILE',
+95         tileId: 't1',
+96         zoneIndex: 0,
+97       });
+98     });
+99     expect(queueSound).toHaveBeenCalledWith('round-complete');
+100   });
+101 });
 102
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:37Z)**_
@@ -423,6 +429,7 @@ Find files using these hooks/components
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:42Z)**_
@@ -432,240 +439,241 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:42Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildNumeralRound } from '../build-numeral-round';
-5	import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
-6	import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
-7	import type { NumberMatchConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
-23	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	interface NumberMatchProps {
-27	  config: NumberMatchConfig;
-28	}
-29	
-30	const NumberMatchSession = ({
-31	  numberMatchConfig,
-32	  roundOrder,
-33	  onRestartSession,
-34	}: {
-35	  numberMatchConfig: NumberMatchConfig;
-36	  roundOrder: readonly number[];
-37	  onRestartSession: () => void;
-38	}) => {
-39	  const { t } = useTranslation('games');
-40	  const [showInstructions, setShowInstructions] = useState(true);
-41	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-42	  const dispatch = useAnswerGameDispatch();
-43	  useGameSounds();
-44	  const navigate = useNavigate();
-45	  const { locale } = useParams({ from: '/$locale' });
-46	  const completionToken = useRef(0);
-47	
-48	  const configRoundIndex = roundOrder[roundIndex];
-49	  const round =
-50	    configRoundIndex === undefined
-51	      ? undefined
-52	      : numberMatchConfig.rounds[configRoundIndex];
-53	
-54	  useRoundTTS(String(round?.value ?? ''));
-55	
-56	  const handleHome = () => {
-57	    void navigate({ to: '/$locale', params: { locale } });
-58	  };
-59	
-60	  const handlePlayAgain = () => {
-61	    onRestartSession();
-62	  };
-63	
-64	  useEffect(() => {
-65	    if (phase !== 'round-complete') return;
-66	
-67	    const token = ++completionToken.current;
-68	    const delayMs = 750;
-69	    const timer = globalThis.setTimeout(() => {
-70	      if (completionToken.current !== token) return;
-71	
-72	      const isLastRound = roundIndex >= roundOrder.length - 1;
-73	      if (isLastRound) {
-74	        dispatch({ type: 'COMPLETE_GAME' });
-75	        return;
-76	      }
-77	
-78	      const nextConfigIndex = roundOrder[roundIndex + 1];
-79	      const nextRound =
-80	        nextConfigIndex === undefined
-81	          ? undefined
-82	          : numberMatchConfig.rounds[nextConfigIndex];
-83	      const value = nextRound?.value;
-84	      if (value === undefined) {
-85	        dispatch({ type: 'COMPLETE_GAME' });
-86	        return;
-87	      }
-88	      const { tiles, zones } = buildNumeralRound(value, {
-89	        tileBankMode: numberMatchConfig.tileBankMode,
-90	        distractorCount: numberMatchConfig.distractorCount,
-91	        range: numberMatchConfig.range,
-92	      });
-93	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-94	    }, delayMs);
-95	
-96	    return () => {
-97	      globalThis.clearTimeout(timer);
-98	    };
-99	  }, [
-100	    phase,
-101	    roundIndex,
-102	    dispatch,
-103	    roundOrder,
-104	    numberMatchConfig.rounds,
-105	    numberMatchConfig.tileBankMode,
-106	    numberMatchConfig.distractorCount,
-107	    numberMatchConfig.range,
-108	  ]);
-109	
-110	  if (showInstructions) {
-111	    return (
-112	      <InstructionsOverlay
-113	        text={t('instructions.number-match')}
-114	        onStart={() => setShowInstructions(false)}
-115	        ttsEnabled={numberMatchConfig.ttsEnabled}
-116	      />
-117	    );
-118	  }
-119	
-120	  if (!round) return null;
-121	
-122	  const showTextQuestion =
-123	    numberMatchConfig.mode === 'numeral-to-group' ||
-124	    numberMatchConfig.mode === 'numeral-to-word' ||
-125	    numberMatchConfig.mode === 'word-to-numeral';
-126	
-127	  return (
-128	    <>
-129	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-130	        <AnswerGame.Question>
-131	          {showTextQuestion ? (
-132	            <TextQuestion text={String(round.value)} />
-133	          ) : (
-134	            <DotGroupQuestion
-135	              count={round.value}
-136	              prompt={String(round.value)}
-137	            />
-138	          )}
-139	          <AudioButton prompt={String(round.value)} />
-140	        </AnswerGame.Question>
-141	        <AnswerGame.Answer>
-142	          <MatchingPairZones />
-143	        </AnswerGame.Answer>
-144	        <AnswerGame.Choices>
-145	          <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
-146	        </AnswerGame.Choices>
-147	      </div>
-148	      <ScoreAnimation visible={phase === 'round-complete'} />
-149	      {phase === 'game-over' ? (
-150	        <GameOverOverlay
-151	          retryCount={retryCount}
-152	          onPlayAgain={handlePlayAgain}
-153	          onHome={handleHome}
-154	        />
-155	      ) : null}
-156	    </>
-157	  );
-158	};
-159	
-160	export const NumberMatch = ({ config }: NumberMatchProps) => {
-161	  const roundsInOrder = config.roundsInOrder === true;
-162	  const [sessionEpoch, setSessionEpoch] = useState(0);
-163	
-164	  const roundOrder = useMemo(() => {
-165	    void sessionEpoch;
-166	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-167	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-168	
-169	  const firstConfigIndex = roundOrder[0];
-170	  const round0 =
-171	    firstConfigIndex === undefined
-172	      ? undefined
-173	      : config.rounds[firstConfigIndex];
-174	  const roundValue = round0?.value;
-175	
-176	  const { tiles, zones } = useMemo(() => {
-177	    if (roundValue === undefined) {
-178	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-179	    }
-180	    return buildNumeralRound(roundValue, {
-181	      tileBankMode: config.tileBankMode,
-182	      distractorCount: config.distractorCount,
-183	      range: config.range,
-184	    });
-185	  }, [
-186	    roundValue,
-187	    config.tileBankMode,
-188	    config.distractorCount,
-189	    config.range,
-190	  ]);
-191	
-192	  const answerGameConfig = useMemo(
-193	    (): AnswerGameConfig => ({
-194	      gameId: config.gameId,
-195	      inputMethod: config.inputMethod,
-196	      wrongTileBehavior: config.wrongTileBehavior,
-197	      tileBankMode: config.tileBankMode,
-198	      distractorCount: config.distractorCount,
-199	      totalRounds: config.rounds.length,
-200	      roundsInOrder: config.roundsInOrder,
-201	      ttsEnabled: config.ttsEnabled,
-202	      initialTiles: tiles,
-203	      initialZones: zones,
-204	    }),
-205	    [
-206	      config.gameId,
-207	      config.inputMethod,
-208	      config.wrongTileBehavior,
-209	      config.tileBankMode,
-210	      config.distractorCount,
-211	      config.rounds.length,
-212	      config.roundsInOrder,
-213	      config.ttsEnabled,
-214	      tiles,
-215	      zones,
-216	    ],
-217	  );
-218	
-219	  if (!round0) return null;
-220	
-221	  return (
-222	    <AnswerGame config={answerGameConfig}>
-223	      <NumberMatchSession
-224	        numberMatchConfig={config}
-225	        roundOrder={roundOrder}
-226	        onRestartSession={() => {
-227	          setSessionEpoch((e) => e + 1);
-228	        }}
-229	      />
-230	    </AnswerGame>
-231	  );
-232	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildNumeralRound } from '../build-numeral-round';
+5 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
+6 import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
+7 import type { NumberMatchConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
+23 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 interface NumberMatchProps {
+27   config: NumberMatchConfig;
+28 }
+29 
+30 const NumberMatchSession = ({
+31   numberMatchConfig,
+32   roundOrder,
+33   onRestartSession,
+34 }: {
+35   numberMatchConfig: NumberMatchConfig;
+36   roundOrder: readonly number[];
+37   onRestartSession: () => void;
+38 }) => {
+39   const { t } = useTranslation('games');
+40   const [showInstructions, setShowInstructions] = useState(true);
+41   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+42   const dispatch = useAnswerGameDispatch();
+43   useGameSounds();
+44   const navigate = useNavigate();
+45   const { locale } = useParams({ from: '/$locale' });
+46   const completionToken = useRef(0);
+47 
+48   const configRoundIndex = roundOrder[roundIndex];
+49   const round =
+50     configRoundIndex === undefined
+51       ? undefined
+52       : numberMatchConfig.rounds[configRoundIndex];
+53 
+54   useRoundTTS(String(round?.value ?? ''));
+55 
+56   const handleHome = () => {
+57     void navigate({ to: '/$locale', params: { locale } });
+58   };
+59 
+60   const handlePlayAgain = () => {
+61     onRestartSession();
+62   };
+63 
+64   useEffect(() => {
+65     if (phase !== 'round-complete') return;
+66 
+67     const token = ++completionToken.current;
+68     const delayMs = 750;
+69     const timer = globalThis.setTimeout(() => {
+70       if (completionToken.current !== token) return;
+71 
+72       const isLastRound = roundIndex >= roundOrder.length - 1;
+73       if (isLastRound) {
+74         dispatch({ type: 'COMPLETE_GAME' });
+75         return;
+76       }
+77 
+78       const nextConfigIndex = roundOrder[roundIndex + 1];
+79       const nextRound =
+80         nextConfigIndex === undefined
+81           ? undefined
+82           : numberMatchConfig.rounds[nextConfigIndex];
+83       const value = nextRound?.value;
+84       if (value === undefined) {
+85         dispatch({ type: 'COMPLETE_GAME' });
+86         return;
+87       }
+88       const { tiles, zones } = buildNumeralRound(value, {
+89         tileBankMode: numberMatchConfig.tileBankMode,
+90         distractorCount: numberMatchConfig.distractorCount,
+91         range: numberMatchConfig.range,
+92       });
+93       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+94     }, delayMs);
+95 
+96     return () => {
+97       globalThis.clearTimeout(timer);
+98     };
+99   }, [
+100     phase,
+101     roundIndex,
+102     dispatch,
+103     roundOrder,
+104     numberMatchConfig.rounds,
+105     numberMatchConfig.tileBankMode,
+106     numberMatchConfig.distractorCount,
+107     numberMatchConfig.range,
+108   ]);
+109 
+110   if (showInstructions) {
+111     return (
+112       <InstructionsOverlay
+113         text={t('instructions.number-match')}
+114         onStart={() => setShowInstructions(false)}
+115         ttsEnabled={numberMatchConfig.ttsEnabled}
+116       />
+117     );
+118   }
+119 
+120   if (!round) return null;
+121 
+122   const showTextQuestion =
+123     numberMatchConfig.mode === 'numeral-to-group' ||
+124     numberMatchConfig.mode === 'numeral-to-word' ||
+125     numberMatchConfig.mode === 'word-to-numeral';
+126 
+127   return (
+128     <>
+129       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+130         <AnswerGame.Question>
+131           {showTextQuestion ? (
+132             <TextQuestion text={String(round.value)} />
+133           ) : (
+134             <DotGroupQuestion
+135               count={round.value}
+136               prompt={String(round.value)}
+137             />
+138           )}
+139           <AudioButton prompt={String(round.value)} />
+140         </AnswerGame.Question>
+141         <AnswerGame.Answer>
+142           <MatchingPairZones />
+143         </AnswerGame.Answer>
+144         <AnswerGame.Choices>
+145           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
+146         </AnswerGame.Choices>
+147       </div>
+148       <ScoreAnimation visible={phase === 'round-complete'} />
+149       {phase === 'game-over' ? (
+150         <GameOverOverlay
+151           retryCount={retryCount}
+152           onPlayAgain={handlePlayAgain}
+153           onHome={handleHome}
+154         />
+155       ) : null}
+156     </>
+157   );
+158 };
+159 
+160 export const NumberMatch = ({ config }: NumberMatchProps) => {
+161   const roundsInOrder = config.roundsInOrder === true;
+162   const [sessionEpoch, setSessionEpoch] = useState(0);
+163 
+164   const roundOrder = useMemo(() => {
+165     void sessionEpoch;
+166     return buildRoundOrder(config.rounds.length, roundsInOrder);
+167   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+168 
+169   const firstConfigIndex = roundOrder[0];
+170   const round0 =
+171     firstConfigIndex === undefined
+172       ? undefined
+173       : config.rounds[firstConfigIndex];
+174   const roundValue = round0?.value;
+175 
+176   const { tiles, zones } = useMemo(() => {
+177     if (roundValue === undefined) {
+178       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+179     }
+180     return buildNumeralRound(roundValue, {
+181       tileBankMode: config.tileBankMode,
+182       distractorCount: config.distractorCount,
+183       range: config.range,
+184     });
+185   }, [
+186     roundValue,
+187     config.tileBankMode,
+188     config.distractorCount,
+189     config.range,
+190   ]);
+191 
+192   const answerGameConfig = useMemo(
+193     (): AnswerGameConfig => ({
+194       gameId: config.gameId,
+195       inputMethod: config.inputMethod,
+196       wrongTileBehavior: config.wrongTileBehavior,
+197       tileBankMode: config.tileBankMode,
+198       distractorCount: config.distractorCount,
+199       totalRounds: config.rounds.length,
+200       roundsInOrder: config.roundsInOrder,
+201       ttsEnabled: config.ttsEnabled,
+202       initialTiles: tiles,
+203       initialZones: zones,
+204     }),
+205     [
+206       config.gameId,
+207       config.inputMethod,
+208       config.wrongTileBehavior,
+209       config.tileBankMode,
+210       config.distractorCount,
+211       config.rounds.length,
+212       config.roundsInOrder,
+213       config.ttsEnabled,
+214       tiles,
+215       zones,
+216     ],
+217   );
+218 
+219   if (!round0) return null;
+220 
+221   return (
+222     <AnswerGame config={answerGameConfig}>
+223       <NumberMatchSession
+224         numberMatchConfig={config}
+225         roundOrder={roundOrder}
+226         onRestartSession={() => {
+227           setSessionEpoch((e) => e + 1);
+228         }}
+229       />
+230     </AnswerGame>
+231   );
+232 };
 233
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:43Z)**_
@@ -675,277 +683,278 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:43Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
-7	import type { WordSpellConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-23	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	function segmentsForWord(
-27	  word: string,
-28	  tileUnit: WordSpellConfig['tileUnit'],
-29	): string[] {
-30	  const trimmed = word.trim();
-31	  if (tileUnit === 'word') return [trimmed];
-32	  if (tileUnit === 'syllable') {
-33	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-34	    return parts.length > 0 ? parts : [trimmed];
-35	  }
-36	  return [...trimmed.toLowerCase()];
-37	}
-38	
-39	function buildTilesAndZones(
-40	  word: string,
-41	  tileUnit: WordSpellConfig['tileUnit'],
-42	): {
-43	  tiles: TileItem[];
-44	  zones: AnswerZone[];
-45	} {
-46	  const segments = segmentsForWord(word, tileUnit);
-47	  const values = segments.map((s) =>
-48	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-49	  );
-50	  const zones: AnswerZone[] = values.map((value, i) => ({
-51	    id: `z${i}`,
-52	    index: i,
-53	    expectedValue: value,
-54	    placedTileId: null,
-55	    isWrong: false,
-56	    isLocked: false,
-57	  }));
-58	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-59	  const tiles: TileItem[] = shuffled.map((value) => ({
-60	    id: nanoid(),
-61	    label: value,
-62	    value,
-63	  }));
-64	  return { tiles, zones };
-65	}
-66	
-67	interface WordSpellProps {
-68	  config: WordSpellConfig;
-69	}
-70	
-71	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-72	const WordSpellSession = ({
-73	  wordSpellConfig,
-74	  roundOrder,
-75	  onRestartSession,
-76	}: {
-77	  wordSpellConfig: WordSpellConfig;
-78	  roundOrder: readonly number[];
-79	  onRestartSession: () => void;
-80	}) => {
-81	  const { t } = useTranslation('games');
-82	  const [showInstructions, setShowInstructions] = useState(true);
-83	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete') return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      const { tiles, zones } = buildTilesAndZones(
-133	        word,
-134	        wordSpellConfig.tileUnit,
-135	      );
-136	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-137	    }, delayMs);
-138	
-139	    return () => {
-140	      globalThis.clearTimeout(timer);
-141	    };
-142	  }, [
-143	    phase,
-144	    roundIndex,
-145	    dispatch,
-146	    roundOrder,
-147	    wordSpellConfig.rounds,
-148	    wordSpellConfig.tileUnit,
-149	  ]);
-150	
-151	  if (showInstructions) {
-152	    return (
-153	      <InstructionsOverlay
-154	        text={t('instructions.word-spell')}
-155	        onStart={() => setShowInstructions(false)}
-156	        ttsEnabled={wordSpellConfig.ttsEnabled}
-157	      />
-158	    );
-159	  }
-160	
-161	  if (!round) return null;
-162	
-163	  const hasEmoji =
-164	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-165	  const imageSrc = round.sceneImage ?? round.image;
-166	  const hasImageUrl =
-167	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-168	
-169	  return (
-170	    <>
-171	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-172	        <AnswerGame.Question>
-173	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-174	            <p className="max-w-md text-center text-lg text-foreground">
-175	              {round.sentence}
-176	            </p>
-177	          ) : null}
-178	          {hasEmoji ? (
-179	            <EmojiQuestion
-180	              emoji={round.emoji!.trim()}
-181	              prompt={round.word}
-182	            />
-183	          ) : hasImageUrl ? (
-184	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-185	          ) : null}
-186	          <AudioButton prompt={round.word} />
-187	        </AnswerGame.Question>
-188	        <AnswerGame.Answer>
-189	          <OrderedLetterSlots />
-190	        </AnswerGame.Answer>
-191	        <AnswerGame.Choices>
-192	          <LetterTileBank />
-193	        </AnswerGame.Choices>
-194	      </div>
-195	      <ScoreAnimation visible={phase === 'round-complete'} />
-196	      {phase === 'game-over' ? (
-197	        <GameOverOverlay
-198	          retryCount={retryCount}
-199	          onPlayAgain={handlePlayAgain}
-200	          onHome={handleHome}
-201	        />
-202	      ) : null}
-203	    </>
-204	  );
-205	};
-206	
-207	export const WordSpell = ({ config }: WordSpellProps) => {
-208	  const roundsInOrder = config.roundsInOrder === true;
-209	  const [sessionEpoch, setSessionEpoch] = useState(0);
-210	
-211	  const roundOrder = useMemo(() => {
-212	    void sessionEpoch;
-213	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-214	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-215	
-216	  const firstConfigIndex = roundOrder[0];
-217	  const round0 =
-218	    firstConfigIndex === undefined
-219	      ? undefined
-220	      : config.rounds[firstConfigIndex];
-221	  const roundWord = round0?.word.trim() ? round0.word : '';
-222	
-223	  const { tiles, zones } = useMemo(() => {
-224	    if (!roundWord)
-225	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-226	    return buildTilesAndZones(roundWord, config.tileUnit);
-227	  }, [roundWord, config.tileUnit]);
-228	
-229	  const answerGameConfig = useMemo(
-230	    (): AnswerGameConfig => ({
-231	      gameId: config.gameId,
-232	      inputMethod: config.inputMethod,
-233	      wrongTileBehavior: config.wrongTileBehavior,
-234	      tileBankMode: config.tileBankMode,
-235	      distractorCount: config.distractorCount,
-236	      totalRounds: config.rounds.length,
-237	      roundsInOrder: config.roundsInOrder,
-238	      ttsEnabled: config.ttsEnabled,
-239	      initialTiles: tiles,
-240	      initialZones: zones,
-241	    }),
-242	    [
-243	      config.gameId,
-244	      config.inputMethod,
-245	      config.wrongTileBehavior,
-246	      config.tileBankMode,
-247	      config.distractorCount,
-248	      config.rounds.length,
-249	      config.roundsInOrder,
-250	      config.ttsEnabled,
-251	      tiles,
-252	      zones,
-253	    ],
-254	  );
-255	
-256	  if (!round0) return null;
-257	
-258	  return (
-259	    <AnswerGame config={answerGameConfig}>
-260	      <WordSpellSession
-261	        wordSpellConfig={config}
-262	        roundOrder={roundOrder}
-263	        onRestartSession={() => {
-264	          setSessionEpoch((e) => e + 1);
-265	        }}
-266	      />
-267	    </AnswerGame>
-268	  );
-269	};
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
+7 import type { WordSpellConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+23 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 function segmentsForWord(
+27   word: string,
+28   tileUnit: WordSpellConfig['tileUnit'],
+29 ): string[] {
+30   const trimmed = word.trim();
+31   if (tileUnit === 'word') return [trimmed];
+32   if (tileUnit === 'syllable') {
+33     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+34     return parts.length > 0 ? parts : [trimmed];
+35   }
+36   return [...trimmed.toLowerCase()];
+37 }
+38 
+39 function buildTilesAndZones(
+40   word: string,
+41   tileUnit: WordSpellConfig['tileUnit'],
+42 ): {
+43   tiles: TileItem[];
+44   zones: AnswerZone[];
+45 } {
+46   const segments = segmentsForWord(word, tileUnit);
+47   const values = segments.map((s) =>
+48     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+49   );
+50   const zones: AnswerZone[] = values.map((value, i) => ({
+51     id: `z${i}`,
+52     index: i,
+53     expectedValue: value,
+54     placedTileId: null,
+55     isWrong: false,
+56     isLocked: false,
+57   }));
+58   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+59   const tiles: TileItem[] = shuffled.map((value) => ({
+60     id: nanoid(),
+61     label: value,
+62     value,
+63   }));
+64   return { tiles, zones };
+65 }
+66 
+67 interface WordSpellProps {
+68   config: WordSpellConfig;
+69 }
+70 
+71 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+72 const WordSpellSession = ({
+73   wordSpellConfig,
+74   roundOrder,
+75   onRestartSession,
+76 }: {
+77   wordSpellConfig: WordSpellConfig;
+78   roundOrder: readonly number[];
+79   onRestartSession: () => void;
+80 }) => {
+81   const { t } = useTranslation('games');
+82   const [showInstructions, setShowInstructions] = useState(true);
+83   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete') return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       const { tiles, zones } = buildTilesAndZones(
+133         word,
+134         wordSpellConfig.tileUnit,
+135       );
+136       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+137     }, delayMs);
+138 
+139     return () => {
+140       globalThis.clearTimeout(timer);
+141     };
+142   }, [
+143     phase,
+144     roundIndex,
+145     dispatch,
+146     roundOrder,
+147     wordSpellConfig.rounds,
+148     wordSpellConfig.tileUnit,
+149   ]);
+150 
+151   if (showInstructions) {
+152     return (
+153       <InstructionsOverlay
+154         text={t('instructions.word-spell')}
+155         onStart={() => setShowInstructions(false)}
+156         ttsEnabled={wordSpellConfig.ttsEnabled}
+157       />
+158     );
+159   }
+160 
+161   if (!round) return null;
+162 
+163   const hasEmoji =
+164     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+165   const imageSrc = round.sceneImage ?? round.image;
+166   const hasImageUrl =
+167     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+168 
+169   return (
+170     <>
+171       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+172         <AnswerGame.Question>
+173           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+174             <p className="max-w-md text-center text-lg text-foreground">
+175               {round.sentence}
+176             </p>
+177           ) : null}
+178           {hasEmoji ? (
+179             <EmojiQuestion
+180               emoji={round.emoji!.trim()}
+181               prompt={round.word}
+182             />
+183           ) : hasImageUrl ? (
+184             <ImageQuestion src={imageSrc!} prompt={round.word} />
+185           ) : null}
+186           <AudioButton prompt={round.word} />
+187         </AnswerGame.Question>
+188         <AnswerGame.Answer>
+189           <OrderedLetterSlots />
+190         </AnswerGame.Answer>
+191         <AnswerGame.Choices>
+192           <LetterTileBank />
+193         </AnswerGame.Choices>
+194       </div>
+195       <ScoreAnimation visible={phase === 'round-complete'} />
+196       {phase === 'game-over' ? (
+197         <GameOverOverlay
+198           retryCount={retryCount}
+199           onPlayAgain={handlePlayAgain}
+200           onHome={handleHome}
+201         />
+202       ) : null}
+203     </>
+204   );
+205 };
+206 
+207 export const WordSpell = ({ config }: WordSpellProps) => {
+208   const roundsInOrder = config.roundsInOrder === true;
+209   const [sessionEpoch, setSessionEpoch] = useState(0);
+210 
+211   const roundOrder = useMemo(() => {
+212     void sessionEpoch;
+213     return buildRoundOrder(config.rounds.length, roundsInOrder);
+214   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+215 
+216   const firstConfigIndex = roundOrder[0];
+217   const round0 =
+218     firstConfigIndex === undefined
+219       ? undefined
+220       : config.rounds[firstConfigIndex];
+221   const roundWord = round0?.word.trim() ? round0.word : '';
+222 
+223   const { tiles, zones } = useMemo(() => {
+224     if (!roundWord)
+225       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+226     return buildTilesAndZones(roundWord, config.tileUnit);
+227   }, [roundWord, config.tileUnit]);
+228 
+229   const answerGameConfig = useMemo(
+230     (): AnswerGameConfig => ({
+231       gameId: config.gameId,
+232       inputMethod: config.inputMethod,
+233       wrongTileBehavior: config.wrongTileBehavior,
+234       tileBankMode: config.tileBankMode,
+235       distractorCount: config.distractorCount,
+236       totalRounds: config.rounds.length,
+237       roundsInOrder: config.roundsInOrder,
+238       ttsEnabled: config.ttsEnabled,
+239       initialTiles: tiles,
+240       initialZones: zones,
+241     }),
+242     [
+243       config.gameId,
+244       config.inputMethod,
+245       config.wrongTileBehavior,
+246       config.tileBankMode,
+247       config.distractorCount,
+248       config.rounds.length,
+249       config.roundsInOrder,
+250       config.ttsEnabled,
+251       tiles,
+252       zones,
+253     ],
+254   );
+255 
+256   if (!round0) return null;
+257 
+258   return (
+259     <AnswerGame config={answerGameConfig}>
+260       <WordSpellSession
+261         wordSpellConfig={config}
+262         roundOrder={roundOrder}
+263         onRestartSession={() => {
+264           setSessionEpoch((e) => e + 1);
+265         }}
+266       />
+267     </AnswerGame>
+268   );
+269 };
 270
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:43Z)**_
@@ -955,217 +964,218 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:43Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
-6	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-7	import type { SortNumbersConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { buildRoundOrder } from '@/games/build-round-order';
-22	
-23	interface SortNumbersProps {
-24	  config: SortNumbersConfig;
-25	}
-26	
-27	const SortNumbersSession = ({
-28	  sortNumbersConfig,
-29	  roundOrder,
-30	  onRestartSession,
-31	}: {
-32	  sortNumbersConfig: SortNumbersConfig;
-33	  roundOrder: readonly number[];
-34	  onRestartSession: () => void;
-35	}) => {
-36	  const { t } = useTranslation('games');
-37	  const [showInstructions, setShowInstructions] = useState(true);
-38	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-39	  const dispatch = useAnswerGameDispatch();
-40	  useGameSounds();
-41	  const navigate = useNavigate();
-42	  const { locale } = useParams({ from: '/$locale' });
-43	  const completionToken = useRef(0);
-44	
-45	  const configRoundIndex = roundOrder[roundIndex];
-46	  const round =
-47	    configRoundIndex === undefined
-48	      ? undefined
-49	      : sortNumbersConfig.rounds[configRoundIndex];
-50	
-51	  const directionLabel =
-52	    sortNumbersConfig.direction === 'ascending'
-53	      ? t('sort-numbers-ui.ascending-label')
-54	      : t('sort-numbers-ui.descending-label');
-55	
-56	  useRoundTTS(directionLabel);
-57	
-58	  const handleHome = () => {
-59	    void navigate({ to: '/$locale', params: { locale } });
-60	  };
-61	
-62	  const handlePlayAgain = () => {
-63	    onRestartSession();
-64	  };
-65	
-66	  useEffect(() => {
-67	    if (phase !== 'round-complete') return;
-68	
-69	    const token = ++completionToken.current;
-70	    const delayMs = 750;
-71	    const timer = globalThis.setTimeout(() => {
-72	      if (completionToken.current !== token) return;
-73	
-74	      const isLastRound = roundIndex >= roundOrder.length - 1;
-75	      if (isLastRound) {
-76	        dispatch({ type: 'COMPLETE_GAME' });
-77	        return;
-78	      }
-79	
-80	      const nextConfigIndex = roundOrder[roundIndex + 1];
-81	      const nextRound =
-82	        nextConfigIndex === undefined
-83	          ? undefined
-84	          : sortNumbersConfig.rounds[nextConfigIndex];
-85	
-86	      if (!nextRound) {
-87	        dispatch({ type: 'COMPLETE_GAME' });
-88	        return;
-89	      }
-90	
-91	      const { tiles, zones } = buildSortRound(
-92	        nextRound.sequence,
-93	        sortNumbersConfig.direction,
-94	      );
-95	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-96	    }, delayMs);
-97	
-98	    return () => {
-99	      globalThis.clearTimeout(timer);
-100	    };
-101	  }, [
-102	    phase,
-103	    roundIndex,
-104	    dispatch,
-105	    roundOrder,
-106	    sortNumbersConfig.rounds,
-107	    sortNumbersConfig.direction,
-108	  ]);
-109	
-110	  if (showInstructions) {
-111	    return (
-112	      <InstructionsOverlay
-113	        text={t('instructions.sort-numbers')}
-114	        onStart={() => setShowInstructions(false)}
-115	        ttsEnabled={sortNumbersConfig.ttsEnabled}
-116	      />
-117	    );
-118	  }
-119	
-120	  if (!round) return null;
-121	
-122	  return (
-123	    <>
-124	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-125	        <AnswerGame.Question>
-126	          <p className="text-center text-lg font-semibold text-foreground">
-127	            {directionLabel}
-128	          </p>
-129	        </AnswerGame.Question>
-130	        <AnswerGame.Answer>
-131	          <NumberSequenceSlots />
-132	        </AnswerGame.Answer>
-133	        <AnswerGame.Choices>
-134	          <SortNumbersTileBank />
-135	        </AnswerGame.Choices>
-136	      </div>
-137	      <ScoreAnimation visible={phase === 'round-complete'} />
-138	      {phase === 'game-over' ? (
-139	        <GameOverOverlay
-140	          retryCount={retryCount}
-141	          onPlayAgain={handlePlayAgain}
-142	          onHome={handleHome}
-143	        />
-144	      ) : null}
-145	    </>
-146	  );
-147	};
-148	
-149	export const SortNumbers = ({ config }: SortNumbersProps) => {
-150	  const roundsInOrder = config.roundsInOrder === true;
-151	  const [sessionEpoch, setSessionEpoch] = useState(0);
-152	
-153	  const roundOrder = useMemo(() => {
-154	    void sessionEpoch;
-155	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-156	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-157	
-158	  const firstConfigIndex = roundOrder[0];
-159	  const round0 =
-160	    firstConfigIndex === undefined
-161	      ? undefined
-162	      : config.rounds[firstConfigIndex];
-163	
-164	  const { tiles, zones } = useMemo(() => {
-165	    if (!round0) {
-166	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-167	    }
-168	    return buildSortRound(round0.sequence, config.direction);
-169	  }, [round0, config.direction]);
-170	
-171	  const answerGameConfig = useMemo(
-172	    (): AnswerGameConfig => ({
-173	      gameId: config.gameId,
-174	      inputMethod: config.inputMethod,
-175	      wrongTileBehavior: config.wrongTileBehavior,
-176	      tileBankMode: config.tileBankMode,
-177	      totalRounds: config.rounds.length,
-178	      roundsInOrder: config.roundsInOrder,
-179	      ttsEnabled: config.ttsEnabled,
-180	      initialTiles: tiles,
-181	      initialZones: zones,
-182	    }),
-183	    [
-184	      config.gameId,
-185	      config.inputMethod,
-186	      config.wrongTileBehavior,
-187	      config.tileBankMode,
-188	      config.rounds.length,
-189	      config.roundsInOrder,
-190	      config.ttsEnabled,
-191	      tiles,
-192	      zones,
-193	    ],
-194	  );
-195	
-196	  if (!round0) return null;
-197	
-198	  return (
-199	    <AnswerGame config={answerGameConfig}>
-200	      <SortNumbersSession
-201	        sortNumbersConfig={config}
-202	        roundOrder={roundOrder}
-203	        onRestartSession={() => {
-204	          setSessionEpoch((e) => e + 1);
-205	        }}
-206	      />
-207	    </AnswerGame>
-208	  );
-209	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
+6 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+7 import type { SortNumbersConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { buildRoundOrder } from '@/games/build-round-order';
+22 
+23 interface SortNumbersProps {
+24   config: SortNumbersConfig;
+25 }
+26 
+27 const SortNumbersSession = ({
+28   sortNumbersConfig,
+29   roundOrder,
+30   onRestartSession,
+31 }: {
+32   sortNumbersConfig: SortNumbersConfig;
+33   roundOrder: readonly number[];
+34   onRestartSession: () => void;
+35 }) => {
+36   const { t } = useTranslation('games');
+37   const [showInstructions, setShowInstructions] = useState(true);
+38   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+39   const dispatch = useAnswerGameDispatch();
+40   useGameSounds();
+41   const navigate = useNavigate();
+42   const { locale } = useParams({ from: '/$locale' });
+43   const completionToken = useRef(0);
+44 
+45   const configRoundIndex = roundOrder[roundIndex];
+46   const round =
+47     configRoundIndex === undefined
+48       ? undefined
+49       : sortNumbersConfig.rounds[configRoundIndex];
+50 
+51   const directionLabel =
+52     sortNumbersConfig.direction === 'ascending'
+53       ? t('sort-numbers-ui.ascending-label')
+54       : t('sort-numbers-ui.descending-label');
+55 
+56   useRoundTTS(directionLabel);
+57 
+58   const handleHome = () => {
+59     void navigate({ to: '/$locale', params: { locale } });
+60   };
+61 
+62   const handlePlayAgain = () => {
+63     onRestartSession();
+64   };
+65 
+66   useEffect(() => {
+67     if (phase !== 'round-complete') return;
+68 
+69     const token = ++completionToken.current;
+70     const delayMs = 750;
+71     const timer = globalThis.setTimeout(() => {
+72       if (completionToken.current !== token) return;
+73 
+74       const isLastRound = roundIndex >= roundOrder.length - 1;
+75       if (isLastRound) {
+76         dispatch({ type: 'COMPLETE_GAME' });
+77         return;
+78       }
+79 
+80       const nextConfigIndex = roundOrder[roundIndex + 1];
+81       const nextRound =
+82         nextConfigIndex === undefined
+83           ? undefined
+84           : sortNumbersConfig.rounds[nextConfigIndex];
+85 
+86       if (!nextRound) {
+87         dispatch({ type: 'COMPLETE_GAME' });
+88         return;
+89       }
+90 
+91       const { tiles, zones } = buildSortRound(
+92         nextRound.sequence,
+93         sortNumbersConfig.direction,
+94       );
+95       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+96     }, delayMs);
+97 
+98     return () => {
+99       globalThis.clearTimeout(timer);
+100     };
+101   }, [
+102     phase,
+103     roundIndex,
+104     dispatch,
+105     roundOrder,
+106     sortNumbersConfig.rounds,
+107     sortNumbersConfig.direction,
+108   ]);
+109 
+110   if (showInstructions) {
+111     return (
+112       <InstructionsOverlay
+113         text={t('instructions.sort-numbers')}
+114         onStart={() => setShowInstructions(false)}
+115         ttsEnabled={sortNumbersConfig.ttsEnabled}
+116       />
+117     );
+118   }
+119 
+120   if (!round) return null;
+121 
+122   return (
+123     <>
+124       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+125         <AnswerGame.Question>
+126           <p className="text-center text-lg font-semibold text-foreground">
+127             {directionLabel}
+128           </p>
+129         </AnswerGame.Question>
+130         <AnswerGame.Answer>
+131           <NumberSequenceSlots />
+132         </AnswerGame.Answer>
+133         <AnswerGame.Choices>
+134           <SortNumbersTileBank />
+135         </AnswerGame.Choices>
+136       </div>
+137       <ScoreAnimation visible={phase === 'round-complete'} />
+138       {phase === 'game-over' ? (
+139         <GameOverOverlay
+140           retryCount={retryCount}
+141           onPlayAgain={handlePlayAgain}
+142           onHome={handleHome}
+143         />
+144       ) : null}
+145     </>
+146   );
+147 };
+148 
+149 export const SortNumbers = ({ config }: SortNumbersProps) => {
+150   const roundsInOrder = config.roundsInOrder === true;
+151   const [sessionEpoch, setSessionEpoch] = useState(0);
+152 
+153   const roundOrder = useMemo(() => {
+154     void sessionEpoch;
+155     return buildRoundOrder(config.rounds.length, roundsInOrder);
+156   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+157 
+158   const firstConfigIndex = roundOrder[0];
+159   const round0 =
+160     firstConfigIndex === undefined
+161       ? undefined
+162       : config.rounds[firstConfigIndex];
+163 
+164   const { tiles, zones } = useMemo(() => {
+165     if (!round0) {
+166       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+167     }
+168     return buildSortRound(round0.sequence, config.direction);
+169   }, [round0, config.direction]);
+170 
+171   const answerGameConfig = useMemo(
+172     (): AnswerGameConfig => ({
+173       gameId: config.gameId,
+174       inputMethod: config.inputMethod,
+175       wrongTileBehavior: config.wrongTileBehavior,
+176       tileBankMode: config.tileBankMode,
+177       totalRounds: config.rounds.length,
+178       roundsInOrder: config.roundsInOrder,
+179       ttsEnabled: config.ttsEnabled,
+180       initialTiles: tiles,
+181       initialZones: zones,
+182     }),
+183     [
+184       config.gameId,
+185       config.inputMethod,
+186       config.wrongTileBehavior,
+187       config.tileBankMode,
+188       config.rounds.length,
+189       config.roundsInOrder,
+190       config.ttsEnabled,
+191       tiles,
+192       zones,
+193     ],
+194   );
+195 
+196   if (!round0) return null;
+197 
+198   return (
+199     <AnswerGame config={answerGameConfig}>
+200       <SortNumbersSession
+201         sortNumbersConfig={config}
+202         roundOrder={roundOrder}
+203         onRestartSession={() => {
+204           setSessionEpoch((e) => e + 1);
+205         }}
+206       />
+207     </AnswerGame>
+208   );
+209 };
 210
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:39:57Z)**_
@@ -1178,7 +1188,7 @@ Now I have a clear picture. Let me implement the spec:
 2. **`useGameSounds.ts`** — return `{ confettiReady: boolean; gameOverReady: boolean }` instead of `void`. Use `useState` to track these flags, and `useEffect` that calls `queueSound` and awaits the returned promise.
 
 3. **Game components** (NumberMatch, WordSpell, SortNumbers) — destructure `{ confettiReady, gameOverReady }` from `useGameSounds()` and use them in place of `phase === 'round-complete'` and `phase === 'game-over'`.
-   
+
 4. **`useGameSounds.test.tsx`** — update the mock to return `Promise.resolve()` by default, and add new test cases.
 
 I'm modifying `queueSound` to return a promise that resolves immediately when the sound starts playing, then updating the hook to track readiness flags with state and effects. Now I'm implementing the hook with the new return type and updating the test mocks accordingly.
@@ -1207,6 +1217,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:39:58Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:00Z)**_
@@ -1236,6 +1247,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:40:10Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:14Z)**_
@@ -1301,6 +1313,7 @@ export const useGameSounds = (): {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:25Z)**_
@@ -1328,6 +1341,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:40:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:31Z)**_
@@ -1348,6 +1362,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:40:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:38Z)**_
@@ -1363,22 +1378,23 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:40:39Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-143	        </AnswerGame.Answer>
-144	        <AnswerGame.Choices>
-145	          <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
-146	        </AnswerGame.Choices>
-147	      </div>
-148	      <ScoreAnimation visible={confettiReady} />
-149	      {gameOverReady ? (
-150	        <GameOverOverlay
-151	          retryCount={retryCount}
-152	          onPlayAgain={handlePlayAgain}
-153	          onHome={handleHome}
-154	        />
-155	      ) : null}
-156	    </>
-157	  );
+143         </AnswerGame.Answer>
+144         <AnswerGame.Choices>
+145           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
+146         </AnswerGame.Choices>
+147       </div>
+148       <ScoreAnimation visible={confettiReady} />
+149       {gameOverReady ? (
+150         <GameOverOverlay
+151           retryCount={retryCount}
+152           onPlayAgain={handlePlayAgain}
+153           onHome={handleHome}
+154         />
+155       ) : null}
+156     </>
+157   );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:40:53Z)**_
@@ -1389,7 +1405,7 @@ The error is on line 148 at column 32: "Unsafe assignment of an error typed valu
 Wait, the column is 32, which points to `confettiReady` in `visible={confettiReady}`. But `confettiReady` is a `boolean`, so that shouldn't cause an issue.
 
 Actually, wait — this error sounds like an eslint error "Unsafe assignment of an error typed value" which is from `@typescript-eslint/no-unsafe-assignment`. But `confettiReady` should be a plain boolean...
- 
+
 Let me look at the ScoreAnimation component to see what type the `visible` prop expects, and whether this error existed before my changes or if I introduced it somehow. I need to look at the ScoreAnimation component to see how the `visible` prop is defined, since that might explain why TypeScript is flagging this as unsafe.
 </details></think>
 
@@ -1400,40 +1416,41 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:40:53Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`
 
 ```text
-1	import confetti from 'canvas-confetti';
-2	import { useEffect, useRef } from 'react';
-3	
-4	interface ScoreAnimationProps {
-5	  visible: boolean;
-6	}
-7	
-8	export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
-9	  const prevRef = useRef(false);
-10	
-11	  useEffect(() => {
-12	    if (visible && !prevRef.current) {
-13	      void confetti({
-14	        particleCount: 80,
-15	        spread: 70,
-16	        origin: { y: 0.5 },
-17	        ticks: 80,
-18	      });
-19	    }
-20	    prevRef.current = visible;
-21	  }, [visible]);
-22	
-23	  if (!visible) return null;
-24	
-25	  return (
-26	    <div
-27	      aria-live="polite"
-28	      aria-label="Round complete!"
-29	      className="pointer-events-none fixed inset-0"
-30	    />
-31	  );
-32	};
+1 import confetti from 'canvas-confetti';
+2 import { useEffect, useRef } from 'react';
+3 
+4 interface ScoreAnimationProps {
+5   visible: boolean;
+6 }
+7 
+8 export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
+9   const prevRef = useRef(false);
+10 
+11   useEffect(() => {
+12     if (visible && !prevRef.current) {
+13       void confetti({
+14         particleCount: 80,
+15         spread: 70,
+16         origin: { y: 0.5 },
+17         ticks: 80,
+18       });
+19     }
+20     prevRef.current = visible;
+21   }, [visible]);
+22 
+23   if (!visible) return null;
+24 
+25   return (
+26     <div
+27       aria-live="polite"
+28       aria-label="Round complete!"
+29       className="pointer-events-none fixed inset-0"
+30     />
+31   );
+32 };
 33
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:41:01Z)**_
@@ -1450,7 +1467,7 @@ Actually, let me re-read the error: "Unsafe assignment of an error typed value."
 
 ```
 
-Column 32 would be `v` in `visible`. That's the prop. But "Unsafe assignment of an error typed value" seems like a TypeScript ESLint error. 
+Column 32 would be `v` in `visible`. That's the prop. But "Unsafe assignment of an error typed value" seems like a TypeScript ESLint error.
 
 Wait, could this be from the `@typescript-eslint/no-unsafe-assignment` rule being triggered because `confettiReady` is typed as `boolean` but from the context it might somehow be `any`? Let me check the full hook signature again.
 
@@ -1471,6 +1488,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:41:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:41:06Z)**_
@@ -1487,6 +1505,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:41:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:41:13Z)**_
@@ -1507,6 +1526,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:41:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:41:19Z)**_
@@ -1517,6 +1537,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:41:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:41:24Z)**_
@@ -1797,6 +1818,7 @@ describe('useGameSounds', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:42:00Z)**_
@@ -1892,6 +1914,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 1.38s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:42:09Z)**_
@@ -1919,6 +1942,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.39s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:42:18Z)**_
@@ -1980,15 +2004,16 @@ Your branch is ahead of 'origin/feat/word-spell-number-match' by 4 commits.
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   src/components/answer-game/useGameSounds.test.tsx
-	modified:   src/components/answer-game/useGameSounds.ts
-	modified:   src/games/number-match/NumberMatch/NumberMatch.tsx
-	modified:   src/games/sort-numbers/SortNumbers/SortNumbers.tsx
-	modified:   src/games/word-spell/WordSpell/WordSpell.tsx
-	modified:   src/lib/audio/AudioFeedback.ts
+ modified:   src/components/answer-game/useGameSounds.test.tsx
+ modified:   src/components/answer-game/useGameSounds.ts
+ modified:   src/games/number-match/NumberMatch/NumberMatch.tsx
+ modified:   src/games/sort-numbers/SortNumbers/SortNumbers.tsx
+ modified:   src/games/word-spell/WordSpell/WordSpell.tsx
+ modified:   src/lib/audio/AudioFeedback.ts
 
 no changes added to commit (use "git add" and/or "git commit -a")
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:44:04Z)**_
@@ -2304,6 +2329,7 @@ index fdb993f..80488c1 100644
  
  /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:44:04Z)**_
@@ -2321,6 +2347,7 @@ b4e9393 fix(SoundEffects): add proper path for sound effects and make default so
 e4f647f ui(GameConfig): align lower to avoid hiding round
 45679be ui(AnswerGame): align centered
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:44:16Z)**_
@@ -2392,6 +2419,7 @@ Calling setState synchronously within an effect body causes cascading renders th
 ✖ 1 problem (1 error, 0 warnings)
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:44:52Z)**_
@@ -2401,7 +2429,7 @@ The lint rule `react-hooks/set-state-in-effect` is preventing the commit. The er
 
 However, we do need to reset the flag when entering `round-complete`. The reset (`setConfettiReady(false)`) makes sense because it needs to reset before the promise resolves. But the lint rule says we can't call setState synchronously within an effect.
 
-Let me think about how to restructure this to avoid the lint error. 
+Let me think about how to restructure this to avoid the lint error.
 
 The problem is that both `setConfettiReady(false)` and `setGameOverReady(false)` are being called synchronously in the effect, which violates the rule. I could derive these values directly from the phase instead of managing them as separate state, or I could use a reducer to batch the state updates, but the thinking cuts off before exploring those options fully. Still writing the effect logic... this approach, when the phase cycles back to `round-complete` in a new round, `readyPhase` would still be `'round-complete'` from the previous round, so `confettiReady` would immediately be `true` before the sound promise resolves. I need to reset `readyPhase` to `null` whenever the phase changes to ensure the flag only becomes `true` after the async operation completes. true immediately - that's the bug. I need a way to reset the tracking between rounds. A counter or epoch stored in state would work: increment it each time we enter `round-complete`, and have the ready state track which epoch it was set for. The linter won't let me call setState synchronously in the effect, so I can't just clear `readyPhase` when the phase changes away from `round-complete`. Let me use a ref to track the current epoch instead.
 
@@ -2463,6 +2491,7 @@ export const useGameSounds = (): {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:45:02Z)**_
@@ -2494,6 +2523,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 1.07s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:45:05Z)**_
@@ -2577,6 +2607,7 @@ React refs are values that are not needed for rendering. Refs should only be acc
 ✖ 2 problems (2 errors, 0 warnings)
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:47:27Z)**_
@@ -2585,14 +2616,15 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:47:27Z)**_
 Now the lint rule says we can't read refs during render. So we can't use `epochRef.current` during render. Let me think of another approach.
 
 The issue is:
+
 1. Can't call setState synchronously in effects
 2. Can't read refs during render
 
 Let me think of a different approach that avoids both:
 
 Instead of using an epoch ref, I can store more information in state. The idea is:
-- Store the "phase that was ready" in state - but that has the issue that when round-complete occurs again, the previous `readyPhase === 'round-complete'` would still be in state.
 
+- Store the "phase that was ready" in state - but that has the issue that when round-complete occurs again, the previous `readyPhase === 'round-complete'` would still be in state.
 
 - But wait, the real problem with that first approach was needing to reset it. What if instead I use a generation counter stored in state alongside the ready phase? That way I can detect when a new round starts and know whether the sound has already played for this particular round.
 
@@ -2647,6 +2679,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:50:32Z)**_
 The lint rule also forbids reading refs during render. I can't use `epochRef.current` during render. I need a different approach.
 
 Let me think about this more carefully. The constraints are:
+
 1. No synchronous setState in an effect body
 2. No reading ref values during render
 
@@ -2657,8 +2690,8 @@ Let me think of another approach.
 What if I use a single state value that directly represents the "ready phase" along with a "nonce" or "generation" that changes with every phase transition?
 
 Actually, let me think differently. The key insight is:
-- `confettiReady` should be `true` when: phase is `round-complete` AND the current `queueSound('round-complete')` promise has resolved
 
+- `confettiReady` should be `true` when: phase is `round-complete` AND the current `queueSound('round-complete')` promise has resolved
 
 - `gameOverReady` should be `true` when: phase is `game-over` AND the current `queueSound('game-complete')` promise has resolved
 - Both should reset when phase changes
@@ -2732,6 +2765,7 @@ When the else-branch effect runs, it schedules `Promise.resolve().then(() => set
 The queueSound's `startsAt.then(() => setConfettiReady(true))` is already in the microtask queue when queueSound resolves.
 
 The timing of when queueSound resolves vs when the else-branch effect runs matters. If the `correct` sound hasn't finished yet when the timer fires (unlikely but possible in a slow environment), then:
+
 - Timer fires at 750ms
 - `correct` sound still playing
 - Effect runs for the new phase → else branch → schedules microtask B
@@ -2788,6 +2822,7 @@ Traceback (most recent call last):
     raise JSONDecodeError("Expecting value", s, err.value) from None
 json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:50:46Z)**_
@@ -2897,6 +2932,7 @@ export const useGameSounds = (): {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:00Z)**_
@@ -2924,6 +2960,7 @@ Run tests after fix
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:03Z)**_
@@ -2949,6 +2986,7 @@ Show failing test details
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:10Z)**_
@@ -2983,6 +3021,7 @@ AssertionError: expected true to be false // Object.is equality
     193|     });
     194|     expect(result.current.sounds.confettiReady).toBe(false);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:22Z)**_
@@ -3010,6 +3049,7 @@ Wait, I see the issue now. The test is dispatching `ADVANCE_ROUND` synchronously
 Let me update the test to use async `act()` so it properly waits for the microtask to complete.
 
 ```
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:22Z)**_
@@ -3024,6 +3064,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:51:24Z)**_
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:29Z)**_
@@ -3033,27 +3074,28 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:51:29Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-180	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-181	    });
-182	    await act(async () => {
-183	      result.current.dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
-184	    });
-185	    expect(result.current.sounds.confettiReady).toBe(true);
-186	
-187	    act(() => {
-188	      result.current.dispatch({
-189	        type: 'ADVANCE_ROUND',
-190	        tiles: [extraTile],
-191	        zones: [extraZone],
-192	      });
-193	    });
-194	    expect(result.current.sounds.confettiReady).toBe(false);
-195	  });
-196	
-197	  it('gameOverReady is false initially', () => {
-198	    const { result } = renderHook(() => useGameSounds(), {
-199	      wrapper: createWrapper(baseConfig),
+180       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+181     });
+182     await act(async () => {
+183       result.current.dispatch({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+184     });
+185     expect(result.current.sounds.confettiReady).toBe(true);
+186 
+187     act(() => {
+188       result.current.dispatch({
+189         type: 'ADVANCE_ROUND',
+190         tiles: [extraTile],
+191         zones: [extraZone],
+192       });
+193     });
+194     expect(result.current.sounds.confettiReady).toBe(false);
+195   });
+196 
+197   it('gameOverReady is false initially', () => {
+198     const { result } = renderHook(() => useGameSounds(), {
+199       wrapper: createWrapper(baseConfig),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:35Z)**_
@@ -3064,6 +3106,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:51:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:42Z)**_
@@ -3088,6 +3131,7 @@ Run tests after test fix
 
 Done in 0.89s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:51:45Z)**_
@@ -3137,6 +3181,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:04Z)**_
@@ -3154,6 +3199,7 @@ Done in 3.95s.
 [feat/word-spell-number-match 3d60453] feat(audio): sync confetti and game-over with sound start
  6 files changed, 218 insertions(+), 16 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:08Z)**_
@@ -3328,6 +3374,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
  ✓ src/lib/speech/SpeechOutput.test.ts (8 tests) 4ms
  ✓ src/components/answer-game/answer-game-reducer.test.ts (14 tests) 3ms
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:34Z)**_
@@ -3338,7 +3385,7 @@ There are several issues:
 1. **TypeScript error**: `useGameSounds.test.tsx(13,23): error TS2554: Expected 1 arguments, but got 0.` - The linter changed `vi.fn().mockResolvedValue(undefined)` to `vi.fn().mockResolvedValue()` which TypeScript doesn't like. I need to fix this.
 
 2. **Pre-existing lint errors** (not my changes):
-   - `playwright-report/trace/*.js` - parsing errors in playwright report files 
+   - `playwright-report/trace/*.js` - parsing errors in playwright report files
    - `NumberSequenceSlots.tsx` - import order and a11y errors
    - `OrderedLetterSlots.tsx` - import order and a11y errors
 
@@ -3348,6 +3395,7 @@ These files weren't modified by me, so they're likely pre-existing issues. Let m
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:34Z)**_
 
 Several issues to fix:
+
 1. TypeScript error in test file — linter changed `mockResolvedValue(undefined)` → `mockResolvedValue()` which TypeScript rejects
 2. Pre-existing lint errors in `NumberSequenceSlots` and `OrderedLetterSlots` — let me check if these are new or pre-existing
 
@@ -3364,6 +3412,7 @@ Check recent commits
 2534c01 fix(audio): prevent sound and TTS overlap during gameplay
 cb9b6cf fix(sort-numbers): return displaced tile to bank when wrong tile placed on occupied lock-manual slot
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:35Z)**_
@@ -3383,6 +3432,7 @@ stash@{4}: lint-staged automatic backup
 stash@{5}: lint-staged automatic backup
 stash@{6}: WIP on master: fbf3a1b chore(cursor): simplify cursor rule to reference CLAUDE.md as source of truth
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:42Z)**_
@@ -3396,6 +3446,7 @@ Check if NumberSequenceSlots/OrderedLetterSlots were modified
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:52:50Z)**_
@@ -3429,6 +3480,7 @@ Check lint errors in pre-existing files
   2 errors and 0 warnings potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:05Z)**_
@@ -3440,7 +3492,7 @@ These are pre-existing errors in files I didn't touch. And there are also playwr
 2. Fix the pre-existing lint errors in NumberSequenceSlots and OrderedLetterSlots (import order + a11y)
 3. Check if playwright-report is already in .eslintignore or similar
 
-Actually wait - the pre-push hook runs `yarn lint` which runs `eslint . 
+Actually wait - the pre-push hook runs `yarn lint` which runs `eslint .
 
 The pre-existing errors are blocking the push even though I didn't introduce them. According to CLAUDE.md, I need to either fix these issues or skip lint with documented justification. Since the user asked me to commit and push, I should fix the TypeScript error in my test file, address the pre-existing lint errors in those two files, and figure out the playwright-report situation - probably by checking if it should be ignored or if there's a configuration issue.
 </details></think>
@@ -3458,6 +3510,7 @@ cb9b6cf fix(sort-numbers): return displaced tile to bank when wrong tile placed 
 8d9acad feat(sort-numbers): add NumberSequenceSlots component
 e5daa0e feat(games): add WordSpell and NumberMatch AnswerGame compositions
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:07Z)**_
@@ -3471,6 +3524,7 @@ Check ESLint ignore file
 ```text
 no .eslintignore
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:12Z)**_
@@ -3493,6 +3547,7 @@ Check ESLint ignores in config
       'playwright.config.ts',
     ignores: [
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:18Z)**_
@@ -3516,6 +3571,7 @@ Check what's ignored in ESLint config
     ],
   },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:27Z)**_
@@ -3524,12 +3580,13 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:53:27Z)**_
 `playwright-report/**` is NOT in the ignores, but `worktrees/**` is. So ESLint ignores files inside `worktrees/` when running from the root. But we're running ESLint from inside the worktree directory, so it runs on all files including `playwright-report/` and non-ignored src files.
 
 I need to:
+
 1. Fix the TypeScript error in my test file
 2. Fix the pre-existing lint errors in NumberSequenceSlots and OrderedLetterSlots
 3. Fix the playwright-report issue (either by adding it to ignores or removing the playwright-report directory)
 
-
 4. For the TypeScript error, I'll revert the linter's change from `mockResolvedValue()` back to `mockResolvedValue(undefined)` since TypeScript requires an explicit value. The pre-existing lint issues are mostly import ordering that can be auto-fixed, plus some a11y errors that need manual fixes like adding role attributes and keyboard handlers. I should also add playwright-report to the ESLint ignores to prevent it from being linted.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:27Z)**_
@@ -3543,105 +3600,106 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:53:28Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-4	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-5	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-6	
-7	const NumberSlot = ({
-8	  zoneIndex,
-9	  label,
-10	  isActive,
-11	  isWrong,
-12	}: {
-13	  zoneIndex: number;
-14	  label: string | null;
-15	  isActive: boolean;
-16	  isWrong: boolean;
-17	}) => {
-18	  const ref = useRef<HTMLLIElement>(null);
-19	  const { placeTile } = useTileEvaluation();
-20	  const dispatch = useAnswerGameDispatch();
-21	
-22	  useEffect(() => {
-23	    const element = ref.current;
-24	    if (!element) return;
-25	    return dropTargetForElements({
-26	      element,
-27	      getData: () => ({ zoneIndex }),
-28	      onDrop: ({ source }) => {
-29	        const tileId = source.data['tileId'];
-30	        if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
-31	      },
-32	    });
-33	  }, [zoneIndex, placeTile]);
-34	
-35	  const ariaLabel = label
-36	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-37	    : `Slot ${zoneIndex + 1}, empty`;
-38	
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  return (
-44	    <li
-45	      ref={ref}
-46	      aria-label={ariaLabel}
-47	      data-active={isActive || undefined}
-48	      data-wrong={isWrong || undefined}
-49	      onClick={isWrong ? handleClick : undefined}
-50	      className={[
-51	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-52	        'border-border',
-53	        isActive && !label
-54	          ? 'animate-pulse ring-2 ring-primary ring-offset-2'
-55	          : '',
-56	        isWrong
-57	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-58	          : '',
-59	        label && !isWrong
-60	          ? 'border-primary bg-primary/10 text-primary'
-61	          : '',
-62	      ]
-63	        .filter(Boolean)
-64	        .join(' ')}
-65	    >
-66	      {label ?? ''}
-67	    </li>
-68	  );
-69	};
-70	
-71	export const NumberSequenceSlots = () => {
-72	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-73	
-74	  return (
-75	    <ol
-76	      aria-label="Answer slots"
-77	      className="flex flex-wrap justify-center gap-2"
-78	    >
-79	      {zones.map((zone, i) => {
-80	        const placedTile = zone.placedTileId
-81	          ? allTiles.find((t) => t.id === zone.placedTileId)
-82	          : null;
-83	        return (
-84	          <NumberSlot
-85	            key={zone.id}
-86	            zoneIndex={i}
-87	            label={placedTile?.label ?? null}
-88	            isActive={
-89	              i === activeSlotIndex && zone.placedTileId === null
-90	            }
-91	            isWrong={zone.isWrong}
-92	          />
-93	        );
-94	      })}
-95	    </ol>
-96	  );
-97	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+4 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+5 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+6 
+7 const NumberSlot = ({
+8   zoneIndex,
+9   label,
+10   isActive,
+11   isWrong,
+12 }: {
+13   zoneIndex: number;
+14   label: string | null;
+15   isActive: boolean;
+16   isWrong: boolean;
+17 }) => {
+18   const ref = useRef<HTMLLIElement>(null);
+19   const { placeTile } = useTileEvaluation();
+20   const dispatch = useAnswerGameDispatch();
+21 
+22   useEffect(() => {
+23     const element = ref.current;
+24     if (!element) return;
+25     return dropTargetForElements({
+26       element,
+27       getData: () => ({ zoneIndex }),
+28       onDrop: ({ source }) => {
+29         const tileId = source.data['tileId'];
+30         if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
+31       },
+32     });
+33   }, [zoneIndex, placeTile]);
+34 
+35   const ariaLabel = label
+36     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+37     : `Slot ${zoneIndex + 1}, empty`;
+38 
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   return (
+44     <li
+45       ref={ref}
+46       aria-label={ariaLabel}
+47       data-active={isActive || undefined}
+48       data-wrong={isWrong || undefined}
+49       onClick={isWrong ? handleClick : undefined}
+50       className={[
+51         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+52         'border-border',
+53         isActive && !label
+54           ? 'animate-pulse ring-2 ring-primary ring-offset-2'
+55           : '',
+56         isWrong
+57           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+58           : '',
+59         label && !isWrong
+60           ? 'border-primary bg-primary/10 text-primary'
+61           : '',
+62       ]
+63         .filter(Boolean)
+64         .join(' ')}
+65     >
+66       {label ?? ''}
+67     </li>
+68   );
+69 };
+70 
+71 export const NumberSequenceSlots = () => {
+72   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+73 
+74   return (
+75     <ol
+76       aria-label="Answer slots"
+77       className="flex flex-wrap justify-center gap-2"
+78     >
+79       {zones.map((zone, i) => {
+80         const placedTile = zone.placedTileId
+81           ? allTiles.find((t) => t.id === zone.placedTileId)
+82           : null;
+83         return (
+84           <NumberSlot
+85             key={zone.id}
+86             zoneIndex={i}
+87             label={placedTile?.label ?? null}
+88             isActive={
+89               i === activeSlotIndex && zone.placedTileId === null
+90             }
+91             isWrong={zone.isWrong}
+92           />
+93         );
+94       })}
+95     </ol>
+96   );
+97 };
 98
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:28Z)**_
@@ -3651,105 +3709,106 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:53:28Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-4	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-5	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-6	
-7	const LetterSlot = ({
-8	  zoneIndex,
-9	  label,
-10	  isActive,
-11	  isWrong,
-12	}: {
-13	  zoneIndex: number;
-14	  label: string | null;
-15	  isActive: boolean;
-16	  isWrong: boolean;
-17	}) => {
-18	  const ref = useRef<HTMLLIElement>(null);
-19	  const { placeTile } = useTileEvaluation();
-20	  const dispatch = useAnswerGameDispatch();
-21	
-22	  useEffect(() => {
-23	    const element = ref.current;
-24	    if (!element) return;
-25	    return dropTargetForElements({
-26	      element,
-27	      getData: () => ({ zoneIndex }),
-28	      onDrop: ({ source }) => {
-29	        const tileId = source.data['tileId'];
-30	        if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
-31	      },
-32	    });
-33	  }, [zoneIndex, placeTile]);
-34	
-35	  const ariaLabel = label
-36	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-37	    : `Slot ${zoneIndex + 1}, empty`;
-38	
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  return (
-44	    <li
-45	      ref={ref}
-46	      aria-label={ariaLabel}
-47	      data-active={isActive || undefined}
-48	      data-wrong={isWrong || undefined}
-49	      onClick={isWrong ? handleClick : undefined}
-50	      className={[
-51	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-52	        'border-border',
-53	        isActive && !label
-54	          ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
-55	          : '',
-56	        isWrong
-57	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-58	          : '',
-59	        label && !isWrong
-60	          ? 'border-primary bg-primary/10 text-primary'
-61	          : '',
-62	      ]
-63	        .filter(Boolean)
-64	        .join(' ')}
-65	    >
-66	      {label ?? ''}
-67	    </li>
-68	  );
-69	};
-70	
-71	export const OrderedLetterSlots = () => {
-72	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-73	
-74	  return (
-75	    <ol
-76	      aria-label="Answer slots"
-77	      className="flex flex-wrap justify-center gap-2"
-78	    >
-79	      {zones.map((zone, i) => {
-80	        const placedTile = zone.placedTileId
-81	          ? allTiles.find((t) => t.id === zone.placedTileId)
-82	          : null;
-83	        return (
-84	          <LetterSlot
-85	            key={zone.id}
-86	            zoneIndex={i}
-87	            label={placedTile?.label ?? null}
-88	            isActive={
-89	              i === activeSlotIndex && zone.placedTileId === null
-90	            }
-91	            isWrong={zone.isWrong}
-92	          />
-93	        );
-94	      })}
-95	    </ol>
-96	  );
-97	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+4 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+5 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+6 
+7 const LetterSlot = ({
+8   zoneIndex,
+9   label,
+10   isActive,
+11   isWrong,
+12 }: {
+13   zoneIndex: number;
+14   label: string | null;
+15   isActive: boolean;
+16   isWrong: boolean;
+17 }) => {
+18   const ref = useRef<HTMLLIElement>(null);
+19   const { placeTile } = useTileEvaluation();
+20   const dispatch = useAnswerGameDispatch();
+21 
+22   useEffect(() => {
+23     const element = ref.current;
+24     if (!element) return;
+25     return dropTargetForElements({
+26       element,
+27       getData: () => ({ zoneIndex }),
+28       onDrop: ({ source }) => {
+29         const tileId = source.data['tileId'];
+30         if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
+31       },
+32     });
+33   }, [zoneIndex, placeTile]);
+34 
+35   const ariaLabel = label
+36     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+37     : `Slot ${zoneIndex + 1}, empty`;
+38 
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   return (
+44     <li
+45       ref={ref}
+46       aria-label={ariaLabel}
+47       data-active={isActive || undefined}
+48       data-wrong={isWrong || undefined}
+49       onClick={isWrong ? handleClick : undefined}
+50       className={[
+51         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+52         'border-border',
+53         isActive && !label
+54           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
+55           : '',
+56         isWrong
+57           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+58           : '',
+59         label && !isWrong
+60           ? 'border-primary bg-primary/10 text-primary'
+61           : '',
+62       ]
+63         .filter(Boolean)
+64         .join(' ')}
+65     >
+66       {label ?? ''}
+67     </li>
+68   );
+69 };
+70 
+71 export const OrderedLetterSlots = () => {
+72   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+73 
+74   return (
+75     <ol
+76       aria-label="Answer slots"
+77       className="flex flex-wrap justify-center gap-2"
+78     >
+79       {zones.map((zone, i) => {
+80         const placedTile = zone.placedTileId
+81           ? allTiles.find((t) => t.id === zone.placedTileId)
+82           : null;
+83         return (
+84           <LetterSlot
+85             key={zone.id}
+86             zoneIndex={i}
+87             label={placedTile?.label ?? null}
+88             isActive={
+89               i === activeSlotIndex && zone.placedTileId === null
+90             }
+91             isWrong={zone.isWrong}
+92           />
+93         );
+94       })}
+95     </ol>
+96   );
+97 };
 98
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:29Z)**_
@@ -3759,17 +3818,18 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:53:29Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	  queueSound: vi.fn().mockResolvedValue(),
-14	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-15	}));
-16	
-17	vi.mock('@/lib/game-event-bus', () => ({
-18	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-19	}));
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13   queueSound: vi.fn().mockResolvedValue(),
+14   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+15 }));
+16 
+17 vi.mock('@/lib/game-event-bus', () => ({
+18   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+19 }));
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:47Z)**_
@@ -3780,7 +3840,6 @@ Now I understand the issues:
 1. **Test file TypeScript error**: `mockResolvedValue()` needs to be `mockResolvedValue(undefined)` - the linter removed the `undefined` argument but TypeScript requires it
 2. **NumberSequenceSlots.tsx**: import order issue (line 3-4: `useAnswerGameDispatch` before `useAnswerGameContext`) + a11y issue (line 44: `<li>` with `onClick` but no keyboard handler and no interactive role)
 3. **OrderedLetterSlots.tsx**: Same issues as above
-
 
 4. For the a11y violations, I need to add `role="button"` to the `<li>` when it's clickable and pair it with an `onKeyDown` handler to satisfy both the click-events and noninteractive-element rules. The slot becomes interactive when `isWrong` is true, allowing users to eject the tile.
 
@@ -3805,6 +3864,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:53:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:54Z)**_
@@ -3820,6 +3880,7 @@ Find remaining mockResolvedValue() calls without argument
 170:    vi.mocked(queueSound).mockResolvedValue();
 255:    vi.mocked(queueSound).mockResolvedValue();
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:53:59Z)**_
@@ -3833,6 +3894,7 @@ Fix all mockResolvedValue() → mockResolvedValue(undefined)
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:03Z)**_
@@ -3847,6 +3909,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:04Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:12Z)**_
@@ -3857,6 +3920,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:24Z)**_
@@ -3867,7 +3931,7 @@ I need to also add the React import for the KeyboardEvent type. Actually `React.
 Actually, looking at the file, there's no `React` import. In modern React with JSX transform, you don't need to import React. But for `React.KeyboardEvent`, I do need to import React or use the type from react.
 
 Actually, I can use `import type { KeyboardEvent } from 'react'` or just use the native `KeyboardEvent` type. Actually `React.KeyboardEvent<HTMLLIElement>` - but I can just use `React.KeyboardEvent` if I import React.
- 
+
 I'm weighing whether to import React just for the type or simplify by using a basic object shape like `{ key: string }` to avoid the extra import entirely.
 </details></think>
 
@@ -3883,6 +3947,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx has been updated. All occurrences were successfully replaced.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:33Z)**_
@@ -3897,6 +3962,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:41Z)**_
@@ -3907,6 +3973,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:46Z)**_
@@ -3920,27 +3987,28 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:47Z)**_
  `./worktrees/feat-word-spell-number-match/eslint.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
-4	import stylisticPlugin from '@stylistic/eslint-plugin';
-5	import { tanstackConfig } from '@tanstack/eslint-config';
-6	import eslintConfigPrettier from 'eslint-config-prettier/flat';
-7	import importPlugin from 'eslint-plugin-import-x';
-8	import jsxA11y from 'eslint-plugin-jsx-a11y';
-9	import reactPlugin from 'eslint-plugin-react';
-10	import reactHooks from 'eslint-plugin-react-hooks';
-11	import eslintPluginUnicorn from 'eslint-plugin-unicorn';
-12	import tseslint from 'typescript-eslint';
-13	
-14	// Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
-15	// Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
-16	// Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
-17	
-18	export default [
-19	  ...tanstackConfig,
-20	  reactPlugin.configs.flat.recommended,
+1 //  @ts-check
+2 
+3 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+4 import stylisticPlugin from '@stylistic/eslint-plugin';
+5 import { tanstackConfig } from '@tanstack/eslint-config';
+6 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+7 import importPlugin from 'eslint-plugin-import-x';
+8 import jsxA11y from 'eslint-plugin-jsx-a11y';
+9 import reactPlugin from 'eslint-plugin-react';
+10 import reactHooks from 'eslint-plugin-react-hooks';
+11 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+12 import tseslint from 'typescript-eslint';
+13 
+14 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
+15 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
+16 // Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
+17 
+18 export default [
+19   ...tanstackConfig,
+20   reactPlugin.configs.flat.recommended,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:53Z)**_
@@ -3951,6 +4019,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:54:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/eslint.config.js has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:54:59Z)**_
@@ -3988,6 +4057,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:55:58Z)**_
@@ -3998,7 +4068,7 @@ Two remaining issues:
 1. `unicorn/no-useless-undefined` — The linter prefers no argument for `mockResolvedValue()`. But TypeScript requires 1 argument. This is a conflict between `unicorn/no-useless-undefined` and TypeScript's type checking.
 
    The solution: use `mockResolvedValue(void 0)` instead of `mockResolvedValue(undefined)` — but that might still trigger the rule. Let me check what `void 0` does vs `undefined`.
-   
+
    `void 0` evaluates to `undefined` syntactically but might slip past the linter. Alternatively, I could adjust the mock's type signature so TypeScript doesn't require an argument, though that might conflict with strict typing. The real issue is that `mockResolvedValue()` works at runtime without arguments, but TypeScript's type signature mandates one — I need to check what Vitest's actual type definition looks like.
 
    For a `Promise<void>` mock, `mockResolvedValue` should accept `void` as its parameter type, which in TypeScript means you can call it without an argument or pass `undefined`. The problem is that `vi.fn()` creates an untyped mock, so TypeScript infers it needs an argument. If I explicitly type the mock function, I should be able to call `mockResolvedValue()` without arguments.
@@ -4041,47 +4111,48 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:56:00Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`
 
 ```text
-35	  const ariaLabel = label
-36	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-37	    : `Slot ${zoneIndex + 1}, empty`;
-38	
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  const handleKeyDown = (e: { key: string }) => {
-44	    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
-45	  };
-46	
-47	  return (
-48	    <li
-49	      ref={ref}
-50	      role={isWrong ? 'button' : undefined}
-51	      tabIndex={isWrong ? 0 : undefined}
-52	      aria-label={ariaLabel}
-53	      data-active={isActive || undefined}
-54	      data-wrong={isWrong || undefined}
-55	      onClick={isWrong ? handleClick : undefined}
-56	      onKeyDown={isWrong ? handleKeyDown : undefined}
-57	      className={[
-58	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-59	        'border-border',
-60	        isActive && !label
-61	          ? 'animate-pulse ring-2 ring-primary ring-offset-2'
-62	          : '',
-63	        isWrong
-64	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-65	          : '',
-66	        label && !isWrong
-67	          ? 'border-primary bg-primary/10 text-primary'
-68	          : '',
-69	      ]
-70	        .filter(Boolean)
-71	        .join(' ')}
-72	    >
-73	      {label ?? ''}
-74	    </li>
+35   const ariaLabel = label
+36     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+37     : `Slot ${zoneIndex + 1}, empty`;
+38 
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   const handleKeyDown = (e: { key: string }) => {
+44     if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+45   };
+46 
+47   return (
+48     <li
+49       ref={ref}
+50       role={isWrong ? 'button' : undefined}
+51       tabIndex={isWrong ? 0 : undefined}
+52       aria-label={ariaLabel}
+53       data-active={isActive || undefined}
+54       data-wrong={isWrong || undefined}
+55       onClick={isWrong ? handleClick : undefined}
+56       onKeyDown={isWrong ? handleKeyDown : undefined}
+57       className={[
+58         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+59         'border-border',
+60         isActive && !label
+61           ? 'animate-pulse ring-2 ring-primary ring-offset-2'
+62           : '',
+63         isWrong
+64           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+65           : '',
+66         label && !isWrong
+67           ? 'border-primary bg-primary/10 text-primary'
+68           : '',
+69       ]
+70         .filter(Boolean)
+71         .join(' ')}
+72     >
+73       {label ?? ''}
+74     </li>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:06Z)**_
@@ -4092,6 +4163,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:56:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:11Z)**_
@@ -4101,42 +4173,43 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:56:11Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`
 
 ```text
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  const handleKeyDown = (e: { key: string }) => {
-44	    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
-45	  };
-46	
-47	  return (
-48	    <li
-49	      ref={ref}
-50	      role={isWrong ? 'button' : undefined}
-51	      tabIndex={isWrong ? 0 : undefined}
-52	      aria-label={ariaLabel}
-53	      data-active={isActive || undefined}
-54	      data-wrong={isWrong || undefined}
-55	      onClick={isWrong ? handleClick : undefined}
-56	      onKeyDown={isWrong ? handleKeyDown : undefined}
-57	      className={[
-58	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-59	        'border-border',
-60	        isActive && !label
-61	          ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
-62	          : '',
-63	        isWrong
-64	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-65	          : '',
-66	        label && !isWrong
-67	          ? 'border-primary bg-primary/10 text-primary'
-68	          : '',
-69	      ]
-70	        .filter(Boolean)
-71	        .join(' ')}
-72	    >
-73	      {label ?? ''}
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   const handleKeyDown = (e: { key: string }) => {
+44     if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+45   };
+46 
+47   return (
+48     <li
+49       ref={ref}
+50       role={isWrong ? 'button' : undefined}
+51       tabIndex={isWrong ? 0 : undefined}
+52       aria-label={ariaLabel}
+53       data-active={isActive || undefined}
+54       data-wrong={isWrong || undefined}
+55       onClick={isWrong ? handleClick : undefined}
+56       onKeyDown={isWrong ? handleKeyDown : undefined}
+57       className={[
+58         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+59         'border-border',
+60         isActive && !label
+61           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
+62           : '',
+63         isWrong
+64           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+65           : '',
+66         label && !isWrong
+67           ? 'border-primary bg-primary/10 text-primary'
+68           : '',
+69       ]
+70         .filter(Boolean)
+71         .join(' ')}
+72     >
+73       {label ?? ''}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:17Z)**_
@@ -4147,6 +4220,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:56:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:24Z)**_
@@ -4160,27 +4234,28 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:56:25Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useGameSounds } from './useGameSounds';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	import { queueSound } from '@/lib/audio/AudioFeedback';
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	  queueSound: vi.fn().mockResolvedValue(undefined),
-14	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-15	}));
-16	
-17	vi.mock('@/lib/game-event-bus', () => ({
-18	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-19	}));
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useGameSounds } from './useGameSounds';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 import { queueSound } from '@/lib/audio/AudioFeedback';
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13   queueSound: vi.fn().mockResolvedValue(undefined),
+14   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+15 }));
+16 
+17 vi.mock('@/lib/game-event-bus', () => ({
+18   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+19 }));
 20
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:29Z)**_
@@ -4194,6 +4269,7 @@ Replace mockResolvedValue(undefined) with mockImplementation
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:56:37Z)**_
@@ -4220,19 +4296,19 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:05Z)**_
 
 <think><details><summary>Thought Process</summary>
-New rule: `jsx-a11y/no-noninteractive-element-to-interactive-role` — says you can't assign interactive roles to non-interactive elements like `<li>`. 
+New rule: `jsx-a11y/no-noninteractive-element-to-interactive-role` — says you can't assign interactive roles to non-interactive elements like `<li>`.
 
 This is the fundamental conflict: `<li>` is a non-interactive element, and you can't give it `role="button"` (which is an interactive role) according to this rule.
 
 The proper solution: don't use `<li>` for interactive slots. Use a different element or wrap.
 
 Options:
-
 
 1. Change `<li>` to something else, like `<div>` or `<button>`
 2. Use `role="option"` which might be allowed on `<li>` elements (it's for `listbox` contexts)
@@ -4245,9 +4321,11 @@ I'm weighing the tradeoffs: keeping `<li>` with a nested button changes the layo
 OR... let me just use `// eslint-disable-next-line` for the original `onClick` handler on `<li>`. This is simpler and doesn't change the component structure. The original code had this issue, and fixing it properly requires structural changes that are out of scope for what we're doing.
 
 Actually, the original code had:
+
 ```tsx
 onClick={isWrong ? handleClick : undefined}
 ```
+
 which triggered `jsx-a11y/no-noninteractive-element-interactions`.
 
 My "fix" changed it to always having the handlers plus a role, but now triggers `jsx-a11y/no-noninteractive-element-to-interactive-role`.
@@ -4268,112 +4346,113 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:57:06Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-5	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-6	
-7	const NumberSlot = ({
-8	  zoneIndex,
-9	  label,
-10	  isActive,
-11	  isWrong,
-12	}: {
-13	  zoneIndex: number;
-14	  label: string | null;
-15	  isActive: boolean;
-16	  isWrong: boolean;
-17	}) => {
-18	  const ref = useRef<HTMLLIElement>(null);
-19	  const { placeTile } = useTileEvaluation();
-20	  const dispatch = useAnswerGameDispatch();
-21	
-22	  useEffect(() => {
-23	    const element = ref.current;
-24	    if (!element) return;
-25	    return dropTargetForElements({
-26	      element,
-27	      getData: () => ({ zoneIndex }),
-28	      onDrop: ({ source }) => {
-29	        const tileId = source.data['tileId'];
-30	        if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
-31	      },
-32	    });
-33	  }, [zoneIndex, placeTile]);
-34	
-35	  const ariaLabel = label
-36	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-37	    : `Slot ${zoneIndex + 1}, empty`;
-38	
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  const handleKeyDown = (e: { key: string }) => {
-44	    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
-45	  };
-46	
-47	  return (
-48	    <li
-49	      ref={ref}
-50	      role="button"
-51	      tabIndex={0}
-52	      aria-label={ariaLabel}
-53	      data-active={isActive || undefined}
-54	      data-wrong={isWrong || undefined}
-55	      onClick={handleClick}
-56	      onKeyDown={handleKeyDown}
-57	      className={[
-58	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-59	        'border-border',
-60	        isActive && !label
-61	          ? 'animate-pulse ring-2 ring-primary ring-offset-2'
-62	          : '',
-63	        isWrong
-64	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-65	          : '',
-66	        label && !isWrong
-67	          ? 'border-primary bg-primary/10 text-primary'
-68	          : '',
-69	      ]
-70	        .filter(Boolean)
-71	        .join(' ')}
-72	    >
-73	      {label ?? ''}
-74	    </li>
-75	  );
-76	};
-77	
-78	export const NumberSequenceSlots = () => {
-79	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-80	
-81	  return (
-82	    <ol
-83	      aria-label="Answer slots"
-84	      className="flex flex-wrap justify-center gap-2"
-85	    >
-86	      {zones.map((zone, i) => {
-87	        const placedTile = zone.placedTileId
-88	          ? allTiles.find((t) => t.id === zone.placedTileId)
-89	          : null;
-90	        return (
-91	          <NumberSlot
-92	            key={zone.id}
-93	            zoneIndex={i}
-94	            label={placedTile?.label ?? null}
-95	            isActive={
-96	              i === activeSlotIndex && zone.placedTileId === null
-97	            }
-98	            isWrong={zone.isWrong}
-99	          />
-100	        );
-101	      })}
-102	    </ol>
-103	  );
-104	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+5 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+6 
+7 const NumberSlot = ({
+8   zoneIndex,
+9   label,
+10   isActive,
+11   isWrong,
+12 }: {
+13   zoneIndex: number;
+14   label: string | null;
+15   isActive: boolean;
+16   isWrong: boolean;
+17 }) => {
+18   const ref = useRef<HTMLLIElement>(null);
+19   const { placeTile } = useTileEvaluation();
+20   const dispatch = useAnswerGameDispatch();
+21 
+22   useEffect(() => {
+23     const element = ref.current;
+24     if (!element) return;
+25     return dropTargetForElements({
+26       element,
+27       getData: () => ({ zoneIndex }),
+28       onDrop: ({ source }) => {
+29         const tileId = source.data['tileId'];
+30         if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
+31       },
+32     });
+33   }, [zoneIndex, placeTile]);
+34 
+35   const ariaLabel = label
+36     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+37     : `Slot ${zoneIndex + 1}, empty`;
+38 
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   const handleKeyDown = (e: { key: string }) => {
+44     if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+45   };
+46 
+47   return (
+48     <li
+49       ref={ref}
+50       role="button"
+51       tabIndex={0}
+52       aria-label={ariaLabel}
+53       data-active={isActive || undefined}
+54       data-wrong={isWrong || undefined}
+55       onClick={handleClick}
+56       onKeyDown={handleKeyDown}
+57       className={[
+58         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+59         'border-border',
+60         isActive && !label
+61           ? 'animate-pulse ring-2 ring-primary ring-offset-2'
+62           : '',
+63         isWrong
+64           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+65           : '',
+66         label && !isWrong
+67           ? 'border-primary bg-primary/10 text-primary'
+68           : '',
+69       ]
+70         .filter(Boolean)
+71         .join(' ')}
+72     >
+73       {label ?? ''}
+74     </li>
+75   );
+76 };
+77 
+78 export const NumberSequenceSlots = () => {
+79   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+80 
+81   return (
+82     <ol
+83       aria-label="Answer slots"
+84       className="flex flex-wrap justify-center gap-2"
+85     >
+86       {zones.map((zone, i) => {
+87         const placedTile = zone.placedTileId
+88           ? allTiles.find((t) => t.id === zone.placedTileId)
+89           : null;
+90         return (
+91           <NumberSlot
+92             key={zone.id}
+93             zoneIndex={i}
+94             label={placedTile?.label ?? null}
+95             isActive={
+96               i === activeSlotIndex && zone.placedTileId === null
+97             }
+98             isWrong={zone.isWrong}
+99           />
+100         );
+101       })}
+102     </ol>
+103   );
+104 };
 105
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:17Z)**_
@@ -4500,6 +4579,7 @@ export const NumberSequenceSlots = () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:22Z)**_
@@ -4509,112 +4589,113 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:57:22Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-5	import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
-6	
-7	const LetterSlot = ({
-8	  zoneIndex,
-9	  label,
-10	  isActive,
-11	  isWrong,
-12	}: {
-13	  zoneIndex: number;
-14	  label: string | null;
-15	  isActive: boolean;
-16	  isWrong: boolean;
-17	}) => {
-18	  const ref = useRef<HTMLLIElement>(null);
-19	  const { placeTile } = useTileEvaluation();
-20	  const dispatch = useAnswerGameDispatch();
-21	
-22	  useEffect(() => {
-23	    const element = ref.current;
-24	    if (!element) return;
-25	    return dropTargetForElements({
-26	      element,
-27	      getData: () => ({ zoneIndex }),
-28	      onDrop: ({ source }) => {
-29	        const tileId = source.data['tileId'];
-30	        if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
-31	      },
-32	    });
-33	  }, [zoneIndex, placeTile]);
-34	
-35	  const ariaLabel = label
-36	    ? `Slot ${zoneIndex + 1}, filled with ${label}`
-37	    : `Slot ${zoneIndex + 1}, empty`;
-38	
-39	  const handleClick = () => {
-40	    if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
-41	  };
-42	
-43	  const handleKeyDown = (e: { key: string }) => {
-44	    if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
-45	  };
-46	
-47	  return (
-48	    <li
-49	      ref={ref}
-50	      role="button"
-51	      tabIndex={0}
-52	      aria-label={ariaLabel}
-53	      data-active={isActive || undefined}
-54	      data-wrong={isWrong || undefined}
-55	      onClick={handleClick}
-56	      onKeyDown={handleKeyDown}
-57	      className={[
-58	        'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
-59	        'border-border',
-60	        isActive && !label
-61	          ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
-62	          : '',
-63	        isWrong
-64	          ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
-65	          : '',
-66	        label && !isWrong
-67	          ? 'border-primary bg-primary/10 text-primary'
-68	          : '',
-69	      ]
-70	        .filter(Boolean)
-71	        .join(' ')}
-72	    >
-73	      {label ?? ''}
-74	    </li>
-75	  );
-76	};
-77	
-78	export const OrderedLetterSlots = () => {
-79	  const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
-80	
-81	  return (
-82	    <ol
-83	      aria-label="Answer slots"
-84	      className="flex flex-wrap justify-center gap-2"
-85	    >
-86	      {zones.map((zone, i) => {
-87	        const placedTile = zone.placedTileId
-88	          ? allTiles.find((t) => t.id === zone.placedTileId)
-89	          : null;
-90	        return (
-91	          <LetterSlot
-92	            key={zone.id}
-93	            zoneIndex={i}
-94	            label={placedTile?.label ?? null}
-95	            isActive={
-96	              i === activeSlotIndex && zone.placedTileId === null
-97	            }
-98	            isWrong={zone.isWrong}
-99	          />
-100	        );
-101	      })}
-102	    </ol>
-103	  );
-104	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+5 import { useTileEvaluation } from '@/components/answer-game/useTileEvaluation';
+6 
+7 const LetterSlot = ({
+8   zoneIndex,
+9   label,
+10   isActive,
+11   isWrong,
+12 }: {
+13   zoneIndex: number;
+14   label: string | null;
+15   isActive: boolean;
+16   isWrong: boolean;
+17 }) => {
+18   const ref = useRef<HTMLLIElement>(null);
+19   const { placeTile } = useTileEvaluation();
+20   const dispatch = useAnswerGameDispatch();
+21 
+22   useEffect(() => {
+23     const element = ref.current;
+24     if (!element) return;
+25     return dropTargetForElements({
+26       element,
+27       getData: () => ({ zoneIndex }),
+28       onDrop: ({ source }) => {
+29         const tileId = source.data['tileId'];
+30         if (typeof tileId === 'string') placeTile(tileId, zoneIndex);
+31       },
+32     });
+33   }, [zoneIndex, placeTile]);
+34 
+35   const ariaLabel = label
+36     ? `Slot ${zoneIndex + 1}, filled with ${label}`
+37     : `Slot ${zoneIndex + 1}, empty`;
+38 
+39   const handleClick = () => {
+40     if (isWrong) dispatch({ type: 'EJECT_TILE', zoneIndex });
+41   };
+42 
+43   const handleKeyDown = (e: { key: string }) => {
+44     if (isWrong && (e.key === 'Enter' || e.key === ' ')) handleClick();
+45   };
+46 
+47   return (
+48     <li
+49       ref={ref}
+50       role="button"
+51       tabIndex={0}
+52       aria-label={ariaLabel}
+53       data-active={isActive || undefined}
+54       data-wrong={isWrong || undefined}
+55       onClick={handleClick}
+56       onKeyDown={handleKeyDown}
+57       className={[
+58         'flex size-14 items-center justify-center rounded-lg border-2 text-2xl font-bold transition-all',
+59         'border-border',
+60         isActive && !label
+61           ? 'ring-2 ring-primary ring-offset-2 animate-pulse'
+62           : '',
+63         isWrong
+64           ? 'cursor-pointer border-destructive bg-destructive/10 text-destructive'
+65           : '',
+66         label && !isWrong
+67           ? 'border-primary bg-primary/10 text-primary'
+68           : '',
+69       ]
+70         .filter(Boolean)
+71         .join(' ')}
+72     >
+73       {label ?? ''}
+74     </li>
+75   );
+76 };
+77 
+78 export const OrderedLetterSlots = () => {
+79   const { zones, activeSlotIndex, allTiles } = useAnswerGameContext();
+80 
+81   return (
+82     <ol
+83       aria-label="Answer slots"
+84       className="flex flex-wrap justify-center gap-2"
+85     >
+86       {zones.map((zone, i) => {
+87         const placedTile = zone.placedTileId
+88           ? allTiles.find((t) => t.id === zone.placedTileId)
+89           : null;
+90         return (
+91           <LetterSlot
+92             key={zone.id}
+93             zoneIndex={i}
+94             label={placedTile?.label ?? null}
+95             isActive={
+96               i === activeSlotIndex && zone.placedTileId === null
+97             }
+98             isWrong={zone.isWrong}
+99           />
+100         );
+101       })}
+102     </ol>
+103   );
+104 };
 105
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:36Z)**_
@@ -4741,6 +4822,7 @@ export const OrderedLetterSlots = () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:46Z)**_
@@ -4759,6 +4841,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.59s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:57:49Z)**_
@@ -4778,6 +4861,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 6.65s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:58:03Z)**_
@@ -4800,6 +4884,7 @@ Run all unit tests
 
 Done in 3.77s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:58:06Z)**_
@@ -5376,6 +5461,7 @@ Done in 3.78s.
 [feat/word-spell-number-match 399fd64] fix(a11y): make wrong-tile slots keyboard accessible; ignore playwright-report in lint
  4 files changed, 41 insertions(+), 10 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:58:20Z)**_
@@ -5407,6 +5493,7 @@ Done in 3.75s.
 To github.com:leocaseiro/base-skill.git
    3d60453..399fd64  feat/word-spell-number-match -> feat/word-spell-number-match
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:58:41Z)**_

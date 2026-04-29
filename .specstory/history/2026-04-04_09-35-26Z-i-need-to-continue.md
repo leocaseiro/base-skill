@@ -10,7 +10,7 @@ _**User (2026-04-04 09:35:26Z)**_
 
 I need to continue fixing my branch build that is failing.
 
-Details are at 
+Details are at
 worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md
 
 ---
@@ -31,6 +31,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:35:30Z)**_
 ```text
 Launching skill: superpowers:executing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -52,6 +53,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
+
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
@@ -60,6 +62,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ### Step 2: Execute Tasks
 
 For each task:
+
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
@@ -68,6 +71,7 @@ For each task:
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
+
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
@@ -75,6 +79,7 @@ After all tasks complete and verified:
 ## When to Stop and Ask for Help
 
 **STOP executing immediately when:**
+
 - Hit a blocker (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
@@ -85,12 +90,14 @@ After all tasks complete and verified:
 ## When to Revisit Earlier Steps
 
 **Return to Review (Step 1) when:**
+
 - Partner updates the plan based on your feedback
 - Fundamental approach needs rethinking
 
 **Don't force through blockers** - stop and ask.
 
 ## Remember
+
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications
@@ -101,10 +108,10 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
-
 
 ---
 
@@ -125,147 +132,148 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:35:34Z)**_
  `./worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md`
 
 ```text
-1	# Fix: Storybook / VR / E2E Test Failures
-2	
-3	Branch: `feat/word-spell-number-match`
-4	Date: 2026-04-04
-5	Status: **Diagnosis complete — fixes not yet applied**
-6	
-7	---
-8	
-9	## Root Cause
-10	
-11	`AnswerGameProvider` now calls `useGameTTS` → `useSettings` → `useRxDB`, which requires
-12	a `DbProvider` context. No story that renders `AnswerGameProvider` (or a full game
-13	component) provides that context, so all of them crash with:
-14	
-15	> **`useRxDB must be used within DbProvider`**
-16	
-17	Additionally, `WordSpell.tsx` and `NumberMatch.tsx` now call `useNavigate`/`useParams`
-18	directly, which produces `useRouter must be used inside a <RouterProvider>` warnings.
-19	Those warnings are non-fatal on their own, but the stories still fail because of the
-20	`DbProvider` issue above.
-21	
-22	---
-23	
-24	## What needs to be done
-25	
-26	### Step 1 — Create shared `withDb` decorator
-27	
-28	Create `.storybook/decorators/withDb.tsx` (mirror the pattern from `withRouter.tsx`):
-29	
-30	```tsx
-31	import { createStorybookDatabase } from '@/db/create-database';
-32	import { DbProvider } from '@/providers/DbProvider';
-33	import type { Decorator } from '@storybook/react';
-34	
-35	export const withDb: Decorator = (Story) => (
-36	  <DbProvider openDatabase={createStorybookDatabase}>
-37	    <Story />
-38	  </DbProvider>
-39	);
-40	```
-41	
-42	Reference: see how `GameShell.stories.tsx` defines `withDb` locally (lines 14-18).
-43	
-44	---
-45	
-46	### Step 2 — Add `withDb` to all 9 failing stories
-47	
-48	All these need `withDb` in their `meta.decorators` array (or at story level if needed):
-49	
-50	| Story file | Current decorators | Add |
-51	|---|---|---|
-52	| `src/components/questions/AudioButton/AudioButton.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-53	| `src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-54	| `src/components/questions/TextQuestion/TextQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-55	| `src/components/questions/ImageQuestion/ImageQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-56	| `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-57	| `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-58	| `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` | none | `withDb` |
-59	| `src/games/word-spell/WordSpell/WordSpell.stories.tsx` | none | `withDb` + `withRouter` |
-60	| `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` | none | `withDb` + `withRouter` |
-61	
-62	For the stories that wrap in `AnswerGameProvider`, `withDb` should come **before** the
-63	`AnswerGameProvider` wrapper in the array so it is the outermost provider:
-64	
-65	```tsx
-66	decorators: [
-67	  withDb,
-68	  (Story) => (
-69	    <AnswerGameProvider config={storyConfig}>
-70	      <Story />
-71	    </AnswerGameProvider>
-72	  ),
-73	],
-74	```
-75	
-76	For `AnswerGame.stories.tsx`, `WordSpell.stories.tsx`, `NumberMatch.stories.tsx` which
-77	had no decorators, add them at the meta level:
-78	
-79	```tsx
-80	// WordSpell / NumberMatch (need both)
-81	decorators: [withDb, withRouter],
-82	
-83	// AnswerGame (only needs db)
-84	decorators: [withDb],
-85	```
-86	
-87	---
-88	
-89	### Step 3 — Update the `write-storybook` skill
-90	
-91	Add `withDb` to the decorators table in
-92	`.claude/skills/write-storybook/index.md` (or wherever the skill lives):
-93	
-94	| Needs | Decorator |
-95	|---|---|
-96	| TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `.storybook/decorators/withRouter` |
-97	| Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `.storybook/decorators/withDb` |
-98	| Theme toggle | `withTheme` — already applied globally |
-99	| ThemeProvider | Already applied globally — do NOT add again |
-100	
-101	---
-102	
-103	### Step 4 — VR tests
-104	
-105	VR failures are likely downstream of the Storybook failures (VR snapshots the same
-106	stories). Once Storybook tests pass, run:
-107	
-108	```bash
-109	yarn test:vr
-110	```
-111	
-112	If diffs are intentional (new UI components), update baselines:
-113	```bash
-114	yarn test:vr:update
-115	```
-116	
-117	---
-118	
-119	### Step 5 — E2E tests
-120	
-121	Check what specific E2E tests are failing:
-122	```bash
-123	yarn test:e2e 2>&1 | head -80
-124	```
-125	
-126	Two recent commits addressed E2E issues:
-127	- `fix(e2e): use different port for VR tests on local`
-128	- `fix(e2e): include withRouter decorator`
-129	
-130	May need further investigation after Storybook passes.
-131	
-132	---
-133	
-134	## Verified Evidence
-135	
-136	- `yarn test --run` → **203 tests pass** (unit tests are clean)
-137	- `yarn test:storybook` → **29 failed / 70 passed** in 9 suites
-138	- Every failure: `useRxDB must be used within DbProvider`
-139	- `WordSpell`/`NumberMatch` also log `useRouter` warnings (non-fatal)
+1 # Fix: Storybook / VR / E2E Test Failures
+2 
+3 Branch: `feat/word-spell-number-match`
+4 Date: 2026-04-04
+5 Status: **Diagnosis complete — fixes not yet applied**
+6 
+7 ---
+8 
+9 ## Root Cause
+10 
+11 `AnswerGameProvider` now calls `useGameTTS` → `useSettings` → `useRxDB`, which requires
+12 a `DbProvider` context. No story that renders `AnswerGameProvider` (or a full game
+13 component) provides that context, so all of them crash with:
+14 
+15 > **`useRxDB must be used within DbProvider`**
+16 
+17 Additionally, `WordSpell.tsx` and `NumberMatch.tsx` now call `useNavigate`/`useParams`
+18 directly, which produces `useRouter must be used inside a <RouterProvider>` warnings.
+19 Those warnings are non-fatal on their own, but the stories still fail because of the
+20 `DbProvider` issue above.
+21 
+22 ---
+23 
+24 ## What needs to be done
+25 
+26 ### Step 1 — Create shared `withDb` decorator
+27 
+28 Create `.storybook/decorators/withDb.tsx` (mirror the pattern from `withRouter.tsx`):
+29 
+30 ```tsx
+31 import { createStorybookDatabase } from '@/db/create-database';
+32 import { DbProvider } from '@/providers/DbProvider';
+33 import type { Decorator } from '@storybook/react';
+34 
+35 export const withDb: Decorator = (Story) => (
+36   <DbProvider openDatabase={createStorybookDatabase}>
+37     <Story />
+38   </DbProvider>
+39 );
+40 ```
+41 
+42 Reference: see how `GameShell.stories.tsx` defines `withDb` locally (lines 14-18).
+43 
+44 ---
+45 
+46 ### Step 2 — Add `withDb` to all 9 failing stories
+47 
+48 All these need `withDb` in their `meta.decorators` array (or at story level if needed):
+49 
+50 | Story file | Current decorators | Add |
+51 |---|---|---|
+52 | `src/components/questions/AudioButton/AudioButton.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+53 | `src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+54 | `src/components/questions/TextQuestion/TextQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+55 | `src/components/questions/ImageQuestion/ImageQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+56 | `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+57 | `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+58 | `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` | none | `withDb` |
+59 | `src/games/word-spell/WordSpell/WordSpell.stories.tsx` | none | `withDb` + `withRouter` |
+60 | `src/games/number-match/NumberMatch/NumberMatch.stories.tsx` | none | `withDb` + `withRouter` |
+61 
+62 For the stories that wrap in `AnswerGameProvider`, `withDb` should come **before** the
+63 `AnswerGameProvider` wrapper in the array so it is the outermost provider:
+64 
+65 ```tsx
+66 decorators: [
+67   withDb,
+68   (Story) => (
+69     <AnswerGameProvider config={storyConfig}>
+70       <Story />
+71     </AnswerGameProvider>
+72   ),
+73 ],
+74 ```
+75 
+76 For `AnswerGame.stories.tsx`, `WordSpell.stories.tsx`, `NumberMatch.stories.tsx` which
+77 had no decorators, add them at the meta level:
+78 
+79 ```tsx
+80 // WordSpell / NumberMatch (need both)
+81 decorators: [withDb, withRouter],
+82 
+83 // AnswerGame (only needs db)
+84 decorators: [withDb],
+85 ```
+86 
+87 ---
+88 
+89 ### Step 3 — Update the `write-storybook` skill
+90 
+91 Add `withDb` to the decorators table in
+92 `.claude/skills/write-storybook/index.md` (or wherever the skill lives):
+93 
+94 | Needs | Decorator |
+95 |---|---|
+96 | TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `.storybook/decorators/withRouter` |
+97 | Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `.storybook/decorators/withDb` |
+98 | Theme toggle | `withTheme` — already applied globally |
+99 | ThemeProvider | Already applied globally — do NOT add again |
+100 
+101 ---
+102 
+103 ### Step 4 — VR tests
+104 
+105 VR failures are likely downstream of the Storybook failures (VR snapshots the same
+106 stories). Once Storybook tests pass, run:
+107 
+108 ```bash
+109 yarn test:vr
+110 ```
+111 
+112 If diffs are intentional (new UI components), update baselines:
+113 ```bash
+114 yarn test:vr:update
+115 ```
+116 
+117 ---
+118 
+119 ### Step 5 — E2E tests
+120 
+121 Check what specific E2E tests are failing:
+122 ```bash
+123 yarn test:e2e 2>&1 | head -80
+124 ```
+125 
+126 Two recent commits addressed E2E issues:
+127 - `fix(e2e): use different port for VR tests on local`
+128 - `fix(e2e): include withRouter decorator`
+129 
+130 May need further investigation after Storybook passes.
+131 
+132 ---
+133 
+134 ## Verified Evidence
+135 
+136 - `yarn test --run` → **203 tests pass** (unit tests are clean)
+137 - `yarn test:storybook` → **29 failed / 70 passed** in 9 suites
+138 - Every failure: `useRxDB must be used within DbProvider`
+139 - `WordSpell`/`NumberMatch` also log `useRouter` warnings (non-fatal)
 140
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:35:40Z)**_
@@ -280,7 +288,6 @@ Now I have a clear picture. Let me set up todos and execute the plan. The plan i
 5. Check E2E tests
 
 Let me start by looking at the existing `withRouter.tsx` decorator and the `GameShell.stories.tsx` to understand the patterns, then I'll create `withDb.tsx`.
-
 
 I'm working in the feat-word-spell-number-match worktree at `/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/`.
 </details></think>
@@ -304,6 +311,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:35:40Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:35:43Z)**_
@@ -333,47 +341,48 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:35:52Z)**_
  `./worktrees/feat-word-spell-number-match/.storybook/decorators/withRouter.tsx`
 
 ```text
-1	import {
-2	  Outlet,
-3	  RouterProvider,
-4	  createMemoryHistory,
-5	  createRootRoute,
-6	  createRoute,
-7	  createRouter,
-8	} from '@tanstack/react-router';
-9	import React from 'react';
-10	import type { Decorator } from '@storybook/react';
-11	
-12	export const withRouter: Decorator = (Story) => {
-13	  // eslint-disable-next-line react-hooks/rules-of-hooks -- Storybook decorator factory
-14	  const router = React.useMemo(() => {
-15	    const rootRoute = createRootRoute({
-16	      component: () => (
-17	        <div>
-18	          <Outlet />
-19	        </div>
-20	      ),
-21	    });
-22	    const localeRoute = createRoute({
-23	      getParentRoute: () => rootRoute,
-24	      path: '/$locale',
-25	      component: function StorybookLocaleRoute() {
-26	        const Cmp = Story as React.ComponentType;
-27	        return <Cmp />;
-28	      },
-29	    });
-30	    const routeTree = rootRoute.addChildren([localeRoute]);
-31	    return createRouter({
-32	      routeTree,
-33	      history: createMemoryHistory({ initialEntries: ['/en'] }),
-34	    });
-35	    /* `Story` identity changes per story — router must be recreated. */
-36	  }, [Story]);
-37	
-38	  return <RouterProvider router={router} />;
-39	};
+1 import {
+2   Outlet,
+3   RouterProvider,
+4   createMemoryHistory,
+5   createRootRoute,
+6   createRoute,
+7   createRouter,
+8 } from '@tanstack/react-router';
+9 import React from 'react';
+10 import type { Decorator } from '@storybook/react';
+11 
+12 export const withRouter: Decorator = (Story) => {
+13   // eslint-disable-next-line react-hooks/rules-of-hooks -- Storybook decorator factory
+14   const router = React.useMemo(() => {
+15     const rootRoute = createRootRoute({
+16       component: () => (
+17         <div>
+18           <Outlet />
+19         </div>
+20       ),
+21     });
+22     const localeRoute = createRoute({
+23       getParentRoute: () => rootRoute,
+24       path: '/$locale',
+25       component: function StorybookLocaleRoute() {
+26         const Cmp = Story as React.ComponentType;
+27         return <Cmp />;
+28       },
+29     });
+30     const routeTree = rootRoute.addChildren([localeRoute]);
+31     return createRouter({
+32       routeTree,
+33       history: createMemoryHistory({ initialEntries: ['/en'] }),
+34     });
+35     /* `Story` identity changes per story — router must be recreated. */
+36   }, [Story]);
+37 
+38   return <RouterProvider router={router} />;
+39 };
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:35:57Z)**_
@@ -406,6 +415,7 @@ worktrees/feat-word-spell-number-match/src/db/create-database.ts
 worktrees/feat-word-spell-number-match/src/db/create-database.test.ts
 worktrees/feat-word-spell-number-match/src/components/game/GameShell.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:01Z)**_
@@ -422,6 +432,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:01Z)**_
 17:  </DbProvider>
 71:  decorators: [withDb, withRouter],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:05Z)**_
@@ -449,6 +460,7 @@ export const withDb: Decorator = (Story) => (
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/.storybook/decorators/withDb.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:11Z)**_
@@ -476,38 +488,39 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:15Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/questions/AudioButton/AudioButton.stories.tsx`
 
 ```text
-1	import { AudioButton } from './AudioButton';
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-5	
-6	const storyConfig: AnswerGameConfig = {
-7	  gameId: 'storybook',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 1,
-12	  ttsEnabled: true,
-13	};
-14	
-15	const meta: Meta<typeof AudioButton> = {
-16	  component: AudioButton,
-17	  tags: ['autodocs'],
-18	  decorators: [
-19	    (Story) => (
-20	      <AnswerGameProvider config={storyConfig}>
-21	        <Story />
-22	      </AnswerGameProvider>
-23	    ),
-24	  ],
-25	};
-26	export default meta;
-27	
-28	type Story = StoryObj<typeof AudioButton>;
-29	
-30	export const Default: Story = { args: { prompt: 'cat' } };
+1 import { AudioButton } from './AudioButton';
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+5 
+6 const storyConfig: AnswerGameConfig = {
+7   gameId: 'storybook',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 1,
+12   ttsEnabled: true,
+13 };
+14 
+15 const meta: Meta<typeof AudioButton> = {
+16   component: AudioButton,
+17   tags: ['autodocs'],
+18   decorators: [
+19     (Story) => (
+20       <AnswerGameProvider config={storyConfig}>
+21         <Story />
+22       </AnswerGameProvider>
+23     ),
+24   ],
+25 };
+26 export default meta;
+27 
+28 type Story = StoryObj<typeof AudioButton>;
+29 
+30 export const Default: Story = { args: { prompt: 'cat' } };
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:15Z)**_
@@ -517,40 +530,41 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:15Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx`
 
 ```text
-1	import { DotGroupQuestion } from './DotGroupQuestion';
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-5	
-6	const storyConfig: AnswerGameConfig = {
-7	  gameId: 'storybook',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 1,
-12	  ttsEnabled: true,
-13	};
-14	
-15	const meta: Meta<typeof DotGroupQuestion> = {
-16	  component: DotGroupQuestion,
-17	  tags: ['autodocs'],
-18	  decorators: [
-19	    (Story) => (
-20	      <AnswerGameProvider config={storyConfig}>
-21	        <Story />
-22	      </AnswerGameProvider>
-23	    ),
-24	  ],
-25	};
-26	export default meta;
-27	
-28	type Story = StoryObj<typeof DotGroupQuestion>;
-29	
-30	export const OneDot: Story = { args: { count: 1, prompt: 'one' } };
-31	export const ThreeDots: Story = { args: { count: 3, prompt: 'three' } };
-32	export const FiveDots: Story = { args: { count: 5, prompt: 'five' } };
+1 import { DotGroupQuestion } from './DotGroupQuestion';
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+5 
+6 const storyConfig: AnswerGameConfig = {
+7   gameId: 'storybook',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 1,
+12   ttsEnabled: true,
+13 };
+14 
+15 const meta: Meta<typeof DotGroupQuestion> = {
+16   component: DotGroupQuestion,
+17   tags: ['autodocs'],
+18   decorators: [
+19     (Story) => (
+20       <AnswerGameProvider config={storyConfig}>
+21         <Story />
+22       </AnswerGameProvider>
+23     ),
+24   ],
+25 };
+26 export default meta;
+27 
+28 type Story = StoryObj<typeof DotGroupQuestion>;
+29 
+30 export const OneDot: Story = { args: { count: 1, prompt: 'one' } };
+31 export const ThreeDots: Story = { args: { count: 3, prompt: 'three' } };
+32 export const FiveDots: Story = { args: { count: 5, prompt: 'five' } };
 33
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:15Z)**_
@@ -560,42 +574,43 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:15Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/questions/TextQuestion/TextQuestion.stories.tsx`
 
 ```text
-1	import { TextQuestion } from './TextQuestion';
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-5	
-6	const storyConfig: AnswerGameConfig = {
-7	  gameId: 'storybook',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 1,
-12	  ttsEnabled: true,
-13	};
-14	
-15	const meta: Meta<typeof TextQuestion> = {
-16	  component: TextQuestion,
-17	  tags: ['autodocs'],
-18	  decorators: [
-19	    (Story) => (
-20	      <AnswerGameProvider config={storyConfig}>
-21	        <Story />
-22	      </AnswerGameProvider>
-23	    ),
-24	  ],
-25	};
-26	export default meta;
-27	
-28	type Story = StoryObj<typeof TextQuestion>;
-29	
-30	export const Default: Story = { args: { text: 'three' } };
-31	export const LongWord: Story = { args: { text: 'elephant' } };
-32	export const SentenceGap: Story = {
-33	  args: { text: 'The ___ sat on the mat.' },
-34	};
+1 import { TextQuestion } from './TextQuestion';
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+5 
+6 const storyConfig: AnswerGameConfig = {
+7   gameId: 'storybook',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 1,
+12   ttsEnabled: true,
+13 };
+14 
+15 const meta: Meta<typeof TextQuestion> = {
+16   component: TextQuestion,
+17   tags: ['autodocs'],
+18   decorators: [
+19     (Story) => (
+20       <AnswerGameProvider config={storyConfig}>
+21         <Story />
+22       </AnswerGameProvider>
+23     ),
+24   ],
+25 };
+26 export default meta;
+27 
+28 type Story = StoryObj<typeof TextQuestion>;
+29 
+30 export const Default: Story = { args: { text: 'three' } };
+31 export const LongWord: Story = { args: { text: 'elephant' } };
+32 export const SentenceGap: Story = {
+33   args: { text: 'The ___ sat on the mat.' },
+34 };
 35
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:16Z)**_
@@ -605,40 +620,41 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:16Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/questions/ImageQuestion/ImageQuestion.stories.tsx`
 
 ```text
-1	import { ImageQuestion } from './ImageQuestion';
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-5	
-6	const storyConfig: AnswerGameConfig = {
-7	  gameId: 'storybook',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 1,
-12	  ttsEnabled: true,
-13	};
-14	
-15	const meta: Meta<typeof ImageQuestion> = {
-16	  component: ImageQuestion,
-17	  tags: ['autodocs'],
-18	  decorators: [
-19	    (Story) => (
-20	      <AnswerGameProvider config={storyConfig}>
-21	        <Story />
-22	      </AnswerGameProvider>
-23	    ),
-24	  ],
-25	};
-26	export default meta;
-27	
-28	type Story = StoryObj<typeof ImageQuestion>;
-29	
-30	export const Default: Story = {
-31	  args: { src: 'https://placehold.co/160', prompt: 'cat' },
-32	};
+1 import { ImageQuestion } from './ImageQuestion';
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+5 
+6 const storyConfig: AnswerGameConfig = {
+7   gameId: 'storybook',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 1,
+12   ttsEnabled: true,
+13 };
+14 
+15 const meta: Meta<typeof ImageQuestion> = {
+16   component: ImageQuestion,
+17   tags: ['autodocs'],
+18   decorators: [
+19     (Story) => (
+20       <AnswerGameProvider config={storyConfig}>
+21         <Story />
+22       </AnswerGameProvider>
+23     ),
+24   ],
+25 };
+26 export default meta;
+27 
+28 type Story = StoryObj<typeof ImageQuestion>;
+29 
+30 export const Default: Story = {
+31   args: { src: 'https://placehold.co/160', prompt: 'cat' },
+32 };
 33
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:17Z)**_
@@ -648,102 +664,103 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:17Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx`
 
 ```text
-1	import { LetterTileBank } from './LetterTileBank';
-2	import type {
-3	  AnswerGameConfig,
-4	  AnswerZone,
-5	  TileItem,
-6	} from '@/components/answer-game/types';
-7	import type { Meta, StoryObj } from '@storybook/react';
-8	import type { ReactNode } from 'react';
-9	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-10	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-11	
-12	const config: AnswerGameConfig = {
-13	  gameId: 'storybook',
-14	  inputMethod: 'drag',
-15	  wrongTileBehavior: 'lock-auto-eject',
-16	  tileBankMode: 'exact',
-17	  totalRounds: 1,
-18	  ttsEnabled: true,
-19	};
-20	
-21	const tiles: TileItem[] = [
-22	  { id: 't1', label: 'c', value: 'c' },
-23	  { id: 't2', label: 'a', value: 'a' },
-24	  { id: 't3', label: 'a', value: 't' },
-25	];
-26	
-27	const zones: AnswerZone[] = [
-28	  {
-29	    id: 'z0',
-30	    index: 0,
-31	    expectedValue: 'C',
-32	    placedTileId: null,
-33	    isWrong: false,
-34	    isLocked: false,
-35	  },
-36	];
-37	
-38	const InitProvider = ({ children }: { children: ReactNode }) => {
-39	  const dispatch = useAnswerGameDispatch();
-40	  dispatch({ type: 'INIT_ROUND', tiles, zones });
-41	  return <>{children}</>;
-42	};
-43	
-44	const meta: Meta<typeof LetterTileBank> = {
-45	  component: LetterTileBank,
-46	  tags: ['autodocs'],
-47	  decorators: [
-48	    (Story) => (
-49	      <AnswerGameProvider config={config}>
-50	        <InitProvider>
-51	          <Story />
-52	        </InitProvider>
-53	      </AnswerGameProvider>
-54	    ),
-55	  ],
-56	};
-57	export default meta;
-58	
-59	type Story = StoryObj<typeof LetterTileBank>;
-60	
-61	export const Default: Story = {};
-62	
-63	const distractorConfig: AnswerGameConfig = {
-64	  ...config,
-65	  tileBankMode: 'distractors',
-66	  distractorCount: 2,
-67	};
-68	const distractorTiles: TileItem[] = [
-69	  ...tiles,
-70	  { id: 'td1', label: 'X', value: 'X' },
-71	  { id: 'td2', label: 'Z', value: 'Z' },
-72	];
-73	
-74	const DistractorInitProvider = ({
-75	  children,
-76	}: {
-77	  children: ReactNode;
-78	}) => {
-79	  const dispatch = useAnswerGameDispatch();
-80	  dispatch({ type: 'INIT_ROUND', tiles: distractorTiles, zones });
-81	  return <>{children}</>;
-82	};
-83	
-84	export const WithDistractors: Story = {
-85	  decorators: [
-86	    (Story) => (
-87	      <AnswerGameProvider config={distractorConfig}>
-88	        <DistractorInitProvider>
-89	          <Story />
-90	        </DistractorInitProvider>
-91	      </AnswerGameProvider>
-92	    ),
-93	  ],
-94	};
+1 import { LetterTileBank } from './LetterTileBank';
+2 import type {
+3   AnswerGameConfig,
+4   AnswerZone,
+5   TileItem,
+6 } from '@/components/answer-game/types';
+7 import type { Meta, StoryObj } from '@storybook/react';
+8 import type { ReactNode } from 'react';
+9 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+10 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+11 
+12 const config: AnswerGameConfig = {
+13   gameId: 'storybook',
+14   inputMethod: 'drag',
+15   wrongTileBehavior: 'lock-auto-eject',
+16   tileBankMode: 'exact',
+17   totalRounds: 1,
+18   ttsEnabled: true,
+19 };
+20 
+21 const tiles: TileItem[] = [
+22   { id: 't1', label: 'c', value: 'c' },
+23   { id: 't2', label: 'a', value: 'a' },
+24   { id: 't3', label: 'a', value: 't' },
+25 ];
+26 
+27 const zones: AnswerZone[] = [
+28   {
+29     id: 'z0',
+30     index: 0,
+31     expectedValue: 'C',
+32     placedTileId: null,
+33     isWrong: false,
+34     isLocked: false,
+35   },
+36 ];
+37 
+38 const InitProvider = ({ children }: { children: ReactNode }) => {
+39   const dispatch = useAnswerGameDispatch();
+40   dispatch({ type: 'INIT_ROUND', tiles, zones });
+41   return <>{children}</>;
+42 };
+43 
+44 const meta: Meta<typeof LetterTileBank> = {
+45   component: LetterTileBank,
+46   tags: ['autodocs'],
+47   decorators: [
+48     (Story) => (
+49       <AnswerGameProvider config={config}>
+50         <InitProvider>
+51           <Story />
+52         </InitProvider>
+53       </AnswerGameProvider>
+54     ),
+55   ],
+56 };
+57 export default meta;
+58 
+59 type Story = StoryObj<typeof LetterTileBank>;
+60 
+61 export const Default: Story = {};
+62 
+63 const distractorConfig: AnswerGameConfig = {
+64   ...config,
+65   tileBankMode: 'distractors',
+66   distractorCount: 2,
+67 };
+68 const distractorTiles: TileItem[] = [
+69   ...tiles,
+70   { id: 'td1', label: 'X', value: 'X' },
+71   { id: 'td2', label: 'Z', value: 'Z' },
+72 ];
+73 
+74 const DistractorInitProvider = ({
+75   children,
+76 }: {
+77   children: ReactNode;
+78 }) => {
+79   const dispatch = useAnswerGameDispatch();
+80   dispatch({ type: 'INIT_ROUND', tiles: distractorTiles, zones });
+81   return <>{children}</>;
+82 };
+83 
+84 export const WithDistractors: Story = {
+85   decorators: [
+86     (Story) => (
+87       <AnswerGameProvider config={distractorConfig}>
+88         <DistractorInitProvider>
+89           <Story />
+90         </DistractorInitProvider>
+91       </AnswerGameProvider>
+92     ),
+93   ],
+94 };
 95
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:22Z)**_
@@ -753,74 +770,75 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:22Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx`
 
 ```text
-1	import { NumeralTileBank } from './NumeralTileBank';
-2	import type {
-3	  AnswerGameConfig,
-4	  AnswerZone,
-5	  TileItem,
-6	} from '@/components/answer-game/types';
-7	import type { Meta, StoryObj } from '@storybook/react';
-8	import type { ReactNode } from 'react';
-9	import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
-10	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-11	
-12	const config: AnswerGameConfig = {
-13	  gameId: 'storybook',
-14	  inputMethod: 'drag',
-15	  wrongTileBehavior: 'lock-auto-eject',
-16	  tileBankMode: 'exact',
-17	  totalRounds: 1,
-18	  ttsEnabled: true,
-19	};
-20	
-21	const tiles: TileItem[] = [
-22	  { id: 't1', label: '1', value: '1' },
-23	  { id: 't2', label: '2', value: '2' },
-24	  { id: 't3', label: '3', value: '3' },
-25	  { id: 't4', label: '4', value: '4' },
-26	  { id: 't5', label: '5', value: '5' },
-27	];
-28	
-29	const zones: AnswerZone[] = [
-30	  {
-31	    id: 'z0',
-32	    index: 0,
-33	    expectedValue: '3',
-34	    placedTileId: null,
-35	    isWrong: false,
-36	    isLocked: false,
-37	  },
-38	];
-39	
-40	const InitProvider = ({ children }: { children: ReactNode }) => {
-41	  const dispatch = useAnswerGameDispatch();
-42	  dispatch({ type: 'INIT_ROUND', tiles, zones });
-43	  return <>{children}</>;
-44	};
-45	
-46	const meta: Meta<typeof NumeralTileBank> = {
-47	  component: NumeralTileBank,
-48	  tags: ['autodocs'],
-49	  args: { tileStyle: 'dots' },
-50	  decorators: [
-51	    (Story) => (
-52	      <AnswerGameProvider config={config}>
-53	        <InitProvider>
-54	          <Story />
-55	        </InitProvider>
-56	      </AnswerGameProvider>
-57	    ),
-58	  ],
-59	};
-60	export default meta;
-61	
-62	type Story = StoryObj<typeof NumeralTileBank>;
-63	
-64	export const DotsStyle: Story = { args: { tileStyle: 'dots' } };
-65	export const FingersStyle: Story = { args: { tileStyle: 'fingers' } };
-66	export const ObjectsStyle: Story = { args: { tileStyle: 'objects' } };
+1 import { NumeralTileBank } from './NumeralTileBank';
+2 import type {
+3   AnswerGameConfig,
+4   AnswerZone,
+5   TileItem,
+6 } from '@/components/answer-game/types';
+7 import type { Meta, StoryObj } from '@storybook/react';
+8 import type { ReactNode } from 'react';
+9 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
+10 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+11 
+12 const config: AnswerGameConfig = {
+13   gameId: 'storybook',
+14   inputMethod: 'drag',
+15   wrongTileBehavior: 'lock-auto-eject',
+16   tileBankMode: 'exact',
+17   totalRounds: 1,
+18   ttsEnabled: true,
+19 };
+20 
+21 const tiles: TileItem[] = [
+22   { id: 't1', label: '1', value: '1' },
+23   { id: 't2', label: '2', value: '2' },
+24   { id: 't3', label: '3', value: '3' },
+25   { id: 't4', label: '4', value: '4' },
+26   { id: 't5', label: '5', value: '5' },
+27 ];
+28 
+29 const zones: AnswerZone[] = [
+30   {
+31     id: 'z0',
+32     index: 0,
+33     expectedValue: '3',
+34     placedTileId: null,
+35     isWrong: false,
+36     isLocked: false,
+37   },
+38 ];
+39 
+40 const InitProvider = ({ children }: { children: ReactNode }) => {
+41   const dispatch = useAnswerGameDispatch();
+42   dispatch({ type: 'INIT_ROUND', tiles, zones });
+43   return <>{children}</>;
+44 };
+45 
+46 const meta: Meta<typeof NumeralTileBank> = {
+47   component: NumeralTileBank,
+48   tags: ['autodocs'],
+49   args: { tileStyle: 'dots' },
+50   decorators: [
+51     (Story) => (
+52       <AnswerGameProvider config={config}>
+53         <InitProvider>
+54           <Story />
+55         </InitProvider>
+56       </AnswerGameProvider>
+57     ),
+58   ],
+59 };
+60 export default meta;
+61 
+62 type Story = StoryObj<typeof NumeralTileBank>;
+63 
+64 export const DotsStyle: Story = { args: { tileStyle: 'dots' } };
+65 export const FingersStyle: Story = { args: { tileStyle: 'fingers' } };
+66 export const ObjectsStyle: Story = { args: { tileStyle: 'objects' } };
 67
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:23Z)**_
@@ -830,80 +848,81 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:23Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
 
 ```text
-1	import { AnswerGame } from './AnswerGame';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-5	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-6	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
-7	
-8	const baseConfig: AnswerGameConfig = {
-9	  gameId: 'storybook',
-10	  inputMethod: 'drag',
-11	  wrongTileBehavior: 'lock-auto-eject',
-12	  tileBankMode: 'exact',
-13	  totalRounds: 3,
-14	  ttsEnabled: true,
-15	};
-16	
-17	const meta: Meta<typeof AnswerGame> = {
-18	  component: AnswerGame,
-19	  tags: ['autodocs'],
-20	  args: { config: baseConfig },
-21	};
-22	export default meta;
-23	
-24	type Story = StoryObj<typeof AnswerGame>;
-25	
-26	export const Default: Story = {
-27	  render: (args) => (
-28	    <AnswerGame {...args}>
-29	      <AnswerGame.Question>
-30	        <ImageQuestion src="https://placehold.co/160" prompt="cat" />
-31	        <AudioButton prompt="cat" />
-32	      </AnswerGame.Question>
-33	      <AnswerGame.Answer>
-34	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
-35	          Answer slots here
-36	        </div>
-37	      </AnswerGame.Answer>
-38	      <AnswerGame.Choices>
-39	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
-40	          Tile bank here
-41	        </div>
-42	      </AnswerGame.Choices>
-43	    </AnswerGame>
-44	  ),
-45	};
-46	
-47	export const TextQuestionMode: Story = {
-48	  args: { config: { ...baseConfig, inputMethod: 'type' } },
-49	  render: (args) => (
-50	    <AnswerGame {...args}>
-51	      <AnswerGame.Question>
-52	        <TextQuestion text="three" />
-53	        <AudioButton prompt="three" />
-54	      </AnswerGame.Question>
-55	      <AnswerGame.Answer>
-56	        <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
-57	          Typed slots here
-58	        </div>
-59	      </AnswerGame.Answer>
-60	    </AnswerGame>
-61	  ),
-62	};
-63	
-64	export const RejectMode: Story = {
-65	  args: { config: { ...baseConfig, wrongTileBehavior: 'reject' } },
-66	  render: Default.render,
-67	};
-68	
-69	export const LockManualMode: Story = {
-70	  args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
-71	  render: Default.render,
-72	};
+1 import { AnswerGame } from './AnswerGame';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+5 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+6 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+7 
+8 const baseConfig: AnswerGameConfig = {
+9   gameId: 'storybook',
+10   inputMethod: 'drag',
+11   wrongTileBehavior: 'lock-auto-eject',
+12   tileBankMode: 'exact',
+13   totalRounds: 3,
+14   ttsEnabled: true,
+15 };
+16 
+17 const meta: Meta<typeof AnswerGame> = {
+18   component: AnswerGame,
+19   tags: ['autodocs'],
+20   args: { config: baseConfig },
+21 };
+22 export default meta;
+23 
+24 type Story = StoryObj<typeof AnswerGame>;
+25 
+26 export const Default: Story = {
+27   render: (args) => (
+28     <AnswerGame {...args}>
+29       <AnswerGame.Question>
+30         <ImageQuestion src="https://placehold.co/160" prompt="cat" />
+31         <AudioButton prompt="cat" />
+32       </AnswerGame.Question>
+33       <AnswerGame.Answer>
+34         <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+35           Answer slots here
+36         </div>
+37       </AnswerGame.Answer>
+38       <AnswerGame.Choices>
+39         <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+40           Tile bank here
+41         </div>
+42       </AnswerGame.Choices>
+43     </AnswerGame>
+44   ),
+45 };
+46 
+47 export const TextQuestionMode: Story = {
+48   args: { config: { ...baseConfig, inputMethod: 'type' } },
+49   render: (args) => (
+50     <AnswerGame {...args}>
+51       <AnswerGame.Question>
+52         <TextQuestion text="three" />
+53         <AudioButton prompt="three" />
+54       </AnswerGame.Question>
+55       <AnswerGame.Answer>
+56         <div className="flex gap-2 rounded-lg border-2 border-dashed p-4 text-muted-foreground">
+57           Typed slots here
+58         </div>
+59       </AnswerGame.Answer>
+60     </AnswerGame>
+61   ),
+62 };
+63 
+64 export const RejectMode: Story = {
+65   args: { config: { ...baseConfig, wrongTileBehavior: 'reject' } },
+66   render: Default.render,
+67 };
+68 
+69 export const LockManualMode: Story = {
+70   args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
+71   render: Default.render,
+72 };
 73
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:24Z)**_
@@ -913,85 +932,86 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:24Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.stories.tsx`
 
 ```text
-1	import { WordSpell } from './WordSpell';
-2	import type { WordSpellConfig } from '../types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const baseConfig: WordSpellConfig = {
-6	  gameId: 'word-spell-storybook',
-7	  component: 'WordSpell',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 5,
-12	  roundsInOrder: true,
-13	  ttsEnabled: true,
-14	  mode: 'picture',
-15	  tileUnit: 'letter',
-16	  rounds: [
-17	    { word: 'cat', image: 'https://placehold.co/160?text=🐱' },
-18	    { word: 'dog', image: 'https://placehold.co/160?text=🐶' },
-19	  ],
-20	};
-21	
-22	const meta: Meta<typeof WordSpell> = {
-23	  component: WordSpell,
-24	  tags: ['autodocs'],
-25	  args: { config: baseConfig },
-26	};
-27	export default meta;
-28	
-29	type Story = StoryObj<typeof WordSpell>;
-30	
-31	export const PictureMode: Story = {};
-32	
-33	export const RecallMode: Story = {
-34	  args: {
-35	    config: {
-36	      ...baseConfig,
-37	      mode: 'recall',
-38	      tileBankMode: 'distractors',
-39	      distractorCount: 4,
-40	      rounds: [{ word: 'cat' }],
-41	    },
-42	  },
-43	};
-44	
-45	export const ScrambleMode: Story = {
-46	  args: { config: { ...baseConfig, mode: 'scramble' } },
-47	};
-48	
-49	export const SentenceGapMode: Story = {
-50	  args: {
-51	    config: {
-52	      ...baseConfig,
-53	      mode: 'sentence-gap',
-54	      rounds: [
-55	        {
-56	          word: 'sat',
-57	          image: 'https://placehold.co/160?text=scene',
-58	          sentence: 'The cat ___ on the mat.',
-59	        },
-60	      ],
-61	    },
-62	  },
-63	};
-64	
-65	export const WithDistractors: Story = {
-66	  args: {
-67	    config: {
-68	      ...baseConfig,
-69	      tileBankMode: 'distractors',
-70	      distractorCount: 3,
-71	    },
-72	  },
-73	};
-74	
-75	export const LockManualWrongTile: Story = {
-76	  args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
-77	};
+1 import { WordSpell } from './WordSpell';
+2 import type { WordSpellConfig } from '../types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const baseConfig: WordSpellConfig = {
+6   gameId: 'word-spell-storybook',
+7   component: 'WordSpell',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 5,
+12   roundsInOrder: true,
+13   ttsEnabled: true,
+14   mode: 'picture',
+15   tileUnit: 'letter',
+16   rounds: [
+17     { word: 'cat', image: 'https://placehold.co/160?text=🐱' },
+18     { word: 'dog', image: 'https://placehold.co/160?text=🐶' },
+19   ],
+20 };
+21 
+22 const meta: Meta<typeof WordSpell> = {
+23   component: WordSpell,
+24   tags: ['autodocs'],
+25   args: { config: baseConfig },
+26 };
+27 export default meta;
+28 
+29 type Story = StoryObj<typeof WordSpell>;
+30 
+31 export const PictureMode: Story = {};
+32 
+33 export const RecallMode: Story = {
+34   args: {
+35     config: {
+36       ...baseConfig,
+37       mode: 'recall',
+38       tileBankMode: 'distractors',
+39       distractorCount: 4,
+40       rounds: [{ word: 'cat' }],
+41     },
+42   },
+43 };
+44 
+45 export const ScrambleMode: Story = {
+46   args: { config: { ...baseConfig, mode: 'scramble' } },
+47 };
+48 
+49 export const SentenceGapMode: Story = {
+50   args: {
+51     config: {
+52       ...baseConfig,
+53       mode: 'sentence-gap',
+54       rounds: [
+55         {
+56           word: 'sat',
+57           image: 'https://placehold.co/160?text=scene',
+58           sentence: 'The cat ___ on the mat.',
+59         },
+60       ],
+61     },
+62   },
+63 };
+64 
+65 export const WithDistractors: Story = {
+66   args: {
+67     config: {
+68       ...baseConfig,
+69       tileBankMode: 'distractors',
+70       distractorCount: 3,
+71     },
+72   },
+73 };
+74 
+75 export const LockManualWrongTile: Story = {
+76   args: { config: { ...baseConfig, wrongTileBehavior: 'lock-manual' } },
+77 };
 78
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:24Z)**_
@@ -1001,76 +1021,77 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:24Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.stories.tsx`
 
 ```text
-1	import { NumberMatch } from './NumberMatch';
-2	import type { NumberMatchConfig } from '../types';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const baseConfig: NumberMatchConfig = {
-6	  gameId: 'number-match-storybook',
-7	  component: 'NumberMatch',
-8	  inputMethod: 'drag',
-9	  wrongTileBehavior: 'lock-auto-eject',
-10	  tileBankMode: 'exact',
-11	  totalRounds: 5,
-12	  roundsInOrder: true,
-13	  ttsEnabled: true,
-14	  mode: 'numeral-to-group',
-15	  tileStyle: 'dots',
-16	  range: { min: 1, max: 5 },
-17	  rounds: [{ value: 3 }, { value: 1 }, { value: 5 }],
-18	};
-19	
-20	const meta: Meta<typeof NumberMatch> = {
-21	  component: NumberMatch,
-22	  tags: ['autodocs'],
-23	  args: { config: baseConfig },
-24	};
-25	export default meta;
-26	
-27	type Story = StoryObj<typeof NumberMatch>;
-28	
-29	export const NumeralToGroup: Story = {};
-30	
-31	export const GroupToNumeral: Story = {
-32	  args: { config: { ...baseConfig, mode: 'group-to-numeral' } },
-33	};
-34	
-35	export const NumeralToWord: Story = {
-36	  args: {
-37	    config: {
-38	      ...baseConfig,
-39	      mode: 'numeral-to-word',
-40	      tileStyle: 'fingers',
-41	    },
-42	  },
-43	};
-44	
-45	export const WordToNumeral: Story = {
-46	  args: {
-47	    config: {
-48	      ...baseConfig,
-49	      mode: 'word-to-numeral',
-50	      tileStyle: 'objects',
-51	    },
-52	  },
-53	};
-54	
-55	export const DotsStyle: Story = {
-56	  args: { config: { ...baseConfig, tileStyle: 'dots' } },
-57	};
-58	export const ObjectsStyle: Story = {
-59	  args: {
-60	    config: {
-61	      ...baseConfig,
-62	      tileStyle: 'objects',
-63	      rounds: [
-64	        { value: 3, objectImage: 'https://placehold.co/32?text=🍎' },
-65	      ],
-66	    },
-67	  },
-68	};
+1 import { NumberMatch } from './NumberMatch';
+2 import type { NumberMatchConfig } from '../types';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const baseConfig: NumberMatchConfig = {
+6   gameId: 'number-match-storybook',
+7   component: 'NumberMatch',
+8   inputMethod: 'drag',
+9   wrongTileBehavior: 'lock-auto-eject',
+10   tileBankMode: 'exact',
+11   totalRounds: 5,
+12   roundsInOrder: true,
+13   ttsEnabled: true,
+14   mode: 'numeral-to-group',
+15   tileStyle: 'dots',
+16   range: { min: 1, max: 5 },
+17   rounds: [{ value: 3 }, { value: 1 }, { value: 5 }],
+18 };
+19 
+20 const meta: Meta<typeof NumberMatch> = {
+21   component: NumberMatch,
+22   tags: ['autodocs'],
+23   args: { config: baseConfig },
+24 };
+25 export default meta;
+26 
+27 type Story = StoryObj<typeof NumberMatch>;
+28 
+29 export const NumeralToGroup: Story = {};
+30 
+31 export const GroupToNumeral: Story = {
+32   args: { config: { ...baseConfig, mode: 'group-to-numeral' } },
+33 };
+34 
+35 export const NumeralToWord: Story = {
+36   args: {
+37     config: {
+38       ...baseConfig,
+39       mode: 'numeral-to-word',
+40       tileStyle: 'fingers',
+41     },
+42   },
+43 };
+44 
+45 export const WordToNumeral: Story = {
+46   args: {
+47     config: {
+48       ...baseConfig,
+49       mode: 'word-to-numeral',
+50       tileStyle: 'objects',
+51     },
+52   },
+53 };
+54 
+55 export const DotsStyle: Story = {
+56   args: { config: { ...baseConfig, tileStyle: 'dots' } },
+57 };
+58 export const ObjectsStyle: Story = {
+59   args: {
+60     config: {
+61       ...baseConfig,
+62       tileStyle: 'objects',
+63       rounds: [
+64         { value: 3, objectImage: 'https://placehold.co/32?text=🍎' },
+65       ],
+66     },
+67   },
+68 };
 69
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:34Z)**_
@@ -1079,6 +1100,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:34Z)**_
 Now I have all the files I need. Let me apply the changes to all 9 story files.
 
 For stories with `AnswerGameProvider` wrapper (need `withDb` as outermost):
+
 1. AudioButton.stories.tsx
 2. DotGroupQuestion.stories.tsx
 3. TextQuestion.stories.tsx
@@ -1089,9 +1111,8 @@ For stories with `AnswerGameProvider` wrapper (need `withDb` as outermost):
 For stories without decorators (need to add):
 7. AnswerGame.stories.tsx - add `withDb`
 
-
-8. WordSpell.stories.tsx - add `withDb` + `withRouter`
-9. NumberMatch.stories.tsx - add `withDb` + `withRouter`
+1. WordSpell.stories.tsx - add `withDb` + `withRouter`
+2. NumberMatch.stories.tsx - add `withDb` + `withRouter`
 
 I'll start updating all the files now, making sure to add `withDb` as the outermost decorator for the wrapped stories and adding both `withDb` and `withRouter` where needed.
 </details></think>
@@ -1108,6 +1129,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/AudioButton/AudioButton.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:38Z)**_
@@ -1118,6 +1140,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:40Z)**_
@@ -1128,6 +1151,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/TextQuestion/TextQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:41Z)**_
@@ -1138,6 +1162,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/ImageQuestion/ImageQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:46Z)**_
@@ -1158,6 +1183,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/AudioButton/AudioButton.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:50Z)**_
@@ -1168,6 +1194,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:51Z)**_
@@ -1178,6 +1205,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/TextQuestion/TextQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:52Z)**_
@@ -1188,6 +1216,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:36:52Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/ImageQuestion/ImageQuestion.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:36:59Z)**_
@@ -1202,6 +1231,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:07Z)**_
@@ -1222,6 +1252,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:13Z)**_
@@ -1236,6 +1267,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:19Z)**_
@@ -1250,6 +1282,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:29Z)**_
@@ -1260,6 +1293,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:33Z)**_
@@ -1274,6 +1308,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:40Z)**_
@@ -1284,6 +1319,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:44Z)**_
@@ -1299,6 +1335,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:45Z)**_
 ```text
 worktrees/feat-word-spell-number-match/.storybook/decorators/withRouter.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:37:53Z)**_
@@ -1309,6 +1346,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:37:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:38:02Z)**_
@@ -1319,6 +1357,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:38:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:38:08Z)**_
@@ -1329,6 +1368,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:38:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:38:15Z)**_
@@ -1345,6 +1385,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:38:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:38:22Z)**_
@@ -1374,6 +1415,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:39:41Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:39:48Z)**_
@@ -1385,6 +1427,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:39:48Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:39:53Z)**_
@@ -1396,6 +1439,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:39:53Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:39:58Z)**_
@@ -1409,6 +1453,7 @@ Find write-storybook skill file
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:40:21Z)**_
@@ -1420,6 +1465,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:40:21Z)**_
 ```text
 Ripgrep search timed out after 20 seconds. The search may have matched files but did not complete in time. Try searching a more specific path or pattern.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:40:24Z)**_
@@ -1434,6 +1480,7 @@ List local skills directory
 write-e2e-vr-tests
 write-storybook
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:40:28Z)**_
@@ -1447,6 +1494,7 @@ List write-storybook skill contents
 ```text
 SKILL.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:40:32Z)**_
@@ -1493,6 +1541,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:40:32Z)**_
 102:| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params |
 103:| Adding `ThemeProvider` decorator                      | Already global — skip                                                 |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:40:36Z)**_
@@ -1502,111 +1551,112 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:40:36Z)**_
  `./.claude/skills/write-storybook/SKILL.md`
 
 ```text
-1	---
-2	name: write-storybook
-3	description: Use when adding or writing Storybook stories for React components in this project — covers file structure, meta config, named exports, decorators, and required variants
-4	---
-5	
-6	# Write Storybook
-7	
-8	## Overview
-9	
-10	Stories live co-located with their component (`ComponentName.stories.tsx`). Each story file exports a `default` meta object and named `Story` exports for each variant. This project uses `@storybook/react` with TanStack Router and `next-themes`.
-11	
-12	## Rules
-13	
-14	- **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
-15	- **All story variants use named exports**: `export const Default: Story = {}`
-16	- Every story file **must include a `Default` story**
-17	- Use `tags: ['autodocs']` in meta unless there's a reason not to
-18	- Do NOT import `React` — JSX transform handles it
-19	
-20	## File Structure
-21	
-22	```
-23	src/components/MyComponent.stories.tsx
-24	```
-25	
-26	## Minimal Template
-27	
-28	```tsx
-29	import { MyComponent } from './MyComponent';
-30	import type { Meta, StoryObj } from '@storybook/react';
-31	
-32	const meta: Meta<typeof MyComponent> = {
-33	  component: MyComponent,
-34	  tags: ['autodocs'],
-35	  args: {
-36	    // shared default props
-37	  },
-38	  argTypes: {
-39	    onSomeAction: { action: 'someAction' },
-40	  },
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<typeof MyComponent>;
-45	
-46	export const Default: Story = {};
-47	
-48	export const SomeVariant: Story = {
-49	  args: { propName: value },
-50	};
-51	```
-52	
-53	## Decorators
-54	
-55	Use decorators when the component depends on context providers:
-56	
-57	| Needs                                           | Decorator                                                  |
-58	| ----------------------------------------------- | ---------------------------------------------------------- |
-59	| TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `../../.storybook/decorators/withRouter` |
-60	| Theme toggle                                    | `withTheme` — already applied globally via `preview.tsx`   |
-61	| ThemeProvider                                   | Already applied globally — do NOT add again                |
-62	
-63	```tsx
-64	import { withRouter } from '../../.storybook/decorators/withRouter';
-65	
-66	const meta: Meta<typeof MyComponent> = {
-67	  component: MyComponent,
-68	  tags: ['autodocs'],
-69	  decorators: [withRouter],
-70	};
-71	```
-72	
-73	## Required Story Variants
-74	
-75	Cover these states to give Storybook meaningful value:
-76	
-77	- **Default** — happy path, all required props
-78	- **Empty / no data** — if component renders a list or optional content
-79	- **Loading / error** — if component has async states
-80	- **Edge case** — long text, zero items, boundary values
-81	- **Interaction states** — selected, bookmarked, disabled, etc.
-82	
-83	## argTypes for Event Handlers
-84	
-85	Any prop starting with `on` should use `{ action: '...' }`:
-86	
-87	```tsx
-88	argTypes: {
-89	  onBookmarkToggle: { action: 'bookmarkToggled' },
-90	  onPlay: { action: 'played' },
-91	},
-92	```
-93	
-94	## Common Mistakes
-95	
-96	| Mistake                                               | Fix                                                                   |
-97	| ----------------------------------------------------- | --------------------------------------------------------------------- |
-98	| `import React from 'react'` at top                    | Remove — not needed                                                   |
-99	| Named export for meta (`export const meta`)           | Use `export default meta`                                             |
-100	| Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                |
-101	| Missing `Default` story                               | Always add one                                                        |
-102	| Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params |
-103	| Adding `ThemeProvider` decorator                      | Already global — skip                                                 |
+1 ---
+2 name: write-storybook
+3 description: Use when adding or writing Storybook stories for React components in this project — covers file structure, meta config, named exports, decorators, and required variants
+4 ---
+5 
+6 # Write Storybook
+7 
+8 ## Overview
+9 
+10 Stories live co-located with their component (`ComponentName.stories.tsx`). Each story file exports a `default` meta object and named `Story` exports for each variant. This project uses `@storybook/react` with TanStack Router and `next-themes`.
+11 
+12 ## Rules
+13 
+14 - **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
+15 - **All story variants use named exports**: `export const Default: Story = {}`
+16 - Every story file **must include a `Default` story**
+17 - Use `tags: ['autodocs']` in meta unless there's a reason not to
+18 - Do NOT import `React` — JSX transform handles it
+19 
+20 ## File Structure
+21 
+22 ```
+23 src/components/MyComponent.stories.tsx
+24 ```
+25 
+26 ## Minimal Template
+27 
+28 ```tsx
+29 import { MyComponent } from './MyComponent';
+30 import type { Meta, StoryObj } from '@storybook/react';
+31 
+32 const meta: Meta<typeof MyComponent> = {
+33   component: MyComponent,
+34   tags: ['autodocs'],
+35   args: {
+36     // shared default props
+37   },
+38   argTypes: {
+39     onSomeAction: { action: 'someAction' },
+40   },
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<typeof MyComponent>;
+45 
+46 export const Default: Story = {};
+47 
+48 export const SomeVariant: Story = {
+49   args: { propName: value },
+50 };
+51 ```
+52 
+53 ## Decorators
+54 
+55 Use decorators when the component depends on context providers:
+56 
+57 | Needs                                           | Decorator                                                  |
+58 | ----------------------------------------------- | ---------------------------------------------------------- |
+59 | TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `../../.storybook/decorators/withRouter` |
+60 | Theme toggle                                    | `withTheme` — already applied globally via `preview.tsx`   |
+61 | ThemeProvider                                   | Already applied globally — do NOT add again                |
+62 
+63 ```tsx
+64 import { withRouter } from '../../.storybook/decorators/withRouter';
+65 
+66 const meta: Meta<typeof MyComponent> = {
+67   component: MyComponent,
+68   tags: ['autodocs'],
+69   decorators: [withRouter],
+70 };
+71 ```
+72 
+73 ## Required Story Variants
+74 
+75 Cover these states to give Storybook meaningful value:
+76 
+77 - **Default** — happy path, all required props
+78 - **Empty / no data** — if component renders a list or optional content
+79 - **Loading / error** — if component has async states
+80 - **Edge case** — long text, zero items, boundary values
+81 - **Interaction states** — selected, bookmarked, disabled, etc.
+82 
+83 ## argTypes for Event Handlers
+84 
+85 Any prop starting with `on` should use `{ action: '...' }`:
+86 
+87 ```tsx
+88 argTypes: {
+89   onBookmarkToggle: { action: 'bookmarkToggled' },
+90   onPlay: { action: 'played' },
+91 },
+92 ```
+93 
+94 ## Common Mistakes
+95 
+96 | Mistake                                               | Fix                                                                   |
+97 | ----------------------------------------------------- | --------------------------------------------------------------------- |
+98 | `import React from 'react'` at top                    | Remove — not needed                                                   |
+99 | Named export for meta (`export const meta`)           | Use `export default meta`                                             |
+100 | Default export for stories (`export default Default`) | Use `export const Default: Story = {}`                                |
+101 | Missing `Default` story                               | Always add one                                                        |
+102 | Forgetting `withRouter` for routing components        | Check if component calls `useNavigate`, `Link`, or reads route params |
+103 | Adding `ThemeProvider` decorator                      | Already global — skip                                                 |
 104
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:41:35Z)**_
@@ -1617,6 +1667,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:41:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/skills/write-storybook/SKILL.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:41:39Z)**_
@@ -1631,6 +1682,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:42:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/skills/write-storybook/SKILL.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:42:16Z)**_
@@ -1665,6 +1717,7 @@ echo "Storybook PID: $!"
 ```text
 Command running in background with ID: b3lso49pn. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/8474b5a8-e06d-4c70-af0c-1dd6385b18d3/tasks/b3lso49pn.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:42:58Z)**_
@@ -1678,6 +1731,7 @@ Wait for Storybook to be ready on port 6006
 ```text
 200
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:43:13Z)**_
@@ -2094,6 +2148,7 @@ Message:
 Ran all test suites**.**
 Done in 10.80s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:43:17Z)**_
@@ -2171,12 +2226,14 @@ If the change is intentional, run: yarn test:vr:update
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:22Z)**_
 
 <think><details><summary>Thought Process</summary>
 There are 2 VR tests failing:
+
 1. `@visual WordSpell picture mode mid-game layout` - timeout waiting for a Letter button to be visible
 2. `@visual NumberMatch numeral-to-group layout` - likely same issue
 
@@ -2196,62 +2253,63 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:44:23Z)**_
  `./worktrees/feat-word-spell-number-match/e2e/visual.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	
-4	test.beforeEach(async ({ page }) => {
-5	  await seedMathRandom(page);
-6	});
-7	
-8	test('@visual home page', async ({ page }) => {
-9	  await page.goto('/en/');
-10	  await page.getByRole('main').waitFor({ state: 'visible' });
-11	  await page
-12	    .getByRole('group', { name: /filter by grade level/i })
-13	    .waitFor({ state: 'visible' });
-14	  await expect(page).toHaveScreenshot('home.png', { fullPage: true });
-15	});
-16	
-17	test('@visual game shell layout', async ({ page }) => {
-18	  await page.goto('/en/game/word-spell');
-19	  // Wait for the exit button — signals the GameShell chrome is fully mounted
-20	  await page
-21	    .getByRole('button', { name: /exit/i })
-22	    .waitFor({ state: 'visible' });
-23	  await expect(page).toHaveScreenshot('game-shell.png', {
-24	    fullPage: true,
-25	  });
-26	});
-27	
-28	test('@visual WordSpell picture mode mid-game layout', async ({
-29	  page,
-30	}) => {
-31	  await page.goto('/en/game/word-spell');
-32	  await page
-33	    .getByRole('button', { name: /^Letter /i })
-34	    .first()
-35	    .waitFor({ state: 'visible' });
-36	  await expect(page).toHaveScreenshot('word-spell-picture-mode.png', {
-37	    fullPage: true,
-38	  });
-39	});
-40	
-41	test('@visual NumberMatch numeral-to-group layout', async ({
-42	  page,
-43	}) => {
-44	  await page.goto('/en/game/number-match');
-45	  await page
-46	    .getByRole('button', { name: 'Hear the question' })
-47	    .waitFor({ state: 'visible' });
-48	  await expect(page).toHaveScreenshot(
-49	    'number-match-numeral-to-group.png',
-50	    {
-51	      fullPage: true,
-52	    },
-53	  );
-54	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 
+4 test.beforeEach(async ({ page }) => {
+5   await seedMathRandom(page);
+6 });
+7 
+8 test('@visual home page', async ({ page }) => {
+9   await page.goto('/en/');
+10   await page.getByRole('main').waitFor({ state: 'visible' });
+11   await page
+12     .getByRole('group', { name: /filter by grade level/i })
+13     .waitFor({ state: 'visible' });
+14   await expect(page).toHaveScreenshot('home.png', { fullPage: true });
+15 });
+16 
+17 test('@visual game shell layout', async ({ page }) => {
+18   await page.goto('/en/game/word-spell');
+19   // Wait for the exit button — signals the GameShell chrome is fully mounted
+20   await page
+21     .getByRole('button', { name: /exit/i })
+22     .waitFor({ state: 'visible' });
+23   await expect(page).toHaveScreenshot('game-shell.png', {
+24     fullPage: true,
+25   });
+26 });
+27 
+28 test('@visual WordSpell picture mode mid-game layout', async ({
+29   page,
+30 }) => {
+31   await page.goto('/en/game/word-spell');
+32   await page
+33     .getByRole('button', { name: /^Letter /i })
+34     .first()
+35     .waitFor({ state: 'visible' });
+36   await expect(page).toHaveScreenshot('word-spell-picture-mode.png', {
+37     fullPage: true,
+38   });
+39 });
+40 
+41 test('@visual NumberMatch numeral-to-group layout', async ({
+42   page,
+43 }) => {
+44   await page.goto('/en/game/number-match');
+45   await page
+46     .getByRole('button', { name: 'Hear the question' })
+47     .waitFor({ state: 'visible' });
+48   await expect(page).toHaveScreenshot(
+49     'number-match-numeral-to-group.png',
+50     {
+51       fullPage: true,
+52     },
+53   );
+54 });
 55
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:32Z)**_
@@ -2260,11 +2318,11 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:44:32Z)**_
 The VR tests test the actual app. They navigate to `/en/game/word-spell` and `/en/game/number-match` and wait for certain UI elements. These are new tests for the new WordSpell and NumberMatch games that we're adding.
 
 The tests are failing because:
+
 1. For WordSpell: it waits for a `Letter` button to be visible (timeout). This might fail because the app isn't running, or because the game doesn't load properly.
 2. For NumberMatch: it waits for "Hear the question" button.
 
 These VR tests require a running dev server. The issue might be that:
-
 
 1. The dev server isn't running (the VR tests need the app to be running)
 2. The new games need something in the DB to work (like a game config)
@@ -2333,6 +2391,7 @@ export default defineConfig({
   },
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:44Z)**_
@@ -2343,8 +2402,8 @@ The VR tests run against the built app served at port 3000. The `test:vr` comman
 The test for WordSpell waits for a `Letter` button (which is part of the LetterTileBank), and NumberMatch waits for "Hear the question" button.
 
 The timeout suggests the button doesn't appear. This could be because:
-1. The route doesn't exist (the game routes might not be set up correctly)
 
+1. The route doesn't exist (the game routes might not be set up correctly)
 
 2. The game isn't loading with the proper configuration
 
@@ -2368,6 +2427,7 @@ Find game config data for word-spell and number-match
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:50Z)**_
@@ -2385,6 +2445,7 @@ Find game config references
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/routes/$locale/_app/game/$gameId.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:53Z)**_
@@ -2394,38 +2455,39 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:44:53Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/registry.ts`
 
 ```text
-1	export type GameLevel = 'PK' | 'K' | '1' | '2' | '3' | '4';
-2	export type GameSubject = 'math' | 'reading' | 'letters';
-3	
-4	export type GameCatalogEntry = {
-5	  id: string;
-6	  titleKey: string;
-7	  levels: GameLevel[];
-8	  subject: GameSubject;
-9	};
-10	
-11	export const GAME_CATALOG: GameCatalogEntry[] = [
-12	  {
-13	    id: 'word-spell',
-14	    titleKey: 'word-spell',
-15	    levels: ['PK', 'K', '1'],
-16	    subject: 'reading',
-17	  },
-18	  {
-19	    id: 'number-match',
-20	    titleKey: 'number-match',
-21	    levels: ['1', '2'],
-22	    subject: 'math',
-23	  },
-24	  {
-25	    id: 'sort-numbers',
-26	    titleKey: 'sort-numbers',
-27	    levels: ['K', '1', '2'],
-28	    subject: 'math',
-29	  },
-30	];
+1 export type GameLevel = 'PK' | 'K' | '1' | '2' | '3' | '4';
+2 export type GameSubject = 'math' | 'reading' | 'letters';
+3 
+4 export type GameCatalogEntry = {
+5   id: string;
+6   titleKey: string;
+7   levels: GameLevel[];
+8   subject: GameSubject;
+9 };
+10 
+11 export const GAME_CATALOG: GameCatalogEntry[] = [
+12   {
+13     id: 'word-spell',
+14     titleKey: 'word-spell',
+15     levels: ['PK', 'K', '1'],
+16     subject: 'reading',
+17   },
+18   {
+19     id: 'number-match',
+20     titleKey: 'number-match',
+21     levels: ['1', '2'],
+22     subject: 'math',
+23   },
+24   {
+25     id: 'sort-numbers',
+26     titleKey: 'sort-numbers',
+27     levels: ['K', '1', '2'],
+28     subject: 'math',
+29   },
+30 ];
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:44:58Z)**_
@@ -2435,582 +2497,583 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:44:58Z)**_
  `./worktrees/feat-word-spell-number-match/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	// src/routes/$locale/_app/game/$gameId.tsx
-2	import { createFileRoute } from '@tanstack/react-router';
-3	import { nanoid } from 'nanoid';
-4	import { useState } from 'react';
-5	import type { NumberMatchConfig } from '@/games/number-match/types';
-6	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-7	import type { WordSpellConfig } from '@/games/word-spell/types';
-8	import type {
-9	  GameEngineState,
-10	  MoveLog,
-11	  ResolvedContent,
-12	  ResolvedGameConfig,
-13	  SessionMeta,
-14	} from '@/lib/game-engine/types';
-15	import type { JSX } from 'react';
-16	import { GameShell } from '@/components/game/GameShell';
-17	import { getOrCreateDatabase } from '@/db/create-database';
-18	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-19	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-20	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-21	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-22	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-23	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-24	
-25	// Stub content used until M5 introduces game registrations
-26	const STUB_CONTENT: ResolvedContent = {
-27	  rounds: [
-28	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-29	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-30	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-31	  ],
-32	};
-33	
-34	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-35	  gameId,
-36	  title: { en: gameId },
-37	  gradeBand: 'year1-2',
-38	  maxRounds: 3,
-39	  maxRetries: 1,
-40	  maxUndoDepth: 3,
-41	  timerVisible: false,
-42	  timerDurationSeconds: null,
-43	  difficulty: 'medium',
-44	});
-45	
-46	interface GameRouteLoaderData {
-47	  config: ResolvedGameConfig;
-48	  initialLog: MoveLog | null;
-49	  sessionId: string;
-50	  meta: SessionMeta;
-51	}
-52	
-53	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-54	  gameId: 'word-spell',
-55	  component: 'WordSpell',
-56	  inputMethod: 'drag',
-57	  wrongTileBehavior: 'lock-auto-eject',
-58	  tileBankMode: 'exact',
-59	  totalRounds: 3,
-60	  roundsInOrder: false,
-61	  ttsEnabled: true,
-62	  mode: 'picture',
-63	  tileUnit: 'letter',
-64	  rounds: [
-65	    { word: 'cat', emoji: '🐱' },
-66	    { word: 'dog', emoji: '🐶' },
-67	    { word: 'sun', emoji: '☀️' },
-68	    { word: 'pin', emoji: '📌' },
-69	    { word: 'sad', emoji: '☹️' },
-70	    { word: 'ant', emoji: '🐜' },
-71	    { word: 'can', emoji: '🥫' },
-72	    { word: 'mum', emoji: '🤱' },
-73	  ],
-74	};
-75	
-76	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-77	  gameId: 'number-match',
-78	  component: 'NumberMatch',
-79	  inputMethod: 'drag',
-80	  wrongTileBehavior: 'lock-auto-eject',
-81	  tileBankMode: 'distractors',
-82	  distractorCount: 5,
-83	  totalRounds: 3,
-84	  roundsInOrder: false,
-85	  ttsEnabled: true,
-86	  mode: 'numeral-to-group',
-87	  tileStyle: 'dots',
-88	  range: { min: 1, max: 12 },
-89	  rounds: Array.from({ length: 3 }, () => ({
-90	    value: Math.floor(Math.random() * 12) + 1,
-91	  })),
-92	});
-93	
-94	const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
-95	  gameId: 'sort-numbers',
-96	  component: 'SortNumbers',
-97	  inputMethod: 'drag',
-98	  wrongTileBehavior: 'lock-manual',
-99	  tileBankMode: 'exact',
-100	  totalRounds: 4,
-101	  roundsInOrder: false,
-102	  ttsEnabled: true,
-103	  direction: 'ascending',
-104	  range: { min: 11, max: 99 },
-105	  quantity: 6,
-106	  allowSkips: true,
-107	  rounds: generateSortRounds({
-108	    range: { min: 11, max: 99 },
-109	    quantity: 6,
-110	    allowSkips: true,
-111	    totalRounds: 8,
-112	  }),
-113	});
-114	
-115	const SortNumbersConfigPanel = ({
-116	  config,
-117	  onChange,
-118	}: {
-119	  config: SortNumbersConfig;
-120	  onChange: (c: SortNumbersConfig) => void;
-121	}) => {
-122	  const [open, setOpen] = useState(false);
-123	
-124	  const regenerate = () => {
-125	    onChange({
-126	      ...config,
-127	      rounds: generateSortRounds({
-128	        range: config.range,
-129	        quantity: config.quantity,
-130	        allowSkips: config.allowSkips,
-131	        totalRounds: config.totalRounds,
-132	      }),
-133	    });
-134	  };
-135	
-136	  return (
-137	    <details
-138	      open={open}
-139	      onToggle={(e) =>
-140	        setOpen((e.currentTarget as HTMLDetailsElement).open)
-141	      }
-142	      className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
-143	    >
-144	      <summary className="cursor-pointer font-medium">
-145	        ⚙️ Game Config
-146	      </summary>
-147	      <div className="mt-3 flex flex-col gap-3">
-148	        <label className="flex flex-col gap-1">
-149	          Direction
-150	          <select
-151	            value={config.direction}
-152	            onChange={(e) =>
-153	              onChange({
-154	                ...config,
-155	                direction: e.target
-156	                  .value as SortNumbersConfig['direction'],
-157	              })
-158	            }
-159	            className="rounded border px-2 py-1"
-160	          >
-161	            <option value="ascending">ascending</option>
-162	            <option value="descending">descending</option>
-163	          </select>
-164	        </label>
-165	        <label className="flex flex-col gap-1">
-166	          Quantity
-167	          <input
-168	            type="number"
-169	            value={config.quantity}
-170	            min={2}
-171	            max={8}
-172	            onChange={(e) =>
-173	              onChange({ ...config, quantity: Number(e.target.value) })
-174	            }
-175	            className="rounded border px-2 py-1"
-176	          />
-177	        </label>
-178	        <label className="flex flex-col gap-1">
-179	          Range min
-180	          <input
-181	            type="number"
-182	            value={config.range.min}
-183	            min={1}
-184	            max={config.range.max - 1}
-185	            onChange={(e) =>
-186	              onChange({
-187	                ...config,
-188	                range: { ...config.range, min: Number(e.target.value) },
-189	              })
-190	            }
-191	            className="rounded border px-2 py-1"
-192	          />
-193	        </label>
-194	        <label className="flex flex-col gap-1">
-195	          Range max
-196	          <input
-197	            type="number"
-198	            value={config.range.max}
-199	            min={config.range.min + 1}
-200	            max={100}
-201	            onChange={(e) =>
-202	              onChange({
-203	                ...config,
-204	                range: { ...config.range, max: Number(e.target.value) },
-205	              })
-206	            }
-207	            className="rounded border px-2 py-1"
-208	          />
-209	        </label>
-210	        <label className="flex items-center gap-2">
-211	          <input
-212	            type="checkbox"
-213	            checked={config.allowSkips}
-214	            onChange={(e) =>
-215	              onChange({ ...config, allowSkips: e.target.checked })
-216	            }
-217	          />
-218	          Allow skips
-219	        </label>
-220	        <label className="flex items-center gap-2">
-221	          <input
-222	            type="checkbox"
-223	            checked={config.ttsEnabled}
-224	            onChange={(e) =>
-225	              onChange({ ...config, ttsEnabled: e.target.checked })
-226	            }
-227	          />
-228	          TTS enabled
-229	        </label>
-230	        <button
-231	          type="button"
-232	          onClick={regenerate}
-233	          className="rounded border px-2 py-1 text-sm"
-234	        >
-235	          Regenerate rounds
-236	        </button>
-237	      </div>
-238	    </details>
-239	  );
-240	};
-241	
-242	const WordSpellConfigPanel = ({
-243	  config,
-244	  onChange,
-245	}: {
-246	  config: WordSpellConfig;
-247	  onChange: (c: WordSpellConfig) => void;
-248	}) => {
-249	  const [open, setOpen] = useState(false);
-250	
-251	  return (
-252	    <details
-253	      open={open}
-254	      onToggle={(e) =>
-255	        setOpen((e.currentTarget as HTMLDetailsElement).open)
-256	      }
-257	      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
-258	    >
-259	      <summary className="cursor-pointer font-medium">
-260	        ⚙️ Game Config
-261	      </summary>
-262	      <div className="mt-3 flex flex-col gap-3">
-263	        <label className="flex flex-col gap-1">
-264	          Input method
-265	          <select
-266	            value={config.inputMethod}
-267	            onChange={(e) =>
-268	              onChange({
-269	                ...config,
-270	                inputMethod: e.target
-271	                  .value as WordSpellConfig['inputMethod'],
-272	              })
-273	            }
-274	            className="rounded border px-2 py-1"
-275	          >
-276	            <option value="drag">drag</option>
-277	            <option value="type">type</option>
-278	            <option value="both">both</option>
-279	          </select>
-280	        </label>
-281	        <label className="flex flex-col gap-1">
-282	          Wrong tile behaviour
-283	          <select
-284	            value={config.wrongTileBehavior}
-285	            onChange={(e) =>
-286	              onChange({
-287	                ...config,
-288	                wrongTileBehavior: e.target
-289	                  .value as WordSpellConfig['wrongTileBehavior'],
-290	              })
-291	            }
-292	            className="rounded border px-2 py-1"
-293	          >
-294	            <option value="reject">reject</option>
-295	            <option value="lock-manual">lock-manual</option>
-296	            <option value="lock-auto-eject">lock-auto-eject</option>
-297	          </select>
-298	        </label>
-299	        <label className="flex items-center gap-2">
-300	          <input
-301	            type="checkbox"
-302	            checked={config.ttsEnabled}
-303	            onChange={(e) =>
-304	              onChange({ ...config, ttsEnabled: e.target.checked })
-305	            }
-306	          />
-307	          TTS enabled
-308	        </label>
-309	      </div>
-310	    </details>
-311	  );
-312	};
-313	
-314	const NumberMatchConfigPanel = ({
-315	  config,
-316	  onChange,
-317	}: {
-318	  config: NumberMatchConfig;
-319	  onChange: (c: NumberMatchConfig) => void;
-320	}) => {
-321	  const [open, setOpen] = useState(false);
-322	
-323	  return (
-324	    <details
-325	      open={open}
-326	      onToggle={(e) =>
-327	        setOpen((e.currentTarget as HTMLDetailsElement).open)
-328	      }
-329	      className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
-330	    >
-331	      <summary className="cursor-pointer font-medium">
-332	        ⚙️ Game Config
-333	      </summary>
-334	      <div className="mt-3 flex flex-col gap-3">
-335	        <label className="flex flex-col gap-1">
-336	          Mode
-337	          <select
-338	            value={config.mode}
-339	            onChange={(e) =>
-340	              onChange({
-341	                ...config,
-342	                mode: e.target.value as NumberMatchConfig['mode'],
-343	              })
-344	            }
-345	            className="rounded border px-2 py-1"
-346	          >
-347	            <option value="numeral-to-group">numeral-to-group</option>
-348	            <option value="group-to-numeral">group-to-numeral</option>
-349	            <option value="numeral-to-word">numeral-to-word</option>
-350	            <option value="word-to-numeral">word-to-numeral</option>
-351	          </select>
-352	        </label>
-353	        <label className="flex flex-col gap-1">
-354	          Tile style
-355	          <select
-356	            value={config.tileStyle}
-357	            onChange={(e) =>
-358	              onChange({
-359	                ...config,
-360	                tileStyle: e.target
-361	                  .value as NumberMatchConfig['tileStyle'],
-362	              })
-363	            }
-364	            className="rounded border px-2 py-1"
-365	          >
-366	            <option value="dots">dots</option>
-367	            <option value="objects">objects</option>
-368	            <option value="fingers">fingers</option>
-369	          </select>
-370	        </label>
-371	        <label className="flex flex-col gap-1">
-372	          Tile bank mode
-373	          <select
-374	            value={config.tileBankMode}
-375	            onChange={(e) =>
-376	              onChange({
-377	                ...config,
-378	                tileBankMode: e.target
-379	                  .value as NumberMatchConfig['tileBankMode'],
-380	              })
-381	            }
-382	            className="rounded border px-2 py-1"
-383	          >
-384	            <option value="exact">exact</option>
-385	            <option value="distractors">distractors</option>
-386	          </select>
-387	        </label>
-388	        <label className="flex flex-col gap-1">
-389	          Range min
-390	          <input
-391	            type="number"
-392	            value={config.range.min}
-393	            min={1}
-394	            max={config.range.max - 1}
-395	            onChange={(e) =>
-396	              onChange({
-397	                ...config,
-398	                range: { ...config.range, min: Number(e.target.value) },
-399	              })
-400	            }
-401	            className="rounded border px-2 py-1"
-402	          />
-403	        </label>
-404	        <label className="flex flex-col gap-1">
-405	          Range max
-406	          <input
-407	            type="number"
-408	            value={config.range.max}
-409	            min={config.range.min + 1}
-410	            max={20}
-411	            onChange={(e) =>
-412	              onChange({
-413	                ...config,
-414	                range: { ...config.range, max: Number(e.target.value) },
-415	              })
-416	            }
-417	            className="rounded border px-2 py-1"
-418	          />
-419	        </label>
-420	        <label className="flex items-center gap-2">
-421	          <input
-422	            type="checkbox"
-423	            checked={config.ttsEnabled}
-424	            onChange={(e) =>
-425	              onChange({ ...config, ttsEnabled: e.target.checked })
-426	            }
-427	          />
-428	          TTS enabled
-429	        </label>
-430	      </div>
-431	    </details>
-432	  );
-433	};
-434	
-435	const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
-436	  const [wordSpellConfig, setWordSpellConfig] =
-437	    useState<WordSpellConfig>(DEFAULT_WORD_SPELL_CONFIG);
-438	  const [numberMatchConfig, setNumberMatchConfig] =
-439	    useState<NumberMatchConfig>(makeDefaultNumberMatchConfig);
-440	  const [sortNumbersConfig, setSortNumbersConfig] =
-441	    useState<SortNumbersConfig>(makeDefaultSortNumbersConfig);
-442	
-443	  if (gameId === 'sort-numbers') {
-444	    return (
-445	      <>
-446	        {import.meta.env.DEV && (
-447	          <SortNumbersConfigPanel
-448	            config={sortNumbersConfig}
-449	            onChange={setSortNumbersConfig}
-450	          />
-451	        )}
-452	        <SortNumbers
-453	          key={sortNumbersConfig.inputMethod}
-454	          config={sortNumbersConfig}
-455	        />
-456	      </>
-457	    );
-458	  }
-459	
-460	  if (gameId === 'word-spell') {
-461	    return (
-462	      <>
-463	        {import.meta.env.DEV && (
-464	          <WordSpellConfigPanel
-465	            config={wordSpellConfig}
-466	            onChange={setWordSpellConfig}
-467	          />
-468	        )}
-469	        <WordSpell
-470	          key={wordSpellConfig.inputMethod}
-471	          config={wordSpellConfig}
-472	        />
-473	      </>
-474	    );
-475	  }
-476	  if (gameId === 'number-match') {
-477	    return (
-478	      <>
-479	        {import.meta.env.DEV && (
-480	          <NumberMatchConfigPanel
-481	            config={numberMatchConfig}
-482	            onChange={setNumberMatchConfig}
-483	          />
-484	        )}
-485	        <NumberMatch
-486	          key={numberMatchConfig.inputMethod}
-487	          config={numberMatchConfig}
-488	        />
-489	      </>
-490	    );
-491	  }
-492	  return (
-493	    <div className="flex h-full items-center justify-center text-muted-foreground">
-494	      <p>Game not found</p>
-495	    </div>
-496	  );
-497	};
-498	
-499	// Exported for direct testing — accepts loader data as props
-500	export const GameRoute = ({
-501	  config,
-502	  initialLog,
-503	  sessionId,
-504	  meta,
-505	}: GameRouteLoaderData): JSX.Element => (
-506	  <GameShell
-507	    config={config}
-508	    moves={{}}
-509	    initialState={meta.initialState}
-510	    sessionId={sessionId}
-511	    meta={meta}
-512	    initialLog={initialLog ?? undefined}
-513	  >
-514	    <GameBody gameId={config.gameId} />
-515	  </GameShell>
-516	);
-517	
-518	// Thin route component wrapper that reads from loader
-519	const RouteComponent = (): JSX.Element => {
-520	  const data = Route.useLoaderData();
-521	  return <GameRoute {...data} />;
-522	};
-523	
-524	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-525	  loader: async ({ params }): Promise<GameRouteLoaderData> => {
-526	    const { gameId } = params;
-527	    const profileId = 'default'; // M5: pull from profile context
-528	
-529	    const db = await getOrCreateDatabase();
-530	    const defaultConfig = makeDefaultConfig(gameId);
-531	    const config = await loadGameConfig(
-532	      gameId,
-533	      profileId,
-534	      defaultConfig.gradeBand,
-535	      db,
-536	      defaultConfig,
-537	    );
-538	
-539	    const initialLog = await findInProgressSession(
-540	      profileId,
-541	      gameId,
-542	      db,
-543	    );
-544	
-545	    const sessionId = initialLog?.sessionId ?? nanoid();
-546	    const seed = initialLog?.seed ?? nanoid();
-547	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-548	    const initialState: GameEngineState = initialLog?.initialState ?? {
-549	      phase: 'instructions',
-550	      roundIndex: 0,
-551	      score: 0,
-552	      streak: 0,
-553	      retryCount: 0,
-554	      content: initialContent,
-555	      currentRound: {
-556	        roundId: initialContent.rounds[0]?.id ?? '',
-557	        answer: null,
-558	        hintsUsed: 0,
-559	      },
-560	    };
-561	
-562	    const meta: SessionMeta = {
-563	      profileId,
-564	      gameId,
-565	      gradeBand: config.gradeBand,
-566	      seed,
-567	      initialContent,
-568	      initialState,
-569	    };
-570	
-571	    return { config, initialLog, sessionId, meta };
-572	  },
-573	  component: RouteComponent,
-574	});
+1 // src/routes/$locale/_app/game/$gameId.tsx
+2 import { createFileRoute } from '@tanstack/react-router';
+3 import { nanoid } from 'nanoid';
+4 import { useState } from 'react';
+5 import type { NumberMatchConfig } from '@/games/number-match/types';
+6 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+7 import type { WordSpellConfig } from '@/games/word-spell/types';
+8 import type {
+9   GameEngineState,
+10   MoveLog,
+11   ResolvedContent,
+12   ResolvedGameConfig,
+13   SessionMeta,
+14 } from '@/lib/game-engine/types';
+15 import type { JSX } from 'react';
+16 import { GameShell } from '@/components/game/GameShell';
+17 import { getOrCreateDatabase } from '@/db/create-database';
+18 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+19 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+20 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+21 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+22 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+23 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+24 
+25 // Stub content used until M5 introduces game registrations
+26 const STUB_CONTENT: ResolvedContent = {
+27   rounds: [
+28     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+29     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+30     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+31   ],
+32 };
+33 
+34 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+35   gameId,
+36   title: { en: gameId },
+37   gradeBand: 'year1-2',
+38   maxRounds: 3,
+39   maxRetries: 1,
+40   maxUndoDepth: 3,
+41   timerVisible: false,
+42   timerDurationSeconds: null,
+43   difficulty: 'medium',
+44 });
+45 
+46 interface GameRouteLoaderData {
+47   config: ResolvedGameConfig;
+48   initialLog: MoveLog | null;
+49   sessionId: string;
+50   meta: SessionMeta;
+51 }
+52 
+53 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+54   gameId: 'word-spell',
+55   component: 'WordSpell',
+56   inputMethod: 'drag',
+57   wrongTileBehavior: 'lock-auto-eject',
+58   tileBankMode: 'exact',
+59   totalRounds: 3,
+60   roundsInOrder: false,
+61   ttsEnabled: true,
+62   mode: 'picture',
+63   tileUnit: 'letter',
+64   rounds: [
+65     { word: 'cat', emoji: '🐱' },
+66     { word: 'dog', emoji: '🐶' },
+67     { word: 'sun', emoji: '☀️' },
+68     { word: 'pin', emoji: '📌' },
+69     { word: 'sad', emoji: '☹️' },
+70     { word: 'ant', emoji: '🐜' },
+71     { word: 'can', emoji: '🥫' },
+72     { word: 'mum', emoji: '🤱' },
+73   ],
+74 };
+75 
+76 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+77   gameId: 'number-match',
+78   component: 'NumberMatch',
+79   inputMethod: 'drag',
+80   wrongTileBehavior: 'lock-auto-eject',
+81   tileBankMode: 'distractors',
+82   distractorCount: 5,
+83   totalRounds: 3,
+84   roundsInOrder: false,
+85   ttsEnabled: true,
+86   mode: 'numeral-to-group',
+87   tileStyle: 'dots',
+88   range: { min: 1, max: 12 },
+89   rounds: Array.from({ length: 3 }, () => ({
+90     value: Math.floor(Math.random() * 12) + 1,
+91   })),
+92 });
+93 
+94 const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
+95   gameId: 'sort-numbers',
+96   component: 'SortNumbers',
+97   inputMethod: 'drag',
+98   wrongTileBehavior: 'lock-manual',
+99   tileBankMode: 'exact',
+100   totalRounds: 4,
+101   roundsInOrder: false,
+102   ttsEnabled: true,
+103   direction: 'ascending',
+104   range: { min: 11, max: 99 },
+105   quantity: 6,
+106   allowSkips: true,
+107   rounds: generateSortRounds({
+108     range: { min: 11, max: 99 },
+109     quantity: 6,
+110     allowSkips: true,
+111     totalRounds: 8,
+112   }),
+113 });
+114 
+115 const SortNumbersConfigPanel = ({
+116   config,
+117   onChange,
+118 }: {
+119   config: SortNumbersConfig;
+120   onChange: (c: SortNumbersConfig) => void;
+121 }) => {
+122   const [open, setOpen] = useState(false);
+123 
+124   const regenerate = () => {
+125     onChange({
+126       ...config,
+127       rounds: generateSortRounds({
+128         range: config.range,
+129         quantity: config.quantity,
+130         allowSkips: config.allowSkips,
+131         totalRounds: config.totalRounds,
+132       }),
+133     });
+134   };
+135 
+136   return (
+137     <details
+138       open={open}
+139       onToggle={(e) =>
+140         setOpen((e.currentTarget as HTMLDetailsElement).open)
+141       }
+142       className="fixed right-4 top-40 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+143     >
+144       <summary className="cursor-pointer font-medium">
+145         ⚙️ Game Config
+146       </summary>
+147       <div className="mt-3 flex flex-col gap-3">
+148         <label className="flex flex-col gap-1">
+149           Direction
+150           <select
+151             value={config.direction}
+152             onChange={(e) =>
+153               onChange({
+154                 ...config,
+155                 direction: e.target
+156                   .value as SortNumbersConfig['direction'],
+157               })
+158             }
+159             className="rounded border px-2 py-1"
+160           >
+161             <option value="ascending">ascending</option>
+162             <option value="descending">descending</option>
+163           </select>
+164         </label>
+165         <label className="flex flex-col gap-1">
+166           Quantity
+167           <input
+168             type="number"
+169             value={config.quantity}
+170             min={2}
+171             max={8}
+172             onChange={(e) =>
+173               onChange({ ...config, quantity: Number(e.target.value) })
+174             }
+175             className="rounded border px-2 py-1"
+176           />
+177         </label>
+178         <label className="flex flex-col gap-1">
+179           Range min
+180           <input
+181             type="number"
+182             value={config.range.min}
+183             min={1}
+184             max={config.range.max - 1}
+185             onChange={(e) =>
+186               onChange({
+187                 ...config,
+188                 range: { ...config.range, min: Number(e.target.value) },
+189               })
+190             }
+191             className="rounded border px-2 py-1"
+192           />
+193         </label>
+194         <label className="flex flex-col gap-1">
+195           Range max
+196           <input
+197             type="number"
+198             value={config.range.max}
+199             min={config.range.min + 1}
+200             max={100}
+201             onChange={(e) =>
+202               onChange({
+203                 ...config,
+204                 range: { ...config.range, max: Number(e.target.value) },
+205               })
+206             }
+207             className="rounded border px-2 py-1"
+208           />
+209         </label>
+210         <label className="flex items-center gap-2">
+211           <input
+212             type="checkbox"
+213             checked={config.allowSkips}
+214             onChange={(e) =>
+215               onChange({ ...config, allowSkips: e.target.checked })
+216             }
+217           />
+218           Allow skips
+219         </label>
+220         <label className="flex items-center gap-2">
+221           <input
+222             type="checkbox"
+223             checked={config.ttsEnabled}
+224             onChange={(e) =>
+225               onChange({ ...config, ttsEnabled: e.target.checked })
+226             }
+227           />
+228           TTS enabled
+229         </label>
+230         <button
+231           type="button"
+232           onClick={regenerate}
+233           className="rounded border px-2 py-1 text-sm"
+234         >
+235           Regenerate rounds
+236         </button>
+237       </div>
+238     </details>
+239   );
+240 };
+241 
+242 const WordSpellConfigPanel = ({
+243   config,
+244   onChange,
+245 }: {
+246   config: WordSpellConfig;
+247   onChange: (c: WordSpellConfig) => void;
+248 }) => {
+249   const [open, setOpen] = useState(false);
+250 
+251   return (
+252     <details
+253       open={open}
+254       onToggle={(e) =>
+255         setOpen((e.currentTarget as HTMLDetailsElement).open)
+256       }
+257       className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+258     >
+259       <summary className="cursor-pointer font-medium">
+260         ⚙️ Game Config
+261       </summary>
+262       <div className="mt-3 flex flex-col gap-3">
+263         <label className="flex flex-col gap-1">
+264           Input method
+265           <select
+266             value={config.inputMethod}
+267             onChange={(e) =>
+268               onChange({
+269                 ...config,
+270                 inputMethod: e.target
+271                   .value as WordSpellConfig['inputMethod'],
+272               })
+273             }
+274             className="rounded border px-2 py-1"
+275           >
+276             <option value="drag">drag</option>
+277             <option value="type">type</option>
+278             <option value="both">both</option>
+279           </select>
+280         </label>
+281         <label className="flex flex-col gap-1">
+282           Wrong tile behaviour
+283           <select
+284             value={config.wrongTileBehavior}
+285             onChange={(e) =>
+286               onChange({
+287                 ...config,
+288                 wrongTileBehavior: e.target
+289                   .value as WordSpellConfig['wrongTileBehavior'],
+290               })
+291             }
+292             className="rounded border px-2 py-1"
+293           >
+294             <option value="reject">reject</option>
+295             <option value="lock-manual">lock-manual</option>
+296             <option value="lock-auto-eject">lock-auto-eject</option>
+297           </select>
+298         </label>
+299         <label className="flex items-center gap-2">
+300           <input
+301             type="checkbox"
+302             checked={config.ttsEnabled}
+303             onChange={(e) =>
+304               onChange({ ...config, ttsEnabled: e.target.checked })
+305             }
+306           />
+307           TTS enabled
+308         </label>
+309       </div>
+310     </details>
+311   );
+312 };
+313 
+314 const NumberMatchConfigPanel = ({
+315   config,
+316   onChange,
+317 }: {
+318   config: NumberMatchConfig;
+319   onChange: (c: NumberMatchConfig) => void;
+320 }) => {
+321   const [open, setOpen] = useState(false);
+322 
+323   return (
+324     <details
+325       open={open}
+326       onToggle={(e) =>
+327         setOpen((e.currentTarget as HTMLDetailsElement).open)
+328       }
+329       className="fixed right-4 top-20 z-50 w-72 rounded-lg border bg-background p-3 text-sm shadow-lg"
+330     >
+331       <summary className="cursor-pointer font-medium">
+332         ⚙️ Game Config
+333       </summary>
+334       <div className="mt-3 flex flex-col gap-3">
+335         <label className="flex flex-col gap-1">
+336           Mode
+337           <select
+338             value={config.mode}
+339             onChange={(e) =>
+340               onChange({
+341                 ...config,
+342                 mode: e.target.value as NumberMatchConfig['mode'],
+343               })
+344             }
+345             className="rounded border px-2 py-1"
+346           >
+347             <option value="numeral-to-group">numeral-to-group</option>
+348             <option value="group-to-numeral">group-to-numeral</option>
+349             <option value="numeral-to-word">numeral-to-word</option>
+350             <option value="word-to-numeral">word-to-numeral</option>
+351           </select>
+352         </label>
+353         <label className="flex flex-col gap-1">
+354           Tile style
+355           <select
+356             value={config.tileStyle}
+357             onChange={(e) =>
+358               onChange({
+359                 ...config,
+360                 tileStyle: e.target
+361                   .value as NumberMatchConfig['tileStyle'],
+362               })
+363             }
+364             className="rounded border px-2 py-1"
+365           >
+366             <option value="dots">dots</option>
+367             <option value="objects">objects</option>
+368             <option value="fingers">fingers</option>
+369           </select>
+370         </label>
+371         <label className="flex flex-col gap-1">
+372           Tile bank mode
+373           <select
+374             value={config.tileBankMode}
+375             onChange={(e) =>
+376               onChange({
+377                 ...config,
+378                 tileBankMode: e.target
+379                   .value as NumberMatchConfig['tileBankMode'],
+380               })
+381             }
+382             className="rounded border px-2 py-1"
+383           >
+384             <option value="exact">exact</option>
+385             <option value="distractors">distractors</option>
+386           </select>
+387         </label>
+388         <label className="flex flex-col gap-1">
+389           Range min
+390           <input
+391             type="number"
+392             value={config.range.min}
+393             min={1}
+394             max={config.range.max - 1}
+395             onChange={(e) =>
+396               onChange({
+397                 ...config,
+398                 range: { ...config.range, min: Number(e.target.value) },
+399               })
+400             }
+401             className="rounded border px-2 py-1"
+402           />
+403         </label>
+404         <label className="flex flex-col gap-1">
+405           Range max
+406           <input
+407             type="number"
+408             value={config.range.max}
+409             min={config.range.min + 1}
+410             max={20}
+411             onChange={(e) =>
+412               onChange({
+413                 ...config,
+414                 range: { ...config.range, max: Number(e.target.value) },
+415               })
+416             }
+417             className="rounded border px-2 py-1"
+418           />
+419         </label>
+420         <label className="flex items-center gap-2">
+421           <input
+422             type="checkbox"
+423             checked={config.ttsEnabled}
+424             onChange={(e) =>
+425               onChange({ ...config, ttsEnabled: e.target.checked })
+426             }
+427           />
+428           TTS enabled
+429         </label>
+430       </div>
+431     </details>
+432   );
+433 };
+434 
+435 const GameBody = ({ gameId }: { gameId: string }): JSX.Element => {
+436   const [wordSpellConfig, setWordSpellConfig] =
+437     useState<WordSpellConfig>(DEFAULT_WORD_SPELL_CONFIG);
+438   const [numberMatchConfig, setNumberMatchConfig] =
+439     useState<NumberMatchConfig>(makeDefaultNumberMatchConfig);
+440   const [sortNumbersConfig, setSortNumbersConfig] =
+441     useState<SortNumbersConfig>(makeDefaultSortNumbersConfig);
+442 
+443   if (gameId === 'sort-numbers') {
+444     return (
+445       <>
+446         {import.meta.env.DEV && (
+447           <SortNumbersConfigPanel
+448             config={sortNumbersConfig}
+449             onChange={setSortNumbersConfig}
+450           />
+451         )}
+452         <SortNumbers
+453           key={sortNumbersConfig.inputMethod}
+454           config={sortNumbersConfig}
+455         />
+456       </>
+457     );
+458   }
+459 
+460   if (gameId === 'word-spell') {
+461     return (
+462       <>
+463         {import.meta.env.DEV && (
+464           <WordSpellConfigPanel
+465             config={wordSpellConfig}
+466             onChange={setWordSpellConfig}
+467           />
+468         )}
+469         <WordSpell
+470           key={wordSpellConfig.inputMethod}
+471           config={wordSpellConfig}
+472         />
+473       </>
+474     );
+475   }
+476   if (gameId === 'number-match') {
+477     return (
+478       <>
+479         {import.meta.env.DEV && (
+480           <NumberMatchConfigPanel
+481             config={numberMatchConfig}
+482             onChange={setNumberMatchConfig}
+483           />
+484         )}
+485         <NumberMatch
+486           key={numberMatchConfig.inputMethod}
+487           config={numberMatchConfig}
+488         />
+489       </>
+490     );
+491   }
+492   return (
+493     <div className="flex h-full items-center justify-center text-muted-foreground">
+494       <p>Game not found</p>
+495     </div>
+496   );
+497 };
+498 
+499 // Exported for direct testing — accepts loader data as props
+500 export const GameRoute = ({
+501   config,
+502   initialLog,
+503   sessionId,
+504   meta,
+505 }: GameRouteLoaderData): JSX.Element => (
+506   <GameShell
+507     config={config}
+508     moves={{}}
+509     initialState={meta.initialState}
+510     sessionId={sessionId}
+511     meta={meta}
+512     initialLog={initialLog ?? undefined}
+513   >
+514     <GameBody gameId={config.gameId} />
+515   </GameShell>
+516 );
+517 
+518 // Thin route component wrapper that reads from loader
+519 const RouteComponent = (): JSX.Element => {
+520   const data = Route.useLoaderData();
+521   return <GameRoute {...data} />;
+522 };
+523 
+524 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+525   loader: async ({ params }): Promise<GameRouteLoaderData> => {
+526     const { gameId } = params;
+527     const profileId = 'default'; // M5: pull from profile context
+528 
+529     const db = await getOrCreateDatabase();
+530     const defaultConfig = makeDefaultConfig(gameId);
+531     const config = await loadGameConfig(
+532       gameId,
+533       profileId,
+534       defaultConfig.gradeBand,
+535       db,
+536       defaultConfig,
+537     );
+538 
+539     const initialLog = await findInProgressSession(
+540       profileId,
+541       gameId,
+542       db,
+543     );
+544 
+545     const sessionId = initialLog?.sessionId ?? nanoid();
+546     const seed = initialLog?.seed ?? nanoid();
+547     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+548     const initialState: GameEngineState = initialLog?.initialState ?? {
+549       phase: 'instructions',
+550       roundIndex: 0,
+551       score: 0,
+552       streak: 0,
+553       retryCount: 0,
+554       content: initialContent,
+555       currentRound: {
+556         roundId: initialContent.rounds[0]?.id ?? '',
+557         answer: null,
+558         hintsUsed: 0,
+559       },
+560     };
+561 
+562     const meta: SessionMeta = {
+563       profileId,
+564       gameId,
+565       gradeBand: config.gradeBand,
+566       seed,
+567       initialContent,
+568       initialState,
+569     };
+570 
+571     return { config, initialLog, sessionId, meta };
+572   },
+573   component: RouteComponent,
+574 });
 575
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:45:17Z)**_
@@ -3019,7 +3082,6 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:45:17Z)**_
 Looking at the game route, the game renders `GameShell` which wraps the `GameBody`. The `GameBody` renders `WordSpell` or `NumberMatch` directly (not wrapped in GameShell state machine). But the `GameRoute` renders `GameShell` and inside it, the `GameBody`.
 
 The VR test for WordSpell waits for a button named `/^Letter /i` to be visible. But the `GameShell` has an `initialState` of `phase: 'instructions'` - so the game might start in an instructions phase, not showing the actual game tiles.
-
 
 I'm realizing the `WordSpell` component renders its own game logic independently of the `GameShell` state machine. The VR tests are timing out waiting for a Letter button, which suggests the issue might be with how the random seed is being set up for the game rounds. The `GameShell` might be blocking the game with an instructions overlay, or there could be a missing `DbProvider` context that `WordSpell` needs through `useGameTTS`. Let me trace through the app route setup to see if `DbProvider` wraps the component properly.
 </details></think>
@@ -3031,38 +3093,39 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:45:17Z)**_
  `./worktrees/feat-word-spell-number-match/src/routes/$locale/_app.tsx`
 
 ```text
-1	import { Outlet, createFileRoute } from '@tanstack/react-router';
-2	import { I18nextProvider } from 'react-i18next';
-3	import { Footer } from '@/components/Footer';
-4	import { Header } from '@/components/Header';
-5	import { OfflineIndicator } from '@/components/OfflineIndicator';
-6	import { seedThemesOnce } from '@/db/seed-themes';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	import { DbProvider } from '@/providers/DbProvider';
-9	import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
-10	
-11	const AppLayout = () => (
-12	  <DbProvider onDatabaseReady={seedThemesOnce}>
-13	    <I18nextProvider i18n={i18n}>
-14	      <ThemeRuntimeProvider>
-15	        <div className="flex min-h-screen flex-col">
-16	          <Header />
-17	          <OfflineIndicator />
-18	          <main className="flex-1">
-19	            <Outlet />
-20	          </main>
-21	          <Footer />
-22	        </div>
-23	      </ThemeRuntimeProvider>
-24	    </I18nextProvider>
-25	  </DbProvider>
-26	);
-27	
-28	export const Route = createFileRoute('/$locale/_app')({
-29	  component: AppLayout,
-30	});
+1 import { Outlet, createFileRoute } from '@tanstack/react-router';
+2 import { I18nextProvider } from 'react-i18next';
+3 import { Footer } from '@/components/Footer';
+4 import { Header } from '@/components/Header';
+5 import { OfflineIndicator } from '@/components/OfflineIndicator';
+6 import { seedThemesOnce } from '@/db/seed-themes';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 import { DbProvider } from '@/providers/DbProvider';
+9 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+10 
+11 const AppLayout = () => (
+12   <DbProvider onDatabaseReady={seedThemesOnce}>
+13     <I18nextProvider i18n={i18n}>
+14       <ThemeRuntimeProvider>
+15         <div className="flex min-h-screen flex-col">
+16           <Header />
+17           <OfflineIndicator />
+18           <main className="flex-1">
+19             <Outlet />
+20           </main>
+21           <Footer />
+22         </div>
+23       </ThemeRuntimeProvider>
+24     </I18nextProvider>
+25   </DbProvider>
+26 );
+27 
+28 export const Route = createFileRoute('/$locale/_app')({
+29   component: AppLayout,
+30 });
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:45:39Z)**_
@@ -3072,7 +3135,7 @@ Good - the app has `DbProvider` at the `_app.tsx` layout level, so the database 
 
 The VR test waits for a Letter button, but the app starts in `phase: 'instructions'`. Let me check what `GameShell` does with the instructions phase - does it show an overlay that prevents the game from being visible?
 
-Actually wait - looking at the route more carefully. The `GameRoute` renders `GameShell` and inside it `GameBody`. But `WordSpell` doesn't interact with `GameShell` - it uses `AnswerGameProvider` which is a completely separate state management. 
+Actually wait - looking at the route more carefully. The `GameRoute` renders `GameShell` and inside it `GameBody`. But `WordSpell` doesn't interact with `GameShell` - it uses `AnswerGameProvider` which is a completely separate state management.
 
 So `GameShell` handles the overall shell chrome while `WordSpell` and `NumberMatch` manage their own game state independently. The real problem might be that the letter buttons don't appear until after some async work completes, like database initialization, and the test times out waiting for them.
 
@@ -3096,87 +3159,88 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:45:39Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
-7	import type { WordSpellConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-23	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	function segmentsForWord(
-27	  word: string,
-28	  tileUnit: WordSpellConfig['tileUnit'],
-29	): string[] {
-30	  const trimmed = word.trim();
-31	  if (tileUnit === 'word') return [trimmed];
-32	  if (tileUnit === 'syllable') {
-33	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-34	    return parts.length > 0 ? parts : [trimmed];
-35	  }
-36	  return [...trimmed.toLowerCase()];
-37	}
-38	
-39	function buildTilesAndZones(
-40	  word: string,
-41	  tileUnit: WordSpellConfig['tileUnit'],
-42	): {
-43	  tiles: TileItem[];
-44	  zones: AnswerZone[];
-45	} {
-46	  const segments = segmentsForWord(word, tileUnit);
-47	  const values = segments.map((s) =>
-48	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-49	  );
-50	  const zones: AnswerZone[] = values.map((value, i) => ({
-51	    id: `z${i}`,
-52	    index: i,
-53	    expectedValue: value,
-54	    placedTileId: null,
-55	    isWrong: false,
-56	    isLocked: false,
-57	  }));
-58	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-59	  const tiles: TileItem[] = shuffled.map((value) => ({
-60	    id: nanoid(),
-61	    label: value,
-62	    value,
-63	  }));
-64	  return { tiles, zones };
-65	}
-66	
-67	interface WordSpellProps {
-68	  config: WordSpellConfig;
-69	}
-70	
-71	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-72	const WordSpellSession = ({
-73	  wordSpellConfig,
-74	  roundOrder,
-75	  onRestartSession,
-76	}: {
-77	  wordSpellConfig: WordSpellConfig;
-78	  roundOrder: readonly number[];
-79	  onRestartSession: () => void;
-80	}) => {
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
+7 import type { WordSpellConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+23 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 function segmentsForWord(
+27   word: string,
+28   tileUnit: WordSpellConfig['tileUnit'],
+29 ): string[] {
+30   const trimmed = word.trim();
+31   if (tileUnit === 'word') return [trimmed];
+32   if (tileUnit === 'syllable') {
+33     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+34     return parts.length > 0 ? parts : [trimmed];
+35   }
+36   return [...trimmed.toLowerCase()];
+37 }
+38 
+39 function buildTilesAndZones(
+40   word: string,
+41   tileUnit: WordSpellConfig['tileUnit'],
+42 ): {
+43   tiles: TileItem[];
+44   zones: AnswerZone[];
+45 } {
+46   const segments = segmentsForWord(word, tileUnit);
+47   const values = segments.map((s) =>
+48     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+49   );
+50   const zones: AnswerZone[] = values.map((value, i) => ({
+51     id: `z${i}`,
+52     index: i,
+53     expectedValue: value,
+54     placedTileId: null,
+55     isWrong: false,
+56     isLocked: false,
+57   }));
+58   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+59   const tiles: TileItem[] = shuffled.map((value) => ({
+60     id: nanoid(),
+61     label: value,
+62     value,
+63   }));
+64   return { tiles, zones };
+65 }
+66 
+67 interface WordSpellProps {
+68   config: WordSpellConfig;
+69 }
+70 
+71 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+72 const WordSpellSession = ({
+73   wordSpellConfig,
+74   roundOrder,
+75   onRestartSession,
+76 }: {
+77   wordSpellConfig: WordSpellConfig;
+78   roundOrder: readonly number[];
+79   onRestartSession: () => void;
+80 }) => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:45:44Z)**_
@@ -3186,127 +3250,128 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:45:44Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-80	}) => {
-81	  const { t } = useTranslation('games');
-82	  const [showInstructions, setShowInstructions] = useState(true);
-83	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  const { confettiReady, gameOverReady } = useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete') return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      const { tiles, zones } = buildTilesAndZones(
-133	        word,
-134	        wordSpellConfig.tileUnit,
-135	      );
-136	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-137	    }, delayMs);
-138	
-139	    return () => {
-140	      globalThis.clearTimeout(timer);
-141	    };
-142	  }, [
-143	    phase,
-144	    roundIndex,
-145	    dispatch,
-146	    roundOrder,
-147	    wordSpellConfig.rounds,
-148	    wordSpellConfig.tileUnit,
-149	  ]);
-150	
-151	  if (showInstructions) {
-152	    return (
-153	      <InstructionsOverlay
-154	        text={t('instructions.word-spell')}
-155	        onStart={() => setShowInstructions(false)}
-156	        ttsEnabled={wordSpellConfig.ttsEnabled}
-157	      />
-158	    );
-159	  }
-160	
-161	  if (!round) return null;
-162	
-163	  const hasEmoji =
-164	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-165	  const imageSrc = round.sceneImage ?? round.image;
-166	  const hasImageUrl =
-167	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-168	
-169	  return (
-170	    <>
-171	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-172	        <AnswerGame.Question>
-173	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-174	            <p className="max-w-md text-center text-lg text-foreground">
-175	              {round.sentence}
-176	            </p>
-177	          ) : null}
-178	          {hasEmoji ? (
-179	            <EmojiQuestion
-180	              emoji={round.emoji!.trim()}
-181	              prompt={round.word}
-182	            />
-183	          ) : hasImageUrl ? (
-184	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-185	          ) : null}
-186	          <AudioButton prompt={round.word} />
-187	        </AnswerGame.Question>
-188	        <AnswerGame.Answer>
-189	          <OrderedLetterSlots />
-190	        </AnswerGame.Answer>
-191	        <AnswerGame.Choices>
-192	          <LetterTileBank />
-193	        </AnswerGame.Choices>
-194	      </div>
-195	      <ScoreAnimation visible={confettiReady} />
-196	      {gameOverReady ? (
-197	        <GameOverOverlay
-198	          retryCount={retryCount}
-199	          onPlayAgain={handlePlayAgain}
+80 }) => {
+81   const { t } = useTranslation('games');
+82   const [showInstructions, setShowInstructions] = useState(true);
+83   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   const { confettiReady, gameOverReady } = useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete') return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       const { tiles, zones } = buildTilesAndZones(
+133         word,
+134         wordSpellConfig.tileUnit,
+135       );
+136       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+137     }, delayMs);
+138 
+139     return () => {
+140       globalThis.clearTimeout(timer);
+141     };
+142   }, [
+143     phase,
+144     roundIndex,
+145     dispatch,
+146     roundOrder,
+147     wordSpellConfig.rounds,
+148     wordSpellConfig.tileUnit,
+149   ]);
+150 
+151   if (showInstructions) {
+152     return (
+153       <InstructionsOverlay
+154         text={t('instructions.word-spell')}
+155         onStart={() => setShowInstructions(false)}
+156         ttsEnabled={wordSpellConfig.ttsEnabled}
+157       />
+158     );
+159   }
+160 
+161   if (!round) return null;
+162 
+163   const hasEmoji =
+164     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+165   const imageSrc = round.sceneImage ?? round.image;
+166   const hasImageUrl =
+167     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+168 
+169   return (
+170     <>
+171       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+172         <AnswerGame.Question>
+173           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+174             <p className="max-w-md text-center text-lg text-foreground">
+175               {round.sentence}
+176             </p>
+177           ) : null}
+178           {hasEmoji ? (
+179             <EmojiQuestion
+180               emoji={round.emoji!.trim()}
+181               prompt={round.word}
+182             />
+183           ) : hasImageUrl ? (
+184             <ImageQuestion src={imageSrc!} prompt={round.word} />
+185           ) : null}
+186           <AudioButton prompt={round.word} />
+187         </AnswerGame.Question>
+188         <AnswerGame.Answer>
+189           <OrderedLetterSlots />
+190         </AnswerGame.Answer>
+191         <AnswerGame.Choices>
+192           <LetterTileBank />
+193         </AnswerGame.Choices>
+194       </div>
+195       <ScoreAnimation visible={confettiReady} />
+196       {gameOverReady ? (
+197         <GameOverOverlay
+198           retryCount={retryCount}
+199           onPlayAgain={handlePlayAgain}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:45:51Z)**_
@@ -3315,10 +3380,11 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:45:51Z)**_
 Found the issue. On line 151-159, `WordSpell` shows `InstructionsOverlay` when `showInstructions` is true (which it is by default). The instructions overlay has a "Start" button that dismisses it. The VR test tries to find a "Letter" button directly, but the `InstructionsOverlay` is shown first.
 
 So the VR test needs to:
+
 1. Click the "Start" button on the instructions overlay first
 2. Then wait for the letter button
 
-OR - maybe the test was written incorrectly (or it was passing before `InstructionsOverlay` was added). 
+OR - maybe the test was written incorrectly (or it was passing before `InstructionsOverlay` was added).
 
 The fix is straightforward—I need to click "Start" first to dismiss the overlay. Let me check what text the `InstructionsOverlay` actually uses for that button.
 </details></think>
@@ -3351,6 +3417,7 @@ Check InstructionsOverlay start button text
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:40:        onClick={onStart}
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:43:        {t('instructions.lets-go')}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:46:01Z)**_
@@ -3361,11 +3428,11 @@ The start button says "Let's go!". The VR test needs to click "Let's go!" before
 Similarly for NumberMatch, let me check if it has the same InstructionsOverlay issue.
 
 Looking at the VR test:
+
 - `WordSpell`: needs to click "Let's go!" then wait for letter tiles
 - `NumberMatch`: needs to click "Let's go!" then wait for "Hear the question" button
 
 But wait - actually looking at `WordSpell.tsx` line 151: `if (showInstructions)` — it returns `InstructionsOverlay`. And `WordSpell` also has to `INIT_ROUND` first to get tiles.
-
 
 I need to check whether `WordSpell` triggers the round initialization automatically or if that's something the test has to handle separately.
 </details></think>
@@ -3377,78 +3444,79 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:46:01Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-200	          onHome={handleHome}
-201	        />
-202	      ) : null}
-203	    </>
-204	  );
-205	};
-206	
-207	export const WordSpell = ({ config }: WordSpellProps) => {
-208	  const roundsInOrder = config.roundsInOrder === true;
-209	  const [sessionEpoch, setSessionEpoch] = useState(0);
-210	
-211	  const roundOrder = useMemo(() => {
-212	    void sessionEpoch;
-213	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-214	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-215	
-216	  const firstConfigIndex = roundOrder[0];
-217	  const round0 =
-218	    firstConfigIndex === undefined
-219	      ? undefined
-220	      : config.rounds[firstConfigIndex];
-221	  const roundWord = round0?.word.trim() ? round0.word : '';
-222	
-223	  const { tiles, zones } = useMemo(() => {
-224	    if (!roundWord)
-225	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-226	    return buildTilesAndZones(roundWord, config.tileUnit);
-227	  }, [roundWord, config.tileUnit]);
-228	
-229	  const answerGameConfig = useMemo(
-230	    (): AnswerGameConfig => ({
-231	      gameId: config.gameId,
-232	      inputMethod: config.inputMethod,
-233	      wrongTileBehavior: config.wrongTileBehavior,
-234	      tileBankMode: config.tileBankMode,
-235	      distractorCount: config.distractorCount,
-236	      totalRounds: config.rounds.length,
-237	      roundsInOrder: config.roundsInOrder,
-238	      ttsEnabled: config.ttsEnabled,
-239	      initialTiles: tiles,
-240	      initialZones: zones,
-241	    }),
-242	    [
-243	      config.gameId,
-244	      config.inputMethod,
-245	      config.wrongTileBehavior,
-246	      config.tileBankMode,
-247	      config.distractorCount,
-248	      config.rounds.length,
-249	      config.roundsInOrder,
-250	      config.ttsEnabled,
-251	      tiles,
-252	      zones,
-253	    ],
-254	  );
-255	
-256	  if (!round0) return null;
-257	
-258	  return (
-259	    <AnswerGame config={answerGameConfig}>
-260	      <WordSpellSession
-261	        wordSpellConfig={config}
-262	        roundOrder={roundOrder}
-263	        onRestartSession={() => {
-264	          setSessionEpoch((e) => e + 1);
-265	        }}
-266	      />
-267	    </AnswerGame>
-268	  );
-269	};
+200           onHome={handleHome}
+201         />
+202       ) : null}
+203     </>
+204   );
+205 };
+206 
+207 export const WordSpell = ({ config }: WordSpellProps) => {
+208   const roundsInOrder = config.roundsInOrder === true;
+209   const [sessionEpoch, setSessionEpoch] = useState(0);
+210 
+211   const roundOrder = useMemo(() => {
+212     void sessionEpoch;
+213     return buildRoundOrder(config.rounds.length, roundsInOrder);
+214   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+215 
+216   const firstConfigIndex = roundOrder[0];
+217   const round0 =
+218     firstConfigIndex === undefined
+219       ? undefined
+220       : config.rounds[firstConfigIndex];
+221   const roundWord = round0?.word.trim() ? round0.word : '';
+222 
+223   const { tiles, zones } = useMemo(() => {
+224     if (!roundWord)
+225       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+226     return buildTilesAndZones(roundWord, config.tileUnit);
+227   }, [roundWord, config.tileUnit]);
+228 
+229   const answerGameConfig = useMemo(
+230     (): AnswerGameConfig => ({
+231       gameId: config.gameId,
+232       inputMethod: config.inputMethod,
+233       wrongTileBehavior: config.wrongTileBehavior,
+234       tileBankMode: config.tileBankMode,
+235       distractorCount: config.distractorCount,
+236       totalRounds: config.rounds.length,
+237       roundsInOrder: config.roundsInOrder,
+238       ttsEnabled: config.ttsEnabled,
+239       initialTiles: tiles,
+240       initialZones: zones,
+241     }),
+242     [
+243       config.gameId,
+244       config.inputMethod,
+245       config.wrongTileBehavior,
+246       config.tileBankMode,
+247       config.distractorCount,
+248       config.rounds.length,
+249       config.roundsInOrder,
+250       config.ttsEnabled,
+251       tiles,
+252       zones,
+253     ],
+254   );
+255 
+256   if (!round0) return null;
+257 
+258   return (
+259     <AnswerGame config={answerGameConfig}>
+260       <WordSpellSession
+261         wordSpellConfig={config}
+262         roundOrder={roundOrder}
+263         onRestartSession={() => {
+264           setSessionEpoch((e) => e + 1);
+265         }}
+266       />
+267     </AnswerGame>
+268   );
+269 };
 270
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:46:11Z)**_
@@ -3457,6 +3525,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:46:11Z)**_
 The `WordSpell` component renders `AnswerGame` with `WordSpellSession` inside. `WordSpellSession` has `showInstructions = true` by default and shows `InstructionsOverlay`. The VR test needs to click "Let's go!" to dismiss the instructions.
 
 The VR test is:
+
 ```ts
 test('@visual WordSpell picture mode mid-game layout', async ({ page }) => {
   await page.goto('/en/game/word-spell');
@@ -3483,6 +3552,7 @@ Check if NumberMatch uses InstructionsOverlay
 110:  if (showInstructions) {
 112:      <InstructionsOverlay
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:46:16Z)**_
@@ -3507,6 +3577,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:46:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/visual.spec.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:46:26Z)**_
@@ -3573,21 +3644,23 @@ If the change is intentional, run: yarn test:vr:update
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:46:51Z)**_
 
 <think><details><summary>Thought Process</summary>
 Progress! The tests are now running but failing because:
+
 1. The buttons were found (test no longer times out) - the "Let's go!" click worked
 2. The screenshots are DIFFERENT from baseline (pixel diffs detected)
 
-This is because these are NEW tests for NEW games, and there are no baseline screenshots yet, or the existing baselines don't match the current output. 
+This is because these are NEW tests for NEW games, and there are no baseline screenshots yet, or the existing baselines don't match the current output.
 
 The output says:
+
 - WordSpell: `e2e/visual.spec.ts:28:1 › @visual WordSpell picture mode mid-game layout` - FAILED
 - NumberMatch: `e2e/visual.spec.ts:42:1 › @visual NumberMatch numeral-to-group layout` - FAILED with diff
-
 
 The dimension mismatch shows the new UI is taller than expected, so I'll update the baselines with `yarn test:vr:update`. While I'm at it, I should also tackle those two bugs the user mentioned—the confetti not always displaying on round completion and the logic that should skip the round-complete sound on the final round and go straight to game complete.
 </details></think>
@@ -3618,7 +3691,6 @@ The diffs show the new game UIs for NumberMatch and WordSpell - these are brand 
 For NumberMatch: The diff shows the game UI with a numeral (1) and a drop zone, plus tile buttons showing dots. There's also a Footer appearing in the new version that wasn't in the baseline.
 
 For WordSpell: The diff shows emoji icons for "cat" and "dog", letter zones (3 zones), and letter tiles (a, c, t, d, g, o). There's also a Footer.
-
 
 I'm noticing the height difference between versions - the new NumberMatch screenshot is taller at 899px compared to the old 807px baseline - which explains why the Footer positioning looks different. Since these are intentional changes with the new game content, I'll update the baselines to capture the current state.
 </details></think>
@@ -3656,6 +3728,7 @@ npm notice To update run: npm install -g npm@11.12.1
 npm notice
 Done in 13.49s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:47:20Z)**_
@@ -3724,6 +3797,7 @@ Run E2E tests
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:48:43Z)**_
@@ -3733,7 +3807,7 @@ E2E tests are all failing on ALL tests (including home page). The timeout at lin
 
 Actually, "home page loads" is also failing across all browsers. This suggests the app server might not be running (or is running on a wrong port). The playwright config says `reuseExistingServer: !process.env['CI']` so it should reuse if running.
 
-Wait, the E2E tests are being run from the main project directory (not worktree). 
+Wait, the E2E tests are being run from the main project directory (not worktree).
 
 The playwright config is set up to automatically start the server on port 3000 with a 120-second timeout, building the client first if needed. So the server should be launching automatically when tests run, unless something's preventing that build or startup process.
 
@@ -3814,6 +3888,7 @@ Running 15 tests using 9 workers
       34 | });
         at /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/smoke.spec.ts:31:32
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:49:31Z)**_
@@ -3823,7 +3898,7 @@ The E2E tests are all timing out waiting for the `main` role to be visible. This
 
 Actually, looking at the smoke.spec.ts tests - they wait for `getByRole('main')` which should appear quickly. If this times out, it means the page isn't rendering at all.
 
-The `playwright.config.ts` says `reuseExistingServer: !process.env['CI']` - so if a server is already running on port 3000, it will use it. Otherwise it builds and starts one. 
+The `playwright.config.ts` says `reuseExistingServer: !process.env['CI']` - so if a server is already running on port 3000, it will use it. Otherwise it builds and starts one.
 
 The VR tests run in Docker so they wouldn't leave a port 3000 server running locally, which means the E2E tests need to build and start their own server. The issue could be that the build is failing or the serve command isn't working properly - I should check what the actual build and serve commands are doing.
 
@@ -3846,6 +3921,7 @@ Check what's running on port 3000
 85334
 90949
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:49:35Z)**_
@@ -3861,6 +3937,7 @@ Check what processes are on port 3000
 90949 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/146.0.7680.178/Helpers/Google Chrome Helper.app/Contents/MacOS/Google Chrome Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --metrics-client-id=cef09672-bf7c-4b42-8a65-0bfd35110bdc --shared-files --metrics-shmem-handle=1752395122,r,1883662589908289287,660386074279521982,524288 --field-trial-handle=1718379636,r,17762719787862486006,11931014377427506200,262144 --enable-features=AllowAllSitesToInitiateMirroring --variations-seed-version=20260402-170046.203000-production --pseudonymization-salt-handle=1935764596,r,16540272746419534244,14186149095030001772,4 --trace-process-track-uuid=3190708989122997041 --seatbelt-client=35
 85334 /Users/leocaseiro/.nvm/versions/node/v24.14.1/bin/node /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node_modules/.bin/vite dev --port 3000
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:49:43Z)**_
@@ -3874,7 +3951,6 @@ Actually wait, the smoke tests wait for `main` to be visible. If the dev server 
 
 Actually, looking at the test:
 
-
 The test navigates to the home page using `localeHomePath('en')` and then waits for the main element to become visible. I need to figure out what URL that function returns.
 </details></think>
 
@@ -3885,66 +3961,68 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:49:43Z)**_
  `./worktrees/feat-word-spell-number-match/e2e/smoke.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	
-4	test.beforeEach(async ({ page }) => {
-5	  await seedMathRandom(page);
-6	});
-7	
-8	/** History router: home under default locale (Playwright webServer uses APP_BASE_URL=/). */
-9	function localeHomePath(locale: string): string {
-10	  return `/${locale}/`;
-11	}
-12	
-13	test('home page loads', async ({ page }) => {
-14	  await page.goto(localeHomePath('en'));
-15	  await page.getByRole('main').waitFor({ state: 'visible' });
-16	  await expect(page).toHaveTitle(/BaseSkill/);
-17	});
-18	
-19	test('game catalog renders', async ({ page }) => {
-20	  await page.goto(localeHomePath('en'));
-21	  await page.getByRole('main').waitFor({ state: 'visible' });
-22	  await expect(
-23	    page.getByRole('group', { name: /filter by grade level/i }),
-24	  ).toBeVisible();
-25	});
-26	
-27	test('WordSpell picture mode renders letter tiles', async ({
-28	  page,
-29	}) => {
-30	  await page.goto('/en/game/word-spell');
-31	  await page.getByRole('main').waitFor({ state: 'visible' });
-32	  const tiles = page.getByRole('button', { name: /^Letter /i });
-33	  await expect(tiles.first()).toBeVisible();
-34	});
-35	
-36	test('NumberMatch numeral-to-group renders numeral question', async ({
-37	  page,
-38	}) => {
-39	  await page.goto('/en/game/number-match');
-40	  await page.getByRole('main').waitFor({ state: 'visible' });
-41	  await expect(
-42	    page.getByRole('button', { name: 'Hear the question' }),
-43	  ).toBeVisible();
-44	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 
+4 test.beforeEach(async ({ page }) => {
+5   await seedMathRandom(page);
+6 });
+7 
+8 /** History router: home under default locale (Playwright webServer uses APP_BASE_URL=/). */
+9 function localeHomePath(locale: string): string {
+10   return `/${locale}/`;
+11 }
+12 
+13 test('home page loads', async ({ page }) => {
+14   await page.goto(localeHomePath('en'));
+15   await page.getByRole('main').waitFor({ state: 'visible' });
+16   await expect(page).toHaveTitle(/BaseSkill/);
+17 });
+18 
+19 test('game catalog renders', async ({ page }) => {
+20   await page.goto(localeHomePath('en'));
+21   await page.getByRole('main').waitFor({ state: 'visible' });
+22   await expect(
+23     page.getByRole('group', { name: /filter by grade level/i }),
+24   ).toBeVisible();
+25 });
+26 
+27 test('WordSpell picture mode renders letter tiles', async ({
+28   page,
+29 }) => {
+30   await page.goto('/en/game/word-spell');
+31   await page.getByRole('main').waitFor({ state: 'visible' });
+32   const tiles = page.getByRole('button', { name: /^Letter /i });
+33   await expect(tiles.first()).toBeVisible();
+34 });
+35 
+36 test('NumberMatch numeral-to-group renders numeral question', async ({
+37   page,
+38 }) => {
+39   await page.goto('/en/game/number-match');
+40   await page.getByRole('main').waitFor({ state: 'visible' });
+41   await expect(
+42     page.getByRole('button', { name: 'Hear the question' }),
+43   ).toBeVisible();
+44 });
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:49:55Z)**_
 
 <think><details><summary>Thought Process</summary>
 The smoke tests are:
+
 1. `home page loads` - navigates to `/en/` and waits for `main` to be visible
 2. `game catalog renders` - same
 3. `WordSpell picture mode renders letter tiles` - navigates to `/en/game/word-spell` and waits for `main`, then letter tiles
 4. `NumberMatch numeral-to-group renders numeral question` - navigates to `/en/game/number-match` and waits for `main`, then AudioButton
 
-The issue: 
-- HOME PAGE is failing too. This means `main` isn't visible on `/en/`.
+The issue:
 
+- HOME PAGE is failing too. This means `main` isn't visible on `/en/`.
 
 - Tests 3 and 4 also depend on `main` being visible, so they're timing out as well.
 
@@ -3965,6 +4043,7 @@ Check vite base URL config
 14:const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 21:  base,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:50:25Z)**_
@@ -3974,7 +4053,7 @@ The default base URL is `/base-skill/`. So the dev server serves the app at `/ba
 
 The E2E tests need `APP_BASE_URL=/` to be set for the tests to work. But the dev server is running without it.
 
-Actually wait - `reuseExistingServer: !process.env['CI']` - so when running locally (not CI), it will try to connect to the existing server at port 3000. 
+Actually wait - `reuseExistingServer: !process.env['CI']` - so when running locally (not CI), it will try to connect to the existing server at port 3000.
 
 It finds the dev server running without `APP_BASE_URL=/`, so the app is served at `/base-skill/` by default. The E2E tests navigate to `/en/` but the app is actually at `/base-skill/en/`, which is why `main` isn't visible. I need to either kill the dev server and let Playwright start a fresh build with `APP_BASE_URL=/`, or start the dev server with that variable set. Let me kill the existing dev server and let Playwright handle the build.
 
@@ -4000,6 +4079,7 @@ Kill dev server on port 3000
 ```text
 port 3000 cleared
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:50:49Z)**_
@@ -4062,14 +4142,16 @@ Run E2E tests with playwright managing server
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:01Z)**_
 
 <think><details><summary>Thought Process</summary>
 Good progress. 8 tests now pass. 7 still fail:
+
 1. The `home page loads` tests now pass (3 browsers) - good
-2. The game catalog test now passes (3 browsers? or maybe 2) - 
+2. The game catalog test now passes (3 browsers? or maybe 2) -
 3. Actually, 7 fail:
    - `[chromium] › WordSpell picture mode renders letter tiles`
    - `[chromium] › NumberMatch numeral-to-group renders numeral question`
@@ -4085,6 +4167,7 @@ The WordSpell and NumberMatch failures are happening because the InstructionsOve
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:01Z)**_
 
 Home page tests pass now! The remaining failures are:
+
 1. WordSpell/NumberMatch smoke tests — same InstructionsOverlay issue as VR
 2. A webkit a11y test
 
@@ -4124,6 +4207,7 @@ Check a11y E2E failure details
       31 |   await page.getByRole('main').waitFor({ state: 'visible' });
       32 |   const tiles = page.getByRole('button', { name: /^Letter /i });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:22Z)**_
@@ -4154,6 +4238,7 @@ test.describe('@a11y accessibility', () => {
   });
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:27Z)**_
@@ -4178,6 +4263,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:51:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/smoke.spec.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:49Z)**_
@@ -4220,6 +4306,7 @@ Running 15 tests using 9 workers
 [1A[2K  15 passed (11.8s)
 Done in 12.33s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:51:54Z)**_
@@ -4245,6 +4332,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:52:06Z)**_
 All plan steps complete. Here's a summary of what was fixed:
 
 **Plan executed successfully:**
+
 - Created `.storybook/decorators/withDb.tsx` (shared decorator)
 - Added `withDb` to 9 story files (6 with `AnswerGameProvider`, 3 standalone)
 - Fixed `LetterTileBank.stories.tsx` — also added `withDb` to the story-level `WithDistractors` decorator
@@ -4254,6 +4342,7 @@ All plan steps complete. Here's a summary of what was fixed:
 - Fixed E2E smoke tests with same "Let's go!" click fix
 
 **Results:**
+
 - Storybook: 33 suites, 99 tests — all pass
 - VR: 4/4 pass (baselines updated)
 - E2E: 15/15 pass
@@ -4285,6 +4374,7 @@ Check useGameSounds hook
 26:      void queueSound('round-complete').then(() => {
 47:  return { confettiReady, gameOverReady };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:52:11Z)**_
@@ -4294,56 +4384,57 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:52:11Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts`
 
 ```text
-1	import { useEffect, useRef, useState } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import type { AnswerGamePhase } from './types';
-4	import { queueSound } from '@/lib/audio/AudioFeedback';
-5	
-6	export const useGameSounds = (): {
-7	  confettiReady: boolean;
-8	  gameOverReady: boolean;
-9	} => {
-10	  const { phase } = useAnswerGameContext();
-11	  const prevPhaseRef = useRef<AnswerGamePhase>(phase);
-12	  const [confettiReady, setConfettiReady] = useState(false);
-13	  const [gameOverReady, setGameOverReady] = useState(false);
-14	
-15	  useEffect(() => {
-16	    const prev = prevPhaseRef.current;
-17	    prevPhaseRef.current = phase;
-18	
-19	    if (phase === prev) return;
-20	
-21	    // cancelled is set by the effect cleanup when phase changes, preventing
-22	    // stale promise callbacks from updating state after the phase has moved on.
-23	    let cancelled = false;
-24	
-25	    if (phase === 'round-complete') {
-26	      void queueSound('round-complete').then(() => {
-27	        if (!cancelled) setConfettiReady(true);
-28	      });
-29	    } else if (phase === 'game-over') {
-30	      void queueSound('game-complete').then(() => {
-31	        if (!cancelled) setGameOverReady(true);
-32	      });
-33	    } else {
-34	      void Promise.resolve().then(() => {
-35	        if (!cancelled) {
-36	          setConfettiReady(false);
-37	          setGameOverReady(false);
-38	        }
-39	      });
-40	    }
-41	
-42	    return () => {
-43	      cancelled = true;
-44	    };
-45	  }, [phase]);
-46	
-47	  return { confettiReady, gameOverReady };
-48	};
+1 import { useEffect, useRef, useState } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import type { AnswerGamePhase } from './types';
+4 import { queueSound } from '@/lib/audio/AudioFeedback';
+5 
+6 export const useGameSounds = (): {
+7   confettiReady: boolean;
+8   gameOverReady: boolean;
+9 } => {
+10   const { phase } = useAnswerGameContext();
+11   const prevPhaseRef = useRef<AnswerGamePhase>(phase);
+12   const [confettiReady, setConfettiReady] = useState(false);
+13   const [gameOverReady, setGameOverReady] = useState(false);
+14 
+15   useEffect(() => {
+16     const prev = prevPhaseRef.current;
+17     prevPhaseRef.current = phase;
+18 
+19     if (phase === prev) return;
+20 
+21     // cancelled is set by the effect cleanup when phase changes, preventing
+22     // stale promise callbacks from updating state after the phase has moved on.
+23     let cancelled = false;
+24 
+25     if (phase === 'round-complete') {
+26       void queueSound('round-complete').then(() => {
+27         if (!cancelled) setConfettiReady(true);
+28       });
+29     } else if (phase === 'game-over') {
+30       void queueSound('game-complete').then(() => {
+31         if (!cancelled) setGameOverReady(true);
+32       });
+33     } else {
+34       void Promise.resolve().then(() => {
+35         if (!cancelled) {
+36           setConfettiReady(false);
+37           setGameOverReady(false);
+38         }
+39       });
+40     }
+41 
+42     return () => {
+43       cancelled = true;
+44     };
+45   }, [phase]);
+46 
+47   return { confettiReady, gameOverReady };
+48 };
 49
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:52:35Z)**_
@@ -4382,6 +4473,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:52:35Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -4411,6 +4503,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -4419,6 +4512,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -4426,6 +4520,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -4461,6 +4556,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -4474,6 +4570,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -4602,6 +4699,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -4621,6 +4719,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -4671,17 +4770,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -4693,6 +4793,7 @@ Let me apply systematic debugging to both bugs.
 **Bug 1: Confetti not always showing when round is complete**
 
 Root cause investigation:
+
 - `useGameSounds` listens to `phase`
 - When `phase === 'round-complete'`, it calls `queueSound('round-complete').then(() => setConfettiReady(true))`
 - In `WordSpell.tsx`, when `phase === 'round-complete'`:
@@ -4743,6 +4844,7 @@ Trace round-complete and game-over data flow
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts:29:    } else if (phase === 'game-over') {
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts:47:  return { confettiReady, gameOverReady };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:53:16Z)**_
@@ -4752,37 +4854,38 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:53:16Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-80	          zones: newZones,
-81	          bankTileIds: newBankTileIds,
-82	          activeSlotIndex:
-83	            nextActiveSlot === -1
-84	              ? state.activeSlotIndex
-85	              : nextActiveSlot,
-86	          retryCount: state.retryCount,
-87	          phase: allFilledCorrectly ? 'round-complete' : 'playing',
-88	        };
-89	      }
-90	
-91	      const lockManual =
-92	        state.config.wrongTileBehavior === 'lock-manual';
-93	      const newZone: AnswerZone = {
-94	        ...zone,
-95	        placedTileId: lockManual ? action.tileId : zone.placedTileId,
-96	        isWrong: true,
-97	        isLocked: true,
-98	      };
-99	      const newZones = state.zones.map((z, i) =>
-100	        i === action.zoneIndex ? newZone : z,
-101	      );
-102	      let newBankTileIds = lockManual
-103	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-104	        : state.bankTileIds;
-105	      if (
-106	        lockManual &&
-107	        zone.placedTileId &&
-108	        zone.placedTileId !== action.tileId
-109	      ) {
+80           zones: newZones,
+81           bankTileIds: newBankTileIds,
+82           activeSlotIndex:
+83             nextActiveSlot === -1
+84               ? state.activeSlotIndex
+85               : nextActiveSlot,
+86           retryCount: state.retryCount,
+87           phase: allFilledCorrectly ? 'round-complete' : 'playing',
+88         };
+89       }
+90 
+91       const lockManual =
+92         state.config.wrongTileBehavior === 'lock-manual';
+93       const newZone: AnswerZone = {
+94         ...zone,
+95         placedTileId: lockManual ? action.tileId : zone.placedTileId,
+96         isWrong: true,
+97         isLocked: true,
+98       };
+99       const newZones = state.zones.map((z, i) =>
+100         i === action.zoneIndex ? newZone : z,
+101       );
+102       let newBankTileIds = lockManual
+103         ? state.bankTileIds.filter((id) => id !== action.tileId)
+104         : state.bankTileIds;
+105       if (
+106         lockManual &&
+107         zone.placedTileId &&
+108         zone.placedTileId !== action.tileId
+109       ) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:53:39Z)**_
@@ -4826,230 +4929,231 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:53:40Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    phase: 'playing',
-20	    roundIndex: 0,
-21	    retryCount: 0,
-22	  };
-23	}
-24	
-25	export function answerGameReducer(
-26	  state: AnswerGameState,
-27	  action: AnswerGameAction,
-28	): AnswerGameState {
-29	  switch (action.type) {
-30	    case 'INIT_ROUND': {
-31	      return {
-32	        ...state,
-33	        allTiles: action.tiles,
-34	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-35	        zones: action.zones,
-36	        activeSlotIndex: 0,
-37	        phase: 'playing',
-38	        roundIndex: 0,
-39	        retryCount: 0,
-40	      };
-41	    }
-42	
-43	    case 'PLACE_TILE': {
-44	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-45	      const zone = state.zones[action.zoneIndex];
-46	      if (!tile || !zone) return state;
-47	
-48	      const correct = tile.value === zone.expectedValue;
-49	
-50	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-51	        return { ...state, retryCount: state.retryCount + 1 };
-52	      }
-53	
-54	      if (correct) {
-55	        const previousId = zone.placedTileId;
-56	        let newBankTileIds = state.bankTileIds.filter(
-57	          (id) => id !== action.tileId,
-58	        );
-59	        if (previousId !== null && previousId !== action.tileId) {
-60	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-61	          newBankTileIds = [...newBankTileIds, previousId];
-62	        }
-63	        const newZone: AnswerZone = {
-64	          ...zone,
-65	          placedTileId: action.tileId,
-66	          isWrong: false,
-67	          isLocked: false,
-68	        };
-69	        const newZones = state.zones.map((z, i) =>
-70	          i === action.zoneIndex ? newZone : z,
-71	        );
-72	        const nextActiveSlot = newZones.findIndex(
-73	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-74	        );
-75	        const allFilledCorrectly = newZones.every(
-76	          (z) => z.placedTileId !== null && !z.isWrong,
-77	        );
-78	        return {
-79	          ...state,
-80	          zones: newZones,
-81	          bankTileIds: newBankTileIds,
-82	          activeSlotIndex:
-83	            nextActiveSlot === -1
-84	              ? state.activeSlotIndex
-85	              : nextActiveSlot,
-86	          retryCount: state.retryCount,
-87	          phase: allFilledCorrectly ? 'round-complete' : 'playing',
-88	        };
-89	      }
-90	
-91	      const lockManual =
-92	        state.config.wrongTileBehavior === 'lock-manual';
-93	      const newZone: AnswerZone = {
-94	        ...zone,
-95	        placedTileId: lockManual ? action.tileId : zone.placedTileId,
-96	        isWrong: true,
-97	        isLocked: true,
-98	      };
-99	      const newZones = state.zones.map((z, i) =>
-100	        i === action.zoneIndex ? newZone : z,
-101	      );
-102	      let newBankTileIds = lockManual
-103	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-104	        : state.bankTileIds;
-105	      if (
-106	        lockManual &&
-107	        zone.placedTileId &&
-108	        zone.placedTileId !== action.tileId
-109	      ) {
-110	        newBankTileIds = [...newBankTileIds, zone.placedTileId];
-111	      }
-112	
-113	      return {
-114	        ...state,
-115	        zones: newZones,
-116	        bankTileIds: newBankTileIds,
-117	        activeSlotIndex: state.activeSlotIndex,
-118	        retryCount: state.retryCount + 1,
-119	        phase: 'playing',
-120	      };
-121	    }
-122	
-123	    case 'REMOVE_TILE': {
-124	      const zone = state.zones[action.zoneIndex];
-125	      if (!zone?.placedTileId) return state;
-126	      return {
-127	        ...state,
-128	        zones: state.zones.map((z, i) =>
-129	          i === action.zoneIndex
-130	            ? {
-131	                ...z,
-132	                placedTileId: null,
-133	                isWrong: false,
-134	                isLocked: false,
-135	              }
-136	            : z,
-137	        ),
-138	        bankTileIds: [...state.bankTileIds, zone.placedTileId],
-139	      };
-140	    }
-141	
-142	    case 'SWAP_TILES': {
-143	      const fromZone = state.zones[action.fromZoneIndex];
-144	      const toZone = state.zones[action.toZoneIndex];
-145	      if (!fromZone || !toZone) return state;
-146	      return {
-147	        ...state,
-148	        zones: state.zones.map((z, i) => {
-149	          if (i === action.fromZoneIndex)
-150	            return { ...z, placedTileId: toZone.placedTileId };
-151	          if (i === action.toZoneIndex)
-152	            return { ...z, placedTileId: fromZone.placedTileId };
-153	          return z;
-154	        }),
-155	      };
-156	    }
-157	
-158	    case 'EJECT_TILE': {
-159	      const zone = state.zones[action.zoneIndex];
-160	      if (!zone) return state;
-161	
-162	      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
-163	      if (!zone.isWrong && !zone.isLocked) return state;
-164	
-165	      if (zone.placedTileId) {
-166	        return {
-167	          ...state,
-168	          zones: state.zones.map((z, i) =>
-169	            i === action.zoneIndex
-170	              ? {
-171	                  ...z,
-172	                  placedTileId: null,
-173	                  isWrong: false,
-174	                  isLocked: false,
-175	                }
-176	              : z,
-177	          ),
-178	          bankTileIds: [...state.bankTileIds, zone.placedTileId],
-179	        };
-180	      }
-181	
-182	      return {
-183	        ...state,
-184	        zones: state.zones.map((z, i) =>
-185	          i === action.zoneIndex
-186	            ? {
-187	                ...z,
-188	                placedTileId: null,
-189	                isWrong: false,
-190	                isLocked: false,
-191	              }
-192	            : z,
-193	        ),
-194	      };
-195	    }
-196	
-197	    case 'ADVANCE_ROUND': {
-198	      return {
-199	        ...state,
-200	        allTiles: action.tiles,
-201	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-202	        zones: action.zones,
-203	        activeSlotIndex: 0,
-204	        phase: 'playing',
-205	        roundIndex: state.roundIndex + 1,
-206	        retryCount: 0,
-207	      };
-208	    }
-209	
-210	    case 'COMPLETE_GAME': {
-211	      return { ...state, phase: 'game-over' };
-212	    }
-213	
-214	    case 'SET_DRAG_ACTIVE': {
-215	      return { ...state, dragActiveTileId: action.tileId };
-216	    }
-217	
-218	    default: {
-219	      return state;
-220	    }
-221	  }
-222	}
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     phase: 'playing',
+20     roundIndex: 0,
+21     retryCount: 0,
+22   };
+23 }
+24 
+25 export function answerGameReducer(
+26   state: AnswerGameState,
+27   action: AnswerGameAction,
+28 ): AnswerGameState {
+29   switch (action.type) {
+30     case 'INIT_ROUND': {
+31       return {
+32         ...state,
+33         allTiles: action.tiles,
+34         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+35         zones: action.zones,
+36         activeSlotIndex: 0,
+37         phase: 'playing',
+38         roundIndex: 0,
+39         retryCount: 0,
+40       };
+41     }
+42 
+43     case 'PLACE_TILE': {
+44       const tile = state.allTiles.find((t) => t.id === action.tileId);
+45       const zone = state.zones[action.zoneIndex];
+46       if (!tile || !zone) return state;
+47 
+48       const correct = tile.value === zone.expectedValue;
+49 
+50       if (!correct && state.config.wrongTileBehavior === 'reject') {
+51         return { ...state, retryCount: state.retryCount + 1 };
+52       }
+53 
+54       if (correct) {
+55         const previousId = zone.placedTileId;
+56         let newBankTileIds = state.bankTileIds.filter(
+57           (id) => id !== action.tileId,
+58         );
+59         if (previousId !== null && previousId !== action.tileId) {
+60           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+61           newBankTileIds = [...newBankTileIds, previousId];
+62         }
+63         const newZone: AnswerZone = {
+64           ...zone,
+65           placedTileId: action.tileId,
+66           isWrong: false,
+67           isLocked: false,
+68         };
+69         const newZones = state.zones.map((z, i) =>
+70           i === action.zoneIndex ? newZone : z,
+71         );
+72         const nextActiveSlot = newZones.findIndex(
+73           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+74         );
+75         const allFilledCorrectly = newZones.every(
+76           (z) => z.placedTileId !== null && !z.isWrong,
+77         );
+78         return {
+79           ...state,
+80           zones: newZones,
+81           bankTileIds: newBankTileIds,
+82           activeSlotIndex:
+83             nextActiveSlot === -1
+84               ? state.activeSlotIndex
+85               : nextActiveSlot,
+86           retryCount: state.retryCount,
+87           phase: allFilledCorrectly ? 'round-complete' : 'playing',
+88         };
+89       }
+90 
+91       const lockManual =
+92         state.config.wrongTileBehavior === 'lock-manual';
+93       const newZone: AnswerZone = {
+94         ...zone,
+95         placedTileId: lockManual ? action.tileId : zone.placedTileId,
+96         isWrong: true,
+97         isLocked: true,
+98       };
+99       const newZones = state.zones.map((z, i) =>
+100         i === action.zoneIndex ? newZone : z,
+101       );
+102       let newBankTileIds = lockManual
+103         ? state.bankTileIds.filter((id) => id !== action.tileId)
+104         : state.bankTileIds;
+105       if (
+106         lockManual &&
+107         zone.placedTileId &&
+108         zone.placedTileId !== action.tileId
+109       ) {
+110         newBankTileIds = [...newBankTileIds, zone.placedTileId];
+111       }
+112 
+113       return {
+114         ...state,
+115         zones: newZones,
+116         bankTileIds: newBankTileIds,
+117         activeSlotIndex: state.activeSlotIndex,
+118         retryCount: state.retryCount + 1,
+119         phase: 'playing',
+120       };
+121     }
+122 
+123     case 'REMOVE_TILE': {
+124       const zone = state.zones[action.zoneIndex];
+125       if (!zone?.placedTileId) return state;
+126       return {
+127         ...state,
+128         zones: state.zones.map((z, i) =>
+129           i === action.zoneIndex
+130             ? {
+131                 ...z,
+132                 placedTileId: null,
+133                 isWrong: false,
+134                 isLocked: false,
+135               }
+136             : z,
+137         ),
+138         bankTileIds: [...state.bankTileIds, zone.placedTileId],
+139       };
+140     }
+141 
+142     case 'SWAP_TILES': {
+143       const fromZone = state.zones[action.fromZoneIndex];
+144       const toZone = state.zones[action.toZoneIndex];
+145       if (!fromZone || !toZone) return state;
+146       return {
+147         ...state,
+148         zones: state.zones.map((z, i) => {
+149           if (i === action.fromZoneIndex)
+150             return { ...z, placedTileId: toZone.placedTileId };
+151           if (i === action.toZoneIndex)
+152             return { ...z, placedTileId: fromZone.placedTileId };
+153           return z;
+154         }),
+155       };
+156     }
+157 
+158     case 'EJECT_TILE': {
+159       const zone = state.zones[action.zoneIndex];
+160       if (!zone) return state;
+161 
+162       // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+163       if (!zone.isWrong && !zone.isLocked) return state;
+164 
+165       if (zone.placedTileId) {
+166         return {
+167           ...state,
+168           zones: state.zones.map((z, i) =>
+169             i === action.zoneIndex
+170               ? {
+171                   ...z,
+172                   placedTileId: null,
+173                   isWrong: false,
+174                   isLocked: false,
+175                 }
+176               : z,
+177           ),
+178           bankTileIds: [...state.bankTileIds, zone.placedTileId],
+179         };
+180       }
+181 
+182       return {
+183         ...state,
+184         zones: state.zones.map((z, i) =>
+185           i === action.zoneIndex
+186             ? {
+187                 ...z,
+188                 placedTileId: null,
+189                 isWrong: false,
+190                 isLocked: false,
+191               }
+192             : z,
+193         ),
+194       };
+195     }
+196 
+197     case 'ADVANCE_ROUND': {
+198       return {
+199         ...state,
+200         allTiles: action.tiles,
+201         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+202         zones: action.zones,
+203         activeSlotIndex: 0,
+204         phase: 'playing',
+205         roundIndex: state.roundIndex + 1,
+206         retryCount: 0,
+207       };
+208     }
+209 
+210     case 'COMPLETE_GAME': {
+211       return { ...state, phase: 'game-over' };
+212     }
+213 
+214     case 'SET_DRAG_ACTIVE': {
+215       return { ...state, dragActiveTileId: action.tileId };
+216     }
+217 
+218     default: {
+219       return state;
+220     }
+221   }
+222 }
 223
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:53:41Z)**_
@@ -5066,6 +5170,7 @@ Check if reducer knows about round count
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGameProvider.tsx:53:    current: state.roundIndex + 1,
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGameProvider.tsx:54:    total: config.totalRounds,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:54:26Z)**_
@@ -5076,6 +5181,7 @@ Now I have the full picture.
 **Bug 1 Root Cause (Confetti timing):**
 
 In `useGameSounds.ts`:
+
 ```ts
 if (phase === 'round-complete') {
   void queueSound('round-complete').then(() => {
@@ -5084,7 +5190,7 @@ if (phase === 'round-complete') {
 }
 ```
 
-`setConfettiReady(true)` is called after the sound FINISHES. But the sound plays asynchronously. Meanwhile, in `WordSpell.tsx`, after 750ms, `ADVANCE_ROUND` or `COMPLETE_GAME` is dispatched, changing the phase. 
+`setConfettiReady(true)` is called after the sound FINISHES. But the sound plays asynchronously. Meanwhile, in `WordSpell.tsx`, after 750ms, `ADVANCE_ROUND` or `COMPLETE_GAME` is dispatched, changing the phase.
 
 When the phase changes, the effect cleanup runs and sets `cancelled = true`. By the time the sound finishes playing, the cancellation flag prevents `setConfettiReady(true)` from ever executing.
 
@@ -5148,6 +5254,7 @@ Verify NumberMatch has same patterns
 169:  const firstConfigIndex = roundOrder[0];
 225:        roundOrder={roundOrder}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:54:42Z)**_
@@ -5156,12 +5263,13 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:54:42Z)**_
 Good. Same pattern. Now let me implement the fixes:
 
 **Fix for Bug 1 (confetti)**: Change `useGameSounds.ts`:
+
 - Before: `void queueSound('round-complete').then(() => { if (!cancelled) setConfettiReady(true); });`
 - After: `setConfettiReady(true); void queueSound('round-complete');`
 
 **Fix for Bug 2 (last round)**: Change `answer-game-reducer.ts`:
-- Before: `phase: allFilledCorrectly ? 'round-complete' : 'playing'`
 
+- Before: `phase: allFilledCorrectly ? 'round-complete' : 'playing'`
 
 - After: Check if we're on the last round, then transition to 'game-over' instead of 'round-complete' when appropriate
 
@@ -5186,6 +5294,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:54:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:55:00Z)**_
@@ -5196,6 +5305,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:55:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/answer-game-reducer.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:55:07Z)**_
@@ -5232,6 +5342,7 @@ Run unit tests to verify reducer changes
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:55:23Z)**_
@@ -5303,6 +5414,7 @@ Number of calls: **1**
  FAIL  src/components/answer-game/useGameSounds.test.tsx > useGameSounds > confettiReady becomes true after the "starts" promise resolves
 AssertionError: expected false to be true // Object.is equality
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:55:30Z)**_
@@ -5313,7 +5425,6 @@ The tests are failing because:
 1. `"queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones"` - this test places tiles using `PLACE_TILE`, but our reducer change now makes the last round go to `game-over` instead of `round-complete`. The test setup probably uses only 1 round (or creates a scenario where the current round is the last), so `isLastRound = true` and phase goes to `game-over` instead of `round-complete`.
 
 2. `"confettiReady becomes true after the "starts" promise resolves"` - this test was expecting confetti to become true AFTER the sound resolves, but now confetti is set immediately. The test setup might have some timing issue.
-
 
 I need to check the test file to understand how it's structured and what needs updating. The reducer test might be using a single round scenario that now triggers the last-round logic, and the sound test needs to account for the immediate confetti behavior.
 </details></think>
@@ -5329,282 +5440,283 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:55:30Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useGameSounds } from './useGameSounds';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	import { queueSound } from '@/lib/audio/AudioFeedback';
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	  queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
-14	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-15	}));
-16	
-17	vi.mock('@/lib/game-event-bus', () => ({
-18	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-19	}));
-20	
-21	const baseConfig: AnswerGameConfig = {
-22	  gameId: 'test',
-23	  inputMethod: 'drag',
-24	  wrongTileBehavior: 'lock-auto-eject',
-25	  tileBankMode: 'exact',
-26	  totalRounds: 1,
-27	  ttsEnabled: false,
-28	};
-29	
-30	const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
-31	const zones: AnswerZone[] = [
-32	  {
-33	    id: 'z0',
-34	    index: 0,
-35	    expectedValue: 'A',
-36	    placedTileId: null,
-37	    isWrong: false,
-38	    isLocked: false,
-39	  },
-40	];
-41	
-42	function createWrapper(config: AnswerGameConfig) {
-43	  const Wrapper = ({ children }: { children: ReactNode }) => (
-44	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-45	  );
-46	  Wrapper.displayName = 'TestWrapper';
-47	  return Wrapper;
-48	}
-49	
-50	describe('useGameSounds', () => {
-51	  beforeEach(() => vi.clearAllMocks());
-52	
-53	  it('does not play a sound on initial render', () => {
-54	    renderHook(() => useGameSounds(), {
-55	      wrapper: createWrapper(baseConfig),
-56	    });
-57	    expect(queueSound).not.toHaveBeenCalled();
-58	  });
-59	
-60	  it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
-61	    const { result } = renderHook(
-62	      () => {
-63	        const dispatch = useAnswerGameDispatch();
-64	        useGameSounds();
-65	        return dispatch;
-66	      },
-67	      { wrapper: createWrapper(baseConfig) },
-68	    );
-69	    act(() => {
-70	      result.current({ type: 'INIT_ROUND', tiles, zones });
-71	    });
-72	    vi.clearAllMocks();
-73	    act(() => {
-74	      result.current({ type: 'COMPLETE_GAME' });
-75	    });
-76	    expect(queueSound).toHaveBeenCalledWith('game-complete');
-77	  });
-78	
-79	  it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
-80	    const { result } = renderHook(
-81	      () => {
-82	        const dispatch = useAnswerGameDispatch();
-83	        useGameSounds();
-84	        return dispatch;
-85	      },
-86	      { wrapper: createWrapper(baseConfig) },
-87	    );
-88	    act(() => {
-89	      result.current({ type: 'INIT_ROUND', tiles, zones });
-90	    });
-91	    vi.clearAllMocks();
-92	    act(() => {
-93	      result.current({
-94	        type: 'PLACE_TILE',
-95	        tileId: 't1',
-96	        zoneIndex: 0,
-97	      });
-98	    });
-99	    expect(queueSound).toHaveBeenCalledWith('round-complete');
-100	  });
-101	
-102	  it('confettiReady is false initially', () => {
-103	    const { result } = renderHook(() => useGameSounds(), {
-104	      wrapper: createWrapper(baseConfig),
-105	    });
-106	    expect(result.current.confettiReady).toBe(false);
-107	  });
-108	
-109	  it('confettiReady is false before the "starts" promise resolves', () => {
-110	    let resolveStarts!: () => void;
-111	    vi.mocked(queueSound).mockImplementationOnce(
-112	      () =>
-113	        new Promise<void>((res) => {
-114	          resolveStarts = res;
-115	        }),
-116	    );
-117	
-118	    const { result } = renderHook(
-119	      () => {
-120	        const dispatch = useAnswerGameDispatch();
-121	        const sounds = useGameSounds();
-122	        return { dispatch, sounds };
-123	      },
-124	      { wrapper: createWrapper(baseConfig) },
-125	    );
-126	    act(() => {
-127	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-128	    });
-129	    act(() => {
-130	      result.current.dispatch({
-131	        type: 'PLACE_TILE',
-132	        tileId: 't1',
-133	        zoneIndex: 0,
-134	      });
-135	    });
-136	
-137	    expect(result.current.sounds.confettiReady).toBe(false);
-138	    // resolve to avoid unhandled promise warnings
-139	    act(() => {
-140	      resolveStarts();
-141	    });
-142	  });
-143	
-144	  it('confettiReady becomes true after the "starts" promise resolves', async () => {
-145	    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-146	
-147	    const { result } = renderHook(
-148	      () => {
-149	        const dispatch = useAnswerGameDispatch();
-150	        const sounds = useGameSounds();
-151	        return { dispatch, sounds };
-152	      },
-153	      { wrapper: createWrapper(baseConfig) },
-154	    );
-155	    act(() => {
-156	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-157	    });
-158	    await act(async () => {
-159	      result.current.dispatch({
-160	        type: 'PLACE_TILE',
-161	        tileId: 't1',
-162	        zoneIndex: 0,
-163	      });
-164	    });
-165	
-166	    expect(result.current.sounds.confettiReady).toBe(true);
-167	  });
-168	
-169	  it('confettiReady resets to false when phase leaves round-complete', async () => {
-170	    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-171	
-172	    const multiRoundConfig: AnswerGameConfig = {
-173	      ...baseConfig,
-174	      totalRounds: 2,
-175	    };
-176	    const extraTile: TileItem = { id: 't2', label: 'B', value: 'B' };
-177	    const extraZone: AnswerZone = {
-178	      id: 'z1',
-179	      index: 1,
-180	      expectedValue: 'B',
-181	      placedTileId: null,
-182	      isWrong: false,
-183	      isLocked: false,
-184	    };
-185	
-186	    const { result } = renderHook(
-187	      () => {
-188	        const dispatch = useAnswerGameDispatch();
-189	        const sounds = useGameSounds();
-190	        return { dispatch, sounds };
-191	      },
-192	      { wrapper: createWrapper(multiRoundConfig) },
-193	    );
-194	
-195	    act(() => {
-196	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-197	    });
-198	    await act(async () => {
-199	      result.current.dispatch({
-200	        type: 'PLACE_TILE',
-201	        tileId: 't1',
-202	        zoneIndex: 0,
-203	      });
-204	    });
-205	    expect(result.current.sounds.confettiReady).toBe(true);
-206	
-207	    await act(async () => {
-208	      result.current.dispatch({
-209	        type: 'ADVANCE_ROUND',
-210	        tiles: [extraTile],
-211	        zones: [extraZone],
-212	      });
-213	    });
-214	    expect(result.current.sounds.confettiReady).toBe(false);
-215	  });
-216	
-217	  it('gameOverReady is false initially', () => {
-218	    const { result } = renderHook(() => useGameSounds(), {
-219	      wrapper: createWrapper(baseConfig),
-220	    });
-221	    expect(result.current.gameOverReady).toBe(false);
-222	  });
-223	
-224	  it('gameOverReady is false before the "starts" promise resolves', () => {
-225	    let resolveStarts!: () => void;
-226	    vi.mocked(queueSound).mockImplementationOnce(
-227	      () =>
-228	        new Promise<void>((res) => {
-229	          resolveStarts = res;
-230	        }),
-231	    );
-232	
-233	    const { result } = renderHook(
-234	      () => {
-235	        const dispatch = useAnswerGameDispatch();
-236	        const sounds = useGameSounds();
-237	        return { dispatch, sounds };
-238	      },
-239	      { wrapper: createWrapper(baseConfig) },
-240	    );
-241	    act(() => {
-242	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-243	    });
-244	    act(() => {
-245	      result.current.dispatch({ type: 'COMPLETE_GAME' });
-246	    });
-247	
-248	    expect(result.current.sounds.gameOverReady).toBe(false);
-249	    act(() => {
-250	      resolveStarts();
-251	    });
-252	  });
-253	
-254	  it('gameOverReady becomes true after the "starts" promise resolves', async () => {
-255	    vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
-256	
-257	    const { result } = renderHook(
-258	      () => {
-259	        const dispatch = useAnswerGameDispatch();
-260	        const sounds = useGameSounds();
-261	        return { dispatch, sounds };
-262	      },
-263	      { wrapper: createWrapper(baseConfig) },
-264	    );
-265	    act(() => {
-266	      result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
-267	    });
-268	    await act(async () => {
-269	      result.current.dispatch({ type: 'COMPLETE_GAME' });
-270	    });
-271	
-272	    expect(result.current.sounds.gameOverReady).toBe(true);
-273	  });
-274	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useGameSounds } from './useGameSounds';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 import { queueSound } from '@/lib/audio/AudioFeedback';
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13   queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
+14   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+15 }));
+16 
+17 vi.mock('@/lib/game-event-bus', () => ({
+18   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+19 }));
+20 
+21 const baseConfig: AnswerGameConfig = {
+22   gameId: 'test',
+23   inputMethod: 'drag',
+24   wrongTileBehavior: 'lock-auto-eject',
+25   tileBankMode: 'exact',
+26   totalRounds: 1,
+27   ttsEnabled: false,
+28 };
+29 
+30 const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
+31 const zones: AnswerZone[] = [
+32   {
+33     id: 'z0',
+34     index: 0,
+35     expectedValue: 'A',
+36     placedTileId: null,
+37     isWrong: false,
+38     isLocked: false,
+39   },
+40 ];
+41 
+42 function createWrapper(config: AnswerGameConfig) {
+43   const Wrapper = ({ children }: { children: ReactNode }) => (
+44     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+45   );
+46   Wrapper.displayName = 'TestWrapper';
+47   return Wrapper;
+48 }
+49 
+50 describe('useGameSounds', () => {
+51   beforeEach(() => vi.clearAllMocks());
+52 
+53   it('does not play a sound on initial render', () => {
+54     renderHook(() => useGameSounds(), {
+55       wrapper: createWrapper(baseConfig),
+56     });
+57     expect(queueSound).not.toHaveBeenCalled();
+58   });
+59 
+60   it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+61     const { result } = renderHook(
+62       () => {
+63         const dispatch = useAnswerGameDispatch();
+64         useGameSounds();
+65         return dispatch;
+66       },
+67       { wrapper: createWrapper(baseConfig) },
+68     );
+69     act(() => {
+70       result.current({ type: 'INIT_ROUND', tiles, zones });
+71     });
+72     vi.clearAllMocks();
+73     act(() => {
+74       result.current({ type: 'COMPLETE_GAME' });
+75     });
+76     expect(queueSound).toHaveBeenCalledWith('game-complete');
+77   });
+78 
+79   it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+80     const { result } = renderHook(
+81       () => {
+82         const dispatch = useAnswerGameDispatch();
+83         useGameSounds();
+84         return dispatch;
+85       },
+86       { wrapper: createWrapper(baseConfig) },
+87     );
+88     act(() => {
+89       result.current({ type: 'INIT_ROUND', tiles, zones });
+90     });
+91     vi.clearAllMocks();
+92     act(() => {
+93       result.current({
+94         type: 'PLACE_TILE',
+95         tileId: 't1',
+96         zoneIndex: 0,
+97       });
+98     });
+99     expect(queueSound).toHaveBeenCalledWith('round-complete');
+100   });
+101 
+102   it('confettiReady is false initially', () => {
+103     const { result } = renderHook(() => useGameSounds(), {
+104       wrapper: createWrapper(baseConfig),
+105     });
+106     expect(result.current.confettiReady).toBe(false);
+107   });
+108 
+109   it('confettiReady is false before the "starts" promise resolves', () => {
+110     let resolveStarts!: () => void;
+111     vi.mocked(queueSound).mockImplementationOnce(
+112       () =>
+113         new Promise<void>((res) => {
+114           resolveStarts = res;
+115         }),
+116     );
+117 
+118     const { result } = renderHook(
+119       () => {
+120         const dispatch = useAnswerGameDispatch();
+121         const sounds = useGameSounds();
+122         return { dispatch, sounds };
+123       },
+124       { wrapper: createWrapper(baseConfig) },
+125     );
+126     act(() => {
+127       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+128     });
+129     act(() => {
+130       result.current.dispatch({
+131         type: 'PLACE_TILE',
+132         tileId: 't1',
+133         zoneIndex: 0,
+134       });
+135     });
+136 
+137     expect(result.current.sounds.confettiReady).toBe(false);
+138     // resolve to avoid unhandled promise warnings
+139     act(() => {
+140       resolveStarts();
+141     });
+142   });
+143 
+144   it('confettiReady becomes true after the "starts" promise resolves', async () => {
+145     vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
+146 
+147     const { result } = renderHook(
+148       () => {
+149         const dispatch = useAnswerGameDispatch();
+150         const sounds = useGameSounds();
+151         return { dispatch, sounds };
+152       },
+153       { wrapper: createWrapper(baseConfig) },
+154     );
+155     act(() => {
+156       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+157     });
+158     await act(async () => {
+159       result.current.dispatch({
+160         type: 'PLACE_TILE',
+161         tileId: 't1',
+162         zoneIndex: 0,
+163       });
+164     });
+165 
+166     expect(result.current.sounds.confettiReady).toBe(true);
+167   });
+168 
+169   it('confettiReady resets to false when phase leaves round-complete', async () => {
+170     vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
+171 
+172     const multiRoundConfig: AnswerGameConfig = {
+173       ...baseConfig,
+174       totalRounds: 2,
+175     };
+176     const extraTile: TileItem = { id: 't2', label: 'B', value: 'B' };
+177     const extraZone: AnswerZone = {
+178       id: 'z1',
+179       index: 1,
+180       expectedValue: 'B',
+181       placedTileId: null,
+182       isWrong: false,
+183       isLocked: false,
+184     };
+185 
+186     const { result } = renderHook(
+187       () => {
+188         const dispatch = useAnswerGameDispatch();
+189         const sounds = useGameSounds();
+190         return { dispatch, sounds };
+191       },
+192       { wrapper: createWrapper(multiRoundConfig) },
+193     );
+194 
+195     act(() => {
+196       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+197     });
+198     await act(async () => {
+199       result.current.dispatch({
+200         type: 'PLACE_TILE',
+201         tileId: 't1',
+202         zoneIndex: 0,
+203       });
+204     });
+205     expect(result.current.sounds.confettiReady).toBe(true);
+206 
+207     await act(async () => {
+208       result.current.dispatch({
+209         type: 'ADVANCE_ROUND',
+210         tiles: [extraTile],
+211         zones: [extraZone],
+212       });
+213     });
+214     expect(result.current.sounds.confettiReady).toBe(false);
+215   });
+216 
+217   it('gameOverReady is false initially', () => {
+218     const { result } = renderHook(() => useGameSounds(), {
+219       wrapper: createWrapper(baseConfig),
+220     });
+221     expect(result.current.gameOverReady).toBe(false);
+222   });
+223 
+224   it('gameOverReady is false before the "starts" promise resolves', () => {
+225     let resolveStarts!: () => void;
+226     vi.mocked(queueSound).mockImplementationOnce(
+227       () =>
+228         new Promise<void>((res) => {
+229           resolveStarts = res;
+230         }),
+231     );
+232 
+233     const { result } = renderHook(
+234       () => {
+235         const dispatch = useAnswerGameDispatch();
+236         const sounds = useGameSounds();
+237         return { dispatch, sounds };
+238       },
+239       { wrapper: createWrapper(baseConfig) },
+240     );
+241     act(() => {
+242       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+243     });
+244     act(() => {
+245       result.current.dispatch({ type: 'COMPLETE_GAME' });
+246     });
+247 
+248     expect(result.current.sounds.gameOverReady).toBe(false);
+249     act(() => {
+250       resolveStarts();
+251     });
+252   });
+253 
+254   it('gameOverReady becomes true after the "starts" promise resolves', async () => {
+255     vi.mocked(queueSound).mockImplementation(() => Promise.resolve());
+256 
+257     const { result } = renderHook(
+258       () => {
+259         const dispatch = useAnswerGameDispatch();
+260         const sounds = useGameSounds();
+261         return { dispatch, sounds };
+262       },
+263       { wrapper: createWrapper(baseConfig) },
+264     );
+265     act(() => {
+266       result.current.dispatch({ type: 'INIT_ROUND', tiles, zones });
+267     });
+268     await act(async () => {
+269       result.current.dispatch({ type: 'COMPLETE_GAME' });
+270     });
+271 
+272     expect(result.current.sounds.gameOverReady).toBe(true);
+273   });
+274 });
 275
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:56:14Z)**_
@@ -5615,7 +5727,6 @@ Now I understand the two failing tests:
 **Test 1: "queues 'round-complete' when phase transitions to round-complete via PLACE_TILE completing all zones"** (line 79)
 
 This test uses `baseConfig` which has `totalRounds: 1`. With our reducer fix, when `roundIndex = 0` (which is the initial state after `INIT_ROUND`) and `totalRounds = 1`, `isLastRound = 0 >= 0` = true. So PLACE_TILE now goes directly to `game-over` instead of `round-complete`. That's why `queueSound` was called with `'game-complete'` instead of `'round-complete'`.
-
 
 The fix is to update the test config to use `totalRounds: 2` so the first round isn't the last one.
 
@@ -5648,6 +5759,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:56:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:56:32Z)**_
@@ -5658,6 +5770,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:56:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:56:47Z)**_
@@ -5680,6 +5793,7 @@ Run unit tests to verify all pass
 
 Done in 3.97s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:56:56Z)**_
@@ -5687,14 +5801,17 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:56:56Z)**_
 All 262 tests pass. Let me do a final summary:
 
 **Bug 1 fixed — Confetti always shows on round complete:**
+
 - Root cause: `setConfettiReady(true)` was tied to `queueSound().then(...)`, but the 750ms `ADVANCE_ROUND` timer always fired before the sound finished, cancelling the callback
 - Fix: confetti is now set immediately when `phase` enters `round-complete`, while the sound plays in parallel
 
 **Bug 2 fixed — Last round goes straight to game-over:**
+
 - Root cause: the reducer always emitted `round-complete` phase even on the last round, causing the round-complete sound to play before `game-complete`
 - Fix: in `answer-game-reducer.ts`, when `allFilledCorrectly && isLastRound`, the phase goes directly to `game-over`, skipping `round-complete` entirely — no round-complete sound, no confetti on last round
 
 Updated tests now correctly document the new behavior:
+
 - "confettiReady becomes true immediately when phase enters round-complete"  
 - "confettiReady does not show when last round completes (goes straight to game-over)"
 
@@ -5714,9 +5831,9 @@ The user is saying that confetti should play together with the round-complete so
 Wait, let me think about this more carefully.
 
 The flow:
+
 1. User places the last tile correctly → `PLACE_TILE` action → phase → `round-complete`
 2. At the same time, the correct sound effect plays (from some other hook/mechanism)
-
 
 3. `useGameSounds` fires for `round-complete` → `setConfettiReady(true)` immediately + plays round-complete sound
 
@@ -5724,9 +5841,10 @@ But the user says confetti is playing with the correct sound, not with the round
 
 Actually, I see the issue now. The user wants confetti to appear as a transition when the round-complete sound plays, not immediately when the phase changes. The original 750ms timer was cutting things short before confetti could display. The real fix is to trigger `setConfettiReady(true)` right when the round-complete sound starts playing, so confetti shows in sync with that audio cue rather than appearing too early with the correct sound. I need to trace through where the correct tile sound is actually coming from—it might be triggered during the `playing` phase through a separate mechanism rather than through the `useGameSounds` hook that handles `round-complete`.
 
-The real issue is timing: confetti should appear when the round-complete sound *starts* playing, not immediately when the phase changes. I'm looking at the available audio utilities like `queueSound`, `playSound`, and `whenSoundEnds` to see if there's a hook for detecting when a sound begins, or if I need a different approach to sync the confetti with the audio start. I need a way to trigger confetti when the round-complete sound actually starts playing, not when it's queued or when it finishes. Looking at the audio module, I have `playSound`, `queueSound`, and `whenSoundEnds`, but I need something like a "when sound starts" callback to get the timing right. are correctly filled), the transition from `playing` phase to `round-complete` phase happens in the same `PLACE_TILE` action that triggers the correct sound.
+The real issue is timing: confetti should appear when the round-complete sound _starts_ playing, not immediately when the phase changes. I'm looking at the available audio utilities like `queueSound`, `playSound`, and `whenSoundEnds` to see if there's a hook for detecting when a sound begins, or if I need a different approach to sync the confetti with the audio start. I need a way to trigger confetti when the round-complete sound actually starts playing, not when it's queued or when it finishes. Looking at the audio module, I have `playSound`, `queueSound`, and `whenSoundEnds`, but I need something like a "when sound starts" callback to get the timing right. are correctly filled), the transition from `playing` phase to `round-complete` phase happens in the same `PLACE_TILE` action that triggers the correct sound.
 
 So the sequence might be:
+
 1. Place last correct tile
 2. `PLACE_TILE` → phase = `round-complete`  
 3. `useGameSounds` fires: `setConfettiReady(true)` immediately (my fix) + `queueSound('round-complete')`
@@ -5751,85 +5869,86 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:57:43Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts`
 
 ```text
-1	type SoundKey =
-2	  | 'correct'
-3	  | 'wrong'
-4	  | 'round-complete'
-5	  | 'game-complete';
-6	
-7	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-8	
-9	const SOUND_PATHS: Record<SoundKey, string> = {
-10	  correct: `${base}/sounds/correct.mp3`,
-11	  wrong: `${base}/sounds/wrong.mp3`,
-12	  'round-complete': `${base}/sounds/round-complete.mp3`,
-13	  'game-complete': `${base}/sounds/game-complete.mp3`,
-14	};
-15	
-16	let currentAudio: HTMLAudioElement | null = null;
-17	let currentResolve: (() => void) | null = null;
-18	let queueTail: Promise<void> = Promise.resolve();
-19	
-20	function playSoundInternal(
-21	  key: SoundKey,
-22	  volume: number,
-23	): Promise<void> {
-24	  currentAudio?.pause();
-25	  currentAudio = null;
-26	
-27	  const audio = new Audio(SOUND_PATHS[key]);
-28	  audio.volume = volume;
-29	  currentAudio = audio;
-30	
-31	  return new Promise<void>((resolve) => {
-32	    currentResolve = resolve;
-33	
-34	    const cleanup = () => {
-35	      if (currentResolve === resolve) currentResolve = null;
-36	      if (currentAudio === audio) currentAudio = null;
-37	      resolve();
-38	    };
-39	
-40	    audio.addEventListener('ended', cleanup, { once: true });
-41	    audio.addEventListener('error', cleanup, { once: true });
-42	
-43	    void audio.play().catch(() => {
-44	      console.error(`Failed to play sound ${key}`);
-45	      cleanup();
-46	    });
-47	  });
-48	}
-49	
-50	/**
-51	 * Plays immediately, cancelling any current audio and resetting the queue.
-52	 * Use for tile feedback (correct/wrong) where the latest sound always wins.
-53	 */
-54	export function playSound(key: SoundKey, volume = 0.8): void {
-55	  currentResolve?.();
-56	  currentResolve = null;
-57	  queueTail = playSoundInternal(key, volume);
-58	}
-59	
-60	/**
-61	 * Queues a sound to play after the current queue drains.
-62	 * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
-63	 * Returns a promise that resolves when the queued sound **starts** (not ends).
-64	 */
-65	export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
-66	  const startsAt = queueTail;
-67	  queueTail = startsAt.then(() => playSoundInternal(key, volume));
-68	  return startsAt;
-69	}
-70	
-71	/**
-72	 * Returns a promise that resolves when all pending audio (current + queued) finishes.
-73	 * Use to delay TTS until the audio queue is empty.
-74	 */
-75	export function whenSoundEnds(): Promise<void> {
-76	  return queueTail;
-77	}
+1 type SoundKey =
+2   | 'correct'
+3   | 'wrong'
+4   | 'round-complete'
+5   | 'game-complete';
+6 
+7 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+8 
+9 const SOUND_PATHS: Record<SoundKey, string> = {
+10   correct: `${base}/sounds/correct.mp3`,
+11   wrong: `${base}/sounds/wrong.mp3`,
+12   'round-complete': `${base}/sounds/round-complete.mp3`,
+13   'game-complete': `${base}/sounds/game-complete.mp3`,
+14 };
+15 
+16 let currentAudio: HTMLAudioElement | null = null;
+17 let currentResolve: (() => void) | null = null;
+18 let queueTail: Promise<void> = Promise.resolve();
+19 
+20 function playSoundInternal(
+21   key: SoundKey,
+22   volume: number,
+23 ): Promise<void> {
+24   currentAudio?.pause();
+25   currentAudio = null;
+26 
+27   const audio = new Audio(SOUND_PATHS[key]);
+28   audio.volume = volume;
+29   currentAudio = audio;
+30 
+31   return new Promise<void>((resolve) => {
+32     currentResolve = resolve;
+33 
+34     const cleanup = () => {
+35       if (currentResolve === resolve) currentResolve = null;
+36       if (currentAudio === audio) currentAudio = null;
+37       resolve();
+38     };
+39 
+40     audio.addEventListener('ended', cleanup, { once: true });
+41     audio.addEventListener('error', cleanup, { once: true });
+42 
+43     void audio.play().catch(() => {
+44       console.error(`Failed to play sound ${key}`);
+45       cleanup();
+46     });
+47   });
+48 }
+49 
+50 /**
+51  * Plays immediately, cancelling any current audio and resetting the queue.
+52  * Use for tile feedback (correct/wrong) where the latest sound always wins.
+53  */
+54 export function playSound(key: SoundKey, volume = 0.8): void {
+55   currentResolve?.();
+56   currentResolve = null;
+57   queueTail = playSoundInternal(key, volume);
+58 }
+59 
+60 /**
+61  * Queues a sound to play after the current queue drains.
+62  * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
+63  * Returns a promise that resolves when the queued sound **starts** (not ends).
+64  */
+65 export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
+66   const startsAt = queueTail;
+67   queueTail = startsAt.then(() => playSoundInternal(key, volume));
+68   return startsAt;
+69 }
+70 
+71 /**
+72  * Returns a promise that resolves when all pending audio (current + queued) finishes.
+73  * Use to delay TTS until the audio queue is empty.
+74  */
+75 export function whenSoundEnds(): Promise<void> {
+76   return queueTail;
+77 }
 78
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:57:45Z)**_
@@ -5845,6 +5964,7 @@ Find where correct sound is triggered
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts:27:      void queueSound('round-complete');
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts:29:      void queueSound('game-complete').then(() => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:58:25Z)**_
@@ -5872,10 +5992,12 @@ The original design was actually sound — play the correct sound, transition to
 I'm weighing three approaches: having the game component directly call `queueSound` and advance after, having `useGameSounds` expose a callback that signals when to advance, or managing the confetti display duration in the component itself and advancing once that animation completes. The core issue is decoupling the round advancement from a hardcoded timer and instead anchoring it to the actual audio and visual events. The real fix is to have `useGameSounds` trigger `confettiReady` when the round-complete sound actually starts, then let the game components advance based on that signal rather than a fixed timer—this way the sequence naturally waits for the correct sound to finish before starting the round-complete sound and showing confetti. Still writing the fix... Spell/NumberMatch effects to wait for `confettiReady`.
 
 So the full fix:
-1. **Revert `useGameSounds.ts`** back to `queueSound(...).then(() => setConfettiReady(true))` 
+
+1. **Revert `useGameSounds.ts`** back to `queueSound(...).then(() => setConfettiReady(true))`
 2. **Update WordSpell.tsx and NumberMatch.tsx**: the round-advance timer should start when `confettiReady` becomes true, not when phase becomes `round-complete`
 
 But also, the `cancelled = true` issue: if WordSpell triggers ADVANCE_ROUND only after `confettiReady`, then:
+
 - Phase → round-complete
 - queueSound starts
 - confettiReady becomes true (when sound starts)
@@ -5902,6 +6024,7 @@ Find where correct/wrong sounds play
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:58:33Z)**_
@@ -5913,6 +6036,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:58:33Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:58:33Z)**_
@@ -5935,6 +6059,7 @@ worktrees/feat-word-spell-number-match/src/components/answer-game/useFreeSwap.te
 worktrees/feat-word-spell-number-match/src/components/answer-game/useAutoNextSlot.test.tsx:15:  playSound: vi.fn(),
 worktrees/feat-word-spell-number-match/src/components/answer-game/useKeyboardInput.test.tsx:13:  playSound: vi.fn(),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:10Z)**_
@@ -5977,7 +6102,7 @@ Now I need to apply the same fix to `NumberMatch.tsx` and update the tests to ma
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:12Z)**_
 
-Now I have the full picture. `queueSound` returns a promise that resolves when the sound **starts** (not ends). The original `.then()` was correct — confetti should fire when round-complete starts. The bug was that the 750ms advance timer was firing before the correct sound finished + round-complete could start. 
+Now I have the full picture. `queueSound` returns a promise that resolves when the sound **starts** (not ends). The original `.then()` was correct — confetti should fire when round-complete starts. The bug was that the 750ms advance timer was firing before the correct sound finished + round-complete could start.
 
 **The fix**: restore the `.then()` in `useGameSounds`, and make `WordSpell`/`NumberMatch` trigger their advance timer only **after** `confettiReady` becomes true (i.e., after the round-complete sound actually starts).
 
@@ -5989,6 +6114,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:59:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:18Z)**_
@@ -6002,87 +6128,88 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:59:19Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-80	}) => {
-81	  const { t } = useTranslation('games');
-82	  const [showInstructions, setShowInstructions] = useState(true);
-83	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  const { confettiReady, gameOverReady } = useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete') return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      const { tiles, zones } = buildTilesAndZones(
-133	        word,
-134	        wordSpellConfig.tileUnit,
-135	      );
-136	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-137	    }, delayMs);
-138	
-139	    return () => {
-140	      globalThis.clearTimeout(timer);
-141	    };
-142	  }, [
-143	    phase,
-144	    roundIndex,
-145	    dispatch,
-146	    roundOrder,
-147	    wordSpellConfig.rounds,
-148	    wordSpellConfig.tileUnit,
-149	  ]);
-150	
-151	  if (showInstructions) {
-152	    return (
-153	      <InstructionsOverlay
-154	        text={t('instructions.word-spell')}
-155	        onStart={() => setShowInstructions(false)}
-156	        ttsEnabled={wordSpellConfig.ttsEnabled}
-157	      />
-158	    );
-159	  }
+80 }) => {
+81   const { t } = useTranslation('games');
+82   const [showInstructions, setShowInstructions] = useState(true);
+83   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   const { confettiReady, gameOverReady } = useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete') return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       const { tiles, zones } = buildTilesAndZones(
+133         word,
+134         wordSpellConfig.tileUnit,
+135       );
+136       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+137     }, delayMs);
+138 
+139     return () => {
+140       globalThis.clearTimeout(timer);
+141     };
+142   }, [
+143     phase,
+144     roundIndex,
+145     dispatch,
+146     roundOrder,
+147     wordSpellConfig.rounds,
+148     wordSpellConfig.tileUnit,
+149   ]);
+150 
+151   if (showInstructions) {
+152     return (
+153       <InstructionsOverlay
+154         text={t('instructions.word-spell')}
+155         onStart={() => setShowInstructions(false)}
+156         ttsEnabled={wordSpellConfig.ttsEnabled}
+157       />
+158     );
+159   }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:36Z)**_
@@ -6093,7 +6220,6 @@ I see the issue. The `useEffect` fires when `phase === 'round-complete'`. The `i
 With our reducer fix, the last round goes directly to `game-over` in the reducer, so `phase` never reaches `round-complete` on the last round. This means the `isLastRound` check inside this effect is now dead code (for the reducer path). But that's fine since the reducer now handles it.
 
 Now I need to change the advance effect to trigger after `confettiReady` rather than immediately:
-
 
 The effect will check both `phase` and `confettiReady` before starting the timer, so it waits for the confetti animation to be ready. Since `confettiReady` is in the dependency array, the effect re-runs when it becomes true while the phase is still `round-complete`. I'll keep the `isLastRound` check as a safety fallback even though the reducer should handle the last round transition now.
 
@@ -6112,6 +6238,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:59:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:46Z)**_
@@ -6125,87 +6252,88 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:59:47Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-38	}) => {
-39	  const { t } = useTranslation('games');
-40	  const [showInstructions, setShowInstructions] = useState(true);
-41	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-42	  const dispatch = useAnswerGameDispatch();
-43	  const { confettiReady, gameOverReady } = useGameSounds();
-44	  const navigate = useNavigate();
-45	  const { locale } = useParams({ from: '/$locale' });
-46	  const completionToken = useRef(0);
-47	
-48	  const configRoundIndex = roundOrder[roundIndex];
-49	  const round =
-50	    configRoundIndex === undefined
-51	      ? undefined
-52	      : numberMatchConfig.rounds[configRoundIndex];
-53	
-54	  useRoundTTS(String(round?.value ?? ''));
-55	
-56	  const handleHome = () => {
-57	    void navigate({ to: '/$locale', params: { locale } });
-58	  };
-59	
-60	  const handlePlayAgain = () => {
-61	    onRestartSession();
-62	  };
-63	
-64	  useEffect(() => {
-65	    if (phase !== 'round-complete') return;
-66	
-67	    const token = ++completionToken.current;
-68	    const delayMs = 750;
-69	    const timer = globalThis.setTimeout(() => {
-70	      if (completionToken.current !== token) return;
-71	
-72	      const isLastRound = roundIndex >= roundOrder.length - 1;
-73	      if (isLastRound) {
-74	        dispatch({ type: 'COMPLETE_GAME' });
-75	        return;
-76	      }
-77	
-78	      const nextConfigIndex = roundOrder[roundIndex + 1];
-79	      const nextRound =
-80	        nextConfigIndex === undefined
-81	          ? undefined
-82	          : numberMatchConfig.rounds[nextConfigIndex];
-83	      const value = nextRound?.value;
-84	      if (value === undefined) {
-85	        dispatch({ type: 'COMPLETE_GAME' });
-86	        return;
-87	      }
-88	      const { tiles, zones } = buildNumeralRound(value, {
-89	        tileBankMode: numberMatchConfig.tileBankMode,
-90	        distractorCount: numberMatchConfig.distractorCount,
-91	        range: numberMatchConfig.range,
-92	      });
-93	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-94	    }, delayMs);
-95	
-96	    return () => {
-97	      globalThis.clearTimeout(timer);
-98	    };
-99	  }, [
-100	    phase,
-101	    roundIndex,
-102	    dispatch,
-103	    roundOrder,
-104	    numberMatchConfig.rounds,
-105	    numberMatchConfig.tileBankMode,
-106	    numberMatchConfig.distractorCount,
-107	    numberMatchConfig.range,
-108	  ]);
-109	
-110	  if (showInstructions) {
-111	    return (
-112	      <InstructionsOverlay
-113	        text={t('instructions.number-match')}
-114	        onStart={() => setShowInstructions(false)}
-115	        ttsEnabled={numberMatchConfig.ttsEnabled}
-116	      />
-117	    );
+38 }) => {
+39   const { t } = useTranslation('games');
+40   const [showInstructions, setShowInstructions] = useState(true);
+41   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+42   const dispatch = useAnswerGameDispatch();
+43   const { confettiReady, gameOverReady } = useGameSounds();
+44   const navigate = useNavigate();
+45   const { locale } = useParams({ from: '/$locale' });
+46   const completionToken = useRef(0);
+47 
+48   const configRoundIndex = roundOrder[roundIndex];
+49   const round =
+50     configRoundIndex === undefined
+51       ? undefined
+52       : numberMatchConfig.rounds[configRoundIndex];
+53 
+54   useRoundTTS(String(round?.value ?? ''));
+55 
+56   const handleHome = () => {
+57     void navigate({ to: '/$locale', params: { locale } });
+58   };
+59 
+60   const handlePlayAgain = () => {
+61     onRestartSession();
+62   };
+63 
+64   useEffect(() => {
+65     if (phase !== 'round-complete') return;
+66 
+67     const token = ++completionToken.current;
+68     const delayMs = 750;
+69     const timer = globalThis.setTimeout(() => {
+70       if (completionToken.current !== token) return;
+71 
+72       const isLastRound = roundIndex >= roundOrder.length - 1;
+73       if (isLastRound) {
+74         dispatch({ type: 'COMPLETE_GAME' });
+75         return;
+76       }
+77 
+78       const nextConfigIndex = roundOrder[roundIndex + 1];
+79       const nextRound =
+80         nextConfigIndex === undefined
+81           ? undefined
+82           : numberMatchConfig.rounds[nextConfigIndex];
+83       const value = nextRound?.value;
+84       if (value === undefined) {
+85         dispatch({ type: 'COMPLETE_GAME' });
+86         return;
+87       }
+88       const { tiles, zones } = buildNumeralRound(value, {
+89         tileBankMode: numberMatchConfig.tileBankMode,
+90         distractorCount: numberMatchConfig.distractorCount,
+91         range: numberMatchConfig.range,
+92       });
+93       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+94     }, delayMs);
+95 
+96     return () => {
+97       globalThis.clearTimeout(timer);
+98     };
+99   }, [
+100     phase,
+101     roundIndex,
+102     dispatch,
+103     roundOrder,
+104     numberMatchConfig.rounds,
+105     numberMatchConfig.tileBankMode,
+106     numberMatchConfig.distractorCount,
+107     numberMatchConfig.range,
+108   ]);
+109 
+110   if (showInstructions) {
+111     return (
+112       <InstructionsOverlay
+113         text={t('instructions.number-match')}
+114         onStart={() => setShowInstructions(false)}
+115         ttsEnabled={numberMatchConfig.ttsEnabled}
+116       />
+117     );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 09:59:57Z)**_
@@ -6216,6 +6344,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 09:59:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:02Z)**_
@@ -6230,6 +6359,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:00:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:23Z)**_
@@ -6252,6 +6382,7 @@ Run all unit tests
 
 Done in 3.85s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:29Z)**_
@@ -6281,6 +6412,7 @@ Check for failures or skips
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:42Z)**_
@@ -6289,11 +6421,12 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:00:42Z)**_
 <summary>Tool use: **Bash**</summary>
 Check test counts
 
-`yarn test --run 2>&1 | grep -E "Test Files|Tests:" `
+`yarn test --run 2>&1 | grep -E "Test Files|Tests:"`
 
 ```text
  Test Files  52 passed (52)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:49Z)**_
@@ -6307,6 +6440,7 @@ Get test counts
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:00:56Z)**_
@@ -6321,6 +6455,7 @@ Check test summary
  Test Files  52 passed (52)
       Tests  203 passed (203)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:01:05Z)**_
@@ -6335,6 +6470,7 @@ Run tests from worktree directory
  Test Files  62 passed (62)
       Tests  263 passed (263)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:01:12Z)**_
@@ -6344,7 +6480,7 @@ The issue was that I ran `yarn test` from the wrong directory (the main project 
 
 But wait, 263 vs 262 - there's 1 more test now because I added a new test "confettiReady does not show when last round completes". That makes sense.
 
-All 263 tests pass from the worktree. 
+All 263 tests pass from the worktree.
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:01:16Z)**_
@@ -6352,11 +6488,13 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:01:16Z)**_
 I was running from the wrong directory. From the worktree: **62 test files, 263 tests — all pass.**
 
 The behavior is now correct:
+
 1. **Correct sound plays** (immediately when tile placed, via `playSound`)  
 2. **Round-complete sound starts** → `confettiReady = true` (confetti appears, synced with the sound)
 3. **750ms after confetti starts** → advance to next round
 
 And for the last round:  
+
 1. Correct sound plays  
 2. Phase goes directly to `game-over` (no round-complete sound or confetti)  
 3. Game-complete sound → game-over overlay
@@ -6434,6 +6572,7 @@ npm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:**
+
 ```
 Tests failing (<N> failures). Must fix before completing:
 
@@ -6523,6 +6662,7 @@ Report: "Keeping branch <name>. Worktree preserved at <path>."
 #### Option 4: Discard
 
 **Confirm first:**
+
 ```
 This will permanently delete:
 - Branch <name>
@@ -6535,6 +6675,7 @@ Type 'discard' to confirm.
 Wait for exact confirmation.
 
 If confirmed:
+
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
@@ -6547,11 +6688,13 @@ Then: Cleanup worktree (Step 5)
 **For Options 1, 2, 4:**
 
 Check if in worktree:
+
 ```bash
 git worktree list | grep $(git branch --show-current)
 ```
 
 If yes:
+
 ```bash
 git worktree remove <worktree-path>
 ```
@@ -6570,30 +6713,36 @@ git worktree remove <worktree-path>
 ## Common Mistakes
 
 **Skipping test verification**
+
 - **Problem:** Merge broken code, create failing PR
 - **Fix:** Always verify tests before offering options
 
 **Open-ended questions**
+
 - **Problem:** "What should I do next?" → ambiguous
 - **Fix:** Present exactly 4 structured options
 
 **Automatic worktree cleanup**
+
 - **Problem:** Remove worktree when might need it (Option 2, 3)
 - **Fix:** Only cleanup for Options 1 and 4
 
 **No confirmation for discard**
+
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
 
 ## Red Flags
 
 **Never:**
+
 - Proceed with failing tests
 - Merge without verifying tests on result
 - Delete work without confirmation
 - Force-push without explicit request
 
 **Always:**
+
 - Verify tests before offering options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
@@ -6602,12 +6751,13 @@ git worktree remove <worktree-path>
 ## Integration
 
 **Called by:**
+
 - **subagent-driven-development** (Step 7) - After all tasks complete
 - **executing-plans** (Step 5) - After all batches complete
 
 **Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
 
+- **using-git-worktrees** - Cleans up worktree created by that skill
 
 ---
 
@@ -6641,6 +6791,7 @@ Verify unit tests pass
 
 Done in 4.00s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:03:12Z)**_
@@ -6677,6 +6828,7 @@ feat/word-spell-number-match
 ?? .storybook/decorators/withDb.tsx
 ?? docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:03:18Z)**_
@@ -6694,6 +6846,7 @@ Check recent commits
 3d60453 feat(audio): sync confetti and game-over with sound start
 2534c01 fix(audio): prevent sound and TTS overlap during gameplay
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:03:22Z)**_
@@ -6721,6 +6874,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:05:41Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants to:
+
 1. Push the current changes to `feat/word-spell-number-match`
 2. After pushing, investigate why confetti isn't playing in sort-numbers game
 
@@ -6780,6 +6934,7 @@ Review changes to commit
 ?? .storybook/decorators/withDb.tsx
 ?? docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:05:55Z)**_
@@ -6857,12 +7012,14 @@ docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md:95:9 error MD060
 ✖ Task killed: eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/.storybook/decorators/withDb.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/smoke.spec.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/e2e/visual.spec.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/answer-game-reducer.ts /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/AudioButton/AudioButton.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/ImageQuestion/ImageQuestion.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/questions/TextQuestion/TextQuestion.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:01Z)**_
 
 <think><details><summary>Thought Process</summary>
 Two issues:
+
 1. `markdownlint` is failing on the plan markdown file - table column style errors
 2. ESLint was killed (SIGKILL) - likely because it was running too long with too many files
 
@@ -6882,17 +7039,18 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:06:04Z)**_
  `./worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md`
 
 ```text
-48	All these need `withDb` in their `meta.decorators` array (or at story level if needed):
-49	
-50	| Story file | Current decorators | Add |
-51	|---|---|---|
-52	| `src/components/questions/AudioButton/AudioButton.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-53	| `src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-54	| `src/components/questions/TextQuestion/TextQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-55	| `src/components/questions/ImageQuestion/ImageQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-56	| `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
-57	| `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+48 All these need `withDb` in their `meta.decorators` array (or at story level if needed):
+49 
+50 | Story file | Current decorators | Add |
+51 |---|---|---|
+52 | `src/components/questions/AudioButton/AudioButton.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+53 | `src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+54 | `src/components/questions/TextQuestion/TextQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+55 | `src/components/questions/ImageQuestion/ImageQuestion.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+56 | `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
+57 | `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx` | `[AnswerGameProvider wrapper]` | `withDb` |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:08Z)**_
@@ -6902,13 +7060,14 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:06:08Z)**_
  `./worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md`
 
 ```text
-92	`.claude/skills/write-storybook/index.md` (or wherever the skill lives):
-93	
-94	| Needs | Decorator |
-95	|---|---|
-96	| TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `.storybook/decorators/withRouter` |
-97	| Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `.storybook/decorators/withDb` |
+92 `.claude/skills/write-storybook/index.md` (or wherever the skill lives):
+93 
+94 | Needs | Decorator |
+95 |---|---|
+96 | TanStack Router (`useNavigate`, `Link`, params) | `withRouter` from `.storybook/decorators/withRouter` |
+97 | Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `.storybook/decorators/withDb` |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:13Z)**_
@@ -6919,6 +7078,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:06:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:26Z)**_
@@ -6929,6 +7089,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:06:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/docs/superpowers/plans/2026-04-04-fix-storybook-vr-e2e-tests.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:48Z)**_
@@ -6977,6 +7138,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:54Z)**_
@@ -6990,6 +7152,7 @@ Check if commit succeeded
 ```text
 528cae8 fix(storybook): add withDb decorator; fix confetti/round-complete timing; fix last-round game-over
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:06:57Z)**_
@@ -7176,6 +7339,7 @@ games/word-spell/WordSpell > Scramble Mode
 Click to debug the error directly in Storybook:
 http://127.0.0.1:6006/?path=/sto
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:09:16Z)**_
@@ -7198,6 +7362,7 @@ Check if push succeeded
     feat/word-spell-number-match           merges with remote feat/word-spell-number-match
     feat/word-spell-number-match           pushes to feat/word-spell-number-match           (fast-forwardable)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:09:34Z)**_
@@ -7207,7 +7372,7 @@ The push failed (exit code 1 from the pre-push hook). The commit is still ahead 
 
 Actually wait, the output was cut off. The push seems to have failed (exit code 1) but let me see what failed. I need to re-run the push to see the full error.
 
-But wait - the storybook server was started with `START_STORYBOOK=1`. Looking at the output, storybook tests were running and showing a11y warnings. 
+But wait - the storybook server was started with `START_STORYBOOK=1`. Looking at the output, storybook tests were running and showing a11y warnings.
 
 I'm trying to figure out whether the storybook tests, VR tests, or something else caused the exit code 1. Looking back at the output more carefully, I see the SIGKILL during lint-staged was actually the pre-commit hook issue that got resolved when the commit succeeded.
 
@@ -7225,6 +7390,7 @@ Check if Storybook is still running
 ```text
 200
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:11:25Z)**_
@@ -7266,6 +7432,7 @@ info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this comm
 husky - pre-push script failed (code 1)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:11:31Z)**_
@@ -7293,6 +7460,7 @@ PID CMD
 31137 --seatbelt-client=416
 45046 3000
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:11:36Z)**_
@@ -7306,6 +7474,7 @@ Get full command of process on port 3000
 ```text
 /Users/leocaseiro/.nvm/versions/node/v24.14.1/bin/node /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/node_modules/.bin/vite dev --port 3000
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:11:40Z)**_
@@ -7342,6 +7511,7 @@ Done in 23.13s.
 To github.com:leocaseiro/base-skill.git
    8805f50..528cae8  feat/word-spell-number-match -> feat/word-spell-number-match
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:12:49Z)**_
@@ -7367,6 +7537,7 @@ Check how SortNumbers uses confetti and game sounds
 87:        dispatch({ type: 'COMPLETE_GAME' });
 137:      <ScoreAnimation visible={confettiReady} />
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:12:56Z)**_
@@ -7388,57 +7559,58 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:12:58Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-60	  };
-61	
-62	  const handlePlayAgain = () => {
-63	    onRestartSession();
-64	  };
-65	
-66	  useEffect(() => {
-67	    if (phase !== 'round-complete') return;
-68	
-69	    const token = ++completionToken.current;
-70	    const delayMs = 750;
-71	    const timer = globalThis.setTimeout(() => {
-72	      if (completionToken.current !== token) return;
-73	
-74	      const isLastRound = roundIndex >= roundOrder.length - 1;
-75	      if (isLastRound) {
-76	        dispatch({ type: 'COMPLETE_GAME' });
-77	        return;
-78	      }
-79	
-80	      const nextConfigIndex = roundOrder[roundIndex + 1];
-81	      const nextRound =
-82	        nextConfigIndex === undefined
-83	          ? undefined
-84	          : sortNumbersConfig.rounds[nextConfigIndex];
-85	
-86	      if (!nextRound) {
-87	        dispatch({ type: 'COMPLETE_GAME' });
-88	        return;
-89	      }
-90	
-91	      const { tiles, zones } = buildSortRound(
-92	        nextRound.sequence,
-93	        sortNumbersConfig.direction,
-94	      );
-95	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-96	    }, delayMs);
-97	
-98	    return () => {
-99	      globalThis.clearTimeout(timer);
-100	    };
-101	  }, [
-102	    phase,
-103	    roundIndex,
-104	    dispatch,
-105	    roundOrder,
-106	    sortNumbersConfig.rounds,
-107	    sortNumbersConfig.direction,
-108	  ]);
+60   };
+61 
+62   const handlePlayAgain = () => {
+63     onRestartSession();
+64   };
+65 
+66   useEffect(() => {
+67     if (phase !== 'round-complete') return;
+68 
+69     const token = ++completionToken.current;
+70     const delayMs = 750;
+71     const timer = globalThis.setTimeout(() => {
+72       if (completionToken.current !== token) return;
+73 
+74       const isLastRound = roundIndex >= roundOrder.length - 1;
+75       if (isLastRound) {
+76         dispatch({ type: 'COMPLETE_GAME' });
+77         return;
+78       }
+79 
+80       const nextConfigIndex = roundOrder[roundIndex + 1];
+81       const nextRound =
+82         nextConfigIndex === undefined
+83           ? undefined
+84           : sortNumbersConfig.rounds[nextConfigIndex];
+85 
+86       if (!nextRound) {
+87         dispatch({ type: 'COMPLETE_GAME' });
+88         return;
+89       }
+90 
+91       const { tiles, zones } = buildSortRound(
+92         nextRound.sequence,
+93         sortNumbersConfig.direction,
+94       );
+95       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+96     }, delayMs);
+97 
+98     return () => {
+99       globalThis.clearTimeout(timer);
+100     };
+101   }, [
+102     phase,
+103     roundIndex,
+104     dispatch,
+105     roundOrder,
+106     sortNumbersConfig.rounds,
+107     sortNumbersConfig.direction,
+108   ]);
 109
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:13:11Z)**_
@@ -7449,6 +7621,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 10:13:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:13:22Z)**_
@@ -7462,6 +7635,7 @@ Verify tests still pass
 ```text
  Test Files  62 passed (62)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 10:23:01Z)**_
@@ -7488,6 +7662,7 @@ The user doesn't want to proceed with this tool use. The tool use was rejected (
 
 Note: The user's next message may contain a correction or preference. Pay close attention — if they explain what went wrong or how they'd prefer you to work, consider saving that to memory for future sessions.
 ```
+
 </details></tool-use>
 
 ---

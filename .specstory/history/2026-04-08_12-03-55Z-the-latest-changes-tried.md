@@ -15,7 +15,8 @@ We have changes at  /Users/leocaseiro/Sites/base-skill/worktrees/feat/sort-numbe
 
 However, it's not working as expected. we should fix via TDD.
 
-Given a config similar to 
+Given a config similar to
+
 ```ts
 {"config": {"gameId": "sort-numbers","component": "SortNumbers","inputMethod": "drag","wrongTileBehavior": "lock-manual","tileBankMode": "exact","totalRounds": 1,"roundsInOrder": false,"ttsEnabled": true,"direction": "ascending","range": {  "min": 2,  "max": 10},"quantity": 5,"skip": {  "mode": "by"},"distractors": {  "source": "random",  "count": 2}}}
 ```
@@ -35,8 +36,6 @@ Show less
 ---
 
 _**Agent (claude-opus-4-6 2026-04-08 12:03:59Z)**_
-
-
 
 I'll investigate the current implementation to understand what's going wrong. Let me start by reading the relevant files.
 
@@ -118,7 +117,8 @@ I've thoroughly examined the sort-numbers game implementation in the worktree at
 
 **Round Generation Flow:**
 ```
-generateSortRounds() 
+
+generateSortRounds()
 ├── For mode:'by' with step=2, start='range-min':
 │   ├── Calculate maxPossibleStart = range.max - (quantity-1)*step
 │   ├── Return Array: [range.min + 0*step, range.min + 1*step, ..., range.min + (quantity-1)*step]
@@ -129,6 +129,7 @@ generateSortRounds()
 └── For mode:'random':
     ├── Pick 'quantity' random numbers without replacement
     └── Return unordered sequence
+
 ```
 
 **Distractor Pool Building:**
@@ -215,11 +216,12 @@ The code generates sequences exactly as specified:
 - `mode:'by'` with step 2, start 'range-min', range [2,20], qty 4 → **[2, 4, 6, 8]** ✓ (skip by 2s)
 - NOT consecutive numbers (2, 3, 4, 5, 6, 7, 8, 9)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-08 12:04:06Z)**_
 
-I need to understand the sort-numbers game implementation in a worktree at `/Users/leocaseiro/Sites/base-skill/worktrees/feat/sort-numbers-skip-config/`. 
+I need to understand the sort-numbers game implementation in a worktree at `/Users/leocaseiro/Sites/base-skill/worktrees/feat/sort-numbers-skip-config/`.
 
 The game has a "skip" config that should generate sequences like "skip by 2s" (e.g., 2, 4, 6, 8, 10) but it's currently generating consecutive numbers (2, 3, 4, 5, 6, 7, 8, 9).
 
@@ -233,6 +235,7 @@ I need to find and read:
 6. The SortNumbersTileBank component (opened in IDE)
 
 Be very thorough - read ALL relevant source files completely. I need to understand:
+
 - How the skip config is defined (types)
 - How the sequence is generated from the config
 - How distractors are added
@@ -275,6 +278,7 @@ drwxr-xr-x@    6 leocaseiro  staff     192 Apr  8 17:38 .specstory
 drwxr-xr-x@    7 leocaseiro  staff     224 Apr  8 06:27 .storybook
 [result-id: r1]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:12Z)**_
@@ -290,6 +294,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:13Z)**_
 ```text
 worktrees/feat/sort-numbers-skip-config/docs/superpowers/specs/2026-04-08-sort-numbers-skip-config-design.md
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:13Z)**_
@@ -302,6 +307,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:13Z)**_
 worktrees/feat/sort-numbers-skip-config/docs/superpowers/plans/2026-04-03-group-i-sort-numbers-game.md
 worktrees/feat/sort-numbers-skip-config/docs/superpowers/plans/2026-04-08-sort-numbers-skip-config.md
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:13Z)**_
@@ -321,6 +327,7 @@ worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.
 worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
 [result-id: r2]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:15Z)**_
@@ -334,196 +341,197 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:15Z)**_
  `./worktrees/feat/sort-numbers-skip-config/docs/superpowers/specs/2026-04-08-sort-numbers-skip-config-design.md`
 
 ```text
-1	# SortNumbers Skip & Distractor Config Design
-2	
-3	## Overview
-4	
-5	Extend the SortNumbers game configuration to support structured skip modes (count by Ns,
-6	random, or consecutive) and configurable distractor sources (random, gaps-only, or
-7	full-range). This replaces the boolean `allowSkips` field with two discriminated unions
-8	that make invalid combinations impossible at the type level.
-9	
-10	## Types
-11	
-12	### SkipConfig (replaces `allowSkips: boolean`)
-13	
-14	```ts
-15	type SkipConfig =
-16	  | { mode: 'random' }
-17	  | { mode: 'consecutive' }
-18	  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
-19	```
-20	
-21	- `random` — picks `quantity` numbers randomly from the range (current `allowSkips: true`
-22	  behavior)
-23	- `consecutive` — picks a consecutive run of `quantity` numbers from a random start within
-24	  the range (current `allowSkips: false` behavior)
-25	- `by` — steps through the range by `step`, starting at `range.min` or a random valid
-26	  position. A valid start is any value where `start + (quantity - 1) * step <= range.max`.
-27	
-28	### DistractorConfig (new; only used when `tileBankMode === 'distractors'`)
-29	
-30	```ts
-31	type DistractorConfig =
-32	  | { source: 'random'; count: number }
-33	  | { source: 'gaps-only'; count: number | 'all' }
-34	  | { source: 'full-range'; count: number | 'all' };
-35	```
-36	
-37	- `random` — picks extra tiles randomly from the range, excluding the correct sequence
-38	  (current distractor behavior)
-39	- `gaps-only` — pool is the numbers skipped over between sequence values (e.g. sequence
-40	  2,4,6 → gap pool is 1,3,5,7)
-41	- `full-range` — pool is all numbers in range not in the sequence
-42	- `count: number` — pick that many from the pool randomly
-43	- `count: 'all'` — include the entire pool as distractor tiles
-44	
-45	### Updated `SortNumbersConfig`
-46	
-47	```ts
-48	interface SortNumbersConfig extends AnswerGameConfig {
-49	  component: 'SortNumbers';
-50	  direction: 'ascending' | 'descending';
-51	  range: { min: number; max: number };
-52	  quantity: number;
-53	  skip: SkipConfig;
-54	  distractors: DistractorConfig;
-55	  rounds: SortNumbersRound[];
-56	}
-57	```
-58	
-59	`allowSkips: boolean` is removed. `tileBankMode` and `distractorCount` on
-60	`SortNumbersConfig` are replaced by the `distractors` union (though `tileBankMode` on the
-61	base `AnswerGameConfig` remains for `'exact'` mode — when `tileBankMode === 'exact'`, the
-62	`distractors` field is ignored).
-63	
-64	## Round Generation (`build-sort-round.ts`)
-65	
-66	### Updated `GenerateOptions`
-67	
-68	```ts
-69	interface GenerateOptions {
-70	  range: { min: number; max: number };
-71	  quantity: number;
-72	  skip: SkipConfig;
-73	  totalRounds: number;
-74	}
-75	```
-76	
-77	### `generateSortRounds` branching
-78	
-79	- `mode: 'consecutive'` — existing logic (random start, `quantity` consecutive numbers)
-80	- `mode: 'random'` — existing `allowSkips` logic (random pick from pool, no repeats)
-81	- `mode: 'by'` — enumerate all valid starting points where
-82	  `start + (quantity - 1) * step <= range.max`, then pick one randomly (if
-83	  `start === 'random'`) or use `range.min` (if `start === 'range-min'`). Build sequence as
-84	  `[start, start + step, start + 2*step, ...]`.
-85	
-86	### Distractor tile building
-87	
-88	A new helper `buildDistractorPool(sequence, range, config: DistractorConfig): number[]`
-89	computes the pool of candidate distractor numbers, then applies `count`:
-90	
-91	- `source: 'random'` — pool = all range numbers not in sequence; pick `count` randomly
-92	- `source: 'gaps-only'` — pool = numbers between consecutive sequence values (exclusive);
-93	  if `count === 'all'` include all, else pick `count` randomly
-94	- `source: 'full-range'` — pool = all range numbers not in sequence; if `count === 'all'`
-95	  include all, else pick `count` randomly
-96	
-97	`buildSortRound` is extended to accept an optional `DistractorConfig` and append distractor
-98	tiles to the shuffled tile bank when provided and `tileBankMode === 'distractors'`.
-99	
-100	## Config Fields (`types.ts`)
-101	
-102	### New `ConfigField` types (in `config-fields.ts`)
-103	
-104	```ts
-105	| {
-106	    type: 'nested-select';
-107	    key: string;
-108	    subKey: string;
-109	    label: string;
-110	    options: { value: string; label: string }[];
-111	  }
-112	| {
-113	    type: 'nested-select-or-number';
-114	    key: string;
-115	    subKey: string;
-116	    label: string;
-117	    min: number;
-118	    max: number;
-119	  }
-120	```
-121	
-122	All existing and new field types gain an optional:
-123	
-124	```ts
-125	visibleWhen?: { key: string; subKey?: string; value: unknown };
-126	```
-127	
-128	`ConfigFormFields` skips rendering a field when its `visibleWhen` condition is not met by
-129	the current config value.
-130	
-131	### `sortNumbersConfigFields` additions
-132	
-133	```ts
-134	// Skip mode
-135	{ type: 'nested-select', key: 'skip', subKey: 'mode', label: 'Skip mode',
-136	  options: ['random', 'consecutive', 'by'] }
-137	
-138	// Shown only when skip.mode === 'by'
-139	{ type: 'nested-number', key: 'skip', subKey: 'step', label: 'Skip step',
-140	  min: 2, max: 100,
-141	  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
-142	
-143	{ type: 'nested-select', key: 'skip', subKey: 'start', label: 'Skip start',
-144	  options: ['range-min', 'random'],
-145	  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
-146	
-147	// Distractor source (shown when tileBankMode === 'distractors')
-148	{ type: 'nested-select', key: 'distractors', subKey: 'source',
-149	  label: 'Distractor source',
-150	  options: ['random', 'gaps-only', 'full-range'],
-151	  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
-152	
-153	// Distractor count
-154	{ type: 'nested-select-or-number', key: 'distractors', subKey: 'count',
-155	  label: 'Distractor count', min: 1, max: 20,
-156	  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
-157	```
-158	
-159	The existing `allowSkips` checkbox entry is removed.
-160	
-161	## ConfigFormFields renderer (`ConfigFormFields.tsx`)
-162	
-163	- Add `nested-select` rendering branch: reads `(config[key] as obj)[subKey]`, writes back
-164	  a spread of the nested object
-165	- Add `nested-select-or-number` rendering branch: a select with an `'all'` option plus a
-166	  number input shown when the current value is numeric
-167	- Apply `visibleWhen` check before rendering any field: if the field has `visibleWhen` and
-168	  `config[key][subKey?] !== value`, skip it
-169	
-170	## Error Handling & Edge Cases
-171	
-172	- If `mode: 'by'` and no valid start exists (e.g. `step * (quantity - 1) > range.max -
-173	range.min`), fall back to `mode: 'consecutive'` for that round and log a warning.
-174	- If distractor pool is smaller than requested `count`, include the full pool without
-175	  error.
-176	- Existing stored configs using `allowSkips: true/false` must be migrated: `true` →
-177	  `{ mode: 'random' }`, `false` → `{ mode: 'consecutive' }`. A migration utility or
-178	  default fallback in the config loader handles this.
-179	
-180	## Testing
-181	
-182	- Unit tests for `generateSortRounds` covering all three skip modes, including edge cases
-183	  (step too large, start fixed vs random)
-184	- Unit tests for `buildDistractorPool` covering all three sources and both count variants
-185	- Updated Storybook stories for `SortNumbers` with `mode: 'by'` + each distractor source
-186	- `ConfigFormFields` unit tests for `nested-select`, `nested-select-or-number`, and
-187	  `visibleWhen` conditional rendering
-188	
+1 # SortNumbers Skip & Distractor Config Design
+2 
+3 ## Overview
+4 
+5 Extend the SortNumbers game configuration to support structured skip modes (count by Ns,
+6 random, or consecutive) and configurable distractor sources (random, gaps-only, or
+7 full-range). This replaces the boolean `allowSkips` field with two discriminated unions
+8 that make invalid combinations impossible at the type level.
+9 
+10 ## Types
+11 
+12 ### SkipConfig (replaces `allowSkips: boolean`)
+13 
+14 ```ts
+15 type SkipConfig =
+16   | { mode: 'random' }
+17   | { mode: 'consecutive' }
+18   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+19 ```
+20 
+21 - `random` — picks `quantity` numbers randomly from the range (current `allowSkips: true`
+22   behavior)
+23 - `consecutive` — picks a consecutive run of `quantity` numbers from a random start within
+24   the range (current `allowSkips: false` behavior)
+25 - `by` — steps through the range by `step`, starting at `range.min` or a random valid
+26   position. A valid start is any value where `start + (quantity - 1) * step <= range.max`.
+27 
+28 ### DistractorConfig (new; only used when `tileBankMode === 'distractors'`)
+29 
+30 ```ts
+31 type DistractorConfig =
+32   | { source: 'random'; count: number }
+33   | { source: 'gaps-only'; count: number | 'all' }
+34   | { source: 'full-range'; count: number | 'all' };
+35 ```
+36 
+37 - `random` — picks extra tiles randomly from the range, excluding the correct sequence
+38   (current distractor behavior)
+39 - `gaps-only` — pool is the numbers skipped over between sequence values (e.g. sequence
+40   2,4,6 → gap pool is 1,3,5,7)
+41 - `full-range` — pool is all numbers in range not in the sequence
+42 - `count: number` — pick that many from the pool randomly
+43 - `count: 'all'` — include the entire pool as distractor tiles
+44 
+45 ### Updated `SortNumbersConfig`
+46 
+47 ```ts
+48 interface SortNumbersConfig extends AnswerGameConfig {
+49   component: 'SortNumbers';
+50   direction: 'ascending' | 'descending';
+51   range: { min: number; max: number };
+52   quantity: number;
+53   skip: SkipConfig;
+54   distractors: DistractorConfig;
+55   rounds: SortNumbersRound[];
+56 }
+57 ```
+58 
+59 `allowSkips: boolean` is removed. `tileBankMode` and `distractorCount` on
+60 `SortNumbersConfig` are replaced by the `distractors` union (though `tileBankMode` on the
+61 base `AnswerGameConfig` remains for `'exact'` mode — when `tileBankMode === 'exact'`, the
+62 `distractors` field is ignored).
+63 
+64 ## Round Generation (`build-sort-round.ts`)
+65 
+66 ### Updated `GenerateOptions`
+67 
+68 ```ts
+69 interface GenerateOptions {
+70   range: { min: number; max: number };
+71   quantity: number;
+72   skip: SkipConfig;
+73   totalRounds: number;
+74 }
+75 ```
+76 
+77 ### `generateSortRounds` branching
+78 
+79 - `mode: 'consecutive'` — existing logic (random start, `quantity` consecutive numbers)
+80 - `mode: 'random'` — existing `allowSkips` logic (random pick from pool, no repeats)
+81 - `mode: 'by'` — enumerate all valid starting points where
+82   `start + (quantity - 1) * step <= range.max`, then pick one randomly (if
+83   `start === 'random'`) or use `range.min` (if `start === 'range-min'`). Build sequence as
+84   `[start, start + step, start + 2*step, ...]`.
+85 
+86 ### Distractor tile building
+87 
+88 A new helper `buildDistractorPool(sequence, range, config: DistractorConfig): number[]`
+89 computes the pool of candidate distractor numbers, then applies `count`:
+90 
+91 - `source: 'random'` — pool = all range numbers not in sequence; pick `count` randomly
+92 - `source: 'gaps-only'` — pool = numbers between consecutive sequence values (exclusive);
+93   if `count === 'all'` include all, else pick `count` randomly
+94 - `source: 'full-range'` — pool = all range numbers not in sequence; if `count === 'all'`
+95   include all, else pick `count` randomly
+96 
+97 `buildSortRound` is extended to accept an optional `DistractorConfig` and append distractor
+98 tiles to the shuffled tile bank when provided and `tileBankMode === 'distractors'`.
+99 
+100 ## Config Fields (`types.ts`)
+101 
+102 ### New `ConfigField` types (in `config-fields.ts`)
+103 
+104 ```ts
+105 | {
+106     type: 'nested-select';
+107     key: string;
+108     subKey: string;
+109     label: string;
+110     options: { value: string; label: string }[];
+111   }
+112 | {
+113     type: 'nested-select-or-number';
+114     key: string;
+115     subKey: string;
+116     label: string;
+117     min: number;
+118     max: number;
+119   }
+120 ```
+121 
+122 All existing and new field types gain an optional:
+123 
+124 ```ts
+125 visibleWhen?: { key: string; subKey?: string; value: unknown };
+126 ```
+127 
+128 `ConfigFormFields` skips rendering a field when its `visibleWhen` condition is not met by
+129 the current config value.
+130 
+131 ### `sortNumbersConfigFields` additions
+132 
+133 ```ts
+134 // Skip mode
+135 { type: 'nested-select', key: 'skip', subKey: 'mode', label: 'Skip mode',
+136   options: ['random', 'consecutive', 'by'] }
+137 
+138 // Shown only when skip.mode === 'by'
+139 { type: 'nested-number', key: 'skip', subKey: 'step', label: 'Skip step',
+140   min: 2, max: 100,
+141   visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+142 
+143 { type: 'nested-select', key: 'skip', subKey: 'start', label: 'Skip start',
+144   options: ['range-min', 'random'],
+145   visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+146 
+147 // Distractor source (shown when tileBankMode === 'distractors')
+148 { type: 'nested-select', key: 'distractors', subKey: 'source',
+149   label: 'Distractor source',
+150   options: ['random', 'gaps-only', 'full-range'],
+151   visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
+152 
+153 // Distractor count
+154 { type: 'nested-select-or-number', key: 'distractors', subKey: 'count',
+155   label: 'Distractor count', min: 1, max: 20,
+156   visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
+157 ```
+158 
+159 The existing `allowSkips` checkbox entry is removed.
+160 
+161 ## ConfigFormFields renderer (`ConfigFormFields.tsx`)
+162 
+163 - Add `nested-select` rendering branch: reads `(config[key] as obj)[subKey]`, writes back
+164   a spread of the nested object
+165 - Add `nested-select-or-number` rendering branch: a select with an `'all'` option plus a
+166   number input shown when the current value is numeric
+167 - Apply `visibleWhen` check before rendering any field: if the field has `visibleWhen` and
+168   `config[key][subKey?] !== value`, skip it
+169 
+170 ## Error Handling & Edge Cases
+171 
+172 - If `mode: 'by'` and no valid start exists (e.g. `step * (quantity - 1) > range.max -
+173 range.min`), fall back to `mode: 'consecutive'` for that round and log a warning.
+174 - If distractor pool is smaller than requested `count`, include the full pool without
+175   error.
+176 - Existing stored configs using `allowSkips: true/false` must be migrated: `true` →
+177   `{ mode: 'random' }`, `false` → `{ mode: 'consecutive' }`. A migration utility or
+178   default fallback in the config loader handles this.
+179 
+180 ## Testing
+181 
+182 - Unit tests for `generateSortRounds` covering all three skip modes, including edge cases
+183   (step too large, start fixed vs random)
+184 - Unit tests for `buildDistractorPool` covering all three sources and both count variants
+185 - Updated Storybook stories for `SortNumbers` with `mode: 'by'` + each distractor source
+186 - `ConfigFormFields` unit tests for `nested-select`, `nested-select-or-number`, and
+187   `visibleWhen` conditional rendering
+188 
 [result-id: r3]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
@@ -535,6 +543,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
 ```text
 File content (15586 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
@@ -544,162 +553,163 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/types.ts`
 
 ```text
-1	// src/games/sort-numbers/types.ts
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	
-5	export type SkipConfig =
-6	  | { mode: 'random' }
-7	  | { mode: 'consecutive' }
-8	  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
-9	
-10	export type DistractorConfig =
-11	  | { source: 'random'; count: number | 'all' }
-12	  | { source: 'gaps-only'; count: number | 'all' }
-13	  | { source: 'full-range'; count: number | 'all' };
-14	
-15	export interface SortNumbersConfig extends AnswerGameConfig {
-16	  component: 'SortNumbers';
-17	  direction: 'ascending' | 'descending';
-18	  range: { min: number; max: number };
-19	  /** How many numbers to sort per round */
-20	  quantity: number;
-21	  skip: SkipConfig;
-22	  distractors: DistractorConfig;
-23	  rounds: SortNumbersRound[];
-24	}
-25	
-26	export interface SortNumbersRound {
-27	  sequence: number[];
-28	}
-29	
-30	export const sortNumbersConfigFields: ConfigField[] = [
-31	  {
-32	    type: 'select',
-33	    key: 'inputMethod',
-34	    label: 'Input method',
-35	    options: [
-36	      { value: 'drag', label: 'drag' },
-37	      { value: 'type', label: 'type' },
-38	      { value: 'both', label: 'both' },
-39	    ],
-40	  },
-41	  {
-42	    type: 'select',
-43	    key: 'wrongTileBehavior',
-44	    label: 'Wrong tile behaviour',
-45	    options: [
-46	      { value: 'reject', label: 'reject' },
-47	      { value: 'lock-manual', label: 'lock-manual' },
-48	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-49	    ],
-50	  },
-51	  {
-52	    type: 'select',
-53	    key: 'tileBankMode',
-54	    label: 'Tile bank mode',
-55	    options: [
-56	      { value: 'exact', label: 'exact' },
-57	      { value: 'distractors', label: 'distractors' },
-58	    ],
-59	  },
-60	  {
-61	    type: 'number',
-62	    key: 'totalRounds',
-63	    label: 'Total rounds',
-64	    min: 1,
-65	    max: 30,
-66	  },
-67	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-68	  {
-69	    type: 'select',
-70	    key: 'direction',
-71	    label: 'Direction',
-72	    options: [
-73	      { value: 'ascending', label: 'ascending' },
-74	      { value: 'descending', label: 'descending' },
-75	    ],
-76	  },
-77	  {
-78	    type: 'number',
-79	    key: 'quantity',
-80	    label: 'Quantity',
-81	    min: 2,
-82	    max: 8,
-83	  },
-84	  {
-85	    type: 'nested-number',
-86	    key: 'range',
-87	    subKey: 'min',
-88	    label: 'Range min',
-89	    min: 1,
-90	    max: 999,
-91	  },
-92	  {
-93	    type: 'nested-number',
-94	    key: 'range',
-95	    subKey: 'max',
-96	    label: 'Range max',
-97	    min: 1,
-98	    max: 999,
-99	  },
-100	  {
-101	    type: 'nested-select',
-102	    key: 'skip',
-103	    subKey: 'mode',
-104	    label: 'Skip mode',
-105	    options: [
-106	      { value: 'random', label: 'random' },
-107	      { value: 'consecutive', label: 'consecutive' },
-108	      { value: 'by', label: 'by' },
-109	    ],
-110	  },
-111	  {
-112	    type: 'nested-number',
-113	    key: 'skip',
-114	    subKey: 'step',
-115	    label: 'Skip step',
-116	    min: 2,
-117	    max: 100,
-118	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-119	  },
-120	  {
-121	    type: 'nested-select',
-122	    key: 'skip',
-123	    subKey: 'start',
-124	    label: 'Skip start',
-125	    options: [
-126	      { value: 'range-min', label: 'range-min' },
-127	      { value: 'random', label: 'random' },
-128	    ],
-129	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-130	  },
-131	  {
-132	    type: 'nested-select',
-133	    key: 'distractors',
-134	    subKey: 'source',
-135	    label: 'Distractor source',
-136	    options: [
-137	      { value: 'random', label: 'random' },
-138	      { value: 'gaps-only', label: 'gaps-only' },
-139	      { value: 'full-range', label: 'full-range' },
-140	    ],
-141	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-142	  },
-143	  {
-144	    type: 'nested-select-or-number',
-145	    key: 'distractors',
-146	    subKey: 'count',
-147	    label: 'Distractor count',
-148	    min: 1,
-149	    max: 20,
-150	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-151	  },
-152	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-153	];
-154	
+1 // src/games/sort-numbers/types.ts
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 
+5 export type SkipConfig =
+6   | { mode: 'random' }
+7   | { mode: 'consecutive' }
+8   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+9 
+10 export type DistractorConfig =
+11   | { source: 'random'; count: number | 'all' }
+12   | { source: 'gaps-only'; count: number | 'all' }
+13   | { source: 'full-range'; count: number | 'all' };
+14 
+15 export interface SortNumbersConfig extends AnswerGameConfig {
+16   component: 'SortNumbers';
+17   direction: 'ascending' | 'descending';
+18   range: { min: number; max: number };
+19   /** How many numbers to sort per round */
+20   quantity: number;
+21   skip: SkipConfig;
+22   distractors: DistractorConfig;
+23   rounds: SortNumbersRound[];
+24 }
+25 
+26 export interface SortNumbersRound {
+27   sequence: number[];
+28 }
+29 
+30 export const sortNumbersConfigFields: ConfigField[] = [
+31   {
+32     type: 'select',
+33     key: 'inputMethod',
+34     label: 'Input method',
+35     options: [
+36       { value: 'drag', label: 'drag' },
+37       { value: 'type', label: 'type' },
+38       { value: 'both', label: 'both' },
+39     ],
+40   },
+41   {
+42     type: 'select',
+43     key: 'wrongTileBehavior',
+44     label: 'Wrong tile behaviour',
+45     options: [
+46       { value: 'reject', label: 'reject' },
+47       { value: 'lock-manual', label: 'lock-manual' },
+48       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+49     ],
+50   },
+51   {
+52     type: 'select',
+53     key: 'tileBankMode',
+54     label: 'Tile bank mode',
+55     options: [
+56       { value: 'exact', label: 'exact' },
+57       { value: 'distractors', label: 'distractors' },
+58     ],
+59   },
+60   {
+61     type: 'number',
+62     key: 'totalRounds',
+63     label: 'Total rounds',
+64     min: 1,
+65     max: 30,
+66   },
+67   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+68   {
+69     type: 'select',
+70     key: 'direction',
+71     label: 'Direction',
+72     options: [
+73       { value: 'ascending', label: 'ascending' },
+74       { value: 'descending', label: 'descending' },
+75     ],
+76   },
+77   {
+78     type: 'number',
+79     key: 'quantity',
+80     label: 'Quantity',
+81     min: 2,
+82     max: 8,
+83   },
+84   {
+85     type: 'nested-number',
+86     key: 'range',
+87     subKey: 'min',
+88     label: 'Range min',
+89     min: 1,
+90     max: 999,
+91   },
+92   {
+93     type: 'nested-number',
+94     key: 'range',
+95     subKey: 'max',
+96     label: 'Range max',
+97     min: 1,
+98     max: 999,
+99   },
+100   {
+101     type: 'nested-select',
+102     key: 'skip',
+103     subKey: 'mode',
+104     label: 'Skip mode',
+105     options: [
+106       { value: 'random', label: 'random' },
+107       { value: 'consecutive', label: 'consecutive' },
+108       { value: 'by', label: 'by' },
+109     ],
+110   },
+111   {
+112     type: 'nested-number',
+113     key: 'skip',
+114     subKey: 'step',
+115     label: 'Skip step',
+116     min: 2,
+117     max: 100,
+118     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+119   },
+120   {
+121     type: 'nested-select',
+122     key: 'skip',
+123     subKey: 'start',
+124     label: 'Skip start',
+125     options: [
+126       { value: 'range-min', label: 'range-min' },
+127       { value: 'random', label: 'random' },
+128     ],
+129     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+130   },
+131   {
+132     type: 'nested-select',
+133     key: 'distractors',
+134     subKey: 'source',
+135     label: 'Distractor source',
+136     options: [
+137       { value: 'random', label: 'random' },
+138       { value: 'gaps-only', label: 'gaps-only' },
+139       { value: 'full-range', label: 'full-range' },
+140     ],
+141     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+142   },
+143   {
+144     type: 'nested-select-or-number',
+145     key: 'distractors',
+146     subKey: 'count',
+147     label: 'Distractor count',
+148     min: 1,
+149     max: 20,
+150     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+151   },
+152   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+153 ];
+154 
 [result-id: r4]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
@@ -709,201 +719,202 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.ts`
 
 ```text
-1	// src/games/sort-numbers/build-sort-round.ts
-2	import { nanoid } from 'nanoid';
-3	import type {
-4	  DistractorConfig,
-5	  SkipConfig,
-6	  SortNumbersRound,
-7	} from './types';
-8	import type {
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	
-13	export function buildDistractorPool(
-14	  sequence: number[],
-15	  range: { min: number; max: number },
-16	  config: DistractorConfig,
-17	): number[] {
-18	  const seqSet = new Set(sequence);
-19	
-20	  let pool: number[];
-21	
-22	  if (config.source === 'gaps-only') {
-23	    pool = [];
-24	    const sorted = [...sequence].toSorted((a, b) => a - b);
-25	    for (let i = 0; i < sorted.length - 1; i++) {
-26	      for (
-27	        let n = (sorted[i] ?? 0) + 1;
-28	        n < (sorted[i + 1] ?? 0);
-29	        n++
-30	      ) {
-31	        pool.push(n);
-32	      }
-33	    }
-34	  } else {
-35	    // Both 'random' and 'full-range' draw from the full non-sequence pool.
-36	    // The difference is in their count contract: 'random' typically uses a
-37	    // fixed numeric count; 'full-range' is intended for taking many/all
-38	    // numbers from the range. At runtime the pool is identical — the
-39	    // distinction is semantic (user intent) and reflected in the UI label.
-40	    pool = Array.from(
-41	      { length: range.max - range.min + 1 },
-42	      (_, i) => range.min + i,
-43	    ).filter((n) => !seqSet.has(n));
-44	  }
-45	
-46	  if (config.count === 'all') return pool;
-47	
-48	  // Pick `count` randomly from pool (Fisher-Yates partial)
-49	  const shuffled = [...pool];
-50	  for (let i = shuffled.length - 1; i > 0; i--) {
-51	    const j = Math.floor(Math.random() * (i + 1));
-52	    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
-53	  }
-54	  return shuffled.slice(0, Math.min(config.count, shuffled.length));
-55	}
-56	
-57	export function buildSortRound(
-58	  numbers: number[],
-59	  direction: 'ascending' | 'descending',
-60	  distractors?: {
-61	    config: DistractorConfig;
-62	    range: { min: number; max: number };
-63	  },
-64	): { tiles: TileItem[]; zones: AnswerZone[] } {
-65	  const sorted = numbers.toSorted((a, b) =>
-66	    direction === 'ascending' ? a - b : b - a,
-67	  );
-68	
-69	  const zones: AnswerZone[] = sorted.map((n, i) => ({
-70	    id: `z${i}`,
-71	    index: i,
-72	    expectedValue: String(n),
-73	    placedTileId: null,
-74	    isWrong: false,
-75	    isLocked: false,
-76	  }));
-77	
-78	  const allNumbers = distractors
-79	    ? [
-80	        ...numbers,
-81	        ...buildDistractorPool(
-82	          numbers,
-83	          distractors.range,
-84	          distractors.config,
-85	        ),
-86	      ]
-87	    : [...numbers];
-88	
-89	  // Shuffle tiles (Fisher-Yates)
-90	  for (let i = allNumbers.length - 1; i > 0; i--) {
-91	    const j = Math.floor(Math.random() * (i + 1));
-92	    [allNumbers[i], allNumbers[j]] = [allNumbers[j]!, allNumbers[i]!];
-93	  }
-94	
-95	  const tiles: TileItem[] = allNumbers.map((n) => ({
-96	    id: nanoid(),
-97	    label: String(n),
-98	    value: String(n),
-99	  }));
-100	
-101	  return { tiles, zones };
-102	}
-103	
-104	function generateConsecutiveRound(
-105	  range: { min: number; max: number },
-106	  quantity: number,
-107	): SortNumbersRound {
-108	  const rangeSize = range.max - range.min + 1;
-109	  if (quantity > rangeSize) {
-110	    return {
-111	      sequence: Array.from(
-112	        { length: rangeSize },
-113	        (_, i) => range.min + i,
-114	      ),
-115	    };
-116	  }
-117	  const maxStart = range.max - quantity + 1;
-118	  const start =
-119	    Math.floor(Math.random() * (maxStart - range.min + 1)) + range.min;
-120	  return {
-121	    sequence: Array.from({ length: quantity }, (_, i) => start + i),
-122	  };
-123	}
-124	
-125	interface GenerateOptions {
-126	  range: { min: number; max: number };
-127	  quantity: number;
-128	  skip: SkipConfig;
-129	  totalRounds: number;
-130	}
-131	
-132	export function generateSortRounds(
-133	  options: GenerateOptions,
-134	): SortNumbersRound[] {
-135	  const { range, quantity, skip, totalRounds } = options;
-136	
-137	  return Array.from({ length: totalRounds }, () => {
-138	    if (skip.mode === 'random') {
-139	      const pool = Array.from(
-140	        { length: range.max - range.min + 1 },
-141	        (_, i) => range.min + i,
-142	      );
-143	      const available = [...pool];
-144	      const picked: number[] = [];
-145	      for (let i = 0; i < quantity && available.length > 0; i++) {
-146	        const idx = Math.floor(Math.random() * available.length);
-147	        picked.push(available[idx]!);
-148	        available.splice(idx, 1);
-149	      }
-150	      return { sequence: picked };
-151	    }
-152	
-153	    if (skip.mode === 'by') {
-154	      const { step, start } = skip;
-155	      const maxPossibleStart = range.max - (quantity - 1) * step;
-156	
-157	      if (maxPossibleStart < range.min) {
-158	        console.warn(
-159	          `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
-160	        );
-161	        return generateConsecutiveRound(range, quantity);
-162	      }
-163	
-164	      if (start === 'range-min') {
-165	        return {
-166	          sequence: Array.from(
-167	            { length: quantity },
-168	            (_, i) => range.min + i * step,
-169	          ),
-170	        };
-171	      }
-172	
-173	      // start === 'random': pick a random valid start
-174	      const validStarts = Array.from(
-175	        { length: maxPossibleStart - range.min + 1 },
-176	        (_, i) => range.min + i,
-177	      );
-178	      const picked =
-179	        validStarts[Math.floor(Math.random() * validStarts.length)] ??
-180	        range.min;
-181	      return {
-182	        sequence: Array.from(
-183	          { length: quantity },
-184	          (_, i) => picked + i * step,
-185	        ),
-186	      };
-187	    }
-188	
-189	    // mode === 'consecutive'
-190	    return generateConsecutiveRound(range, quantity);
-191	  });
-192	}
-193	
+1 // src/games/sort-numbers/build-sort-round.ts
+2 import { nanoid } from 'nanoid';
+3 import type {
+4   DistractorConfig,
+5   SkipConfig,
+6   SortNumbersRound,
+7 } from './types';
+8 import type {
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 
+13 export function buildDistractorPool(
+14   sequence: number[],
+15   range: { min: number; max: number },
+16   config: DistractorConfig,
+17 ): number[] {
+18   const seqSet = new Set(sequence);
+19 
+20   let pool: number[];
+21 
+22   if (config.source === 'gaps-only') {
+23     pool = [];
+24     const sorted = [...sequence].toSorted((a, b) => a - b);
+25     for (let i = 0; i < sorted.length - 1; i++) {
+26       for (
+27         let n = (sorted[i] ?? 0) + 1;
+28         n < (sorted[i + 1] ?? 0);
+29         n++
+30       ) {
+31         pool.push(n);
+32       }
+33     }
+34   } else {
+35     // Both 'random' and 'full-range' draw from the full non-sequence pool.
+36     // The difference is in their count contract: 'random' typically uses a
+37     // fixed numeric count; 'full-range' is intended for taking many/all
+38     // numbers from the range. At runtime the pool is identical — the
+39     // distinction is semantic (user intent) and reflected in the UI label.
+40     pool = Array.from(
+41       { length: range.max - range.min + 1 },
+42       (_, i) => range.min + i,
+43     ).filter((n) => !seqSet.has(n));
+44   }
+45 
+46   if (config.count === 'all') return pool;
+47 
+48   // Pick `count` randomly from pool (Fisher-Yates partial)
+49   const shuffled = [...pool];
+50   for (let i = shuffled.length - 1; i > 0; i--) {
+51     const j = Math.floor(Math.random() * (i + 1));
+52     [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+53   }
+54   return shuffled.slice(0, Math.min(config.count, shuffled.length));
+55 }
+56 
+57 export function buildSortRound(
+58   numbers: number[],
+59   direction: 'ascending' | 'descending',
+60   distractors?: {
+61     config: DistractorConfig;
+62     range: { min: number; max: number };
+63   },
+64 ): { tiles: TileItem[]; zones: AnswerZone[] } {
+65   const sorted = numbers.toSorted((a, b) =>
+66     direction === 'ascending' ? a - b : b - a,
+67   );
+68 
+69   const zones: AnswerZone[] = sorted.map((n, i) => ({
+70     id: `z${i}`,
+71     index: i,
+72     expectedValue: String(n),
+73     placedTileId: null,
+74     isWrong: false,
+75     isLocked: false,
+76   }));
+77 
+78   const allNumbers = distractors
+79     ? [
+80         ...numbers,
+81         ...buildDistractorPool(
+82           numbers,
+83           distractors.range,
+84           distractors.config,
+85         ),
+86       ]
+87     : [...numbers];
+88 
+89   // Shuffle tiles (Fisher-Yates)
+90   for (let i = allNumbers.length - 1; i > 0; i--) {
+91     const j = Math.floor(Math.random() * (i + 1));
+92     [allNumbers[i], allNumbers[j]] = [allNumbers[j]!, allNumbers[i]!];
+93   }
+94 
+95   const tiles: TileItem[] = allNumbers.map((n) => ({
+96     id: nanoid(),
+97     label: String(n),
+98     value: String(n),
+99   }));
+100 
+101   return { tiles, zones };
+102 }
+103 
+104 function generateConsecutiveRound(
+105   range: { min: number; max: number },
+106   quantity: number,
+107 ): SortNumbersRound {
+108   const rangeSize = range.max - range.min + 1;
+109   if (quantity > rangeSize) {
+110     return {
+111       sequence: Array.from(
+112         { length: rangeSize },
+113         (_, i) => range.min + i,
+114       ),
+115     };
+116   }
+117   const maxStart = range.max - quantity + 1;
+118   const start =
+119     Math.floor(Math.random() * (maxStart - range.min + 1)) + range.min;
+120   return {
+121     sequence: Array.from({ length: quantity }, (_, i) => start + i),
+122   };
+123 }
+124 
+125 interface GenerateOptions {
+126   range: { min: number; max: number };
+127   quantity: number;
+128   skip: SkipConfig;
+129   totalRounds: number;
+130 }
+131 
+132 export function generateSortRounds(
+133   options: GenerateOptions,
+134 ): SortNumbersRound[] {
+135   const { range, quantity, skip, totalRounds } = options;
+136 
+137   return Array.from({ length: totalRounds }, () => {
+138     if (skip.mode === 'random') {
+139       const pool = Array.from(
+140         { length: range.max - range.min + 1 },
+141         (_, i) => range.min + i,
+142       );
+143       const available = [...pool];
+144       const picked: number[] = [];
+145       for (let i = 0; i < quantity && available.length > 0; i++) {
+146         const idx = Math.floor(Math.random() * available.length);
+147         picked.push(available[idx]!);
+148         available.splice(idx, 1);
+149       }
+150       return { sequence: picked };
+151     }
+152 
+153     if (skip.mode === 'by') {
+154       const { step, start } = skip;
+155       const maxPossibleStart = range.max - (quantity - 1) * step;
+156 
+157       if (maxPossibleStart < range.min) {
+158         console.warn(
+159           `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
+160         );
+161         return generateConsecutiveRound(range, quantity);
+162       }
+163 
+164       if (start === 'range-min') {
+165         return {
+166           sequence: Array.from(
+167             { length: quantity },
+168             (_, i) => range.min + i * step,
+169           ),
+170         };
+171       }
+172 
+173       // start === 'random': pick a random valid start
+174       const validStarts = Array.from(
+175         { length: maxPossibleStart - range.min + 1 },
+176         (_, i) => range.min + i,
+177       );
+178       const picked =
+179         validStarts[Math.floor(Math.random() * validStarts.length)] ??
+180         range.min;
+181       return {
+182         sequence: Array.from(
+183           { length: quantity },
+184           (_, i) => picked + i * step,
+185         ),
+186       };
+187     }
+188 
+189     // mode === 'consecutive'
+190     return generateConsecutiveRound(range, quantity);
+191   });
+192 }
+193 
 [result-id: r5]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
@@ -913,238 +924,239 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:16Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import {
-3	  buildDistractorPool,
-4	  buildSortRound,
-5	  generateSortRounds,
-6	} from './build-sort-round';
-7	
-8	describe('buildSortRound', () => {
-9	  it('creates zones in ascending order for ascending direction', () => {
-10	    const { zones } = buildSortRound([3, 1, 2], 'ascending');
-11	    expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
-12	  });
-13	
-14	  it('creates zones in descending order for descending direction', () => {
-15	    const { zones } = buildSortRound([3, 1, 2], 'descending');
-16	    expect(zones.map((z) => z.expectedValue)).toEqual(['3', '2', '1']);
-17	  });
-18	
-19	  it('creates tiles with all sequence numbers', () => {
-20	    const { tiles } = buildSortRound([1, 2, 3], 'ascending');
-21	    expect(tiles.map((t) => t.value).toSorted()).toEqual([
-22	      '1',
-23	      '2',
-24	      '3',
-25	    ]);
-26	    expect(tiles).toHaveLength(3);
-27	  });
-28	
-29	  it('each tile has a unique id', () => {
-30	    const { tiles } = buildSortRound([1, 2, 3], 'ascending');
-31	    const ids = tiles.map((t) => t.id);
-32	    expect(new Set(ids).size).toBe(3);
-33	  });
-34	
-35	  it('appends distractor tiles when distractorConfig is provided', () => {
-36	    const { tiles } = buildSortRound([2, 4, 6], 'ascending', {
-37	      config: { source: 'full-range', count: 2 },
-38	      range: { min: 1, max: 10 },
-39	    });
-40	    // 3 sequence tiles + 2 distractor tiles
-41	    expect(tiles).toHaveLength(5);
-42	  });
-43	
-44	  it('distractor tiles are not part of the zones expectedValue set', () => {
-45	    const { tiles, zones } = buildSortRound([2, 4, 6], 'ascending', {
-46	      config: { source: 'full-range', count: 2 },
-47	      range: { min: 1, max: 10 },
-48	    });
-49	    const expectedValues = new Set(zones.map((z) => z.expectedValue));
-50	    const extraTiles = tiles.filter(
-51	      (t) => !expectedValues.has(t.value),
-52	    );
-53	    expect(extraTiles).toHaveLength(2);
-54	  });
-55	});
-56	
-57	describe('generateSortRounds', () => {
-58	  it('mode consecutive generates consecutive sequences', () => {
-59	    const rounds = generateSortRounds({
-60	      range: { min: 1, max: 10 },
-61	      quantity: 3,
-62	      skip: { mode: 'consecutive' },
-63	      totalRounds: 2,
-64	    });
-65	    expect(rounds).toHaveLength(2);
-66	    for (const round of rounds) {
-67	      expect(round.sequence).toHaveLength(3);
-68	      const diffs = round.sequence
-69	        .slice(1)
-70	        .map((n, i) => n - (round.sequence[i] ?? 0));
-71	      expect(diffs.every((d) => d === 1)).toBe(true);
-72	    }
-73	  });
-74	
-75	  it('mode random generates sequences of correct length within range', () => {
-76	    const rounds = generateSortRounds({
-77	      range: { min: 1, max: 20 },
-78	      quantity: 4,
-79	      skip: { mode: 'random' },
-80	      totalRounds: 3,
-81	    });
-82	    expect(rounds).toHaveLength(3);
-83	    for (const round of rounds) {
-84	      expect(round.sequence).toHaveLength(4);
-85	      for (const n of round.sequence) {
-86	        expect(n).toBeGreaterThanOrEqual(1);
-87	        expect(n).toBeLessThanOrEqual(20);
-88	      }
-89	    }
-90	  });
-91	
-92	  it('mode random all numbers in a round are unique', () => {
-93	    const rounds = generateSortRounds({
-94	      range: { min: 1, max: 20 },
-95	      quantity: 5,
-96	      skip: { mode: 'random' },
-97	      totalRounds: 1,
-98	    });
-99	    const seq = rounds[0]?.sequence ?? [];
-100	    expect(new Set(seq).size).toBe(seq.length);
-101	  });
-102	
-103	  it('mode by with start range-min generates fixed-step sequence from range.min', () => {
-104	    const rounds = generateSortRounds({
-105	      range: { min: 2, max: 20 },
-106	      quantity: 4,
-107	      skip: { mode: 'by', step: 3, start: 'range-min' },
-108	      totalRounds: 1,
-109	    });
-110	    expect(rounds[0]?.sequence).toEqual([2, 5, 8, 11]);
-111	  });
-112	
-113	  it('mode by with start random generates valid fixed-step sequence', () => {
-114	    const rounds = generateSortRounds({
-115	      range: { min: 1, max: 20 },
-116	      quantity: 3,
-117	      skip: { mode: 'by', step: 5, start: 'random' },
-118	      totalRounds: 5,
-119	    });
-120	    for (const round of rounds) {
-121	      expect(round.sequence).toHaveLength(3);
-122	      const diffs = round.sequence
-123	        .slice(1)
-124	        .map((n, i) => n - (round.sequence[i] ?? 0));
-125	      expect(diffs.every((d) => d === 5)).toBe(true);
-126	      expect(round.sequence[0]).toBeGreaterThanOrEqual(1);
-127	      expect(round.sequence.at(-1)).toBeLessThanOrEqual(20);
-128	    }
-129	  });
-130	
-131	  it('mode by falls back to consecutive when step is too large', () => {
-132	    const rounds = generateSortRounds({
-133	      range: { min: 1, max: 5 },
-134	      quantity: 3,
-135	      skip: { mode: 'by', step: 10, start: 'range-min' },
-136	      totalRounds: 1,
-137	    });
-138	    // step * (quantity - 1) = 20 > range.max - range.min = 4 → fallback to consecutive
-139	    const seq = rounds[0]?.sequence ?? [];
-140	    expect(seq).toHaveLength(3);
-141	    const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
-142	    expect(diffs.every((d) => d === 1)).toBe(true);
-143	  });
-144	
-145	  it('mode consecutive handles quantity larger than range size', () => {
-146	    const rounds = generateSortRounds({
-147	      range: { min: 1, max: 3 },
-148	      quantity: 5,
-149	      skip: { mode: 'consecutive' },
-150	      totalRounds: 1,
-151	    });
-152	    const seq = rounds[0]?.sequence ?? [];
-153	    expect(seq).toHaveLength(3); // clamped to range size
-154	    for (const n of seq) {
-155	      expect(n).toBeGreaterThanOrEqual(1);
-156	      expect(n).toBeLessThanOrEqual(3);
-157	    }
-158	  });
-159	});
-160	
-161	describe('buildDistractorPool', () => {
-162	  it('source random returns count numbers not in sequence', () => {
-163	    const pool = buildDistractorPool(
-164	      [2, 4, 6],
-165	      { min: 1, max: 10 },
-166	      { source: 'random', count: 3 },
-167	    );
-168	    expect(pool).toHaveLength(3);
-169	    for (const n of pool) {
-170	      expect([2, 4, 6]).not.toContain(n);
-171	      expect(n).toBeGreaterThanOrEqual(1);
-172	      expect(n).toBeLessThanOrEqual(10);
-173	    }
-174	  });
-175	
-176	  it('source gaps-only count all returns numbers between consecutive sequence values', () => {
-177	    const pool = buildDistractorPool(
-178	      [2, 4, 6],
-179	      { min: 1, max: 8 },
-180	      { source: 'gaps-only', count: 'all' },
-181	    );
-182	    // Between 2 and 4: 3. Between 4 and 6: 5.
-183	    expect(pool.toSorted((a, b) => a - b)).toEqual([3, 5]);
-184	  });
-185	
-186	  it('source gaps-only count number returns that many from gaps', () => {
-187	    const pool = buildDistractorPool(
-188	      [2, 5, 8],
-189	      { min: 1, max: 10 },
-190	      { source: 'gaps-only', count: 2 },
-191	    );
-192	    // Gaps: between 2 and 5: 3,4. Between 5 and 8: 6,7.
-193	    expect(pool).toHaveLength(2);
-194	    for (const n of pool) {
-195	      expect([3, 4, 6, 7]).toContain(n);
-196	    }
-197	  });
-198	
-199	  it('source full-range count all returns all non-sequence numbers in range', () => {
-200	    const pool = buildDistractorPool(
-201	      [2, 4, 6],
-202	      { min: 1, max: 8 },
-203	      { source: 'full-range', count: 'all' },
-204	    );
-205	    expect(pool.toSorted((a, b) => a - b)).toEqual([1, 3, 5, 7, 8]);
-206	  });
-207	
-208	  it('source full-range count number returns that many', () => {
-209	    const pool = buildDistractorPool(
-210	      [2, 4, 6],
-211	      { min: 1, max: 10 },
-212	      { source: 'full-range', count: 3 },
-213	    );
-214	    expect(pool).toHaveLength(3);
-215	    for (const n of pool) {
-216	      expect([2, 4, 6]).not.toContain(n);
-217	    }
-218	  });
-219	
-220	  it('returns full pool when count exceeds pool size', () => {
-221	    const pool = buildDistractorPool(
-222	      [1, 2, 3, 4, 5],
-223	      { min: 1, max: 6 },
-224	      { source: 'random', count: 10 },
-225	    );
-226	    // Only 1 number in range not in sequence: 6
-227	    expect(pool).toEqual([6]);
-228	  });
-229	});
-230	
+1 import { describe, expect, it } from 'vitest';
+2 import {
+3   buildDistractorPool,
+4   buildSortRound,
+5   generateSortRounds,
+6 } from './build-sort-round';
+7 
+8 describe('buildSortRound', () => {
+9   it('creates zones in ascending order for ascending direction', () => {
+10     const { zones } = buildSortRound([3, 1, 2], 'ascending');
+11     expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
+12   });
+13 
+14   it('creates zones in descending order for descending direction', () => {
+15     const { zones } = buildSortRound([3, 1, 2], 'descending');
+16     expect(zones.map((z) => z.expectedValue)).toEqual(['3', '2', '1']);
+17   });
+18 
+19   it('creates tiles with all sequence numbers', () => {
+20     const { tiles } = buildSortRound([1, 2, 3], 'ascending');
+21     expect(tiles.map((t) => t.value).toSorted()).toEqual([
+22       '1',
+23       '2',
+24       '3',
+25     ]);
+26     expect(tiles).toHaveLength(3);
+27   });
+28 
+29   it('each tile has a unique id', () => {
+30     const { tiles } = buildSortRound([1, 2, 3], 'ascending');
+31     const ids = tiles.map((t) => t.id);
+32     expect(new Set(ids).size).toBe(3);
+33   });
+34 
+35   it('appends distractor tiles when distractorConfig is provided', () => {
+36     const { tiles } = buildSortRound([2, 4, 6], 'ascending', {
+37       config: { source: 'full-range', count: 2 },
+38       range: { min: 1, max: 10 },
+39     });
+40     // 3 sequence tiles + 2 distractor tiles
+41     expect(tiles).toHaveLength(5);
+42   });
+43 
+44   it('distractor tiles are not part of the zones expectedValue set', () => {
+45     const { tiles, zones } = buildSortRound([2, 4, 6], 'ascending', {
+46       config: { source: 'full-range', count: 2 },
+47       range: { min: 1, max: 10 },
+48     });
+49     const expectedValues = new Set(zones.map((z) => z.expectedValue));
+50     const extraTiles = tiles.filter(
+51       (t) => !expectedValues.has(t.value),
+52     );
+53     expect(extraTiles).toHaveLength(2);
+54   });
+55 });
+56 
+57 describe('generateSortRounds', () => {
+58   it('mode consecutive generates consecutive sequences', () => {
+59     const rounds = generateSortRounds({
+60       range: { min: 1, max: 10 },
+61       quantity: 3,
+62       skip: { mode: 'consecutive' },
+63       totalRounds: 2,
+64     });
+65     expect(rounds).toHaveLength(2);
+66     for (const round of rounds) {
+67       expect(round.sequence).toHaveLength(3);
+68       const diffs = round.sequence
+69         .slice(1)
+70         .map((n, i) => n - (round.sequence[i] ?? 0));
+71       expect(diffs.every((d) => d === 1)).toBe(true);
+72     }
+73   });
+74 
+75   it('mode random generates sequences of correct length within range', () => {
+76     const rounds = generateSortRounds({
+77       range: { min: 1, max: 20 },
+78       quantity: 4,
+79       skip: { mode: 'random' },
+80       totalRounds: 3,
+81     });
+82     expect(rounds).toHaveLength(3);
+83     for (const round of rounds) {
+84       expect(round.sequence).toHaveLength(4);
+85       for (const n of round.sequence) {
+86         expect(n).toBeGreaterThanOrEqual(1);
+87         expect(n).toBeLessThanOrEqual(20);
+88       }
+89     }
+90   });
+91 
+92   it('mode random all numbers in a round are unique', () => {
+93     const rounds = generateSortRounds({
+94       range: { min: 1, max: 20 },
+95       quantity: 5,
+96       skip: { mode: 'random' },
+97       totalRounds: 1,
+98     });
+99     const seq = rounds[0]?.sequence ?? [];
+100     expect(new Set(seq).size).toBe(seq.length);
+101   });
+102 
+103   it('mode by with start range-min generates fixed-step sequence from range.min', () => {
+104     const rounds = generateSortRounds({
+105       range: { min: 2, max: 20 },
+106       quantity: 4,
+107       skip: { mode: 'by', step: 3, start: 'range-min' },
+108       totalRounds: 1,
+109     });
+110     expect(rounds[0]?.sequence).toEqual([2, 5, 8, 11]);
+111   });
+112 
+113   it('mode by with start random generates valid fixed-step sequence', () => {
+114     const rounds = generateSortRounds({
+115       range: { min: 1, max: 20 },
+116       quantity: 3,
+117       skip: { mode: 'by', step: 5, start: 'random' },
+118       totalRounds: 5,
+119     });
+120     for (const round of rounds) {
+121       expect(round.sequence).toHaveLength(3);
+122       const diffs = round.sequence
+123         .slice(1)
+124         .map((n, i) => n - (round.sequence[i] ?? 0));
+125       expect(diffs.every((d) => d === 5)).toBe(true);
+126       expect(round.sequence[0]).toBeGreaterThanOrEqual(1);
+127       expect(round.sequence.at(-1)).toBeLessThanOrEqual(20);
+128     }
+129   });
+130 
+131   it('mode by falls back to consecutive when step is too large', () => {
+132     const rounds = generateSortRounds({
+133       range: { min: 1, max: 5 },
+134       quantity: 3,
+135       skip: { mode: 'by', step: 10, start: 'range-min' },
+136       totalRounds: 1,
+137     });
+138     // step * (quantity - 1) = 20 > range.max - range.min = 4 → fallback to consecutive
+139     const seq = rounds[0]?.sequence ?? [];
+140     expect(seq).toHaveLength(3);
+141     const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
+142     expect(diffs.every((d) => d === 1)).toBe(true);
+143   });
+144 
+145   it('mode consecutive handles quantity larger than range size', () => {
+146     const rounds = generateSortRounds({
+147       range: { min: 1, max: 3 },
+148       quantity: 5,
+149       skip: { mode: 'consecutive' },
+150       totalRounds: 1,
+151     });
+152     const seq = rounds[0]?.sequence ?? [];
+153     expect(seq).toHaveLength(3); // clamped to range size
+154     for (const n of seq) {
+155       expect(n).toBeGreaterThanOrEqual(1);
+156       expect(n).toBeLessThanOrEqual(3);
+157     }
+158   });
+159 });
+160 
+161 describe('buildDistractorPool', () => {
+162   it('source random returns count numbers not in sequence', () => {
+163     const pool = buildDistractorPool(
+164       [2, 4, 6],
+165       { min: 1, max: 10 },
+166       { source: 'random', count: 3 },
+167     );
+168     expect(pool).toHaveLength(3);
+169     for (const n of pool) {
+170       expect([2, 4, 6]).not.toContain(n);
+171       expect(n).toBeGreaterThanOrEqual(1);
+172       expect(n).toBeLessThanOrEqual(10);
+173     }
+174   });
+175 
+176   it('source gaps-only count all returns numbers between consecutive sequence values', () => {
+177     const pool = buildDistractorPool(
+178       [2, 4, 6],
+179       { min: 1, max: 8 },
+180       { source: 'gaps-only', count: 'all' },
+181     );
+182     // Between 2 and 4: 3. Between 4 and 6: 5.
+183     expect(pool.toSorted((a, b) => a - b)).toEqual([3, 5]);
+184   });
+185 
+186   it('source gaps-only count number returns that many from gaps', () => {
+187     const pool = buildDistractorPool(
+188       [2, 5, 8],
+189       { min: 1, max: 10 },
+190       { source: 'gaps-only', count: 2 },
+191     );
+192     // Gaps: between 2 and 5: 3,4. Between 5 and 8: 6,7.
+193     expect(pool).toHaveLength(2);
+194     for (const n of pool) {
+195       expect([3, 4, 6, 7]).toContain(n);
+196     }
+197   });
+198 
+199   it('source full-range count all returns all non-sequence numbers in range', () => {
+200     const pool = buildDistractorPool(
+201       [2, 4, 6],
+202       { min: 1, max: 8 },
+203       { source: 'full-range', count: 'all' },
+204     );
+205     expect(pool.toSorted((a, b) => a - b)).toEqual([1, 3, 5, 7, 8]);
+206   });
+207 
+208   it('source full-range count number returns that many', () => {
+209     const pool = buildDistractorPool(
+210       [2, 4, 6],
+211       { min: 1, max: 10 },
+212       { source: 'full-range', count: 3 },
+213     );
+214     expect(pool).toHaveLength(3);
+215     for (const n of pool) {
+216       expect([2, 4, 6]).not.toContain(n);
+217     }
+218   });
+219 
+220   it('returns full pool when count exceeds pool size', () => {
+221     const pool = buildDistractorPool(
+222       [1, 2, 3, 4, 5],
+223       { min: 1, max: 6 },
+224       { source: 'random', count: 10 },
+225     );
+226     // Only 1 number in range not in sequence: 6
+227     expect(pool).toEqual([6]);
+228   });
+229 });
+230 
 [result-id: r6]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:19Z)**_
@@ -1158,308 +1170,309 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:19Z)**_
  `./worktrees/feat/sort-numbers-skip-config/docs/superpowers/plans/2026-04-08-sort-numbers-skip-config.md`
 
 ```text
-0	# SortNumbers Skip & Distractor Config Implementation Plan
-1	
-2	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-3	
-4	**Goal:** Replace the boolean `allowSkips` field on `SortNumbersConfig` with structured `SkipConfig` and `DistractorConfig` discriminated unions, update round generation, and add new config form field types to the UI.
-5	
-6	**Architecture:** The change is layered: types first, then pure logic (round generation), then integration (component + route), then UI renderer. Each layer is independently testable. The form renderer gains two new field types (`nested-select`, `nested-select-or-number`) plus a `visibleWhen` conditional display mechanism.
-7	
-8	**Tech Stack:** TypeScript discriminated unions, Vitest unit tests, React (const components), Tailwind CSS, Storybook 8, TanStack Router, `@testing-library/react`
-9	
-10	---
-11	
-12	## File Map
-13	
-14	| File                                                         | Action | Responsibility                                                                                      |
-15	| ------------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------- |
-16	| `src/lib/config-fields.ts`                                   | Modify | Add `nested-select`, `nested-select-or-number` variants; add optional `visibleWhen` to all variants |
-17	| `src/games/sort-numbers/types.ts`                            | Modify | Add `SkipConfig`, `DistractorConfig`; update `SortNumbersConfig`; update `sortNumbersConfigFields`  |
-18	| `src/games/sort-numbers/build-sort-round.ts`                 | Modify | Update `GenerateOptions`, `generateSortRounds`; add `buildDistractorPool`; extend `buildSortRound`  |
-19	| `src/games/sort-numbers/build-sort-round.test.ts`            | Modify | Update existing tests; add tests for new modes and `buildDistractorPool`                            |
-20	| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`         | Modify | Pass distractor config to `buildSortRound` when `tileBankMode === 'distractors'`                    |
-21	| `src/routes/$locale/_app/game/$gameId.tsx`                   | Modify | Update default config, resolve function, add migration from `allowSkips: boolean`                   |
-22	| `src/components/ConfigFormFields.tsx`                        | Modify | Add `nested-select`, `nested-select-or-number` renderers; add `visibleWhen` gate                    |
-23	| `src/components/ConfigFormFields.test.tsx`                   | Modify | Add tests for new renderers and `visibleWhen`                                                       |
-24	| `src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx` | Create | Stories for `mode: 'by'` and each distractor source                                                 |
-25	| `src/components/ConfigFormFields.stories.tsx`                | Modify | Add story showcasing `nested-select` and `nested-select-or-number`                                  |
-26	
-27	---
-28	
-29	## Task 1: Extend `ConfigField` type with new variants and `visibleWhen`
-30	
-31	**Files:**
-32	
-33	- Modify: `src/lib/config-fields.ts`
-34	
-35	This is purely additive — no existing code breaks.
-36	
-37	- [ ] **Step 1: Replace the file content**
-38	
-39	```ts
-40	// src/lib/config-fields.ts
-41	export type VisibleWhen = {
-42	  key: string;
-43	  subKey?: string;
-44	  value: unknown;
-45	};
-46	
-47	export type ConfigField =
-48	  | {
-49	      type: 'select';
-50	      key: string;
-51	      label: string;
-52	      options: { value: string; label: string }[];
-53	      visibleWhen?: VisibleWhen;
-54	    }
-55	  | {
-56	      type: 'number';
-57	      key: string;
-58	      label: string;
-59	      min: number;
-60	      max: number;
-61	      visibleWhen?: VisibleWhen;
-62	    }
-63	  | {
-64	      /** A number field that reads/writes from a nested object: config[key][subKey] */
-65	      type: 'nested-number';
-66	      key: string;
-67	      subKey: string;
-68	      label: string;
-69	      min: number;
-70	      max: number;
-71	      visibleWhen?: VisibleWhen;
-72	    }
-73	  | {
-74	      /** A select that reads/writes from a nested object: config[key][subKey] */
-75	      type: 'nested-select';
-76	      key: string;
-77	      subKey: string;
-78	      label: string;
-79	      options: { value: string; label: string }[];
-80	      visibleWhen?: VisibleWhen;
-81	    }
-82	  | {
-83	      /**
-84	       * A hybrid field: a type-selector ('all' | 'number') plus a number input
-85	       * when the current value is numeric. Reads/writes config[key][subKey].
-86	       */
-87	      type: 'nested-select-or-number';
-88	      key: string;
-89	      subKey: string;
-90	      label: string;
-91	      min: number;
-92	      max: number;
-93	      visibleWhen?: VisibleWhen;
-94	    }
-95	  | {
-96	      type: 'checkbox';
-97	      key: string;
-98	      label: string;
-99	      visibleWhen?: VisibleWhen;
-100	    };
-101	```
-102	
-103	- [ ] **Step 2: Run typecheck to confirm no regressions**
-104	
-105	Run: `cd worktrees/feat/sort-numbers-skip-config && yarn typecheck`
-106	
-107	Expected: no errors (change is additive)
-108	
-109	- [ ] **Step 3: Commit**
-110	
-111	```bash
-112	cd worktrees/feat/sort-numbers-skip-config
-113	git add src/lib/config-fields.ts
-114	git commit -m "feat(config-fields): add nested-select, nested-select-or-number variants with visibleWhen"
-115	```
-116	
-117	---
-118	
-119	## Task 2: Update `SortNumbersConfig` types
-120	
-121	**Files:**
-122	
-123	- Modify: `src/games/sort-numbers/types.ts`
-124	
-125	> **Note:** After this task TypeScript will report errors in `build-sort-round.ts` and
-126	> `src/routes/$locale/_app/game/$gameId.tsx` because they still use `allowSkips`. Do not
-127	> commit until Tasks 3 and 4 are also complete.
-128	
-129	- [ ] **Step 1: Replace the file content**
-130	
-131	```ts
-132	// src/games/sort-numbers/types.ts
-133	import type { AnswerGameConfig } from '@/components/answer-game/types';
-134	import type { ConfigField } from '@/lib/config-fields';
-135	
-136	export type SkipConfig =
-137	  | { mode: 'random' }
-138	  | { mode: 'consecutive' }
-139	  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
-140	
-141	export type DistractorConfig =
-142	  | { source: 'random'; count: number }
-143	  | { source: 'gaps-only'; count: number | 'all' }
-144	  | { source: 'full-range'; count: number | 'all' };
-145	
-146	export interface SortNumbersConfig extends AnswerGameConfig {
-147	  component: 'SortNumbers';
-148	  direction: 'ascending' | 'descending';
-149	  range: { min: number; max: number };
-150	  /** How many numbers to sort per round */
-151	  quantity: number;
-152	  skip: SkipConfig;
-153	  distractors: DistractorConfig;
-154	  rounds: SortNumbersRound[];
-155	}
-156	
-157	export interface SortNumbersRound {
-158	  sequence: number[];
-159	}
-160	
-161	export const sortNumbersConfigFields: ConfigField[] = [
-162	  {
-163	    type: 'select',
-164	    key: 'inputMethod',
-165	    label: 'Input method',
-166	    options: [
-167	      { value: 'drag', label: 'drag' },
-168	      { value: 'type', label: 'type' },
-169	      { value: 'both', label: 'both' },
-170	    ],
-171	  },
-172	  {
-173	    type: 'select',
-174	    key: 'wrongTileBehavior',
-175	    label: 'Wrong tile behaviour',
-176	    options: [
-177	      { value: 'reject', label: 'reject' },
-178	      { value: 'lock-manual', label: 'lock-manual' },
-179	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-180	    ],
-181	  },
-182	  {
-183	    type: 'select',
-184	    key: 'tileBankMode',
-185	    label: 'Tile bank mode',
-186	    options: [
-187	      { value: 'exact', label: 'exact' },
-188	      { value: 'distractors', label: 'distractors' },
-189	    ],
-190	  },
-191	  {
-192	    type: 'number',
-193	    key: 'totalRounds',
-194	    label: 'Total rounds',
-195	    min: 1,
-196	    max: 30,
-197	  },
-198	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-199	  {
-200	    type: 'select',
-201	    key: 'direction',
-202	    label: 'Direction',
-203	    options: [
-204	      { value: 'ascending', label: 'ascending' },
-205	      { value: 'descending', label: 'descending' },
-206	    ],
-207	  },
-208	  {
-209	    type: 'number',
-210	    key: 'quantity',
-211	    label: 'Quantity',
-212	    min: 2,
-213	    max: 8,
-214	  },
-215	  {
-216	    type: 'nested-number',
-217	    key: 'range',
-218	    subKey: 'min',
-219	    label: 'Range min',
-220	    min: 1,
-221	    max: 999,
-222	  },
-223	  {
-224	    type: 'nested-number',
-225	    key: 'range',
-226	    subKey: 'max',
-227	    label: 'Range max',
-228	    min: 1,
-229	    max: 999,
-230	  },
-231	  {
-232	    type: 'nested-select',
-233	    key: 'skip',
-234	    subKey: 'mode',
-235	    label: 'Skip mode',
-236	    options: [
-237	      { value: 'random', label: 'random' },
-238	      { value: 'consecutive', label: 'consecutive' },
-239	      { value: 'by', label: 'by' },
-240	    ],
-241	  },
-242	  {
-243	    type: 'nested-number',
-244	    key: 'skip',
-245	    subKey: 'step',
-246	    label: 'Skip step',
-247	    min: 2,
-248	    max: 100,
-249	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-250	  },
-251	  {
-252	    type: 'nested-select',
-253	    key: 'skip',
-254	    subKey: 'start',
-255	    label: 'Skip start',
-256	    options: [
-257	      { value: 'range-min', label: 'range-min' },
-258	      { value: 'random', label: 'random' },
-259	    ],
-260	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-261	  },
-262	  {
-263	    type: 'nested-select',
-264	    key: 'distractors',
-265	    subKey: 'source',
-266	    label: 'Distractor source',
-267	    options: [
-268	      { value: 'random', label: 'random' },
-269	      { value: 'gaps-only', label: 'gaps-only' },
-270	      { value: 'full-range', label: 'full-range' },
-271	    ],
-272	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-273	  },
-274	  {
-275	    type: 'nested-select-or-number',
-276	    key: 'distractors',
-277	    subKey: 'count',
-278	    label: 'Distractor count',
-279	    min: 1,
-280	    max: 20,
-281	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-282	  },
-283	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-284	];
-285	```
-286	
-287	---
-288	
-289	## Task 3: Update `build-sort-round.ts` (TDD)
-290	
-291	**Files:**
-292	
-293	- Modify: `src/games/sort-numbers/build-sort-round.test.ts`
-294	- Modify: `src/games/sort-numbers/build-sort-round.ts`
-295	
-296	> Still part of the Tasks 2–4 commit group — do not commit until Task 4 is also complete.
-297	
-298	- [ ] **Step 1: Add failing tests to `build-sort-round.test.ts`**
-299	
+0 # SortNumbers Skip & Distractor Config Implementation Plan
+1 
+2 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+3 
+4 **Goal:** Replace the boolean `allowSkips` field on `SortNumbersConfig` with structured `SkipConfig` and `DistractorConfig` discriminated unions, update round generation, and add new config form field types to the UI.
+5 
+6 **Architecture:** The change is layered: types first, then pure logic (round generation), then integration (component + route), then UI renderer. Each layer is independently testable. The form renderer gains two new field types (`nested-select`, `nested-select-or-number`) plus a `visibleWhen` conditional display mechanism.
+7 
+8 **Tech Stack:** TypeScript discriminated unions, Vitest unit tests, React (const components), Tailwind CSS, Storybook 8, TanStack Router, `@testing-library/react`
+9 
+10 ---
+11 
+12 ## File Map
+13 
+14 | File                                                         | Action | Responsibility                                                                                      |
+15 | ------------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------- |
+16 | `src/lib/config-fields.ts`                                   | Modify | Add `nested-select`, `nested-select-or-number` variants; add optional `visibleWhen` to all variants |
+17 | `src/games/sort-numbers/types.ts`                            | Modify | Add `SkipConfig`, `DistractorConfig`; update `SortNumbersConfig`; update `sortNumbersConfigFields`  |
+18 | `src/games/sort-numbers/build-sort-round.ts`                 | Modify | Update `GenerateOptions`, `generateSortRounds`; add `buildDistractorPool`; extend `buildSortRound`  |
+19 | `src/games/sort-numbers/build-sort-round.test.ts`            | Modify | Update existing tests; add tests for new modes and `buildDistractorPool`                            |
+20 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`         | Modify | Pass distractor config to `buildSortRound` when `tileBankMode === 'distractors'`                    |
+21 | `src/routes/$locale/_app/game/$gameId.tsx`                   | Modify | Update default config, resolve function, add migration from `allowSkips: boolean`                   |
+22 | `src/components/ConfigFormFields.tsx`                        | Modify | Add `nested-select`, `nested-select-or-number` renderers; add `visibleWhen` gate                    |
+23 | `src/components/ConfigFormFields.test.tsx`                   | Modify | Add tests for new renderers and `visibleWhen`                                                       |
+24 | `src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx` | Create | Stories for `mode: 'by'` and each distractor source                                                 |
+25 | `src/components/ConfigFormFields.stories.tsx`                | Modify | Add story showcasing `nested-select` and `nested-select-or-number`                                  |
+26 
+27 ---
+28 
+29 ## Task 1: Extend `ConfigField` type with new variants and `visibleWhen`
+30 
+31 **Files:**
+32 
+33 - Modify: `src/lib/config-fields.ts`
+34 
+35 This is purely additive — no existing code breaks.
+36 
+37 - [ ] **Step 1: Replace the file content**
+38 
+39 ```ts
+40 // src/lib/config-fields.ts
+41 export type VisibleWhen = {
+42   key: string;
+43   subKey?: string;
+44   value: unknown;
+45 };
+46 
+47 export type ConfigField =
+48   | {
+49       type: 'select';
+50       key: string;
+51       label: string;
+52       options: { value: string; label: string }[];
+53       visibleWhen?: VisibleWhen;
+54     }
+55   | {
+56       type: 'number';
+57       key: string;
+58       label: string;
+59       min: number;
+60       max: number;
+61       visibleWhen?: VisibleWhen;
+62     }
+63   | {
+64       /** A number field that reads/writes from a nested object: config[key][subKey] */
+65       type: 'nested-number';
+66       key: string;
+67       subKey: string;
+68       label: string;
+69       min: number;
+70       max: number;
+71       visibleWhen?: VisibleWhen;
+72     }
+73   | {
+74       /** A select that reads/writes from a nested object: config[key][subKey] */
+75       type: 'nested-select';
+76       key: string;
+77       subKey: string;
+78       label: string;
+79       options: { value: string; label: string }[];
+80       visibleWhen?: VisibleWhen;
+81     }
+82   | {
+83       /**
+84        * A hybrid field: a type-selector ('all' | 'number') plus a number input
+85        * when the current value is numeric. Reads/writes config[key][subKey].
+86        */
+87       type: 'nested-select-or-number';
+88       key: string;
+89       subKey: string;
+90       label: string;
+91       min: number;
+92       max: number;
+93       visibleWhen?: VisibleWhen;
+94     }
+95   | {
+96       type: 'checkbox';
+97       key: string;
+98       label: string;
+99       visibleWhen?: VisibleWhen;
+100     };
+101 ```
+102 
+103 - [ ] **Step 2: Run typecheck to confirm no regressions**
+104 
+105 Run: `cd worktrees/feat/sort-numbers-skip-config && yarn typecheck`
+106 
+107 Expected: no errors (change is additive)
+108 
+109 - [ ] **Step 3: Commit**
+110 
+111 ```bash
+112 cd worktrees/feat/sort-numbers-skip-config
+113 git add src/lib/config-fields.ts
+114 git commit -m "feat(config-fields): add nested-select, nested-select-or-number variants with visibleWhen"
+115 ```
+116 
+117 ---
+118 
+119 ## Task 2: Update `SortNumbersConfig` types
+120 
+121 **Files:**
+122 
+123 - Modify: `src/games/sort-numbers/types.ts`
+124 
+125 > **Note:** After this task TypeScript will report errors in `build-sort-round.ts` and
+126 > `src/routes/$locale/_app/game/$gameId.tsx` because they still use `allowSkips`. Do not
+127 > commit until Tasks 3 and 4 are also complete.
+128 
+129 - [ ] **Step 1: Replace the file content**
+130 
+131 ```ts
+132 // src/games/sort-numbers/types.ts
+133 import type { AnswerGameConfig } from '@/components/answer-game/types';
+134 import type { ConfigField } from '@/lib/config-fields';
+135 
+136 export type SkipConfig =
+137   | { mode: 'random' }
+138   | { mode: 'consecutive' }
+139   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+140 
+141 export type DistractorConfig =
+142   | { source: 'random'; count: number }
+143   | { source: 'gaps-only'; count: number | 'all' }
+144   | { source: 'full-range'; count: number | 'all' };
+145 
+146 export interface SortNumbersConfig extends AnswerGameConfig {
+147   component: 'SortNumbers';
+148   direction: 'ascending' | 'descending';
+149   range: { min: number; max: number };
+150   /** How many numbers to sort per round */
+151   quantity: number;
+152   skip: SkipConfig;
+153   distractors: DistractorConfig;
+154   rounds: SortNumbersRound[];
+155 }
+156 
+157 export interface SortNumbersRound {
+158   sequence: number[];
+159 }
+160 
+161 export const sortNumbersConfigFields: ConfigField[] = [
+162   {
+163     type: 'select',
+164     key: 'inputMethod',
+165     label: 'Input method',
+166     options: [
+167       { value: 'drag', label: 'drag' },
+168       { value: 'type', label: 'type' },
+169       { value: 'both', label: 'both' },
+170     ],
+171   },
+172   {
+173     type: 'select',
+174     key: 'wrongTileBehavior',
+175     label: 'Wrong tile behaviour',
+176     options: [
+177       { value: 'reject', label: 'reject' },
+178       { value: 'lock-manual', label: 'lock-manual' },
+179       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+180     ],
+181   },
+182   {
+183     type: 'select',
+184     key: 'tileBankMode',
+185     label: 'Tile bank mode',
+186     options: [
+187       { value: 'exact', label: 'exact' },
+188       { value: 'distractors', label: 'distractors' },
+189     ],
+190   },
+191   {
+192     type: 'number',
+193     key: 'totalRounds',
+194     label: 'Total rounds',
+195     min: 1,
+196     max: 30,
+197   },
+198   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+199   {
+200     type: 'select',
+201     key: 'direction',
+202     label: 'Direction',
+203     options: [
+204       { value: 'ascending', label: 'ascending' },
+205       { value: 'descending', label: 'descending' },
+206     ],
+207   },
+208   {
+209     type: 'number',
+210     key: 'quantity',
+211     label: 'Quantity',
+212     min: 2,
+213     max: 8,
+214   },
+215   {
+216     type: 'nested-number',
+217     key: 'range',
+218     subKey: 'min',
+219     label: 'Range min',
+220     min: 1,
+221     max: 999,
+222   },
+223   {
+224     type: 'nested-number',
+225     key: 'range',
+226     subKey: 'max',
+227     label: 'Range max',
+228     min: 1,
+229     max: 999,
+230   },
+231   {
+232     type: 'nested-select',
+233     key: 'skip',
+234     subKey: 'mode',
+235     label: 'Skip mode',
+236     options: [
+237       { value: 'random', label: 'random' },
+238       { value: 'consecutive', label: 'consecutive' },
+239       { value: 'by', label: 'by' },
+240     ],
+241   },
+242   {
+243     type: 'nested-number',
+244     key: 'skip',
+245     subKey: 'step',
+246     label: 'Skip step',
+247     min: 2,
+248     max: 100,
+249     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+250   },
+251   {
+252     type: 'nested-select',
+253     key: 'skip',
+254     subKey: 'start',
+255     label: 'Skip start',
+256     options: [
+257       { value: 'range-min', label: 'range-min' },
+258       { value: 'random', label: 'random' },
+259     ],
+260     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+261   },
+262   {
+263     type: 'nested-select',
+264     key: 'distractors',
+265     subKey: 'source',
+266     label: 'Distractor source',
+267     options: [
+268       { value: 'random', label: 'random' },
+269       { value: 'gaps-only', label: 'gaps-only' },
+270       { value: 'full-range', label: 'full-range' },
+271     ],
+272     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+273   },
+274   {
+275     type: 'nested-select-or-number',
+276     key: 'distractors',
+277     subKey: 'count',
+278     label: 'Distractor count',
+279     min: 1,
+280     max: 20,
+281     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+282   },
+283   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+284 ];
+285 ```
+286 
+287 ---
+288 
+289 ## Task 3: Update `build-sort-round.ts` (TDD)
+290 
+291 **Files:**
+292 
+293 - Modify: `src/games/sort-numbers/build-sort-round.test.ts`
+294 - Modify: `src/games/sort-numbers/build-sort-round.ts`
+295 
+296 > Still part of the Tasks 2–4 commit group — do not commit until Task 4 is also complete.
+297 
+298 - [ ] **Step 1: Add failing tests to `build-sort-round.test.ts`**
+299 
 [result-id: r7]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:20Z)**_
@@ -1469,266 +1482,267 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:20Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerGameDraftState,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-16	import { Slot } from '@/components/answer-game/Slot/Slot';
-17	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-18	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-19	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-20	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-21	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-22	import { buildRoundOrder } from '@/games/build-round-order';
-23	
-24	interface SortNumbersProps {
-25	  config: SortNumbersConfig;
-26	  initialState?: AnswerGameDraftState;
-27	  sessionId?: string;
-28	  seed?: string;
-29	}
-30	
-31	const SortNumbersSession = ({
-32	  sortNumbersConfig,
-33	  roundOrder,
-34	  onRestartSession,
-35	}: {
-36	  sortNumbersConfig: SortNumbersConfig;
-37	  roundOrder: readonly number[];
-38	  onRestartSession: () => void;
-39	}) => {
-40	  const { t } = useTranslation('games');
-41	  const { phase, roundIndex, retryCount, zones } =
-42	    useAnswerGameContext();
-43	  const dispatch = useAnswerGameDispatch();
-44	  const { confettiReady, gameOverReady } = useGameSounds();
-45	  const navigate = useNavigate();
-46	  const { locale } = useParams({ from: '/$locale' });
-47	  const completionToken = useRef(0);
-48	
-49	  const configRoundIndex = roundOrder[roundIndex];
-50	  const round =
-51	    configRoundIndex === undefined
-52	      ? undefined
-53	      : sortNumbersConfig.rounds[configRoundIndex];
-54	
-55	  const directionLabel =
-56	    sortNumbersConfig.direction === 'ascending'
-57	      ? t('sort-numbers-ui.ascending-label')
-58	      : t('sort-numbers-ui.descending-label');
-59	
-60	  useRoundTTS(directionLabel);
-61	
-62	  const handleHome = () => {
-63	    void navigate({ to: '/$locale', params: { locale } });
-64	  };
-65	
-66	  const handlePlayAgain = () => {
-67	    onRestartSession();
-68	  };
-69	
-70	  useEffect(() => {
-71	    if (phase !== 'round-complete' || !confettiReady) return;
-72	
-73	    const token = ++completionToken.current;
-74	    const delayMs = 750;
-75	    const timer = globalThis.setTimeout(() => {
-76	      if (completionToken.current !== token) return;
-77	
-78	      const isLastRound = roundIndex >= roundOrder.length - 1;
-79	      if (isLastRound) {
-80	        dispatch({ type: 'COMPLETE_GAME' });
-81	        return;
-82	      }
-83	
-84	      const nextConfigIndex = roundOrder[roundIndex + 1];
-85	      const nextRound =
-86	        nextConfigIndex === undefined
-87	          ? undefined
-88	          : sortNumbersConfig.rounds[nextConfigIndex];
-89	
-90	      if (!nextRound) {
-91	        dispatch({ type: 'COMPLETE_GAME' });
-92	        return;
-93	      }
-94	
-95	      const distractor =
-96	        sortNumbersConfig.tileBankMode === 'distractors'
-97	          ? {
-98	              config: sortNumbersConfig.distractors,
-99	              range: sortNumbersConfig.range,
-100	            }
-101	          : undefined;
-102	
-103	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-104	        nextRound.sequence,
-105	        sortNumbersConfig.direction,
-106	        distractor,
-107	      );
-108	      dispatch({
-109	        type: 'ADVANCE_ROUND',
-110	        tiles: nextTiles,
-111	        zones: nextZones,
-112	      });
-113	    }, delayMs);
-114	
-115	    return () => {
-116	      globalThis.clearTimeout(timer);
-117	    };
-118	  }, [
-119	    phase,
-120	    confettiReady,
-121	    roundIndex,
-122	    dispatch,
-123	    roundOrder,
-124	    sortNumbersConfig.rounds,
-125	    sortNumbersConfig.direction,
-126	    sortNumbersConfig.tileBankMode,
-127	    sortNumbersConfig.distractors,
-128	    sortNumbersConfig.range,
-129	  ]);
-130	
-131	  if (!round) return null;
-132	
-133	  return (
-134	    <>
-135	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-136	        <AnswerGame.Question>
-137	          <p className="text-center text-lg font-semibold text-foreground">
-138	            {directionLabel}
-139	          </p>
-140	        </AnswerGame.Question>
-141	        <AnswerGame.Answer>
-142	          <SlotRow className="gap-2">
-143	            {zones.map((zone, i) => (
-144	              <Slot
-145	                key={zone.id}
-146	                index={i}
-147	                className="size-14 rounded-lg"
-148	              >
-149	                {({ label }) => (
-150	                  <span className="text-2xl font-bold">{label}</span>
-151	                )}
-152	              </Slot>
-153	            ))}
-154	          </SlotRow>
-155	        </AnswerGame.Answer>
-156	        <AnswerGame.Choices>
-157	          <SortNumbersTileBank />
-158	        </AnswerGame.Choices>
-159	      </div>
-160	      <ScoreAnimation visible={confettiReady} />
-161	      {gameOverReady ? (
-162	        <GameOverOverlay
-163	          retryCount={retryCount}
-164	          onPlayAgain={handlePlayAgain}
-165	          onHome={handleHome}
-166	        />
-167	      ) : null}
-168	    </>
-169	  );
-170	};
-171	
-172	export const SortNumbers = ({
-173	  config,
-174	  initialState,
-175	  sessionId,
-176	  seed,
-177	}: SortNumbersProps) => {
-178	  const roundsInOrder = config.roundsInOrder === true;
-179	  const [sessionEpoch, setSessionEpoch] = useState(0);
-180	
-181	  const roundOrder = useMemo(() => {
-182	    void sessionEpoch;
-183	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-184	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-185	
-186	  const firstConfigIndex = roundOrder[0];
-187	  const round0 =
-188	    firstConfigIndex === undefined
-189	      ? undefined
-190	      : config.rounds[firstConfigIndex];
-191	
-192	  const { tiles, zones } = useMemo(() => {
-193	    if (!round0) {
-194	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-195	    }
-196	    const distractor =
-197	      config.tileBankMode === 'distractors'
-198	        ? { config: config.distractors, range: config.range }
-199	        : undefined;
-200	    return buildSortRound(
-201	      round0.sequence,
-202	      config.direction,
-203	      distractor,
-204	    );
-205	  }, [
-206	    round0,
-207	    config.direction,
-208	    config.tileBankMode,
-209	    config.distractors,
-210	    config.range,
-211	  ]);
-212	
-213	  const answerGameConfig = useMemo(
-214	    (): AnswerGameConfig => ({
-215	      gameId: config.gameId,
-216	      inputMethod: config.inputMethod,
-217	      wrongTileBehavior: config.wrongTileBehavior,
-218	      tileBankMode: config.tileBankMode,
-219	      totalRounds: config.rounds.length,
-220	      roundsInOrder: config.roundsInOrder,
-221	      ttsEnabled: config.ttsEnabled,
-222	      touchKeyboardInputMode: 'numeric',
-223	      initialTiles: tiles,
-224	      initialZones: zones,
-225	      slotInteraction: 'free-swap' as const,
-226	    }),
-227	    [
-228	      config.gameId,
-229	      config.inputMethod,
-230	      config.wrongTileBehavior,
-231	      config.tileBankMode,
-232	      config.rounds.length,
-233	      config.roundsInOrder,
-234	      config.ttsEnabled,
-235	      tiles,
-236	      zones,
-237	    ],
-238	  );
-239	
-240	  if (!round0) return null;
-241	
-242	  return (
-243	    <AnswerGame
-244	      config={answerGameConfig}
-245	      initialState={initialState}
-246	      sessionId={sessionId}
-247	    >
-248	      <SortNumbersSession
-249	        sortNumbersConfig={config}
-250	        roundOrder={roundOrder}
-251	        onRestartSession={() => {
-252	          setSessionEpoch((e) => e + 1);
-253	        }}
-254	      />
-255	    </AnswerGame>
-256	  );
-257	};
-258	
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerGameDraftState,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+16 import { Slot } from '@/components/answer-game/Slot/Slot';
+17 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+18 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+19 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+20 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+21 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+22 import { buildRoundOrder } from '@/games/build-round-order';
+23 
+24 interface SortNumbersProps {
+25   config: SortNumbersConfig;
+26   initialState?: AnswerGameDraftState;
+27   sessionId?: string;
+28   seed?: string;
+29 }
+30 
+31 const SortNumbersSession = ({
+32   sortNumbersConfig,
+33   roundOrder,
+34   onRestartSession,
+35 }: {
+36   sortNumbersConfig: SortNumbersConfig;
+37   roundOrder: readonly number[];
+38   onRestartSession: () => void;
+39 }) => {
+40   const { t } = useTranslation('games');
+41   const { phase, roundIndex, retryCount, zones } =
+42     useAnswerGameContext();
+43   const dispatch = useAnswerGameDispatch();
+44   const { confettiReady, gameOverReady } = useGameSounds();
+45   const navigate = useNavigate();
+46   const { locale } = useParams({ from: '/$locale' });
+47   const completionToken = useRef(0);
+48 
+49   const configRoundIndex = roundOrder[roundIndex];
+50   const round =
+51     configRoundIndex === undefined
+52       ? undefined
+53       : sortNumbersConfig.rounds[configRoundIndex];
+54 
+55   const directionLabel =
+56     sortNumbersConfig.direction === 'ascending'
+57       ? t('sort-numbers-ui.ascending-label')
+58       : t('sort-numbers-ui.descending-label');
+59 
+60   useRoundTTS(directionLabel);
+61 
+62   const handleHome = () => {
+63     void navigate({ to: '/$locale', params: { locale } });
+64   };
+65 
+66   const handlePlayAgain = () => {
+67     onRestartSession();
+68   };
+69 
+70   useEffect(() => {
+71     if (phase !== 'round-complete' || !confettiReady) return;
+72 
+73     const token = ++completionToken.current;
+74     const delayMs = 750;
+75     const timer = globalThis.setTimeout(() => {
+76       if (completionToken.current !== token) return;
+77 
+78       const isLastRound = roundIndex >= roundOrder.length - 1;
+79       if (isLastRound) {
+80         dispatch({ type: 'COMPLETE_GAME' });
+81         return;
+82       }
+83 
+84       const nextConfigIndex = roundOrder[roundIndex + 1];
+85       const nextRound =
+86         nextConfigIndex === undefined
+87           ? undefined
+88           : sortNumbersConfig.rounds[nextConfigIndex];
+89 
+90       if (!nextRound) {
+91         dispatch({ type: 'COMPLETE_GAME' });
+92         return;
+93       }
+94 
+95       const distractor =
+96         sortNumbersConfig.tileBankMode === 'distractors'
+97           ? {
+98               config: sortNumbersConfig.distractors,
+99               range: sortNumbersConfig.range,
+100             }
+101           : undefined;
+102 
+103       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+104         nextRound.sequence,
+105         sortNumbersConfig.direction,
+106         distractor,
+107       );
+108       dispatch({
+109         type: 'ADVANCE_ROUND',
+110         tiles: nextTiles,
+111         zones: nextZones,
+112       });
+113     }, delayMs);
+114 
+115     return () => {
+116       globalThis.clearTimeout(timer);
+117     };
+118   }, [
+119     phase,
+120     confettiReady,
+121     roundIndex,
+122     dispatch,
+123     roundOrder,
+124     sortNumbersConfig.rounds,
+125     sortNumbersConfig.direction,
+126     sortNumbersConfig.tileBankMode,
+127     sortNumbersConfig.distractors,
+128     sortNumbersConfig.range,
+129   ]);
+130 
+131   if (!round) return null;
+132 
+133   return (
+134     <>
+135       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+136         <AnswerGame.Question>
+137           <p className="text-center text-lg font-semibold text-foreground">
+138             {directionLabel}
+139           </p>
+140         </AnswerGame.Question>
+141         <AnswerGame.Answer>
+142           <SlotRow className="gap-2">
+143             {zones.map((zone, i) => (
+144               <Slot
+145                 key={zone.id}
+146                 index={i}
+147                 className="size-14 rounded-lg"
+148               >
+149                 {({ label }) => (
+150                   <span className="text-2xl font-bold">{label}</span>
+151                 )}
+152               </Slot>
+153             ))}
+154           </SlotRow>
+155         </AnswerGame.Answer>
+156         <AnswerGame.Choices>
+157           <SortNumbersTileBank />
+158         </AnswerGame.Choices>
+159       </div>
+160       <ScoreAnimation visible={confettiReady} />
+161       {gameOverReady ? (
+162         <GameOverOverlay
+163           retryCount={retryCount}
+164           onPlayAgain={handlePlayAgain}
+165           onHome={handleHome}
+166         />
+167       ) : null}
+168     </>
+169   );
+170 };
+171 
+172 export const SortNumbers = ({
+173   config,
+174   initialState,
+175   sessionId,
+176   seed,
+177 }: SortNumbersProps) => {
+178   const roundsInOrder = config.roundsInOrder === true;
+179   const [sessionEpoch, setSessionEpoch] = useState(0);
+180 
+181   const roundOrder = useMemo(() => {
+182     void sessionEpoch;
+183     return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+184   }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+185 
+186   const firstConfigIndex = roundOrder[0];
+187   const round0 =
+188     firstConfigIndex === undefined
+189       ? undefined
+190       : config.rounds[firstConfigIndex];
+191 
+192   const { tiles, zones } = useMemo(() => {
+193     if (!round0) {
+194       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+195     }
+196     const distractor =
+197       config.tileBankMode === 'distractors'
+198         ? { config: config.distractors, range: config.range }
+199         : undefined;
+200     return buildSortRound(
+201       round0.sequence,
+202       config.direction,
+203       distractor,
+204     );
+205   }, [
+206     round0,
+207     config.direction,
+208     config.tileBankMode,
+209     config.distractors,
+210     config.range,
+211   ]);
+212 
+213   const answerGameConfig = useMemo(
+214     (): AnswerGameConfig => ({
+215       gameId: config.gameId,
+216       inputMethod: config.inputMethod,
+217       wrongTileBehavior: config.wrongTileBehavior,
+218       tileBankMode: config.tileBankMode,
+219       totalRounds: config.rounds.length,
+220       roundsInOrder: config.roundsInOrder,
+221       ttsEnabled: config.ttsEnabled,
+222       touchKeyboardInputMode: 'numeric',
+223       initialTiles: tiles,
+224       initialZones: zones,
+225       slotInteraction: 'free-swap' as const,
+226     }),
+227     [
+228       config.gameId,
+229       config.inputMethod,
+230       config.wrongTileBehavior,
+231       config.tileBankMode,
+232       config.rounds.length,
+233       config.roundsInOrder,
+234       config.ttsEnabled,
+235       tiles,
+236       zones,
+237     ],
+238   );
+239 
+240   if (!round0) return null;
+241 
+242   return (
+243     <AnswerGame
+244       config={answerGameConfig}
+245       initialState={initialState}
+246       sessionId={sessionId}
+247     >
+248       <SortNumbersSession
+249         sortNumbersConfig={config}
+250         roundOrder={roundOrder}
+251         onRestartSession={() => {
+252           setSessionEpoch((e) => e + 1);
+253         }}
+254       />
+255     </AnswerGame>
+256   );
+257 };
+258 
 [result-id: r8]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:21Z)**_
@@ -1738,96 +1752,97 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:21Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const NumberTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Number ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const SortNumbersTileBank = () => {
-36	  const {
-37	    allTiles,
-38	    bankTileIds,
-39	    dragActiveTileId,
-40	    dragHoverBankTileId,
-41	  } = useAnswerGameContext();
-42	  const { bankRef } = useBankDropTarget();
-43	
-44	  return (
-45	    <div
-46	      ref={bankRef}
-47	      data-tile-bank=""
-48	      className="flex flex-wrap justify-center gap-3"
-49	    >
-50	      {allTiles.map((tile) => {
-51	        const inBank = bankTileIds.includes(tile.id);
-52	        const isDragging = tile.id === dragActiveTileId;
-53	        const isHoverTarget = tile.id === dragHoverBankTileId;
-54	
-55	        if (inBank) {
-56	          return (
-57	            <div
-58	              key={tile.id}
-59	              className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
-60	            >
-61	              <div
-62	                data-tile-bank-hole={tile.id}
-63	                className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
-64	                aria-hidden="true"
-65	              />
-66	              <div
-67	                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-68	                aria-hidden={isDragging || undefined}
-69	              >
-70	                <NumberTile tile={tile} />
-71	              </div>
-72	            </div>
-73	          );
-74	        }
-75	
-76	        return (
-77	          <div
-78	            key={tile.id}
-79	            data-tile-bank-hole={tile.id}
-80	            className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
-81	            aria-hidden="true"
-82	          />
-83	        );
-84	      })}
-85	    </div>
-86	  );
-87	};
-88	
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const NumberTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Number ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const SortNumbersTileBank = () => {
+36   const {
+37     allTiles,
+38     bankTileIds,
+39     dragActiveTileId,
+40     dragHoverBankTileId,
+41   } = useAnswerGameContext();
+42   const { bankRef } = useBankDropTarget();
+43 
+44   return (
+45     <div
+46       ref={bankRef}
+47       data-tile-bank=""
+48       className="flex flex-wrap justify-center gap-3"
+49     >
+50       {allTiles.map((tile) => {
+51         const inBank = bankTileIds.includes(tile.id);
+52         const isDragging = tile.id === dragActiveTileId;
+53         const isHoverTarget = tile.id === dragHoverBankTileId;
+54 
+55         if (inBank) {
+56           return (
+57             <div
+58               key={tile.id}
+59               className={`relative size-14 rounded-xl transition-all${isHoverTarget ? ' ring-2 ring-primary ring-offset-2' : ''}`}
+60             >
+61               <div
+62                 data-tile-bank-hole={tile.id}
+63                 className={`size-14 rounded-xl bg-muted/60 shadow-inner${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+64                 aria-hidden="true"
+65               />
+66               <div
+67                 className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+68                 aria-hidden={isDragging || undefined}
+69               >
+70                 <NumberTile tile={tile} />
+71               </div>
+72             </div>
+73           );
+74         }
+75 
+76         return (
+77           <div
+78             key={tile.id}
+79             data-tile-bank-hole={tile.id}
+80             className={`size-14 rounded-xl bg-muted/60 shadow-inner transition-all${isHoverTarget ? ' border-2 border-dashed border-primary' : ''}`}
+81             aria-hidden="true"
+82           />
+83         );
+84       })}
+85     </div>
+86   );
+87 };
+88 
 [result-id: r9]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:23Z)**_
@@ -1864,6 +1879,7 @@ b32f816 fix(lint): ignore .claude/worktrees/** to prevent cross-worktree ESLint 
 bf34c28 fix(slot): use span inner tag when as="span" to fix block-in-inline HTML
 [result-id: r10]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:27Z)**_
@@ -1897,6 +1913,7 @@ Date:   Wed Apr 8 20:39:06 2026 +1000
  1 file changed, 16 insertions(+)
 [result-id: r11]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:31Z)**_
@@ -1955,6 +1972,7 @@ index ad5cf64..4462b49 100644
      merged.rounds.some(
 [result-id: r12]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:34Z)**_
@@ -1968,158 +1986,159 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:35Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-220	  if (!saved || saved.component !== 'SortNumbers') return base;
-221	
-222	  // Migrate legacy allowSkips: boolean → skip: SkipConfig
-223	  let migratedSaved = saved;
-224	  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
-225	    migratedSaved = {
-226	      ...saved,
-227	      skip: saved.allowSkips
-228	        ? { mode: 'random' }
-229	        : { mode: 'consecutive' },
-230	    };
-231	  }
-232	
-233	  const merged: SortNumbersConfig = {
-234	    ...base,
-235	    ...(migratedSaved as Partial<SortNumbersConfig>),
-236	    gameId: 'sort-numbers',
-237	    component: 'SortNumbers',
-238	  };
-239	
-240	  const tr = Math.max(1, merged.totalRounds);
-241	  merged.totalRounds = tr;
-242	
-243	  // Normalize skip: mode 'by' requires step and start.
-244	  // When the config form changes mode to 'by' it only sets mode, leaving
-245	  // step/start undefined. Guard here so generateSortRounds never receives NaN.
-246	  if (merged.skip.mode === 'by') {
-247	    const partial = merged.skip as {
-248	      mode: 'by';
-249	      step?: number;
-250	      start?: 'range-min' | 'random';
-251	    };
-252	    merged.skip = {
-253	      mode: 'by',
-254	      step: typeof partial.step === 'number' ? partial.step : 2,
-255	      start: partial.start ?? 'range-min',
-256	    };
-257	  }
-258	
-259	  const roundsStale =
-260	    Array.isArray(merged.rounds) &&
-261	    merged.rounds.some(
-262	      (r) =>
-263	        r.sequence.length !== merged.quantity ||
-264	        r.sequence.some(
-265	          (v) => v < merged.range.min || v > merged.range.max,
-266	        ),
-267	    );
-268	
-269	  if (
-270	    !Array.isArray(merged.rounds) ||
-271	    merged.rounds.length === 0 ||
-272	    merged.rounds.length !== tr ||
-273	    roundsStale
-274	  ) {
-275	    merged.rounds = generateSortRounds({
-276	      range: merged.range,
-277	      quantity: merged.quantity,
-278	      skip: merged.skip,
-279	      totalRounds: tr,
-280	    });
-281	  }
-282	
-283	  return merged;
-284	};
-285	
-286	const WordSpellGameBody = ({
-287	  gameId,
-288	  sessionId,
-289	  seed,
-290	  draftState,
-291	  gameSpecificConfig,
-292	  bookmarkId,
-293	  bookmarkName,
-294	  bookmarkColor,
-295	}: {
-296	  gameId: string;
-297	  sessionId: string;
-298	  seed: string;
-299	  draftState: AnswerGameDraftState | null;
-300	  gameSpecificConfig: Record<string, unknown> | null;
-301	  bookmarkId: string | null;
-302	  bookmarkName: string | null;
-303	  bookmarkColor: string | null;
-304	}): JSX.Element => {
-305	  const { t } = useTranslation('games');
-306	  const { save, updateConfig } = useSavedConfigs();
-307	  const initial = useMemo(
-308	    () => resolveWordSpellConfig(gameSpecificConfig),
-309	    [gameSpecificConfig],
-310	  );
-311	  const [cfg, setCfg] = useState(initial);
-312	  const [showInstructions, setShowInstructions] = useState(
-313	    draftState === null,
-314	  );
-315	  useEffect(() => {
-316	    setCfg(initial);
-317	  }, [initial]);
-318	  usePersistLastGameConfig(
-319	    gameId,
-320	    cfg as unknown as Record<string, unknown>,
-321	  );
-322	
-323	  if (showInstructions) {
-324	    return (
-325	      <InstructionsOverlay
-326	        text={t('instructions.word-spell')}
-327	        onStart={() => setShowInstructions(false)}
-328	        ttsEnabled={cfg.ttsEnabled}
-329	        gameTitle={t('word-spell')}
-330	        bookmarkName={bookmarkName ?? undefined}
-331	        bookmarkColor={
-332	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-333	        }
-334	        subject="reading"
-335	        config={cfg as unknown as Record<string, unknown>}
-336	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-337	        onSaveBookmark={async (name, color) => {
-338	          await save({
-339	            gameId,
-340	            name,
-341	            color,
-342	            config: cfg as unknown as Record<string, unknown>,
-343	          });
-344	        }}
-345	        onUpdateBookmark={
-346	          bookmarkId
-347	            ? async (name, config) => {
-348	                await updateConfig(bookmarkId, config, name);
-349	              }
-350	            : undefined
-351	        }
-352	        configFields={wordSpellConfigFields}
-353	      />
-354	    );
-355	  }
-356	
-357	  return (
-358	    <WordSpell
-359	      key={cfg.inputMethod}
-360	      config={cfg}
-361	      initialState={draftState ?? undefined}
-362	      sessionId={sessionId}
-363	      seed={seed}
-364	    />
-365	  );
-366	};
-367	
-368	const NumberMatchGameBody = ({
-369	  gameId,
+220   if (!saved || saved.component !== 'SortNumbers') return base;
+221 
+222   // Migrate legacy allowSkips: boolean → skip: SkipConfig
+223   let migratedSaved = saved;
+224   if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+225     migratedSaved = {
+226       ...saved,
+227       skip: saved.allowSkips
+228         ? { mode: 'random' }
+229         : { mode: 'consecutive' },
+230     };
+231   }
+232 
+233   const merged: SortNumbersConfig = {
+234     ...base,
+235     ...(migratedSaved as Partial<SortNumbersConfig>),
+236     gameId: 'sort-numbers',
+237     component: 'SortNumbers',
+238   };
+239 
+240   const tr = Math.max(1, merged.totalRounds);
+241   merged.totalRounds = tr;
+242 
+243   // Normalize skip: mode 'by' requires step and start.
+244   // When the config form changes mode to 'by' it only sets mode, leaving
+245   // step/start undefined. Guard here so generateSortRounds never receives NaN.
+246   if (merged.skip.mode === 'by') {
+247     const partial = merged.skip as {
+248       mode: 'by';
+249       step?: number;
+250       start?: 'range-min' | 'random';
+251     };
+252     merged.skip = {
+253       mode: 'by',
+254       step: typeof partial.step === 'number' ? partial.step : 2,
+255       start: partial.start ?? 'range-min',
+256     };
+257   }
+258 
+259   const roundsStale =
+260     Array.isArray(merged.rounds) &&
+261     merged.rounds.some(
+262       (r) =>
+263         r.sequence.length !== merged.quantity ||
+264         r.sequence.some(
+265           (v) => v < merged.range.min || v > merged.range.max,
+266         ),
+267     );
+268 
+269   if (
+270     !Array.isArray(merged.rounds) ||
+271     merged.rounds.length === 0 ||
+272     merged.rounds.length !== tr ||
+273     roundsStale
+274   ) {
+275     merged.rounds = generateSortRounds({
+276       range: merged.range,
+277       quantity: merged.quantity,
+278       skip: merged.skip,
+279       totalRounds: tr,
+280     });
+281   }
+282 
+283   return merged;
+284 };
+285 
+286 const WordSpellGameBody = ({
+287   gameId,
+288   sessionId,
+289   seed,
+290   draftState,
+291   gameSpecificConfig,
+292   bookmarkId,
+293   bookmarkName,
+294   bookmarkColor,
+295 }: {
+296   gameId: string;
+297   sessionId: string;
+298   seed: string;
+299   draftState: AnswerGameDraftState | null;
+300   gameSpecificConfig: Record<string, unknown> | null;
+301   bookmarkId: string | null;
+302   bookmarkName: string | null;
+303   bookmarkColor: string | null;
+304 }): JSX.Element => {
+305   const { t } = useTranslation('games');
+306   const { save, updateConfig } = useSavedConfigs();
+307   const initial = useMemo(
+308     () => resolveWordSpellConfig(gameSpecificConfig),
+309     [gameSpecificConfig],
+310   );
+311   const [cfg, setCfg] = useState(initial);
+312   const [showInstructions, setShowInstructions] = useState(
+313     draftState === null,
+314   );
+315   useEffect(() => {
+316     setCfg(initial);
+317   }, [initial]);
+318   usePersistLastGameConfig(
+319     gameId,
+320     cfg as unknown as Record<string, unknown>,
+321   );
+322 
+323   if (showInstructions) {
+324     return (
+325       <InstructionsOverlay
+326         text={t('instructions.word-spell')}
+327         onStart={() => setShowInstructions(false)}
+328         ttsEnabled={cfg.ttsEnabled}
+329         gameTitle={t('word-spell')}
+330         bookmarkName={bookmarkName ?? undefined}
+331         bookmarkColor={
+332           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+333         }
+334         subject="reading"
+335         config={cfg as unknown as Record<string, unknown>}
+336         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+337         onSaveBookmark={async (name, color) => {
+338           await save({
+339             gameId,
+340             name,
+341             color,
+342             config: cfg as unknown as Record<string, unknown>,
+343           });
+344         }}
+345         onUpdateBookmark={
+346           bookmarkId
+347             ? async (name, config) => {
+348                 await updateConfig(bookmarkId, config, name);
+349               }
+350             : undefined
+351         }
+352         configFields={wordSpellConfigFields}
+353       />
+354     );
+355   }
+356 
+357   return (
+358     <WordSpell
+359       key={cfg.inputMethod}
+360       config={cfg}
+361       initialState={draftState ?? undefined}
+362       sessionId={sessionId}
+363       seed={seed}
+364     />
+365   );
+366 };
+367 
+368 const NumberMatchGameBody = ({
+369   gameId,
 [result-id: r13]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:37Z)**_
@@ -2151,6 +2170,7 @@ generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling ba
    Duration  517ms (transform 20ms, setup 50ms, collect 15ms, tests 4ms, environment 302ms, prepare 34ms)
 [result-id: r14]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:41Z)**_
@@ -2179,6 +2199,7 @@ console.log('Skip by 2s from range.min (1):', result[0].sequence);
 ```text
 Skip by 2s from range.min (1): [ 1, 3, 5, 7, 9 ]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:46Z)**_
@@ -2209,6 +2230,7 @@ src/games/sort-numbers/build-sort-round.test.ts:    const rounds = generateSortR
 src/games/sort-numbers/build-sort-round.test.ts:    const rounds = generateSortRounds({
 [result-id: r15]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:49Z)**_
@@ -2225,6 +2247,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:50Z)**_
 ```text
 grep: src/routes//_app/game/.tsx: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:53Z)**_
@@ -2244,6 +2267,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:04:54Z)**_
 ./src/routes/$locale/_app/game/$gameId.tsx
 ./src/routes/$locale/_app/game/$gameId.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:03Z)**_
@@ -2287,6 +2311,7 @@ const resolveSortNumbersConfig = (
   // When the config form changes mode to 'by' it only sets mode, leaving
 [result-id: r16]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:05Z)**_
@@ -2366,6 +2391,7 @@ const resolveSortNumbersConfig = (
   // When the config form changes mode to 'by' it only sets mode, leaving
 [result-id: r17]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:07Z)**_
@@ -2392,6 +2418,7 @@ cc7d066 refactor: NumberSequenceSlots is now a thin re-export of shared OrderedS
 271301a feat(husky): add pre-push hook with per-check skip flags
 [result-id: r18]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:10Z)**_
@@ -2421,6 +2448,7 @@ src/games/sort-numbers/build-sort-round.test.ts:      [1, 2, 3, 4, 5],
 src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx:  skip: { mode: 'consecutive' },
 [result-id: r19]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:13Z)**_
@@ -2434,112 +2462,113 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:14Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx`
 
 ```text
-1	// src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
-2	import { withDb } from '../../../../.storybook/decorators/withDb';
-3	import { withRouter } from '../../../../.storybook/decorators/withRouter';
-4	import { SortNumbers } from './SortNumbers';
-5	import type { SortNumbersConfig } from '../types';
-6	import type { Meta, StoryObj } from '@storybook/react';
-7	
-8	const baseConfig: SortNumbersConfig = {
-9	  gameId: 'sort-numbers',
-10	  component: 'SortNumbers',
-11	  inputMethod: 'drag',
-12	  wrongTileBehavior: 'lock-manual',
-13	  tileBankMode: 'exact',
-14	  totalRounds: 3,
-15	  roundsInOrder: false,
-16	  ttsEnabled: false,
-17	  direction: 'ascending',
-18	  range: { min: 2, max: 20 },
-19	  quantity: 4,
-20	  skip: { mode: 'consecutive' },
-21	  distractors: { source: 'random', count: 2 },
-22	  rounds: [
-23	    { sequence: [3, 4, 5, 6] },
-24	    { sequence: [7, 8, 9, 10] },
-25	    { sequence: [11, 12, 13, 14] },
-26	  ],
-27	};
-28	
-29	const meta: Meta<typeof SortNumbers> = {
-30	  component: SortNumbers,
-31	  tags: ['autodocs'],
-32	  decorators: [withDb, withRouter],
-33	  args: { config: baseConfig },
-34	};
-35	export default meta;
-36	
-37	type Story = StoryObj<typeof SortNumbers>;
-38	
-39	export const Consecutive: Story = {};
-40	
-41	export const SkipByStepRangeMin: Story = {
-42	  args: {
-43	    config: {
-44	      ...baseConfig,
-45	      skip: { mode: 'by', step: 3, start: 'range-min' },
-46	      rounds: [
-47	        { sequence: [2, 5, 8, 11] },
-48	        { sequence: [2, 5, 8, 11] },
-49	        { sequence: [2, 5, 8, 11] },
-50	      ],
-51	    },
-52	  },
-53	};
-54	
-55	export const SkipRandom: Story = {
-56	  args: {
-57	    config: {
-58	      ...baseConfig,
-59	      skip: { mode: 'random' },
-60	      rounds: [
-61	        { sequence: [2, 7, 12, 18] },
-62	        { sequence: [3, 6, 11, 15] },
-63	        { sequence: [4, 9, 14, 20] },
-64	      ],
-65	    },
-66	  },
-67	};
-68	
-69	export const DistractorsRandom: Story = {
-70	  args: {
-71	    config: {
-72	      ...baseConfig,
-73	      tileBankMode: 'distractors',
-74	      distractors: { source: 'random', count: 3 },
-75	    },
-76	  },
-77	};
-78	
-79	export const DistractorsGapsOnly: Story = {
-80	  args: {
-81	    config: {
-82	      ...baseConfig,
-83	      skip: { mode: 'by', step: 2, start: 'range-min' },
-84	      tileBankMode: 'distractors',
-85	      distractors: { source: 'gaps-only', count: 'all' },
-86	      rounds: [
-87	        { sequence: [2, 4, 6, 8] },
-88	        { sequence: [2, 4, 6, 8] },
-89	        { sequence: [2, 4, 6, 8] },
-90	      ],
-91	    },
-92	  },
-93	};
-94	
-95	export const DistractorsFullRange: Story = {
-96	  args: {
-97	    config: {
-98	      ...baseConfig,
-99	      tileBankMode: 'distractors',
-100	      distractors: { source: 'full-range', count: 4 },
-101	    },
-102	  },
-103	};
-104	
+1 // src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
+2 import { withDb } from '../../../../.storybook/decorators/withDb';
+3 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+4 import { SortNumbers } from './SortNumbers';
+5 import type { SortNumbersConfig } from '../types';
+6 import type { Meta, StoryObj } from '@storybook/react';
+7 
+8 const baseConfig: SortNumbersConfig = {
+9   gameId: 'sort-numbers',
+10   component: 'SortNumbers',
+11   inputMethod: 'drag',
+12   wrongTileBehavior: 'lock-manual',
+13   tileBankMode: 'exact',
+14   totalRounds: 3,
+15   roundsInOrder: false,
+16   ttsEnabled: false,
+17   direction: 'ascending',
+18   range: { min: 2, max: 20 },
+19   quantity: 4,
+20   skip: { mode: 'consecutive' },
+21   distractors: { source: 'random', count: 2 },
+22   rounds: [
+23     { sequence: [3, 4, 5, 6] },
+24     { sequence: [7, 8, 9, 10] },
+25     { sequence: [11, 12, 13, 14] },
+26   ],
+27 };
+28 
+29 const meta: Meta<typeof SortNumbers> = {
+30   component: SortNumbers,
+31   tags: ['autodocs'],
+32   decorators: [withDb, withRouter],
+33   args: { config: baseConfig },
+34 };
+35 export default meta;
+36 
+37 type Story = StoryObj<typeof SortNumbers>;
+38 
+39 export const Consecutive: Story = {};
+40 
+41 export const SkipByStepRangeMin: Story = {
+42   args: {
+43     config: {
+44       ...baseConfig,
+45       skip: { mode: 'by', step: 3, start: 'range-min' },
+46       rounds: [
+47         { sequence: [2, 5, 8, 11] },
+48         { sequence: [2, 5, 8, 11] },
+49         { sequence: [2, 5, 8, 11] },
+50       ],
+51     },
+52   },
+53 };
+54 
+55 export const SkipRandom: Story = {
+56   args: {
+57     config: {
+58       ...baseConfig,
+59       skip: { mode: 'random' },
+60       rounds: [
+61         { sequence: [2, 7, 12, 18] },
+62         { sequence: [3, 6, 11, 15] },
+63         { sequence: [4, 9, 14, 20] },
+64       ],
+65     },
+66   },
+67 };
+68 
+69 export const DistractorsRandom: Story = {
+70   args: {
+71     config: {
+72       ...baseConfig,
+73       tileBankMode: 'distractors',
+74       distractors: { source: 'random', count: 3 },
+75     },
+76   },
+77 };
+78 
+79 export const DistractorsGapsOnly: Story = {
+80   args: {
+81     config: {
+82       ...baseConfig,
+83       skip: { mode: 'by', step: 2, start: 'range-min' },
+84       tileBankMode: 'distractors',
+85       distractors: { source: 'gaps-only', count: 'all' },
+86       rounds: [
+87         { sequence: [2, 4, 6, 8] },
+88         { sequence: [2, 4, 6, 8] },
+89         { sequence: [2, 4, 6, 8] },
+90       ],
+91     },
+92   },
+93 };
+94 
+95 export const DistractorsFullRange: Story = {
+96   args: {
+97     config: {
+98       ...baseConfig,
+99       tileBankMode: 'distractors',
+100       distractors: { source: 'full-range', count: 4 },
+101     },
+102   },
+103 };
+104 
 [result-id: r20]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:22Z)**_
@@ -2553,52 +2582,53 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:23Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.ts`
 
 ```text
-150	      return { sequence: picked };
-151	    }
-152	
-153	    if (skip.mode === 'by') {
-154	      const { step, start } = skip;
-155	      const maxPossibleStart = range.max - (quantity - 1) * step;
-156	
-157	      if (maxPossibleStart < range.min) {
-158	        console.warn(
-159	          `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
-160	        );
-161	        return generateConsecutiveRound(range, quantity);
-162	      }
-163	
-164	      if (start === 'range-min') {
-165	        return {
-166	          sequence: Array.from(
-167	            { length: quantity },
-168	            (_, i) => range.min + i * step,
-169	          ),
-170	        };
-171	      }
-172	
-173	      // start === 'random': pick a random valid start
-174	      const validStarts = Array.from(
-175	        { length: maxPossibleStart - range.min + 1 },
-176	        (_, i) => range.min + i,
-177	      );
-178	      const picked =
-179	        validStarts[Math.floor(Math.random() * validStarts.length)] ??
-180	        range.min;
-181	      return {
-182	        sequence: Array.from(
-183	          { length: quantity },
-184	          (_, i) => picked + i * step,
-185	        ),
-186	      };
-187	    }
-188	
-189	    // mode === 'consecutive'
-190	    return generateConsecutiveRound(range, quantity);
-191	  });
-192	}
-193	
+150       return { sequence: picked };
+151     }
+152 
+153     if (skip.mode === 'by') {
+154       const { step, start } = skip;
+155       const maxPossibleStart = range.max - (quantity - 1) * step;
+156 
+157       if (maxPossibleStart < range.min) {
+158         console.warn(
+159           `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
+160         );
+161         return generateConsecutiveRound(range, quantity);
+162       }
+163 
+164       if (start === 'range-min') {
+165         return {
+166           sequence: Array.from(
+167             { length: quantity },
+168             (_, i) => range.min + i * step,
+169           ),
+170         };
+171       }
+172 
+173       // start === 'random': pick a random valid start
+174       const validStarts = Array.from(
+175         { length: maxPossibleStart - range.min + 1 },
+176         (_, i) => range.min + i,
+177       );
+178       const picked =
+179         validStarts[Math.floor(Math.random() * validStarts.length)] ??
+180         range.min;
+181       return {
+182         sequence: Array.from(
+183           { length: quantity },
+184           (_, i) => picked + i * step,
+185         ),
+186       };
+187     }
+188 
+189     // mode === 'consecutive'
+190     return generateConsecutiveRound(range, quantity);
+191   });
+192 }
+193 
 [result-id: r21]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:25Z)**_
@@ -2629,6 +2659,7 @@ console.log('Got:     ', result[0].sequence);
 Expected: [2, 4, 6, 8]
 Got:      [ 2, 4, 6, 8 ]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:33Z)**_
@@ -2647,6 +2678,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:34Z)**_
 ./src/components/ConfigFormFields.test.tsx
 ./src/components/ConfigFormFields.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:35Z)**_
@@ -2656,231 +2688,232 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:35Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/components/ConfigFormFields.tsx`
 
 ```text
-1	// src/components/ConfigFormFields.tsx
-2	import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
-3	import type { JSX } from 'react';
-4	
-5	const isFieldVisible = (
-6	  field: ConfigField,
-7	  config: Record<string, unknown>,
-8	): boolean => {
-9	  const vw: VisibleWhen | undefined =
-10	    'visibleWhen' in field ? field.visibleWhen : undefined;
-11	  if (!vw) return true;
-12	  const { key, subKey, value } = vw;
-13	  const configValue = subKey
-14	    ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
-15	    : config[key];
-16	  return configValue === value;
-17	};
-18	
-19	type ConfigFormFieldsProps = {
-20	  fields: ConfigField[];
-21	  config: Record<string, unknown>;
-22	  onChange: (config: Record<string, unknown>) => void;
-23	};
-24	
-25	export const ConfigFormFields = ({
-26	  fields,
-27	  config,
-28	  onChange,
-29	}: ConfigFormFieldsProps): JSX.Element => (
-30	  <div className="flex flex-col gap-3">
-31	    {fields.map((field) => {
-32	      if (!isFieldVisible(field, config)) return null;
-33	
-34	      if (field.type === 'select') {
-35	        return (
-36	          <label
-37	            key={field.key}
-38	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-39	          >
-40	            {field.label}
-41	            <select
-42	              aria-label={field.label}
-43	              value={String(config[field.key] ?? '')}
-44	              onChange={(e) =>
-45	                onChange({ ...config, [field.key]: e.target.value })
-46	              }
-47	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-48	            >
-49	              {field.options.map((opt) => (
-50	                <option key={opt.value} value={opt.value}>
-51	                  {opt.label}
-52	                </option>
-53	              ))}
-54	            </select>
-55	          </label>
-56	        );
-57	      }
-58	
-59	      if (field.type === 'nested-select') {
-60	        const nested = config[field.key] as
-61	          | Record<string, unknown>
-62	          | undefined;
-63	        return (
-64	          <label
-65	            key={`${field.key}.${field.subKey}`}
-66	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-67	          >
-68	            {field.label}
-69	            <select
-70	              aria-label={field.label}
-71	              value={String(nested?.[field.subKey] ?? '')}
-72	              onChange={(e) =>
-73	                onChange({
-74	                  ...config,
-75	                  [field.key]: {
-76	                    ...nested,
-77	                    [field.subKey]: e.target.value,
-78	                  },
-79	                })
-80	              }
-81	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-82	            >
-83	              {field.options.map((opt) => (
-84	                <option key={opt.value} value={opt.value}>
-85	                  {opt.label}
-86	                </option>
-87	              ))}
-88	            </select>
-89	          </label>
-90	        );
-91	      }
-92	
-93	      if (field.type === 'nested-select-or-number') {
-94	        const nested = config[field.key] as
-95	          | Record<string, unknown>
-96	          | undefined;
-97	        const currentValue = nested?.[field.subKey];
-98	        const isAll = currentValue === 'all';
-99	        return (
-100	          <div
-101	            key={`${field.key}.${field.subKey}`}
-102	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-103	          >
-104	            <span>{field.label}</span>
-105	            <div className="flex gap-2">
-106	              <select
-107	                aria-label={`${field.label} type`}
-108	                value={isAll ? 'all' : 'number'}
-109	                onChange={(e) => {
-110	                  const next =
-111	                    e.target.value === 'all' ? 'all' : field.min;
-112	                  onChange({
-113	                    ...config,
-114	                    [field.key]: { ...nested, [field.subKey]: next },
-115	                  });
-116	                }}
-117	                className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-118	              >
-119	                <option value="number">number</option>
-120	                <option value="all">all</option>
-121	              </select>
-122	              {!isAll && (
-123	                <input
-124	                  type="number"
-125	                  aria-label={`${field.label} value`}
-126	                  value={Number(currentValue ?? field.min)}
-127	                  min={field.min}
-128	                  max={field.max}
-129	                  onChange={(e) =>
-130	                    onChange({
-131	                      ...config,
-132	                      [field.key]: {
-133	                        ...nested,
-134	                        [field.subKey]: Number(e.target.value),
-135	                      },
-136	                    })
-137	                  }
-138	                  className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-139	                />
-140	              )}
-141	            </div>
-142	          </div>
-143	        );
-144	      }
-145	
-146	      if (field.type === 'nested-number') {
-147	        const nested = config[field.key] as
-148	          | Record<string, unknown>
-149	          | undefined;
-150	        return (
-151	          <label
-152	            key={`${field.key}.${field.subKey}`}
-153	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-154	          >
-155	            {field.label}
-156	            <input
-157	              type="number"
-158	              aria-label={field.label}
-159	              value={Number(nested?.[field.subKey] ?? field.min)}
-160	              min={field.min}
-161	              max={field.max}
-162	              onChange={(e) =>
-163	                onChange({
-164	                  ...config,
-165	                  [field.key]: {
-166	                    ...nested,
-167	                    [field.subKey]: Number(e.target.value),
-168	                  },
-169	                })
-170	              }
-171	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-172	            />
-173	          </label>
-174	        );
-175	      }
-176	
-177	      if (field.type === 'number') {
-178	        return (
-179	          <label
-180	            key={field.key}
-181	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-182	          >
-183	            {field.label}
-184	            <input
-185	              type="number"
-186	              aria-label={field.label}
-187	              value={Number(config[field.key] ?? field.min)}
-188	              min={field.min}
-189	              max={field.max}
-190	              onChange={(e) =>
-191	                onChange({
-192	                  ...config,
-193	                  [field.key]: Number(e.target.value),
-194	                })
-195	              }
-196	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-197	            />
-198	          </label>
-199	        );
-200	      }
-201	
-202	      // checkbox
-203	      return (
-204	        <label
-205	          key={field.key}
-206	          className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
-207	        >
-208	          <input
-209	            type="checkbox"
-210	            aria-label={field.label}
-211	            checked={Boolean(config[field.key])}
-212	            onChange={(e) =>
-213	              onChange({ ...config, [field.key]: e.target.checked })
-214	            }
-215	            className="h-5 w-5 accent-primary"
-216	          />
-217	          {field.label}
-218	        </label>
-219	      );
-220	    })}
-221	  </div>
-222	);
-223	
+1 // src/components/ConfigFormFields.tsx
+2 import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
+3 import type { JSX } from 'react';
+4 
+5 const isFieldVisible = (
+6   field: ConfigField,
+7   config: Record<string, unknown>,
+8 ): boolean => {
+9   const vw: VisibleWhen | undefined =
+10     'visibleWhen' in field ? field.visibleWhen : undefined;
+11   if (!vw) return true;
+12   const { key, subKey, value } = vw;
+13   const configValue = subKey
+14     ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
+15     : config[key];
+16   return configValue === value;
+17 };
+18 
+19 type ConfigFormFieldsProps = {
+20   fields: ConfigField[];
+21   config: Record<string, unknown>;
+22   onChange: (config: Record<string, unknown>) => void;
+23 };
+24 
+25 export const ConfigFormFields = ({
+26   fields,
+27   config,
+28   onChange,
+29 }: ConfigFormFieldsProps): JSX.Element => (
+30   <div className="flex flex-col gap-3">
+31     {fields.map((field) => {
+32       if (!isFieldVisible(field, config)) return null;
+33 
+34       if (field.type === 'select') {
+35         return (
+36           <label
+37             key={field.key}
+38             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+39           >
+40             {field.label}
+41             <select
+42               aria-label={field.label}
+43               value={String(config[field.key] ?? '')}
+44               onChange={(e) =>
+45                 onChange({ ...config, [field.key]: e.target.value })
+46               }
+47               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+48             >
+49               {field.options.map((opt) => (
+50                 <option key={opt.value} value={opt.value}>
+51                   {opt.label}
+52                 </option>
+53               ))}
+54             </select>
+55           </label>
+56         );
+57       }
+58 
+59       if (field.type === 'nested-select') {
+60         const nested = config[field.key] as
+61           | Record<string, unknown>
+62           | undefined;
+63         return (
+64           <label
+65             key={`${field.key}.${field.subKey}`}
+66             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+67           >
+68             {field.label}
+69             <select
+70               aria-label={field.label}
+71               value={String(nested?.[field.subKey] ?? '')}
+72               onChange={(e) =>
+73                 onChange({
+74                   ...config,
+75                   [field.key]: {
+76                     ...nested,
+77                     [field.subKey]: e.target.value,
+78                   },
+79                 })
+80               }
+81               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+82             >
+83               {field.options.map((opt) => (
+84                 <option key={opt.value} value={opt.value}>
+85                   {opt.label}
+86                 </option>
+87               ))}
+88             </select>
+89           </label>
+90         );
+91       }
+92 
+93       if (field.type === 'nested-select-or-number') {
+94         const nested = config[field.key] as
+95           | Record<string, unknown>
+96           | undefined;
+97         const currentValue = nested?.[field.subKey];
+98         const isAll = currentValue === 'all';
+99         return (
+100           <div
+101             key={`${field.key}.${field.subKey}`}
+102             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+103           >
+104             <span>{field.label}</span>
+105             <div className="flex gap-2">
+106               <select
+107                 aria-label={`${field.label} type`}
+108                 value={isAll ? 'all' : 'number'}
+109                 onChange={(e) => {
+110                   const next =
+111                     e.target.value === 'all' ? 'all' : field.min;
+112                   onChange({
+113                     ...config,
+114                     [field.key]: { ...nested, [field.subKey]: next },
+115                   });
+116                 }}
+117                 className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+118               >
+119                 <option value="number">number</option>
+120                 <option value="all">all</option>
+121               </select>
+122               {!isAll && (
+123                 <input
+124                   type="number"
+125                   aria-label={`${field.label} value`}
+126                   value={Number(currentValue ?? field.min)}
+127                   min={field.min}
+128                   max={field.max}
+129                   onChange={(e) =>
+130                     onChange({
+131                       ...config,
+132                       [field.key]: {
+133                         ...nested,
+134                         [field.subKey]: Number(e.target.value),
+135                       },
+136                     })
+137                   }
+138                   className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+139                 />
+140               )}
+141             </div>
+142           </div>
+143         );
+144       }
+145 
+146       if (field.type === 'nested-number') {
+147         const nested = config[field.key] as
+148           | Record<string, unknown>
+149           | undefined;
+150         return (
+151           <label
+152             key={`${field.key}.${field.subKey}`}
+153             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+154           >
+155             {field.label}
+156             <input
+157               type="number"
+158               aria-label={field.label}
+159               value={Number(nested?.[field.subKey] ?? field.min)}
+160               min={field.min}
+161               max={field.max}
+162               onChange={(e) =>
+163                 onChange({
+164                   ...config,
+165                   [field.key]: {
+166                     ...nested,
+167                     [field.subKey]: Number(e.target.value),
+168                   },
+169                 })
+170               }
+171               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+172             />
+173           </label>
+174         );
+175       }
+176 
+177       if (field.type === 'number') {
+178         return (
+179           <label
+180             key={field.key}
+181             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+182           >
+183             {field.label}
+184             <input
+185               type="number"
+186               aria-label={field.label}
+187               value={Number(config[field.key] ?? field.min)}
+188               min={field.min}
+189               max={field.max}
+190               onChange={(e) =>
+191                 onChange({
+192                   ...config,
+193                   [field.key]: Number(e.target.value),
+194                 })
+195               }
+196               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+197             />
+198           </label>
+199         );
+200       }
+201 
+202       // checkbox
+203       return (
+204         <label
+205           key={field.key}
+206           className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
+207         >
+208           <input
+209             type="checkbox"
+210             aria-label={field.label}
+211             checked={Boolean(config[field.key])}
+212             onChange={(e) =>
+213               onChange({ ...config, [field.key]: e.target.checked })
+214             }
+215             className="h-5 w-5 accent-primary"
+216           />
+217           {field.label}
+218         </label>
+219       );
+220     })}
+221   </div>
+222 );
+223 
 [result-id: r22]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:41Z)**_
@@ -2910,48 +2943,49 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:42Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.ts`
 
 ```text
-153	    if (skip.mode === 'by') {
-154	      const { step, start } = skip;
-155	      const maxPossibleStart = range.max - (quantity - 1) * step;
-156	
-157	      if (maxPossibleStart < range.min) {
-158	        console.warn(
-159	          `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
-160	        );
-161	        return generateConsecutiveRound(range, quantity);
-162	      }
-163	
-164	      if (start === 'range-min') {
-165	        return {
-166	          sequence: Array.from(
-167	            { length: quantity },
-168	            (_, i) => range.min + i * step,
-169	          ),
-170	        };
-171	      }
-172	
-173	      // start === 'random': pick a random valid start
-174	      const validStarts = Array.from(
-175	        { length: maxPossibleStart - range.min + 1 },
-176	        (_, i) => range.min + i,
-177	      );
-178	      const picked =
-179	        validStarts[Math.floor(Math.random() * validStarts.length)] ??
-180	        range.min;
-181	      return {
-182	        sequence: Array.from(
-183	          { length: quantity },
-184	          (_, i) => picked + i * step,
-185	        ),
-186	      };
-187	    }
-188	
-189	    // mode === 'consecutive'
-190	    return generateConsecutiveRound(range, quantity);
-191	  });
-192	}
+153     if (skip.mode === 'by') {
+154       const { step, start } = skip;
+155       const maxPossibleStart = range.max - (quantity - 1) * step;
+156 
+157       if (maxPossibleStart < range.min) {
+158         console.warn(
+159           `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
+160         );
+161         return generateConsecutiveRound(range, quantity);
+162       }
+163 
+164       if (start === 'range-min') {
+165         return {
+166           sequence: Array.from(
+167             { length: quantity },
+168             (_, i) => range.min + i * step,
+169           ),
+170         };
+171       }
+172 
+173       // start === 'random': pick a random valid start
+174       const validStarts = Array.from(
+175         { length: maxPossibleStart - range.min + 1 },
+176         (_, i) => range.min + i,
+177       );
+178       const picked =
+179         validStarts[Math.floor(Math.random() * validStarts.length)] ??
+180         range.min;
+181       return {
+182         sequence: Array.from(
+183           { length: quantity },
+184           (_, i) => picked + i * step,
+185         ),
+186       };
+187     }
+188 
+189     // mode === 'consecutive'
+190     return generateConsecutiveRound(range, quantity);
+191   });
+192 }
 [result-id: r23]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:45Z)**_
@@ -2963,6 +2997,7 @@ const maxPossibleStart = range.max - (quantity - 1) * step;
 ```
 
 If `step` is `undefined` (which it will be if the user just changed the mode to 'by' before setting step), then:
+
 - `(quantity - 1) * undefined` = `NaN`
 - `range.max - NaN` = `NaN`  
 - `NaN < range.min` is `true`!
@@ -2998,6 +3033,7 @@ step: undefined
 maxPossibleStart: NaN
 maxPossibleStart < range.min: false
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:48Z)**_
@@ -3031,6 +3067,7 @@ try {
 ```text
 Result: [ NaN, NaN, NaN, NaN, NaN ]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:51Z)**_
@@ -3081,6 +3118,7 @@ const resolveWordSpellConfig = (
   const merged: WordSpellConfig = {
 [result-id: r24]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:54Z)**_
@@ -3094,108 +3132,109 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:05:55Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-210	    targetLen,
-211	    merged.range,
-212	  );
-213	  return merged;
-214	};
-215	
-216	const resolveSortNumbersConfig = (
-217	  saved: Record<string, unknown> | null,
-218	): SortNumbersConfig => {
-219	  const base = makeDefaultSortNumbersConfig();
-220	  if (!saved || saved.component !== 'SortNumbers') return base;
-221	
-222	  // Migrate legacy allowSkips: boolean → skip: SkipConfig
-223	  let migratedSaved = saved;
-224	  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
-225	    migratedSaved = {
-226	      ...saved,
-227	      skip: saved.allowSkips
-228	        ? { mode: 'random' }
-229	        : { mode: 'consecutive' },
-230	    };
-231	  }
-232	
-233	  const merged: SortNumbersConfig = {
-234	    ...base,
-235	    ...(migratedSaved as Partial<SortNumbersConfig>),
-236	    gameId: 'sort-numbers',
-237	    component: 'SortNumbers',
-238	  };
-239	
-240	  const tr = Math.max(1, merged.totalRounds);
-241	  merged.totalRounds = tr;
-242	
-243	  // Normalize skip: mode 'by' requires step and start.
-244	  // When the config form changes mode to 'by' it only sets mode, leaving
-245	  // step/start undefined. Guard here so generateSortRounds never receives NaN.
-246	  if (merged.skip.mode === 'by') {
-247	    const partial = merged.skip as {
-248	      mode: 'by';
-249	      step?: number;
-250	      start?: 'range-min' | 'random';
-251	    };
-252	    merged.skip = {
-253	      mode: 'by',
-254	      step: typeof partial.step === 'number' ? partial.step : 2,
-255	      start: partial.start ?? 'range-min',
-256	    };
-257	  }
-258	
-259	  const roundsStale =
-260	    Array.isArray(merged.rounds) &&
-261	    merged.rounds.some(
-262	      (r) =>
-263	        r.sequence.length !== merged.quantity ||
-264	        r.sequence.some(
-265	          (v) => v < merged.range.min || v > merged.range.max,
-266	        ),
-267	    );
-268	
-269	  if (
-270	    !Array.isArray(merged.rounds) ||
-271	    merged.rounds.length === 0 ||
-272	    merged.rounds.length !== tr ||
-273	    roundsStale
-274	  ) {
-275	    merged.rounds = generateSortRounds({
-276	      range: merged.range,
-277	      quantity: merged.quantity,
-278	      skip: merged.skip,
-279	      totalRounds: tr,
-280	    });
-281	  }
-282	
-283	  return merged;
-284	};
-285	
-286	const WordSpellGameBody = ({
-287	  gameId,
-288	  sessionId,
-289	  seed,
-290	  draftState,
-291	  gameSpecificConfig,
-292	  bookmarkId,
-293	  bookmarkName,
-294	  bookmarkColor,
-295	}: {
-296	  gameId: string;
-297	  sessionId: string;
-298	  seed: string;
-299	  draftState: AnswerGameDraftState | null;
-300	  gameSpecificConfig: Record<string, unknown> | null;
-301	  bookmarkId: string | null;
-302	  bookmarkName: string | null;
-303	  bookmarkColor: string | null;
-304	}): JSX.Element => {
-305	  const { t } = useTranslation('games');
-306	  const { save, updateConfig } = useSavedConfigs();
-307	  const initial = useMemo(
-308	    () => resolveWordSpellConfig(gameSpecificConfig),
-309	    [gameSpecificConfig],
+210     targetLen,
+211     merged.range,
+212   );
+213   return merged;
+214 };
+215 
+216 const resolveSortNumbersConfig = (
+217   saved: Record<string, unknown> | null,
+218 ): SortNumbersConfig => {
+219   const base = makeDefaultSortNumbersConfig();
+220   if (!saved || saved.component !== 'SortNumbers') return base;
+221 
+222   // Migrate legacy allowSkips: boolean → skip: SkipConfig
+223   let migratedSaved = saved;
+224   if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+225     migratedSaved = {
+226       ...saved,
+227       skip: saved.allowSkips
+228         ? { mode: 'random' }
+229         : { mode: 'consecutive' },
+230     };
+231   }
+232 
+233   const merged: SortNumbersConfig = {
+234     ...base,
+235     ...(migratedSaved as Partial<SortNumbersConfig>),
+236     gameId: 'sort-numbers',
+237     component: 'SortNumbers',
+238   };
+239 
+240   const tr = Math.max(1, merged.totalRounds);
+241   merged.totalRounds = tr;
+242 
+243   // Normalize skip: mode 'by' requires step and start.
+244   // When the config form changes mode to 'by' it only sets mode, leaving
+245   // step/start undefined. Guard here so generateSortRounds never receives NaN.
+246   if (merged.skip.mode === 'by') {
+247     const partial = merged.skip as {
+248       mode: 'by';
+249       step?: number;
+250       start?: 'range-min' | 'random';
+251     };
+252     merged.skip = {
+253       mode: 'by',
+254       step: typeof partial.step === 'number' ? partial.step : 2,
+255       start: partial.start ?? 'range-min',
+256     };
+257   }
+258 
+259   const roundsStale =
+260     Array.isArray(merged.rounds) &&
+261     merged.rounds.some(
+262       (r) =>
+263         r.sequence.length !== merged.quantity ||
+264         r.sequence.some(
+265           (v) => v < merged.range.min || v > merged.range.max,
+266         ),
+267     );
+268 
+269   if (
+270     !Array.isArray(merged.rounds) ||
+271     merged.rounds.length === 0 ||
+272     merged.rounds.length !== tr ||
+273     roundsStale
+274   ) {
+275     merged.rounds = generateSortRounds({
+276       range: merged.range,
+277       quantity: merged.quantity,
+278       skip: merged.skip,
+279       totalRounds: tr,
+280     });
+281   }
+282 
+283   return merged;
+284 };
+285 
+286 const WordSpellGameBody = ({
+287   gameId,
+288   sessionId,
+289   seed,
+290   draftState,
+291   gameSpecificConfig,
+292   bookmarkId,
+293   bookmarkName,
+294   bookmarkColor,
+295 }: {
+296   gameId: string;
+297   sessionId: string;
+298   seed: string;
+299   draftState: AnswerGameDraftState | null;
+300   gameSpecificConfig: Record<string, unknown> | null;
+301   bookmarkId: string | null;
+302   bookmarkName: string | null;
+303   bookmarkColor: string | null;
+304 }): JSX.Element => {
+305   const { t } = useTranslation('games');
+306   const { save, updateConfig } = useSavedConfigs();
+307   const initial = useMemo(
+308     () => resolveWordSpellConfig(gameSpecificConfig),
+309     [gameSpecificConfig],
 [result-id: r25]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:06:21Z)**_
@@ -3203,6 +3242,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-08 12:06:21Z)**_
 Great! So the normalization (lines 243-257) happens BEFORE the rounds are regenerated (lines 269-281). This should work correctly. But wait... I need to check if there's a scenario where the roundsStale check might not trigger regeneration. Let me check the roundsStale logic more carefully...
 
 Actually, looking at lines 259-267, the roundsStale check validates that each sequence:
+
 1. Has the correct length (merged.quantity)
 2. All values are within the range
 
@@ -3266,10 +3306,12 @@ I've thoroughly examined the sort-numbers game implementation in the worktree at
 ### **KEY ARCHITECTURE UNDERSTANDING**
 
 **Type System (Discriminated Unions):**
+
 - `SkipConfig` uses TypeScript discriminated unions to prevent invalid states (e.g., mode:'by' without step/start)
 - `DistractorConfig` similarly ensures source and count are paired correctly
 
 **Round Generation Flow:**
+
 ```
 generateSortRounds() 
 ├── For mode:'by' with step=2, start='range-min':
@@ -3285,16 +3327,19 @@ generateSortRounds()
 ```
 
 **Distractor Pool Building:**
+
 - `source:'gaps-only'`: Numbers in gaps BETWEEN sequence values (e.g., sequence [2,4,6] → gaps [3, 5])
 - `source:'random'` or `'full-range'`: All range numbers except sequence (semantic difference only)
 - `count: 'all'` or `count: number` - include all or sample randomly
 
 **Component Integration:**
+
 - `SortNumbers` reads skip config and passes it to `generateSortRounds()`
 - When building a round's tiles via `buildSortRound()`, passes distractor config if tileBankMode='distractors'
 - Distractors are shuffled together with sequence tiles and displayed in the tile bank
 
 **Config Form Behavior:**
+
 - When user changes skip.mode via dropdown → only `mode` field updates (e.g., `{ mode: 'by' }`)
 - Missing step/start are normalized in `resolveSortNumbersConfig()` before generating rounds
 - `visibleWhen` gates show step/start inputs only when skip.mode==='by'
@@ -3305,11 +3350,13 @@ generateSortRounds()
 ### **CURRENT TEST COVERAGE**
 
 ✓ All 19 unit tests in build-sort-round.test.ts **PASSING**:
+
 - generateSortRounds modes: consecutive, random, by (all variants)
 - buildDistractorPool: all three sources with count variants
 - buildSortRound: zones/tiles, distractor inclusion, uniqueness
 
 ✓ Storybook story manual verification shows:
+
 - SkipByStepRangeMin correctly generates [2,5,8,11] (step 3)
 - DistractorsGapsOnly correctly generates [2,4,6,8] (step 2) plus gaps [1,3,5,7]
 
@@ -3335,12 +3382,14 @@ generateSortRounds()
 While testing the logic, I identified a **potential but unlikely bug scenario**:
 
 **Scenario**: If a user:
+
 1. Starts with config having `{ rounds: [consecutive sequence], skip: { mode: 'consecutive' }, quantity: 5 }`
 2. Changes skip.mode to 'by' (form only updates mode, leaving step/start undefined)
 3. Without changing quantity or range (so roundsStale check passes)
 4. Closes and reopens config form
 
 **What happens**:
+
 - Normalization sets step:2, start:'range-min' ✓
 - BUT existing rounds are NOT regenerated because they:
   - Still have length 5 ✓
@@ -3348,6 +3397,7 @@ While testing the logic, I identified a **potential but unlikely bug scenario**:
   - Pass stale check even though they're now the wrong pattern
 
 **However**: This is mitigated because:
+
 1. The form's `visibleWhen` prevents accessing 'by' mode without setting step/start
 2. Changing step or any other param triggers regeneration
 3. The normalization defaults to valid values
@@ -3357,6 +3407,7 @@ While testing the logic, I identified a **potential but unlikely bug scenario**:
 ### **SUMMARY**
 
 The implementation is **functionally complete and correct**:
+
 - Types prevent invalid configurations
 - All three skip modes work correctly (verified via tests and manual checks)
 - All three distractor sources work correctly  
@@ -3365,6 +3416,7 @@ The implementation is **functionally complete and correct**:
 - Component integration passes distractor config correctly
 
 The code generates sequences exactly as specified:
+
 - `mode:'by'` with step 2, start 'range-min', range [2,20], qty 4 → **[2, 4, 6, 8]** ✓ (skip by 2s)
 - NOT consecutive numbers (2, 3, 4, 5, 6, 7, 8, 9)
 
@@ -3374,6 +3426,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:34Z)**_
 The agent found a lot of detail. Now let me understand the user's problem:
 
 Given config:
+
 ```ts
 {
   "gameId": "sort-numbers",
@@ -3387,7 +3440,6 @@ Given config:
 
 Expected: 2, 4, 6, 8, 10 (skip by 2s, 5 elements)
 Actual: 2, 3, 4, 5, 6, 7, 8, 9 (consecutive)
-
 
 The skip config is incomplete—it has `mode: "by"` but lacks the `step` and `start` values that should be filled in during normalization. There's also a stale round detection issue where sequences generated with different skip configurations aren't being regenerated, so old rounds might persist even when the config changes. I need to examine the actual implementation to pinpoint where the normalization and validation are failing.
 </details></think>
@@ -3403,200 +3455,201 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:34Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.ts`
 
 ```text
-1	// src/games/sort-numbers/build-sort-round.ts
-2	import { nanoid } from 'nanoid';
-3	import type {
-4	  DistractorConfig,
-5	  SkipConfig,
-6	  SortNumbersRound,
-7	} from './types';
-8	import type {
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	
-13	export function buildDistractorPool(
-14	  sequence: number[],
-15	  range: { min: number; max: number },
-16	  config: DistractorConfig,
-17	): number[] {
-18	  const seqSet = new Set(sequence);
-19	
-20	  let pool: number[];
-21	
-22	  if (config.source === 'gaps-only') {
-23	    pool = [];
-24	    const sorted = [...sequence].toSorted((a, b) => a - b);
-25	    for (let i = 0; i < sorted.length - 1; i++) {
-26	      for (
-27	        let n = (sorted[i] ?? 0) + 1;
-28	        n < (sorted[i + 1] ?? 0);
-29	        n++
-30	      ) {
-31	        pool.push(n);
-32	      }
-33	    }
-34	  } else {
-35	    // Both 'random' and 'full-range' draw from the full non-sequence pool.
-36	    // The difference is in their count contract: 'random' typically uses a
-37	    // fixed numeric count; 'full-range' is intended for taking many/all
-38	    // numbers from the range. At runtime the pool is identical — the
-39	    // distinction is semantic (user intent) and reflected in the UI label.
-40	    pool = Array.from(
-41	      { length: range.max - range.min + 1 },
-42	      (_, i) => range.min + i,
-43	    ).filter((n) => !seqSet.has(n));
-44	  }
-45	
-46	  if (config.count === 'all') return pool;
-47	
-48	  // Pick `count` randomly from pool (Fisher-Yates partial)
-49	  const shuffled = [...pool];
-50	  for (let i = shuffled.length - 1; i > 0; i--) {
-51	    const j = Math.floor(Math.random() * (i + 1));
-52	    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
-53	  }
-54	  return shuffled.slice(0, Math.min(config.count, shuffled.length));
-55	}
-56	
-57	export function buildSortRound(
-58	  numbers: number[],
-59	  direction: 'ascending' | 'descending',
-60	  distractors?: {
-61	    config: DistractorConfig;
-62	    range: { min: number; max: number };
-63	  },
-64	): { tiles: TileItem[]; zones: AnswerZone[] } {
-65	  const sorted = numbers.toSorted((a, b) =>
-66	    direction === 'ascending' ? a - b : b - a,
-67	  );
-68	
-69	  const zones: AnswerZone[] = sorted.map((n, i) => ({
-70	    id: `z${i}`,
-71	    index: i,
-72	    expectedValue: String(n),
-73	    placedTileId: null,
-74	    isWrong: false,
-75	    isLocked: false,
-76	  }));
-77	
-78	  const allNumbers = distractors
-79	    ? [
-80	        ...numbers,
-81	        ...buildDistractorPool(
-82	          numbers,
-83	          distractors.range,
-84	          distractors.config,
-85	        ),
-86	      ]
-87	    : [...numbers];
-88	
-89	  // Shuffle tiles (Fisher-Yates)
-90	  for (let i = allNumbers.length - 1; i > 0; i--) {
-91	    const j = Math.floor(Math.random() * (i + 1));
-92	    [allNumbers[i], allNumbers[j]] = [allNumbers[j]!, allNumbers[i]!];
-93	  }
-94	
-95	  const tiles: TileItem[] = allNumbers.map((n) => ({
-96	    id: nanoid(),
-97	    label: String(n),
-98	    value: String(n),
-99	  }));
-100	
-101	  return { tiles, zones };
-102	}
-103	
-104	function generateConsecutiveRound(
-105	  range: { min: number; max: number },
-106	  quantity: number,
-107	): SortNumbersRound {
-108	  const rangeSize = range.max - range.min + 1;
-109	  if (quantity > rangeSize) {
-110	    return {
-111	      sequence: Array.from(
-112	        { length: rangeSize },
-113	        (_, i) => range.min + i,
-114	      ),
-115	    };
-116	  }
-117	  const maxStart = range.max - quantity + 1;
-118	  const start =
-119	    Math.floor(Math.random() * (maxStart - range.min + 1)) + range.min;
-120	  return {
-121	    sequence: Array.from({ length: quantity }, (_, i) => start + i),
-122	  };
-123	}
-124	
-125	interface GenerateOptions {
-126	  range: { min: number; max: number };
-127	  quantity: number;
-128	  skip: SkipConfig;
-129	  totalRounds: number;
-130	}
-131	
-132	export function generateSortRounds(
-133	  options: GenerateOptions,
-134	): SortNumbersRound[] {
-135	  const { range, quantity, skip, totalRounds } = options;
-136	
-137	  return Array.from({ length: totalRounds }, () => {
-138	    if (skip.mode === 'random') {
-139	      const pool = Array.from(
-140	        { length: range.max - range.min + 1 },
-141	        (_, i) => range.min + i,
-142	      );
-143	      const available = [...pool];
-144	      const picked: number[] = [];
-145	      for (let i = 0; i < quantity && available.length > 0; i++) {
-146	        const idx = Math.floor(Math.random() * available.length);
-147	        picked.push(available[idx]!);
-148	        available.splice(idx, 1);
-149	      }
-150	      return { sequence: picked };
-151	    }
-152	
-153	    if (skip.mode === 'by') {
-154	      const { step, start } = skip;
-155	      const maxPossibleStart = range.max - (quantity - 1) * step;
-156	
-157	      if (maxPossibleStart < range.min) {
-158	        console.warn(
-159	          `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
-160	        );
-161	        return generateConsecutiveRound(range, quantity);
-162	      }
-163	
-164	      if (start === 'range-min') {
-165	        return {
-166	          sequence: Array.from(
-167	            { length: quantity },
-168	            (_, i) => range.min + i * step,
-169	          ),
-170	        };
-171	      }
-172	
-173	      // start === 'random': pick a random valid start
-174	      const validStarts = Array.from(
-175	        { length: maxPossibleStart - range.min + 1 },
-176	        (_, i) => range.min + i,
-177	      );
-178	      const picked =
-179	        validStarts[Math.floor(Math.random() * validStarts.length)] ??
-180	        range.min;
-181	      return {
-182	        sequence: Array.from(
-183	          { length: quantity },
-184	          (_, i) => picked + i * step,
-185	        ),
-186	      };
-187	    }
-188	
-189	    // mode === 'consecutive'
-190	    return generateConsecutiveRound(range, quantity);
-191	  });
-192	}
+1 // src/games/sort-numbers/build-sort-round.ts
+2 import { nanoid } from 'nanoid';
+3 import type {
+4   DistractorConfig,
+5   SkipConfig,
+6   SortNumbersRound,
+7 } from './types';
+8 import type {
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 
+13 export function buildDistractorPool(
+14   sequence: number[],
+15   range: { min: number; max: number },
+16   config: DistractorConfig,
+17 ): number[] {
+18   const seqSet = new Set(sequence);
+19 
+20   let pool: number[];
+21 
+22   if (config.source === 'gaps-only') {
+23     pool = [];
+24     const sorted = [...sequence].toSorted((a, b) => a - b);
+25     for (let i = 0; i < sorted.length - 1; i++) {
+26       for (
+27         let n = (sorted[i] ?? 0) + 1;
+28         n < (sorted[i + 1] ?? 0);
+29         n++
+30       ) {
+31         pool.push(n);
+32       }
+33     }
+34   } else {
+35     // Both 'random' and 'full-range' draw from the full non-sequence pool.
+36     // The difference is in their count contract: 'random' typically uses a
+37     // fixed numeric count; 'full-range' is intended for taking many/all
+38     // numbers from the range. At runtime the pool is identical — the
+39     // distinction is semantic (user intent) and reflected in the UI label.
+40     pool = Array.from(
+41       { length: range.max - range.min + 1 },
+42       (_, i) => range.min + i,
+43     ).filter((n) => !seqSet.has(n));
+44   }
+45 
+46   if (config.count === 'all') return pool;
+47 
+48   // Pick `count` randomly from pool (Fisher-Yates partial)
+49   const shuffled = [...pool];
+50   for (let i = shuffled.length - 1; i > 0; i--) {
+51     const j = Math.floor(Math.random() * (i + 1));
+52     [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+53   }
+54   return shuffled.slice(0, Math.min(config.count, shuffled.length));
+55 }
+56 
+57 export function buildSortRound(
+58   numbers: number[],
+59   direction: 'ascending' | 'descending',
+60   distractors?: {
+61     config: DistractorConfig;
+62     range: { min: number; max: number };
+63   },
+64 ): { tiles: TileItem[]; zones: AnswerZone[] } {
+65   const sorted = numbers.toSorted((a, b) =>
+66     direction === 'ascending' ? a - b : b - a,
+67   );
+68 
+69   const zones: AnswerZone[] = sorted.map((n, i) => ({
+70     id: `z${i}`,
+71     index: i,
+72     expectedValue: String(n),
+73     placedTileId: null,
+74     isWrong: false,
+75     isLocked: false,
+76   }));
+77 
+78   const allNumbers = distractors
+79     ? [
+80         ...numbers,
+81         ...buildDistractorPool(
+82           numbers,
+83           distractors.range,
+84           distractors.config,
+85         ),
+86       ]
+87     : [...numbers];
+88 
+89   // Shuffle tiles (Fisher-Yates)
+90   for (let i = allNumbers.length - 1; i > 0; i--) {
+91     const j = Math.floor(Math.random() * (i + 1));
+92     [allNumbers[i], allNumbers[j]] = [allNumbers[j]!, allNumbers[i]!];
+93   }
+94 
+95   const tiles: TileItem[] = allNumbers.map((n) => ({
+96     id: nanoid(),
+97     label: String(n),
+98     value: String(n),
+99   }));
+100 
+101   return { tiles, zones };
+102 }
+103 
+104 function generateConsecutiveRound(
+105   range: { min: number; max: number },
+106   quantity: number,
+107 ): SortNumbersRound {
+108   const rangeSize = range.max - range.min + 1;
+109   if (quantity > rangeSize) {
+110     return {
+111       sequence: Array.from(
+112         { length: rangeSize },
+113         (_, i) => range.min + i,
+114       ),
+115     };
+116   }
+117   const maxStart = range.max - quantity + 1;
+118   const start =
+119     Math.floor(Math.random() * (maxStart - range.min + 1)) + range.min;
+120   return {
+121     sequence: Array.from({ length: quantity }, (_, i) => start + i),
+122   };
+123 }
+124 
+125 interface GenerateOptions {
+126   range: { min: number; max: number };
+127   quantity: number;
+128   skip: SkipConfig;
+129   totalRounds: number;
+130 }
+131 
+132 export function generateSortRounds(
+133   options: GenerateOptions,
+134 ): SortNumbersRound[] {
+135   const { range, quantity, skip, totalRounds } = options;
+136 
+137   return Array.from({ length: totalRounds }, () => {
+138     if (skip.mode === 'random') {
+139       const pool = Array.from(
+140         { length: range.max - range.min + 1 },
+141         (_, i) => range.min + i,
+142       );
+143       const available = [...pool];
+144       const picked: number[] = [];
+145       for (let i = 0; i < quantity && available.length > 0; i++) {
+146         const idx = Math.floor(Math.random() * available.length);
+147         picked.push(available[idx]!);
+148         available.splice(idx, 1);
+149       }
+150       return { sequence: picked };
+151     }
+152 
+153     if (skip.mode === 'by') {
+154       const { step, start } = skip;
+155       const maxPossibleStart = range.max - (quantity - 1) * step;
+156 
+157       if (maxPossibleStart < range.min) {
+158         console.warn(
+159           `generateSortRounds: mode 'by' step=${step} quantity=${quantity} exceeds range [${range.min},${range.max}]; falling back to consecutive`,
+160         );
+161         return generateConsecutiveRound(range, quantity);
+162       }
+163 
+164       if (start === 'range-min') {
+165         return {
+166           sequence: Array.from(
+167             { length: quantity },
+168             (_, i) => range.min + i * step,
+169           ),
+170         };
+171       }
+172 
+173       // start === 'random': pick a random valid start
+174       const validStarts = Array.from(
+175         { length: maxPossibleStart - range.min + 1 },
+176         (_, i) => range.min + i,
+177       );
+178       const picked =
+179         validStarts[Math.floor(Math.random() * validStarts.length)] ??
+180         range.min;
+181       return {
+182         sequence: Array.from(
+183           { length: quantity },
+184           (_, i) => picked + i * step,
+185         ),
+186       };
+187     }
+188 
+189     // mode === 'consecutive'
+190     return generateConsecutiveRound(range, quantity);
+191   });
+192 }
 193
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:06:34Z)**_
@@ -3606,161 +3659,162 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:34Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/types.ts`
 
 ```text
-1	// src/games/sort-numbers/types.ts
-2	import type { AnswerGameConfig } from '@/components/answer-game/types';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	
-5	export type SkipConfig =
-6	  | { mode: 'random' }
-7	  | { mode: 'consecutive' }
-8	  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
-9	
-10	export type DistractorConfig =
-11	  | { source: 'random'; count: number | 'all' }
-12	  | { source: 'gaps-only'; count: number | 'all' }
-13	  | { source: 'full-range'; count: number | 'all' };
-14	
-15	export interface SortNumbersConfig extends AnswerGameConfig {
-16	  component: 'SortNumbers';
-17	  direction: 'ascending' | 'descending';
-18	  range: { min: number; max: number };
-19	  /** How many numbers to sort per round */
-20	  quantity: number;
-21	  skip: SkipConfig;
-22	  distractors: DistractorConfig;
-23	  rounds: SortNumbersRound[];
-24	}
-25	
-26	export interface SortNumbersRound {
-27	  sequence: number[];
-28	}
-29	
-30	export const sortNumbersConfigFields: ConfigField[] = [
-31	  {
-32	    type: 'select',
-33	    key: 'inputMethod',
-34	    label: 'Input method',
-35	    options: [
-36	      { value: 'drag', label: 'drag' },
-37	      { value: 'type', label: 'type' },
-38	      { value: 'both', label: 'both' },
-39	    ],
-40	  },
-41	  {
-42	    type: 'select',
-43	    key: 'wrongTileBehavior',
-44	    label: 'Wrong tile behaviour',
-45	    options: [
-46	      { value: 'reject', label: 'reject' },
-47	      { value: 'lock-manual', label: 'lock-manual' },
-48	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-49	    ],
-50	  },
-51	  {
-52	    type: 'select',
-53	    key: 'tileBankMode',
-54	    label: 'Tile bank mode',
-55	    options: [
-56	      { value: 'exact', label: 'exact' },
-57	      { value: 'distractors', label: 'distractors' },
-58	    ],
-59	  },
-60	  {
-61	    type: 'number',
-62	    key: 'totalRounds',
-63	    label: 'Total rounds',
-64	    min: 1,
-65	    max: 30,
-66	  },
-67	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-68	  {
-69	    type: 'select',
-70	    key: 'direction',
-71	    label: 'Direction',
-72	    options: [
-73	      { value: 'ascending', label: 'ascending' },
-74	      { value: 'descending', label: 'descending' },
-75	    ],
-76	  },
-77	  {
-78	    type: 'number',
-79	    key: 'quantity',
-80	    label: 'Quantity',
-81	    min: 2,
-82	    max: 8,
-83	  },
-84	  {
-85	    type: 'nested-number',
-86	    key: 'range',
-87	    subKey: 'min',
-88	    label: 'Range min',
-89	    min: 1,
-90	    max: 999,
-91	  },
-92	  {
-93	    type: 'nested-number',
-94	    key: 'range',
-95	    subKey: 'max',
-96	    label: 'Range max',
-97	    min: 1,
-98	    max: 999,
-99	  },
-100	  {
-101	    type: 'nested-select',
-102	    key: 'skip',
-103	    subKey: 'mode',
-104	    label: 'Skip mode',
-105	    options: [
-106	      { value: 'random', label: 'random' },
-107	      { value: 'consecutive', label: 'consecutive' },
-108	      { value: 'by', label: 'by' },
-109	    ],
-110	  },
-111	  {
-112	    type: 'nested-number',
-113	    key: 'skip',
-114	    subKey: 'step',
-115	    label: 'Skip step',
-116	    min: 2,
-117	    max: 100,
-118	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-119	  },
-120	  {
-121	    type: 'nested-select',
-122	    key: 'skip',
-123	    subKey: 'start',
-124	    label: 'Skip start',
-125	    options: [
-126	      { value: 'range-min', label: 'range-min' },
-127	      { value: 'random', label: 'random' },
-128	    ],
-129	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-130	  },
-131	  {
-132	    type: 'nested-select',
-133	    key: 'distractors',
-134	    subKey: 'source',
-135	    label: 'Distractor source',
-136	    options: [
-137	      { value: 'random', label: 'random' },
-138	      { value: 'gaps-only', label: 'gaps-only' },
-139	      { value: 'full-range', label: 'full-range' },
-140	    ],
-141	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-142	  },
-143	  {
-144	    type: 'nested-select-or-number',
-145	    key: 'distractors',
-146	    subKey: 'count',
-147	    label: 'Distractor count',
-148	    min: 1,
-149	    max: 20,
-150	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-151	  },
-152	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-153	];
+1 // src/games/sort-numbers/types.ts
+2 import type { AnswerGameConfig } from '@/components/answer-game/types';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 
+5 export type SkipConfig =
+6   | { mode: 'random' }
+7   | { mode: 'consecutive' }
+8   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+9 
+10 export type DistractorConfig =
+11   | { source: 'random'; count: number | 'all' }
+12   | { source: 'gaps-only'; count: number | 'all' }
+13   | { source: 'full-range'; count: number | 'all' };
+14 
+15 export interface SortNumbersConfig extends AnswerGameConfig {
+16   component: 'SortNumbers';
+17   direction: 'ascending' | 'descending';
+18   range: { min: number; max: number };
+19   /** How many numbers to sort per round */
+20   quantity: number;
+21   skip: SkipConfig;
+22   distractors: DistractorConfig;
+23   rounds: SortNumbersRound[];
+24 }
+25 
+26 export interface SortNumbersRound {
+27   sequence: number[];
+28 }
+29 
+30 export const sortNumbersConfigFields: ConfigField[] = [
+31   {
+32     type: 'select',
+33     key: 'inputMethod',
+34     label: 'Input method',
+35     options: [
+36       { value: 'drag', label: 'drag' },
+37       { value: 'type', label: 'type' },
+38       { value: 'both', label: 'both' },
+39     ],
+40   },
+41   {
+42     type: 'select',
+43     key: 'wrongTileBehavior',
+44     label: 'Wrong tile behaviour',
+45     options: [
+46       { value: 'reject', label: 'reject' },
+47       { value: 'lock-manual', label: 'lock-manual' },
+48       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+49     ],
+50   },
+51   {
+52     type: 'select',
+53     key: 'tileBankMode',
+54     label: 'Tile bank mode',
+55     options: [
+56       { value: 'exact', label: 'exact' },
+57       { value: 'distractors', label: 'distractors' },
+58     ],
+59   },
+60   {
+61     type: 'number',
+62     key: 'totalRounds',
+63     label: 'Total rounds',
+64     min: 1,
+65     max: 30,
+66   },
+67   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+68   {
+69     type: 'select',
+70     key: 'direction',
+71     label: 'Direction',
+72     options: [
+73       { value: 'ascending', label: 'ascending' },
+74       { value: 'descending', label: 'descending' },
+75     ],
+76   },
+77   {
+78     type: 'number',
+79     key: 'quantity',
+80     label: 'Quantity',
+81     min: 2,
+82     max: 8,
+83   },
+84   {
+85     type: 'nested-number',
+86     key: 'range',
+87     subKey: 'min',
+88     label: 'Range min',
+89     min: 1,
+90     max: 999,
+91   },
+92   {
+93     type: 'nested-number',
+94     key: 'range',
+95     subKey: 'max',
+96     label: 'Range max',
+97     min: 1,
+98     max: 999,
+99   },
+100   {
+101     type: 'nested-select',
+102     key: 'skip',
+103     subKey: 'mode',
+104     label: 'Skip mode',
+105     options: [
+106       { value: 'random', label: 'random' },
+107       { value: 'consecutive', label: 'consecutive' },
+108       { value: 'by', label: 'by' },
+109     ],
+110   },
+111   {
+112     type: 'nested-number',
+113     key: 'skip',
+114     subKey: 'step',
+115     label: 'Skip step',
+116     min: 2,
+117     max: 100,
+118     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+119   },
+120   {
+121     type: 'nested-select',
+122     key: 'skip',
+123     subKey: 'start',
+124     label: 'Skip start',
+125     options: [
+126       { value: 'range-min', label: 'range-min' },
+127       { value: 'random', label: 'random' },
+128     ],
+129     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+130   },
+131   {
+132     type: 'nested-select',
+133     key: 'distractors',
+134     subKey: 'source',
+135     label: 'Distractor source',
+136     options: [
+137       { value: 'random', label: 'random' },
+138       { value: 'gaps-only', label: 'gaps-only' },
+139       { value: 'full-range', label: 'full-range' },
+140     ],
+141     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+142   },
+143   {
+144     type: 'nested-select-or-number',
+145     key: 'distractors',
+146     subKey: 'count',
+147     label: 'Distractor count',
+148     min: 1,
+149     max: 20,
+150     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+151   },
+152   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+153 ];
 154
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:06:35Z)**_
@@ -3770,775 +3824,776 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:35Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import type { AnswerGameDraftState } from '@/components/answer-game/types';
-6	import type {
-7	  NumberMatchConfig,
-8	  NumberMatchRound,
-9	} from '@/games/number-match/types';
-10	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-11	import type {
-12	  WordSpellConfig,
-13	  WordSpellRound,
-14	} from '@/games/word-spell/types';
-15	import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-16	import type { InProgressSession } from '@/lib/game-engine/session-finder';
-17	import type {
-18	  GameEngineState,
-19	  MoveLog,
-20	  ResolvedContent,
-21	  ResolvedGameConfig,
-22	  SessionMeta,
-23	} from '@/lib/game-engine/types';
-24	import type { JSX } from 'react';
-25	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-26	import { GameShell } from '@/components/game/GameShell';
-27	import { getOrCreateDatabase } from '@/db/create-database';
-28	import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-29	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-30	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-31	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-32	import { numberMatchConfigFields } from '@/games/number-match/types';
-33	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-34	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-35	import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
-36	import { wordSpellConfigFields } from '@/games/word-spell/types';
-37	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-38	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-39	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-40	
-41	const STUB_CONTENT: ResolvedContent = {
-42	  rounds: [
-43	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-44	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-45	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-46	  ],
-47	};
-48	
-49	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-50	  gameId,
-51	  title: { en: gameId },
-52	  gradeBand: 'year1-2',
-53	  maxRounds: 3,
-54	  maxRetries: 1,
-55	  maxUndoDepth: 3,
-56	  timerVisible: false,
-57	  timerDurationSeconds: null,
-58	  difficulty: 'medium',
-59	});
-60	
-61	interface GameRouteLoaderData {
-62	  config: ResolvedGameConfig;
-63	  initialLog: MoveLog | null;
-64	  draftState: AnswerGameDraftState | null;
-65	  sessionId: string;
-66	  seed: string;
-67	  meta: SessionMeta;
-68	  gameSpecificConfig: Record<string, unknown> | null;
-69	  bookmarkId: string | null;
-70	  bookmarkName: string | null;
-71	  bookmarkColor: string | null;
-72	}
-73	
-74	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-75	  { word: 'cat', emoji: '🐱' },
-76	  { word: 'dog', emoji: '🐶' },
-77	  { word: 'sun', emoji: '☀️' },
-78	  { word: 'pin', emoji: '📌' },
-79	  { word: 'sad', emoji: '☹️' },
-80	  { word: 'ant', emoji: '🐜' },
-81	  { word: 'can', emoji: '🥫' },
-82	  { word: 'mum', emoji: '🤱' },
-83	];
-84	
-85	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-86	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-87	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-88	};
-89	
-90	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-91	  gameId: 'word-spell',
-92	  component: 'WordSpell',
-93	  inputMethod: 'drag',
-94	  wrongTileBehavior: 'lock-auto-eject',
-95	  tileBankMode: 'exact',
-96	  totalRounds: 8,
-97	  roundsInOrder: false,
-98	  ttsEnabled: true,
-99	  mode: 'picture',
-100	  tileUnit: 'letter',
-101	  rounds: sliceWordSpellRounds(8),
-102	};
-103	
-104	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-105	  gameId: 'number-match',
-106	  component: 'NumberMatch',
-107	  inputMethod: 'drag',
-108	  wrongTileBehavior: 'lock-auto-eject',
-109	  tileBankMode: 'distractors',
-110	  distractorCount: 2,
-111	  totalRounds: 3,
-112	  roundsInOrder: false,
-113	  ttsEnabled: true,
-114	  mode: 'numeral-to-group',
-115	  tileStyle: 'dots',
-116	  range: { min: 1, max: 12 },
-117	  rounds: Array.from({ length: 3 }, () => ({
-118	    value: Math.floor(Math.random() * 12) + 1,
-119	  })),
-120	});
-121	
-122	const resizeNumberMatchRounds = (
-123	  prev: NumberMatchRound[],
-124	  count: number,
-125	  range: { min: number; max: number },
-126	): NumberMatchRound[] => {
-127	  const n = Math.max(1, Math.min(count, 50));
-128	  const span = Math.max(1, range.max - range.min + 1);
-129	  const next = prev.slice(0, n).map((r) => {
-130	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-131	    return { value: range.min + Math.floor(Math.random() * span) };
-132	  });
-133	  while (next.length < n) {
-134	    next.push({
-135	      value: range.min + Math.floor(Math.random() * span),
-136	    });
-137	  }
-138	  return next;
-139	};
-140	
-141	const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
-142	  gameId: 'sort-numbers',
-143	  component: 'SortNumbers',
-144	  inputMethod: 'drag',
-145	  wrongTileBehavior: 'lock-manual',
-146	  tileBankMode: 'exact',
-147	  totalRounds: 8,
-148	  roundsInOrder: false,
-149	  ttsEnabled: true,
-150	  direction: 'ascending',
-151	  range: { min: 11, max: 99 },
-152	  quantity: 6,
-153	  skip: { mode: 'random' },
-154	  distractors: { source: 'random', count: 2 },
-155	  rounds: generateSortRounds({
-156	    range: { min: 11, max: 99 },
-157	    quantity: 6,
-158	    skip: { mode: 'random' },
-159	    totalRounds: 8,
-160	  }),
-161	});
-162	
-163	const resolveWordSpellConfig = (
-164	  saved: Record<string, unknown> | null,
-165	): WordSpellConfig => {
-166	  const base: WordSpellConfig = {
-167	    ...DEFAULT_WORD_SPELL_CONFIG,
-168	    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
-169	  };
-170	  if (!saved || saved.component !== 'WordSpell') return base;
-171	  const merged: WordSpellConfig = {
-172	    ...base,
-173	    ...(saved as Partial<WordSpellConfig>),
-174	    gameId: 'word-spell',
-175	    component: 'WordSpell',
-176	  };
-177	  const targetTotal = Math.max(
-178	    1,
-179	    Math.min(
-180	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-181	      WORD_SPELL_ROUND_POOL.length,
-182	    ),
-183	  );
-184	  if (
-185	    !Array.isArray(merged.rounds) ||
-186	    merged.rounds.length === 0 ||
-187	    merged.rounds.length !== targetTotal
-188	  ) {
-189	    merged.rounds = sliceWordSpellRounds(targetTotal);
-190	  }
-191	  merged.totalRounds = merged.rounds.length;
-192	  return merged;
-193	};
-194	
-195	const resolveNumberMatchConfig = (
-196	  saved: Record<string, unknown> | null,
-197	): NumberMatchConfig => {
-198	  const base = makeDefaultNumberMatchConfig();
-199	  if (!saved || saved.component !== 'NumberMatch') return base;
-200	  const merged: NumberMatchConfig = {
-201	    ...base,
-202	    ...(saved as Partial<NumberMatchConfig>),
-203	    gameId: 'number-match',
-204	    component: 'NumberMatch',
-205	  };
-206	  const targetLen =
-207	    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
-208	  merged.rounds = resizeNumberMatchRounds(
-209	    Array.isArray(merged.rounds) ? merged.rounds : [],
-210	    targetLen,
-211	    merged.range,
-212	  );
-213	  return merged;
-214	};
-215	
-216	const resolveSortNumbersConfig = (
-217	  saved: Record<string, unknown> | null,
-218	): SortNumbersConfig => {
-219	  const base = makeDefaultSortNumbersConfig();
-220	  if (!saved || saved.component !== 'SortNumbers') return base;
-221	
-222	  // Migrate legacy allowSkips: boolean → skip: SkipConfig
-223	  let migratedSaved = saved;
-224	  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
-225	    migratedSaved = {
-226	      ...saved,
-227	      skip: saved.allowSkips
-228	        ? { mode: 'random' }
-229	        : { mode: 'consecutive' },
-230	    };
-231	  }
-232	
-233	  const merged: SortNumbersConfig = {
-234	    ...base,
-235	    ...(migratedSaved as Partial<SortNumbersConfig>),
-236	    gameId: 'sort-numbers',
-237	    component: 'SortNumbers',
-238	  };
-239	
-240	  const tr = Math.max(1, merged.totalRounds);
-241	  merged.totalRounds = tr;
-242	
-243	  // Normalize skip: mode 'by' requires step and start.
-244	  // When the config form changes mode to 'by' it only sets mode, leaving
-245	  // step/start undefined. Guard here so generateSortRounds never receives NaN.
-246	  if (merged.skip.mode === 'by') {
-247	    const partial = merged.skip as {
-248	      mode: 'by';
-249	      step?: number;
-250	      start?: 'range-min' | 'random';
-251	    };
-252	    merged.skip = {
-253	      mode: 'by',
-254	      step: typeof partial.step === 'number' ? partial.step : 2,
-255	      start: partial.start ?? 'range-min',
-256	    };
-257	  }
-258	
-259	  const roundsStale =
-260	    Array.isArray(merged.rounds) &&
-261	    merged.rounds.some(
-262	      (r) =>
-263	        r.sequence.length !== merged.quantity ||
-264	        r.sequence.some(
-265	          (v) => v < merged.range.min || v > merged.range.max,
-266	        ),
-267	    );
-268	
-269	  if (
-270	    !Array.isArray(merged.rounds) ||
-271	    merged.rounds.length === 0 ||
-272	    merged.rounds.length !== tr ||
-273	    roundsStale
-274	  ) {
-275	    merged.rounds = generateSortRounds({
-276	      range: merged.range,
-277	      quantity: merged.quantity,
-278	      skip: merged.skip,
-279	      totalRounds: tr,
-280	    });
-281	  }
-282	
-283	  return merged;
-284	};
-285	
-286	const WordSpellGameBody = ({
-287	  gameId,
-288	  sessionId,
-289	  seed,
-290	  draftState,
-291	  gameSpecificConfig,
-292	  bookmarkId,
-293	  bookmarkName,
-294	  bookmarkColor,
-295	}: {
-296	  gameId: string;
-297	  sessionId: string;
-298	  seed: string;
-299	  draftState: AnswerGameDraftState | null;
-300	  gameSpecificConfig: Record<string, unknown> | null;
-301	  bookmarkId: string | null;
-302	  bookmarkName: string | null;
-303	  bookmarkColor: string | null;
-304	}): JSX.Element => {
-305	  const { t } = useTranslation('games');
-306	  const { save, updateConfig } = useSavedConfigs();
-307	  const initial = useMemo(
-308	    () => resolveWordSpellConfig(gameSpecificConfig),
-309	    [gameSpecificConfig],
-310	  );
-311	  const [cfg, setCfg] = useState(initial);
-312	  const [showInstructions, setShowInstructions] = useState(
-313	    draftState === null,
-314	  );
-315	  useEffect(() => {
-316	    setCfg(initial);
-317	  }, [initial]);
-318	  usePersistLastGameConfig(
-319	    gameId,
-320	    cfg as unknown as Record<string, unknown>,
-321	  );
-322	
-323	  if (showInstructions) {
-324	    return (
-325	      <InstructionsOverlay
-326	        text={t('instructions.word-spell')}
-327	        onStart={() => setShowInstructions(false)}
-328	        ttsEnabled={cfg.ttsEnabled}
-329	        gameTitle={t('word-spell')}
-330	        bookmarkName={bookmarkName ?? undefined}
-331	        bookmarkColor={
-332	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-333	        }
-334	        subject="reading"
-335	        config={cfg as unknown as Record<string, unknown>}
-336	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-337	        onSaveBookmark={async (name, color) => {
-338	          await save({
-339	            gameId,
-340	            name,
-341	            color,
-342	            config: cfg as unknown as Record<string, unknown>,
-343	          });
-344	        }}
-345	        onUpdateBookmark={
-346	          bookmarkId
-347	            ? async (name, config) => {
-348	                await updateConfig(bookmarkId, config, name);
-349	              }
-350	            : undefined
-351	        }
-352	        configFields={wordSpellConfigFields}
-353	      />
-354	    );
-355	  }
-356	
-357	  return (
-358	    <WordSpell
-359	      key={cfg.inputMethod}
-360	      config={cfg}
-361	      initialState={draftState ?? undefined}
-362	      sessionId={sessionId}
-363	      seed={seed}
-364	    />
-365	  );
-366	};
-367	
-368	const NumberMatchGameBody = ({
-369	  gameId,
-370	  sessionId,
-371	  seed,
-372	  draftState,
-373	  gameSpecificConfig,
-374	  bookmarkId,
-375	  bookmarkName,
-376	  bookmarkColor,
-377	}: {
-378	  gameId: string;
-379	  sessionId: string;
-380	  seed: string;
-381	  draftState: AnswerGameDraftState | null;
-382	  gameSpecificConfig: Record<string, unknown> | null;
-383	  bookmarkId: string | null;
-384	  bookmarkName: string | null;
-385	  bookmarkColor: string | null;
-386	}): JSX.Element => {
-387	  const { t } = useTranslation('games');
-388	  const { save, updateConfig } = useSavedConfigs();
-389	  const initial = useMemo(
-390	    () => resolveNumberMatchConfig(gameSpecificConfig),
-391	    [gameSpecificConfig],
-392	  );
-393	  const [cfg, setCfg] = useState(initial);
-394	  const [showInstructions, setShowInstructions] = useState(
-395	    draftState === null,
-396	  );
-397	  useEffect(() => {
-398	    setCfg(initial);
-399	  }, [initial]);
-400	  usePersistLastGameConfig(
-401	    gameId,
-402	    cfg as unknown as Record<string, unknown>,
-403	  );
-404	
-405	  if (showInstructions) {
-406	    return (
-407	      <InstructionsOverlay
-408	        text={t('instructions.number-match')}
-409	        onStart={() => setShowInstructions(false)}
-410	        ttsEnabled={cfg.ttsEnabled}
-411	        gameTitle={t('number-match')}
-412	        bookmarkName={bookmarkName ?? undefined}
-413	        bookmarkColor={
-414	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-415	        }
-416	        subject="math"
-417	        config={cfg as unknown as Record<string, unknown>}
-418	        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-419	        onSaveBookmark={async (name, color) => {
-420	          await save({
-421	            gameId,
-422	            name,
-423	            color,
-424	            config: cfg as unknown as Record<string, unknown>,
-425	          });
-426	        }}
-427	        onUpdateBookmark={
-428	          bookmarkId
-429	            ? async (name, config) => {
-430	                await updateConfig(bookmarkId, config, name);
-431	              }
-432	            : undefined
-433	        }
-434	        configFields={numberMatchConfigFields}
-435	      />
-436	    );
-437	  }
-438	
-439	  return (
-440	    <NumberMatch
-441	      key={cfg.inputMethod}
-442	      config={cfg}
-443	      initialState={draftState ?? undefined}
-444	      sessionId={sessionId}
-445	      seed={seed}
-446	    />
-447	  );
-448	};
-449	
-450	const SortNumbersGameBody = ({
-451	  gameId,
-452	  sessionId,
-453	  seed,
-454	  draftState,
-455	  gameSpecificConfig,
-456	  bookmarkId,
-457	  bookmarkName,
-458	  bookmarkColor,
-459	}: {
-460	  gameId: string;
-461	  sessionId: string;
-462	  seed: string;
-463	  draftState: AnswerGameDraftState | null;
-464	  gameSpecificConfig: Record<string, unknown> | null;
-465	  bookmarkId: string | null;
-466	  bookmarkName: string | null;
-467	  bookmarkColor: string | null;
-468	}): JSX.Element => {
-469	  const { t } = useTranslation('games');
-470	  const { save, updateConfig } = useSavedConfigs();
-471	  const initial = useMemo(
-472	    () => resolveSortNumbersConfig(gameSpecificConfig),
-473	    [gameSpecificConfig],
-474	  );
-475	  const [cfg, setCfg] = useState(initial);
-476	  const [showInstructions, setShowInstructions] = useState(
-477	    draftState === null,
-478	  );
-479	  useEffect(() => {
-480	    setCfg(initial);
-481	  }, [initial]);
-482	  usePersistLastGameConfig(
-483	    gameId,
-484	    cfg as unknown as Record<string, unknown>,
-485	  );
-486	
-487	  if (showInstructions) {
-488	    return (
-489	      <InstructionsOverlay
-490	        text={t('instructions.sort-numbers')}
-491	        onStart={() => setShowInstructions(false)}
-492	        ttsEnabled={cfg.ttsEnabled}
-493	        gameTitle={t('sort-numbers')}
-494	        bookmarkName={bookmarkName ?? undefined}
-495	        bookmarkColor={
-496	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-497	        }
-498	        subject="math"
-499	        config={cfg as unknown as Record<string, unknown>}
-500	        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-501	        onSaveBookmark={async (name, color) => {
-502	          await save({
-503	            gameId,
-504	            name,
-505	            color,
-506	            config: cfg as unknown as Record<string, unknown>,
-507	          });
-508	        }}
-509	        onUpdateBookmark={
-510	          bookmarkId
-511	            ? async (name, config) => {
-512	                await updateConfig(bookmarkId, config, name);
-513	              }
-514	            : undefined
-515	        }
-516	        configFields={sortNumbersConfigFields}
-517	      />
-518	    );
-519	  }
-520	
-521	  return (
-522	    <SortNumbers
-523	      key={cfg.inputMethod}
-524	      config={cfg}
-525	      initialState={draftState ?? undefined}
-526	      sessionId={sessionId}
-527	      seed={seed}
-528	    />
-529	  );
-530	};
-531	
-532	const GameBody = ({
-533	  gameId,
-534	  sessionId,
-535	  seed,
-536	  draftState,
-537	  gameSpecificConfig,
-538	  bookmarkId,
-539	  bookmarkName,
-540	  bookmarkColor,
-541	}: {
-542	  gameId: string;
-543	  sessionId: string;
-544	  seed: string;
-545	  draftState: AnswerGameDraftState | null;
-546	  gameSpecificConfig: Record<string, unknown> | null;
-547	  bookmarkId: string | null;
-548	  bookmarkName: string | null;
-549	  bookmarkColor: string | null;
-550	}): JSX.Element => {
-551	  if (gameId === 'sort-numbers') {
-552	    return (
-553	      <SortNumbersGameBody
-554	        gameId={gameId}
-555	        sessionId={sessionId}
-556	        seed={seed}
-557	        draftState={draftState}
-558	        gameSpecificConfig={gameSpecificConfig}
-559	        bookmarkId={bookmarkId}
-560	        bookmarkName={bookmarkName}
-561	        bookmarkColor={bookmarkColor}
-562	      />
-563	    );
-564	  }
-565	
-566	  if (gameId === 'word-spell') {
-567	    return (
-568	      <WordSpellGameBody
-569	        gameId={gameId}
-570	        sessionId={sessionId}
-571	        seed={seed}
-572	        draftState={draftState}
-573	        gameSpecificConfig={gameSpecificConfig}
-574	        bookmarkId={bookmarkId}
-575	        bookmarkName={bookmarkName}
-576	        bookmarkColor={bookmarkColor}
-577	      />
-578	    );
-579	  }
-580	
-581	  if (gameId === 'number-match') {
-582	    return (
-583	      <NumberMatchGameBody
-584	        gameId={gameId}
-585	        sessionId={sessionId}
-586	        seed={seed}
-587	        draftState={draftState}
-588	        gameSpecificConfig={gameSpecificConfig}
-589	        bookmarkId={bookmarkId}
-590	        bookmarkName={bookmarkName}
-591	        bookmarkColor={bookmarkColor}
-592	      />
-593	    );
-594	  }
-595	
-596	  return (
-597	    <div className="flex h-full items-center justify-center text-muted-foreground">
-598	      <p>Game not found</p>
-599	    </div>
-600	  );
-601	};
-602	
-603	export const GameRoute = ({
-604	  config,
-605	  initialLog,
-606	  draftState,
-607	  sessionId,
-608	  seed,
-609	  meta,
-610	  gameSpecificConfig,
-611	  bookmarkId,
-612	  bookmarkName,
-613	  bookmarkColor,
-614	}: GameRouteLoaderData): JSX.Element => (
-615	  <GameShell
-616	    config={config}
-617	    moves={{}}
-618	    initialState={meta.initialState}
-619	    sessionId={sessionId}
-620	    meta={meta}
-621	    initialLog={initialLog ?? undefined}
-622	  >
-623	    <GameBody
-624	      gameId={config.gameId}
-625	      sessionId={sessionId}
-626	      seed={seed}
-627	      draftState={draftState}
-628	      gameSpecificConfig={gameSpecificConfig}
-629	      bookmarkId={bookmarkId}
-630	      bookmarkName={bookmarkName}
-631	      bookmarkColor={bookmarkColor}
-632	    />
-633	  </GameShell>
-634	);
-635	
-636	const RouteComponent = (): JSX.Element => {
-637	  const data = Route.useLoaderData();
-638	  return <GameRoute {...data} />;
-639	};
-640	
-641	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-642	  validateSearch: (search: Record<string, unknown>) => ({
-643	    configId:
-644	      typeof search.configId === 'string' ? search.configId : undefined,
-645	  }),
-646	  loaderDeps: ({ search }) => ({ configId: search.configId }),
-647	  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
-648	    const { gameId } = params;
-649	    const profileId = 'default';
-650	    const defaultConfig = makeDefaultConfig(gameId);
-651	
-652	    // Route loaders run server-side (SSR) where IndexedDB is unavailable.
-653	    // Return minimal defaults so the client hydrates and re-runs on the client.
-654	    if (typeof indexedDB === 'undefined') {
-655	      const sessionId = nanoid();
-656	      const seed = nanoid();
-657	      const initialState: GameEngineState = {
-658	        phase: 'instructions',
-659	        roundIndex: 0,
-660	        score: 0,
-661	        streak: 0,
-662	        retryCount: 0,
-663	        content: STUB_CONTENT,
-664	        currentRound: {
-665	          roundId: STUB_CONTENT.rounds[0]?.id ?? '',
-666	          answer: null,
-667	          hintsUsed: 0,
-668	        },
-669	      };
-670	      return {
-671	        config: defaultConfig,
-672	        initialLog: null,
-673	        draftState: null,
-674	        sessionId,
-675	        seed,
-676	        meta: {
-677	          profileId,
-678	          gameId,
-679	          gradeBand: defaultConfig.gradeBand,
-680	          seed,
-681	          initialContent: STUB_CONTENT,
-682	          initialState,
-683	        },
-684	        gameSpecificConfig: null,
-685	        bookmarkId: null,
-686	        bookmarkName: null,
-687	        bookmarkColor: null,
-688	      };
-689	    }
-690	
-691	    const db = await getOrCreateDatabase();
-692	    const config = await loadGameConfig(
-693	      gameId,
-694	      profileId,
-695	      defaultConfig.gradeBand,
-696	      db,
-697	      defaultConfig,
-698	    );
-699	
-700	    const inProgressSession: InProgressSession | null =
-701	      await findInProgressSession(profileId, gameId, db);
-702	    const initialLog = inProgressSession?.log ?? null;
-703	    const draftState = inProgressSession?.draftState ?? null;
-704	
-705	    let gameSpecificConfig: Record<string, unknown> | null = null;
-706	    let bookmarkId: string | null = null;
-707	    let bookmarkName: string | null = null;
-708	    let bookmarkColor: string | null = null;
-709	
-710	    if (deps.configId) {
-711	      const savedDoc = await db.saved_game_configs
-712	        .findOne(deps.configId)
-713	        .exec();
-714	      if (savedDoc) {
-715	        gameSpecificConfig = savedDoc.config;
-716	        bookmarkId = savedDoc.id;
-717	        bookmarkName = savedDoc.name;
-718	        bookmarkColor = savedDoc.color;
-719	      }
-720	    } else {
-721	      const lastDoc = await db.saved_game_configs
-722	        .findOne(lastSessionSavedConfigId(gameId))
-723	        .exec();
-724	      if (lastDoc) gameSpecificConfig = lastDoc.config;
-725	    }
-726	
-727	    const sessionId = initialLog?.sessionId ?? nanoid();
-728	    const seed = initialLog?.seed ?? nanoid();
-729	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-730	    const initialState: GameEngineState = initialLog?.initialState ?? {
-731	      phase: 'instructions',
-732	      roundIndex: 0,
-733	      score: 0,
-734	      streak: 0,
-735	      retryCount: 0,
-736	      content: initialContent,
-737	      currentRound: {
-738	        roundId: initialContent.rounds[0]?.id ?? '',
-739	        answer: null,
-740	        hintsUsed: 0,
-741	      },
-742	    };
-743	
-744	    const meta: SessionMeta = {
-745	      profileId,
-746	      gameId,
-747	      gradeBand: config.gradeBand,
-748	      seed,
-749	      initialContent,
-750	      initialState,
-751	    };
-752	
-753	    return {
-754	      config,
-755	      initialLog,
-756	      draftState,
-757	      sessionId,
-758	      seed,
-759	      meta,
-760	      gameSpecificConfig,
-761	      bookmarkId,
-762	      bookmarkName,
-763	      bookmarkColor,
-764	    };
-765	  },
-766	  component: RouteComponent,
-767	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import type { AnswerGameDraftState } from '@/components/answer-game/types';
+6 import type {
+7   NumberMatchConfig,
+8   NumberMatchRound,
+9 } from '@/games/number-match/types';
+10 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+11 import type {
+12   WordSpellConfig,
+13   WordSpellRound,
+14 } from '@/games/word-spell/types';
+15 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+16 import type { InProgressSession } from '@/lib/game-engine/session-finder';
+17 import type {
+18   GameEngineState,
+19   MoveLog,
+20   ResolvedContent,
+21   ResolvedGameConfig,
+22   SessionMeta,
+23 } from '@/lib/game-engine/types';
+24 import type { JSX } from 'react';
+25 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+26 import { GameShell } from '@/components/game/GameShell';
+27 import { getOrCreateDatabase } from '@/db/create-database';
+28 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+29 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+30 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+31 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+32 import { numberMatchConfigFields } from '@/games/number-match/types';
+33 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+34 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+35 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+36 import { wordSpellConfigFields } from '@/games/word-spell/types';
+37 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+38 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+39 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+40 
+41 const STUB_CONTENT: ResolvedContent = {
+42   rounds: [
+43     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+44     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+45     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+46   ],
+47 };
+48 
+49 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+50   gameId,
+51   title: { en: gameId },
+52   gradeBand: 'year1-2',
+53   maxRounds: 3,
+54   maxRetries: 1,
+55   maxUndoDepth: 3,
+56   timerVisible: false,
+57   timerDurationSeconds: null,
+58   difficulty: 'medium',
+59 });
+60 
+61 interface GameRouteLoaderData {
+62   config: ResolvedGameConfig;
+63   initialLog: MoveLog | null;
+64   draftState: AnswerGameDraftState | null;
+65   sessionId: string;
+66   seed: string;
+67   meta: SessionMeta;
+68   gameSpecificConfig: Record<string, unknown> | null;
+69   bookmarkId: string | null;
+70   bookmarkName: string | null;
+71   bookmarkColor: string | null;
+72 }
+73 
+74 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+75   { word: 'cat', emoji: '🐱' },
+76   { word: 'dog', emoji: '🐶' },
+77   { word: 'sun', emoji: '☀️' },
+78   { word: 'pin', emoji: '📌' },
+79   { word: 'sad', emoji: '☹️' },
+80   { word: 'ant', emoji: '🐜' },
+81   { word: 'can', emoji: '🥫' },
+82   { word: 'mum', emoji: '🤱' },
+83 ];
+84 
+85 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+86   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+87   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+88 };
+89 
+90 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+91   gameId: 'word-spell',
+92   component: 'WordSpell',
+93   inputMethod: 'drag',
+94   wrongTileBehavior: 'lock-auto-eject',
+95   tileBankMode: 'exact',
+96   totalRounds: 8,
+97   roundsInOrder: false,
+98   ttsEnabled: true,
+99   mode: 'picture',
+100   tileUnit: 'letter',
+101   rounds: sliceWordSpellRounds(8),
+102 };
+103 
+104 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+105   gameId: 'number-match',
+106   component: 'NumberMatch',
+107   inputMethod: 'drag',
+108   wrongTileBehavior: 'lock-auto-eject',
+109   tileBankMode: 'distractors',
+110   distractorCount: 2,
+111   totalRounds: 3,
+112   roundsInOrder: false,
+113   ttsEnabled: true,
+114   mode: 'numeral-to-group',
+115   tileStyle: 'dots',
+116   range: { min: 1, max: 12 },
+117   rounds: Array.from({ length: 3 }, () => ({
+118     value: Math.floor(Math.random() * 12) + 1,
+119   })),
+120 });
+121 
+122 const resizeNumberMatchRounds = (
+123   prev: NumberMatchRound[],
+124   count: number,
+125   range: { min: number; max: number },
+126 ): NumberMatchRound[] => {
+127   const n = Math.max(1, Math.min(count, 50));
+128   const span = Math.max(1, range.max - range.min + 1);
+129   const next = prev.slice(0, n).map((r) => {
+130     if (r.value >= range.min && r.value <= range.max) return { ...r };
+131     return { value: range.min + Math.floor(Math.random() * span) };
+132   });
+133   while (next.length < n) {
+134     next.push({
+135       value: range.min + Math.floor(Math.random() * span),
+136     });
+137   }
+138   return next;
+139 };
+140 
+141 const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
+142   gameId: 'sort-numbers',
+143   component: 'SortNumbers',
+144   inputMethod: 'drag',
+145   wrongTileBehavior: 'lock-manual',
+146   tileBankMode: 'exact',
+147   totalRounds: 8,
+148   roundsInOrder: false,
+149   ttsEnabled: true,
+150   direction: 'ascending',
+151   range: { min: 11, max: 99 },
+152   quantity: 6,
+153   skip: { mode: 'random' },
+154   distractors: { source: 'random', count: 2 },
+155   rounds: generateSortRounds({
+156     range: { min: 11, max: 99 },
+157     quantity: 6,
+158     skip: { mode: 'random' },
+159     totalRounds: 8,
+160   }),
+161 });
+162 
+163 const resolveWordSpellConfig = (
+164   saved: Record<string, unknown> | null,
+165 ): WordSpellConfig => {
+166   const base: WordSpellConfig = {
+167     ...DEFAULT_WORD_SPELL_CONFIG,
+168     rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+169   };
+170   if (!saved || saved.component !== 'WordSpell') return base;
+171   const merged: WordSpellConfig = {
+172     ...base,
+173     ...(saved as Partial<WordSpellConfig>),
+174     gameId: 'word-spell',
+175     component: 'WordSpell',
+176   };
+177   const targetTotal = Math.max(
+178     1,
+179     Math.min(
+180       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+181       WORD_SPELL_ROUND_POOL.length,
+182     ),
+183   );
+184   if (
+185     !Array.isArray(merged.rounds) ||
+186     merged.rounds.length === 0 ||
+187     merged.rounds.length !== targetTotal
+188   ) {
+189     merged.rounds = sliceWordSpellRounds(targetTotal);
+190   }
+191   merged.totalRounds = merged.rounds.length;
+192   return merged;
+193 };
+194 
+195 const resolveNumberMatchConfig = (
+196   saved: Record<string, unknown> | null,
+197 ): NumberMatchConfig => {
+198   const base = makeDefaultNumberMatchConfig();
+199   if (!saved || saved.component !== 'NumberMatch') return base;
+200   const merged: NumberMatchConfig = {
+201     ...base,
+202     ...(saved as Partial<NumberMatchConfig>),
+203     gameId: 'number-match',
+204     component: 'NumberMatch',
+205   };
+206   const targetLen =
+207     merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+208   merged.rounds = resizeNumberMatchRounds(
+209     Array.isArray(merged.rounds) ? merged.rounds : [],
+210     targetLen,
+211     merged.range,
+212   );
+213   return merged;
+214 };
+215 
+216 const resolveSortNumbersConfig = (
+217   saved: Record<string, unknown> | null,
+218 ): SortNumbersConfig => {
+219   const base = makeDefaultSortNumbersConfig();
+220   if (!saved || saved.component !== 'SortNumbers') return base;
+221 
+222   // Migrate legacy allowSkips: boolean → skip: SkipConfig
+223   let migratedSaved = saved;
+224   if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+225     migratedSaved = {
+226       ...saved,
+227       skip: saved.allowSkips
+228         ? { mode: 'random' }
+229         : { mode: 'consecutive' },
+230     };
+231   }
+232 
+233   const merged: SortNumbersConfig = {
+234     ...base,
+235     ...(migratedSaved as Partial<SortNumbersConfig>),
+236     gameId: 'sort-numbers',
+237     component: 'SortNumbers',
+238   };
+239 
+240   const tr = Math.max(1, merged.totalRounds);
+241   merged.totalRounds = tr;
+242 
+243   // Normalize skip: mode 'by' requires step and start.
+244   // When the config form changes mode to 'by' it only sets mode, leaving
+245   // step/start undefined. Guard here so generateSortRounds never receives NaN.
+246   if (merged.skip.mode === 'by') {
+247     const partial = merged.skip as {
+248       mode: 'by';
+249       step?: number;
+250       start?: 'range-min' | 'random';
+251     };
+252     merged.skip = {
+253       mode: 'by',
+254       step: typeof partial.step === 'number' ? partial.step : 2,
+255       start: partial.start ?? 'range-min',
+256     };
+257   }
+258 
+259   const roundsStale =
+260     Array.isArray(merged.rounds) &&
+261     merged.rounds.some(
+262       (r) =>
+263         r.sequence.length !== merged.quantity ||
+264         r.sequence.some(
+265           (v) => v < merged.range.min || v > merged.range.max,
+266         ),
+267     );
+268 
+269   if (
+270     !Array.isArray(merged.rounds) ||
+271     merged.rounds.length === 0 ||
+272     merged.rounds.length !== tr ||
+273     roundsStale
+274   ) {
+275     merged.rounds = generateSortRounds({
+276       range: merged.range,
+277       quantity: merged.quantity,
+278       skip: merged.skip,
+279       totalRounds: tr,
+280     });
+281   }
+282 
+283   return merged;
+284 };
+285 
+286 const WordSpellGameBody = ({
+287   gameId,
+288   sessionId,
+289   seed,
+290   draftState,
+291   gameSpecificConfig,
+292   bookmarkId,
+293   bookmarkName,
+294   bookmarkColor,
+295 }: {
+296   gameId: string;
+297   sessionId: string;
+298   seed: string;
+299   draftState: AnswerGameDraftState | null;
+300   gameSpecificConfig: Record<string, unknown> | null;
+301   bookmarkId: string | null;
+302   bookmarkName: string | null;
+303   bookmarkColor: string | null;
+304 }): JSX.Element => {
+305   const { t } = useTranslation('games');
+306   const { save, updateConfig } = useSavedConfigs();
+307   const initial = useMemo(
+308     () => resolveWordSpellConfig(gameSpecificConfig),
+309     [gameSpecificConfig],
+310   );
+311   const [cfg, setCfg] = useState(initial);
+312   const [showInstructions, setShowInstructions] = useState(
+313     draftState === null,
+314   );
+315   useEffect(() => {
+316     setCfg(initial);
+317   }, [initial]);
+318   usePersistLastGameConfig(
+319     gameId,
+320     cfg as unknown as Record<string, unknown>,
+321   );
+322 
+323   if (showInstructions) {
+324     return (
+325       <InstructionsOverlay
+326         text={t('instructions.word-spell')}
+327         onStart={() => setShowInstructions(false)}
+328         ttsEnabled={cfg.ttsEnabled}
+329         gameTitle={t('word-spell')}
+330         bookmarkName={bookmarkName ?? undefined}
+331         bookmarkColor={
+332           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+333         }
+334         subject="reading"
+335         config={cfg as unknown as Record<string, unknown>}
+336         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+337         onSaveBookmark={async (name, color) => {
+338           await save({
+339             gameId,
+340             name,
+341             color,
+342             config: cfg as unknown as Record<string, unknown>,
+343           });
+344         }}
+345         onUpdateBookmark={
+346           bookmarkId
+347             ? async (name, config) => {
+348                 await updateConfig(bookmarkId, config, name);
+349               }
+350             : undefined
+351         }
+352         configFields={wordSpellConfigFields}
+353       />
+354     );
+355   }
+356 
+357   return (
+358     <WordSpell
+359       key={cfg.inputMethod}
+360       config={cfg}
+361       initialState={draftState ?? undefined}
+362       sessionId={sessionId}
+363       seed={seed}
+364     />
+365   );
+366 };
+367 
+368 const NumberMatchGameBody = ({
+369   gameId,
+370   sessionId,
+371   seed,
+372   draftState,
+373   gameSpecificConfig,
+374   bookmarkId,
+375   bookmarkName,
+376   bookmarkColor,
+377 }: {
+378   gameId: string;
+379   sessionId: string;
+380   seed: string;
+381   draftState: AnswerGameDraftState | null;
+382   gameSpecificConfig: Record<string, unknown> | null;
+383   bookmarkId: string | null;
+384   bookmarkName: string | null;
+385   bookmarkColor: string | null;
+386 }): JSX.Element => {
+387   const { t } = useTranslation('games');
+388   const { save, updateConfig } = useSavedConfigs();
+389   const initial = useMemo(
+390     () => resolveNumberMatchConfig(gameSpecificConfig),
+391     [gameSpecificConfig],
+392   );
+393   const [cfg, setCfg] = useState(initial);
+394   const [showInstructions, setShowInstructions] = useState(
+395     draftState === null,
+396   );
+397   useEffect(() => {
+398     setCfg(initial);
+399   }, [initial]);
+400   usePersistLastGameConfig(
+401     gameId,
+402     cfg as unknown as Record<string, unknown>,
+403   );
+404 
+405   if (showInstructions) {
+406     return (
+407       <InstructionsOverlay
+408         text={t('instructions.number-match')}
+409         onStart={() => setShowInstructions(false)}
+410         ttsEnabled={cfg.ttsEnabled}
+411         gameTitle={t('number-match')}
+412         bookmarkName={bookmarkName ?? undefined}
+413         bookmarkColor={
+414           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+415         }
+416         subject="math"
+417         config={cfg as unknown as Record<string, unknown>}
+418         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+419         onSaveBookmark={async (name, color) => {
+420           await save({
+421             gameId,
+422             name,
+423             color,
+424             config: cfg as unknown as Record<string, unknown>,
+425           });
+426         }}
+427         onUpdateBookmark={
+428           bookmarkId
+429             ? async (name, config) => {
+430                 await updateConfig(bookmarkId, config, name);
+431               }
+432             : undefined
+433         }
+434         configFields={numberMatchConfigFields}
+435       />
+436     );
+437   }
+438 
+439   return (
+440     <NumberMatch
+441       key={cfg.inputMethod}
+442       config={cfg}
+443       initialState={draftState ?? undefined}
+444       sessionId={sessionId}
+445       seed={seed}
+446     />
+447   );
+448 };
+449 
+450 const SortNumbersGameBody = ({
+451   gameId,
+452   sessionId,
+453   seed,
+454   draftState,
+455   gameSpecificConfig,
+456   bookmarkId,
+457   bookmarkName,
+458   bookmarkColor,
+459 }: {
+460   gameId: string;
+461   sessionId: string;
+462   seed: string;
+463   draftState: AnswerGameDraftState | null;
+464   gameSpecificConfig: Record<string, unknown> | null;
+465   bookmarkId: string | null;
+466   bookmarkName: string | null;
+467   bookmarkColor: string | null;
+468 }): JSX.Element => {
+469   const { t } = useTranslation('games');
+470   const { save, updateConfig } = useSavedConfigs();
+471   const initial = useMemo(
+472     () => resolveSortNumbersConfig(gameSpecificConfig),
+473     [gameSpecificConfig],
+474   );
+475   const [cfg, setCfg] = useState(initial);
+476   const [showInstructions, setShowInstructions] = useState(
+477     draftState === null,
+478   );
+479   useEffect(() => {
+480     setCfg(initial);
+481   }, [initial]);
+482   usePersistLastGameConfig(
+483     gameId,
+484     cfg as unknown as Record<string, unknown>,
+485   );
+486 
+487   if (showInstructions) {
+488     return (
+489       <InstructionsOverlay
+490         text={t('instructions.sort-numbers')}
+491         onStart={() => setShowInstructions(false)}
+492         ttsEnabled={cfg.ttsEnabled}
+493         gameTitle={t('sort-numbers')}
+494         bookmarkName={bookmarkName ?? undefined}
+495         bookmarkColor={
+496           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+497         }
+498         subject="math"
+499         config={cfg as unknown as Record<string, unknown>}
+500         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+501         onSaveBookmark={async (name, color) => {
+502           await save({
+503             gameId,
+504             name,
+505             color,
+506             config: cfg as unknown as Record<string, unknown>,
+507           });
+508         }}
+509         onUpdateBookmark={
+510           bookmarkId
+511             ? async (name, config) => {
+512                 await updateConfig(bookmarkId, config, name);
+513               }
+514             : undefined
+515         }
+516         configFields={sortNumbersConfigFields}
+517       />
+518     );
+519   }
+520 
+521   return (
+522     <SortNumbers
+523       key={cfg.inputMethod}
+524       config={cfg}
+525       initialState={draftState ?? undefined}
+526       sessionId={sessionId}
+527       seed={seed}
+528     />
+529   );
+530 };
+531 
+532 const GameBody = ({
+533   gameId,
+534   sessionId,
+535   seed,
+536   draftState,
+537   gameSpecificConfig,
+538   bookmarkId,
+539   bookmarkName,
+540   bookmarkColor,
+541 }: {
+542   gameId: string;
+543   sessionId: string;
+544   seed: string;
+545   draftState: AnswerGameDraftState | null;
+546   gameSpecificConfig: Record<string, unknown> | null;
+547   bookmarkId: string | null;
+548   bookmarkName: string | null;
+549   bookmarkColor: string | null;
+550 }): JSX.Element => {
+551   if (gameId === 'sort-numbers') {
+552     return (
+553       <SortNumbersGameBody
+554         gameId={gameId}
+555         sessionId={sessionId}
+556         seed={seed}
+557         draftState={draftState}
+558         gameSpecificConfig={gameSpecificConfig}
+559         bookmarkId={bookmarkId}
+560         bookmarkName={bookmarkName}
+561         bookmarkColor={bookmarkColor}
+562       />
+563     );
+564   }
+565 
+566   if (gameId === 'word-spell') {
+567     return (
+568       <WordSpellGameBody
+569         gameId={gameId}
+570         sessionId={sessionId}
+571         seed={seed}
+572         draftState={draftState}
+573         gameSpecificConfig={gameSpecificConfig}
+574         bookmarkId={bookmarkId}
+575         bookmarkName={bookmarkName}
+576         bookmarkColor={bookmarkColor}
+577       />
+578     );
+579   }
+580 
+581   if (gameId === 'number-match') {
+582     return (
+583       <NumberMatchGameBody
+584         gameId={gameId}
+585         sessionId={sessionId}
+586         seed={seed}
+587         draftState={draftState}
+588         gameSpecificConfig={gameSpecificConfig}
+589         bookmarkId={bookmarkId}
+590         bookmarkName={bookmarkName}
+591         bookmarkColor={bookmarkColor}
+592       />
+593     );
+594   }
+595 
+596   return (
+597     <div className="flex h-full items-center justify-center text-muted-foreground">
+598       <p>Game not found</p>
+599     </div>
+600   );
+601 };
+602 
+603 export const GameRoute = ({
+604   config,
+605   initialLog,
+606   draftState,
+607   sessionId,
+608   seed,
+609   meta,
+610   gameSpecificConfig,
+611   bookmarkId,
+612   bookmarkName,
+613   bookmarkColor,
+614 }: GameRouteLoaderData): JSX.Element => (
+615   <GameShell
+616     config={config}
+617     moves={{}}
+618     initialState={meta.initialState}
+619     sessionId={sessionId}
+620     meta={meta}
+621     initialLog={initialLog ?? undefined}
+622   >
+623     <GameBody
+624       gameId={config.gameId}
+625       sessionId={sessionId}
+626       seed={seed}
+627       draftState={draftState}
+628       gameSpecificConfig={gameSpecificConfig}
+629       bookmarkId={bookmarkId}
+630       bookmarkName={bookmarkName}
+631       bookmarkColor={bookmarkColor}
+632     />
+633   </GameShell>
+634 );
+635 
+636 const RouteComponent = (): JSX.Element => {
+637   const data = Route.useLoaderData();
+638   return <GameRoute {...data} />;
+639 };
+640 
+641 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+642   validateSearch: (search: Record<string, unknown>) => ({
+643     configId:
+644       typeof search.configId === 'string' ? search.configId : undefined,
+645   }),
+646   loaderDeps: ({ search }) => ({ configId: search.configId }),
+647   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
+648     const { gameId } = params;
+649     const profileId = 'default';
+650     const defaultConfig = makeDefaultConfig(gameId);
+651 
+652     // Route loaders run server-side (SSR) where IndexedDB is unavailable.
+653     // Return minimal defaults so the client hydrates and re-runs on the client.
+654     if (typeof indexedDB === 'undefined') {
+655       const sessionId = nanoid();
+656       const seed = nanoid();
+657       const initialState: GameEngineState = {
+658         phase: 'instructions',
+659         roundIndex: 0,
+660         score: 0,
+661         streak: 0,
+662         retryCount: 0,
+663         content: STUB_CONTENT,
+664         currentRound: {
+665           roundId: STUB_CONTENT.rounds[0]?.id ?? '',
+666           answer: null,
+667           hintsUsed: 0,
+668         },
+669       };
+670       return {
+671         config: defaultConfig,
+672         initialLog: null,
+673         draftState: null,
+674         sessionId,
+675         seed,
+676         meta: {
+677           profileId,
+678           gameId,
+679           gradeBand: defaultConfig.gradeBand,
+680           seed,
+681           initialContent: STUB_CONTENT,
+682           initialState,
+683         },
+684         gameSpecificConfig: null,
+685         bookmarkId: null,
+686         bookmarkName: null,
+687         bookmarkColor: null,
+688       };
+689     }
+690 
+691     const db = await getOrCreateDatabase();
+692     const config = await loadGameConfig(
+693       gameId,
+694       profileId,
+695       defaultConfig.gradeBand,
+696       db,
+697       defaultConfig,
+698     );
+699 
+700     const inProgressSession: InProgressSession | null =
+701       await findInProgressSession(profileId, gameId, db);
+702     const initialLog = inProgressSession?.log ?? null;
+703     const draftState = inProgressSession?.draftState ?? null;
+704 
+705     let gameSpecificConfig: Record<string, unknown> | null = null;
+706     let bookmarkId: string | null = null;
+707     let bookmarkName: string | null = null;
+708     let bookmarkColor: string | null = null;
+709 
+710     if (deps.configId) {
+711       const savedDoc = await db.saved_game_configs
+712         .findOne(deps.configId)
+713         .exec();
+714       if (savedDoc) {
+715         gameSpecificConfig = savedDoc.config;
+716         bookmarkId = savedDoc.id;
+717         bookmarkName = savedDoc.name;
+718         bookmarkColor = savedDoc.color;
+719       }
+720     } else {
+721       const lastDoc = await db.saved_game_configs
+722         .findOne(lastSessionSavedConfigId(gameId))
+723         .exec();
+724       if (lastDoc) gameSpecificConfig = lastDoc.config;
+725     }
+726 
+727     const sessionId = initialLog?.sessionId ?? nanoid();
+728     const seed = initialLog?.seed ?? nanoid();
+729     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+730     const initialState: GameEngineState = initialLog?.initialState ?? {
+731       phase: 'instructions',
+732       roundIndex: 0,
+733       score: 0,
+734       streak: 0,
+735       retryCount: 0,
+736       content: initialContent,
+737       currentRound: {
+738         roundId: initialContent.rounds[0]?.id ?? '',
+739         answer: null,
+740         hintsUsed: 0,
+741       },
+742     };
+743 
+744     const meta: SessionMeta = {
+745       profileId,
+746       gameId,
+747       gradeBand: config.gradeBand,
+748       seed,
+749       initialContent,
+750       initialState,
+751     };
+752 
+753     return {
+754       config,
+755       initialLog,
+756       draftState,
+757       sessionId,
+758       seed,
+759       meta,
+760       gameSpecificConfig,
+761       bookmarkId,
+762       bookmarkName,
+763       bookmarkColor,
+764     };
+765   },
+766   component: RouteComponent,
+767 });
 768
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:06:38Z)**_
@@ -4558,265 +4613,266 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:39Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerGameDraftState,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-16	import { Slot } from '@/components/answer-game/Slot/Slot';
-17	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-18	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-19	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-20	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-21	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-22	import { buildRoundOrder } from '@/games/build-round-order';
-23	
-24	interface SortNumbersProps {
-25	  config: SortNumbersConfig;
-26	  initialState?: AnswerGameDraftState;
-27	  sessionId?: string;
-28	  seed?: string;
-29	}
-30	
-31	const SortNumbersSession = ({
-32	  sortNumbersConfig,
-33	  roundOrder,
-34	  onRestartSession,
-35	}: {
-36	  sortNumbersConfig: SortNumbersConfig;
-37	  roundOrder: readonly number[];
-38	  onRestartSession: () => void;
-39	}) => {
-40	  const { t } = useTranslation('games');
-41	  const { phase, roundIndex, retryCount, zones } =
-42	    useAnswerGameContext();
-43	  const dispatch = useAnswerGameDispatch();
-44	  const { confettiReady, gameOverReady } = useGameSounds();
-45	  const navigate = useNavigate();
-46	  const { locale } = useParams({ from: '/$locale' });
-47	  const completionToken = useRef(0);
-48	
-49	  const configRoundIndex = roundOrder[roundIndex];
-50	  const round =
-51	    configRoundIndex === undefined
-52	      ? undefined
-53	      : sortNumbersConfig.rounds[configRoundIndex];
-54	
-55	  const directionLabel =
-56	    sortNumbersConfig.direction === 'ascending'
-57	      ? t('sort-numbers-ui.ascending-label')
-58	      : t('sort-numbers-ui.descending-label');
-59	
-60	  useRoundTTS(directionLabel);
-61	
-62	  const handleHome = () => {
-63	    void navigate({ to: '/$locale', params: { locale } });
-64	  };
-65	
-66	  const handlePlayAgain = () => {
-67	    onRestartSession();
-68	  };
-69	
-70	  useEffect(() => {
-71	    if (phase !== 'round-complete' || !confettiReady) return;
-72	
-73	    const token = ++completionToken.current;
-74	    const delayMs = 750;
-75	    const timer = globalThis.setTimeout(() => {
-76	      if (completionToken.current !== token) return;
-77	
-78	      const isLastRound = roundIndex >= roundOrder.length - 1;
-79	      if (isLastRound) {
-80	        dispatch({ type: 'COMPLETE_GAME' });
-81	        return;
-82	      }
-83	
-84	      const nextConfigIndex = roundOrder[roundIndex + 1];
-85	      const nextRound =
-86	        nextConfigIndex === undefined
-87	          ? undefined
-88	          : sortNumbersConfig.rounds[nextConfigIndex];
-89	
-90	      if (!nextRound) {
-91	        dispatch({ type: 'COMPLETE_GAME' });
-92	        return;
-93	      }
-94	
-95	      const distractor =
-96	        sortNumbersConfig.tileBankMode === 'distractors'
-97	          ? {
-98	              config: sortNumbersConfig.distractors,
-99	              range: sortNumbersConfig.range,
-100	            }
-101	          : undefined;
-102	
-103	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-104	        nextRound.sequence,
-105	        sortNumbersConfig.direction,
-106	        distractor,
-107	      );
-108	      dispatch({
-109	        type: 'ADVANCE_ROUND',
-110	        tiles: nextTiles,
-111	        zones: nextZones,
-112	      });
-113	    }, delayMs);
-114	
-115	    return () => {
-116	      globalThis.clearTimeout(timer);
-117	    };
-118	  }, [
-119	    phase,
-120	    confettiReady,
-121	    roundIndex,
-122	    dispatch,
-123	    roundOrder,
-124	    sortNumbersConfig.rounds,
-125	    sortNumbersConfig.direction,
-126	    sortNumbersConfig.tileBankMode,
-127	    sortNumbersConfig.distractors,
-128	    sortNumbersConfig.range,
-129	  ]);
-130	
-131	  if (!round) return null;
-132	
-133	  return (
-134	    <>
-135	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-136	        <AnswerGame.Question>
-137	          <p className="text-center text-lg font-semibold text-foreground">
-138	            {directionLabel}
-139	          </p>
-140	        </AnswerGame.Question>
-141	        <AnswerGame.Answer>
-142	          <SlotRow className="gap-2">
-143	            {zones.map((zone, i) => (
-144	              <Slot
-145	                key={zone.id}
-146	                index={i}
-147	                className="size-14 rounded-lg"
-148	              >
-149	                {({ label }) => (
-150	                  <span className="text-2xl font-bold">{label}</span>
-151	                )}
-152	              </Slot>
-153	            ))}
-154	          </SlotRow>
-155	        </AnswerGame.Answer>
-156	        <AnswerGame.Choices>
-157	          <SortNumbersTileBank />
-158	        </AnswerGame.Choices>
-159	      </div>
-160	      <ScoreAnimation visible={confettiReady} />
-161	      {gameOverReady ? (
-162	        <GameOverOverlay
-163	          retryCount={retryCount}
-164	          onPlayAgain={handlePlayAgain}
-165	          onHome={handleHome}
-166	        />
-167	      ) : null}
-168	    </>
-169	  );
-170	};
-171	
-172	export const SortNumbers = ({
-173	  config,
-174	  initialState,
-175	  sessionId,
-176	  seed,
-177	}: SortNumbersProps) => {
-178	  const roundsInOrder = config.roundsInOrder === true;
-179	  const [sessionEpoch, setSessionEpoch] = useState(0);
-180	
-181	  const roundOrder = useMemo(() => {
-182	    void sessionEpoch;
-183	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-184	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-185	
-186	  const firstConfigIndex = roundOrder[0];
-187	  const round0 =
-188	    firstConfigIndex === undefined
-189	      ? undefined
-190	      : config.rounds[firstConfigIndex];
-191	
-192	  const { tiles, zones } = useMemo(() => {
-193	    if (!round0) {
-194	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-195	    }
-196	    const distractor =
-197	      config.tileBankMode === 'distractors'
-198	        ? { config: config.distractors, range: config.range }
-199	        : undefined;
-200	    return buildSortRound(
-201	      round0.sequence,
-202	      config.direction,
-203	      distractor,
-204	    );
-205	  }, [
-206	    round0,
-207	    config.direction,
-208	    config.tileBankMode,
-209	    config.distractors,
-210	    config.range,
-211	  ]);
-212	
-213	  const answerGameConfig = useMemo(
-214	    (): AnswerGameConfig => ({
-215	      gameId: config.gameId,
-216	      inputMethod: config.inputMethod,
-217	      wrongTileBehavior: config.wrongTileBehavior,
-218	      tileBankMode: config.tileBankMode,
-219	      totalRounds: config.rounds.length,
-220	      roundsInOrder: config.roundsInOrder,
-221	      ttsEnabled: config.ttsEnabled,
-222	      touchKeyboardInputMode: 'numeric',
-223	      initialTiles: tiles,
-224	      initialZones: zones,
-225	      slotInteraction: 'free-swap' as const,
-226	    }),
-227	    [
-228	      config.gameId,
-229	      config.inputMethod,
-230	      config.wrongTileBehavior,
-231	      config.tileBankMode,
-232	      config.rounds.length,
-233	      config.roundsInOrder,
-234	      config.ttsEnabled,
-235	      tiles,
-236	      zones,
-237	    ],
-238	  );
-239	
-240	  if (!round0) return null;
-241	
-242	  return (
-243	    <AnswerGame
-244	      config={answerGameConfig}
-245	      initialState={initialState}
-246	      sessionId={sessionId}
-247	    >
-248	      <SortNumbersSession
-249	        sortNumbersConfig={config}
-250	        roundOrder={roundOrder}
-251	        onRestartSession={() => {
-252	          setSessionEpoch((e) => e + 1);
-253	        }}
-254	      />
-255	    </AnswerGame>
-256	  );
-257	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerGameDraftState,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+16 import { Slot } from '@/components/answer-game/Slot/Slot';
+17 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+18 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+19 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+20 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+21 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+22 import { buildRoundOrder } from '@/games/build-round-order';
+23 
+24 interface SortNumbersProps {
+25   config: SortNumbersConfig;
+26   initialState?: AnswerGameDraftState;
+27   sessionId?: string;
+28   seed?: string;
+29 }
+30 
+31 const SortNumbersSession = ({
+32   sortNumbersConfig,
+33   roundOrder,
+34   onRestartSession,
+35 }: {
+36   sortNumbersConfig: SortNumbersConfig;
+37   roundOrder: readonly number[];
+38   onRestartSession: () => void;
+39 }) => {
+40   const { t } = useTranslation('games');
+41   const { phase, roundIndex, retryCount, zones } =
+42     useAnswerGameContext();
+43   const dispatch = useAnswerGameDispatch();
+44   const { confettiReady, gameOverReady } = useGameSounds();
+45   const navigate = useNavigate();
+46   const { locale } = useParams({ from: '/$locale' });
+47   const completionToken = useRef(0);
+48 
+49   const configRoundIndex = roundOrder[roundIndex];
+50   const round =
+51     configRoundIndex === undefined
+52       ? undefined
+53       : sortNumbersConfig.rounds[configRoundIndex];
+54 
+55   const directionLabel =
+56     sortNumbersConfig.direction === 'ascending'
+57       ? t('sort-numbers-ui.ascending-label')
+58       : t('sort-numbers-ui.descending-label');
+59 
+60   useRoundTTS(directionLabel);
+61 
+62   const handleHome = () => {
+63     void navigate({ to: '/$locale', params: { locale } });
+64   };
+65 
+66   const handlePlayAgain = () => {
+67     onRestartSession();
+68   };
+69 
+70   useEffect(() => {
+71     if (phase !== 'round-complete' || !confettiReady) return;
+72 
+73     const token = ++completionToken.current;
+74     const delayMs = 750;
+75     const timer = globalThis.setTimeout(() => {
+76       if (completionToken.current !== token) return;
+77 
+78       const isLastRound = roundIndex >= roundOrder.length - 1;
+79       if (isLastRound) {
+80         dispatch({ type: 'COMPLETE_GAME' });
+81         return;
+82       }
+83 
+84       const nextConfigIndex = roundOrder[roundIndex + 1];
+85       const nextRound =
+86         nextConfigIndex === undefined
+87           ? undefined
+88           : sortNumbersConfig.rounds[nextConfigIndex];
+89 
+90       if (!nextRound) {
+91         dispatch({ type: 'COMPLETE_GAME' });
+92         return;
+93       }
+94 
+95       const distractor =
+96         sortNumbersConfig.tileBankMode === 'distractors'
+97           ? {
+98               config: sortNumbersConfig.distractors,
+99               range: sortNumbersConfig.range,
+100             }
+101           : undefined;
+102 
+103       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+104         nextRound.sequence,
+105         sortNumbersConfig.direction,
+106         distractor,
+107       );
+108       dispatch({
+109         type: 'ADVANCE_ROUND',
+110         tiles: nextTiles,
+111         zones: nextZones,
+112       });
+113     }, delayMs);
+114 
+115     return () => {
+116       globalThis.clearTimeout(timer);
+117     };
+118   }, [
+119     phase,
+120     confettiReady,
+121     roundIndex,
+122     dispatch,
+123     roundOrder,
+124     sortNumbersConfig.rounds,
+125     sortNumbersConfig.direction,
+126     sortNumbersConfig.tileBankMode,
+127     sortNumbersConfig.distractors,
+128     sortNumbersConfig.range,
+129   ]);
+130 
+131   if (!round) return null;
+132 
+133   return (
+134     <>
+135       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+136         <AnswerGame.Question>
+137           <p className="text-center text-lg font-semibold text-foreground">
+138             {directionLabel}
+139           </p>
+140         </AnswerGame.Question>
+141         <AnswerGame.Answer>
+142           <SlotRow className="gap-2">
+143             {zones.map((zone, i) => (
+144               <Slot
+145                 key={zone.id}
+146                 index={i}
+147                 className="size-14 rounded-lg"
+148               >
+149                 {({ label }) => (
+150                   <span className="text-2xl font-bold">{label}</span>
+151                 )}
+152               </Slot>
+153             ))}
+154           </SlotRow>
+155         </AnswerGame.Answer>
+156         <AnswerGame.Choices>
+157           <SortNumbersTileBank />
+158         </AnswerGame.Choices>
+159       </div>
+160       <ScoreAnimation visible={confettiReady} />
+161       {gameOverReady ? (
+162         <GameOverOverlay
+163           retryCount={retryCount}
+164           onPlayAgain={handlePlayAgain}
+165           onHome={handleHome}
+166         />
+167       ) : null}
+168     </>
+169   );
+170 };
+171 
+172 export const SortNumbers = ({
+173   config,
+174   initialState,
+175   sessionId,
+176   seed,
+177 }: SortNumbersProps) => {
+178   const roundsInOrder = config.roundsInOrder === true;
+179   const [sessionEpoch, setSessionEpoch] = useState(0);
+180 
+181   const roundOrder = useMemo(() => {
+182     void sessionEpoch;
+183     return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+184   }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+185 
+186   const firstConfigIndex = roundOrder[0];
+187   const round0 =
+188     firstConfigIndex === undefined
+189       ? undefined
+190       : config.rounds[firstConfigIndex];
+191 
+192   const { tiles, zones } = useMemo(() => {
+193     if (!round0) {
+194       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+195     }
+196     const distractor =
+197       config.tileBankMode === 'distractors'
+198         ? { config: config.distractors, range: config.range }
+199         : undefined;
+200     return buildSortRound(
+201       round0.sequence,
+202       config.direction,
+203       distractor,
+204     );
+205   }, [
+206     round0,
+207     config.direction,
+208     config.tileBankMode,
+209     config.distractors,
+210     config.range,
+211   ]);
+212 
+213   const answerGameConfig = useMemo(
+214     (): AnswerGameConfig => ({
+215       gameId: config.gameId,
+216       inputMethod: config.inputMethod,
+217       wrongTileBehavior: config.wrongTileBehavior,
+218       tileBankMode: config.tileBankMode,
+219       totalRounds: config.rounds.length,
+220       roundsInOrder: config.roundsInOrder,
+221       ttsEnabled: config.ttsEnabled,
+222       touchKeyboardInputMode: 'numeric',
+223       initialTiles: tiles,
+224       initialZones: zones,
+225       slotInteraction: 'free-swap' as const,
+226     }),
+227     [
+228       config.gameId,
+229       config.inputMethod,
+230       config.wrongTileBehavior,
+231       config.tileBankMode,
+232       config.rounds.length,
+233       config.roundsInOrder,
+234       config.ttsEnabled,
+235       tiles,
+236       zones,
+237     ],
+238   );
+239 
+240   if (!round0) return null;
+241 
+242   return (
+243     <AnswerGame
+244       config={answerGameConfig}
+245       initialState={initialState}
+246       sessionId={sessionId}
+247     >
+248       <SortNumbersSession
+249         sortNumbersConfig={config}
+250         roundOrder={roundOrder}
+251         onRestartSession={() => {
+252           setSessionEpoch((e) => e + 1);
+253         }}
+254       />
+255     </AnswerGame>
+256   );
+257 };
 258
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:06:39Z)**_
@@ -4826,237 +4882,238 @@ _**Agent (claude-opus-4-6 2026-04-08 12:06:39Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/build-sort-round.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import {
-3	  buildDistractorPool,
-4	  buildSortRound,
-5	  generateSortRounds,
-6	} from './build-sort-round';
-7	
-8	describe('buildSortRound', () => {
-9	  it('creates zones in ascending order for ascending direction', () => {
-10	    const { zones } = buildSortRound([3, 1, 2], 'ascending');
-11	    expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
-12	  });
-13	
-14	  it('creates zones in descending order for descending direction', () => {
-15	    const { zones } = buildSortRound([3, 1, 2], 'descending');
-16	    expect(zones.map((z) => z.expectedValue)).toEqual(['3', '2', '1']);
-17	  });
-18	
-19	  it('creates tiles with all sequence numbers', () => {
-20	    const { tiles } = buildSortRound([1, 2, 3], 'ascending');
-21	    expect(tiles.map((t) => t.value).toSorted()).toEqual([
-22	      '1',
-23	      '2',
-24	      '3',
-25	    ]);
-26	    expect(tiles).toHaveLength(3);
-27	  });
-28	
-29	  it('each tile has a unique id', () => {
-30	    const { tiles } = buildSortRound([1, 2, 3], 'ascending');
-31	    const ids = tiles.map((t) => t.id);
-32	    expect(new Set(ids).size).toBe(3);
-33	  });
-34	
-35	  it('appends distractor tiles when distractorConfig is provided', () => {
-36	    const { tiles } = buildSortRound([2, 4, 6], 'ascending', {
-37	      config: { source: 'full-range', count: 2 },
-38	      range: { min: 1, max: 10 },
-39	    });
-40	    // 3 sequence tiles + 2 distractor tiles
-41	    expect(tiles).toHaveLength(5);
-42	  });
-43	
-44	  it('distractor tiles are not part of the zones expectedValue set', () => {
-45	    const { tiles, zones } = buildSortRound([2, 4, 6], 'ascending', {
-46	      config: { source: 'full-range', count: 2 },
-47	      range: { min: 1, max: 10 },
-48	    });
-49	    const expectedValues = new Set(zones.map((z) => z.expectedValue));
-50	    const extraTiles = tiles.filter(
-51	      (t) => !expectedValues.has(t.value),
-52	    );
-53	    expect(extraTiles).toHaveLength(2);
-54	  });
-55	});
-56	
-57	describe('generateSortRounds', () => {
-58	  it('mode consecutive generates consecutive sequences', () => {
-59	    const rounds = generateSortRounds({
-60	      range: { min: 1, max: 10 },
-61	      quantity: 3,
-62	      skip: { mode: 'consecutive' },
-63	      totalRounds: 2,
-64	    });
-65	    expect(rounds).toHaveLength(2);
-66	    for (const round of rounds) {
-67	      expect(round.sequence).toHaveLength(3);
-68	      const diffs = round.sequence
-69	        .slice(1)
-70	        .map((n, i) => n - (round.sequence[i] ?? 0));
-71	      expect(diffs.every((d) => d === 1)).toBe(true);
-72	    }
-73	  });
-74	
-75	  it('mode random generates sequences of correct length within range', () => {
-76	    const rounds = generateSortRounds({
-77	      range: { min: 1, max: 20 },
-78	      quantity: 4,
-79	      skip: { mode: 'random' },
-80	      totalRounds: 3,
-81	    });
-82	    expect(rounds).toHaveLength(3);
-83	    for (const round of rounds) {
-84	      expect(round.sequence).toHaveLength(4);
-85	      for (const n of round.sequence) {
-86	        expect(n).toBeGreaterThanOrEqual(1);
-87	        expect(n).toBeLessThanOrEqual(20);
-88	      }
-89	    }
-90	  });
-91	
-92	  it('mode random all numbers in a round are unique', () => {
-93	    const rounds = generateSortRounds({
-94	      range: { min: 1, max: 20 },
-95	      quantity: 5,
-96	      skip: { mode: 'random' },
-97	      totalRounds: 1,
-98	    });
-99	    const seq = rounds[0]?.sequence ?? [];
-100	    expect(new Set(seq).size).toBe(seq.length);
-101	  });
-102	
-103	  it('mode by with start range-min generates fixed-step sequence from range.min', () => {
-104	    const rounds = generateSortRounds({
-105	      range: { min: 2, max: 20 },
-106	      quantity: 4,
-107	      skip: { mode: 'by', step: 3, start: 'range-min' },
-108	      totalRounds: 1,
-109	    });
-110	    expect(rounds[0]?.sequence).toEqual([2, 5, 8, 11]);
-111	  });
-112	
-113	  it('mode by with start random generates valid fixed-step sequence', () => {
-114	    const rounds = generateSortRounds({
-115	      range: { min: 1, max: 20 },
-116	      quantity: 3,
-117	      skip: { mode: 'by', step: 5, start: 'random' },
-118	      totalRounds: 5,
-119	    });
-120	    for (const round of rounds) {
-121	      expect(round.sequence).toHaveLength(3);
-122	      const diffs = round.sequence
-123	        .slice(1)
-124	        .map((n, i) => n - (round.sequence[i] ?? 0));
-125	      expect(diffs.every((d) => d === 5)).toBe(true);
-126	      expect(round.sequence[0]).toBeGreaterThanOrEqual(1);
-127	      expect(round.sequence.at(-1)).toBeLessThanOrEqual(20);
-128	    }
-129	  });
-130	
-131	  it('mode by falls back to consecutive when step is too large', () => {
-132	    const rounds = generateSortRounds({
-133	      range: { min: 1, max: 5 },
-134	      quantity: 3,
-135	      skip: { mode: 'by', step: 10, start: 'range-min' },
-136	      totalRounds: 1,
-137	    });
-138	    // step * (quantity - 1) = 20 > range.max - range.min = 4 → fallback to consecutive
-139	    const seq = rounds[0]?.sequence ?? [];
-140	    expect(seq).toHaveLength(3);
-141	    const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
-142	    expect(diffs.every((d) => d === 1)).toBe(true);
-143	  });
-144	
-145	  it('mode consecutive handles quantity larger than range size', () => {
-146	    const rounds = generateSortRounds({
-147	      range: { min: 1, max: 3 },
-148	      quantity: 5,
-149	      skip: { mode: 'consecutive' },
-150	      totalRounds: 1,
-151	    });
-152	    const seq = rounds[0]?.sequence ?? [];
-153	    expect(seq).toHaveLength(3); // clamped to range size
-154	    for (const n of seq) {
-155	      expect(n).toBeGreaterThanOrEqual(1);
-156	      expect(n).toBeLessThanOrEqual(3);
-157	    }
-158	  });
-159	});
-160	
-161	describe('buildDistractorPool', () => {
-162	  it('source random returns count numbers not in sequence', () => {
-163	    const pool = buildDistractorPool(
-164	      [2, 4, 6],
-165	      { min: 1, max: 10 },
-166	      { source: 'random', count: 3 },
-167	    );
-168	    expect(pool).toHaveLength(3);
-169	    for (const n of pool) {
-170	      expect([2, 4, 6]).not.toContain(n);
-171	      expect(n).toBeGreaterThanOrEqual(1);
-172	      expect(n).toBeLessThanOrEqual(10);
-173	    }
-174	  });
-175	
-176	  it('source gaps-only count all returns numbers between consecutive sequence values', () => {
-177	    const pool = buildDistractorPool(
-178	      [2, 4, 6],
-179	      { min: 1, max: 8 },
-180	      { source: 'gaps-only', count: 'all' },
-181	    );
-182	    // Between 2 and 4: 3. Between 4 and 6: 5.
-183	    expect(pool.toSorted((a, b) => a - b)).toEqual([3, 5]);
-184	  });
-185	
-186	  it('source gaps-only count number returns that many from gaps', () => {
-187	    const pool = buildDistractorPool(
-188	      [2, 5, 8],
-189	      { min: 1, max: 10 },
-190	      { source: 'gaps-only', count: 2 },
-191	    );
-192	    // Gaps: between 2 and 5: 3,4. Between 5 and 8: 6,7.
-193	    expect(pool).toHaveLength(2);
-194	    for (const n of pool) {
-195	      expect([3, 4, 6, 7]).toContain(n);
-196	    }
-197	  });
-198	
-199	  it('source full-range count all returns all non-sequence numbers in range', () => {
-200	    const pool = buildDistractorPool(
-201	      [2, 4, 6],
-202	      { min: 1, max: 8 },
-203	      { source: 'full-range', count: 'all' },
-204	    );
-205	    expect(pool.toSorted((a, b) => a - b)).toEqual([1, 3, 5, 7, 8]);
-206	  });
-207	
-208	  it('source full-range count number returns that many', () => {
-209	    const pool = buildDistractorPool(
-210	      [2, 4, 6],
-211	      { min: 1, max: 10 },
-212	      { source: 'full-range', count: 3 },
-213	    );
-214	    expect(pool).toHaveLength(3);
-215	    for (const n of pool) {
-216	      expect([2, 4, 6]).not.toContain(n);
-217	    }
-218	  });
-219	
-220	  it('returns full pool when count exceeds pool size', () => {
-221	    const pool = buildDistractorPool(
-222	      [1, 2, 3, 4, 5],
-223	      { min: 1, max: 6 },
-224	      { source: 'random', count: 10 },
-225	    );
-226	    // Only 1 number in range not in sequence: 6
-227	    expect(pool).toEqual([6]);
-228	  });
-229	});
+1 import { describe, expect, it } from 'vitest';
+2 import {
+3   buildDistractorPool,
+4   buildSortRound,
+5   generateSortRounds,
+6 } from './build-sort-round';
+7 
+8 describe('buildSortRound', () => {
+9   it('creates zones in ascending order for ascending direction', () => {
+10     const { zones } = buildSortRound([3, 1, 2], 'ascending');
+11     expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
+12   });
+13 
+14   it('creates zones in descending order for descending direction', () => {
+15     const { zones } = buildSortRound([3, 1, 2], 'descending');
+16     expect(zones.map((z) => z.expectedValue)).toEqual(['3', '2', '1']);
+17   });
+18 
+19   it('creates tiles with all sequence numbers', () => {
+20     const { tiles } = buildSortRound([1, 2, 3], 'ascending');
+21     expect(tiles.map((t) => t.value).toSorted()).toEqual([
+22       '1',
+23       '2',
+24       '3',
+25     ]);
+26     expect(tiles).toHaveLength(3);
+27   });
+28 
+29   it('each tile has a unique id', () => {
+30     const { tiles } = buildSortRound([1, 2, 3], 'ascending');
+31     const ids = tiles.map((t) => t.id);
+32     expect(new Set(ids).size).toBe(3);
+33   });
+34 
+35   it('appends distractor tiles when distractorConfig is provided', () => {
+36     const { tiles } = buildSortRound([2, 4, 6], 'ascending', {
+37       config: { source: 'full-range', count: 2 },
+38       range: { min: 1, max: 10 },
+39     });
+40     // 3 sequence tiles + 2 distractor tiles
+41     expect(tiles).toHaveLength(5);
+42   });
+43 
+44   it('distractor tiles are not part of the zones expectedValue set', () => {
+45     const { tiles, zones } = buildSortRound([2, 4, 6], 'ascending', {
+46       config: { source: 'full-range', count: 2 },
+47       range: { min: 1, max: 10 },
+48     });
+49     const expectedValues = new Set(zones.map((z) => z.expectedValue));
+50     const extraTiles = tiles.filter(
+51       (t) => !expectedValues.has(t.value),
+52     );
+53     expect(extraTiles).toHaveLength(2);
+54   });
+55 });
+56 
+57 describe('generateSortRounds', () => {
+58   it('mode consecutive generates consecutive sequences', () => {
+59     const rounds = generateSortRounds({
+60       range: { min: 1, max: 10 },
+61       quantity: 3,
+62       skip: { mode: 'consecutive' },
+63       totalRounds: 2,
+64     });
+65     expect(rounds).toHaveLength(2);
+66     for (const round of rounds) {
+67       expect(round.sequence).toHaveLength(3);
+68       const diffs = round.sequence
+69         .slice(1)
+70         .map((n, i) => n - (round.sequence[i] ?? 0));
+71       expect(diffs.every((d) => d === 1)).toBe(true);
+72     }
+73   });
+74 
+75   it('mode random generates sequences of correct length within range', () => {
+76     const rounds = generateSortRounds({
+77       range: { min: 1, max: 20 },
+78       quantity: 4,
+79       skip: { mode: 'random' },
+80       totalRounds: 3,
+81     });
+82     expect(rounds).toHaveLength(3);
+83     for (const round of rounds) {
+84       expect(round.sequence).toHaveLength(4);
+85       for (const n of round.sequence) {
+86         expect(n).toBeGreaterThanOrEqual(1);
+87         expect(n).toBeLessThanOrEqual(20);
+88       }
+89     }
+90   });
+91 
+92   it('mode random all numbers in a round are unique', () => {
+93     const rounds = generateSortRounds({
+94       range: { min: 1, max: 20 },
+95       quantity: 5,
+96       skip: { mode: 'random' },
+97       totalRounds: 1,
+98     });
+99     const seq = rounds[0]?.sequence ?? [];
+100     expect(new Set(seq).size).toBe(seq.length);
+101   });
+102 
+103   it('mode by with start range-min generates fixed-step sequence from range.min', () => {
+104     const rounds = generateSortRounds({
+105       range: { min: 2, max: 20 },
+106       quantity: 4,
+107       skip: { mode: 'by', step: 3, start: 'range-min' },
+108       totalRounds: 1,
+109     });
+110     expect(rounds[0]?.sequence).toEqual([2, 5, 8, 11]);
+111   });
+112 
+113   it('mode by with start random generates valid fixed-step sequence', () => {
+114     const rounds = generateSortRounds({
+115       range: { min: 1, max: 20 },
+116       quantity: 3,
+117       skip: { mode: 'by', step: 5, start: 'random' },
+118       totalRounds: 5,
+119     });
+120     for (const round of rounds) {
+121       expect(round.sequence).toHaveLength(3);
+122       const diffs = round.sequence
+123         .slice(1)
+124         .map((n, i) => n - (round.sequence[i] ?? 0));
+125       expect(diffs.every((d) => d === 5)).toBe(true);
+126       expect(round.sequence[0]).toBeGreaterThanOrEqual(1);
+127       expect(round.sequence.at(-1)).toBeLessThanOrEqual(20);
+128     }
+129   });
+130 
+131   it('mode by falls back to consecutive when step is too large', () => {
+132     const rounds = generateSortRounds({
+133       range: { min: 1, max: 5 },
+134       quantity: 3,
+135       skip: { mode: 'by', step: 10, start: 'range-min' },
+136       totalRounds: 1,
+137     });
+138     // step * (quantity - 1) = 20 > range.max - range.min = 4 → fallback to consecutive
+139     const seq = rounds[0]?.sequence ?? [];
+140     expect(seq).toHaveLength(3);
+141     const diffs = seq.slice(1).map((n, i) => n - (seq[i] ?? 0));
+142     expect(diffs.every((d) => d === 1)).toBe(true);
+143   });
+144 
+145   it('mode consecutive handles quantity larger than range size', () => {
+146     const rounds = generateSortRounds({
+147       range: { min: 1, max: 3 },
+148       quantity: 5,
+149       skip: { mode: 'consecutive' },
+150       totalRounds: 1,
+151     });
+152     const seq = rounds[0]?.sequence ?? [];
+153     expect(seq).toHaveLength(3); // clamped to range size
+154     for (const n of seq) {
+155       expect(n).toBeGreaterThanOrEqual(1);
+156       expect(n).toBeLessThanOrEqual(3);
+157     }
+158   });
+159 });
+160 
+161 describe('buildDistractorPool', () => {
+162   it('source random returns count numbers not in sequence', () => {
+163     const pool = buildDistractorPool(
+164       [2, 4, 6],
+165       { min: 1, max: 10 },
+166       { source: 'random', count: 3 },
+167     );
+168     expect(pool).toHaveLength(3);
+169     for (const n of pool) {
+170       expect([2, 4, 6]).not.toContain(n);
+171       expect(n).toBeGreaterThanOrEqual(1);
+172       expect(n).toBeLessThanOrEqual(10);
+173     }
+174   });
+175 
+176   it('source gaps-only count all returns numbers between consecutive sequence values', () => {
+177     const pool = buildDistractorPool(
+178       [2, 4, 6],
+179       { min: 1, max: 8 },
+180       { source: 'gaps-only', count: 'all' },
+181     );
+182     // Between 2 and 4: 3. Between 4 and 6: 5.
+183     expect(pool.toSorted((a, b) => a - b)).toEqual([3, 5]);
+184   });
+185 
+186   it('source gaps-only count number returns that many from gaps', () => {
+187     const pool = buildDistractorPool(
+188       [2, 5, 8],
+189       { min: 1, max: 10 },
+190       { source: 'gaps-only', count: 2 },
+191     );
+192     // Gaps: between 2 and 5: 3,4. Between 5 and 8: 6,7.
+193     expect(pool).toHaveLength(2);
+194     for (const n of pool) {
+195       expect([3, 4, 6, 7]).toContain(n);
+196     }
+197   });
+198 
+199   it('source full-range count all returns all non-sequence numbers in range', () => {
+200     const pool = buildDistractorPool(
+201       [2, 4, 6],
+202       { min: 1, max: 8 },
+203       { source: 'full-range', count: 'all' },
+204     );
+205     expect(pool.toSorted((a, b) => a - b)).toEqual([1, 3, 5, 7, 8]);
+206   });
+207 
+208   it('source full-range count number returns that many', () => {
+209     const pool = buildDistractorPool(
+210       [2, 4, 6],
+211       { min: 1, max: 10 },
+212       { source: 'full-range', count: 3 },
+213     );
+214     expect(pool).toHaveLength(3);
+215     for (const n of pool) {
+216       expect([2, 4, 6]).not.toContain(n);
+217     }
+218   });
+219 
+220   it('returns full pool when count exceeds pool size', () => {
+221     const pool = buildDistractorPool(
+222       [1, 2, 3, 4, 5],
+223       { min: 1, max: 6 },
+224       { source: 'random', count: 10 },
+225     );
+226     // Only 1 number in range not in sequence: 6
+227     expect(pool).toEqual([6]);
+228   });
+229 });
 230
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:09:06Z)**_
@@ -5065,6 +5122,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:09:06Z)**_
 Now I have a thorough understanding of the code. Let me trace the bug the user is describing.
 
 Given the config:
+
 ```json
 {
   "gameId": "sort-numbers",
@@ -5122,6 +5180,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:10:47Z)**_
 Now I have a complete picture. Let me trace through the user's exact config to find the bugs.
 
 User's config:
+
 ```json
 {
   "gameId": "sort-numbers",
@@ -5167,6 +5226,7 @@ The real issue is that the stale check only validates the sequence length and wh
 In the user's case, they likely selected "by" mode from a form dropdown, which set `skip.mode` to 'by' while leaving `step` and `start` undefined. The config resolver then fills in defaults like `step: 2` and `start: 'range-min'`. But if those rounds were already generated with a different mode and saved to the database, they'd still pass the stale check and wouldn't be regenerated with the new pattern. pass the stale check (correct quantity, values in range), they WON'T be regenerated.
 
 Example scenario:
+
 1. Config form starts with default: skip.mode = 'random', range {11,99}, quantity 6
 2. Rounds are generated randomly
 3. User changes range to {2,10}
@@ -5208,230 +5268,231 @@ _**Agent (claude-opus-4-6 2026-04-08 12:10:47Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/components/ConfigFormFields.tsx`
 
 ```text
-1	// src/components/ConfigFormFields.tsx
-2	import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
-3	import type { JSX } from 'react';
-4	
-5	const isFieldVisible = (
-6	  field: ConfigField,
-7	  config: Record<string, unknown>,
-8	): boolean => {
-9	  const vw: VisibleWhen | undefined =
-10	    'visibleWhen' in field ? field.visibleWhen : undefined;
-11	  if (!vw) return true;
-12	  const { key, subKey, value } = vw;
-13	  const configValue = subKey
-14	    ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
-15	    : config[key];
-16	  return configValue === value;
-17	};
-18	
-19	type ConfigFormFieldsProps = {
-20	  fields: ConfigField[];
-21	  config: Record<string, unknown>;
-22	  onChange: (config: Record<string, unknown>) => void;
-23	};
-24	
-25	export const ConfigFormFields = ({
-26	  fields,
-27	  config,
-28	  onChange,
-29	}: ConfigFormFieldsProps): JSX.Element => (
-30	  <div className="flex flex-col gap-3">
-31	    {fields.map((field) => {
-32	      if (!isFieldVisible(field, config)) return null;
-33	
-34	      if (field.type === 'select') {
-35	        return (
-36	          <label
-37	            key={field.key}
-38	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-39	          >
-40	            {field.label}
-41	            <select
-42	              aria-label={field.label}
-43	              value={String(config[field.key] ?? '')}
-44	              onChange={(e) =>
-45	                onChange({ ...config, [field.key]: e.target.value })
-46	              }
-47	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-48	            >
-49	              {field.options.map((opt) => (
-50	                <option key={opt.value} value={opt.value}>
-51	                  {opt.label}
-52	                </option>
-53	              ))}
-54	            </select>
-55	          </label>
-56	        );
-57	      }
-58	
-59	      if (field.type === 'nested-select') {
-60	        const nested = config[field.key] as
-61	          | Record<string, unknown>
-62	          | undefined;
-63	        return (
-64	          <label
-65	            key={`${field.key}.${field.subKey}`}
-66	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-67	          >
-68	            {field.label}
-69	            <select
-70	              aria-label={field.label}
-71	              value={String(nested?.[field.subKey] ?? '')}
-72	              onChange={(e) =>
-73	                onChange({
-74	                  ...config,
-75	                  [field.key]: {
-76	                    ...nested,
-77	                    [field.subKey]: e.target.value,
-78	                  },
-79	                })
-80	              }
-81	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-82	            >
-83	              {field.options.map((opt) => (
-84	                <option key={opt.value} value={opt.value}>
-85	                  {opt.label}
-86	                </option>
-87	              ))}
-88	            </select>
-89	          </label>
-90	        );
-91	      }
-92	
-93	      if (field.type === 'nested-select-or-number') {
-94	        const nested = config[field.key] as
-95	          | Record<string, unknown>
-96	          | undefined;
-97	        const currentValue = nested?.[field.subKey];
-98	        const isAll = currentValue === 'all';
-99	        return (
-100	          <div
-101	            key={`${field.key}.${field.subKey}`}
-102	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-103	          >
-104	            <span>{field.label}</span>
-105	            <div className="flex gap-2">
-106	              <select
-107	                aria-label={`${field.label} type`}
-108	                value={isAll ? 'all' : 'number'}
-109	                onChange={(e) => {
-110	                  const next =
-111	                    e.target.value === 'all' ? 'all' : field.min;
-112	                  onChange({
-113	                    ...config,
-114	                    [field.key]: { ...nested, [field.subKey]: next },
-115	                  });
-116	                }}
-117	                className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-118	              >
-119	                <option value="number">number</option>
-120	                <option value="all">all</option>
-121	              </select>
-122	              {!isAll && (
-123	                <input
-124	                  type="number"
-125	                  aria-label={`${field.label} value`}
-126	                  value={Number(currentValue ?? field.min)}
-127	                  min={field.min}
-128	                  max={field.max}
-129	                  onChange={(e) =>
-130	                    onChange({
-131	                      ...config,
-132	                      [field.key]: {
-133	                        ...nested,
-134	                        [field.subKey]: Number(e.target.value),
-135	                      },
-136	                    })
-137	                  }
-138	                  className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-139	                />
-140	              )}
-141	            </div>
-142	          </div>
-143	        );
-144	      }
-145	
-146	      if (field.type === 'nested-number') {
-147	        const nested = config[field.key] as
-148	          | Record<string, unknown>
-149	          | undefined;
-150	        return (
-151	          <label
-152	            key={`${field.key}.${field.subKey}`}
-153	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-154	          >
-155	            {field.label}
-156	            <input
-157	              type="number"
-158	              aria-label={field.label}
-159	              value={Number(nested?.[field.subKey] ?? field.min)}
-160	              min={field.min}
-161	              max={field.max}
-162	              onChange={(e) =>
-163	                onChange({
-164	                  ...config,
-165	                  [field.key]: {
-166	                    ...nested,
-167	                    [field.subKey]: Number(e.target.value),
-168	                  },
-169	                })
-170	              }
-171	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-172	            />
-173	          </label>
-174	        );
-175	      }
-176	
-177	      if (field.type === 'number') {
-178	        return (
-179	          <label
-180	            key={field.key}
-181	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-182	          >
-183	            {field.label}
-184	            <input
-185	              type="number"
-186	              aria-label={field.label}
-187	              value={Number(config[field.key] ?? field.min)}
-188	              min={field.min}
-189	              max={field.max}
-190	              onChange={(e) =>
-191	                onChange({
-192	                  ...config,
-193	                  [field.key]: Number(e.target.value),
-194	                })
-195	              }
-196	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-197	            />
-198	          </label>
-199	        );
-200	      }
-201	
-202	      // checkbox
-203	      return (
-204	        <label
-205	          key={field.key}
-206	          className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
-207	        >
-208	          <input
-209	            type="checkbox"
-210	            aria-label={field.label}
-211	            checked={Boolean(config[field.key])}
-212	            onChange={(e) =>
-213	              onChange({ ...config, [field.key]: e.target.checked })
-214	            }
-215	            className="h-5 w-5 accent-primary"
-216	          />
-217	          {field.label}
-218	        </label>
-219	      );
-220	    })}
-221	  </div>
-222	);
+1 // src/components/ConfigFormFields.tsx
+2 import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
+3 import type { JSX } from 'react';
+4 
+5 const isFieldVisible = (
+6   field: ConfigField,
+7   config: Record<string, unknown>,
+8 ): boolean => {
+9   const vw: VisibleWhen | undefined =
+10     'visibleWhen' in field ? field.visibleWhen : undefined;
+11   if (!vw) return true;
+12   const { key, subKey, value } = vw;
+13   const configValue = subKey
+14     ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
+15     : config[key];
+16   return configValue === value;
+17 };
+18 
+19 type ConfigFormFieldsProps = {
+20   fields: ConfigField[];
+21   config: Record<string, unknown>;
+22   onChange: (config: Record<string, unknown>) => void;
+23 };
+24 
+25 export const ConfigFormFields = ({
+26   fields,
+27   config,
+28   onChange,
+29 }: ConfigFormFieldsProps): JSX.Element => (
+30   <div className="flex flex-col gap-3">
+31     {fields.map((field) => {
+32       if (!isFieldVisible(field, config)) return null;
+33 
+34       if (field.type === 'select') {
+35         return (
+36           <label
+37             key={field.key}
+38             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+39           >
+40             {field.label}
+41             <select
+42               aria-label={field.label}
+43               value={String(config[field.key] ?? '')}
+44               onChange={(e) =>
+45                 onChange({ ...config, [field.key]: e.target.value })
+46               }
+47               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+48             >
+49               {field.options.map((opt) => (
+50                 <option key={opt.value} value={opt.value}>
+51                   {opt.label}
+52                 </option>
+53               ))}
+54             </select>
+55           </label>
+56         );
+57       }
+58 
+59       if (field.type === 'nested-select') {
+60         const nested = config[field.key] as
+61           | Record<string, unknown>
+62           | undefined;
+63         return (
+64           <label
+65             key={`${field.key}.${field.subKey}`}
+66             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+67           >
+68             {field.label}
+69             <select
+70               aria-label={field.label}
+71               value={String(nested?.[field.subKey] ?? '')}
+72               onChange={(e) =>
+73                 onChange({
+74                   ...config,
+75                   [field.key]: {
+76                     ...nested,
+77                     [field.subKey]: e.target.value,
+78                   },
+79                 })
+80               }
+81               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+82             >
+83               {field.options.map((opt) => (
+84                 <option key={opt.value} value={opt.value}>
+85                   {opt.label}
+86                 </option>
+87               ))}
+88             </select>
+89           </label>
+90         );
+91       }
+92 
+93       if (field.type === 'nested-select-or-number') {
+94         const nested = config[field.key] as
+95           | Record<string, unknown>
+96           | undefined;
+97         const currentValue = nested?.[field.subKey];
+98         const isAll = currentValue === 'all';
+99         return (
+100           <div
+101             key={`${field.key}.${field.subKey}`}
+102             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+103           >
+104             <span>{field.label}</span>
+105             <div className="flex gap-2">
+106               <select
+107                 aria-label={`${field.label} type`}
+108                 value={isAll ? 'all' : 'number'}
+109                 onChange={(e) => {
+110                   const next =
+111                     e.target.value === 'all' ? 'all' : field.min;
+112                   onChange({
+113                     ...config,
+114                     [field.key]: { ...nested, [field.subKey]: next },
+115                   });
+116                 }}
+117                 className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+118               >
+119                 <option value="number">number</option>
+120                 <option value="all">all</option>
+121               </select>
+122               {!isAll && (
+123                 <input
+124                   type="number"
+125                   aria-label={`${field.label} value`}
+126                   value={Number(currentValue ?? field.min)}
+127                   min={field.min}
+128                   max={field.max}
+129                   onChange={(e) =>
+130                     onChange({
+131                       ...config,
+132                       [field.key]: {
+133                         ...nested,
+134                         [field.subKey]: Number(e.target.value),
+135                       },
+136                     })
+137                   }
+138                   className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+139                 />
+140               )}
+141             </div>
+142           </div>
+143         );
+144       }
+145 
+146       if (field.type === 'nested-number') {
+147         const nested = config[field.key] as
+148           | Record<string, unknown>
+149           | undefined;
+150         return (
+151           <label
+152             key={`${field.key}.${field.subKey}`}
+153             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+154           >
+155             {field.label}
+156             <input
+157               type="number"
+158               aria-label={field.label}
+159               value={Number(nested?.[field.subKey] ?? field.min)}
+160               min={field.min}
+161               max={field.max}
+162               onChange={(e) =>
+163                 onChange({
+164                   ...config,
+165                   [field.key]: {
+166                     ...nested,
+167                     [field.subKey]: Number(e.target.value),
+168                   },
+169                 })
+170               }
+171               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+172             />
+173           </label>
+174         );
+175       }
+176 
+177       if (field.type === 'number') {
+178         return (
+179           <label
+180             key={field.key}
+181             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+182           >
+183             {field.label}
+184             <input
+185               type="number"
+186               aria-label={field.label}
+187               value={Number(config[field.key] ?? field.min)}
+188               min={field.min}
+189               max={field.max}
+190               onChange={(e) =>
+191                 onChange({
+192                   ...config,
+193                   [field.key]: Number(e.target.value),
+194                 })
+195               }
+196               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+197             />
+198           </label>
+199         );
+200       }
+201 
+202       // checkbox
+203       return (
+204         <label
+205           key={field.key}
+206           className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
+207         >
+208           <input
+209             type="checkbox"
+210             aria-label={field.label}
+211             checked={Boolean(config[field.key])}
+212             onChange={(e) =>
+213               onChange({ ...config, [field.key]: e.target.checked })
+214             }
+215             className="h-5 w-5 accent-primary"
+216           />
+217           {field.label}
+218         </label>
+219       );
+220     })}
+221   </div>
+222 );
 223
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:10:48Z)**_
@@ -5441,111 +5502,112 @@ _**Agent (claude-opus-4-6 2026-04-08 12:10:48Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx`
 
 ```text
-1	// src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
-2	import { withDb } from '../../../../.storybook/decorators/withDb';
-3	import { withRouter } from '../../../../.storybook/decorators/withRouter';
-4	import { SortNumbers } from './SortNumbers';
-5	import type { SortNumbersConfig } from '../types';
-6	import type { Meta, StoryObj } from '@storybook/react';
-7	
-8	const baseConfig: SortNumbersConfig = {
-9	  gameId: 'sort-numbers',
-10	  component: 'SortNumbers',
-11	  inputMethod: 'drag',
-12	  wrongTileBehavior: 'lock-manual',
-13	  tileBankMode: 'exact',
-14	  totalRounds: 3,
-15	  roundsInOrder: false,
-16	  ttsEnabled: false,
-17	  direction: 'ascending',
-18	  range: { min: 2, max: 20 },
-19	  quantity: 4,
-20	  skip: { mode: 'consecutive' },
-21	  distractors: { source: 'random', count: 2 },
-22	  rounds: [
-23	    { sequence: [3, 4, 5, 6] },
-24	    { sequence: [7, 8, 9, 10] },
-25	    { sequence: [11, 12, 13, 14] },
-26	  ],
-27	};
-28	
-29	const meta: Meta<typeof SortNumbers> = {
-30	  component: SortNumbers,
-31	  tags: ['autodocs'],
-32	  decorators: [withDb, withRouter],
-33	  args: { config: baseConfig },
-34	};
-35	export default meta;
-36	
-37	type Story = StoryObj<typeof SortNumbers>;
-38	
-39	export const Consecutive: Story = {};
-40	
-41	export const SkipByStepRangeMin: Story = {
-42	  args: {
-43	    config: {
-44	      ...baseConfig,
-45	      skip: { mode: 'by', step: 3, start: 'range-min' },
-46	      rounds: [
-47	        { sequence: [2, 5, 8, 11] },
-48	        { sequence: [2, 5, 8, 11] },
-49	        { sequence: [2, 5, 8, 11] },
-50	      ],
-51	    },
-52	  },
-53	};
-54	
-55	export const SkipRandom: Story = {
-56	  args: {
-57	    config: {
-58	      ...baseConfig,
-59	      skip: { mode: 'random' },
-60	      rounds: [
-61	        { sequence: [2, 7, 12, 18] },
-62	        { sequence: [3, 6, 11, 15] },
-63	        { sequence: [4, 9, 14, 20] },
-64	      ],
-65	    },
-66	  },
-67	};
-68	
-69	export const DistractorsRandom: Story = {
-70	  args: {
-71	    config: {
-72	      ...baseConfig,
-73	      tileBankMode: 'distractors',
-74	      distractors: { source: 'random', count: 3 },
-75	    },
-76	  },
-77	};
-78	
-79	export const DistractorsGapsOnly: Story = {
-80	  args: {
-81	    config: {
-82	      ...baseConfig,
-83	      skip: { mode: 'by', step: 2, start: 'range-min' },
-84	      tileBankMode: 'distractors',
-85	      distractors: { source: 'gaps-only', count: 'all' },
-86	      rounds: [
-87	        { sequence: [2, 4, 6, 8] },
-88	        { sequence: [2, 4, 6, 8] },
-89	        { sequence: [2, 4, 6, 8] },
-90	      ],
-91	    },
-92	  },
-93	};
-94	
-95	export const DistractorsFullRange: Story = {
-96	  args: {
-97	    config: {
-98	      ...baseConfig,
-99	      tileBankMode: 'distractors',
-100	      distractors: { source: 'full-range', count: 4 },
-101	    },
-102	  },
-103	};
+1 // src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
+2 import { withDb } from '../../../../.storybook/decorators/withDb';
+3 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+4 import { SortNumbers } from './SortNumbers';
+5 import type { SortNumbersConfig } from '../types';
+6 import type { Meta, StoryObj } from '@storybook/react';
+7 
+8 const baseConfig: SortNumbersConfig = {
+9   gameId: 'sort-numbers',
+10   component: 'SortNumbers',
+11   inputMethod: 'drag',
+12   wrongTileBehavior: 'lock-manual',
+13   tileBankMode: 'exact',
+14   totalRounds: 3,
+15   roundsInOrder: false,
+16   ttsEnabled: false,
+17   direction: 'ascending',
+18   range: { min: 2, max: 20 },
+19   quantity: 4,
+20   skip: { mode: 'consecutive' },
+21   distractors: { source: 'random', count: 2 },
+22   rounds: [
+23     { sequence: [3, 4, 5, 6] },
+24     { sequence: [7, 8, 9, 10] },
+25     { sequence: [11, 12, 13, 14] },
+26   ],
+27 };
+28 
+29 const meta: Meta<typeof SortNumbers> = {
+30   component: SortNumbers,
+31   tags: ['autodocs'],
+32   decorators: [withDb, withRouter],
+33   args: { config: baseConfig },
+34 };
+35 export default meta;
+36 
+37 type Story = StoryObj<typeof SortNumbers>;
+38 
+39 export const Consecutive: Story = {};
+40 
+41 export const SkipByStepRangeMin: Story = {
+42   args: {
+43     config: {
+44       ...baseConfig,
+45       skip: { mode: 'by', step: 3, start: 'range-min' },
+46       rounds: [
+47         { sequence: [2, 5, 8, 11] },
+48         { sequence: [2, 5, 8, 11] },
+49         { sequence: [2, 5, 8, 11] },
+50       ],
+51     },
+52   },
+53 };
+54 
+55 export const SkipRandom: Story = {
+56   args: {
+57     config: {
+58       ...baseConfig,
+59       skip: { mode: 'random' },
+60       rounds: [
+61         { sequence: [2, 7, 12, 18] },
+62         { sequence: [3, 6, 11, 15] },
+63         { sequence: [4, 9, 14, 20] },
+64       ],
+65     },
+66   },
+67 };
+68 
+69 export const DistractorsRandom: Story = {
+70   args: {
+71     config: {
+72       ...baseConfig,
+73       tileBankMode: 'distractors',
+74       distractors: { source: 'random', count: 3 },
+75     },
+76   },
+77 };
+78 
+79 export const DistractorsGapsOnly: Story = {
+80   args: {
+81     config: {
+82       ...baseConfig,
+83       skip: { mode: 'by', step: 2, start: 'range-min' },
+84       tileBankMode: 'distractors',
+85       distractors: { source: 'gaps-only', count: 'all' },
+86       rounds: [
+87         { sequence: [2, 4, 6, 8] },
+88         { sequence: [2, 4, 6, 8] },
+89         { sequence: [2, 4, 6, 8] },
+90       ],
+91     },
+92   },
+93 };
+94 
+95 export const DistractorsFullRange: Story = {
+96   args: {
+97     config: {
+98       ...baseConfig,
+99       tileBankMode: 'distractors',
+100       distractors: { source: 'full-range', count: 4 },
+101     },
+102   },
+103 };
 104
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:11:57Z)**_
@@ -5558,16 +5620,18 @@ Let me compile my analysis. I see multiple bugs:
 **BUG 1: `roundsStale` check doesn't validate skip mode**
 
 In `resolveSortNumbersConfig` (gameId.tsx lines 259-267), the stale check only validates:
+
 - Round count
 - Sequence length matches quantity
 - Values within range
 
 It does NOT validate:
+
 - Whether the sequence matches the current skip pattern (consecutive vs by-step vs random)
 - Whether the step size is correct for 'by' mode
 
 So when a user changes skip.mode from 'consecutive' to 'by', if the old rounds happen to have the right quantity and be within range, they won't be regenerated.
- 
+
 **BUG 2: Config form loses skip properties on mode change**
 
 When the nested-select for `skip.mode` changes, the form spreads the existing skip object while updating only the mode field, which means properties like `step` and `start` from the previous mode persist even after switching to a mode that doesn't use them.
@@ -5591,6 +5655,7 @@ The `roundsStale` flag triggers regeneration if any round has a mismatched seque
 But here's the real issue: the stale check only validates quantity and range, not the skip pattern. So when a user changes skip mode and saves the config, the old rounds get persisted to the database. On the next load, the stale check passes because quantity and range still match, but the rounds are using the wrong skip pattern. The bug only surfaces when loading a previously saved config with pre-existing rounds—fresh configs would regenerate correctly since the base rounds don't match the expected quantity anyway. I realize there's an even more important path: the config form's `onConfigChange` callback.
 
 In `SortNumbersGameBody` (gameId.tsx line 500):
+
 ```tsx
 onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
 ```
@@ -5598,6 +5663,7 @@ onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
 When the user changes skip.mode in the form, the `onChange` in ConfigFormFields sends the new config to `resolveSortNumbersConfig`. This new config `c` includes the `rounds` from the current `cfg` state (because the form spreads `...config` and only changes the `skip.mode` field).
 
 So the flow is:
+
 1. Current `cfg` has rounds generated with mode 'consecutive': [[2,3,4,5,6], ...]
 2. User changes skip.mode to 'by' in the form
 3. Form calls onChange with: `{...cfg, skip: {...cfg.skip, mode: 'by'}}` - this preserves cfg.rounds!
@@ -5640,6 +5706,7 @@ generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling ba
    Start at  22:11:58
    Duration  374ms (transform 22ms, setup 28ms, collect 15ms, tests 4ms, environment 177ms, prepare 29ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:12:01Z)**_
@@ -5657,6 +5724,7 @@ All 19 existing tests pass. Here's my root cause analysis and proposed TDD plan.
 ## Root Cause Analysis
 
 **The core bug is in `resolveSortNumbersConfig`** ([gameId.tsx:259-267](src/routes/$locale/_app/game/$gameId.tsx#L259-L267)). The `roundsStale` check only validates:
+
 - Sequence length matches `quantity`
 - All values within `range`
 
@@ -5682,6 +5750,7 @@ If the prior quantity was 8 (matching the user's description of seeing `2,3,4,5,
 ## Proposed Fix
 
 Add skip-pattern validation to the stale check. For each round:
+
 - **mode 'by'**: verify sorted diffs all equal `step`
 - **mode 'consecutive'**: verify sorted diffs all equal 1
 - **mode 'random'**: no pattern to validate (quantity + range check is sufficient)
@@ -5797,6 +5866,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:20:24Z)**_
 Found 1 file
 worktrees/feat/sort-numbers-skip-config/src/lib/config-fields.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:20:26Z)**_
@@ -5806,69 +5876,70 @@ _**Agent (claude-opus-4-6 2026-04-08 12:20:26Z)**_
  `./worktrees/feat/sort-numbers-skip-config/src/lib/config-fields.ts`
 
 ```text
-1	// src/lib/config-fields.ts
-2	export type VisibleWhen = {
-3	  key: string;
-4	  subKey?: string;
-5	  value: unknown;
-6	};
-7	
-8	export type ConfigField =
-9	  | {
-10	      type: 'select';
-11	      key: string;
-12	      label: string;
-13	      options: { value: string; label: string }[];
-14	      visibleWhen?: VisibleWhen;
-15	    }
-16	  | {
-17	      type: 'number';
-18	      key: string;
-19	      label: string;
-20	      min: number;
-21	      max: number;
-22	      visibleWhen?: VisibleWhen;
-23	    }
-24	  | {
-25	      /** A number field that reads/writes from a nested object: config[key][subKey] */
-26	      type: 'nested-number';
-27	      key: string;
-28	      subKey: string;
-29	      label: string;
-30	      min: number;
-31	      max: number;
-32	      visibleWhen?: VisibleWhen;
-33	    }
-34	  | {
-35	      /** A select that reads/writes from a nested object: config[key][subKey] */
-36	      type: 'nested-select';
-37	      key: string;
-38	      subKey: string;
-39	      label: string;
-40	      options: { value: string; label: string }[];
-41	      visibleWhen?: VisibleWhen;
-42	    }
-43	  | {
-44	      /**
-45	       * A hybrid field: a type-selector ('all' | 'number') plus a number input
-46	       * when the current value is numeric. Reads/writes config[key][subKey].
-47	       */
-48	      type: 'nested-select-or-number';
-49	      key: string;
-50	      subKey: string;
-51	      label: string;
-52	      min: number;
-53	      max: number;
-54	      visibleWhen?: VisibleWhen;
-55	    }
-56	  | {
-57	      type: 'checkbox';
-58	      key: string;
-59	      label: string;
-60	      visibleWhen?: VisibleWhen;
-61	    };
+1 // src/lib/config-fields.ts
+2 export type VisibleWhen = {
+3   key: string;
+4   subKey?: string;
+5   value: unknown;
+6 };
+7 
+8 export type ConfigField =
+9   | {
+10       type: 'select';
+11       key: string;
+12       label: string;
+13       options: { value: string; label: string }[];
+14       visibleWhen?: VisibleWhen;
+15     }
+16   | {
+17       type: 'number';
+18       key: string;
+19       label: string;
+20       min: number;
+21       max: number;
+22       visibleWhen?: VisibleWhen;
+23     }
+24   | {
+25       /** A number field that reads/writes from a nested object: config[key][subKey] */
+26       type: 'nested-number';
+27       key: string;
+28       subKey: string;
+29       label: string;
+30       min: number;
+31       max: number;
+32       visibleWhen?: VisibleWhen;
+33     }
+34   | {
+35       /** A select that reads/writes from a nested object: config[key][subKey] */
+36       type: 'nested-select';
+37       key: string;
+38       subKey: string;
+39       label: string;
+40       options: { value: string; label: string }[];
+41       visibleWhen?: VisibleWhen;
+42     }
+43   | {
+44       /**
+45        * A hybrid field: a type-selector ('all' | 'number') plus a number input
+46        * when the current value is numeric. Reads/writes config[key][subKey].
+47        */
+48       type: 'nested-select-or-number';
+49       key: string;
+50       subKey: string;
+51       label: string;
+52       min: number;
+53       max: number;
+54       visibleWhen?: VisibleWhen;
+55     }
+56   | {
+57       type: 'checkbox';
+58       key: string;
+59       label: string;
+60       visibleWhen?: VisibleWhen;
+61     };
 62
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:21:30Z)**_
@@ -5889,7 +5960,6 @@ The field definitions and types look correct. Let me re-read the field definitio
 ```
 
 This should update `config.skip.step`. Let me look at the `nested-number` handler in ConfigFormFields again:
-
 
 I'm rendering a number input that reads from the nested config object and updates it when the value changes, properly spreading both the parent and nested properties.
 
@@ -5968,8 +6038,6 @@ Solution:
 
 _**Agent (claude-opus-4-6 2026-04-08 12:27:51Z)**_
 
-
-
 Based on the current implementation, here's the config you need:
 
 | Field | Value |
@@ -5989,6 +6057,7 @@ Based on the current implementation, here's the config you need:
 - **Skip start = `range-min`** means the sequence starts at `range.min` (1), giving **1, 3, 5, 7, 9** — not 2, 4, 6, 8, 10.
 
 To get **2, 4, 6, 8, 10**, you'd need either:
+
 1. Set `range.min = 2` — but then distractors would only include 3, 5, 7, 9 (not 1)
 2. A new start option like a fixed start number (e.g., `start: 2`)
 
@@ -5997,6 +6066,7 @@ Plus there's the stale-rounds bug where changing skip mode doesn't regenerate ro
 **So the real question is: what should the behavior be?**
 
 Your example implies:
+
 - Range defines the **distractor pool** (1–10)
 - The sequence starts at a specific number (2), not necessarily `range.min`
 - Skip step = 2 determines the pattern
@@ -6017,6 +6087,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:30:01Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants:
+
 1. A fixed `start: number` option for SkipConfig
 2. Some automatic/smart defaults to simplify the config setup
 
@@ -6202,12 +6273,9 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-opus-4-6 2026-04-08 12:30:05Z)**_
-
-
 
 I already have strong context from the investigation. Let me think through simplification approaches before asking my first question.
 
@@ -6226,6 +6294,7 @@ _**Agent (claude-opus-4-6 2026-04-08 12:30:05Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:30:12Z)**_
@@ -6268,8 +6337,6 @@ That soujnds goog, we can have an option like, simple/advanced config?
 
 _**Agent (claude-opus-4-6 2026-04-08 12:31:16Z)**_
 
-
-
 Great idea. Follow-up question:
 
 **For the "simple" config, should the skip-by sequence always start from `range.min`?** Or should the teacher pick the starting number?
@@ -6302,8 +6369,6 @@ Let's do it
 ---
 
 _**Agent (claude-opus-4-6 2026-04-08 12:32:51Z)**_
-
-
 
 So to confirm — in simple mode, the teacher would configure:
 
@@ -6462,8 +6527,6 @@ it could be descending
 
 _**Agent (claude-opus-4-6 2026-04-08 12:34:36Z)**_
 
-
-
 Good point. Updated:
 
 ```ts
@@ -6500,8 +6563,6 @@ _**User (2026-04-08 12:34:54Z)**_
 
 _**Agent (claude-opus-4-6 2026-04-08 12:35:03Z)**_
 
-
-
 Moving on to the next section.
 
 ## Section 2: Config Form UX
@@ -6537,8 +6598,6 @@ Y
 
 _**Agent (claude-opus-4-6 2026-04-08 12:35:47Z)**_
 
-
-
 ## Section 3: Resolver & Round Generation
 
 A pure function `resolveSimpleConfig(simple: SortNumbersSimpleConfig): SortNumbersConfig` that:
@@ -6567,8 +6626,6 @@ Y
 ---
 
 _**Agent (claude-opus-4-6 2026-04-08 12:36:03Z)**_
-
-
 
 ## Section 4: Bug Fixes (Advanced Mode)
 
@@ -6604,8 +6661,6 @@ Y
 ---
 
 _**Agent (claude-opus-4-6 2026-04-08 12:37:17Z)**_
-
-
 
 ## Section 5: Testing Strategy
 
@@ -6695,6 +6750,7 @@ List existing specs in worktree
 2026-04-08-drag-preview-sound-fix-design.md
 2026-04-08-sort-numbers-skip-config-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:37:38Z)**_
@@ -6704,195 +6760,196 @@ _**Agent (claude-opus-4-6 2026-04-08 12:37:38Z)**_
  `./worktrees/feat/sort-numbers-skip-config/docs/superpowers/specs/2026-04-08-sort-numbers-skip-config-design.md`
 
 ```text
-1	# SortNumbers Skip & Distractor Config Design
-2	
-3	## Overview
-4	
-5	Extend the SortNumbers game configuration to support structured skip modes (count by Ns,
-6	random, or consecutive) and configurable distractor sources (random, gaps-only, or
-7	full-range). This replaces the boolean `allowSkips` field with two discriminated unions
-8	that make invalid combinations impossible at the type level.
-9	
-10	## Types
-11	
-12	### SkipConfig (replaces `allowSkips: boolean`)
-13	
-14	```ts
-15	type SkipConfig =
-16	  | { mode: 'random' }
-17	  | { mode: 'consecutive' }
-18	  | { mode: 'by'; step: number; start: 'range-min' | 'random' };
-19	```
-20	
-21	- `random` — picks `quantity` numbers randomly from the range (current `allowSkips: true`
-22	  behavior)
-23	- `consecutive` — picks a consecutive run of `quantity` numbers from a random start within
-24	  the range (current `allowSkips: false` behavior)
-25	- `by` — steps through the range by `step`, starting at `range.min` or a random valid
-26	  position. A valid start is any value where `start + (quantity - 1) * step <= range.max`.
-27	
-28	### DistractorConfig (new; only used when `tileBankMode === 'distractors'`)
-29	
-30	```ts
-31	type DistractorConfig =
-32	  | { source: 'random'; count: number }
-33	  | { source: 'gaps-only'; count: number | 'all' }
-34	  | { source: 'full-range'; count: number | 'all' };
-35	```
-36	
-37	- `random` — picks extra tiles randomly from the range, excluding the correct sequence
-38	  (current distractor behavior)
-39	- `gaps-only` — pool is the numbers skipped over between sequence values (e.g. sequence
-40	  2,4,6 → gap pool is 1,3,5,7)
-41	- `full-range` — pool is all numbers in range not in the sequence
-42	- `count: number` — pick that many from the pool randomly
-43	- `count: 'all'` — include the entire pool as distractor tiles
-44	
-45	### Updated `SortNumbersConfig`
-46	
-47	```ts
-48	interface SortNumbersConfig extends AnswerGameConfig {
-49	  component: 'SortNumbers';
-50	  direction: 'ascending' | 'descending';
-51	  range: { min: number; max: number };
-52	  quantity: number;
-53	  skip: SkipConfig;
-54	  distractors: DistractorConfig;
-55	  rounds: SortNumbersRound[];
-56	}
-57	```
-58	
-59	`allowSkips: boolean` is removed. `tileBankMode` and `distractorCount` on
-60	`SortNumbersConfig` are replaced by the `distractors` union (though `tileBankMode` on the
-61	base `AnswerGameConfig` remains for `'exact'` mode — when `tileBankMode === 'exact'`, the
-62	`distractors` field is ignored).
-63	
-64	## Round Generation (`build-sort-round.ts`)
-65	
-66	### Updated `GenerateOptions`
-67	
-68	```ts
-69	interface GenerateOptions {
-70	  range: { min: number; max: number };
-71	  quantity: number;
-72	  skip: SkipConfig;
-73	  totalRounds: number;
-74	}
-75	```
-76	
-77	### `generateSortRounds` branching
-78	
-79	- `mode: 'consecutive'` — existing logic (random start, `quantity` consecutive numbers)
-80	- `mode: 'random'` — existing `allowSkips` logic (random pick from pool, no repeats)
-81	- `mode: 'by'` — enumerate all valid starting points where
-82	  `start + (quantity - 1) * step <= range.max`, then pick one randomly (if
-83	  `start === 'random'`) or use `range.min` (if `start === 'range-min'`). Build sequence as
-84	  `[start, start + step, start + 2*step, ...]`.
-85	
-86	### Distractor tile building
-87	
-88	A new helper `buildDistractorPool(sequence, range, config: DistractorConfig): number[]`
-89	computes the pool of candidate distractor numbers, then applies `count`:
-90	
-91	- `source: 'random'` — pool = all range numbers not in sequence; pick `count` randomly
-92	- `source: 'gaps-only'` — pool = numbers between consecutive sequence values (exclusive);
-93	  if `count === 'all'` include all, else pick `count` randomly
-94	- `source: 'full-range'` — pool = all range numbers not in sequence; if `count === 'all'`
-95	  include all, else pick `count` randomly
-96	
-97	`buildSortRound` is extended to accept an optional `DistractorConfig` and append distractor
-98	tiles to the shuffled tile bank when provided and `tileBankMode === 'distractors'`.
-99	
-100	## Config Fields (`types.ts`)
-101	
-102	### New `ConfigField` types (in `config-fields.ts`)
-103	
-104	```ts
-105	| {
-106	    type: 'nested-select';
-107	    key: string;
-108	    subKey: string;
-109	    label: string;
-110	    options: { value: string; label: string }[];
-111	  }
-112	| {
-113	    type: 'nested-select-or-number';
-114	    key: string;
-115	    subKey: string;
-116	    label: string;
-117	    min: number;
-118	    max: number;
-119	  }
-120	```
-121	
-122	All existing and new field types gain an optional:
-123	
-124	```ts
-125	visibleWhen?: { key: string; subKey?: string; value: unknown };
-126	```
-127	
-128	`ConfigFormFields` skips rendering a field when its `visibleWhen` condition is not met by
-129	the current config value.
-130	
-131	### `sortNumbersConfigFields` additions
-132	
-133	```ts
-134	// Skip mode
-135	{ type: 'nested-select', key: 'skip', subKey: 'mode', label: 'Skip mode',
-136	  options: ['random', 'consecutive', 'by'] }
-137	
-138	// Shown only when skip.mode === 'by'
-139	{ type: 'nested-number', key: 'skip', subKey: 'step', label: 'Skip step',
-140	  min: 2, max: 100,
-141	  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
-142	
-143	{ type: 'nested-select', key: 'skip', subKey: 'start', label: 'Skip start',
-144	  options: ['range-min', 'random'],
-145	  visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
-146	
-147	// Distractor source (shown when tileBankMode === 'distractors')
-148	{ type: 'nested-select', key: 'distractors', subKey: 'source',
-149	  label: 'Distractor source',
-150	  options: ['random', 'gaps-only', 'full-range'],
-151	  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
-152	
-153	// Distractor count
-154	{ type: 'nested-select-or-number', key: 'distractors', subKey: 'count',
-155	  label: 'Distractor count', min: 1, max: 20,
-156	  visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
-157	```
-158	
-159	The existing `allowSkips` checkbox entry is removed.
-160	
-161	## ConfigFormFields renderer (`ConfigFormFields.tsx`)
-162	
-163	- Add `nested-select` rendering branch: reads `(config[key] as obj)[subKey]`, writes back
-164	  a spread of the nested object
-165	- Add `nested-select-or-number` rendering branch: a select with an `'all'` option plus a
-166	  number input shown when the current value is numeric
-167	- Apply `visibleWhen` check before rendering any field: if the field has `visibleWhen` and
-168	  `config[key][subKey?] !== value`, skip it
-169	
-170	## Error Handling & Edge Cases
-171	
-172	- If `mode: 'by'` and no valid start exists (e.g. `step * (quantity - 1) > range.max -
-173	range.min`), fall back to `mode: 'consecutive'` for that round and log a warning.
-174	- If distractor pool is smaller than requested `count`, include the full pool without
-175	  error.
-176	- Existing stored configs using `allowSkips: true/false` must be migrated: `true` →
-177	  `{ mode: 'random' }`, `false` → `{ mode: 'consecutive' }`. A migration utility or
-178	  default fallback in the config loader handles this.
-179	
-180	## Testing
-181	
-182	- Unit tests for `generateSortRounds` covering all three skip modes, including edge cases
-183	  (step too large, start fixed vs random)
-184	- Unit tests for `buildDistractorPool` covering all three sources and both count variants
-185	- Updated Storybook stories for `SortNumbers` with `mode: 'by'` + each distractor source
-186	- `ConfigFormFields` unit tests for `nested-select`, `nested-select-or-number`, and
-187	  `visibleWhen` conditional rendering
+1 # SortNumbers Skip & Distractor Config Design
+2 
+3 ## Overview
+4 
+5 Extend the SortNumbers game configuration to support structured skip modes (count by Ns,
+6 random, or consecutive) and configurable distractor sources (random, gaps-only, or
+7 full-range). This replaces the boolean `allowSkips` field with two discriminated unions
+8 that make invalid combinations impossible at the type level.
+9 
+10 ## Types
+11 
+12 ### SkipConfig (replaces `allowSkips: boolean`)
+13 
+14 ```ts
+15 type SkipConfig =
+16   | { mode: 'random' }
+17   | { mode: 'consecutive' }
+18   | { mode: 'by'; step: number; start: 'range-min' | 'random' };
+19 ```
+20 
+21 - `random` — picks `quantity` numbers randomly from the range (current `allowSkips: true`
+22   behavior)
+23 - `consecutive` — picks a consecutive run of `quantity` numbers from a random start within
+24   the range (current `allowSkips: false` behavior)
+25 - `by` — steps through the range by `step`, starting at `range.min` or a random valid
+26   position. A valid start is any value where `start + (quantity - 1) * step <= range.max`.
+27 
+28 ### DistractorConfig (new; only used when `tileBankMode === 'distractors'`)
+29 
+30 ```ts
+31 type DistractorConfig =
+32   | { source: 'random'; count: number }
+33   | { source: 'gaps-only'; count: number | 'all' }
+34   | { source: 'full-range'; count: number | 'all' };
+35 ```
+36 
+37 - `random` — picks extra tiles randomly from the range, excluding the correct sequence
+38   (current distractor behavior)
+39 - `gaps-only` — pool is the numbers skipped over between sequence values (e.g. sequence
+40   2,4,6 → gap pool is 1,3,5,7)
+41 - `full-range` — pool is all numbers in range not in the sequence
+42 - `count: number` — pick that many from the pool randomly
+43 - `count: 'all'` — include the entire pool as distractor tiles
+44 
+45 ### Updated `SortNumbersConfig`
+46 
+47 ```ts
+48 interface SortNumbersConfig extends AnswerGameConfig {
+49   component: 'SortNumbers';
+50   direction: 'ascending' | 'descending';
+51   range: { min: number; max: number };
+52   quantity: number;
+53   skip: SkipConfig;
+54   distractors: DistractorConfig;
+55   rounds: SortNumbersRound[];
+56 }
+57 ```
+58 
+59 `allowSkips: boolean` is removed. `tileBankMode` and `distractorCount` on
+60 `SortNumbersConfig` are replaced by the `distractors` union (though `tileBankMode` on the
+61 base `AnswerGameConfig` remains for `'exact'` mode — when `tileBankMode === 'exact'`, the
+62 `distractors` field is ignored).
+63 
+64 ## Round Generation (`build-sort-round.ts`)
+65 
+66 ### Updated `GenerateOptions`
+67 
+68 ```ts
+69 interface GenerateOptions {
+70   range: { min: number; max: number };
+71   quantity: number;
+72   skip: SkipConfig;
+73   totalRounds: number;
+74 }
+75 ```
+76 
+77 ### `generateSortRounds` branching
+78 
+79 - `mode: 'consecutive'` — existing logic (random start, `quantity` consecutive numbers)
+80 - `mode: 'random'` — existing `allowSkips` logic (random pick from pool, no repeats)
+81 - `mode: 'by'` — enumerate all valid starting points where
+82   `start + (quantity - 1) * step <= range.max`, then pick one randomly (if
+83   `start === 'random'`) or use `range.min` (if `start === 'range-min'`). Build sequence as
+84   `[start, start + step, start + 2*step, ...]`.
+85 
+86 ### Distractor tile building
+87 
+88 A new helper `buildDistractorPool(sequence, range, config: DistractorConfig): number[]`
+89 computes the pool of candidate distractor numbers, then applies `count`:
+90 
+91 - `source: 'random'` — pool = all range numbers not in sequence; pick `count` randomly
+92 - `source: 'gaps-only'` — pool = numbers between consecutive sequence values (exclusive);
+93   if `count === 'all'` include all, else pick `count` randomly
+94 - `source: 'full-range'` — pool = all range numbers not in sequence; if `count === 'all'`
+95   include all, else pick `count` randomly
+96 
+97 `buildSortRound` is extended to accept an optional `DistractorConfig` and append distractor
+98 tiles to the shuffled tile bank when provided and `tileBankMode === 'distractors'`.
+99 
+100 ## Config Fields (`types.ts`)
+101 
+102 ### New `ConfigField` types (in `config-fields.ts`)
+103 
+104 ```ts
+105 | {
+106     type: 'nested-select';
+107     key: string;
+108     subKey: string;
+109     label: string;
+110     options: { value: string; label: string }[];
+111   }
+112 | {
+113     type: 'nested-select-or-number';
+114     key: string;
+115     subKey: string;
+116     label: string;
+117     min: number;
+118     max: number;
+119   }
+120 ```
+121 
+122 All existing and new field types gain an optional:
+123 
+124 ```ts
+125 visibleWhen?: { key: string; subKey?: string; value: unknown };
+126 ```
+127 
+128 `ConfigFormFields` skips rendering a field when its `visibleWhen` condition is not met by
+129 the current config value.
+130 
+131 ### `sortNumbersConfigFields` additions
+132 
+133 ```ts
+134 // Skip mode
+135 { type: 'nested-select', key: 'skip', subKey: 'mode', label: 'Skip mode',
+136   options: ['random', 'consecutive', 'by'] }
+137 
+138 // Shown only when skip.mode === 'by'
+139 { type: 'nested-number', key: 'skip', subKey: 'step', label: 'Skip step',
+140   min: 2, max: 100,
+141   visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+142 
+143 { type: 'nested-select', key: 'skip', subKey: 'start', label: 'Skip start',
+144   options: ['range-min', 'random'],
+145   visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' } }
+146 
+147 // Distractor source (shown when tileBankMode === 'distractors')
+148 { type: 'nested-select', key: 'distractors', subKey: 'source',
+149   label: 'Distractor source',
+150   options: ['random', 'gaps-only', 'full-range'],
+151   visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
+152 
+153 // Distractor count
+154 { type: 'nested-select-or-number', key: 'distractors', subKey: 'count',
+155   label: 'Distractor count', min: 1, max: 20,
+156   visibleWhen: { key: 'tileBankMode', value: 'distractors' } }
+157 ```
+158 
+159 The existing `allowSkips` checkbox entry is removed.
+160 
+161 ## ConfigFormFields renderer (`ConfigFormFields.tsx`)
+162 
+163 - Add `nested-select` rendering branch: reads `(config[key] as obj)[subKey]`, writes back
+164   a spread of the nested object
+165 - Add `nested-select-or-number` rendering branch: a select with an `'all'` option plus a
+166   number input shown when the current value is numeric
+167 - Apply `visibleWhen` check before rendering any field: if the field has `visibleWhen` and
+168   `config[key][subKey?] !== value`, skip it
+169 
+170 ## Error Handling & Edge Cases
+171 
+172 - If `mode: 'by'` and no valid start exists (e.g. `step * (quantity - 1) > range.max -
+173 range.min`), fall back to `mode: 'consecutive'` for that round and log a warning.
+174 - If distractor pool is smaller than requested `count`, include the full pool without
+175   error.
+176 - Existing stored configs using `allowSkips: true/false` must be migrated: `true` →
+177   `{ mode: 'random' }`, `false` → `{ mode: 'consecutive' }`. A migration utility or
+178   default fallback in the config loader handles this.
+179 
+180 ## Testing
+181 
+182 - Unit tests for `generateSortRounds` covering all three skip modes, including edge cases
+183   (step too large, start fixed vs random)
+184 - Unit tests for `buildDistractorPool` covering all three sources and both count variants
+185 - Updated Storybook stories for `SortNumbers` with `mode: 'by'` + each distractor source
+186 - `ConfigFormFields` unit tests for `nested-select`, `nested-select-or-number`, and
+187   `visibleWhen` conditional rendering
 188
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:37:42Z)**_
@@ -7111,6 +7168,7 @@ When config form sends `skip: { mode: 'by' }` without `start`, default to
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat/sort-numbers-skip-config/docs/superpowers/specs/2026-04-08-sort-numbers-skip-config-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:38:24Z)**_
@@ -7187,6 +7245,7 @@ scope.md 3ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 2.40s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-08 12:38:29Z)**_

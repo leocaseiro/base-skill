@@ -7,6 +7,7 @@
 _**User (2026-04-07 06:32:31Z)**_
 
 <ide_selection>The user selected the lines 69 to 69 from /Users/leocaseiro/Sites/base-skill/docs/project-scope.md:
+
 ## 2. Architecture (`docs/architecture.md`)
 
 This may or may not be related to the current task.</ide_selection>
@@ -28,10 +29,9 @@ E.g. scenario
 5. user should be able to continue playing, and see `ca<slot>`, with the `t` tile in tileBank
 6. if user goes offline, it should be able to continue the game still, and even start new game, and bookmark variations of the game.
 
-
 This app should be offline first! For evertyhing.
-See @docs/prd.md @docs/project-scope.md for reference, and any other relevant document you might find. 
- 
+See @docs/prd.md @docs/project-scope.md for reference, and any other relevant document you might find.
+
 /brainstorming
 
 ---
@@ -50,6 +50,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:32:35Z)**_
 ```text
 Launching skill: superpowers:brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -218,7 +219,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:38Z)**_
@@ -242,6 +242,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:32:39Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:41Z)**_
@@ -375,6 +376,7 @@ src/components/answer-game/AnswerGame/AnswerGame.test.tsx
 src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:50Z)**_
@@ -425,6 +427,7 @@ docs/superpowers/plans/2026-04-06-touch-keyboard-type-mode.md
 docs/superpowers/plans/2026-04-05-game-config-ui-redesign.md
 docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:50Z)**_
@@ -452,6 +455,7 @@ b79e8cc ai(specstory): sync
 4620eda test: update word-spell VR baseline after cursor removed in drag mode
 3756b1b fix: hide cursor underscore in drag mode; regenerate sort-numbers rounds on quantity change
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:53Z)**_
@@ -461,744 +465,745 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:32:53Z)**_
  `./docs/architecture.md`
 
 ```text
-1	# BaseSkill — System Architecture
-2	
-3	> **Meta-framework: TanStack Start.** Chosen for its Vite-native architecture, fully type-safe routing via TanStack Router, and a smooth server upgrade path (server functions, API routes) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server capabilities activate without restructuring the client.
-4	
-5	---
-6	
-7	## 1. Tech Stack
-8	
-9	| Layer                   | Technology                                  | Rationale                                                                                                                                |
-10	| ----------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-11	| **Meta-framework**      | TanStack Start                              | Vite-native, type-safe routing, static SPA + future server upgrade path                                                                  |
-12	| **Router**              | TanStack Router (file-based)                | End-to-end type safety for routes, params, search, loaders                                                                               |
-13	| **UI library**          | React 19                                    | Component model; hooks for RxDB reactive queries                                                                                         |
-14	| **Language**            | TypeScript (strict mode)                    | `noImplicitAny`, no `any` ESLint rule, CI enforcement                                                                                    |
-15	| **UI components**       | shadcn/ui                                   | Accessible, unstyled base; extended for kid-friendly defaults                                                                            |
-16	| **Styling**             | Tailwind CSS v4                             | Utility-first; CSS variable injection for theme engine                                                                                   |
-17	| **Local database**      | RxDB (Dexie storage)                        | Offline-first, reactive; IndexedDB via **Dexie-backed** RxStorage (free tier). See [ADR 0001](adrs/0001-rxdb-without-tanstack-query.md). |
-18	| **Build tool**          | Vite (via TanStack Start)                   | Fast HMR, static SPA preset via Nitro                                                                                                    |
-19	| **Service Worker**      | Workbox via vite-plugin-pwa                 | Pre-caches app shell and game assets                                                                                                     |
-20	| **Cloud sync**          | RxDB replication plugins                    | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth                                                                         |
-21	| **Auth (OneDrive)**     | MSAL.js                                     | Native PKCE SPA flow, no backend needed                                                                                                  |
-22	| **Auth (Google Drive)** | Cloudflare Worker BFF                       | Proxy for `client_secret` (Google non-standard PKCE requirement)                                                                         |
-23	| **i18n**                | react-i18next                               | Translation namespaces, TTS language routing                                                                                             |
-24	| **Testing**             | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression                                                                                                  |
-25	| **CI/CD**               | GitHub Actions                              | Lint, type-check, test, build, deploy to GitHub Pages                                                                                    |
-26	
-27	---
-28	
-29	## 2. System Architecture Overview
-30	
-31	```mermaid
-32	graph TD
-33	    subgraph client [Client — Browser]
-34	        TanStackStart["TanStack Start\n(Vite + Nitro static)"]
-35	        TanStackRouter["TanStack Router\n(file-based routes)"]
-36	        ReactApp["React App\n(components + hooks)"]
-37	        RxDB["RxDB\n(IndexedDB)"]
-38	        EventBus["Event Bus\n(pub/sub)"]
-39	        ServiceWorker["Service Worker\n(Workbox)"]
-40	    end
-41	
-42	    subgraph cloud [Cloud Storage — User's own account]
-43	        GoogleDrive["Google Drive\n(free tier)"]
-44	        OneDrive["OneDrive\n(free tier)"]
-45	    end
-46	
-47	    subgraph proxy [Cloudflare Worker — Free tier]
-48	        CFWorker["OAuth BFF Proxy\n(Google token exchange only)"]
-49	    end
-50	
-51	    subgraph hosting [GitHub Pages]
-52	        StaticFiles["Static HTML/JS/CSS\n(SPA)"]
-53	    end
-54	
-55	    Browser["User's Browser"] --> ServiceWorker
-56	    ServiceWorker --> StaticFiles
-57	    ServiceWorker --> ReactApp
-58	    ReactApp --> TanStackRouter
-59	    TanStackRouter --> TanStackStart
-60	    ReactApp --> RxDB
-61	    ReactApp --> EventBus
-62	    RxDB -->|"replication plugin"| GoogleDrive
-63	    RxDB -->|"replication plugin"| OneDrive
-64	    ReactApp -->|"PKCE token exchange"| CFWorker
-65	    CFWorker -->|"adds client_secret"| GoogleDrive
-66	```
-67	
-68	**Key properties:**
-69	
-70	- All application logic runs in the browser. No server required.
-71	- RxDB is the single source of truth. State persists across refreshes automatically.
-72	- **Data access (M2):** React hooks subscribe to RxDB queries; `@tanstack/react-query` is [deferred until M6](adrs/0001-rxdb-without-tanstack-query.md) when network sync arrives, to avoid a duplicate cache for local data.
-73	- Each game is its own code-split bundle. The app shell loads instantly; game bundles are downloaded on first play or when the parent explicitly triggers a download. A "Download All Games" option exists in parent settings but is not triggered on first load.
-74	- Service worker pre-caches the app shell. Game assets are cached per game on first play.
-75	- Cloud sync is opt-in. The app functions identically without it.
-76	
-77	---
-78	
-79	## 3. TanStack Start Configuration
-80	
-81	### Static SPA Preset
-82	
-83	TanStack Start is configured with the Nitro static preset for GitHub Pages deployment:
-84	
-85	```typescript
-86	// app.config.ts
-87	import { defineConfig } from '@tanstack/start/config';
-88	
-89	export default defineConfig({
-90	  server: {
-91	    preset: 'static',
-92	  },
-93	  vite: {
-94	    plugins: [
-95	      // vite-plugin-pwa added here
-96	    ],
-97	  },
-98	});
-99	```
-100	
-101	**Output:** A `dist/` directory of static HTML/JS/CSS files. Deployable to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
-102	
-103	**Future server upgrade:** When server features are needed (auth, WebSockets, premium APIs), change `preset` to `'cloudflare-workers'`, `'vercel'`, or `'node-server'`. Client-side code is unchanged.
-104	
-105	---
-106	
-107	## 4. TanStack Router — Route Tree
-108	
-109	### File-Based Routing Convention
-110	
-111	Routes are defined as files in the `routes/` directory. TanStack Router generates a fully type-safe route tree at build time.
-112	
-113	```
-114	routes/
-115	  __root.tsx                    # Root document (HTML shell, global providers)
-116	  _app.tsx                      # App layout (offline indicator, theme, i18n provider)
-117	  _app/
-118	    index.tsx                   # Profile picker / home screen
-119	    dashboard.tsx               # Game grid (requires active profile)
-120	    game/
-121	      $gameId.tsx               # Game shell (dynamic segment, type-safe)
-122	    settings.tsx                # Child settings (volume, speech, theme, language)
-123	    parent.tsx                  # Parent settings layout (PIN-gated)
-124	    parent/
-125	      index.tsx                 # Parent settings home
-126	      overrides.tsx             # Game override controls
-127	      history.tsx               # Session history viewer
-128	      data.tsx                  # Data management (clear history/progress)
-129	      sync.tsx                  # Cloud sync configuration
-130	      voices.tsx                # TTS voice selector
-131	```
-132	
-133	### Route Guards
-134	
-135	```typescript
-136	// _app/dashboard.tsx — redirect to profile picker if no active profile
-137	export const Route = createFileRoute('/_app/dashboard')({
-138	  beforeLoad: ({ context }) => {
-139	    if (!context.activeProfile) {
-140	      throw redirect({ to: '/_app/' });
-141	    }
-142	  },
-143	  loader: async ({ context }) => {
-144	    // Pre-fetch game catalog + bookmarks from RxDB
-145	    return {
-146	      games: await context.db.games.find().exec(),
-147	      bookmarks: await context.db.bookmarks
-148	        .find({ selector: { profileId: context.activeProfile.id } })
-149	        .exec(),
-150	    };
-151	  },
-152	});
-153	
-154	// _app/parent.tsx — PIN gate
-155	export const Route = createFileRoute('/_app/parent')({
-156	  beforeLoad: ({ context }) => {
-157	    if (!context.parentUnlocked) {
-158	      throw redirect({
-159	        to: '/_app/dashboard',
-160	        search: { pinRequired: true },
-161	      });
-162	    }
-163	  },
-164	});
-165	```
-166	
-167	### Type-Safe Route Parameters
-168	
-169	```typescript
-170	// _app/game/$gameId.tsx
-171	export const Route = createFileRoute('/_app/game/$gameId')({
-172	  params: {
-173	    parse: (params) => ({ gameId: params.gameId }), // typed string
-174	  },
-175	  loader: async ({ params, context }) => {
-176	    const config = await context.gameLoader.load(params.gameId);
-177	    const overrides = await context.db.game_config_overrides
-178	      .findOne({
-179	        selector: {
-180	          profileId: context.activeProfile.id,
-181	          gameId: params.gameId,
-182	        },
-183	      })
-184	      .exec();
-185	    return { config, overrides };
-186	  },
-187	});
-188	```
-189	
-190	### Route Tree Diagram
-191	
-192	```mermaid
-193	flowchart LR
-194	    root["__root.tsx\n(HTML shell)"]
-195	    root --> idx["index.tsx\n/ → redirect /en"]
-196	    root --> locale["$locale/route.tsx\n/$locale\nvalidates locale,\nsyncs i18n language"]
-197	    locale --> app["$locale/_app.tsx\nDbProvider +\nI18nextProvider +\nThemeRuntimeProvider"]
-198	    app --> home["_app/index.tsx\n/ (home catalog)"]
-199	    app --> dashboard["_app/dashboard.tsx\n/dashboard"]
-200	    app --> settings["_app/settings.tsx\n/settings"]
-201	    app --> game["_app/game/$gameId.tsx\n/game/:gameId"]
-202	    app --> parent["_app/parent.tsx\n/parent (PIN-gated)"]
-203	    parent --> parentIdx["parent/index.tsx\n/parent/"]
-204	    parent --> overrides["parent/overrides.tsx\n/parent/overrides"]
-205	    parent --> history["parent/history.tsx\n/parent/history"]
-206	    parent --> data["parent/data.tsx\n/parent/data"]
-207	    parent --> sync["parent/sync.tsx\n/parent/sync"]
-208	    parent --> voices["parent/voices.tsx\n/parent/voices"]
-209	```
-210	
-211	---
-212	
-213	## 5. Component Architecture
-214	
-215	### Layout Hierarchy
-216	
-217	```
-218	__root.tsx
-219	└── _app.tsx  (AppLayout)
-220	    ├── OfflineIndicator
-221	    ├── ThemeProvider (CSS variables from RxDB)
-222	    ├── I18nProvider (react-i18next)
-223	    └── [child route outlet]
-224	        ├── _app/index.tsx     → ProfilePicker
-225	        ├── _app/dashboard.tsx → Dashboard
-226	        │   ├── BookmarkedGamesRow
-227	        │   ├── RecentGamesRow
-228	        │   └── GameGrid (by subject/grade)
-229	        ├── _app/game/$gameId.tsx → GameShell
-230	        │   ├── GameHeader (back, title, score, timer)
-231	        │   ├── GameArea (game-specific component)
-232	        │   └── GameControls (pause, exit)
-233	        ├── _app/settings.tsx  → ChildSettings
-234	        └── _app/parent.tsx    → ParentSettings
-235	            ├── GameOverridesScreen
-236	            ├── SessionHistoryViewer
-237	            ├── DataManagementScreen
-238	            ├── CloudSyncScreen
-239	            └── VoiceSelectorScreen
-240	```
-241	
-242	### React Provider Hierarchy
-243	
-244	```mermaid
-245	graph TD
-246	    Root["__root.tsx\n(HTML shell, devtools, THEME_INIT_SCRIPT)"]
-247	    Root --> LocaleRoute["$locale/route.tsx\nbeforeLoad: validate locale\nsyncs i18n.changeLanguage"]
-248	    LocaleRoute --> AppShell["$locale/_app.tsx"]
-249	
-250	    subgraph providers ["Providers (nested, outermost first)"]
-251	        DbProvider["DbProvider\n— initialises RxDB\n— seeds themes on ready\n— exposes db via context"]
-252	        I18nProvider["I18nextProvider\n— provides t() and useTranslation\n— language driven by $locale param"]
-253	        ThemeProvider["ThemeRuntimeProvider\n— subscribes to themes collection\n— injects --bs-* CSS variables"]
-254	    end
-255	
-256	    AppShell --> DbProvider
-257	    DbProvider --> I18nProvider
-258	    I18nProvider --> ThemeProvider
-259	    ThemeProvider --> Outlet["<Outlet />\n(child routes)"]
-260	
-261	    Outlet --> HomeCatalog["_app/index\nHomeCatalog"]
-262	    Outlet --> Dashboard["_app/dashboard\nDashboard"]
-263	    Outlet --> GameShell["_app/game/$gameId\nGameShell"]
-264	    Outlet --> ChildSettings["_app/settings\nChildSettings"]
-265	    Outlet --> ParentSettings["_app/parent\nParentSettings (PIN-gated)"]
-266	```
-267	
-268	### Reusable Game Components
-269	
-270	These components are game-framework-level and used across multiple games:
-271	
-272	| Component                | Description                                  | Used By                    |
-273	| ------------------------ | -------------------------------------------- | -------------------------- |
-274	| `DragAndDrop`            | Pointer events, magnetic snap, ghost preview | Number Match, Word Builder |
-275	| `LetterTracer`           | Canvas tracing with touch/mouse              | Letter Tracing             |
-276	| `MultipleChoice`         | Tap/click answer selection                   | Math Facts                 |
-277	| `SpeechInput`            | STT with animated visual indicator (GIF)     | Read Aloud                 |
-278	| `SpeechOutput`           | TTS wrapper with voice selection             | All games                  |
-279	| `Timer`                  | Configurable, hideable per parent settings   | Math Facts (optional all)  |
-280	| `EncouragementAnnouncer` | TTS + visual popup, event-triggered          | All games                  |
-281	| `ScoreAnimation`         | CSS confetti/stars reward animations         | All games                  |
-282	| `ProgressBar`            | In-game progress display                     | All games                  |
-283	| `ScoreBoard`             | Current score display                        | All games                  |
-284	| `OfflineIndicator`       | `navigator.onLine` banner                    | App shell                  |
-285	
-286	---
-287	
-288	## 6. State Management
-289	
-290	### RxDB as Single Source of Truth
-291	
-292	All persistent state lives in RxDB. Components subscribe to reactive queries; UI updates automatically when data changes.
-293	
-294	```typescript
-295	// Example: reactive profile hook
-296	function useActiveProfile() {
-297	  const [profile, setProfile] = useState<Profile | null>(null);
-298	
-299	  useEffect(() => {
-300	    const sub = db.profiles
-301	      .findOne({ selector: { isActive: true } })
-302	      .$.subscribe(setProfile);
-303	    return () => sub.unsubscribe();
-304	  }, []);
-305	
-306	  return profile;
-307	}
-308	```
-309	
-310	### TanStack Query Integration (Evaluation Point)
-311	
-312	During Milestone 2, evaluate whether TanStack Query should wrap RxDB observables:
-313	
-314	- **Option A**: RxDB reactive queries only (custom hooks). Simpler. RxDB handles caching natively.
-315	- **Option B**: TanStack Query wraps RxDB `exec()` calls. Adds cache invalidation, loading/error states, suspense support.
-316	- **Decision criteria**: If server data (Cloudflare Worker, future APIs) needs to be mixed with local RxDB data in the same loading lifecycle, TanStack Query is the natural bridge. For pure local data, RxDB hooks are sufficient.
-317	
-318	**Provisional decision**: Use RxDB custom hooks for all local data. Add TanStack Query only when server-side data fetching is introduced (post-M6).
-319	
-320	### Non-Persistent UI State
-321	
-322	Non-persistent state (modal open/closed, current game step, animation state) uses React's `useState`/`useReducer` co-located with the component that owns it. No global UI state store.
-323	
-324	### RxDB Provider and Hooks Setup
-325	
-326	```mermaid
-327	sequenceDiagram
-328	    participant App as App mount
-329	    participant DbP as DbProvider
-330	    participant DB as RxDB (IndexedDB)
-331	    participant Seed as seedThemesOnce()
-332	    participant Hook as useRxQuery / useRxDB
-333	    participant Comp as Component
-334	
-335	    App->>DbP: render <DbProvider>
-336	    DbP->>DB: getOrCreateDatabase()
-337	    DB-->>DbP: db instance
-338	    DbP->>DB: checkVersionAndMigrate(db)
-339	    DbP->>Seed: seedThemesOnce(db)
-340	    Seed->>DB: upsert preset themes (if missing)
-341	    DbP-->>App: isReady = true
-342	
-343	    Note over Hook,Comp: Hooks used anywhere inside DbProvider
-344	    Comp->>Hook: useRxDB()
-345	    Hook-->>Comp: db instance from context
-346	
-347	    Comp->>Hook: useRxQuery(db.themes.find().$)
-348	    Hook->>DB: subscribe to Observable
-349	    DB-->>Hook: current docs
-350	    Hook-->>Comp: docs[] (re-renders on change)
-351	
-352	    Note over Hook,DB: On unmount
-353	    Hook->>DB: subscription.unsubscribe()
-354	```
-355	
-356	---
-357	
-358	## 7. Data Flow
-359	
-360	```mermaid
-361	sequenceDiagram
-362	    participant Child as Child
-363	    participant UI as React UI
-364	    participant Hook as RxDB Hook
-365	    participant RxDB as RxDB (IndexedDB)
-366	    participant SW as Service Worker
-367	    participant Cloud as Cloud (Drive/OneDrive)
-368	
-369	    Child->>UI: Taps answer
-370	    UI->>Hook: mutate(action)
-371	    Hook->>RxDB: upsert document
-372	    RxDB-->>Hook: reactive update
-373	    Hook-->>UI: re-render
-374	    UI-->>Child: sees new state
-375	
-376	    Note over RxDB,Cloud: Background sync (when online)
-377	    RxDB->>Cloud: replication plugin push
-378	    Cloud-->>RxDB: replication plugin pull
-379	```
-380	
-381	---
-382	
-383	## 8. Cloud Sync Architecture
-384	
-385	### Overview
-386	
-387	RxDB provides [replication plugins](https://rxdb.info/replication.html) for Google Drive and OneDrive. These plugins:
-388	
-389	1. Read the RxDB `checkpoint` (last sync position)
-390	2. Push local changes to the cloud file
-391	3. Pull remote changes and merge into local RxDB
-392	4. Handle conflict resolution per collection strategy
-393	
-394	### Google Drive Sync
-395	
-396	**Challenge**: Google OAuth requires a `client_secret` even with PKCE (non-standard — violates RFC 7636).
-397	
-398	**Solution**: A lightweight Cloudflare Worker (~50 lines) acts as a Backend-for-Frontend (BFF) proxy:
-399	
-400	```mermaid
-401	sequenceDiagram
-402	    participant App as SPA (Browser)
-403	    participant CF as Cloudflare Worker
-404	    participant Google as Google OAuth
-405	
-406	    App->>Google: Redirect to consent screen (PKCE code_challenge)
-407	    Google-->>App: Authorization code (redirect_uri callback)
-408	    App->>CF: POST /token {code, code_verifier, redirect_uri}
-409	    CF->>Google: POST /token {code, code_verifier, client_secret, redirect_uri}
-410	    Google-->>CF: {access_token, refresh_token}
-411	    CF-->>App: {access_token, refresh_token}
-412	    App->>App: Store tokens encrypted in IndexedDB
-413	```
-414	
-415	- The `client_secret` lives in Cloudflare Worker environment variables — never in the client bundle.
-416	- The Worker is deployed separately and is **not** part of the GPL-licensed app repository.
-417	- Cloudflare Workers free tier: 100,000 requests/day — sufficient for OAuth token exchanges.
-418	- Token refresh follows the same proxy pattern.
-419	
-420	### OneDrive Sync
-421	
-422	MSAL.js handles the full PKCE flow natively for OneDrive — no backend proxy needed:
-423	
-424	```mermaid
-425	sequenceDiagram
-426	    participant App as SPA (Browser)
-427	    participant MSAL as MSAL.js
-428	    participant MS as Microsoft OAuth
-429	
-430	    App->>MSAL: loginPopup() or loginRedirect()
-431	    MSAL->>MS: PKCE authorization request
-432	    MS-->>MSAL: Authorization code
-433	    MSAL->>MS: Token exchange (client-side PKCE)
-434	    MS-->>MSAL: {access_token, refresh_token}
-435	    MSAL-->>App: Account + tokens (cached in MSAL cache)
-436	```
-437	
-438	### Token Storage
-439	
-440	OAuth tokens are stored **encrypted in IndexedDB** — never in `localStorage` or `sessionStorage`:
-441	
-442	- Encryption key derived from device-specific entropy (e.g., a random key generated once and stored in IndexedDB with a separate namespace).
-443	- Tokens are never exposed in URL fragments or query strings after the OAuth redirect.
-444	- MSAL.js manages its own encrypted token cache internally.
-445	- Google Drive tokens are stored in a separate encrypted RxDB document (`sync_meta` collection).
-446	
-447	### Device-Aware Sync
-448	
-449	Each synced record includes a `deviceId` field (generated once per device, stored in `sync_meta`):
-450	
-451	- **Device-specific data** (e.g., available TTS voices) is tagged with `deviceId` and not applied on other devices.
-452	- **Shared data** (progress, bookmarks, themes) syncs across all devices.
-453	- On a new device, if the synced voice is unavailable, the app falls back to the OS default voice for that language.
-454	
-455	### Conflict Resolution
-456	
-457	| Collection              | Strategy                                                      |
-458	| ----------------------- | ------------------------------------------------------------- |
-459	| `profiles`              | Last-write-wins (by `updatedAt` timestamp)                    |
-460	| `progress`              | Merge: take max score, sum stars, extend streaks              |
-461	| `settings`              | Last-write-wins (per profile)                                 |
-462	| `game_config_overrides` | Last-write-wins (by `updatedAt`)                              |
-463	| `bookmarks`             | Union (all bookmarks from all devices kept)                   |
-464	| `themes`                | Last-write-wins (by `updatedAt`)                              |
-465	| `session_history`       | Append-only; no conflicts (chunks are immutable once written) |
-466	| `session_history_index` | Append-only; no conflicts                                     |
-467	| `sync_meta`             | Device-local; not cross-device synced                         |
-468	| `app_meta`              | Device-local; not cross-device synced                         |
-469	
-470	---
-471	
-472	## 9. PWA and Offline Strategy
-473	
-474	### Service Worker Lifecycle
-475	
-476	```mermaid
-477	stateDiagram-v2
-478	    [*] --> Installing: First visit / SW update available
-479	    Installing --> Waiting: Install complete
-480	    Waiting --> Active: skipWaiting() called
-481	    Active --> Controlling: clientsClaim()
-482	    Controlling --> [*]: SW terminated (browser GC)
-483	
-484	    Active --> VersionCheck: New SW installed
-485	    VersionCheck --> CachePurge: Version mismatch detected
-486	    CachePurge --> MigrationCheck: Stale caches purged
-487	    MigrationCheck --> AppRender: No schema change
-488	    MigrationCheck --> RxDBMigration: Schema version changed
-489	    RxDBMigration --> AppRender: Migration complete
-490	```
-491	
-492	### Cache Strategy (Workbox)
-493	
-494	| Asset Type                    | Strategy                                                                       | TTL        |
-495	| ----------------------------- | ------------------------------------------------------------------------------ | ---------- |
-496	| App shell (HTML, core JS/CSS) | Cache-first, update on install                                                 | SW version |
-497	| Game bundles (JS per game)    | Cache-first, code-split per game, downloaded on first play or parent-triggered | SW version |
-498	| Game assets (images, audio)   | Cache-first, lazy-loaded per game                                              | SW version |
-499	| API calls (future)            | Network-first with fallback                                                    | 5 minutes  |
-500	| Google Fonts (if used)        | Stale-while-revalidate                                                         | 30 days    |
-501	
-502	### App Versioning
-503	
-504	Every CD deploy stamps a semver version:
-505	
-506	1. Version embedded in `app_meta` RxDB collection on first run.
-507	2. New SW checks its version against the cached version.
-508	3. On mismatch: `skipWaiting()` + `clientsClaim()` → purge old caches → run RxDB migrations if needed → render app.
-509	4. Version displayed in Parent Settings > About.
-510	
-511	### Offline/Online Detection
-512	
-513	```typescript
-514	// Global hook — used by OfflineIndicator and RxDB sync
-515	function useOnlineStatus() {
-516	  const [isOnline, setIsOnline] = useState(navigator.onLine);
-517	
-518	  useEffect(() => {
-519	    const handleOnline = () => setIsOnline(true);
-520	    const handleOffline = () => setIsOnline(false);
-521	    window.addEventListener('online', handleOnline);
-522	    window.addEventListener('offline', handleOffline);
-523	    return () => {
-524	      window.removeEventListener('online', handleOnline);
-525	      window.removeEventListener('offline', handleOffline);
-526	    };
-527	  }, []);
-528	
-529	  return isOnline;
-530	}
-531	```
-532	
-533	---
-534	
-535	## 10. Event Bus and Extension Points
-536	
-537	### Event Bus
-538	
-539	A typed pub/sub system used for:
-540	
-541	1. **Session recorder**: subscribes to game events, writes to `session_history`.
-542	2. **Encouragement system**: listens for `game:evaluate` events, triggers TTS + animation.
-543	3. **Plugin hooks**: external code subscribes without modifying app source.
-544	
-545	```typescript
-546	// Event type definitions
-547	interface AppEvents {
-548	  'game:start': {
-549	    gameId: string;
-550	    profileId: string;
-551	    sessionId: string;
-552	  };
-553	  'game:action': {
-554	    sessionId: string;
-555	    action: string;
-556	    payload: unknown;
-557	  };
-558	  'game:evaluate': {
-559	    sessionId: string;
-560	    result: 'correct' | 'incorrect' | 'near-miss';
-561	  };
-562	  'game:score': { sessionId: string; score: number; total: number };
-563	  'game:hint': { sessionId: string; hintType: string };
-564	  'game:end': {
-565	    sessionId: string;
-566	    finalScore: number;
-567	    duration: number;
-568	  };
-569	  'profile:switch': {
-570	    fromProfileId: string | null;
-571	    toProfileId: string;
-572	  };
-573	  'sync:start': { provider: 'google-drive' | 'onedrive' };
-574	  'sync:complete': {
-575	    provider: 'google-drive' | 'onedrive';
-576	    timestamp: number;
-577	  };
-578	  'sync:error': {
-579	    provider: 'google-drive' | 'onedrive';
-580	    error: string;
-581	  };
-582	}
-583	
-584	interface EventBus {
-585	  emit<K extends keyof AppEvents>(
-586	    event: K,
-587	    payload: AppEvents[K],
-588	  ): void;
-589	  on<K extends keyof AppEvents>(
-590	    event: K,
-591	    handler: (payload: AppEvents[K]) => void,
-592	  ): () => void;
-593	  off<K extends keyof AppEvents>(
-594	    event: K,
-595	    handler: (payload: AppEvents[K]) => void,
-596	  ): void;
-597	}
-598	```
-599	
-600	### Plugin Hook API
-601	
-602	External plugins (from separate repos) register via a public API exposed on `window.__baseSkillPlugins`:
-603	
-604	```typescript
-605	interface PluginAPI {
-606	  eventBus: Pick<EventBus, 'on' | 'off'>; // subscribe only, not emit
-607	  registerUISlot: (
-608	    slot: UISlot,
-609	    component: React.ComponentType,
-610	  ) => () => void;
-611	  getConfig: () => ReadonlyAppConfig;
-612	}
-613	
-614	type UISlot =
-615	  | 'dashboard:banner' // Above game grid
-616	  | 'game:overlay' // Floating overlay during gameplay
-617	  | 'parent:settings:section'; // Additional section in parent settings
-618	```
-619	
-620	Plugins cannot `emit` events — they can only subscribe. This ensures app state integrity.
-621	
-622	### Analytics Abstraction
-623	
-624	```typescript
-625	interface AnalyticsAdapter {
-626	  trackEvent(name: string, properties?: Record<string, unknown>): void;
-627	  trackPageView(path: string): void;
-628	  identify(profileId: string): void; // pseudonymous — no PII
-629	  reset(): void;
-630	}
-631	
-632	// Default: no-op implementation
-633	const noopAnalytics: AnalyticsAdapter = {
-634	  trackEvent: () => {},
-635	  trackPageView: () => {},
-636	  identify: () => {},
-637	  reset: () => {},
-638	};
-639	```
-640	
-641	Provider is injected at app initialization via config. Swap providers by changing the config, not the code.
-642	
-643	---
-644	
-645	## 11. Directory Structure (Target)
-646	
-647	```
-648	base-skill/
-649	├── app/
-650	│   ├── routes/                     # TanStack Router file-based routes
-651	│   │   ├── __root.tsx
-652	│   │   ├── _app.tsx
-653	│   │   ├── _app/
-654	│   │   │   ├── index.tsx
-655	│   │   │   ├── dashboard.tsx
-656	│   │   │   ├── game/
-657	│   │   │   │   └── $gameId.tsx
-658	│   │   │   ├── settings.tsx
-659	│   │   │   └── parent/
-660	│   │   │       ├── index.tsx
-661	│   │   │       ├── overrides.tsx
-662	│   │   │       ├── history.tsx
-663	│   │   │       ├── data.tsx
-664	│   │   │       ├── sync.tsx
-665	│   │   │       └── voices.tsx
-666	│   ├── components/
-667	│   │   ├── game/                   # Reusable game components
-668	│   │   │   ├── DragAndDrop.tsx
-669	│   │   │   ├── LetterTracer.tsx
-670	│   │   │   ├── MultipleChoice.tsx
-671	│   │   │   ├── SpeechInput.tsx
-672	│   │   │   ├── SpeechOutput.tsx
-673	│   │   │   ├── Timer.tsx
-674	│   │   │   ├── EncouragementAnnouncer.tsx
-675	│   │   │   ├── ScoreAnimation.tsx
-676	│   │   │   ├── ProgressBar.tsx
-677	│   │   │   └── ScoreBoard.tsx
-678	│   │   ├── ui/                     # shadcn/ui components (generated)
-679	│   │   ├── layout/
-680	│   │   │   ├── AppLayout.tsx
-681	│   │   │   ├── GameShell.tsx
-682	│   │   │   └── OfflineIndicator.tsx
-683	│   │   └── profile/
-684	│   │       ├── ProfilePicker.tsx
-685	│   │       └── AvatarPicker.tsx
-686	│   ├── db/
-687	│   │   ├── index.ts                # RxDB initialization
-688	│   │   ├── schemas/                # JSON Schema definitions per collection
-689	│   │   ├── hooks/                  # Reactive RxDB query hooks
-690	│   │   └── migrations/             # Schema migration scripts
-691	│   ├── games/                      # Individual game implementations
-692	│   │   ├── letter-tracing/
-693	│   │   ├── number-match/
-694	│   │   ├── word-builder/
-695	│   │   ├── read-aloud/
-696	│   │   └── math-facts/
-697	│   ├── lib/
-698	│   │   ├── event-bus.ts
-699	│   │   ├── analytics.ts
-700	│   │   ├── theme.ts
-701	│   │   ├── speech.ts               # TTS/STT wrappers
-702	│   │   └── game-config-loader.ts
-703	│   ├── i18n/
-704	│   │   ├── index.ts
-705	│   │   └── locales/
-706	│   │       ├── en/
-707	│   │       └── pt-BR/
-708	│   └── styles/
-709	│       └── globals.css             # Tailwind directives + CSS variables
-710	├── public/
-711	│   ├── manifest.json
-712	│   └── icons/
-713	├── tests/
-714	│   ├── unit/
-715	│   ├── e2e/                        # Playwright tests
-716	│   └── fixtures/                   # RxDB seed data
-717	├── docs/                           # Design documents (this folder)
-718	├── app.config.ts                   # TanStack Start config
-719	├── vite.config.ts
-720	├── tsconfig.json
-721	├── package.json
-722	└── LICENSE
-723	```
-724	
-725	---
-726	
-727	## 12. Security Considerations
-728	
-729	| Risk                                 | Mitigation                                                                                                 |
-730	| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-731	| OAuth `client_secret` exposure       | Stored only in Cloudflare Worker env vars; never in client bundle                                          |
-732	| Token storage in browser             | Encrypted IndexedDB; keys derived from device entropy; never in `localStorage`                             |
-733	| XSS via game content                 | Game configs are JSON (no eval); content rendered as text nodes or via sanitized JSX                       |
-734	| Plugin injection from external repos | Plugins receive read-only event bus (subscribe only); cannot emit events or modify RxDB directly           |
-735	| Personal data in session history     | Session history contains gameplay events only — no PII. ProfileId is a UUID with no link to real identity. |
-736	| Dependency supply chain              | `npm audit` in CI; pin major versions; Dependabot alerts                                                   |
+1 # BaseSkill — System Architecture
+2 
+3 > **Meta-framework: TanStack Start.** Chosen for its Vite-native architecture, fully type-safe routing via TanStack Router, and a smooth server upgrade path (server functions, API routes) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server capabilities activate without restructuring the client.
+4 
+5 ---
+6 
+7 ## 1. Tech Stack
+8 
+9 | Layer                   | Technology                                  | Rationale                                                                                                                                |
+10 | ----------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+11 | **Meta-framework**      | TanStack Start                              | Vite-native, type-safe routing, static SPA + future server upgrade path                                                                  |
+12 | **Router**              | TanStack Router (file-based)                | End-to-end type safety for routes, params, search, loaders                                                                               |
+13 | **UI library**          | React 19                                    | Component model; hooks for RxDB reactive queries                                                                                         |
+14 | **Language**            | TypeScript (strict mode)                    | `noImplicitAny`, no `any` ESLint rule, CI enforcement                                                                                    |
+15 | **UI components**       | shadcn/ui                                   | Accessible, unstyled base; extended for kid-friendly defaults                                                                            |
+16 | **Styling**             | Tailwind CSS v4                             | Utility-first; CSS variable injection for theme engine                                                                                   |
+17 | **Local database**      | RxDB (Dexie storage)                        | Offline-first, reactive; IndexedDB via **Dexie-backed** RxStorage (free tier). See [ADR 0001](adrs/0001-rxdb-without-tanstack-query.md). |
+18 | **Build tool**          | Vite (via TanStack Start)                   | Fast HMR, static SPA preset via Nitro                                                                                                    |
+19 | **Service Worker**      | Workbox via vite-plugin-pwa                 | Pre-caches app shell and game assets                                                                                                     |
+20 | **Cloud sync**          | RxDB replication plugins                    | Cloud storage (initially Google Drive + OneDrive) via PKCE OAuth                                                                         |
+21 | **Auth (OneDrive)**     | MSAL.js                                     | Native PKCE SPA flow, no backend needed                                                                                                  |
+22 | **Auth (Google Drive)** | Cloudflare Worker BFF                       | Proxy for `client_secret` (Google non-standard PKCE requirement)                                                                         |
+23 | **i18n**                | react-i18next                               | Translation namespaces, TTS language routing                                                                                             |
+24 | **Testing**             | Vitest + React Testing Library + Playwright | Unit, component, E2E, visual regression                                                                                                  |
+25 | **CI/CD**               | GitHub Actions                              | Lint, type-check, test, build, deploy to GitHub Pages                                                                                    |
+26 
+27 ---
+28 
+29 ## 2. System Architecture Overview
+30 
+31 ```mermaid
+32 graph TD
+33     subgraph client [Client — Browser]
+34         TanStackStart["TanStack Start\n(Vite + Nitro static)"]
+35         TanStackRouter["TanStack Router\n(file-based routes)"]
+36         ReactApp["React App\n(components + hooks)"]
+37         RxDB["RxDB\n(IndexedDB)"]
+38         EventBus["Event Bus\n(pub/sub)"]
+39         ServiceWorker["Service Worker\n(Workbox)"]
+40     end
+41 
+42     subgraph cloud [Cloud Storage — User's own account]
+43         GoogleDrive["Google Drive\n(free tier)"]
+44         OneDrive["OneDrive\n(free tier)"]
+45     end
+46 
+47     subgraph proxy [Cloudflare Worker — Free tier]
+48         CFWorker["OAuth BFF Proxy\n(Google token exchange only)"]
+49     end
+50 
+51     subgraph hosting [GitHub Pages]
+52         StaticFiles["Static HTML/JS/CSS\n(SPA)"]
+53     end
+54 
+55     Browser["User's Browser"] --> ServiceWorker
+56     ServiceWorker --> StaticFiles
+57     ServiceWorker --> ReactApp
+58     ReactApp --> TanStackRouter
+59     TanStackRouter --> TanStackStart
+60     ReactApp --> RxDB
+61     ReactApp --> EventBus
+62     RxDB -->|"replication plugin"| GoogleDrive
+63     RxDB -->|"replication plugin"| OneDrive
+64     ReactApp -->|"PKCE token exchange"| CFWorker
+65     CFWorker -->|"adds client_secret"| GoogleDrive
+66 ```
+67 
+68 **Key properties:**
+69 
+70 - All application logic runs in the browser. No server required.
+71 - RxDB is the single source of truth. State persists across refreshes automatically.
+72 - **Data access (M2):** React hooks subscribe to RxDB queries; `@tanstack/react-query` is [deferred until M6](adrs/0001-rxdb-without-tanstack-query.md) when network sync arrives, to avoid a duplicate cache for local data.
+73 - Each game is its own code-split bundle. The app shell loads instantly; game bundles are downloaded on first play or when the parent explicitly triggers a download. A "Download All Games" option exists in parent settings but is not triggered on first load.
+74 - Service worker pre-caches the app shell. Game assets are cached per game on first play.
+75 - Cloud sync is opt-in. The app functions identically without it.
+76 
+77 ---
+78 
+79 ## 3. TanStack Start Configuration
+80 
+81 ### Static SPA Preset
+82 
+83 TanStack Start is configured with the Nitro static preset for GitHub Pages deployment:
+84 
+85 ```typescript
+86 // app.config.ts
+87 import { defineConfig } from '@tanstack/start/config';
+88 
+89 export default defineConfig({
+90   server: {
+91     preset: 'static',
+92   },
+93   vite: {
+94     plugins: [
+95       // vite-plugin-pwa added here
+96     ],
+97   },
+98 });
+99 ```
+100 
+101 **Output:** A `dist/` directory of static HTML/JS/CSS files. Deployable to GitHub Pages, Netlify, Vercel, Cloudflare Pages, or any static host.
+102 
+103 **Future server upgrade:** When server features are needed (auth, WebSockets, premium APIs), change `preset` to `'cloudflare-workers'`, `'vercel'`, or `'node-server'`. Client-side code is unchanged.
+104 
+105 ---
+106 
+107 ## 4. TanStack Router — Route Tree
+108 
+109 ### File-Based Routing Convention
+110 
+111 Routes are defined as files in the `routes/` directory. TanStack Router generates a fully type-safe route tree at build time.
+112 
+113 ```
+114 routes/
+115   __root.tsx                    # Root document (HTML shell, global providers)
+116   _app.tsx                      # App layout (offline indicator, theme, i18n provider)
+117   _app/
+118     index.tsx                   # Profile picker / home screen
+119     dashboard.tsx               # Game grid (requires active profile)
+120     game/
+121       $gameId.tsx               # Game shell (dynamic segment, type-safe)
+122     settings.tsx                # Child settings (volume, speech, theme, language)
+123     parent.tsx                  # Parent settings layout (PIN-gated)
+124     parent/
+125       index.tsx                 # Parent settings home
+126       overrides.tsx             # Game override controls
+127       history.tsx               # Session history viewer
+128       data.tsx                  # Data management (clear history/progress)
+129       sync.tsx                  # Cloud sync configuration
+130       voices.tsx                # TTS voice selector
+131 ```
+132 
+133 ### Route Guards
+134 
+135 ```typescript
+136 // _app/dashboard.tsx — redirect to profile picker if no active profile
+137 export const Route = createFileRoute('/_app/dashboard')({
+138   beforeLoad: ({ context }) => {
+139     if (!context.activeProfile) {
+140       throw redirect({ to: '/_app/' });
+141     }
+142   },
+143   loader: async ({ context }) => {
+144     // Pre-fetch game catalog + bookmarks from RxDB
+145     return {
+146       games: await context.db.games.find().exec(),
+147       bookmarks: await context.db.bookmarks
+148         .find({ selector: { profileId: context.activeProfile.id } })
+149         .exec(),
+150     };
+151   },
+152 });
+153 
+154 // _app/parent.tsx — PIN gate
+155 export const Route = createFileRoute('/_app/parent')({
+156   beforeLoad: ({ context }) => {
+157     if (!context.parentUnlocked) {
+158       throw redirect({
+159         to: '/_app/dashboard',
+160         search: { pinRequired: true },
+161       });
+162     }
+163   },
+164 });
+165 ```
+166 
+167 ### Type-Safe Route Parameters
+168 
+169 ```typescript
+170 // _app/game/$gameId.tsx
+171 export const Route = createFileRoute('/_app/game/$gameId')({
+172   params: {
+173     parse: (params) => ({ gameId: params.gameId }), // typed string
+174   },
+175   loader: async ({ params, context }) => {
+176     const config = await context.gameLoader.load(params.gameId);
+177     const overrides = await context.db.game_config_overrides
+178       .findOne({
+179         selector: {
+180           profileId: context.activeProfile.id,
+181           gameId: params.gameId,
+182         },
+183       })
+184       .exec();
+185     return { config, overrides };
+186   },
+187 });
+188 ```
+189 
+190 ### Route Tree Diagram
+191 
+192 ```mermaid
+193 flowchart LR
+194     root["__root.tsx\n(HTML shell)"]
+195     root --> idx["index.tsx\n/ → redirect /en"]
+196     root --> locale["$locale/route.tsx\n/$locale\nvalidates locale,\nsyncs i18n language"]
+197     locale --> app["$locale/_app.tsx\nDbProvider +\nI18nextProvider +\nThemeRuntimeProvider"]
+198     app --> home["_app/index.tsx\n/ (home catalog)"]
+199     app --> dashboard["_app/dashboard.tsx\n/dashboard"]
+200     app --> settings["_app/settings.tsx\n/settings"]
+201     app --> game["_app/game/$gameId.tsx\n/game/:gameId"]
+202     app --> parent["_app/parent.tsx\n/parent (PIN-gated)"]
+203     parent --> parentIdx["parent/index.tsx\n/parent/"]
+204     parent --> overrides["parent/overrides.tsx\n/parent/overrides"]
+205     parent --> history["parent/history.tsx\n/parent/history"]
+206     parent --> data["parent/data.tsx\n/parent/data"]
+207     parent --> sync["parent/sync.tsx\n/parent/sync"]
+208     parent --> voices["parent/voices.tsx\n/parent/voices"]
+209 ```
+210 
+211 ---
+212 
+213 ## 5. Component Architecture
+214 
+215 ### Layout Hierarchy
+216 
+217 ```
+218 __root.tsx
+219 └── _app.tsx  (AppLayout)
+220     ├── OfflineIndicator
+221     ├── ThemeProvider (CSS variables from RxDB)
+222     ├── I18nProvider (react-i18next)
+223     └── [child route outlet]
+224         ├── _app/index.tsx     → ProfilePicker
+225         ├── _app/dashboard.tsx → Dashboard
+226         │   ├── BookmarkedGamesRow
+227         │   ├── RecentGamesRow
+228         │   └── GameGrid (by subject/grade)
+229         ├── _app/game/$gameId.tsx → GameShell
+230         │   ├── GameHeader (back, title, score, timer)
+231         │   ├── GameArea (game-specific component)
+232         │   └── GameControls (pause, exit)
+233         ├── _app/settings.tsx  → ChildSettings
+234         └── _app/parent.tsx    → ParentSettings
+235             ├── GameOverridesScreen
+236             ├── SessionHistoryViewer
+237             ├── DataManagementScreen
+238             ├── CloudSyncScreen
+239             └── VoiceSelectorScreen
+240 ```
+241 
+242 ### React Provider Hierarchy
+243 
+244 ```mermaid
+245 graph TD
+246     Root["__root.tsx\n(HTML shell, devtools, THEME_INIT_SCRIPT)"]
+247     Root --> LocaleRoute["$locale/route.tsx\nbeforeLoad: validate locale\nsyncs i18n.changeLanguage"]
+248     LocaleRoute --> AppShell["$locale/_app.tsx"]
+249 
+250     subgraph providers ["Providers (nested, outermost first)"]
+251         DbProvider["DbProvider\n— initialises RxDB\n— seeds themes on ready\n— exposes db via context"]
+252         I18nProvider["I18nextProvider\n— provides t() and useTranslation\n— language driven by $locale param"]
+253         ThemeProvider["ThemeRuntimeProvider\n— subscribes to themes collection\n— injects --bs-* CSS variables"]
+254     end
+255 
+256     AppShell --> DbProvider
+257     DbProvider --> I18nProvider
+258     I18nProvider --> ThemeProvider
+259     ThemeProvider --> Outlet["<Outlet />\n(child routes)"]
+260 
+261     Outlet --> HomeCatalog["_app/index\nHomeCatalog"]
+262     Outlet --> Dashboard["_app/dashboard\nDashboard"]
+263     Outlet --> GameShell["_app/game/$gameId\nGameShell"]
+264     Outlet --> ChildSettings["_app/settings\nChildSettings"]
+265     Outlet --> ParentSettings["_app/parent\nParentSettings (PIN-gated)"]
+266 ```
+267 
+268 ### Reusable Game Components
+269 
+270 These components are game-framework-level and used across multiple games:
+271 
+272 | Component                | Description                                  | Used By                    |
+273 | ------------------------ | -------------------------------------------- | -------------------------- |
+274 | `DragAndDrop`            | Pointer events, magnetic snap, ghost preview | Number Match, Word Builder |
+275 | `LetterTracer`           | Canvas tracing with touch/mouse              | Letter Tracing             |
+276 | `MultipleChoice`         | Tap/click answer selection                   | Math Facts                 |
+277 | `SpeechInput`            | STT with animated visual indicator (GIF)     | Read Aloud                 |
+278 | `SpeechOutput`           | TTS wrapper with voice selection             | All games                  |
+279 | `Timer`                  | Configurable, hideable per parent settings   | Math Facts (optional all)  |
+280 | `EncouragementAnnouncer` | TTS + visual popup, event-triggered          | All games                  |
+281 | `ScoreAnimation`         | CSS confetti/stars reward animations         | All games                  |
+282 | `ProgressBar`            | In-game progress display                     | All games                  |
+283 | `ScoreBoard`             | Current score display                        | All games                  |
+284 | `OfflineIndicator`       | `navigator.onLine` banner                    | App shell                  |
+285 
+286 ---
+287 
+288 ## 6. State Management
+289 
+290 ### RxDB as Single Source of Truth
+291 
+292 All persistent state lives in RxDB. Components subscribe to reactive queries; UI updates automatically when data changes.
+293 
+294 ```typescript
+295 // Example: reactive profile hook
+296 function useActiveProfile() {
+297   const [profile, setProfile] = useState<Profile | null>(null);
+298 
+299   useEffect(() => {
+300     const sub = db.profiles
+301       .findOne({ selector: { isActive: true } })
+302       .$.subscribe(setProfile);
+303     return () => sub.unsubscribe();
+304   }, []);
+305 
+306   return profile;
+307 }
+308 ```
+309 
+310 ### TanStack Query Integration (Evaluation Point)
+311 
+312 During Milestone 2, evaluate whether TanStack Query should wrap RxDB observables:
+313 
+314 - **Option A**: RxDB reactive queries only (custom hooks). Simpler. RxDB handles caching natively.
+315 - **Option B**: TanStack Query wraps RxDB `exec()` calls. Adds cache invalidation, loading/error states, suspense support.
+316 - **Decision criteria**: If server data (Cloudflare Worker, future APIs) needs to be mixed with local RxDB data in the same loading lifecycle, TanStack Query is the natural bridge. For pure local data, RxDB hooks are sufficient.
+317 
+318 **Provisional decision**: Use RxDB custom hooks for all local data. Add TanStack Query only when server-side data fetching is introduced (post-M6).
+319 
+320 ### Non-Persistent UI State
+321 
+322 Non-persistent state (modal open/closed, current game step, animation state) uses React's `useState`/`useReducer` co-located with the component that owns it. No global UI state store.
+323 
+324 ### RxDB Provider and Hooks Setup
+325 
+326 ```mermaid
+327 sequenceDiagram
+328     participant App as App mount
+329     participant DbP as DbProvider
+330     participant DB as RxDB (IndexedDB)
+331     participant Seed as seedThemesOnce()
+332     participant Hook as useRxQuery / useRxDB
+333     participant Comp as Component
+334 
+335     App->>DbP: render <DbProvider>
+336     DbP->>DB: getOrCreateDatabase()
+337     DB-->>DbP: db instance
+338     DbP->>DB: checkVersionAndMigrate(db)
+339     DbP->>Seed: seedThemesOnce(db)
+340     Seed->>DB: upsert preset themes (if missing)
+341     DbP-->>App: isReady = true
+342 
+343     Note over Hook,Comp: Hooks used anywhere inside DbProvider
+344     Comp->>Hook: useRxDB()
+345     Hook-->>Comp: db instance from context
+346 
+347     Comp->>Hook: useRxQuery(db.themes.find().$)
+348     Hook->>DB: subscribe to Observable
+349     DB-->>Hook: current docs
+350     Hook-->>Comp: docs[] (re-renders on change)
+351 
+352     Note over Hook,DB: On unmount
+353     Hook->>DB: subscription.unsubscribe()
+354 ```
+355 
+356 ---
+357 
+358 ## 7. Data Flow
+359 
+360 ```mermaid
+361 sequenceDiagram
+362     participant Child as Child
+363     participant UI as React UI
+364     participant Hook as RxDB Hook
+365     participant RxDB as RxDB (IndexedDB)
+366     participant SW as Service Worker
+367     participant Cloud as Cloud (Drive/OneDrive)
+368 
+369     Child->>UI: Taps answer
+370     UI->>Hook: mutate(action)
+371     Hook->>RxDB: upsert document
+372     RxDB-->>Hook: reactive update
+373     Hook-->>UI: re-render
+374     UI-->>Child: sees new state
+375 
+376     Note over RxDB,Cloud: Background sync (when online)
+377     RxDB->>Cloud: replication plugin push
+378     Cloud-->>RxDB: replication plugin pull
+379 ```
+380 
+381 ---
+382 
+383 ## 8. Cloud Sync Architecture
+384 
+385 ### Overview
+386 
+387 RxDB provides [replication plugins](https://rxdb.info/replication.html) for Google Drive and OneDrive. These plugins:
+388 
+389 1. Read the RxDB `checkpoint` (last sync position)
+390 2. Push local changes to the cloud file
+391 3. Pull remote changes and merge into local RxDB
+392 4. Handle conflict resolution per collection strategy
+393 
+394 ### Google Drive Sync
+395 
+396 **Challenge**: Google OAuth requires a `client_secret` even with PKCE (non-standard — violates RFC 7636).
+397 
+398 **Solution**: A lightweight Cloudflare Worker (~50 lines) acts as a Backend-for-Frontend (BFF) proxy:
+399 
+400 ```mermaid
+401 sequenceDiagram
+402     participant App as SPA (Browser)
+403     participant CF as Cloudflare Worker
+404     participant Google as Google OAuth
+405 
+406     App->>Google: Redirect to consent screen (PKCE code_challenge)
+407     Google-->>App: Authorization code (redirect_uri callback)
+408     App->>CF: POST /token {code, code_verifier, redirect_uri}
+409     CF->>Google: POST /token {code, code_verifier, client_secret, redirect_uri}
+410     Google-->>CF: {access_token, refresh_token}
+411     CF-->>App: {access_token, refresh_token}
+412     App->>App: Store tokens encrypted in IndexedDB
+413 ```
+414 
+415 - The `client_secret` lives in Cloudflare Worker environment variables — never in the client bundle.
+416 - The Worker is deployed separately and is **not** part of the GPL-licensed app repository.
+417 - Cloudflare Workers free tier: 100,000 requests/day — sufficient for OAuth token exchanges.
+418 - Token refresh follows the same proxy pattern.
+419 
+420 ### OneDrive Sync
+421 
+422 MSAL.js handles the full PKCE flow natively for OneDrive — no backend proxy needed:
+423 
+424 ```mermaid
+425 sequenceDiagram
+426     participant App as SPA (Browser)
+427     participant MSAL as MSAL.js
+428     participant MS as Microsoft OAuth
+429 
+430     App->>MSAL: loginPopup() or loginRedirect()
+431     MSAL->>MS: PKCE authorization request
+432     MS-->>MSAL: Authorization code
+433     MSAL->>MS: Token exchange (client-side PKCE)
+434     MS-->>MSAL: {access_token, refresh_token}
+435     MSAL-->>App: Account + tokens (cached in MSAL cache)
+436 ```
+437 
+438 ### Token Storage
+439 
+440 OAuth tokens are stored **encrypted in IndexedDB** — never in `localStorage` or `sessionStorage`:
+441 
+442 - Encryption key derived from device-specific entropy (e.g., a random key generated once and stored in IndexedDB with a separate namespace).
+443 - Tokens are never exposed in URL fragments or query strings after the OAuth redirect.
+444 - MSAL.js manages its own encrypted token cache internally.
+445 - Google Drive tokens are stored in a separate encrypted RxDB document (`sync_meta` collection).
+446 
+447 ### Device-Aware Sync
+448 
+449 Each synced record includes a `deviceId` field (generated once per device, stored in `sync_meta`):
+450 
+451 - **Device-specific data** (e.g., available TTS voices) is tagged with `deviceId` and not applied on other devices.
+452 - **Shared data** (progress, bookmarks, themes) syncs across all devices.
+453 - On a new device, if the synced voice is unavailable, the app falls back to the OS default voice for that language.
+454 
+455 ### Conflict Resolution
+456 
+457 | Collection              | Strategy                                                      |
+458 | ----------------------- | ------------------------------------------------------------- |
+459 | `profiles`              | Last-write-wins (by `updatedAt` timestamp)                    |
+460 | `progress`              | Merge: take max score, sum stars, extend streaks              |
+461 | `settings`              | Last-write-wins (per profile)                                 |
+462 | `game_config_overrides` | Last-write-wins (by `updatedAt`)                              |
+463 | `bookmarks`             | Union (all bookmarks from all devices kept)                   |
+464 | `themes`                | Last-write-wins (by `updatedAt`)                              |
+465 | `session_history`       | Append-only; no conflicts (chunks are immutable once written) |
+466 | `session_history_index` | Append-only; no conflicts                                     |
+467 | `sync_meta`             | Device-local; not cross-device synced                         |
+468 | `app_meta`              | Device-local; not cross-device synced                         |
+469 
+470 ---
+471 
+472 ## 9. PWA and Offline Strategy
+473 
+474 ### Service Worker Lifecycle
+475 
+476 ```mermaid
+477 stateDiagram-v2
+478     [*] --> Installing: First visit / SW update available
+479     Installing --> Waiting: Install complete
+480     Waiting --> Active: skipWaiting() called
+481     Active --> Controlling: clientsClaim()
+482     Controlling --> [*]: SW terminated (browser GC)
+483 
+484     Active --> VersionCheck: New SW installed
+485     VersionCheck --> CachePurge: Version mismatch detected
+486     CachePurge --> MigrationCheck: Stale caches purged
+487     MigrationCheck --> AppRender: No schema change
+488     MigrationCheck --> RxDBMigration: Schema version changed
+489     RxDBMigration --> AppRender: Migration complete
+490 ```
+491 
+492 ### Cache Strategy (Workbox)
+493 
+494 | Asset Type                    | Strategy                                                                       | TTL        |
+495 | ----------------------------- | ------------------------------------------------------------------------------ | ---------- |
+496 | App shell (HTML, core JS/CSS) | Cache-first, update on install                                                 | SW version |
+497 | Game bundles (JS per game)    | Cache-first, code-split per game, downloaded on first play or parent-triggered | SW version |
+498 | Game assets (images, audio)   | Cache-first, lazy-loaded per game                                              | SW version |
+499 | API calls (future)            | Network-first with fallback                                                    | 5 minutes  |
+500 | Google Fonts (if used)        | Stale-while-revalidate                                                         | 30 days    |
+501 
+502 ### App Versioning
+503 
+504 Every CD deploy stamps a semver version:
+505 
+506 1. Version embedded in `app_meta` RxDB collection on first run.
+507 2. New SW checks its version against the cached version.
+508 3. On mismatch: `skipWaiting()` + `clientsClaim()` → purge old caches → run RxDB migrations if needed → render app.
+509 4. Version displayed in Parent Settings > About.
+510 
+511 ### Offline/Online Detection
+512 
+513 ```typescript
+514 // Global hook — used by OfflineIndicator and RxDB sync
+515 function useOnlineStatus() {
+516   const [isOnline, setIsOnline] = useState(navigator.onLine);
+517 
+518   useEffect(() => {
+519     const handleOnline = () => setIsOnline(true);
+520     const handleOffline = () => setIsOnline(false);
+521     window.addEventListener('online', handleOnline);
+522     window.addEventListener('offline', handleOffline);
+523     return () => {
+524       window.removeEventListener('online', handleOnline);
+525       window.removeEventListener('offline', handleOffline);
+526     };
+527   }, []);
+528 
+529   return isOnline;
+530 }
+531 ```
+532 
+533 ---
+534 
+535 ## 10. Event Bus and Extension Points
+536 
+537 ### Event Bus
+538 
+539 A typed pub/sub system used for:
+540 
+541 1. **Session recorder**: subscribes to game events, writes to `session_history`.
+542 2. **Encouragement system**: listens for `game:evaluate` events, triggers TTS + animation.
+543 3. **Plugin hooks**: external code subscribes without modifying app source.
+544 
+545 ```typescript
+546 // Event type definitions
+547 interface AppEvents {
+548   'game:start': {
+549     gameId: string;
+550     profileId: string;
+551     sessionId: string;
+552   };
+553   'game:action': {
+554     sessionId: string;
+555     action: string;
+556     payload: unknown;
+557   };
+558   'game:evaluate': {
+559     sessionId: string;
+560     result: 'correct' | 'incorrect' | 'near-miss';
+561   };
+562   'game:score': { sessionId: string; score: number; total: number };
+563   'game:hint': { sessionId: string; hintType: string };
+564   'game:end': {
+565     sessionId: string;
+566     finalScore: number;
+567     duration: number;
+568   };
+569   'profile:switch': {
+570     fromProfileId: string | null;
+571     toProfileId: string;
+572   };
+573   'sync:start': { provider: 'google-drive' | 'onedrive' };
+574   'sync:complete': {
+575     provider: 'google-drive' | 'onedrive';
+576     timestamp: number;
+577   };
+578   'sync:error': {
+579     provider: 'google-drive' | 'onedrive';
+580     error: string;
+581   };
+582 }
+583 
+584 interface EventBus {
+585   emit<K extends keyof AppEvents>(
+586     event: K,
+587     payload: AppEvents[K],
+588   ): void;
+589   on<K extends keyof AppEvents>(
+590     event: K,
+591     handler: (payload: AppEvents[K]) => void,
+592   ): () => void;
+593   off<K extends keyof AppEvents>(
+594     event: K,
+595     handler: (payload: AppEvents[K]) => void,
+596   ): void;
+597 }
+598 ```
+599 
+600 ### Plugin Hook API
+601 
+602 External plugins (from separate repos) register via a public API exposed on `window.__baseSkillPlugins`:
+603 
+604 ```typescript
+605 interface PluginAPI {
+606   eventBus: Pick<EventBus, 'on' | 'off'>; // subscribe only, not emit
+607   registerUISlot: (
+608     slot: UISlot,
+609     component: React.ComponentType,
+610   ) => () => void;
+611   getConfig: () => ReadonlyAppConfig;
+612 }
+613 
+614 type UISlot =
+615   | 'dashboard:banner' // Above game grid
+616   | 'game:overlay' // Floating overlay during gameplay
+617   | 'parent:settings:section'; // Additional section in parent settings
+618 ```
+619 
+620 Plugins cannot `emit` events — they can only subscribe. This ensures app state integrity.
+621 
+622 ### Analytics Abstraction
+623 
+624 ```typescript
+625 interface AnalyticsAdapter {
+626   trackEvent(name: string, properties?: Record<string, unknown>): void;
+627   trackPageView(path: string): void;
+628   identify(profileId: string): void; // pseudonymous — no PII
+629   reset(): void;
+630 }
+631 
+632 // Default: no-op implementation
+633 const noopAnalytics: AnalyticsAdapter = {
+634   trackEvent: () => {},
+635   trackPageView: () => {},
+636   identify: () => {},
+637   reset: () => {},
+638 };
+639 ```
+640 
+641 Provider is injected at app initialization via config. Swap providers by changing the config, not the code.
+642 
+643 ---
+644 
+645 ## 11. Directory Structure (Target)
+646 
+647 ```
+648 base-skill/
+649 ├── app/
+650 │   ├── routes/                     # TanStack Router file-based routes
+651 │   │   ├── __root.tsx
+652 │   │   ├── _app.tsx
+653 │   │   ├── _app/
+654 │   │   │   ├── index.tsx
+655 │   │   │   ├── dashboard.tsx
+656 │   │   │   ├── game/
+657 │   │   │   │   └── $gameId.tsx
+658 │   │   │   ├── settings.tsx
+659 │   │   │   └── parent/
+660 │   │   │       ├── index.tsx
+661 │   │   │       ├── overrides.tsx
+662 │   │   │       ├── history.tsx
+663 │   │   │       ├── data.tsx
+664 │   │   │       ├── sync.tsx
+665 │   │   │       └── voices.tsx
+666 │   ├── components/
+667 │   │   ├── game/                   # Reusable game components
+668 │   │   │   ├── DragAndDrop.tsx
+669 │   │   │   ├── LetterTracer.tsx
+670 │   │   │   ├── MultipleChoice.tsx
+671 │   │   │   ├── SpeechInput.tsx
+672 │   │   │   ├── SpeechOutput.tsx
+673 │   │   │   ├── Timer.tsx
+674 │   │   │   ├── EncouragementAnnouncer.tsx
+675 │   │   │   ├── ScoreAnimation.tsx
+676 │   │   │   ├── ProgressBar.tsx
+677 │   │   │   └── ScoreBoard.tsx
+678 │   │   ├── ui/                     # shadcn/ui components (generated)
+679 │   │   ├── layout/
+680 │   │   │   ├── AppLayout.tsx
+681 │   │   │   ├── GameShell.tsx
+682 │   │   │   └── OfflineIndicator.tsx
+683 │   │   └── profile/
+684 │   │       ├── ProfilePicker.tsx
+685 │   │       └── AvatarPicker.tsx
+686 │   ├── db/
+687 │   │   ├── index.ts                # RxDB initialization
+688 │   │   ├── schemas/                # JSON Schema definitions per collection
+689 │   │   ├── hooks/                  # Reactive RxDB query hooks
+690 │   │   └── migrations/             # Schema migration scripts
+691 │   ├── games/                      # Individual game implementations
+692 │   │   ├── letter-tracing/
+693 │   │   ├── number-match/
+694 │   │   ├── word-builder/
+695 │   │   ├── read-aloud/
+696 │   │   └── math-facts/
+697 │   ├── lib/
+698 │   │   ├── event-bus.ts
+699 │   │   ├── analytics.ts
+700 │   │   ├── theme.ts
+701 │   │   ├── speech.ts               # TTS/STT wrappers
+702 │   │   └── game-config-loader.ts
+703 │   ├── i18n/
+704 │   │   ├── index.ts
+705 │   │   └── locales/
+706 │   │       ├── en/
+707 │   │       └── pt-BR/
+708 │   └── styles/
+709 │       └── globals.css             # Tailwind directives + CSS variables
+710 ├── public/
+711 │   ├── manifest.json
+712 │   └── icons/
+713 ├── tests/
+714 │   ├── unit/
+715 │   ├── e2e/                        # Playwright tests
+716 │   └── fixtures/                   # RxDB seed data
+717 ├── docs/                           # Design documents (this folder)
+718 ├── app.config.ts                   # TanStack Start config
+719 ├── vite.config.ts
+720 ├── tsconfig.json
+721 ├── package.json
+722 └── LICENSE
+723 ```
+724 
+725 ---
+726 
+727 ## 12. Security Considerations
+728 
+729 | Risk                                 | Mitigation                                                                                                 |
+730 | ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+731 | OAuth `client_secret` exposure       | Stored only in Cloudflare Worker env vars; never in client bundle                                          |
+732 | Token storage in browser             | Encrypted IndexedDB; keys derived from device entropy; never in `localStorage`                             |
+733 | XSS via game content                 | Game configs are JSON (no eval); content rendered as text nodes or via sanitized JSX                       |
+734 | Plugin injection from external repos | Plugins receive read-only event bus (subscribe only); cannot emit events or modify RxDB directly           |
+735 | Personal data in session history     | Session history contains gameplay events only — no PII. ProfileId is a UUID with no link to real identity. |
+736 | Dependency supply chain              | `npm audit` in CI; pin major versions; Dependabot alerts                                                   |
 737
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:54Z)**_
@@ -1246,6 +1251,7 @@ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
 src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
 src/games/word-spell/WordSpell/WordSpell.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:58Z)**_
@@ -1263,6 +1269,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:32:59Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:59Z)**_
@@ -1285,6 +1292,7 @@ worktrees/feat-dark-mode-a11y-vr/vite.config.ts
 .claude/worktrees/bold-chatelet/.storybook/vite.config.ts
 .claude/worktrees/bold-chatelet/vite.config.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:32:59Z)**_
@@ -1396,6 +1404,7 @@ worktrees/feat-answer-game-primitive/node_modules/@jridgewell/resolve-uri/packag
 node_modules/@tanstack/react-devtools/package.json
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:03Z)**_
@@ -1405,89 +1414,90 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:03Z)**_
  `./vite.config.ts`
 
 ```text
-1	import { createRequire } from 'node:module';
-2	
-3	import tailwindcss from '@tailwindcss/vite';
-4	import { devtools } from '@tanstack/devtools-vite';
-5	
-6	import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-7	
-8	import viteReact from '@vitejs/plugin-react';
-9	import { defineConfig } from 'vite';
-10	import { VitePWA } from 'vite-plugin-pwa';
-11	import tsconfigPaths from 'vite-tsconfig-paths';
-12	import { version } from './package.json';
-13	
-14	const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
-15	
-16	const require = createRequire(import.meta.url);
-17	const pragmaticElementAdapter =
-18	  require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
-19	
-20	const config = defineConfig({
-21	  base,
-22	  resolve: {
-23	    alias: {
-24	      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
-25	        pragmaticElementAdapter,
-26	    },
-27	  },
-28	  define: {
-29	    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
-30	  },
-31	  plugins: [
-32	    devtools(),
-33	    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-34	    tailwindcss(),
-35	    tanstackStart({
-36	      spa: { enabled: true },
-37	      router: {
-38	        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
-39	        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
-40	      },
-41	    }),
-42	    viteReact(),
-43	    VitePWA({
-44	      registerType: 'autoUpdate',
-45	      strategies: 'generateSW',
-46	      injectRegister: 'auto',
-47	      workbox: {
-48	        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-49	        runtimeCaching: [
-50	          {
-51	            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-52	            handler: 'StaleWhileRevalidate',
-53	            options: {
-54	              cacheName: 'google-fonts-cache',
-55	              expiration: {
-56	                maxEntries: 10,
-57	                maxAgeSeconds: 60 * 60 * 24 * 365,
-58	              },
-59	              cacheableResponse: { statuses: [0, 200] },
-60	            },
-61	          },
-62	          {
-63	            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-64	            handler: 'CacheFirst',
-65	            options: {
-66	              cacheName: 'gstatic-fonts-cache',
-67	              expiration: {
-68	                maxEntries: 10,
-69	                maxAgeSeconds: 60 * 60 * 24 * 365,
-70	              },
-71	              cacheableResponse: { statuses: [0, 200] },
-72	            },
-73	          },
-74	        ],
-75	      },
-76	      manifest: false,
-77	    }),
-78	  ],
-79	});
-80	
-81	export default config;
+1 import { createRequire } from 'node:module';
+2 
+3 import tailwindcss from '@tailwindcss/vite';
+4 import { devtools } from '@tanstack/devtools-vite';
+5 
+6 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+7 
+8 import viteReact from '@vitejs/plugin-react';
+9 import { defineConfig } from 'vite';
+10 import { VitePWA } from 'vite-plugin-pwa';
+11 import tsconfigPaths from 'vite-tsconfig-paths';
+12 import { version } from './package.json';
+13 
+14 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
+15 
+16 const require = createRequire(import.meta.url);
+17 const pragmaticElementAdapter =
+18   require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
+19 
+20 const config = defineConfig({
+21   base,
+22   resolve: {
+23     alias: {
+24       '@atlaskit/pragmatic-drag-and-drop/element/adapter':
+25         pragmaticElementAdapter,
+26     },
+27   },
+28   define: {
+29     'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+30   },
+31   plugins: [
+32     devtools(),
+33     tsconfigPaths({ projects: ['./tsconfig.json'] }),
+34     tailwindcss(),
+35     tanstackStart({
+36       spa: { enabled: true },
+37       router: {
+38         // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
+39         routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
+40       },
+41     }),
+42     viteReact(),
+43     VitePWA({
+44       registerType: 'autoUpdate',
+45       strategies: 'generateSW',
+46       injectRegister: 'auto',
+47       workbox: {
+48         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+49         runtimeCaching: [
+50           {
+51             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+52             handler: 'StaleWhileRevalidate',
+53             options: {
+54               cacheName: 'google-fonts-cache',
+55               expiration: {
+56                 maxEntries: 10,
+57                 maxAgeSeconds: 60 * 60 * 24 * 365,
+58               },
+59               cacheableResponse: { statuses: [0, 200] },
+60             },
+61           },
+62           {
+63             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+64             handler: 'CacheFirst',
+65             options: {
+66               cacheName: 'gstatic-fonts-cache',
+67               expiration: {
+68                 maxEntries: 10,
+69                 maxAgeSeconds: 60 * 60 * 24 * 365,
+70               },
+71               cacheableResponse: { statuses: [0, 200] },
+72             },
+73           },
+74         ],
+75       },
+76       manifest: false,
+77     }),
+78   ],
+79 });
+80 
+81 export default config;
 82
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:03Z)**_
@@ -1497,44 +1507,45 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:03Z)**_
  `./src/lib/game-engine/replay.ts`
 
 ```text
-1	// src/lib/game-engine/replay.ts
-2	import type { GameEngineState, MoveHandler, MoveLog } from './types';
-3	
-4	/**
-5	 * Pure function — no React, no side effects, no RxDB.
-6	 * Replays moves 0..stepIndex from log.initialState using provided move handlers.
-7	 * UNDO moves are handled by re-replaying from initialState to the targetStep.
-8	 */
-9	export function replayToStep(
-10	  log: MoveLog,
-11	  stepIndex: number,
-12	  moveHandlers: Record<string, MoveHandler>,
-13	): GameEngineState {
-14	  let state = log.initialState;
-15	
-16	  for (let i = 0; i <= stepIndex && i < log.moves.length; i++) {
-17	    const move = log.moves[i];
-18	    if (!move) continue;
-19	
-20	    if (move.type === 'UNDO') {
-21	      const targetStep = move.args['targetStep'] as number;
-22	      // Replay from initial state to targetStep (exclusive — gives state BEFORE targetStep was applied)
-23	      state =
-24	        targetStep > 0
-25	          ? replayToStep(log, targetStep - 1, moveHandlers)
-26	          : log.initialState;
-27	    } else {
-28	      const handler = moveHandlers[move.type];
-29	      if (handler) {
-30	        state = handler(state, move.args);
-31	      }
-32	    }
-33	  }
-34	
-35	  return state;
-36	}
+1 // src/lib/game-engine/replay.ts
+2 import type { GameEngineState, MoveHandler, MoveLog } from './types';
+3 
+4 /**
+5  * Pure function — no React, no side effects, no RxDB.
+6  * Replays moves 0..stepIndex from log.initialState using provided move handlers.
+7  * UNDO moves are handled by re-replaying from initialState to the targetStep.
+8  */
+9 export function replayToStep(
+10   log: MoveLog,
+11   stepIndex: number,
+12   moveHandlers: Record<string, MoveHandler>,
+13 ): GameEngineState {
+14   let state = log.initialState;
+15 
+16   for (let i = 0; i <= stepIndex && i < log.moves.length; i++) {
+17     const move = log.moves[i];
+18     if (!move) continue;
+19 
+20     if (move.type === 'UNDO') {
+21       const targetStep = move.args['targetStep'] as number;
+22       // Replay from initial state to targetStep (exclusive — gives state BEFORE targetStep was applied)
+23       state =
+24         targetStep > 0
+25           ? replayToStep(log, targetStep - 1, moveHandlers)
+26           : log.initialState;
+27     } else {
+28       const handler = moveHandlers[move.type];
+29       if (handler) {
+30         state = handler(state, move.args);
+31       }
+32     }
+33   }
+34 
+35   return state;
+36 }
 37
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:06Z)**_
@@ -1544,47 +1555,48 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:06Z)**_
  `./src/lib/game-engine/move-log.ts`
 
 ```text
-1	// src/lib/game-engine/move-log.ts
-2	import { useCallback, useRef, useState } from 'react';
-3	import type { Move } from './types';
-4	
-5	export interface UseMoveLogReturn {
-6	  moves: Move[];
-7	  canUndo: boolean;
-8	  appendMove: (move: Move) => boolean;
-9	}
-10	
-11	export function useMoveLog(
-12	  maxUndoDepth: number | null,
-13	): UseMoveLogReturn {
-14	  const [moves, setMoves] = useState<Move[]>([]);
-15	  const movesRef = useRef<Move[]>([]);
-16	
-17	  const appendMove = useCallback(
-18	    (move: Move): boolean => {
-19	      if (move.type === 'UNDO') {
-20	        if (maxUndoDepth === 0) return false;
-21	
-22	        if (maxUndoDepth !== null) {
-23	          const targetStep = move.args['targetStep'] as number;
-24	          const depth = movesRef.current.length - targetStep;
-25	          if (depth > maxUndoDepth) return false;
-26	        }
-27	      }
-28	
-29	      movesRef.current = [...movesRef.current, move];
-30	      setMoves(movesRef.current);
-31	      return true;
-32	    },
-33	    [maxUndoDepth],
-34	  );
-35	
-36	  const canUndo = maxUndoDepth !== 0 && moves.length > 0;
-37	
-38	  return { moves, canUndo, appendMove };
-39	}
+1 // src/lib/game-engine/move-log.ts
+2 import { useCallback, useRef, useState } from 'react';
+3 import type { Move } from './types';
+4 
+5 export interface UseMoveLogReturn {
+6   moves: Move[];
+7   canUndo: boolean;
+8   appendMove: (move: Move) => boolean;
+9 }
+10 
+11 export function useMoveLog(
+12   maxUndoDepth: number | null,
+13 ): UseMoveLogReturn {
+14   const [moves, setMoves] = useState<Move[]>([]);
+15   const movesRef = useRef<Move[]>([]);
+16 
+17   const appendMove = useCallback(
+18     (move: Move): boolean => {
+19       if (move.type === 'UNDO') {
+20         if (maxUndoDepth === 0) return false;
+21 
+22         if (maxUndoDepth !== null) {
+23           const targetStep = move.args['targetStep'] as number;
+24           const depth = movesRef.current.length - targetStep;
+25           if (depth > maxUndoDepth) return false;
+26         }
+27       }
+28 
+29       movesRef.current = [...movesRef.current, move];
+30       setMoves(movesRef.current);
+31       return true;
+32     },
+33     [maxUndoDepth],
+34   );
+35 
+36   const canUndo = maxUndoDepth !== 0 && moves.length > 0;
+37 
+38   return { moves, canUndo, appendMove };
+39 }
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:06Z)**_
@@ -1594,98 +1606,99 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:06Z)**_
  `./src/lib/game-engine/types.ts`
 
 ```text
-1	// src/lib/game-engine/types.ts
-2	import type { GradeBand } from '@/types/game-events';
-3	
-4	export type GamePhase =
-5	  | 'idle'
-6	  | 'loading'
-7	  | 'instructions'
-8	  | 'playing'
-9	  | 'evaluating'
-10	  | 'scoring'
-11	  | 'next-round'
-12	  | 'retry'
-13	  | 'game-over';
-14	
-15	export interface RoundDefinition {
-16	  id: string;
-17	  prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
-18	  correctAnswer: string;
-19	  distractors?: string[];
-20	}
-21	
-22	export interface ResolvedContent {
-23	  rounds: RoundDefinition[];
-24	}
-25	
-26	export interface RoundState {
-27	  roundId: string;
-28	  answer: string | null;
-29	  hintsUsed: number;
-30	}
-31	
-32	export interface GameEngineState {
-33	  phase: GamePhase;
-34	  roundIndex: number;
-35	  score: number;
-36	  streak: number;
-37	  retryCount: number;
-38	  content: ResolvedContent;
-39	  currentRound: RoundState;
-40	}
-41	
-42	export type MoveType =
-43	  | 'SUBMIT_ANSWER'
-44	  | 'REQUEST_HINT'
-45	  | 'SKIP_INSTRUCTIONS'
-46	  | 'UNDO';
-47	
-48	export interface Move {
-49	  type: MoveType | string; // string allows game-specific types in M5
-50	  args: Record<string, string | number | boolean>;
-51	  timestamp: number;
-52	}
-53	
-54	export interface MoveLog {
-55	  gameId: string;
-56	  sessionId: string;
-57	  profileId: string;
-58	  seed: string;
-59	  initialContent: ResolvedContent;
-60	  initialState: GameEngineState;
-61	  moves: Move[];
-62	}
-63	
-64	export interface ResolvedGameConfig {
-65	  gameId: string;
-66	  title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
-67	  gradeBand: GradeBand;
-68	  maxRounds: number;
-69	  maxRetries: number;
-70	  maxUndoDepth: number | null; // null = unlimited; 0 = no undo
-71	  timerVisible: boolean;
-72	  timerDurationSeconds: number | null;
-73	  difficulty: string;
-74	}
-75	
-76	export type MoveHandler = (
-77	  state: GameEngineState,
-78	  args: Move['args'],
-79	) => GameEngineState;
-80	
-81	export interface SessionMeta {
-82	  profileId: string;
-83	  gameId: string;
-84	  gradeBand: GradeBand;
-85	  seed: string;
-86	  initialContent: ResolvedContent;
-87	  initialState: GameEngineState;
-88	}
-89	
-90	export { type GradeBand } from '@/types/game-events';
+1 // src/lib/game-engine/types.ts
+2 import type { GradeBand } from '@/types/game-events';
+3 
+4 export type GamePhase =
+5   | 'idle'
+6   | 'loading'
+7   | 'instructions'
+8   | 'playing'
+9   | 'evaluating'
+10   | 'scoring'
+11   | 'next-round'
+12   | 'retry'
+13   | 'game-over';
+14 
+15 export interface RoundDefinition {
+16   id: string;
+17   prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
+18   correctAnswer: string;
+19   distractors?: string[];
+20 }
+21 
+22 export interface ResolvedContent {
+23   rounds: RoundDefinition[];
+24 }
+25 
+26 export interface RoundState {
+27   roundId: string;
+28   answer: string | null;
+29   hintsUsed: number;
+30 }
+31 
+32 export interface GameEngineState {
+33   phase: GamePhase;
+34   roundIndex: number;
+35   score: number;
+36   streak: number;
+37   retryCount: number;
+38   content: ResolvedContent;
+39   currentRound: RoundState;
+40 }
+41 
+42 export type MoveType =
+43   | 'SUBMIT_ANSWER'
+44   | 'REQUEST_HINT'
+45   | 'SKIP_INSTRUCTIONS'
+46   | 'UNDO';
+47 
+48 export interface Move {
+49   type: MoveType | string; // string allows game-specific types in M5
+50   args: Record<string, string | number | boolean>;
+51   timestamp: number;
+52 }
+53 
+54 export interface MoveLog {
+55   gameId: string;
+56   sessionId: string;
+57   profileId: string;
+58   seed: string;
+59   initialContent: ResolvedContent;
+60   initialState: GameEngineState;
+61   moves: Move[];
+62 }
+63 
+64 export interface ResolvedGameConfig {
+65   gameId: string;
+66   title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
+67   gradeBand: GradeBand;
+68   maxRounds: number;
+69   maxRetries: number;
+70   maxUndoDepth: number | null; // null = unlimited; 0 = no undo
+71   timerVisible: boolean;
+72   timerDurationSeconds: number | null;
+73   difficulty: string;
+74 }
+75 
+76 export type MoveHandler = (
+77   state: GameEngineState,
+78   args: Move['args'],
+79 ) => GameEngineState;
+80 
+81 export interface SessionMeta {
+82   profileId: string;
+83   gameId: string;
+84   gradeBand: GradeBand;
+85   seed: string;
+86   initialContent: ResolvedContent;
+87   initialState: GameEngineState;
+88 }
+89 
+90 export { type GradeBand } from '@/types/game-events';
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:09Z)**_
@@ -1695,76 +1708,77 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:09Z)**_
  `./src/lib/game-engine/session-finder.ts`
 
 ```text
-1	// src/lib/game-engine/session-finder.ts
-2	import type {
-3	  GameEngineState,
-4	  Move,
-5	  MoveLog,
-6	  MoveType,
-7	  ResolvedContent,
-8	} from './types';
-9	import type { BaseSkillDatabase } from '@/db/types';
-10	
-11	const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
-12	
-13	export async function findInProgressSession(
-14	  profileId: string,
-15	  gameId: string,
-16	  db: BaseSkillDatabase,
-17	): Promise<MoveLog | null> {
-18	  const index = await db.session_history_index
-19	    .findOne({
-20	      selector: { profileId, gameId, status: 'in-progress' },
-21	    })
-22	    .exec();
-23	
-24	  if (!index) return null;
-25	
-26	  // Check staleness
-27	  const ageMs = Date.now() - new Date(index.startedAt).getTime();
-28	  if (ageMs > STALE_THRESHOLD_MS) {
-29	    await index.incrementalPatch({ status: 'abandoned' });
-30	    return null;
-31	  }
-32	
-33	  // Load all chunks sorted by chunkIndex
-34	  const chunks = await db.session_history
-35	    .find({ selector: { sessionId: index.sessionId } })
-36	    .exec();
-37	
-38	  const allEvents = chunks
-39	    .toSorted((a, b) => a.chunkIndex - b.chunkIndex)
-40	    .flatMap(
-41	      (c) =>
-42	        c.events as Array<{
-43	          timestamp: string;
-44	          action: string;
-45	          payload: Record<string, string | number | boolean> | null;
-46	          result: null;
-47	        }>,
-48	    );
-49	
-50	  const moves: Move[] = allEvents.map((e) => ({
-51	    type: e.action as MoveType,
-52	    args: (e.payload ?? {}) as unknown as Record<
-53	      string,
-54	      string | number | boolean
-55	    >,
-56	    timestamp: new Date(e.timestamp).getTime(),
-57	  }));
-58	
-59	  return {
-60	    gameId: index.gameId,
-61	    sessionId: index.sessionId,
-62	    profileId: index.profileId,
-63	    seed: index.seed,
-64	    initialContent: index.initialContent as unknown as ResolvedContent,
-65	    initialState: index.initialState as unknown as GameEngineState,
-66	    moves,
-67	  };
-68	}
+1 // src/lib/game-engine/session-finder.ts
+2 import type {
+3   GameEngineState,
+4   Move,
+5   MoveLog,
+6   MoveType,
+7   ResolvedContent,
+8 } from './types';
+9 import type { BaseSkillDatabase } from '@/db/types';
+10 
+11 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+12 
+13 export async function findInProgressSession(
+14   profileId: string,
+15   gameId: string,
+16   db: BaseSkillDatabase,
+17 ): Promise<MoveLog | null> {
+18   const index = await db.session_history_index
+19     .findOne({
+20       selector: { profileId, gameId, status: 'in-progress' },
+21     })
+22     .exec();
+23 
+24   if (!index) return null;
+25 
+26   // Check staleness
+27   const ageMs = Date.now() - new Date(index.startedAt).getTime();
+28   if (ageMs > STALE_THRESHOLD_MS) {
+29     await index.incrementalPatch({ status: 'abandoned' });
+30     return null;
+31   }
+32 
+33   // Load all chunks sorted by chunkIndex
+34   const chunks = await db.session_history
+35     .find({ selector: { sessionId: index.sessionId } })
+36     .exec();
+37 
+38   const allEvents = chunks
+39     .toSorted((a, b) => a.chunkIndex - b.chunkIndex)
+40     .flatMap(
+41       (c) =>
+42         c.events as Array<{
+43           timestamp: string;
+44           action: string;
+45           payload: Record<string, string | number | boolean> | null;
+46           result: null;
+47         }>,
+48     );
+49 
+50   const moves: Move[] = allEvents.map((e) => ({
+51     type: e.action as MoveType,
+52     args: (e.payload ?? {}) as unknown as Record<
+53       string,
+54       string | number | boolean
+55     >,
+56     timestamp: new Date(e.timestamp).getTime(),
+57   }));
+58 
+59   return {
+60     gameId: index.gameId,
+61     sessionId: index.sessionId,
+62     profileId: index.profileId,
+63     seed: index.seed,
+64     initialContent: index.initialContent as unknown as ResolvedContent,
+65     initialState: index.initialState as unknown as GameEngineState,
+66     moves,
+67   };
+68 }
 69
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:10Z)**_
@@ -1778,6 +1792,7 @@ Found 2 files
 package.json
 vite.config.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:13Z)**_
@@ -1794,6 +1809,7 @@ Check package.json for PWA-related deps and version
     "workbox-build": "^7.4.0",
     "workbox-window": "^7.4.0"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:14Z)**_
@@ -1803,57 +1819,58 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:14Z)**_
  `./src/lib/game-engine/game-engine-provider.test.tsx`
 
 ```text
-1	// src/lib/game-engine/game-engine-provider.test.tsx
-2	import { act, renderHook, waitFor } from '@testing-library/react';
-3	import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-4	import {
-5	  GameEngineProvider,
-6	  useGameDispatch,
-7	  useGameState,
-8	} from './index';
-9	import type {
-10	  GameEngineState,
-11	  MoveHandler,
-12	  MoveLog,
-13	  ResolvedContent,
-14	  ResolvedGameConfig,
-15	} from './types';
-16	import type { BaseSkillDatabase } from '@/db/types';
-17	import type { ReactNode } from 'react';
-18	import {
-19	  createTestDatabase,
-20	  destroyTestDatabase,
-21	} from '@/db/create-database';
-22	import { DbProvider } from '@/providers/DbProvider';
-23	
-24	const content: ResolvedContent = {
-25	  rounds: [
-26	    { id: 'r1', prompt: { en: 'Q1' }, correctAnswer: 'A' },
-27	    { id: 'r2', prompt: { en: 'Q2' }, correctAnswer: 'B' },
-28	  ],
-29	};
-30	
-31	const config: ResolvedGameConfig = {
-32	  gameId: 'test',
-33	  title: { en: 'Test' },
-34	  gradeBand: 'year1-2',
-35	  maxRounds: 2,
-36	  maxRetries: 1,
-37	  maxUndoDepth: 3,
-38	  timerVisible: false,
-39	  timerDurationSeconds: null,
-40	  difficulty: 'medium',
-41	};
-42	
-43	const initialState: GameEngineState = {
-44	  phase: 'instructions',
-45	  roundIndex: 0,
-46	  score: 0,
-47	  streak: 0,
-48	  retryCount: 0,
-49	  content,
-50	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+1 // src/lib/game-engine/game-engine-provider.test.tsx
+2 import { act, renderHook, waitFor } from '@testing-library/react';
+3 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+4 import {
+5   GameEngineProvider,
+6   useGameDispatch,
+7   useGameState,
+8 } from './index';
+9 import type {
+10   GameEngineState,
+11   MoveHandler,
+12   MoveLog,
+13   ResolvedContent,
+14   ResolvedGameConfig,
+15 } from './types';
+16 import type { BaseSkillDatabase } from '@/db/types';
+17 import type { ReactNode } from 'react';
+18 import {
+19   createTestDatabase,
+20   destroyTestDatabase,
+21 } from '@/db/create-database';
+22 import { DbProvider } from '@/providers/DbProvider';
+23 
+24 const content: ResolvedContent = {
+25   rounds: [
+26     { id: 'r1', prompt: { en: 'Q1' }, correctAnswer: 'A' },
+27     { id: 'r2', prompt: { en: 'Q2' }, correctAnswer: 'B' },
+28   ],
+29 };
+30 
+31 const config: ResolvedGameConfig = {
+32   gameId: 'test',
+33   title: { en: 'Test' },
+34   gradeBand: 'year1-2',
+35   maxRounds: 2,
+36   maxRetries: 1,
+37   maxUndoDepth: 3,
+38   timerVisible: false,
+39   timerDurationSeconds: null,
+40   difficulty: 'medium',
+41 };
+42 
+43 const initialState: GameEngineState = {
+44   phase: 'instructions',
+45   roundIndex: 0,
+46   score: 0,
+47   streak: 0,
+48   retryCount: 0,
+49   content,
+50   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:18Z)**_
@@ -1869,208 +1886,209 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:18Z)**_
  `./src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import {
-3	  createContext,
-4	  useCallback,
-5	  useContext,
-6	  useMemo,
-7	  useRef,
-8	} from 'react';
-9	import { createReducer, useGameLifecycle } from './lifecycle';
-10	import { useMoveLog } from './move-log';
-11	import { useSessionRecorder } from './session-recorder';
-12	import type {
-13	  GameEngineState,
-14	  Move,
-15	  MoveHandler,
-16	  MoveLog,
-17	  ResolvedGameConfig,
-18	  SessionMeta,
-19	} from './types';
-20	import type { JSX, ReactNode } from 'react';
-21	import { useRxDB } from '@/db/hooks/useRxDB';
-22	
-23	// --- Contexts ---
-24	
-25	const GameStateContext = createContext<GameEngineState | null>(null);
-26	const GameDispatchContext = createContext<
-27	  ((move: Move) => void) | null
-28	>(null);
-29	
-30	// --- Consumer hooks ---
-31	
-32	export const useGameState = (): GameEngineState => {
-33	  const ctx = useContext(GameStateContext);
-34	  if (!ctx)
-35	    throw new Error(
-36	      'useGameState must be used within GameEngineProvider',
-37	    );
-38	  return ctx;
-39	};
-40	
-41	export const useGameDispatch = (): ((move: Move) => void) => {
-42	  const ctx = useContext(GameDispatchContext);
-43	  if (!ctx)
-44	    throw new Error(
-45	      'useGameDispatch must be used within GameEngineProvider',
-46	    );
-47	  return ctx;
-48	};
-49	
-50	// --- Inner component that calls useSessionRecorder once db is ready ---
-51	
-52	interface RecorderProps {
-53	  moves: Move[];
-54	  sessionId: string;
-55	  meta: SessionMeta;
-56	  phase: string;
-57	}
-58	
-59	const SessionRecorderBridge = ({
-60	  moves,
-61	  sessionId,
-62	  meta,
-63	  phase,
-64	}: RecorderProps): null => {
-65	  const { db } = useRxDB();
-66	  useSessionRecorder(
-67	    moves,
-68	    sessionId,
-69	    meta,
-70	    db as NonNullable<typeof db>,
-71	    phase,
-72	  );
-73	  return null;
-74	};
-75	
-76	// Wrapper that only mounts SessionRecorderBridge once db is available
-77	const SessionRecorderGate = (
-78	  props: RecorderProps,
-79	): JSX.Element | null => {
-80	  const { db } = useRxDB();
-81	  if (!db) return null;
-82	  return <SessionRecorderBridge {...props} />;
-83	};
-84	
-85	// Helper: replay a MoveLog through the full lifecycle reducer
-86	function replayLog(
-87	  log: MoveLog,
-88	  config: ResolvedGameConfig,
-89	  gameMovers: Record<string, MoveHandler>,
-90	): GameEngineState {
-91	  const reducer = createReducer(config, gameMovers);
-92	  let state = log.initialState;
-93	  for (const move of log.moves) {
-94	    state = reducer(state, move);
-95	  }
-96	  return state;
-97	}
-98	
-99	// --- Provider ---
-100	
-101	interface GameEngineProviderProps {
-102	  config: ResolvedGameConfig;
-103	  moves: Record<string, MoveHandler>;
-104	  initialState: GameEngineState;
-105	  sessionId: string;
-106	  meta: SessionMeta;
-107	  initialLog?: MoveLog;
-108	  children: ReactNode;
-109	}
-110	
-111	export const GameEngineProvider = ({
-112	  config,
-113	  moves: gameMovers,
-114	  initialState,
-115	  sessionId,
-116	  meta,
-117	  initialLog,
-118	  children,
-119	}: GameEngineProviderProps): JSX.Element => {
-120	  // Compute resumed initial state if initialLog provided — run once on mount
-121	  const resolvedInitialState = useMemo(() => {
-122	    if (!initialLog || initialLog.moves.length === 0)
-123	      return initialState;
-124	    return replayLog(initialLog, config, gameMovers);
-125	    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount; initialLog is treated as immutable
-126	  }, []);
-127	
-128	  const [state, lifecycleDispatch] = useGameLifecycle(
-129	    config,
-130	    gameMovers,
-131	    resolvedInitialState,
-132	  );
-133	
-134	  const { moves, canUndo, appendMove } = useMoveLog(
-135	    config.maxUndoDepth,
-136	  );
-137	
-138	  // Keep refs so dispatch closure stays stable across re-renders
-139	  const movesRef = useRef<Move[]>(moves);
-140	  movesRef.current = moves;
-141	  const metaRef = useRef<SessionMeta>(meta);
-142	  metaRef.current = meta;
-143	  const canUndoRef = useRef<boolean>(canUndo);
-144	  canUndoRef.current = canUndo;
-145	
-146	  const dispatch = useCallback(
-147	    (move: Move) => {
-148	      if (move.type === 'UNDO') {
-149	        if (!canUndoRef.current) return;
-150	        const accepted = appendMove(move);
-151	        if (!accepted) return;
-152	
-153	        const targetStep = move.args['targetStep'] as number;
-154	        // Replay all moves up to targetStep using full lifecycle reducer
-155	        const currentMeta = metaRef.current;
-156	        const tempLog: MoveLog = {
-157	          gameId: currentMeta.gameId,
-158	          sessionId,
-159	          profileId: currentMeta.profileId,
-160	          seed: currentMeta.seed,
-161	          initialContent: currentMeta.initialContent,
-162	          initialState,
-163	          moves: movesRef.current.slice(0, targetStep),
-164	        };
-165	        const recoveredState = replayLog(tempLog, config, gameMovers);
-166	        lifecycleDispatch({
-167	          type: 'RESTORE_STATE',
-168	          args: { _state: JSON.stringify(recoveredState) },
-169	          timestamp: move.timestamp,
-170	        });
-171	        return;
-172	      }
-173	
-174	      appendMove(move);
-175	      lifecycleDispatch(move);
-176	    },
-177	    [
-178	      appendMove,
-179	      sessionId,
-180	      initialState,
-181	      config,
-182	      gameMovers,
-183	      lifecycleDispatch,
-184	    ],
-185	  );
-186	
-187	  return (
-188	    <GameStateContext.Provider value={state}>
-189	      <GameDispatchContext.Provider value={dispatch}>
-190	        <SessionRecorderGate
-191	          moves={moves}
-192	          sessionId={sessionId}
-193	          meta={meta}
-194	          phase={state.phase}
-195	        />
-196	        {children}
-197	      </GameDispatchContext.Provider>
-198	    </GameStateContext.Provider>
-199	  );
-200	};
+1 // src/lib/game-engine/index.ts
+2 import {
+3   createContext,
+4   useCallback,
+5   useContext,
+6   useMemo,
+7   useRef,
+8 } from 'react';
+9 import { createReducer, useGameLifecycle } from './lifecycle';
+10 import { useMoveLog } from './move-log';
+11 import { useSessionRecorder } from './session-recorder';
+12 import type {
+13   GameEngineState,
+14   Move,
+15   MoveHandler,
+16   MoveLog,
+17   ResolvedGameConfig,
+18   SessionMeta,
+19 } from './types';
+20 import type { JSX, ReactNode } from 'react';
+21 import { useRxDB } from '@/db/hooks/useRxDB';
+22 
+23 // --- Contexts ---
+24 
+25 const GameStateContext = createContext<GameEngineState | null>(null);
+26 const GameDispatchContext = createContext<
+27   ((move: Move) => void) | null
+28 >(null);
+29 
+30 // --- Consumer hooks ---
+31 
+32 export const useGameState = (): GameEngineState => {
+33   const ctx = useContext(GameStateContext);
+34   if (!ctx)
+35     throw new Error(
+36       'useGameState must be used within GameEngineProvider',
+37     );
+38   return ctx;
+39 };
+40 
+41 export const useGameDispatch = (): ((move: Move) => void) => {
+42   const ctx = useContext(GameDispatchContext);
+43   if (!ctx)
+44     throw new Error(
+45       'useGameDispatch must be used within GameEngineProvider',
+46     );
+47   return ctx;
+48 };
+49 
+50 // --- Inner component that calls useSessionRecorder once db is ready ---
+51 
+52 interface RecorderProps {
+53   moves: Move[];
+54   sessionId: string;
+55   meta: SessionMeta;
+56   phase: string;
+57 }
+58 
+59 const SessionRecorderBridge = ({
+60   moves,
+61   sessionId,
+62   meta,
+63   phase,
+64 }: RecorderProps): null => {
+65   const { db } = useRxDB();
+66   useSessionRecorder(
+67     moves,
+68     sessionId,
+69     meta,
+70     db as NonNullable<typeof db>,
+71     phase,
+72   );
+73   return null;
+74 };
+75 
+76 // Wrapper that only mounts SessionRecorderBridge once db is available
+77 const SessionRecorderGate = (
+78   props: RecorderProps,
+79 ): JSX.Element | null => {
+80   const { db } = useRxDB();
+81   if (!db) return null;
+82   return <SessionRecorderBridge {...props} />;
+83 };
+84 
+85 // Helper: replay a MoveLog through the full lifecycle reducer
+86 function replayLog(
+87   log: MoveLog,
+88   config: ResolvedGameConfig,
+89   gameMovers: Record<string, MoveHandler>,
+90 ): GameEngineState {
+91   const reducer = createReducer(config, gameMovers);
+92   let state = log.initialState;
+93   for (const move of log.moves) {
+94     state = reducer(state, move);
+95   }
+96   return state;
+97 }
+98 
+99 // --- Provider ---
+100 
+101 interface GameEngineProviderProps {
+102   config: ResolvedGameConfig;
+103   moves: Record<string, MoveHandler>;
+104   initialState: GameEngineState;
+105   sessionId: string;
+106   meta: SessionMeta;
+107   initialLog?: MoveLog;
+108   children: ReactNode;
+109 }
+110 
+111 export const GameEngineProvider = ({
+112   config,
+113   moves: gameMovers,
+114   initialState,
+115   sessionId,
+116   meta,
+117   initialLog,
+118   children,
+119 }: GameEngineProviderProps): JSX.Element => {
+120   // Compute resumed initial state if initialLog provided — run once on mount
+121   const resolvedInitialState = useMemo(() => {
+122     if (!initialLog || initialLog.moves.length === 0)
+123       return initialState;
+124     return replayLog(initialLog, config, gameMovers);
+125     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount; initialLog is treated as immutable
+126   }, []);
+127 
+128   const [state, lifecycleDispatch] = useGameLifecycle(
+129     config,
+130     gameMovers,
+131     resolvedInitialState,
+132   );
+133 
+134   const { moves, canUndo, appendMove } = useMoveLog(
+135     config.maxUndoDepth,
+136   );
+137 
+138   // Keep refs so dispatch closure stays stable across re-renders
+139   const movesRef = useRef<Move[]>(moves);
+140   movesRef.current = moves;
+141   const metaRef = useRef<SessionMeta>(meta);
+142   metaRef.current = meta;
+143   const canUndoRef = useRef<boolean>(canUndo);
+144   canUndoRef.current = canUndo;
+145 
+146   const dispatch = useCallback(
+147     (move: Move) => {
+148       if (move.type === 'UNDO') {
+149         if (!canUndoRef.current) return;
+150         const accepted = appendMove(move);
+151         if (!accepted) return;
+152 
+153         const targetStep = move.args['targetStep'] as number;
+154         // Replay all moves up to targetStep using full lifecycle reducer
+155         const currentMeta = metaRef.current;
+156         const tempLog: MoveLog = {
+157           gameId: currentMeta.gameId,
+158           sessionId,
+159           profileId: currentMeta.profileId,
+160           seed: currentMeta.seed,
+161           initialContent: currentMeta.initialContent,
+162           initialState,
+163           moves: movesRef.current.slice(0, targetStep),
+164         };
+165         const recoveredState = replayLog(tempLog, config, gameMovers);
+166         lifecycleDispatch({
+167           type: 'RESTORE_STATE',
+168           args: { _state: JSON.stringify(recoveredState) },
+169           timestamp: move.timestamp,
+170         });
+171         return;
+172       }
+173 
+174       appendMove(move);
+175       lifecycleDispatch(move);
+176     },
+177     [
+178       appendMove,
+179       sessionId,
+180       initialState,
+181       config,
+182       gameMovers,
+183       lifecycleDispatch,
+184     ],
+185   );
+186 
+187   return (
+188     <GameStateContext.Provider value={state}>
+189       <GameDispatchContext.Provider value={dispatch}>
+190         <SessionRecorderGate
+191           moves={moves}
+192           sessionId={sessionId}
+193           meta={meta}
+194           phase={state.phase}
+195         />
+196         {children}
+197       </GameDispatchContext.Provider>
+198     </GameStateContext.Provider>
+199   );
+200 };
 201
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:19Z)**_
@@ -2113,6 +2131,7 @@ src/db/migrations.ts:20:  await db.app_meta.insert({
 
 [Showing results with pagination = limit: 30]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:31Z)**_
@@ -2160,6 +2179,7 @@ src/routes/$locale/_app/game/$gameId.test.tsx
 src/routes/$locale/_app/index.tsx
 src/routes/$locale/_app/game/$gameId.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:31Z)**_
@@ -2178,6 +2198,7 @@ manifest.json
 robots.txt
 sounds
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:34Z)**_
@@ -2187,32 +2208,33 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:34Z)**_
  `./public/manifest.json`
 
 ```text
-1	{
-2	  "name": "BaseSkill",
-3	  "short_name": "BaseSkill",
-4	  "description": "Free, open-source, offline-first educational PWA for children",
-5	  "display": "standalone",
-6	  "theme_color": "#0077B6",
-7	  "background_color": "#EAF6FB",
-8	  "start_url": "/base-skill/",
-9	  "scope": "/base-skill/",
-10	  "icons": [
-11	    {
-12	      "src": "logo192.png",
-13	      "type": "image/png",
-14	      "sizes": "192x192",
-15	      "purpose": "any maskable"
-16	    },
-17	    {
-18	      "src": "logo512.png",
-19	      "type": "image/png",
-20	      "sizes": "512x512",
-21	      "purpose": "any maskable"
-22	    }
-23	  ]
-24	}
+1 {
+2   "name": "BaseSkill",
+3   "short_name": "BaseSkill",
+4   "description": "Free, open-source, offline-first educational PWA for children",
+5   "display": "standalone",
+6   "theme_color": "#0077B6",
+7   "background_color": "#EAF6FB",
+8   "start_url": "/base-skill/",
+9   "scope": "/base-skill/",
+10   "icons": [
+11     {
+12       "src": "logo192.png",
+13       "type": "image/png",
+14       "sizes": "192x192",
+15       "purpose": "any maskable"
+16     },
+17     {
+18       "src": "logo512.png",
+19       "type": "image/png",
+20       "sizes": "512x512",
+21       "purpose": "any maskable"
+22     }
+23   ]
+24 }
 25
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:35Z)**_
@@ -2222,630 +2244,631 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:35Z)**_
  `./src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import type {
-6	  NumberMatchConfig,
-7	  NumberMatchRound,
-8	} from '@/games/number-match/types';
-9	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-10	import type {
-11	  WordSpellConfig,
-12	  WordSpellRound,
-13	} from '@/games/word-spell/types';
-14	import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-15	import type {
-16	  GameEngineState,
-17	  MoveLog,
-18	  ResolvedContent,
-19	  ResolvedGameConfig,
-20	  SessionMeta,
-21	} from '@/lib/game-engine/types';
-22	import type { JSX } from 'react';
-23	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-24	import { GameShell } from '@/components/game/GameShell';
-25	import { getOrCreateDatabase } from '@/db/create-database';
-26	import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-27	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-28	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-29	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-30	import { numberMatchConfigFields } from '@/games/number-match/types';
-31	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-32	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-33	import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
-34	import { wordSpellConfigFields } from '@/games/word-spell/types';
-35	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-36	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-37	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-38	
-39	const STUB_CONTENT: ResolvedContent = {
-40	  rounds: [
-41	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-42	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-43	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-44	  ],
-45	};
-46	
-47	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-48	  gameId,
-49	  title: { en: gameId },
-50	  gradeBand: 'year1-2',
-51	  maxRounds: 3,
-52	  maxRetries: 1,
-53	  maxUndoDepth: 3,
-54	  timerVisible: false,
-55	  timerDurationSeconds: null,
-56	  difficulty: 'medium',
-57	});
-58	
-59	interface GameRouteLoaderData {
-60	  config: ResolvedGameConfig;
-61	  initialLog: MoveLog | null;
-62	  sessionId: string;
-63	  meta: SessionMeta;
-64	  gameSpecificConfig: Record<string, unknown> | null;
-65	  bookmarkId: string | null;
-66	  bookmarkName: string | null;
-67	  bookmarkColor: string | null;
-68	}
-69	
-70	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-71	  { word: 'cat', emoji: '🐱' },
-72	  { word: 'dog', emoji: '🐶' },
-73	  { word: 'sun', emoji: '☀️' },
-74	  { word: 'pin', emoji: '📌' },
-75	  { word: 'sad', emoji: '☹️' },
-76	  { word: 'ant', emoji: '🐜' },
-77	  { word: 'can', emoji: '🥫' },
-78	  { word: 'mum', emoji: '🤱' },
-79	];
-80	
-81	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-82	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-83	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-84	};
-85	
-86	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-87	  gameId: 'word-spell',
-88	  component: 'WordSpell',
-89	  inputMethod: 'drag',
-90	  wrongTileBehavior: 'lock-auto-eject',
-91	  tileBankMode: 'exact',
-92	  totalRounds: 8,
-93	  roundsInOrder: false,
-94	  ttsEnabled: true,
-95	  mode: 'picture',
-96	  tileUnit: 'letter',
-97	  rounds: sliceWordSpellRounds(8),
-98	};
-99	
-100	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-101	  gameId: 'number-match',
-102	  component: 'NumberMatch',
-103	  inputMethod: 'drag',
-104	  wrongTileBehavior: 'lock-auto-eject',
-105	  tileBankMode: 'distractors',
-106	  distractorCount: 2,
-107	  totalRounds: 3,
-108	  roundsInOrder: false,
-109	  ttsEnabled: true,
-110	  mode: 'numeral-to-group',
-111	  tileStyle: 'dots',
-112	  range: { min: 1, max: 12 },
-113	  rounds: Array.from({ length: 3 }, () => ({
-114	    value: Math.floor(Math.random() * 12) + 1,
-115	  })),
-116	});
-117	
-118	const resizeNumberMatchRounds = (
-119	  prev: NumberMatchRound[],
-120	  count: number,
-121	  range: { min: number; max: number },
-122	): NumberMatchRound[] => {
-123	  const n = Math.max(1, Math.min(count, 50));
-124	  const span = Math.max(1, range.max - range.min + 1);
-125	  const next = prev.slice(0, n).map((r) => {
-126	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-127	    return { value: range.min + Math.floor(Math.random() * span) };
-128	  });
-129	  while (next.length < n) {
-130	    next.push({
-131	      value: range.min + Math.floor(Math.random() * span),
-132	    });
-133	  }
-134	  return next;
-135	};
-136	
-137	const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
-138	  gameId: 'sort-numbers',
-139	  component: 'SortNumbers',
-140	  inputMethod: 'drag',
-141	  wrongTileBehavior: 'lock-manual',
-142	  tileBankMode: 'exact',
-143	  totalRounds: 8,
-144	  roundsInOrder: false,
-145	  ttsEnabled: true,
-146	  direction: 'ascending',
-147	  range: { min: 11, max: 99 },
-148	  quantity: 6,
-149	  allowSkips: true,
-150	  rounds: generateSortRounds({
-151	    range: { min: 11, max: 99 },
-152	    quantity: 6,
-153	    allowSkips: true,
-154	    totalRounds: 8,
-155	  }),
-156	});
-157	
-158	const resolveWordSpellConfig = (
-159	  saved: Record<string, unknown> | null,
-160	): WordSpellConfig => {
-161	  const base: WordSpellConfig = {
-162	    ...DEFAULT_WORD_SPELL_CONFIG,
-163	    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
-164	  };
-165	  if (!saved || saved.component !== 'WordSpell') return base;
-166	  const merged: WordSpellConfig = {
-167	    ...base,
-168	    ...(saved as Partial<WordSpellConfig>),
-169	    gameId: 'word-spell',
-170	    component: 'WordSpell',
-171	  };
-172	  const targetTotal = Math.max(
-173	    1,
-174	    Math.min(
-175	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-176	      WORD_SPELL_ROUND_POOL.length,
-177	    ),
-178	  );
-179	  if (
-180	    !Array.isArray(merged.rounds) ||
-181	    merged.rounds.length === 0 ||
-182	    merged.rounds.length !== targetTotal
-183	  ) {
-184	    merged.rounds = sliceWordSpellRounds(targetTotal);
-185	  }
-186	  merged.totalRounds = merged.rounds.length;
-187	  return merged;
-188	};
-189	
-190	const resolveNumberMatchConfig = (
-191	  saved: Record<string, unknown> | null,
-192	): NumberMatchConfig => {
-193	  const base = makeDefaultNumberMatchConfig();
-194	  if (!saved || saved.component !== 'NumberMatch') return base;
-195	  const merged: NumberMatchConfig = {
-196	    ...base,
-197	    ...(saved as Partial<NumberMatchConfig>),
-198	    gameId: 'number-match',
-199	    component: 'NumberMatch',
-200	  };
-201	  const targetLen =
-202	    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
-203	  merged.rounds = resizeNumberMatchRounds(
-204	    Array.isArray(merged.rounds) ? merged.rounds : [],
-205	    targetLen,
-206	    merged.range,
-207	  );
-208	  return merged;
-209	};
-210	
-211	const resolveSortNumbersConfig = (
-212	  saved: Record<string, unknown> | null,
-213	): SortNumbersConfig => {
-214	  const base = makeDefaultSortNumbersConfig();
-215	  if (!saved || saved.component !== 'SortNumbers') return base;
-216	  const merged: SortNumbersConfig = {
-217	    ...base,
-218	    ...(saved as Partial<SortNumbersConfig>),
-219	    gameId: 'sort-numbers',
-220	    component: 'SortNumbers',
-221	  };
-222	  const tr = Math.max(1, merged.totalRounds);
-223	  merged.totalRounds = tr;
-224	  const roundsStale =
-225	    Array.isArray(merged.rounds) &&
-226	    merged.rounds.some(
-227	      (r) =>
-228	        r.sequence.length !== merged.quantity ||
-229	        r.sequence.some(
-230	          (v) => v < merged.range.min || v > merged.range.max,
-231	        ),
-232	    );
-233	  if (
-234	    !Array.isArray(merged.rounds) ||
-235	    merged.rounds.length === 0 ||
-236	    merged.rounds.length !== tr ||
-237	    roundsStale
-238	  ) {
-239	    merged.rounds = generateSortRounds({
-240	      range: merged.range,
-241	      quantity: merged.quantity,
-242	      allowSkips: merged.allowSkips,
-243	      totalRounds: tr,
-244	    });
-245	  }
-246	  return merged;
-247	};
-248	
-249	const WordSpellGameBody = ({
-250	  gameId,
-251	  gameSpecificConfig,
-252	  bookmarkId,
-253	  bookmarkName,
-254	  bookmarkColor,
-255	}: {
-256	  gameId: string;
-257	  gameSpecificConfig: Record<string, unknown> | null;
-258	  bookmarkId: string | null;
-259	  bookmarkName: string | null;
-260	  bookmarkColor: string | null;
-261	}): JSX.Element => {
-262	  const { t } = useTranslation('games');
-263	  const { save, updateConfig } = useSavedConfigs();
-264	  const initial = useMemo(
-265	    () => resolveWordSpellConfig(gameSpecificConfig),
-266	    [gameSpecificConfig],
-267	  );
-268	  const [cfg, setCfg] = useState(initial);
-269	  const [showInstructions, setShowInstructions] = useState(true);
-270	  useEffect(() => {
-271	    setCfg(initial);
-272	  }, [initial]);
-273	  usePersistLastGameConfig(
-274	    gameId,
-275	    cfg as unknown as Record<string, unknown>,
-276	  );
-277	
-278	  if (showInstructions) {
-279	    return (
-280	      <InstructionsOverlay
-281	        text={t('instructions.word-spell')}
-282	        onStart={() => setShowInstructions(false)}
-283	        ttsEnabled={cfg.ttsEnabled}
-284	        gameTitle={t('word-spell')}
-285	        bookmarkName={bookmarkName ?? undefined}
-286	        bookmarkColor={
-287	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-288	        }
-289	        subject="reading"
-290	        config={cfg as unknown as Record<string, unknown>}
-291	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-292	        onSaveBookmark={async (name, color) => {
-293	          await save({
-294	            gameId,
-295	            name,
-296	            color,
-297	            config: cfg as unknown as Record<string, unknown>,
-298	          });
-299	        }}
-300	        onUpdateBookmark={
-301	          bookmarkId
-302	            ? async (name, config) => {
-303	                await updateConfig(bookmarkId, config, name);
-304	              }
-305	            : undefined
-306	        }
-307	        configFields={wordSpellConfigFields}
-308	      />
-309	    );
-310	  }
-311	
-312	  return <WordSpell key={cfg.inputMethod} config={cfg} />;
-313	};
-314	
-315	const NumberMatchGameBody = ({
-316	  gameId,
-317	  gameSpecificConfig,
-318	  bookmarkId,
-319	  bookmarkName,
-320	  bookmarkColor,
-321	}: {
-322	  gameId: string;
-323	  gameSpecificConfig: Record<string, unknown> | null;
-324	  bookmarkId: string | null;
-325	  bookmarkName: string | null;
-326	  bookmarkColor: string | null;
-327	}): JSX.Element => {
-328	  const { t } = useTranslation('games');
-329	  const { save, updateConfig } = useSavedConfigs();
-330	  const initial = useMemo(
-331	    () => resolveNumberMatchConfig(gameSpecificConfig),
-332	    [gameSpecificConfig],
-333	  );
-334	  const [cfg, setCfg] = useState(initial);
-335	  const [showInstructions, setShowInstructions] = useState(true);
-336	  useEffect(() => {
-337	    setCfg(initial);
-338	  }, [initial]);
-339	  usePersistLastGameConfig(
-340	    gameId,
-341	    cfg as unknown as Record<string, unknown>,
-342	  );
-343	
-344	  if (showInstructions) {
-345	    return (
-346	      <InstructionsOverlay
-347	        text={t('instructions.number-match')}
-348	        onStart={() => setShowInstructions(false)}
-349	        ttsEnabled={cfg.ttsEnabled}
-350	        gameTitle={t('number-match')}
-351	        bookmarkName={bookmarkName ?? undefined}
-352	        bookmarkColor={
-353	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-354	        }
-355	        subject="math"
-356	        config={cfg as unknown as Record<string, unknown>}
-357	        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-358	        onSaveBookmark={async (name, color) => {
-359	          await save({
-360	            gameId,
-361	            name,
-362	            color,
-363	            config: cfg as unknown as Record<string, unknown>,
-364	          });
-365	        }}
-366	        onUpdateBookmark={
-367	          bookmarkId
-368	            ? async (name, config) => {
-369	                await updateConfig(bookmarkId, config, name);
-370	              }
-371	            : undefined
-372	        }
-373	        configFields={numberMatchConfigFields}
-374	      />
-375	    );
-376	  }
-377	
-378	  return <NumberMatch key={cfg.inputMethod} config={cfg} />;
-379	};
-380	
-381	const SortNumbersGameBody = ({
-382	  gameId,
-383	  gameSpecificConfig,
-384	  bookmarkId,
-385	  bookmarkName,
-386	  bookmarkColor,
-387	}: {
-388	  gameId: string;
-389	  gameSpecificConfig: Record<string, unknown> | null;
-390	  bookmarkId: string | null;
-391	  bookmarkName: string | null;
-392	  bookmarkColor: string | null;
-393	}): JSX.Element => {
-394	  const { t } = useTranslation('games');
-395	  const { save, updateConfig } = useSavedConfigs();
-396	  const initial = useMemo(
-397	    () => resolveSortNumbersConfig(gameSpecificConfig),
-398	    [gameSpecificConfig],
-399	  );
-400	  const [cfg, setCfg] = useState(initial);
-401	  const [showInstructions, setShowInstructions] = useState(true);
-402	  useEffect(() => {
-403	    setCfg(initial);
-404	  }, [initial]);
-405	  usePersistLastGameConfig(
-406	    gameId,
-407	    cfg as unknown as Record<string, unknown>,
-408	  );
-409	
-410	  if (showInstructions) {
-411	    return (
-412	      <InstructionsOverlay
-413	        text={t('instructions.sort-numbers')}
-414	        onStart={() => setShowInstructions(false)}
-415	        ttsEnabled={cfg.ttsEnabled}
-416	        gameTitle={t('sort-numbers')}
-417	        bookmarkName={bookmarkName ?? undefined}
-418	        bookmarkColor={
-419	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-420	        }
-421	        subject="math"
-422	        config={cfg as unknown as Record<string, unknown>}
-423	        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-424	        onSaveBookmark={async (name, color) => {
-425	          await save({
-426	            gameId,
-427	            name,
-428	            color,
-429	            config: cfg as unknown as Record<string, unknown>,
-430	          });
-431	        }}
-432	        onUpdateBookmark={
-433	          bookmarkId
-434	            ? async (name, config) => {
-435	                await updateConfig(bookmarkId, config, name);
-436	              }
-437	            : undefined
-438	        }
-439	        configFields={sortNumbersConfigFields}
-440	      />
-441	    );
-442	  }
-443	
-444	  return <SortNumbers key={cfg.inputMethod} config={cfg} />;
-445	};
-446	
-447	const GameBody = ({
-448	  gameId,
-449	  gameSpecificConfig,
-450	  bookmarkId,
-451	  bookmarkName,
-452	  bookmarkColor,
-453	}: {
-454	  gameId: string;
-455	  gameSpecificConfig: Record<string, unknown> | null;
-456	  bookmarkId: string | null;
-457	  bookmarkName: string | null;
-458	  bookmarkColor: string | null;
-459	}): JSX.Element => {
-460	  if (gameId === 'sort-numbers') {
-461	    return (
-462	      <SortNumbersGameBody
-463	        gameId={gameId}
-464	        gameSpecificConfig={gameSpecificConfig}
-465	        bookmarkId={bookmarkId}
-466	        bookmarkName={bookmarkName}
-467	        bookmarkColor={bookmarkColor}
-468	      />
-469	    );
-470	  }
-471	
-472	  if (gameId === 'word-spell') {
-473	    return (
-474	      <WordSpellGameBody
-475	        gameId={gameId}
-476	        gameSpecificConfig={gameSpecificConfig}
-477	        bookmarkId={bookmarkId}
-478	        bookmarkName={bookmarkName}
-479	        bookmarkColor={bookmarkColor}
-480	      />
-481	    );
-482	  }
-483	
-484	  if (gameId === 'number-match') {
-485	    return (
-486	      <NumberMatchGameBody
-487	        gameId={gameId}
-488	        gameSpecificConfig={gameSpecificConfig}
-489	        bookmarkId={bookmarkId}
-490	        bookmarkName={bookmarkName}
-491	        bookmarkColor={bookmarkColor}
-492	      />
-493	    );
-494	  }
-495	
-496	  return (
-497	    <div className="flex h-full items-center justify-center text-muted-foreground">
-498	      <p>Game not found</p>
-499	    </div>
-500	  );
-501	};
-502	
-503	export const GameRoute = ({
-504	  config,
-505	  initialLog,
-506	  sessionId,
-507	  meta,
-508	  gameSpecificConfig,
-509	  bookmarkId,
-510	  bookmarkName,
-511	  bookmarkColor,
-512	}: GameRouteLoaderData): JSX.Element => (
-513	  <GameShell
-514	    config={config}
-515	    moves={{}}
-516	    initialState={meta.initialState}
-517	    sessionId={sessionId}
-518	    meta={meta}
-519	    initialLog={initialLog ?? undefined}
-520	  >
-521	    <GameBody
-522	      gameId={config.gameId}
-523	      gameSpecificConfig={gameSpecificConfig}
-524	      bookmarkId={bookmarkId}
-525	      bookmarkName={bookmarkName}
-526	      bookmarkColor={bookmarkColor}
-527	    />
-528	  </GameShell>
-529	);
-530	
-531	const RouteComponent = (): JSX.Element => {
-532	  const data = Route.useLoaderData();
-533	  return <GameRoute {...data} />;
-534	};
-535	
-536	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-537	  validateSearch: (search: Record<string, unknown>) => ({
-538	    configId:
-539	      typeof search.configId === 'string' ? search.configId : undefined,
-540	  }),
-541	  loaderDeps: ({ search }) => ({ configId: search.configId }),
-542	  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
-543	    const { gameId } = params;
-544	    const profileId = 'default';
-545	
-546	    const db = await getOrCreateDatabase();
-547	    const defaultConfig = makeDefaultConfig(gameId);
-548	    const config = await loadGameConfig(
-549	      gameId,
-550	      profileId,
-551	      defaultConfig.gradeBand,
-552	      db,
-553	      defaultConfig,
-554	    );
-555	
-556	    const initialLog = await findInProgressSession(
-557	      profileId,
-558	      gameId,
-559	      db,
-560	    );
-561	
-562	    let gameSpecificConfig: Record<string, unknown> | null = null;
-563	    let bookmarkId: string | null = null;
-564	    let bookmarkName: string | null = null;
-565	    let bookmarkColor: string | null = null;
-566	
-567	    if (deps.configId) {
-568	      const savedDoc = await db.saved_game_configs
-569	        .findOne(deps.configId)
-570	        .exec();
-571	      if (savedDoc) {
-572	        gameSpecificConfig = savedDoc.config;
-573	        bookmarkId = savedDoc.id;
-574	        bookmarkName = savedDoc.name;
-575	        bookmarkColor = savedDoc.color;
-576	      }
-577	    } else {
-578	      const lastDoc = await db.saved_game_configs
-579	        .findOne(lastSessionSavedConfigId(gameId))
-580	        .exec();
-581	      if (lastDoc) gameSpecificConfig = lastDoc.config;
-582	    }
-583	
-584	    const sessionId = initialLog?.sessionId ?? nanoid();
-585	    const seed = initialLog?.seed ?? nanoid();
-586	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-587	    const initialState: GameEngineState = initialLog?.initialState ?? {
-588	      phase: 'instructions',
-589	      roundIndex: 0,
-590	      score: 0,
-591	      streak: 0,
-592	      retryCount: 0,
-593	      content: initialContent,
-594	      currentRound: {
-595	        roundId: initialContent.rounds[0]?.id ?? '',
-596	        answer: null,
-597	        hintsUsed: 0,
-598	      },
-599	    };
-600	
-601	    const meta: SessionMeta = {
-602	      profileId,
-603	      gameId,
-604	      gradeBand: config.gradeBand,
-605	      seed,
-606	      initialContent,
-607	      initialState,
-608	    };
-609	
-610	    return {
-611	      config,
-612	      initialLog,
-613	      sessionId,
-614	      meta,
-615	      gameSpecificConfig,
-616	      bookmarkId,
-617	      bookmarkName,
-618	      bookmarkColor,
-619	    };
-620	  },
-621	  component: RouteComponent,
-622	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import type {
+6   NumberMatchConfig,
+7   NumberMatchRound,
+8 } from '@/games/number-match/types';
+9 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+10 import type {
+11   WordSpellConfig,
+12   WordSpellRound,
+13 } from '@/games/word-spell/types';
+14 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+15 import type {
+16   GameEngineState,
+17   MoveLog,
+18   ResolvedContent,
+19   ResolvedGameConfig,
+20   SessionMeta,
+21 } from '@/lib/game-engine/types';
+22 import type { JSX } from 'react';
+23 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+24 import { GameShell } from '@/components/game/GameShell';
+25 import { getOrCreateDatabase } from '@/db/create-database';
+26 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+27 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+28 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+29 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+30 import { numberMatchConfigFields } from '@/games/number-match/types';
+31 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+32 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+33 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+34 import { wordSpellConfigFields } from '@/games/word-spell/types';
+35 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+36 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+37 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+38 
+39 const STUB_CONTENT: ResolvedContent = {
+40   rounds: [
+41     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+42     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+43     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+44   ],
+45 };
+46 
+47 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+48   gameId,
+49   title: { en: gameId },
+50   gradeBand: 'year1-2',
+51   maxRounds: 3,
+52   maxRetries: 1,
+53   maxUndoDepth: 3,
+54   timerVisible: false,
+55   timerDurationSeconds: null,
+56   difficulty: 'medium',
+57 });
+58 
+59 interface GameRouteLoaderData {
+60   config: ResolvedGameConfig;
+61   initialLog: MoveLog | null;
+62   sessionId: string;
+63   meta: SessionMeta;
+64   gameSpecificConfig: Record<string, unknown> | null;
+65   bookmarkId: string | null;
+66   bookmarkName: string | null;
+67   bookmarkColor: string | null;
+68 }
+69 
+70 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+71   { word: 'cat', emoji: '🐱' },
+72   { word: 'dog', emoji: '🐶' },
+73   { word: 'sun', emoji: '☀️' },
+74   { word: 'pin', emoji: '📌' },
+75   { word: 'sad', emoji: '☹️' },
+76   { word: 'ant', emoji: '🐜' },
+77   { word: 'can', emoji: '🥫' },
+78   { word: 'mum', emoji: '🤱' },
+79 ];
+80 
+81 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+82   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+83   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+84 };
+85 
+86 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+87   gameId: 'word-spell',
+88   component: 'WordSpell',
+89   inputMethod: 'drag',
+90   wrongTileBehavior: 'lock-auto-eject',
+91   tileBankMode: 'exact',
+92   totalRounds: 8,
+93   roundsInOrder: false,
+94   ttsEnabled: true,
+95   mode: 'picture',
+96   tileUnit: 'letter',
+97   rounds: sliceWordSpellRounds(8),
+98 };
+99 
+100 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+101   gameId: 'number-match',
+102   component: 'NumberMatch',
+103   inputMethod: 'drag',
+104   wrongTileBehavior: 'lock-auto-eject',
+105   tileBankMode: 'distractors',
+106   distractorCount: 2,
+107   totalRounds: 3,
+108   roundsInOrder: false,
+109   ttsEnabled: true,
+110   mode: 'numeral-to-group',
+111   tileStyle: 'dots',
+112   range: { min: 1, max: 12 },
+113   rounds: Array.from({ length: 3 }, () => ({
+114     value: Math.floor(Math.random() * 12) + 1,
+115   })),
+116 });
+117 
+118 const resizeNumberMatchRounds = (
+119   prev: NumberMatchRound[],
+120   count: number,
+121   range: { min: number; max: number },
+122 ): NumberMatchRound[] => {
+123   const n = Math.max(1, Math.min(count, 50));
+124   const span = Math.max(1, range.max - range.min + 1);
+125   const next = prev.slice(0, n).map((r) => {
+126     if (r.value >= range.min && r.value <= range.max) return { ...r };
+127     return { value: range.min + Math.floor(Math.random() * span) };
+128   });
+129   while (next.length < n) {
+130     next.push({
+131       value: range.min + Math.floor(Math.random() * span),
+132     });
+133   }
+134   return next;
+135 };
+136 
+137 const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
+138   gameId: 'sort-numbers',
+139   component: 'SortNumbers',
+140   inputMethod: 'drag',
+141   wrongTileBehavior: 'lock-manual',
+142   tileBankMode: 'exact',
+143   totalRounds: 8,
+144   roundsInOrder: false,
+145   ttsEnabled: true,
+146   direction: 'ascending',
+147   range: { min: 11, max: 99 },
+148   quantity: 6,
+149   allowSkips: true,
+150   rounds: generateSortRounds({
+151     range: { min: 11, max: 99 },
+152     quantity: 6,
+153     allowSkips: true,
+154     totalRounds: 8,
+155   }),
+156 });
+157 
+158 const resolveWordSpellConfig = (
+159   saved: Record<string, unknown> | null,
+160 ): WordSpellConfig => {
+161   const base: WordSpellConfig = {
+162     ...DEFAULT_WORD_SPELL_CONFIG,
+163     rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+164   };
+165   if (!saved || saved.component !== 'WordSpell') return base;
+166   const merged: WordSpellConfig = {
+167     ...base,
+168     ...(saved as Partial<WordSpellConfig>),
+169     gameId: 'word-spell',
+170     component: 'WordSpell',
+171   };
+172   const targetTotal = Math.max(
+173     1,
+174     Math.min(
+175       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+176       WORD_SPELL_ROUND_POOL.length,
+177     ),
+178   );
+179   if (
+180     !Array.isArray(merged.rounds) ||
+181     merged.rounds.length === 0 ||
+182     merged.rounds.length !== targetTotal
+183   ) {
+184     merged.rounds = sliceWordSpellRounds(targetTotal);
+185   }
+186   merged.totalRounds = merged.rounds.length;
+187   return merged;
+188 };
+189 
+190 const resolveNumberMatchConfig = (
+191   saved: Record<string, unknown> | null,
+192 ): NumberMatchConfig => {
+193   const base = makeDefaultNumberMatchConfig();
+194   if (!saved || saved.component !== 'NumberMatch') return base;
+195   const merged: NumberMatchConfig = {
+196     ...base,
+197     ...(saved as Partial<NumberMatchConfig>),
+198     gameId: 'number-match',
+199     component: 'NumberMatch',
+200   };
+201   const targetLen =
+202     merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+203   merged.rounds = resizeNumberMatchRounds(
+204     Array.isArray(merged.rounds) ? merged.rounds : [],
+205     targetLen,
+206     merged.range,
+207   );
+208   return merged;
+209 };
+210 
+211 const resolveSortNumbersConfig = (
+212   saved: Record<string, unknown> | null,
+213 ): SortNumbersConfig => {
+214   const base = makeDefaultSortNumbersConfig();
+215   if (!saved || saved.component !== 'SortNumbers') return base;
+216   const merged: SortNumbersConfig = {
+217     ...base,
+218     ...(saved as Partial<SortNumbersConfig>),
+219     gameId: 'sort-numbers',
+220     component: 'SortNumbers',
+221   };
+222   const tr = Math.max(1, merged.totalRounds);
+223   merged.totalRounds = tr;
+224   const roundsStale =
+225     Array.isArray(merged.rounds) &&
+226     merged.rounds.some(
+227       (r) =>
+228         r.sequence.length !== merged.quantity ||
+229         r.sequence.some(
+230           (v) => v < merged.range.min || v > merged.range.max,
+231         ),
+232     );
+233   if (
+234     !Array.isArray(merged.rounds) ||
+235     merged.rounds.length === 0 ||
+236     merged.rounds.length !== tr ||
+237     roundsStale
+238   ) {
+239     merged.rounds = generateSortRounds({
+240       range: merged.range,
+241       quantity: merged.quantity,
+242       allowSkips: merged.allowSkips,
+243       totalRounds: tr,
+244     });
+245   }
+246   return merged;
+247 };
+248 
+249 const WordSpellGameBody = ({
+250   gameId,
+251   gameSpecificConfig,
+252   bookmarkId,
+253   bookmarkName,
+254   bookmarkColor,
+255 }: {
+256   gameId: string;
+257   gameSpecificConfig: Record<string, unknown> | null;
+258   bookmarkId: string | null;
+259   bookmarkName: string | null;
+260   bookmarkColor: string | null;
+261 }): JSX.Element => {
+262   const { t } = useTranslation('games');
+263   const { save, updateConfig } = useSavedConfigs();
+264   const initial = useMemo(
+265     () => resolveWordSpellConfig(gameSpecificConfig),
+266     [gameSpecificConfig],
+267   );
+268   const [cfg, setCfg] = useState(initial);
+269   const [showInstructions, setShowInstructions] = useState(true);
+270   useEffect(() => {
+271     setCfg(initial);
+272   }, [initial]);
+273   usePersistLastGameConfig(
+274     gameId,
+275     cfg as unknown as Record<string, unknown>,
+276   );
+277 
+278   if (showInstructions) {
+279     return (
+280       <InstructionsOverlay
+281         text={t('instructions.word-spell')}
+282         onStart={() => setShowInstructions(false)}
+283         ttsEnabled={cfg.ttsEnabled}
+284         gameTitle={t('word-spell')}
+285         bookmarkName={bookmarkName ?? undefined}
+286         bookmarkColor={
+287           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+288         }
+289         subject="reading"
+290         config={cfg as unknown as Record<string, unknown>}
+291         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+292         onSaveBookmark={async (name, color) => {
+293           await save({
+294             gameId,
+295             name,
+296             color,
+297             config: cfg as unknown as Record<string, unknown>,
+298           });
+299         }}
+300         onUpdateBookmark={
+301           bookmarkId
+302             ? async (name, config) => {
+303                 await updateConfig(bookmarkId, config, name);
+304               }
+305             : undefined
+306         }
+307         configFields={wordSpellConfigFields}
+308       />
+309     );
+310   }
+311 
+312   return <WordSpell key={cfg.inputMethod} config={cfg} />;
+313 };
+314 
+315 const NumberMatchGameBody = ({
+316   gameId,
+317   gameSpecificConfig,
+318   bookmarkId,
+319   bookmarkName,
+320   bookmarkColor,
+321 }: {
+322   gameId: string;
+323   gameSpecificConfig: Record<string, unknown> | null;
+324   bookmarkId: string | null;
+325   bookmarkName: string | null;
+326   bookmarkColor: string | null;
+327 }): JSX.Element => {
+328   const { t } = useTranslation('games');
+329   const { save, updateConfig } = useSavedConfigs();
+330   const initial = useMemo(
+331     () => resolveNumberMatchConfig(gameSpecificConfig),
+332     [gameSpecificConfig],
+333   );
+334   const [cfg, setCfg] = useState(initial);
+335   const [showInstructions, setShowInstructions] = useState(true);
+336   useEffect(() => {
+337     setCfg(initial);
+338   }, [initial]);
+339   usePersistLastGameConfig(
+340     gameId,
+341     cfg as unknown as Record<string, unknown>,
+342   );
+343 
+344   if (showInstructions) {
+345     return (
+346       <InstructionsOverlay
+347         text={t('instructions.number-match')}
+348         onStart={() => setShowInstructions(false)}
+349         ttsEnabled={cfg.ttsEnabled}
+350         gameTitle={t('number-match')}
+351         bookmarkName={bookmarkName ?? undefined}
+352         bookmarkColor={
+353           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+354         }
+355         subject="math"
+356         config={cfg as unknown as Record<string, unknown>}
+357         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+358         onSaveBookmark={async (name, color) => {
+359           await save({
+360             gameId,
+361             name,
+362             color,
+363             config: cfg as unknown as Record<string, unknown>,
+364           });
+365         }}
+366         onUpdateBookmark={
+367           bookmarkId
+368             ? async (name, config) => {
+369                 await updateConfig(bookmarkId, config, name);
+370               }
+371             : undefined
+372         }
+373         configFields={numberMatchConfigFields}
+374       />
+375     );
+376   }
+377 
+378   return <NumberMatch key={cfg.inputMethod} config={cfg} />;
+379 };
+380 
+381 const SortNumbersGameBody = ({
+382   gameId,
+383   gameSpecificConfig,
+384   bookmarkId,
+385   bookmarkName,
+386   bookmarkColor,
+387 }: {
+388   gameId: string;
+389   gameSpecificConfig: Record<string, unknown> | null;
+390   bookmarkId: string | null;
+391   bookmarkName: string | null;
+392   bookmarkColor: string | null;
+393 }): JSX.Element => {
+394   const { t } = useTranslation('games');
+395   const { save, updateConfig } = useSavedConfigs();
+396   const initial = useMemo(
+397     () => resolveSortNumbersConfig(gameSpecificConfig),
+398     [gameSpecificConfig],
+399   );
+400   const [cfg, setCfg] = useState(initial);
+401   const [showInstructions, setShowInstructions] = useState(true);
+402   useEffect(() => {
+403     setCfg(initial);
+404   }, [initial]);
+405   usePersistLastGameConfig(
+406     gameId,
+407     cfg as unknown as Record<string, unknown>,
+408   );
+409 
+410   if (showInstructions) {
+411     return (
+412       <InstructionsOverlay
+413         text={t('instructions.sort-numbers')}
+414         onStart={() => setShowInstructions(false)}
+415         ttsEnabled={cfg.ttsEnabled}
+416         gameTitle={t('sort-numbers')}
+417         bookmarkName={bookmarkName ?? undefined}
+418         bookmarkColor={
+419           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+420         }
+421         subject="math"
+422         config={cfg as unknown as Record<string, unknown>}
+423         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+424         onSaveBookmark={async (name, color) => {
+425           await save({
+426             gameId,
+427             name,
+428             color,
+429             config: cfg as unknown as Record<string, unknown>,
+430           });
+431         }}
+432         onUpdateBookmark={
+433           bookmarkId
+434             ? async (name, config) => {
+435                 await updateConfig(bookmarkId, config, name);
+436               }
+437             : undefined
+438         }
+439         configFields={sortNumbersConfigFields}
+440       />
+441     );
+442   }
+443 
+444   return <SortNumbers key={cfg.inputMethod} config={cfg} />;
+445 };
+446 
+447 const GameBody = ({
+448   gameId,
+449   gameSpecificConfig,
+450   bookmarkId,
+451   bookmarkName,
+452   bookmarkColor,
+453 }: {
+454   gameId: string;
+455   gameSpecificConfig: Record<string, unknown> | null;
+456   bookmarkId: string | null;
+457   bookmarkName: string | null;
+458   bookmarkColor: string | null;
+459 }): JSX.Element => {
+460   if (gameId === 'sort-numbers') {
+461     return (
+462       <SortNumbersGameBody
+463         gameId={gameId}
+464         gameSpecificConfig={gameSpecificConfig}
+465         bookmarkId={bookmarkId}
+466         bookmarkName={bookmarkName}
+467         bookmarkColor={bookmarkColor}
+468       />
+469     );
+470   }
+471 
+472   if (gameId === 'word-spell') {
+473     return (
+474       <WordSpellGameBody
+475         gameId={gameId}
+476         gameSpecificConfig={gameSpecificConfig}
+477         bookmarkId={bookmarkId}
+478         bookmarkName={bookmarkName}
+479         bookmarkColor={bookmarkColor}
+480       />
+481     );
+482   }
+483 
+484   if (gameId === 'number-match') {
+485     return (
+486       <NumberMatchGameBody
+487         gameId={gameId}
+488         gameSpecificConfig={gameSpecificConfig}
+489         bookmarkId={bookmarkId}
+490         bookmarkName={bookmarkName}
+491         bookmarkColor={bookmarkColor}
+492       />
+493     );
+494   }
+495 
+496   return (
+497     <div className="flex h-full items-center justify-center text-muted-foreground">
+498       <p>Game not found</p>
+499     </div>
+500   );
+501 };
+502 
+503 export const GameRoute = ({
+504   config,
+505   initialLog,
+506   sessionId,
+507   meta,
+508   gameSpecificConfig,
+509   bookmarkId,
+510   bookmarkName,
+511   bookmarkColor,
+512 }: GameRouteLoaderData): JSX.Element => (
+513   <GameShell
+514     config={config}
+515     moves={{}}
+516     initialState={meta.initialState}
+517     sessionId={sessionId}
+518     meta={meta}
+519     initialLog={initialLog ?? undefined}
+520   >
+521     <GameBody
+522       gameId={config.gameId}
+523       gameSpecificConfig={gameSpecificConfig}
+524       bookmarkId={bookmarkId}
+525       bookmarkName={bookmarkName}
+526       bookmarkColor={bookmarkColor}
+527     />
+528   </GameShell>
+529 );
+530 
+531 const RouteComponent = (): JSX.Element => {
+532   const data = Route.useLoaderData();
+533   return <GameRoute {...data} />;
+534 };
+535 
+536 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+537   validateSearch: (search: Record<string, unknown>) => ({
+538     configId:
+539       typeof search.configId === 'string' ? search.configId : undefined,
+540   }),
+541   loaderDeps: ({ search }) => ({ configId: search.configId }),
+542   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
+543     const { gameId } = params;
+544     const profileId = 'default';
+545 
+546     const db = await getOrCreateDatabase();
+547     const defaultConfig = makeDefaultConfig(gameId);
+548     const config = await loadGameConfig(
+549       gameId,
+550       profileId,
+551       defaultConfig.gradeBand,
+552       db,
+553       defaultConfig,
+554     );
+555 
+556     const initialLog = await findInProgressSession(
+557       profileId,
+558       gameId,
+559       db,
+560     );
+561 
+562     let gameSpecificConfig: Record<string, unknown> | null = null;
+563     let bookmarkId: string | null = null;
+564     let bookmarkName: string | null = null;
+565     let bookmarkColor: string | null = null;
+566 
+567     if (deps.configId) {
+568       const savedDoc = await db.saved_game_configs
+569         .findOne(deps.configId)
+570         .exec();
+571       if (savedDoc) {
+572         gameSpecificConfig = savedDoc.config;
+573         bookmarkId = savedDoc.id;
+574         bookmarkName = savedDoc.name;
+575         bookmarkColor = savedDoc.color;
+576       }
+577     } else {
+578       const lastDoc = await db.saved_game_configs
+579         .findOne(lastSessionSavedConfigId(gameId))
+580         .exec();
+581       if (lastDoc) gameSpecificConfig = lastDoc.config;
+582     }
+583 
+584     const sessionId = initialLog?.sessionId ?? nanoid();
+585     const seed = initialLog?.seed ?? nanoid();
+586     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+587     const initialState: GameEngineState = initialLog?.initialState ?? {
+588       phase: 'instructions',
+589       roundIndex: 0,
+590       score: 0,
+591       streak: 0,
+592       retryCount: 0,
+593       content: initialContent,
+594       currentRound: {
+595         roundId: initialContent.rounds[0]?.id ?? '',
+596         answer: null,
+597         hintsUsed: 0,
+598       },
+599     };
+600 
+601     const meta: SessionMeta = {
+602       profileId,
+603       gameId,
+604       gradeBand: config.gradeBand,
+605       seed,
+606       initialContent,
+607       initialState,
+608     };
+609 
+610     return {
+611       config,
+612       initialLog,
+613       sessionId,
+614       meta,
+615       gameSpecificConfig,
+616       bookmarkId,
+617       bookmarkName,
+618       bookmarkColor,
+619     };
+620   },
+621   component: RouteComponent,
+622 });
 623
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:49Z)**_
@@ -2854,14 +2877,16 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:49Z)**_
 Now I have a much better picture. Let me also check the session recorder to understand how the move log is being persisted (which is crucial for the game resume feature), and the `app-meta` schema to understand how version is being tracked.
 
 Key findings:
+
 1. **PWA/Service Worker**: `vite-plugin-pwa` is already installed (v1.2.0) and configured with `generateSW` and `registerType: 'autoUpdate'`, but:
-   - `manifest: false` — meaning the manifest is not injected via the plugin, but there's already a `public/manifest.json`. 
+   - `manifest: false` — meaning the manifest is not injected via the plugin, but there's already a `public/manifest.json`.
    - The service worker exists but I need to verify it's actually working correctly.
    - Workbox is configured to cache fonts and app assets like JS, CSS, HTML, and images, though it's missing `cleanupOutdatedCaches: true` and proper version-based cache invalidation plus update notification UI.
 
 2. **App version display**: `VITE_APP_VERSION` is defined from `package.json` version (0.1.0), and the `app_meta` schema tracks this.
 
 3. **Game session resume**: The infrastructure looks solid — `findInProgressSession` loads the move history from RxDB and `GameEngineProvider` replays those moves. The game route loader already calls `findInProgressSession`, but here's the issue: the actual game components like WordSpell, NumberMatch, and SortNumbers don't actually use `GameEngineProvider` — they manage their own state with `useState` instead, so the replayed move history isn't being fed into them.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:50Z)**_
@@ -2873,6 +2898,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:50Z)**_
 ```text
 src/components/game/GameShell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:50Z)**_
@@ -2882,179 +2908,180 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:50Z)**_
  `./src/lib/game-engine/session-recorder.ts`
 
 ```text
-1	// src/lib/game-engine/session-recorder.ts
-2	import { useEffect, useRef } from 'react';
-3	import type { Move, SessionMeta } from './types';
-4	import type { BaseSkillDatabase } from '@/db/types';
-5	import type { GameEndEvent } from '@/types/game-events';
-6	import { getGameEventBus } from '@/lib/game-event-bus';
-7	
-8	const CHUNK_MAX_MOVES = 200;
-9	const CHUNK_MAX_BYTES = 50 * 1024; // 50 KB
-10	
-11	function moveToEvent(move: Move) {
-12	  return {
-13	    timestamp: new Date(move.timestamp).toISOString(),
-14	    action: move.type,
-15	    payload: move.args as Record<string, unknown>,
-16	    result: null,
-17	  };
-18	}
-19	
-20	export function useSessionRecorder(
-21	  moves: Move[],
-22	  sessionId: string,
-23	  meta: SessionMeta,
-24	  db: BaseSkillDatabase,
-25	  phase: string,
-26	): void {
-27	  const indexCreated = useRef(false);
-28	  const startedAt = useRef(new Date().toISOString());
-29	  const prevMovesLength = useRef(0);
-30	
-31	  // Create session_history_index on mount
-32	  useEffect(() => {
-33	    if (indexCreated.current) return;
-34	    indexCreated.current = true;
-35	
-36	    void db.session_history_index.upsert({
-37	      sessionId,
-38	      profileId: meta.profileId,
-39	      gameId: meta.gameId,
-40	      startedAt: startedAt.current,
-41	      gradeBand: meta.gradeBand,
-42	      status: 'in-progress',
-43	      seed: meta.seed,
-44	      initialContent: meta.initialContent as unknown as Record<
-45	        string,
-46	        unknown
-47	      >,
-48	      initialState: meta.initialState as unknown as Record<
-49	        string,
-50	        unknown
-51	      >,
-52	      totalChunks: 1,
-53	      totalEvents: 0,
-54	    });
-55	  }, [db, sessionId, meta]);
-56	
-57	  // Write moves to session_history chunks on every move addition
-58	  useEffect(() => {
-59	    if (moves.length === 0) return;
-60	    if (moves.length === prevMovesLength.current) return;
-61	    prevMovesLength.current = moves.length;
-62	
-63	    const allEvents = moves.map((m) => moveToEvent(m));
-64	    const chunks: (typeof allEvents)[] = [];
-65	    let currentChunk: typeof allEvents = [];
-66	    let currentBytes = 0;
-67	
-68	    for (const event of allEvents) {
-69	      const eventBytes = JSON.stringify(event).length;
-70	      if (
-71	        currentChunk.length >= CHUNK_MAX_MOVES ||
-72	        currentBytes + eventBytes > CHUNK_MAX_BYTES
-73	      ) {
-74	        chunks.push(currentChunk);
-75	        currentChunk = [];
-76	        currentBytes = 0;
-77	      }
-78	      currentChunk.push(event);
-79	      currentBytes += eventBytes;
-80	    }
-81	    if (currentChunk.length > 0) chunks.push(currentChunk);
-82	
-83	    const writes = chunks.map((events, chunkIndex) =>
-84	      db.session_history.upsert({
-85	        id: `${sessionId}-chunk-${chunkIndex}`,
-86	        sessionId,
-87	        profileId: meta.profileId,
-88	        gameId: meta.gameId,
-89	        chunkIndex,
-90	        events,
-91	        createdAt: startedAt.current,
-92	      }),
-93	    );
-94	
-95	    void Promise.all(writes).then(() => {
-96	      void db.session_history_index
-97	        .findOne(sessionId)
-98	        .exec()
-99	        .then((doc) => {
-100	          if (doc) {
-101	            void doc.incrementalPatch({
-102	              totalEvents: moves.length,
-103	              totalChunks: chunks.length,
-104	            });
-105	          }
-106	        });
-107	    });
-108	  }, [moves, db, sessionId, meta]);
-109	
-110	  // Mark completed when game-over
-111	  useEffect(() => {
-112	    if (phase !== 'game-over') return;
-113	
-114	    const endedAt = new Date().toISOString();
-115	    const durationMs =
-116	      new Date(endedAt).getTime() -
-117	      new Date(startedAt.current).getTime();
-118	
-119	    void db.session_history_index
-120	      .findOne(sessionId)
-121	      .exec()
-122	      .then((doc) => {
-123	        if (!doc || doc.status === 'completed') return;
-124	        void doc.incrementalPatch({
-125	          status: 'completed',
-126	          endedAt,
-127	          duration: Math.round(durationMs / 1000),
-128	        });
-129	      });
-130	
-131	    // Emit game:end on event bus
-132	    const bus = getGameEventBus();
-133	    const endEvent: GameEndEvent = {
-134	      type: 'game:end',
-135	      gameId: meta.gameId,
-136	      sessionId,
-137	      profileId: meta.profileId,
-138	      timestamp: Date.now(),
-139	      roundIndex: 0,
-140	      finalScore: 0,
-141	      totalRounds: meta.initialContent.rounds.length,
-142	      correctCount: 0,
-143	      durationMs,
-144	    };
-145	    bus.emit(endEvent);
-146	  }, [phase, db, sessionId, meta]);
-147	
-148	  // Flush on visibilitychange (hidden)
-149	  useEffect(() => {
-150	    const handleVisibility = () => {
-151	      if (document.visibilityState === 'hidden') {
-152	        void db.session_history_index
-153	          .findOne(sessionId)
-154	          .exec()
-155	          .then((doc) => {
-156	            if (doc && doc.status === 'in-progress') {
-157	              void doc.incrementalPatch({ totalEvents: moves.length });
-158	            }
-159	          });
-160	      }
-161	    };
-162	
-163	    document.addEventListener('visibilitychange', handleVisibility);
-164	    return () => {
-165	      document.removeEventListener(
-166	        'visibilitychange',
-167	        handleVisibility,
-168	      );
-169	    };
-170	  }, [db, sessionId, moves.length]);
-171	}
+1 // src/lib/game-engine/session-recorder.ts
+2 import { useEffect, useRef } from 'react';
+3 import type { Move, SessionMeta } from './types';
+4 import type { BaseSkillDatabase } from '@/db/types';
+5 import type { GameEndEvent } from '@/types/game-events';
+6 import { getGameEventBus } from '@/lib/game-event-bus';
+7 
+8 const CHUNK_MAX_MOVES = 200;
+9 const CHUNK_MAX_BYTES = 50 * 1024; // 50 KB
+10 
+11 function moveToEvent(move: Move) {
+12   return {
+13     timestamp: new Date(move.timestamp).toISOString(),
+14     action: move.type,
+15     payload: move.args as Record<string, unknown>,
+16     result: null,
+17   };
+18 }
+19 
+20 export function useSessionRecorder(
+21   moves: Move[],
+22   sessionId: string,
+23   meta: SessionMeta,
+24   db: BaseSkillDatabase,
+25   phase: string,
+26 ): void {
+27   const indexCreated = useRef(false);
+28   const startedAt = useRef(new Date().toISOString());
+29   const prevMovesLength = useRef(0);
+30 
+31   // Create session_history_index on mount
+32   useEffect(() => {
+33     if (indexCreated.current) return;
+34     indexCreated.current = true;
+35 
+36     void db.session_history_index.upsert({
+37       sessionId,
+38       profileId: meta.profileId,
+39       gameId: meta.gameId,
+40       startedAt: startedAt.current,
+41       gradeBand: meta.gradeBand,
+42       status: 'in-progress',
+43       seed: meta.seed,
+44       initialContent: meta.initialContent as unknown as Record<
+45         string,
+46         unknown
+47       >,
+48       initialState: meta.initialState as unknown as Record<
+49         string,
+50         unknown
+51       >,
+52       totalChunks: 1,
+53       totalEvents: 0,
+54     });
+55   }, [db, sessionId, meta]);
+56 
+57   // Write moves to session_history chunks on every move addition
+58   useEffect(() => {
+59     if (moves.length === 0) return;
+60     if (moves.length === prevMovesLength.current) return;
+61     prevMovesLength.current = moves.length;
+62 
+63     const allEvents = moves.map((m) => moveToEvent(m));
+64     const chunks: (typeof allEvents)[] = [];
+65     let currentChunk: typeof allEvents = [];
+66     let currentBytes = 0;
+67 
+68     for (const event of allEvents) {
+69       const eventBytes = JSON.stringify(event).length;
+70       if (
+71         currentChunk.length >= CHUNK_MAX_MOVES ||
+72         currentBytes + eventBytes > CHUNK_MAX_BYTES
+73       ) {
+74         chunks.push(currentChunk);
+75         currentChunk = [];
+76         currentBytes = 0;
+77       }
+78       currentChunk.push(event);
+79       currentBytes += eventBytes;
+80     }
+81     if (currentChunk.length > 0) chunks.push(currentChunk);
+82 
+83     const writes = chunks.map((events, chunkIndex) =>
+84       db.session_history.upsert({
+85         id: `${sessionId}-chunk-${chunkIndex}`,
+86         sessionId,
+87         profileId: meta.profileId,
+88         gameId: meta.gameId,
+89         chunkIndex,
+90         events,
+91         createdAt: startedAt.current,
+92       }),
+93     );
+94 
+95     void Promise.all(writes).then(() => {
+96       void db.session_history_index
+97         .findOne(sessionId)
+98         .exec()
+99         .then((doc) => {
+100           if (doc) {
+101             void doc.incrementalPatch({
+102               totalEvents: moves.length,
+103               totalChunks: chunks.length,
+104             });
+105           }
+106         });
+107     });
+108   }, [moves, db, sessionId, meta]);
+109 
+110   // Mark completed when game-over
+111   useEffect(() => {
+112     if (phase !== 'game-over') return;
+113 
+114     const endedAt = new Date().toISOString();
+115     const durationMs =
+116       new Date(endedAt).getTime() -
+117       new Date(startedAt.current).getTime();
+118 
+119     void db.session_history_index
+120       .findOne(sessionId)
+121       .exec()
+122       .then((doc) => {
+123         if (!doc || doc.status === 'completed') return;
+124         void doc.incrementalPatch({
+125           status: 'completed',
+126           endedAt,
+127           duration: Math.round(durationMs / 1000),
+128         });
+129       });
+130 
+131     // Emit game:end on event bus
+132     const bus = getGameEventBus();
+133     const endEvent: GameEndEvent = {
+134       type: 'game:end',
+135       gameId: meta.gameId,
+136       sessionId,
+137       profileId: meta.profileId,
+138       timestamp: Date.now(),
+139       roundIndex: 0,
+140       finalScore: 0,
+141       totalRounds: meta.initialContent.rounds.length,
+142       correctCount: 0,
+143       durationMs,
+144     };
+145     bus.emit(endEvent);
+146   }, [phase, db, sessionId, meta]);
+147 
+148   // Flush on visibilitychange (hidden)
+149   useEffect(() => {
+150     const handleVisibility = () => {
+151       if (document.visibilityState === 'hidden') {
+152         void db.session_history_index
+153           .findOne(sessionId)
+154           .exec()
+155           .then((doc) => {
+156             if (doc && doc.status === 'in-progress') {
+157               void doc.incrementalPatch({ totalEvents: moves.length });
+158             }
+159           });
+160       }
+161     };
+162 
+163     document.addEventListener('visibilitychange', handleVisibility);
+164     return () => {
+165       document.removeEventListener(
+166         'visibilitychange',
+167         handleVisibility,
+168       );
+169     };
+170   }, [db, sessionId, moves.length]);
+171 }
 172
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:54Z)**_
@@ -3064,67 +3091,68 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:54Z)**_
  `./src/components/game/GameShell.tsx`
 
 ```text
-1	// src/components/game/GameShell.tsx
-2	import { useNavigate, useParams } from '@tanstack/react-router';
-3	import { useTranslation } from 'react-i18next';
-4	import type {
-5	  GameEngineState,
-6	  MoveHandler,
-7	  MoveLog,
-8	  ResolvedGameConfig,
-9	  SessionMeta,
-10	} from '@/lib/game-engine/types';
-11	import type { JSX, ReactNode } from 'react';
-12	import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
-13	import {
-14	  GameEngineProvider,
-15	  useGameDispatch,
-16	  useGameState,
-17	} from '@/lib/game-engine/index';
-18	
-19	export interface GameShellProps {
-20	  config: ResolvedGameConfig;
-21	  moves: Record<string, MoveHandler>;
-22	  initialState: GameEngineState;
-23	  sessionId: string;
-24	  meta: SessionMeta;
-25	  initialLog?: MoveLog;
-26	  children: ReactNode;
-27	}
-28	
-29	interface GameShellChromeProps {
-30	  config: ResolvedGameConfig;
-31	  children: ReactNode;
-32	}
-33	
-34	const GameShellChrome = ({
-35	  config,
-36	  children,
-37	}: GameShellChromeProps): JSX.Element => {
-38	  const state = useGameState();
-39	  const dispatch = useGameDispatch();
-40	  const navigate = useNavigate();
-41	  const { t } = useTranslation('games');
-42	  const { locale } = useParams({ from: '/$locale' });
-43	
-44	  const roundOverride = useGameRoundProgress();
-45	  const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
-46	  const roundTotal = roundOverride?.total ?? config.maxRounds;
-47	  const title =
-48	    config.title[locale] ?? config.title['en'] ?? config.gameId;
-49	
-50	  const handleExit = () => {
-51	    void navigate({ to: '/$locale', params: { locale } });
-52	  };
-53	
-54	  const handleUndo = () => {
-55	    dispatch({
-56	      type: 'UNDO',
-57	      args: { targetStep: Math.max(0, state.roundIndex) },
-58	      timestamp: Date.now(),
-59	    });
-60	  };
+1 // src/components/game/GameShell.tsx
+2 import { useNavigate, useParams } from '@tanstack/react-router';
+3 import { useTranslation } from 'react-i18next';
+4 import type {
+5   GameEngineState,
+6   MoveHandler,
+7   MoveLog,
+8   ResolvedGameConfig,
+9   SessionMeta,
+10 } from '@/lib/game-engine/types';
+11 import type { JSX, ReactNode } from 'react';
+12 import { useGameRoundProgress } from '@/lib/game-engine/GameRoundContext';
+13 import {
+14   GameEngineProvider,
+15   useGameDispatch,
+16   useGameState,
+17 } from '@/lib/game-engine/index';
+18 
+19 export interface GameShellProps {
+20   config: ResolvedGameConfig;
+21   moves: Record<string, MoveHandler>;
+22   initialState: GameEngineState;
+23   sessionId: string;
+24   meta: SessionMeta;
+25   initialLog?: MoveLog;
+26   children: ReactNode;
+27 }
+28 
+29 interface GameShellChromeProps {
+30   config: ResolvedGameConfig;
+31   children: ReactNode;
+32 }
+33 
+34 const GameShellChrome = ({
+35   config,
+36   children,
+37 }: GameShellChromeProps): JSX.Element => {
+38   const state = useGameState();
+39   const dispatch = useGameDispatch();
+40   const navigate = useNavigate();
+41   const { t } = useTranslation('games');
+42   const { locale } = useParams({ from: '/$locale' });
+43 
+44   const roundOverride = useGameRoundProgress();
+45   const roundCurrent = roundOverride?.current ?? state.roundIndex + 1;
+46   const roundTotal = roundOverride?.total ?? config.maxRounds;
+47   const title =
+48     config.title[locale] ?? config.title['en'] ?? config.gameId;
+49 
+50   const handleExit = () => {
+51     void navigate({ to: '/$locale', params: { locale } });
+52   };
+53 
+54   const handleUndo = () => {
+55     dispatch({
+56       type: 'UNDO',
+57       args: { targetStep: Math.max(0, state.roundIndex) },
+58       timestamp: Date.now(),
+59     });
+60   };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:33:54Z)**_
@@ -3134,87 +3162,88 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:33:54Z)**_
  `./src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-5	import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
-6	import type { WordSpellConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-16	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-17	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-18	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-19	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-20	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-21	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-22	import { buildRoundOrder } from '@/games/build-round-order';
-23	
-24	function segmentsForWord(
-25	  word: string,
-26	  tileUnit: WordSpellConfig['tileUnit'],
-27	): string[] {
-28	  const trimmed = word.trim();
-29	  if (tileUnit === 'word') return [trimmed];
-30	  if (tileUnit === 'syllable') {
-31	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-32	    return parts.length > 0 ? parts : [trimmed];
-33	  }
-34	  return [...trimmed.toLowerCase()];
-35	}
-36	
-37	function buildTilesAndZones(
-38	  word: string,
-39	  tileUnit: WordSpellConfig['tileUnit'],
-40	): {
-41	  tiles: TileItem[];
-42	  zones: AnswerZone[];
-43	} {
-44	  const segments = segmentsForWord(word, tileUnit);
-45	  const values = segments.map((s) =>
-46	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-47	  );
-48	  const zones: AnswerZone[] = values.map((value, i) => ({
-49	    id: `z${i}`,
-50	    index: i,
-51	    expectedValue: value,
-52	    placedTileId: null,
-53	    isWrong: false,
-54	    isLocked: false,
-55	  }));
-56	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-57	  const tiles: TileItem[] = shuffled.map((value) => ({
-58	    id: nanoid(),
-59	    label: value,
-60	    value,
-61	  }));
-62	  return { tiles, zones };
-63	}
-64	
-65	interface WordSpellProps {
-66	  config: WordSpellConfig;
-67	}
-68	
-69	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-70	const WordSpellSession = ({
-71	  wordSpellConfig,
-72	  roundOrder,
-73	  onRestartSession,
-74	}: {
-75	  wordSpellConfig: WordSpellConfig;
-76	  roundOrder: readonly number[];
-77	  onRestartSession: () => void;
-78	}) => {
-79	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-80	  const dispatch = useAnswerGameDispatch();
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+5 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
+6 import type { WordSpellConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+16 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+17 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+18 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+19 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+20 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+21 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+22 import { buildRoundOrder } from '@/games/build-round-order';
+23 
+24 function segmentsForWord(
+25   word: string,
+26   tileUnit: WordSpellConfig['tileUnit'],
+27 ): string[] {
+28   const trimmed = word.trim();
+29   if (tileUnit === 'word') return [trimmed];
+30   if (tileUnit === 'syllable') {
+31     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+32     return parts.length > 0 ? parts : [trimmed];
+33   }
+34   return [...trimmed.toLowerCase()];
+35 }
+36 
+37 function buildTilesAndZones(
+38   word: string,
+39   tileUnit: WordSpellConfig['tileUnit'],
+40 ): {
+41   tiles: TileItem[];
+42   zones: AnswerZone[];
+43 } {
+44   const segments = segmentsForWord(word, tileUnit);
+45   const values = segments.map((s) =>
+46     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+47   );
+48   const zones: AnswerZone[] = values.map((value, i) => ({
+49     id: `z${i}`,
+50     index: i,
+51     expectedValue: value,
+52     placedTileId: null,
+53     isWrong: false,
+54     isLocked: false,
+55   }));
+56   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+57   const tiles: TileItem[] = shuffled.map((value) => ({
+58     id: nanoid(),
+59     label: value,
+60     value,
+61   }));
+62   return { tiles, zones };
+63 }
+64 
+65 interface WordSpellProps {
+66   config: WordSpellConfig;
+67 }
+68 
+69 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+70 const WordSpellSession = ({
+71   wordSpellConfig,
+72   roundOrder,
+73   onRestartSession,
+74 }: {
+75   wordSpellConfig: WordSpellConfig;
+76   roundOrder: readonly number[];
+77   onRestartSession: () => void;
+78 }) => {
+79   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+80   const dispatch = useAnswerGameDispatch();
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:34:04Z)**_
@@ -3227,8 +3256,8 @@ Now I have a clear picture. Let me understand the key architecture:
 2. **GameEngineProvider** is set up in `GameShell`, but the actual games (WordSpell, NumberMatch, SortNumbers) use `AnswerGameContext` — a different state management system.
 
 So the resume flow is:
-- The session recorder records moves via `GameEngineProvider` moves
 
+- The session recorder records moves via `GameEngineProvider` moves
 
 - `findInProgressSession` loads a `MoveLog` from RxDB
 - `GameEngineProvider` replays those moves to compute a `GameEngineState`
@@ -3294,6 +3323,7 @@ src/components/answer-game/useGameTTS.ts
 src/components/answer-game/useTileEvaluation.test.tsx
 src/components/answer-game/useTileEvaluation.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:34:08Z)**_
@@ -3303,106 +3333,107 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:34:08Z)**_
  `./src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-7	import { TouchKeyboardContext } from './TouchKeyboardContext';
-8	import { useKeyboardInput } from './useKeyboardInput';
-9	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-10	import type {
-11	  AnswerGameAction,
-12	  AnswerGameConfig,
-13	  AnswerGameState,
-14	} from './types';
-15	import type { Dispatch, ReactNode } from 'react';
-16	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-17	
-18	export const AnswerGameStateContext =
-19	  createContext<AnswerGameState | null>(null);
-20	export const AnswerGameDispatchContext =
-21	  createContext<Dispatch<AnswerGameAction> | null>(null);
-22	
-23	const KeyboardInputAdapter = () => {
-24	  useKeyboardInput();
-25	  return null;
-26	};
-27	
-28	const TouchKeyboardAdapter = ({
-29	  inputMode,
-30	  children,
-31	}: {
-32	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-33	  children: ReactNode;
-34	}) => {
-35	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-36	  return (
-37	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-38	      <HiddenKeyboardInput
-39	        inputRef={hiddenInputRef}
-40	        inputMode={inputMode}
-41	      />
-42	      {children}
-43	    </TouchKeyboardContext.Provider>
-44	  );
-45	};
-46	
-47	interface AnswerGameProviderProps {
-48	  config: AnswerGameConfig;
-49	  children: ReactNode;
-50	}
-51	
-52	export const AnswerGameProvider = ({
-53	  config,
-54	  children,
-55	}: AnswerGameProviderProps) => {
-56	  const [state, dispatch] = useReducer(
-57	    answerGameReducer,
-58	    config,
-59	    makeInitialState,
-60	  );
-61	
-62	  useEffect(() => {
-63	    const tiles = config.initialTiles;
-64	    const zones = config.initialZones;
-65	    if (tiles?.length && zones?.length) {
-66	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-67	    }
-68	  }, [config.gameId, config.initialTiles, config.initialZones]);
-69	
-70	  const roundProgress = {
-71	    current: state.roundIndex + 1,
-72	    total: config.totalRounds,
-73	  };
-74	
-75	  const usesTouchKeyboard =
-76	    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
-77	
-78	  return (
-79	    <GameRoundContext.Provider value={roundProgress}>
-80	      <AnswerGameStateContext.Provider value={state}>
-81	        <AnswerGameDispatchContext.Provider value={dispatch}>
-82	          {usesTouchKeyboard ? (
-83	            <TouchKeyboardAdapter
-84	              inputMode={config.touchKeyboardInputMode ?? 'text'}
-85	            >
-86	              {children}
-87	            </TouchKeyboardAdapter>
-88	          ) : (
-89	            <TouchKeyboardContext.Provider value={null}>
-90	              <KeyboardInputAdapter />
-91	              {children}
-92	            </TouchKeyboardContext.Provider>
-93	          )}
-94	        </AnswerGameDispatchContext.Provider>
-95	      </AnswerGameStateContext.Provider>
-96	    </GameRoundContext.Provider>
-97	  );
-98	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+7 import { TouchKeyboardContext } from './TouchKeyboardContext';
+8 import { useKeyboardInput } from './useKeyboardInput';
+9 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+10 import type {
+11   AnswerGameAction,
+12   AnswerGameConfig,
+13   AnswerGameState,
+14 } from './types';
+15 import type { Dispatch, ReactNode } from 'react';
+16 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+17 
+18 export const AnswerGameStateContext =
+19   createContext<AnswerGameState | null>(null);
+20 export const AnswerGameDispatchContext =
+21   createContext<Dispatch<AnswerGameAction> | null>(null);
+22 
+23 const KeyboardInputAdapter = () => {
+24   useKeyboardInput();
+25   return null;
+26 };
+27 
+28 const TouchKeyboardAdapter = ({
+29   inputMode,
+30   children,
+31 }: {
+32   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+33   children: ReactNode;
+34 }) => {
+35   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+36   return (
+37     <TouchKeyboardContext.Provider value={focusKeyboard}>
+38       <HiddenKeyboardInput
+39         inputRef={hiddenInputRef}
+40         inputMode={inputMode}
+41       />
+42       {children}
+43     </TouchKeyboardContext.Provider>
+44   );
+45 };
+46 
+47 interface AnswerGameProviderProps {
+48   config: AnswerGameConfig;
+49   children: ReactNode;
+50 }
+51 
+52 export const AnswerGameProvider = ({
+53   config,
+54   children,
+55 }: AnswerGameProviderProps) => {
+56   const [state, dispatch] = useReducer(
+57     answerGameReducer,
+58     config,
+59     makeInitialState,
+60   );
+61 
+62   useEffect(() => {
+63     const tiles = config.initialTiles;
+64     const zones = config.initialZones;
+65     if (tiles?.length && zones?.length) {
+66       dispatch({ type: 'INIT_ROUND', tiles, zones });
+67     }
+68   }, [config.gameId, config.initialTiles, config.initialZones]);
+69 
+70   const roundProgress = {
+71     current: state.roundIndex + 1,
+72     total: config.totalRounds,
+73   };
+74 
+75   const usesTouchKeyboard =
+76     navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+77 
+78   return (
+79     <GameRoundContext.Provider value={roundProgress}>
+80       <AnswerGameStateContext.Provider value={state}>
+81         <AnswerGameDispatchContext.Provider value={dispatch}>
+82           {usesTouchKeyboard ? (
+83             <TouchKeyboardAdapter
+84               inputMode={config.touchKeyboardInputMode ?? 'text'}
+85             >
+86               {children}
+87             </TouchKeyboardAdapter>
+88           ) : (
+89             <TouchKeyboardContext.Provider value={null}>
+90               <KeyboardInputAdapter />
+91               {children}
+92             </TouchKeyboardContext.Provider>
+93           )}
+94         </AnswerGameDispatchContext.Provider>
+95       </AnswerGameStateContext.Provider>
+96     </GameRoundContext.Provider>
+97   );
+98 };
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:34:11Z)**_
@@ -3412,87 +3443,88 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:34:11Z)**_
  `./src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    phase: 'playing',
-20	    roundIndex: 0,
-21	    retryCount: 0,
-22	  };
-23	}
-24	
-25	export function answerGameReducer(
-26	  state: AnswerGameState,
-27	  action: AnswerGameAction,
-28	): AnswerGameState {
-29	  switch (action.type) {
-30	    case 'INIT_ROUND': {
-31	      return {
-32	        ...state,
-33	        allTiles: action.tiles,
-34	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-35	        zones: action.zones,
-36	        activeSlotIndex: 0,
-37	        phase: 'playing',
-38	        roundIndex: 0,
-39	        retryCount: 0,
-40	      };
-41	    }
-42	
-43	    case 'PLACE_TILE': {
-44	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-45	      const zone = state.zones[action.zoneIndex];
-46	      if (!tile || !zone) return state;
-47	
-48	      const correct = tile.value === zone.expectedValue;
-49	
-50	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-51	        return { ...state, retryCount: state.retryCount + 1 };
-52	      }
-53	
-54	      if (correct) {
-55	        const previousId = zone.placedTileId;
-56	        let newBankTileIds = state.bankTileIds.filter(
-57	          (id) => id !== action.tileId,
-58	        );
-59	        if (previousId !== null && previousId !== action.tileId) {
-60	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-61	          newBankTileIds = [...newBankTileIds, previousId];
-62	        }
-63	        const newZone: AnswerZone = {
-64	          ...zone,
-65	          placedTileId: action.tileId,
-66	          isWrong: false,
-67	          isLocked: false,
-68	        };
-69	        const newZones = state.zones.map((z, i) =>
-70	          i === action.zoneIndex ? newZone : z,
-71	        );
-72	        const nextActiveSlot = newZones.findIndex(
-73	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-74	        );
-75	        const allFilledCorrectly = newZones.every(
-76	          (z) => z.placedTileId !== null && !z.isWrong,
-77	        );
-78	        const isLastRound =
-79	          state.roundIndex >= state.config.totalRounds - 1;
-80	        return {
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     phase: 'playing',
+20     roundIndex: 0,
+21     retryCount: 0,
+22   };
+23 }
+24 
+25 export function answerGameReducer(
+26   state: AnswerGameState,
+27   action: AnswerGameAction,
+28 ): AnswerGameState {
+29   switch (action.type) {
+30     case 'INIT_ROUND': {
+31       return {
+32         ...state,
+33         allTiles: action.tiles,
+34         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+35         zones: action.zones,
+36         activeSlotIndex: 0,
+37         phase: 'playing',
+38         roundIndex: 0,
+39         retryCount: 0,
+40       };
+41     }
+42 
+43     case 'PLACE_TILE': {
+44       const tile = state.allTiles.find((t) => t.id === action.tileId);
+45       const zone = state.zones[action.zoneIndex];
+46       if (!tile || !zone) return state;
+47 
+48       const correct = tile.value === zone.expectedValue;
+49 
+50       if (!correct && state.config.wrongTileBehavior === 'reject') {
+51         return { ...state, retryCount: state.retryCount + 1 };
+52       }
+53 
+54       if (correct) {
+55         const previousId = zone.placedTileId;
+56         let newBankTileIds = state.bankTileIds.filter(
+57           (id) => id !== action.tileId,
+58         );
+59         if (previousId !== null && previousId !== action.tileId) {
+60           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+61           newBankTileIds = [...newBankTileIds, previousId];
+62         }
+63         const newZone: AnswerZone = {
+64           ...zone,
+65           placedTileId: action.tileId,
+66           isWrong: false,
+67           isLocked: false,
+68         };
+69         const newZones = state.zones.map((z, i) =>
+70           i === action.zoneIndex ? newZone : z,
+71         );
+72         const nextActiveSlot = newZones.findIndex(
+73           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+74         );
+75         const allFilledCorrectly = newZones.every(
+76           (z) => z.placedTileId !== null && !z.isWrong,
+77         );
+78         const isLastRound =
+79           state.roundIndex >= state.config.totalRounds - 1;
+80         return {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:34:40Z)**_
@@ -3503,12 +3535,12 @@ Now I have a comprehensive understanding. Let me now also check the `db/migratio
 Summary of current state:
 
 **What already exists:**
+
 1. `vite-plugin-pwa` v1.2.0 is already installed and configured with `generateSW` + `autoUpdate`
 2. `public/manifest.json` exists
-3. `VITE_APP_VERSION` is injected from `package.json` 
+3. `VITE_APP_VERSION` is injected from `package.json`
 4. `app_meta` collection stores `appVersion` in RxDB
 5. `session_history_index` with `status: 'in-progress'` + `findInProgressSession` + `GameEngineProvider` with `initialLog` support — but only for the `GameEngineProvider` state layer, NOT for `AnswerGame` state
-
 
 6. `AnswerGameProvider` manages game state (tiles, zones, round) in memory only
 
@@ -3563,6 +3595,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:34:52Z)**_
 Here's what I found from exploring the codebase:
 
 **What's already in place:**
+
 - `vite-plugin-pwa` v1.2.0 installed, `generateSW` + `autoUpdate` configured
 - `public/manifest.json` exists (standalone PWA)
 - `VITE_APP_VERSION` injected from `package.json` (v0.1.0), stored in `app_meta` RxDB collection
@@ -3600,275 +3633,276 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:37:27Z)**_
  `./.claude/worktrees/bold-chatelet/docs/baseskill_milestone_breakdown_85146c93.plan.md`
 
 ```text
-1	---
-2	name: BaseSkill Milestone Breakdown
-3	overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
-4	todos:
-5	  - id: m0-design-docs
-6	    content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
-7	    status: pending
-8	  - id: m1-scaffolding
-9	    content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
-10	    status: pending
-11	  - id: m2-data-layer
-12	    content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
-13	    status: completed
-14	  - id: m3-app-shell
-15	    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
-16	    status: pending
-17	  - id: m4-game-engine
-18	    content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
-19	    status: pending
-20	  - id: m5-reference-games
-21	    content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
-22	    status: pending
-23	  - id: m6-cloud-sync
-24	    content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
-25	    status: pending
-26	  - id: m7-parent-features
-27	    content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
-28	    status: pending
-29	  - id: m8-polish
-30	    content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
-31	    status: pending
-32	isProject: false
-33	---
-34	
-35	# BaseSkill: PRD to Completion Milestone Breakdown
-36	
-37	**Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
-38	
-39	This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
-40	
-41	---
-42	
-43	## Milestone 0 -- Design Documents (SYNC prerequisite)
-44	
-45	Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
-46	
-47	**ASYNC work streams:**
-48	
-49	- `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
-50	- `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
-51	- `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
-52	- `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
-53	- `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
-54	- `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
-55	- `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
-56	- `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
-57	- `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
-58	
-59	**SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
-60	
-61	---
-62	
-63	## Milestone 1 -- Project Scaffolding and CI/CD
-64	
-65	Bootstrap the repository and get a green CI pipeline on an empty app shell.
-66	
-67	**SYNC (sequential):**
-68	
-69	1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
-70	2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
-71	3. Set up TanStack Router nested layouts for app shell / game shell / settings
-72	4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
-73	5. Add `LICENSE` (GPL v3)
-74	6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
-75	7. Set up Vitest + React Testing Library
-76	8. Set up Playwright (empty E2E suite)
-77	9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
-78	10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
-79	11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
-80	12. App versioning: semver stamp in build output
-81	
-82	**Key TanStack decisions:**
-83	
-84	- Use TanStack Router's file-based routing convention (`routes/` directory)
-85	- Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
-86	- Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
-87	- Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
-88	
-89	**Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
-90	
-91	---
-92	
-93	## Milestone 2 -- Data Layer and Core Infrastructure
-94	
-95	Set up RxDB and the foundational systems that everything else depends on.
-96	
-97	**SYNC (must complete in order):**
-98	
-99	1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
-100	2. Schema migration framework (version tracking via `app_meta`)
-101	3. React hooks for reactive RxDB queries
-102	4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
-103	
-104	**ASYNC (can proceed in parallel once RxDB is up):**
-105	
-106	- **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
-107	- **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
-108	- **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
-109	- **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
-110	
-111	---
-112	
-113	## Milestone 3 -- Profile System and App Shell UI
-114	
-115	Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
-116	
-117	**SYNC (sequential):**
-118	
-119	1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
-120	2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
-121	3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
-122	4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
-123	5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
-124	6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
-125	7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
-126	
-127	**ASYNC (can start once profile + layout exist):**
-128	
-129	- **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
-130	- **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
-131	
-132	---
-133	
-134	## Milestone 4 -- Game Engine Framework
-135	
-136	Build the reusable game infrastructure (no specific games yet).
-137	
-138	**SYNC (sequential):**
-139	
-140	1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
-141	2. **Game shell UI** -- consistent header, game area, controls, back/exit
-142	3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
-143	4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
-144	
-145	**ASYNC (reusable components, independent of each other):**
-146	
-147	- `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
-148	- `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
-149	- `MultipleChoice` -- tap/click answer selection
-150	- `Timer` -- configurable, hideable per parent settings
-151	- `ScoreAnimation` -- confetti, stars, CSS-only reward animations
-152	- `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
-153	- `ProgressBar` / `ScoreBoard` -- in-game progress display
-154	
-155	---
-156	
-157	## Milestone 5 -- Reference Games
-158	
-159	Implement the 5 reference games. Each game is independent and can be built in parallel.
-160	
-161	**ASYNC (all 5 are independent):**
-162	
-163	- **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
-164	- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
-165	- **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
-166	- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
-167	- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
-168	
-169	Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
-170	
-171	---
-172	
-173	## Milestone 6 -- Cloud Sync and OAuth
-174	
-175	Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
-176	
-177	**SYNC (sequential):**
-178	
-179	1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
-180	2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
-181	3. **Token management** -- encrypted IndexedDB storage, refresh token handling
-182	4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
-183	5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
-184	
-185	**ASYNC (within this milestone):**
-186	
-187	- Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
-188	- OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
-189	
-190	---
-191	
-192	## Milestone 7 -- Parent/Guardian Features
-193	
-194	Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
-195	
-196	**ASYNC (independent screens):**
-197	
-198	- **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
-199	- **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
-200	- **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
-201	- **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
-202	- **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
-203	
-204	---
-205	
-206	## Milestone 8 -- Polish, Accessibility, and Testing
-207	
-208	Final hardening pass. Most of this is ASYNC.
-209	
-210	**ASYNC work streams:**
-211	
-212	- **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
-213	- **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
-214	- **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
-215	- **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
-216	- **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
-217	- **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
-218	- **PWA install prompt** -- custom install banner, iOS/Android handling
-219	- **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
-220	
-221	---
-222	
-223	## Dependency Graph
-224	
-225	```mermaid
-226	graph TD
-227	    M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
-228	    M1 --> M2[M2: Data Layer and Core Infra]
-229	    M2 --> M3[M3: Profile System and App Shell]
-230	    M2 --> M4[M4: Game Engine Framework]
-231	    M2 --> M6[M6: Cloud Sync and OAuth]
-232	    M3 --> M5[M5: Reference Games]
-233	    M4 --> M5
-234	    M3 --> M7[M7: Parent Features]
-235	    M4 --> M7
-236	    M6 --> M7
-237	    M5 --> M8[M8: Polish and Testing]
-238	    M7 --> M8
-239	```
-240	
-241	---
-242	
-243	## Summary: What Can Run in Parallel
-244	
-245	| Phase | Parallel Streams                                |
-246	| ----- | ----------------------------------------------- |
-247	| M0    | Most design docs can be written concurrently    |
-248	| M2    | Event bus, i18n, theme engine, speech services  |
-249	| M3    | Bookmarks, recents (after shell exists)         |
-250	| M4    | All 7 reusable game components                  |
-251	| M5    | All 5 reference games                           |
-252	| M6    | OneDrive plugin, Google Drive plugin, CF Worker |
-253	| M7    | All 5 parent settings screens                   |
-254	| M8    | All 8 polish work streams                       |
-255	
-256	The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
-257	
-258	---
-259	
-260	## Future: Server Upgrade Path (post-M8)
-261	
-262	When premium/server features are needed, TanStack Start enables a smooth transition:
-263	
-264	- Switch from static preset to Cloudflare Workers / Vercel / Node preset
-265	- Add server functions for auth, multiplayer WebSocket coordination, premium content gating
-266	- TanStack Start's server functions and API routes activate without restructuring the client-side app
-267	- The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
+1 ---
+2 name: BaseSkill Milestone Breakdown
+3 overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
+4 todos:
+5   - id: m0-design-docs
+6     content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
+7     status: pending
+8   - id: m1-scaffolding
+9     content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
+10     status: pending
+11   - id: m2-data-layer
+12     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
+13     status: completed
+14   - id: m3-app-shell
+15     content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
+16     status: pending
+17   - id: m4-game-engine
+18     content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
+19     status: pending
+20   - id: m5-reference-games
+21     content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
+22     status: pending
+23   - id: m6-cloud-sync
+24     content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
+25     status: pending
+26   - id: m7-parent-features
+27     content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
+28     status: pending
+29   - id: m8-polish
+30     content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
+31     status: pending
+32 isProject: false
+33 ---
+34 
+35 # BaseSkill: PRD to Completion Milestone Breakdown
+36 
+37 **Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
+38 
+39 This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
+40 
+41 ---
+42 
+43 ## Milestone 0 -- Design Documents (SYNC prerequisite)
+44 
+45 Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
+46 
+47 **ASYNC work streams:**
+48 
+49 - `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
+50 - `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
+51 - `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
+52 - `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
+53 - `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
+54 - `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
+55 - `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
+56 - `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
+57 - `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
+58 
+59 **SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
+60 
+61 ---
+62 
+63 ## Milestone 1 -- Project Scaffolding and CI/CD
+64 
+65 Bootstrap the repository and get a green CI pipeline on an empty app shell.
+66 
+67 **SYNC (sequential):**
+68 
+69 1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
+70 2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
+71 3. Set up TanStack Router nested layouts for app shell / game shell / settings
+72 4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
+73 5. Add `LICENSE` (GPL v3)
+74 6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
+75 7. Set up Vitest + React Testing Library
+76 8. Set up Playwright (empty E2E suite)
+77 9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
+78 10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
+79 11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
+80 12. App versioning: semver stamp in build output
+81 
+82 **Key TanStack decisions:**
+83 
+84 - Use TanStack Router's file-based routing convention (`routes/` directory)
+85 - Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
+86 - Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
+87 - Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
+88 
+89 **Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
+90 
+91 ---
+92 
+93 ## Milestone 2 -- Data Layer and Core Infrastructure
+94 
+95 Set up RxDB and the foundational systems that everything else depends on.
+96 
+97 **SYNC (must complete in order):**
+98 
+99 1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
+100 2. Schema migration framework (version tracking via `app_meta`)
+101 3. React hooks for reactive RxDB queries
+102 4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
+103 
+104 **ASYNC (can proceed in parallel once RxDB is up):**
+105 
+106 - **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
+107 - **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
+108 - **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
+109 - **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
+110 
+111 ---
+112 
+113 ## Milestone 3 -- Profile System and App Shell UI
+114 
+115 Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
+116 
+117 **SYNC (sequential):**
+118 
+119 1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
+120 2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
+121 3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
+122 4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
+123 5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
+124 6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
+125 7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
+126 
+127 **ASYNC (can start once profile + layout exist):**
+128 
+129 - **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
+130 - **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
+131 
+132 ---
+133 
+134 ## Milestone 4 -- Game Engine Framework
+135 
+136 Build the reusable game infrastructure (no specific games yet).
+137 
+138 **SYNC (sequential):**
+139 
+140 1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
+141 2. **Game shell UI** -- consistent header, game area, controls, back/exit
+142 3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
+143 4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
+144 
+145 **ASYNC (reusable components, independent of each other):**
+146 
+147 - `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
+148 - `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
+149 - `MultipleChoice` -- tap/click answer selection
+150 - `Timer` -- configurable, hideable per parent settings
+151 - `ScoreAnimation` -- confetti, stars, CSS-only reward animations
+152 - `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
+153 - `ProgressBar` / `ScoreBoard` -- in-game progress display
+154 
+155 ---
+156 
+157 ## Milestone 5 -- Reference Games
+158 
+159 Implement the 5 reference games. Each game is independent and can be built in parallel.
+160 
+161 **ASYNC (all 5 are independent):**
+162 
+163 - **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
+164 - **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
+165 - **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
+166 - **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
+167 - **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
+168 
+169 Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
+170 
+171 ---
+172 
+173 ## Milestone 6 -- Cloud Sync and OAuth
+174 
+175 Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
+176 
+177 **SYNC (sequential):**
+178 
+179 1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
+180 2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
+181 3. **Token management** -- encrypted IndexedDB storage, refresh token handling
+182 4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
+183 5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
+184 
+185 **ASYNC (within this milestone):**
+186 
+187 - Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
+188 - OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
+189 
+190 ---
+191 
+192 ## Milestone 7 -- Parent/Guardian Features
+193 
+194 Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
+195 
+196 **ASYNC (independent screens):**
+197 
+198 - **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
+199 - **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
+200 - **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
+201 - **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
+202 - **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
+203 
+204 ---
+205 
+206 ## Milestone 8 -- Polish, Accessibility, and Testing
+207 
+208 Final hardening pass. Most of this is ASYNC.
+209 
+210 **ASYNC work streams:**
+211 
+212 - **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
+213 - **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
+214 - **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
+215 - **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
+216 - **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
+217 - **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
+218 - **PWA install prompt** -- custom install banner, iOS/Android handling
+219 - **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
+220 
+221 ---
+222 
+223 ## Dependency Graph
+224 
+225 ```mermaid
+226 graph TD
+227     M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
+228     M1 --> M2[M2: Data Layer and Core Infra]
+229     M2 --> M3[M3: Profile System and App Shell]
+230     M2 --> M4[M4: Game Engine Framework]
+231     M2 --> M6[M6: Cloud Sync and OAuth]
+232     M3 --> M5[M5: Reference Games]
+233     M4 --> M5
+234     M3 --> M7[M7: Parent Features]
+235     M4 --> M7
+236     M6 --> M7
+237     M5 --> M8[M8: Polish and Testing]
+238     M7 --> M8
+239 ```
+240 
+241 ---
+242 
+243 ## Summary: What Can Run in Parallel
+244 
+245 | Phase | Parallel Streams                                |
+246 | ----- | ----------------------------------------------- |
+247 | M0    | Most design docs can be written concurrently    |
+248 | M2    | Event bus, i18n, theme engine, speech services  |
+249 | M3    | Bookmarks, recents (after shell exists)         |
+250 | M4    | All 7 reusable game components                  |
+251 | M5    | All 5 reference games                           |
+252 | M6    | OneDrive plugin, Google Drive plugin, CF Worker |
+253 | M7    | All 5 parent settings screens                   |
+254 | M8    | All 8 polish work streams                       |
+255 
+256 The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
+257 
+258 ---
+259 
+260 ## Future: Server Upgrade Path (post-M8)
+261 
+262 When premium/server features are needed, TanStack Start enables a smooth transition:
+263 
+264 - Switch from static preset to Cloudflare Workers / Vercel / Node preset
+265 - Add server functions for auth, multiplayer WebSocket coordination, premium content gating
+266 - TanStack Start's server functions and API routes activate without restructuring the client-side app
+267 - The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
 268
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:37:42Z)**_
@@ -3880,13 +3914,14 @@ The milestone plan shows:
 - **M8**: PWA install prompt + SW migration testing are deferred to Polish phase
 
 There's nothing specifically about:
+
 - Full offline hardening (M8)
 - IndexedDB for AnswerGameState persistence (not mentioned anywhere explicitly)
 - Game session resume UI
 
 The cloud sync is M6. The RxDB IndexedDB layer is M2 (already done).
 
-So the question is: the `AnswerGameState` (tile positions etc.) persistence to IndexedDB is NOT explicitly planned anywhere. 
+So the question is: the `AnswerGameState` (tile positions etc.) persistence to IndexedDB is NOT explicitly planned anywhere.
 
 Looking at the timeline more carefully, the `AnswerGameState` persistence should be tackled now as part of this offline-first push, since it's not captured in any milestone. The service worker and workbox setup started in M1 but the full hardening—version display, update notifications, complete cache strategies—is deferred to M8, which hasn't been implemented yet.
 </details></think>
@@ -3979,6 +4014,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:39:58Z)**_
 Good. The version + "Beta" badge should be in the header. Now I have enough to propose approaches and then present the design.
 
 Let me summarize what I know:
+
 1. **Game resume**: Instant silent resume (Option A) - persist `AnswerGameState` to RxDB on every significant action, restore on page load
 2. **SW update**: C + B — don't interrupt mid-game, show banner when not in a game
 3. **Version display**: Header, with "Beta" label
@@ -3988,7 +4024,6 @@ Now let me move to proposing 2-3 approaches.
 Let me think about the approaches:
 
 **For game state persistence (the hardest part)**:
-
 
 I could snapshot the full `AnswerGameState` to RxDB whenever an action dispatches, which gives me a simple and fast restore but means writing frequently as players move tiles. Alternatively, I could use event sourcing by recording individual game actions in the session history and replaying them on load, which is more efficient on writes but requires rebuilding state from the event log.
 
@@ -4079,7 +4114,6 @@ They also want to combine: use event sourcing (option 1) for the full replay his
 
 This is actually a well-known pattern in event sourcing systems. You keep the full event log for replay/history purposes, but also maintain a "read model" (snapshot) so you don't have to replay from scratch every time.
 
-
 I should look through the existing documentation to see if this decision was already documented somewhere.
 </details></think>
 
@@ -4104,6 +4138,7 @@ docs/superpowers/specs/2026-04-05-game-config-ui-redesign.md
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md
 docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:44:05Z)**_
@@ -4131,6 +4166,7 @@ docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md:22:`queueSound` 
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:44:09Z)**_
@@ -4140,414 +4176,415 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:44:09Z)**_
  `./docs/superpowers/specs/2026-04-02-milestone-4-game-engine-design.md`
 
 ```text
-1	# M4 Game Engine Framework — Design Spec
-2	
-3	**Date:** 2026-04-02
-4	**Status:** Approved
-5	**Milestone:** 4 — Game Engine Framework
-6	**Depends on:** M2 (RxDB, event bus, speech services), M3 (app shell, routing)
-7	
-8	---
-9	
-10	## 1. Overview
-11	
-12	M4 builds the reusable game infrastructure that all 5 reference games (M5) run on. Reusable interaction components (DragAndDrop, LetterTracer, etc.) are **deferred to M5**, built alongside the games that need them.
-13	
-14	The defining requirement beyond the milestone plan: the engine supports **parent-watchable replay**. Parents can scrub through every step their child took — including every undo — to see real learning behaviour (e.g. repeated undo to fake a better score). This is achieved via an append-only move log and a standalone replay function, similar in spirit to boardgame.io's move history and Redux DevTools.
-15	
-16	---
-17	
-18	## 2. Architecture
-19	
-20	Three layers, cleanly separated:
-21	
-22	```
-23	Route loader (/$locale/_app/game/$gameId)
-24	  ├── loadGameConfig()           ← override merging (RxDB read, runs once)
-25	  └── findInProgressSession()    ← silent resume check (RxDB read, runs once)
-26	        │
-27	        ▼
-28	GameShell
-29	└── GameEngineProvider           ← Redux-style context provider
-30	    ├── GameStateContext          ← state only (re-renders consumers)
-31	    ├── GameDispatchContext       ← stable dispatch ref (no re-renders)
-32	    ├── useGameLifecycle          ← state machine, no RxDB
-33	    ├── useMoveLog                ← in-memory append-only log, no RxDB
-34	    ├── useSessionRecorder        ← RxDB writes on every move + flush on hide/unload
-35	    └── <game component>         ← useGameState() + useGameDispatch()
-36	
-37	replayToStep(log, stepIndex)     ← standalone pure fn, no React
-38	                                    used by: live undo + silent resume + M7 viewer
-39	```
-40	
-41	### Provider internals — three composed hooks
-42	
-43	| Hook                        | Responsibility                                                                                                                          |
-44	| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-45	| `useGameLifecycle(config)`  | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log.                                                                |
-46	| `useMoveLog(maxUndoDepth)`  | Append-only in-memory move log + undo enforcement. No RxDB — fast synchronous access only.                                              |
-47	| `useSessionRecorder(moves)` | Writes to RxDB **on every move** and on `visibilitychange`/`beforeunload`. Chunks at 200 moves / 50 KB. Emits `game:end` on bus at end. |
-48	
-49	---
-50	
-51	## 3. Types
-52	
-53	```ts
-54	// src/lib/game-engine/types.ts
-55	
-56	export type GamePhase =
-57	  | 'idle'
-58	  | 'loading'
-59	  | 'instructions'
-60	  | 'playing'
-61	  | 'evaluating'
-62	  | 'scoring'
-63	  | 'next-round'
-64	  | 'retry'
-65	  | 'game-over';
-66	
-67	export interface GameEngineState {
-68	  phase: GamePhase;
-69	  roundIndex: number;
-70	  score: number;
-71	  streak: number;
-72	  retryCount: number;
-73	  content: ResolvedContent; // pre-materialized at session start
-74	  currentRound: RoundState;
-75	}
-76	
-77	export type MoveType =
-78	  | 'SUBMIT_ANSWER'
-79	  | 'REQUEST_HINT'
-80	  | 'SKIP_INSTRUCTIONS'
-81	  | 'UNDO';
-82	// Game-specific types added in M5 per game
-83	
-84	export interface Move {
-85	  type: MoveType;
-86	  args: Record<string, string | number | boolean>;
-87	  // For UNDO: args = { targetStep: number }
-88	  timestamp: number;
-89	}
-90	
-91	export interface MoveLog {
-92	  gameId: string;
-93	  sessionId: string;
-94	  profileId: string;
-95	  seed: string; // PRNG seed (stored for auditability)
-96	  initialContent: ResolvedContent; // pre-resolved question list (fast replay, no re-generation)
-97	  initialState: GameEngineState;
-98	  moves: Move[];
-99	}
-100	
-101	export interface ResolvedContent {
-102	  rounds: RoundDefinition[];
-103	}
-104	
-105	export interface RoundDefinition {
-106	  id: string;
-107	  prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
-108	  correctAnswer: string;
-109	  distractors?: string[]; // optional — not all game types use distractors
-110	  // Extended per game type in M5
-111	}
-112	
-113	export interface RoundState {
-114	  roundId: string;
-115	  answer: string | null;
-116	  hintsUsed: number;
-117	}
-118	
-119	export interface ResolvedGameConfig {
-120	  gameId: string;
-121	  title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
-122	  gradeBand: GradeBand;
-123	  maxRounds: number;
-124	  maxRetries: number;
-125	  maxUndoDepth: number | null; // null = unlimited; 0 = no undo
-126	  timerVisible: boolean;
-127	  timerDurationSeconds: number | null;
-128	  difficulty: string;
-129	}
-130	```
-131	
-132	---
-133	
-134	## 4. Lifecycle State Machine
-135	
-136	```
-137	idle → loading → instructions → playing → evaluating → scoring
-138	                                                          ├→ next-round → playing  (loop)
-139	                                                          ├→ retry      → playing  (bounded by maxRetries)
-140	                                                          └→ game-over
-141	```
-142	
-143	### Transitions
-144	
-145	| Function                | From         | To                             | Trigger                             |
-146	| ----------------------- | ------------ | ------------------------------ | ----------------------------------- |
-147	| `load(gameId)`          | idle         | loading                        | Route loader resolves               |
-148	| `showInstructions()`    | loading      | instructions                   | Assets ready                        |
-149	| `startPlay()`           | instructions | playing                        | Child taps Start / instructions end |
-150	| `submitAnswer(payload)` | playing      | evaluating                     | Child submits                       |
-151	| `evaluate(result)`      | evaluating   | scoring                        | Engine scores answer                |
-152	| `scoreRound(score)`     | scoring      | next-round / retry / game-over | Engine decides                      |
-153	| `nextRound()`           | next-round   | playing                        | Advance                             |
-154	| `retry()`               | retry        | playing                        | Replay current round                |
-155	| `endGame()`             | game-over    | idle                           | Navigate back                       |
-156	
-157	---
-158	
-159	## 5. Move Log — Append-Only, UNDO as First-Class Move
-160	
-161	The log is **never mutated**. Undo appends an `UNDO` entry rather than removing the previous move. This means the parent always sees the full history including every undo the child used.
-162	
-163	Example — child undid twice to get a correct answer:
-164	
-165	```
-166	move[0]  SUBMIT_ANSWER  { answer: 'B' }    ← wrong
-167	move[1]  UNDO           { targetStep: 0 }  ← undo back to start of round 1
-168	move[2]  SUBMIT_ANSWER  { answer: 'C' }    ← wrong again
-169	move[3]  UNDO           { targetStep: 0 }  ← undo again
-170	move[4]  SUBMIT_ANSWER  { answer: 'A' }    ← correct
-171	```
-172	
-173	The final score looks good; the move log tells the full story.
-174	
-175	---
-176	
-177	## 6. Replay Engine
-178	
-179	```ts
-180	// src/lib/game-engine/replay.ts
-181	
-182	// Pure function — no React, no side effects, no RxDB
-183	export function replayToStep(
-184	  log: MoveLog,
-185	  stepIndex: number,
-186	): GameEngineState;
-187	```
-188	
-189	**UNDO handling:** When `replayToStep` encounters an `UNDO` move at position N with `{ targetStep: M }`, it replays moves `0 → M` to recover state at M, then continues applying moves `N+1 → stepIndex` on top. No snapshots required — short sessions (10–50 moves) make this trivially cheap.
-190	
-191	**Used by:**
-192	
-193	1. `useMoveLog` — live undo during gameplay
-194	2. M7 parent session history viewer — scrub to any step without mounting a GameShell
-195	
-196	---
-197	
-198	## 7. Config Loader + Override Merging
-199	
-200	```ts
-201	// src/lib/game-engine/config-loader.ts
-202	
-203	export async function loadGameConfig(
-204	  gameId: string,
-205	  profileId: string,
-206	  gradeBand: GradeBand,
-207	  db: AppDatabase,
-208	): Promise<ResolvedGameConfig>;
-209	```
-210	
-211	Priority chain (highest → lowest):
-212	
-213	1. **Profile override** — from `game_config_overrides` collection (profileId + gameId match)
-214	2. **Grade-band override** — from `game_config_overrides` (profileId + gradeBand match)
-215	3. **Global override** — from `game_config_overrides` (profileId, applies to all games)
-216	4. **Game default** — from the game's bundled JSON config
-217	
-218	Called in the TanStack Router `loader` for `/$locale/_app/game/$gameId` so config is resolved before the component mounts.
-219	
-220	---
-221	
-222	## 8. GameEngineProvider
-223	
-224	```ts
-225	// src/lib/game-engine/index.ts
-226	
-227	interface GameEngineProviderProps {
-228	  config: ResolvedGameConfig;
-229	  moves: Record<
-230	    string,
-231	    (state: GameEngineState, args: Move['args']) => GameEngineState
-232	  >;
-233	  children: ReactNode;
-234	}
-235	
-236	export function GameEngineProvider({
-237	  config,
-238	  moves,
-239	  children,
-240	}: GameEngineProviderProps): JSX.Element;
-241	
-242	// Consumer hooks
-243	export function useGameState(): GameEngineState;
-244	export function useGameDispatch(): (move: Move) => void;
-245	```
-246	
-247	Split contexts prevent unnecessary re-renders: components that only dispatch (e.g. answer buttons) don't re-render when state changes.
-248	
-249	---
-250	
-251	## 9. Session Recorder
-252	
-253	```ts
-254	// src/lib/game-engine/session-recorder.ts
-255	
-256	export function useSessionRecorder(
-257	  moves: Move[],
-258	  sessionId: string,
-259	  meta: SessionMeta,
-260	): void;
-261	```
-262	
-263	**Write triggers (all must flush to RxDB):**
-264	
-265	1. **Every move** — write the latest move to the current in-progress chunk immediately
-266	2. **`visibilitychange` → hidden** — flush in-progress buffer; browser may be closed
-267	3. **`beforeunload`** — synchronous flush via `navigator.sendBeacon` or `indexedDB` direct write
-268	4. **Chunk boundary** — open a new chunk document when current exceeds 200 moves or 50 KB
-269	5. **`game-over` phase** — flush final chunk, write `session_history_index` summary, emit `game:end` on `TypedGameEventBus`
-270	
-271	**`session_history_index` status field:**
-272	
-273	The index document gains a `status` field to distinguish complete from interrupted sessions:
-274	
-275	```ts
-276	status: 'in-progress' | 'completed' | 'abandoned';
-277	// 'in-progress'  → game started, not yet finished (browser close mid-session)
-278	// 'completed'    → game:end reached normally
-279	// 'abandoned'    → child exited via the Exit button before game-over
-280	```
-281	
-282	Move log stored as-is (includes seed + initialContent + all moves including UNDOs).
-283	
-284	---
-285	
-286	## 9a. Silent Resume
-287	
-288	When a child navigates to a game, the TanStack Router `loader` checks for an `in-progress` session for this `(profileId, gameId)` pair in `session_history_index`. If found, the move log is loaded from `session_history` chunks and `replayToStep` reconstructs the state at the last recorded move. The child lands directly back in the game at the correct round — no prompt.
-289	
-290	```ts
-291	// In the loader for /$locale/_app/game/$gameId
-292	const resumeLog = await findInProgressSession(profileId, gameId, db);
-293	// resumeLog is null (no resume) or a fully hydrated MoveLog
-294	
-295	// Passed into GameEngineProvider as optional initialLog prop:
-296	// If present → engine calls replayToStep(resumeLog, resumeLog.moves.length - 1)
-297	// If absent  → engine starts fresh, generates new sessionId + seed
-298	```
-299	
-300	**Edge case:** If the in-progress session is more than 24 hours old, treat it as `abandoned` (update status, start fresh). Stale sessions should not silently resume days later.
-301	
-302	---
-303	
-304	## 10. GameShell UI — Layout B
-305	
-306	```
-307	┌─────────────────────────────────────┐
-308	│ ← Word Builder          Round 2/5   │  top bar: back button, game title, round counter
-309	├─────────────────────────────────────┤
-310	│ ⭐ 3   ████░░░░░░   ⏱ 0:42          │  sub-bar: score, progress bar, timer (hideable)
-311	├─────────────────────────────────────┤
-312	│                                     │
-313	│         [game component here]       │  game area: flex-1, max available height
-314	│                                     │
-315	├─────────────────────────────────────┤
-316	│  ⟲ Undo        II Pause     ✕ Exit  │  footer: undo (hidden if maxUndoDepth=0)
-317	└─────────────────────────────────────┘
-318	```
-319	
-320	**Undo button:** renders only when `maxUndoDepth !== 0` and `moves.length > 0`
-321	**Timer:** hidden when `timerVisible: false` in `ResolvedGameConfig`
-322	**Back / Exit:** both navigate to `/$locale/dashboard` after confirming end of session
-323	
-324	---
-325	
-326	## 11. Directory Structure
-327	
-328	```
-329	src/
-330	  lib/
-331	    game-engine/
-332	      types.ts            ← all shared types
-333	      replay.ts           ← replayToStep() pure fn
-334	      lifecycle.ts        ← useGameLifecycle hook
-335	      move-log.ts         ← useMoveLog hook (append-only + undo)
-336	      session-recorder.ts ← useSessionRecorder hook (RxDB writes)
-337	      config-loader.ts    ← loadGameConfig (override merging)
-338	      index.ts            ← GameEngineProvider, useGameState, useGameDispatch
-339	  components/
-340	    game/
-341	      GameShell.tsx       ← Layout B shell component
-342	```
-343	
-344	---
-345	
-346	## 12. Existing Utilities to Reuse
-347	
-348	| Utility                                   | Path                                      | Used By                                 |
-349	| ----------------------------------------- | ----------------------------------------- | --------------------------------------- |
-350	| `TypedGameEventBus` / `getGameEventBus()` | `src/lib/game-event-bus.ts`               | `useSessionRecorder` — emits `game:end` |
-351	| `GameEvent` types, `GradeBand`            | `src/types/game-events.ts`                | `types.ts` imports `GradeBand`          |
-352	| `useRxDB()`                               | `src/db/hooks/useRxDB.ts`                 | `useSessionRecorder` — RxDB access      |
-353	| `session_history` schema                  | `src/db/schemas/session_history.ts`       | `useSessionRecorder`                    |
-354	| `session_history_index` schema            | `src/db/schemas/session_history_index.ts` | `useSessionRecorder`                    |
-355	| `game_config_overrides` schema            | `src/db/schemas/game_config_overrides.ts` | `loadGameConfig`                        |
-356	
-357	---
-358	
-359	## 13. Files to Create / Modify
-360	
-361	### New (create)
-362	
-363	- `src/lib/game-engine/types.ts`
-364	- `src/lib/game-engine/replay.ts`
-365	- `src/lib/game-engine/lifecycle.ts`
-366	- `src/lib/game-engine/move-log.ts`
-367	- `src/lib/game-engine/session-recorder.ts`
-368	- `src/lib/game-engine/config-loader.ts`
-369	- `src/lib/game-engine/index.ts`
-370	- `src/components/game/GameShell.tsx`
-371	
-372	### Modified
-373	
-374	- `src/routes/$locale/_app/game/$gameId.tsx` — replace placeholder with real GameShell + loader; add resume logic in `loader`
-375	- `src/types/game-events.ts` — verify `GameEventType` covers all move-triggered bus events
-376	- `src/db/schemas/session_history_index.ts` — add `status: 'in-progress' | 'completed' | 'abandoned'` field + schema version bump
-377	
-378	---
-379	
-380	## 14. Testing Strategy
-381	
-382	### Unit (Vitest)
-383	
-384	- `replay.ts`: normal play, single undo, double undo, UNDO beyond log start, empty log
-385	- `move-log.ts`: append, undo at depth 0/1/unlimited, depth limit enforcement
-386	- `config-loader.ts`: all 4 priority levels, missing override cases, grade-band fallthrough
-387	- `lifecycle.ts`: all 9 transitions, invalid transition guards
-388	
-389	### Integration (Vitest + RTL)
-390	
-391	- `GameEngineProvider`: renders game component, dispatches moves, state updates correctly
-392	- `useSessionRecorder`: move log writes reach `session_history` in RxDB
-393	
-394	### E2E (Playwright)
-395	
-396	- Full game session: instructions → 3 rounds → game-over
-397	- Undo during play: move log contains `UNDO` entries, state rolls back correctly
-398	- Config override: `maxUndoDepth: 0` hides undo button; `timerVisible: false` hides timer
-399	- Silent resume: play 2 rounds → simulate browser close (clear in-memory state) → reload game route → child lands on round 3 with correct score
-400	- Stale resume: in-progress session older than 24 h → marked `abandoned`, fresh session starts
-401	
-402	### Verification
-403	
-404	```bash
-405	yarn typecheck && yarn test && yarn build
-406	```
+1 # M4 Game Engine Framework — Design Spec
+2 
+3 **Date:** 2026-04-02
+4 **Status:** Approved
+5 **Milestone:** 4 — Game Engine Framework
+6 **Depends on:** M2 (RxDB, event bus, speech services), M3 (app shell, routing)
+7 
+8 ---
+9 
+10 ## 1. Overview
+11 
+12 M4 builds the reusable game infrastructure that all 5 reference games (M5) run on. Reusable interaction components (DragAndDrop, LetterTracer, etc.) are **deferred to M5**, built alongside the games that need them.
+13 
+14 The defining requirement beyond the milestone plan: the engine supports **parent-watchable replay**. Parents can scrub through every step their child took — including every undo — to see real learning behaviour (e.g. repeated undo to fake a better score). This is achieved via an append-only move log and a standalone replay function, similar in spirit to boardgame.io's move history and Redux DevTools.
+15 
+16 ---
+17 
+18 ## 2. Architecture
+19 
+20 Three layers, cleanly separated:
+21 
+22 ```
+23 Route loader (/$locale/_app/game/$gameId)
+24   ├── loadGameConfig()           ← override merging (RxDB read, runs once)
+25   └── findInProgressSession()    ← silent resume check (RxDB read, runs once)
+26         │
+27         ▼
+28 GameShell
+29 └── GameEngineProvider           ← Redux-style context provider
+30     ├── GameStateContext          ← state only (re-renders consumers)
+31     ├── GameDispatchContext       ← stable dispatch ref (no re-renders)
+32     ├── useGameLifecycle          ← state machine, no RxDB
+33     ├── useMoveLog                ← in-memory append-only log, no RxDB
+34     ├── useSessionRecorder        ← RxDB writes on every move + flush on hide/unload
+35     └── <game component>         ← useGameState() + useGameDispatch()
+36 
+37 replayToStep(log, stepIndex)     ← standalone pure fn, no React
+38                                     used by: live undo + silent resume + M7 viewer
+39 ```
+40 
+41 ### Provider internals — three composed hooks
+42 
+43 | Hook                        | Responsibility                                                                                                                          |
+44 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+45 | `useGameLifecycle(config)`  | Lifecycle state machine (8 phases, 9 transitions). No RxDB, no move log.                                                                |
+46 | `useMoveLog(maxUndoDepth)`  | Append-only in-memory move log + undo enforcement. No RxDB — fast synchronous access only.                                              |
+47 | `useSessionRecorder(moves)` | Writes to RxDB **on every move** and on `visibilitychange`/`beforeunload`. Chunks at 200 moves / 50 KB. Emits `game:end` on bus at end. |
+48 
+49 ---
+50 
+51 ## 3. Types
+52 
+53 ```ts
+54 // src/lib/game-engine/types.ts
+55 
+56 export type GamePhase =
+57   | 'idle'
+58   | 'loading'
+59   | 'instructions'
+60   | 'playing'
+61   | 'evaluating'
+62   | 'scoring'
+63   | 'next-round'
+64   | 'retry'
+65   | 'game-over';
+66 
+67 export interface GameEngineState {
+68   phase: GamePhase;
+69   roundIndex: number;
+70   score: number;
+71   streak: number;
+72   retryCount: number;
+73   content: ResolvedContent; // pre-materialized at session start
+74   currentRound: RoundState;
+75 }
+76 
+77 export type MoveType =
+78   | 'SUBMIT_ANSWER'
+79   | 'REQUEST_HINT'
+80   | 'SKIP_INSTRUCTIONS'
+81   | 'UNDO';
+82 // Game-specific types added in M5 per game
+83 
+84 export interface Move {
+85   type: MoveType;
+86   args: Record<string, string | number | boolean>;
+87   // For UNDO: args = { targetStep: number }
+88   timestamp: number;
+89 }
+90 
+91 export interface MoveLog {
+92   gameId: string;
+93   sessionId: string;
+94   profileId: string;
+95   seed: string; // PRNG seed (stored for auditability)
+96   initialContent: ResolvedContent; // pre-resolved question list (fast replay, no re-generation)
+97   initialState: GameEngineState;
+98   moves: Move[];
+99 }
+100 
+101 export interface ResolvedContent {
+102   rounds: RoundDefinition[];
+103 }
+104 
+105 export interface RoundDefinition {
+106   id: string;
+107   prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
+108   correctAnswer: string;
+109   distractors?: string[]; // optional — not all game types use distractors
+110   // Extended per game type in M5
+111 }
+112 
+113 export interface RoundState {
+114   roundId: string;
+115   answer: string | null;
+116   hintsUsed: number;
+117 }
+118 
+119 export interface ResolvedGameConfig {
+120   gameId: string;
+121   title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
+122   gradeBand: GradeBand;
+123   maxRounds: number;
+124   maxRetries: number;
+125   maxUndoDepth: number | null; // null = unlimited; 0 = no undo
+126   timerVisible: boolean;
+127   timerDurationSeconds: number | null;
+128   difficulty: string;
+129 }
+130 ```
+131 
+132 ---
+133 
+134 ## 4. Lifecycle State Machine
+135 
+136 ```
+137 idle → loading → instructions → playing → evaluating → scoring
+138                                                           ├→ next-round → playing  (loop)
+139                                                           ├→ retry      → playing  (bounded by maxRetries)
+140                                                           └→ game-over
+141 ```
+142 
+143 ### Transitions
+144 
+145 | Function                | From         | To                             | Trigger                             |
+146 | ----------------------- | ------------ | ------------------------------ | ----------------------------------- |
+147 | `load(gameId)`          | idle         | loading                        | Route loader resolves               |
+148 | `showInstructions()`    | loading      | instructions                   | Assets ready                        |
+149 | `startPlay()`           | instructions | playing                        | Child taps Start / instructions end |
+150 | `submitAnswer(payload)` | playing      | evaluating                     | Child submits                       |
+151 | `evaluate(result)`      | evaluating   | scoring                        | Engine scores answer                |
+152 | `scoreRound(score)`     | scoring      | next-round / retry / game-over | Engine decides                      |
+153 | `nextRound()`           | next-round   | playing                        | Advance                             |
+154 | `retry()`               | retry        | playing                        | Replay current round                |
+155 | `endGame()`             | game-over    | idle                           | Navigate back                       |
+156 
+157 ---
+158 
+159 ## 5. Move Log — Append-Only, UNDO as First-Class Move
+160 
+161 The log is **never mutated**. Undo appends an `UNDO` entry rather than removing the previous move. This means the parent always sees the full history including every undo the child used.
+162 
+163 Example — child undid twice to get a correct answer:
+164 
+165 ```
+166 move[0]  SUBMIT_ANSWER  { answer: 'B' }    ← wrong
+167 move[1]  UNDO           { targetStep: 0 }  ← undo back to start of round 1
+168 move[2]  SUBMIT_ANSWER  { answer: 'C' }    ← wrong again
+169 move[3]  UNDO           { targetStep: 0 }  ← undo again
+170 move[4]  SUBMIT_ANSWER  { answer: 'A' }    ← correct
+171 ```
+172 
+173 The final score looks good; the move log tells the full story.
+174 
+175 ---
+176 
+177 ## 6. Replay Engine
+178 
+179 ```ts
+180 // src/lib/game-engine/replay.ts
+181 
+182 // Pure function — no React, no side effects, no RxDB
+183 export function replayToStep(
+184   log: MoveLog,
+185   stepIndex: number,
+186 ): GameEngineState;
+187 ```
+188 
+189 **UNDO handling:** When `replayToStep` encounters an `UNDO` move at position N with `{ targetStep: M }`, it replays moves `0 → M` to recover state at M, then continues applying moves `N+1 → stepIndex` on top. No snapshots required — short sessions (10–50 moves) make this trivially cheap.
+190 
+191 **Used by:**
+192 
+193 1. `useMoveLog` — live undo during gameplay
+194 2. M7 parent session history viewer — scrub to any step without mounting a GameShell
+195 
+196 ---
+197 
+198 ## 7. Config Loader + Override Merging
+199 
+200 ```ts
+201 // src/lib/game-engine/config-loader.ts
+202 
+203 export async function loadGameConfig(
+204   gameId: string,
+205   profileId: string,
+206   gradeBand: GradeBand,
+207   db: AppDatabase,
+208 ): Promise<ResolvedGameConfig>;
+209 ```
+210 
+211 Priority chain (highest → lowest):
+212 
+213 1. **Profile override** — from `game_config_overrides` collection (profileId + gameId match)
+214 2. **Grade-band override** — from `game_config_overrides` (profileId + gradeBand match)
+215 3. **Global override** — from `game_config_overrides` (profileId, applies to all games)
+216 4. **Game default** — from the game's bundled JSON config
+217 
+218 Called in the TanStack Router `loader` for `/$locale/_app/game/$gameId` so config is resolved before the component mounts.
+219 
+220 ---
+221 
+222 ## 8. GameEngineProvider
+223 
+224 ```ts
+225 // src/lib/game-engine/index.ts
+226 
+227 interface GameEngineProviderProps {
+228   config: ResolvedGameConfig;
+229   moves: Record<
+230     string,
+231     (state: GameEngineState, args: Move['args']) => GameEngineState
+232   >;
+233   children: ReactNode;
+234 }
+235 
+236 export function GameEngineProvider({
+237   config,
+238   moves,
+239   children,
+240 }: GameEngineProviderProps): JSX.Element;
+241 
+242 // Consumer hooks
+243 export function useGameState(): GameEngineState;
+244 export function useGameDispatch(): (move: Move) => void;
+245 ```
+246 
+247 Split contexts prevent unnecessary re-renders: components that only dispatch (e.g. answer buttons) don't re-render when state changes.
+248 
+249 ---
+250 
+251 ## 9. Session Recorder
+252 
+253 ```ts
+254 // src/lib/game-engine/session-recorder.ts
+255 
+256 export function useSessionRecorder(
+257   moves: Move[],
+258   sessionId: string,
+259   meta: SessionMeta,
+260 ): void;
+261 ```
+262 
+263 **Write triggers (all must flush to RxDB):**
+264 
+265 1. **Every move** — write the latest move to the current in-progress chunk immediately
+266 2. **`visibilitychange` → hidden** — flush in-progress buffer; browser may be closed
+267 3. **`beforeunload`** — synchronous flush via `navigator.sendBeacon` or `indexedDB` direct write
+268 4. **Chunk boundary** — open a new chunk document when current exceeds 200 moves or 50 KB
+269 5. **`game-over` phase** — flush final chunk, write `session_history_index` summary, emit `game:end` on `TypedGameEventBus`
+270 
+271 **`session_history_index` status field:**
+272 
+273 The index document gains a `status` field to distinguish complete from interrupted sessions:
+274 
+275 ```ts
+276 status: 'in-progress' | 'completed' | 'abandoned';
+277 // 'in-progress'  → game started, not yet finished (browser close mid-session)
+278 // 'completed'    → game:end reached normally
+279 // 'abandoned'    → child exited via the Exit button before game-over
+280 ```
+281 
+282 Move log stored as-is (includes seed + initialContent + all moves including UNDOs).
+283 
+284 ---
+285 
+286 ## 9a. Silent Resume
+287 
+288 When a child navigates to a game, the TanStack Router `loader` checks for an `in-progress` session for this `(profileId, gameId)` pair in `session_history_index`. If found, the move log is loaded from `session_history` chunks and `replayToStep` reconstructs the state at the last recorded move. The child lands directly back in the game at the correct round — no prompt.
+289 
+290 ```ts
+291 // In the loader for /$locale/_app/game/$gameId
+292 const resumeLog = await findInProgressSession(profileId, gameId, db);
+293 // resumeLog is null (no resume) or a fully hydrated MoveLog
+294 
+295 // Passed into GameEngineProvider as optional initialLog prop:
+296 // If present → engine calls replayToStep(resumeLog, resumeLog.moves.length - 1)
+297 // If absent  → engine starts fresh, generates new sessionId + seed
+298 ```
+299 
+300 **Edge case:** If the in-progress session is more than 24 hours old, treat it as `abandoned` (update status, start fresh). Stale sessions should not silently resume days later.
+301 
+302 ---
+303 
+304 ## 10. GameShell UI — Layout B
+305 
+306 ```
+307 ┌─────────────────────────────────────┐
+308 │ ← Word Builder          Round 2/5   │  top bar: back button, game title, round counter
+309 ├─────────────────────────────────────┤
+310 │ ⭐ 3   ████░░░░░░   ⏱ 0:42          │  sub-bar: score, progress bar, timer (hideable)
+311 ├─────────────────────────────────────┤
+312 │                                     │
+313 │         [game component here]       │  game area: flex-1, max available height
+314 │                                     │
+315 ├─────────────────────────────────────┤
+316 │  ⟲ Undo        II Pause     ✕ Exit  │  footer: undo (hidden if maxUndoDepth=0)
+317 └─────────────────────────────────────┘
+318 ```
+319 
+320 **Undo button:** renders only when `maxUndoDepth !== 0` and `moves.length > 0`
+321 **Timer:** hidden when `timerVisible: false` in `ResolvedGameConfig`
+322 **Back / Exit:** both navigate to `/$locale/dashboard` after confirming end of session
+323 
+324 ---
+325 
+326 ## 11. Directory Structure
+327 
+328 ```
+329 src/
+330   lib/
+331     game-engine/
+332       types.ts            ← all shared types
+333       replay.ts           ← replayToStep() pure fn
+334       lifecycle.ts        ← useGameLifecycle hook
+335       move-log.ts         ← useMoveLog hook (append-only + undo)
+336       session-recorder.ts ← useSessionRecorder hook (RxDB writes)
+337       config-loader.ts    ← loadGameConfig (override merging)
+338       index.ts            ← GameEngineProvider, useGameState, useGameDispatch
+339   components/
+340     game/
+341       GameShell.tsx       ← Layout B shell component
+342 ```
+343 
+344 ---
+345 
+346 ## 12. Existing Utilities to Reuse
+347 
+348 | Utility                                   | Path                                      | Used By                                 |
+349 | ----------------------------------------- | ----------------------------------------- | --------------------------------------- |
+350 | `TypedGameEventBus` / `getGameEventBus()` | `src/lib/game-event-bus.ts`               | `useSessionRecorder` — emits `game:end` |
+351 | `GameEvent` types, `GradeBand`            | `src/types/game-events.ts`                | `types.ts` imports `GradeBand`          |
+352 | `useRxDB()`                               | `src/db/hooks/useRxDB.ts`                 | `useSessionRecorder` — RxDB access      |
+353 | `session_history` schema                  | `src/db/schemas/session_history.ts`       | `useSessionRecorder`                    |
+354 | `session_history_index` schema            | `src/db/schemas/session_history_index.ts` | `useSessionRecorder`                    |
+355 | `game_config_overrides` schema            | `src/db/schemas/game_config_overrides.ts` | `loadGameConfig`                        |
+356 
+357 ---
+358 
+359 ## 13. Files to Create / Modify
+360 
+361 ### New (create)
+362 
+363 - `src/lib/game-engine/types.ts`
+364 - `src/lib/game-engine/replay.ts`
+365 - `src/lib/game-engine/lifecycle.ts`
+366 - `src/lib/game-engine/move-log.ts`
+367 - `src/lib/game-engine/session-recorder.ts`
+368 - `src/lib/game-engine/config-loader.ts`
+369 - `src/lib/game-engine/index.ts`
+370 - `src/components/game/GameShell.tsx`
+371 
+372 ### Modified
+373 
+374 - `src/routes/$locale/_app/game/$gameId.tsx` — replace placeholder with real GameShell + loader; add resume logic in `loader`
+375 - `src/types/game-events.ts` — verify `GameEventType` covers all move-triggered bus events
+376 - `src/db/schemas/session_history_index.ts` — add `status: 'in-progress' | 'completed' | 'abandoned'` field + schema version bump
+377 
+378 ---
+379 
+380 ## 14. Testing Strategy
+381 
+382 ### Unit (Vitest)
+383 
+384 - `replay.ts`: normal play, single undo, double undo, UNDO beyond log start, empty log
+385 - `move-log.ts`: append, undo at depth 0/1/unlimited, depth limit enforcement
+386 - `config-loader.ts`: all 4 priority levels, missing override cases, grade-band fallthrough
+387 - `lifecycle.ts`: all 9 transitions, invalid transition guards
+388 
+389 ### Integration (Vitest + RTL)
+390 
+391 - `GameEngineProvider`: renders game component, dispatches moves, state updates correctly
+392 - `useSessionRecorder`: move log writes reach `session_history` in RxDB
+393 
+394 ### E2E (Playwright)
+395 
+396 - Full game session: instructions → 3 rounds → game-over
+397 - Undo during play: move log contains `UNDO` entries, state rolls back correctly
+398 - Config override: `maxUndoDepth: 0` hides undo button; `timerVisible: false` hides timer
+399 - Silent resume: play 2 rounds → simulate browser close (clear in-memory state) → reload game route → child lands on round 3 with correct score
+400 - Stale resume: in-progress session older than 24 h → marked `abandoned`, fresh session starts
+401 
+402 ### Verification
+403 
+404 ```bash
+405 yarn typecheck && yarn test && yarn build
+406 ```
 407
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:44:41Z)**_
@@ -4559,13 +4596,14 @@ Found it! Section 9a "Silent Resume" in the M4 design spec describes exactly wha
 
 So the user was correct — they DID decide on Approach 1 (event sourcing). The M4 spec has this fully designed.
 
-However, the critical gap is: this `replayToStep` only reconstructs the `GameEngineState` (roundIndex, score, phase, etc.) — NOT the `AnswerGameState` (tile placement, zones, bankTileIds). 
+However, the critical gap is: this `replayToStep` only reconstructs the `GameEngineState` (roundIndex, score, phase, etc.) — NOT the `AnswerGameState` (tile placement, zones, bankTileIds).
 
 The `AnswerGameProvider` is a separate React context that isn't driven by `GameEngineProvider`. Now I see what the user wants: combine event sourcing (the existing MoveLog for replay) with a snapshot of the latest `AnswerGameState` for fast resume on page reload. This is the classic event sourcing plus read model pattern — the event log stays as canonical truth for the parent replay viewer, while the snapshot gives you instant recovery without replaying everything.
 
 The key insight is that `MoveLog` only captures `GameEngine` moves, not `AnswerGame` actions like PLACE_TILE. So I need two separate persistence layers: keep the existing MoveLog for engine-level replay, and add a new `AnswerGameState` snapshot to RxDB specifically for fast resume of the answer game layer.
 
 For storing the snapshot, adding a `draftState` field directly to `session_history_index` feels cleanest since that document already tracks the current session state—it avoids creating a new collection and keeps related data together. AnswerGameState) field to `session_history_index` would be:
+
 - Clean
 - No new collection needed
 - The session recorder already updates session_history_index on every move
@@ -4574,6 +4612,7 @@ For storing the snapshot, adding a `draftState` field directly to `session_histo
 Let me think about the user's question: "I want event sourcing (approach 1), but also a snapshot for fast reload. What are your thoughts?"
 
 My thoughts: Yes, this is the right pattern. Event sourcing + snapshot = best of both worlds. The only question is:
+
 1. What exactly goes in the snapshot? (Full AnswerGameState: tiles, zones, bankTileIds, phase)
 2. Where is it stored? (I'd recommend adding a `draftState` field to `session_history_index` or a separate `game_draft` collection)
 3. When is it updated? (After every AnswerGame dispatch — debounced)
@@ -4629,6 +4668,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:46:49Z)**_
 Let me now present the full design sections. I'll present them section by section and ask for approval after each main section.
 
 The design covers:
+
 1. **Overview & scope** — what this feature set covers
 2. **Game state persistence & resume** — `AnswerGameState` snapshot + `findInProgressSession` wire-up
 3. **Service worker & offline hardening** — Workbox config, SW update lifecycle, offline navigation
@@ -4637,9 +4677,9 @@ The design covers:
 Let me structure this well.
 
 Key decisions so far:
+
 - Resume: instant silent resume (option A)
 - SW update: C (mid-game) + B (elsewhere) — show banner when not in game, apply on natural exit when in game
-
 
 - Version display: header + Parent Settings > About
 - Game state: event sourcing with MoveLog for replay capability, plus AnswerGameState snapshot on session_history_index for fast resume
@@ -4670,48 +4710,49 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:46:49Z)**_
  `./src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:46:49Z)**_
@@ -4721,82 +4762,83 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:46:49Z)**_
  `./src/components/answer-game/types.ts`
 
 ```text
-1	export interface AnswerGameConfig {
-2	  gameId: string;
-3	  /** @default 'drag' */
-4	  inputMethod: 'drag' | 'type' | 'both';
-5	  /** @default 'lock-auto-eject' */
-6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-7	  tileBankMode: 'exact' | 'distractors';
-8	  distractorCount?: number;
-9	  /** Total number of rounds in this session */
-10	  totalRounds: number;
-11	  /**
-12	   * When `true`, rounds follow the order of `rounds` in config.
-13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
-14	   */
-15	  roundsInOrder?: boolean;
-16	  /** Whether TTS is enabled for this profile */
-17	  ttsEnabled: boolean;
-18	  /**
-19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
-20	   * @default 'text'
-21	   */
-22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-23	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
-24	  initialTiles?: TileItem[];
-25	  initialZones?: AnswerZone[];
-26	}
-27	
-28	export interface TileItem {
-29	  id: string;
-30	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
-31	  label: string;
-32	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
-33	  value: string;
-34	}
-35	
-36	export interface AnswerZone {
-37	  id: string;
-38	  index: number;
-39	  /** Correct tile value for this slot; matched against `TileItem.value` */
-40	  expectedValue: string;
-41	  placedTileId: string | null;
-42	  isWrong: boolean;
-43	  isLocked: boolean;
-44	}
-45	
-46	export type AnswerGamePhase =
-47	  | 'playing'
-48	  | 'round-complete'
-49	  | 'game-over';
-50	
-51	export interface AnswerGameState {
-52	  config: AnswerGameConfig;
-53	  /** Full tile list for the current round — never mutated mid-round */
-54	  allTiles: TileItem[];
-55	  /** IDs of tiles currently visible in the choice bank */
-56	  bankTileIds: string[];
-57	  zones: AnswerZone[];
-58	  /** Index of next slot to fill in auto-next-slot mode */
-59	  activeSlotIndex: number;
-60	  dragActiveTileId: string | null;
-61	  phase: AnswerGamePhase;
-62	  roundIndex: number;
-63	  retryCount: number;
-64	}
-65	
-66	export type AnswerGameAction =
-67	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-68	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-69	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-70	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-71	  | { type: 'EJECT_TILE'; zoneIndex: number }
-72	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-73	  | { type: 'COMPLETE_GAME' }
-74	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+1 export interface AnswerGameConfig {
+2   gameId: string;
+3   /** @default 'drag' */
+4   inputMethod: 'drag' | 'type' | 'both';
+5   /** @default 'lock-auto-eject' */
+6   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7   tileBankMode: 'exact' | 'distractors';
+8   distractorCount?: number;
+9   /** Total number of rounds in this session */
+10   totalRounds: number;
+11   /**
+12    * When `true`, rounds follow the order of `rounds` in config.
+13    * When `false` or omitted, order is shuffled once per session (again after Play again).
+14    */
+15   roundsInOrder?: boolean;
+16   /** Whether TTS is enabled for this profile */
+17   ttsEnabled: boolean;
+18   /**
+19    * Controls the OS keyboard type shown on touch devices in type/both mode.
+20    * @default 'text'
+21    */
+22   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+24   initialTiles?: TileItem[];
+25   initialZones?: AnswerZone[];
+26 }
+27 
+28 export interface TileItem {
+29   id: string;
+30   /** Display label shown on the tile (e.g. "A", "cat", "3") */
+31   label: string;
+32   /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+33   value: string;
+34 }
+35 
+36 export interface AnswerZone {
+37   id: string;
+38   index: number;
+39   /** Correct tile value for this slot; matched against `TileItem.value` */
+40   expectedValue: string;
+41   placedTileId: string | null;
+42   isWrong: boolean;
+43   isLocked: boolean;
+44 }
+45 
+46 export type AnswerGamePhase =
+47   | 'playing'
+48   | 'round-complete'
+49   | 'game-over';
+50 
+51 export interface AnswerGameState {
+52   config: AnswerGameConfig;
+53   /** Full tile list for the current round — never mutated mid-round */
+54   allTiles: TileItem[];
+55   /** IDs of tiles currently visible in the choice bank */
+56   bankTileIds: string[];
+57   zones: AnswerZone[];
+58   /** Index of next slot to fill in auto-next-slot mode */
+59   activeSlotIndex: number;
+60   dragActiveTileId: string | null;
+61   phase: AnswerGamePhase;
+62   roundIndex: number;
+63   retryCount: number;
+64 }
+65 
+66 export type AnswerGameAction =
+67   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+68   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+69   | { type: 'REMOVE_TILE'; zoneIndex: number }
+70   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+71   | { type: 'EJECT_TILE'; zoneIndex: number }
+72   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+73   | { type: 'COMPLETE_GAME' }
+74   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 06:47:04Z)**_
@@ -4805,13 +4847,13 @@ _**Agent (claude-sonnet-4-6 2026-04-07 06:47:04Z)**_
 Now I have a complete picture. Let me now present the full design sections.
 
 Key architecture for game resume:
+
 1. `AnswerGameState` snapshot stored in `session_history_index.draftState`
 2. `AnswerGameProvider` accepts optional `initialState` prop — if provided, skips `makeInitialState` and `INIT_ROUND` effect
 3. On resume, skip `showInstructions` overlay
 4. `findInProgressSession` also returns the `draftState` (or we add a separate function `findDraftState`)
 
 The `AnswerGameState` that needs to be snapshotted:
-
 
 `allTiles`, `bankTileIds`, `zones`, `activeSlotIndex`, `phase`, `roundIndex`, `retryCount`, and `config`. Though `config` contains `initialTiles` and `initialZones` which we won't need on restore, we do need the metadata like `totalRounds` and `roundsInOrder` to continue properly.
 
@@ -4891,18 +4933,21 @@ AnswerGame dispatch → answerGameReducer → new state → useAnswerGameDraftSy
 `findInProgressSession()` already loads the `MoveLog`. It now also returns `draftState` from the `session_history_index` document.
 
 Route loader passes both to the game body:
+
 - `initialLog` → `GameEngineProvider` (existing, for score/phase replay)
 - `draftState` → `AnswerGameProvider` (new, for tile/zone visual state)
 
 ### `AnswerGameProvider` changes
 
 Accepts new optional prop `initialState?: AnswerGameDraftState`. When provided:
+
 - `useReducer` initialises directly from `initialState` instead of `makeInitialState(config)`
 - The `INIT_ROUND` useEffect is guarded — only fires if `initialState` is absent
 
 ### Game body changes (WordSpell, NumberMatch, SortNumbers)
 
 When `initialLog !== null` (resuming):
+
 - `showInstructions` initialises to `false` — skip the overlay
 - `initialState` from `draftState` passed through to `AnswerGameProvider`
 
@@ -4933,6 +4978,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:13:40Z)**_
 ## Section 3: Service Worker & Offline Hardening
 
 ### What's already working
+
 `vite-plugin-pwa` with `generateSW` + `autoUpdate` is configured. `globPatterns` pre-caches all JS/CSS/HTML/fonts. `manifest.json` exists. The SW registers and caches the app shell today.
 
 ### Gaps to close
@@ -4954,7 +5000,7 @@ SW waiting event → set updateAvailable state → show banner (if not mid-game)
 
 `useServiceWorker()` hook exposes `{ updateAvailable, applyUpdate }`.
 
-- **When not in a game** (home, dashboard, settings): show `<UpdateBanner>` — a small non-intrusive strip at the top: *"New version available — tap to update"*. Tapping calls `applyUpdate()` which posts `SKIP_WAITING` to the SW then reloads.
+- **When not in a game** (home, dashboard, settings): show `<UpdateBanner>` — a small non-intrusive strip at the top: _"New version available — tap to update"_. Tapping calls `applyUpdate()` which posts `SKIP_WAITING` to the SW then reloads.
 
 - **When mid-game** (`/game/:gameId` route): suppress the banner. On natural exit (back button, game-over navigation), the pending update fires automatically before navigating away — child never sees an interrupt.
 
@@ -5030,7 +5076,7 @@ can you confirm if I load the app when offline, I'll still be able to see everyt
 _**Agent (claude-sonnet-4-6 2026-04-07 07:15:04Z)**_
 
 <think><details><summary>Thought Process</summary>
-The user is asking whether the current setup actually supports loading the app offline. Let me check the current vite-plugin-pwa configuration more carefully. 
+The user is asking whether the current setup actually supports loading the app offline. Let me check the current vite-plugin-pwa configuration more carefully.
 
 Looking at the `vite.config.ts`:
 
@@ -5075,6 +5121,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:15:04Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:15:11Z)**_
@@ -5113,6 +5160,7 @@ workbox: {
 ```
 
 Two additional notes:
+
 - This only works after a **production build** (`yarn build`) — in dev mode the SW doesn't register (that's by design with Vite)
 - The **first ever load must happen online** to prime the cache — there's no way around this
 
@@ -5214,6 +5262,7 @@ Fast-forward
  create mode 100644 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
  create mode 100644 src/stories/ThemeShowcase.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:39:53Z)**_
@@ -5228,6 +5277,7 @@ Create worktree for offline feature branch
 Preparing worktree (new branch 'feat/service-worker-workbox-offline-setup')
 HEAD is now at 50b3bd0 feat: dark mode fix, A11Y colour enforcement & VR test coverage (#27)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:41:23Z)**_
@@ -5667,6 +5717,7 @@ _app.tsx
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/docs/superpowers/specs/2026-04-07-service-worker-workbox-offline-design.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:41:29Z)**_
@@ -5692,6 +5743,7 @@ Running self-review now.
 **Placeholder scan:** No TBDs or incomplete sections. ✓
 
 **Internal consistency check:**
+
 - Schema version bump (1→2) mentioned in both section 2.2 and files table. ✓
 - `draftState` return from `findInProgressSession` flows correctly: session-finder → route loader → game body → `AnswerGameProvider`. ✓
 - `registerType: 'prompt'` + `injectRegister: null` is consistent with manual registration via `useServiceWorker`. ✓
@@ -5730,6 +5782,7 @@ EOF
  1 file changed, 425 insertions(+)
  create mode 100644 docs/superpowers/specs/2026-04-07-service-worker-workbox-offline-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:41:46Z)**_

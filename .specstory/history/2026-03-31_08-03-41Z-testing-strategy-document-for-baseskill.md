@@ -136,6 +136,7 @@ The document must be comprehensive and actionable. Cover:
     - `db-factory.ts` — helper that creates an in-memory RxDB instance pre-seeded with fixture data
 
     Fixture format:
+
     ```typescript
     // tests/fixtures/profiles.ts
     export const aliceProfile = {
@@ -154,16 +155,16 @@ The document must be comprehensive and actionable. Cover:
 
 13. **Coverage Targets Summary**:
 
-    | Category | Target |
-    |----------|--------|
-    | Game logic (override merging, session recorder) | 100% |
-    | RxDB schemas | 100% |
-    | Event bus | 100% |
-    | UI components | 85% line |
-    | E2E critical flows | 100% flow coverage |
-    | Accessibility (axe) | Zero violations |
-    | i18n completeness | Zero missing keys |
-    | Visual regression | Pixel-perfect baselines |
+    | Category                                        | Target                  |
+    | ----------------------------------------------- | ----------------------- |
+    | Game logic (override merging, session recorder) | 100%                    |
+    | RxDB schemas                                    | 100%                    |
+    | Event bus                                       | 100%                    |
+    | UI components                                   | 85% line                |
+    | E2E critical flows                              | 100% flow coverage      |
+    | Accessibility (axe)                             | Zero violations         |
+    | i18n completeness                               | Zero missing keys       |
+    | Visual regression                               | Pixel-perfect baselines |
 
 After writing the file, return "DONE: docs/testing-strategy.md written successfully".
 
@@ -180,15 +181,14 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 
 <details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/docs/testing-strategy.md</summary>
 
+Status: **loading**
+
 </details>
 
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
-
-_**Agent (claude-4.6-sonnet-medium-thinking)**_
-
-DONE: docs/testing-strategy.md written successfully

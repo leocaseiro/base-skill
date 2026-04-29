@@ -6,7 +6,7 @@
 
 _**User**_
 
-/brainstorm milestone 2 @docs/baseskill_milestone_breakdown_85146c93.plan.md:93-110 
+/brainstorm milestone 2 @docs/baseskill_milestone_breakdown_85146c93.plan.md:93-110
 
 ---
 
@@ -19,10 +19,7 @@ I'm initiating brainstorming for Milestone 2's broad requirements including RxDB
 
 _**Agent (composer-2)**_
 
-
 Brainstorming Milestone 2: loading the brainstorming skill, reading the full plan context, and scanning the repo for existing patterns.
-
-
 
 _**Agent (composer-2)**_
 
@@ -33,6 +30,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -46,6 +44,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -55,7 +54,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="unknown" data-tool-name="task_v2">
 <details>
 <summary>Tool use: **task_v2**</summary>
-
 
 Parameters:
 
@@ -68,6 +66,7 @@ Parameters:
   "subagentType": "explore"
 }
 ```
+
 Additional data:
 
 ```json
@@ -77,6 +76,7 @@ Additional data:
   "terminationReason": "completed"
 }
 ```
+
 Result:
 
 ```json
@@ -84,13 +84,14 @@ Result:
   "agentId": "a4ca1862-7cce-44ab-9ec2-76b5b63794d2"
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+
 <summary>Tool use: **task_v2**</summary>
 
 </details></tool-use>
@@ -100,23 +101,23 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Brainstorming milestone**
 
-I'm starting a brainstorm session for Milestone 2, focusing on structuring the content for the markdown document. 
+I'm starting a brainstorm session for Milestone 2, focusing on structuring the content for the markdown document.
 
 **Writing brainstorm**
 
-I'm writing the brainstorm document to `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md` as instructed by the Cursor command. 
+I'm writing the brainstorm document to `docs/brainstorms/YYYY-MM-DD-<topic>-brainstorm.md` as instructed by the Cursor command.
 
 **Resolving brainstorm conflict**
 
-I'm resolving the conflict between the brainstorm command and superpowers skill regarding output paths and workflow handoff. 
+I'm resolving the conflict between the brainstorm command and superpowers skill regarding output paths and workflow handoff.
 
 **Synthesizing brainstorm**
 
-I'm synthesizing research and milestone details into a structured brainstorm plan with phase 0 verdict on brainstorming needs. I'm re-reading the command to understand the phased approach for the brainstorming session. I'm synthesizing the brainstorming approach by reviewing the command's phased structure and identifying key strategic questions to ask. 
+I'm synthesizing research and milestone details into a structured brainstorm plan with phase 0 verdict on brainstorming needs. I'm re-reading the command to understand the phased approach for the brainstorming session. I'm synthesizing the brainstorming approach by reviewing the command's phased structure and identifying key strategic questions to ask.
 
-I'm focusing on high-leverage questions for Phase 1.2 to clarify success criteria and scope before proceeding with full brainstorm. I'm synthesizing the brainstorm summary and formulating the first multiple-choice question for Phase 1.2. 
+I'm focusing on high-leverage questions for Phase 1.2 to clarify success criteria and scope before proceeding with full brainstorm. I'm synthesizing the brainstorm summary and formulating the first multiple-choice question for Phase 1.2.
 
-I'm formulating the first multiple-choice question for Phase 1.2 and will hold off on writing the full file until later phases. 
+I'm formulating the first multiple-choice question for Phase 1.2 and will hold off on writing the full file until later phases.
 
 **Formulating questions**
 
@@ -124,10 +125,7 @@ I'm crafting the milestone exit criteria question for Phase 1.2 with three optio
 
 _**Agent (composer-2)**_
 
-
 Checking `docs/data-model.md` for collection details to ground the brainstorm.
-
-
 
 _**Agent (composer-2)**_
 
@@ -138,6 +136,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -154,6 +153,7 @@ Directory: **/Users/leocaseiro/Sites/base-skill/docs** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -163,7 +163,7 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Creating brainstorm docs**
 
-I'm creating the brainstorm documentation directory and starting to synthesize the plan, repo, and data model constraints into a complete document. I'm synthesizing the plan, repo, and data model constraints into a complete brainstorm document with key decisions and open questions. 
+I'm creating the brainstorm documentation directory and starting to synthesize the plan, repo, and data model constraints into a complete document. I'm synthesizing the plan, repo, and data model constraints into a complete brainstorm document with key decisions and open questions.
 
 **Listing open questions**
 
@@ -171,10 +171,7 @@ I'm identifying the highest-impact open questions from the brainstorm to resolve
 
 _**Agent (composer-2)**_
 
-
 Creating `docs/brainstorms/` and writing the Milestone 2 brainstorm document. Repo research shows design docs are authoritative (`data-model.md` mandates RxDB-only, no localStorage for user data) while the scaffold still uses `localStorage` for theme—M2 should reconcile that.
-
-
 
 _**Agent (composer-2)**_
 
@@ -187,6 +184,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -199,7 +197,6 @@ _**Agent (composer-2)**_
 I need to ask the user about each open question before proceeding to planning phase. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Here’s where things stand after loading the brainstorming skill, reading the milestone breakdown and `docs/data-model.md`, and scanning the repo (no RxDB yet; theme still on `localStorage`; TanStack Router in place; i18n/speech/event bus mostly spec-only).
 
@@ -217,8 +214,8 @@ Here’s where things stand after loading the brainstorming skill, reading the m
 
 **Open question 1 (please pick one):** What counts as “Milestone 2 done” for you?
 
-- **A)** Full scope: all SYNC items **and** all four ASYNC areas (event bus, i18n, theme engine, speech) working end-to-end.  
-- **B)** SYNC-only first ship: RxDB + migrations + hooks + **written** TanStack Query decision; ASYNC items stubbed or deferred to early M3.  
+- **A)** Full scope: all SYNC items **and** all four ASYNC areas (event bus, i18n, theme engine, speech) working end-to-end.
+- **B)** SYNC-only first ship: RxDB + migrations + hooks + **written** TanStack Query decision; ASYNC items stubbed or deferred to early M3.
 - **C)** SYNC + **one** vertical slice through the stack (e.g. themes: RxDB + seed + CSS vars + UI) plus stubs for the other ASYNC streams.
 
 Reply with **A, B, or C** (or a short variant). After that, we can go through the remaining open questions in the doc (locale in URLs, bootstrap storage, plugin API stability) **one at a time**, as the command specifies.
@@ -227,9 +224,9 @@ Reply with **A, B, or C** (or a short variant). After that, we can go through th
 
 **Phase 4 — What do you want next?**
 
-1. **Review and refine** — tighten the brainstorm (I can run a structured pass on the doc).  
-2. **Proceed to planning** — run `/workflows:plan` when you’re satisfied with answers.  
-3. **More questions** — keep clarifying before planning.  
+1. **Review and refine** — tighten the brainstorm (I can run a structured pass on the doc).
+2. **Proceed to planning** — run `/workflows:plan` when you’re satisfied with answers.
+3. **More questions** — keep clarifying before planning.
 4. **Done for now** — pause here.
 
 ---
@@ -258,10 +255,7 @@ A
 
 _**Agent (composer-2)**_
 
-
 Recording choice A (full M2 scope) and continuing with question 3 — asking the next open question one at a time. Updating the brainstorm document.
-
-
 
 _**Agent (composer-2)**_
 
@@ -272,6 +266,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -285,10 +280,7 @@ The response 'A' for Q1 is definitely the M2 scope answer, not a path vs run opt
 
 _**Agent (composer-2)**_
 
-
 Recording **A** (full Milestone 2: SYNC + all four ASYNC streams). Treating **3** as the handoff choice “ask more questions” and proceeding to the next open item (locale / URLs).
-
-
 
 _**Agent (composer-2)**_
 
@@ -301,6 +293,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -316,6 +309,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -325,14 +319,13 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Clarifying user input**
 
-I need to determine if user's '3' refers to bootstrap storage answer or if they're skipping to question 3. I'll ask the locale question first to clarify if user wants to discuss bootstrap for Q3. 
+I need to determine if user's '3' refers to bootstrap storage answer or if they're skipping to question 3. I'll ask the locale question first to clarify if user wants to discuss bootstrap for Q3.
 
 **Asking locale**
 
 I'll ask about bootstrap storage next since the user may have meant that instead of continuing with more questions. </details></think>
 
 _**Agent (composer-2)**_
-
 
 Update applied in `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`: **Milestone 2 “done”** is now **full scope (A)** — all SYNC work plus event bus, i18n, theme engine, and speech in the same milestone.
 
@@ -342,7 +335,7 @@ I’m treating **3** as **“more questions”** from the handoff. If you instea
 
 For `en` / `pt-BR`, which do you want in Milestone 2?
 
-- **A)** **Locale in the URL** (e.g. `/en/...` and `/pt-BR/...`) — better for shareable links and clearer back/forward; more Router and link work up front.  
+- **A)** **Locale in the URL** (e.g. `/en/...` and `/pt-BR/...`) — better for shareable links and clearer back/forward; more Router and link work up front.
 - **B)** **Runtime only** (locale from settings / `i18n.changeLanguage`, same paths for everyone) — simpler Router; URLs don’t encode language.
 
 Reply with **A** or **B** (or a short variant, e.g. “B now, revisit A in M8”).
@@ -357,11 +350,6 @@ A
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -371,17 +359,15 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
 
-
 Recording **A** (locale in URL paths) and updating the brainstorm.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -393,6 +379,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -408,12 +395,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Updated `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`: **locale in URLs (A)** is in **Resolved Questions**, **Key Decisions** (#6), and the i18n bullet under **What We're Building**.
 
@@ -421,8 +408,8 @@ Updated `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`: **locale in URL
 
 `docs/data-model.md` wants RxDB as the main store; the app still needs a sane first paint and DB init. Which policy do you want for Milestone 2?
 
-- **A)** **Strict:** No user/locale/theme data outside RxDB. UI waits on DB (or shows a minimal loader) before interactive shell; no `localStorage` for those concerns.  
-- **B)** **Small allowlist:** Documented keys only — e.g. **last URL locale** (so `/en` vs `/pt-BR` can redirect before settings load), optional **“db opening”** flag; still no duplicate copies of profile/settings/theme.  
+- **A)** **Strict:** No user/locale/theme data outside RxDB. UI waits on DB (or shows a minimal loader) before interactive shell; no `localStorage` for those concerns.
+- **B)** **Small allowlist:** Documented keys only — e.g. **last URL locale** (so `/en` vs `/pt-BR` can redirect before settings load), optional **“db opening”** flag; still no duplicate copies of profile/settings/theme.
 - **C)** **Pragmatic FOUC:** **B** plus **ephemeral theme hint** (class on `<html>` or one key) until RxDB theme applies, then RxDB wins.
 
 Reply with **A**, **B**, or **C** (or a one-line tweak).
@@ -444,10 +431,7 @@ I'm adjusting the bootstrap storage logic to handle default theme/language setti
 
 _**Agent (composer-2)**_
 
-
 Capturing default theme/language and anonymous homepage + full game list as resolved decisions, and updating the brainstorm to align bootstrap and routing implications.
-
-
 
 _**Agent (composer-2)**_
 
@@ -458,6 +442,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -467,7 +452,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -479,6 +463,7 @@ Parameters:
   "pattern": "profile|beforeLoad|picker"
 }
 ```
+
 Additional data:
 
 ```json
@@ -501,13 +486,14 @@ Additional data:
   "totalMatches": 277
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -521,11 +507,8 @@ I'm updating the brainstorm to clarify bootstrap storage defaults for theme and 
 
 _**Agent (composer-2)**_
 
-
 Integrating your product intent: resolving bootstrap storage (defaults + no profile required for browsing) and noting the Milestone 3 route-guard conflict for planning.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -537,6 +520,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -552,6 +536,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -567,6 +552,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -582,6 +568,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -597,6 +584,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -612,19 +600,20 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was captured in `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`:
 
-**Resolved (bootstrap + your product intent)**  
-- **Default theme:** Built-in static tokens / CSS variables so the shell looks correct **before** RxDB; RxDB themes apply for persisted customization.  
-- **Default language:** **`en`** as the default locale, with routing that sends people into **`/en/...`** (URL stays the source of truth for locale).  
-- **Pre-profile UX:** Homepage + **full game list** without choosing a profile; catalog treated as **static registry** (not blocked on RxDB). Profile is for per-child things (progress, bookmarks, parent flows, etc.).  
+**Resolved (bootstrap + your product intent)**
+
+- **Default theme:** Built-in static tokens / CSS variables so the shell looks correct **before** RxDB; RxDB themes apply for persisted customization.
+- **Default language:** **`en`** as the default locale, with routing that sends people into **`/en/...`** (URL stays the source of truth for locale).
+- **Pre-profile UX:** Homepage + **full game list** without choosing a profile; catalog treated as **static registry** (not blocked on RxDB). Profile is for per-child things (progress, bookmarks, parent flows, etc.).
 - **Data model alignment:** No parallel `localStorage` mirror of RxDB for **signed-in** users; exceptions are URL locale, static default theme, and any tiny allowlist you document later (e.g. migration flags).
 
 **Cross-milestone note:** The brainstorm calls out that the milestone breakdown and `docs/ui-ux.md` still read **profile-first** in places; **M3 planning** should adjust `beforeLoad` / guards so browsing isn’t gated on a profile.
@@ -633,7 +622,7 @@ Here’s what was captured in `docs/brainstorms/2026-03-31-milestone-2-brainstor
 
 **Remaining open question (plugin surface):** For M2, should the event bus be **internal-only** (core + first-party games), or do you want **stable third-party registration APIs** in this milestone?
 
-- **A)** Internal-only for M2; document extension points, stabilize public API in a later milestone.  
+- **A)** Internal-only for M2; document extension points, stabilize public API in a later milestone.
 - **B)** M2 ships a **versioned, documented** registration API for plugins/third parties.
 
 Reply **A** or **B** (or a short in-between).
@@ -648,11 +637,6 @@ Simple for now, A
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -662,17 +646,15 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
 
-
 Recording **A** (internal-only event bus for M2) and marking the brainstorm ready for planning.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -684,6 +666,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -699,6 +682,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -714,6 +698,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -729,6 +714,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -744,12 +730,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Updates are in `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`:
 
@@ -785,7 +771,6 @@ When you mention `/workflows:plan`, did you mean `/writing-plans`?
 
 _**Agent (composer-2)**_
 
-
 Here’s the distinction:
 
 - **`/workflows:plan`** — That text came from the **Cursor “brainstorm” command** you used. Its handoff step explicitly says to run `/workflows:plan` next.
@@ -808,10 +793,7 @@ _**User**_
 
 _**Agent (composer-2)**_
 
-
 Using the writing-plans skill to create the Milestone 2 implementation plan. Exploring the codebase and design docs for accurate file paths and patterns.
-
-
 
 _**Agent (composer-2)**_
 
@@ -822,6 +804,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -835,6 +818,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -847,46 +831,47 @@ _**Agent (composer-2)**_
 
 Directory: **/Users/leocaseiro/Sites/base-skill** (33 files)
 
-| File |
-|------|
-| `vitest.config.ts` |
-| `vite.config.ts` |
-| `src/vite-env.d.ts` |
-| `src/test-setup.ts` |
-| `src/routes/_app/settings.tsx` |
-| `src/routes/_app/parent/voices.tsx` |
-| `src/routes/_app/parent/sync.tsx` |
+| File                                   |
+| -------------------------------------- |
+| `vitest.config.ts`                     |
+| `vite.config.ts`                       |
+| `src/vite-env.d.ts`                    |
+| `src/test-setup.ts`                    |
+| `src/routes/_app/settings.tsx`         |
+| `src/routes/_app/parent/voices.tsx`    |
+| `src/routes/_app/parent/sync.tsx`      |
 | `src/routes/_app/parent/overrides.tsx` |
-| `src/routes/_app/parent/index.tsx` |
-| `src/routes/_app/parent/history.tsx` |
-| `src/routes/_app/parent/data.tsx` |
-| `src/routes/_app/parent.tsx` |
-| `src/routes/_app/index.tsx` |
-| `src/routes/_app/index.test.tsx` |
-| `src/routes/_app/game/$gameId.tsx` |
-| `src/routes/_app/dashboard.tsx` |
-| `src/routes/_app.tsx` |
-| `src/routes/__root.tsx` |
-| `src/routes/__root.test.tsx` |
-| `src/router.tsx` |
-| `src/routeTree.gen.ts` |
-| `src/lib/utils.ts` |
-| `src/components/ui/sonner.tsx` |
-| `src/components/ui/sheet.tsx` |
-| `src/components/ui/card.tsx` |
-| `src/components/ui/button.tsx` |
-| `src/components/ui/alert-dialog.tsx` |
-| `src/components/ThemeToggle.tsx` |
-| `src/components/Header.tsx` |
-| `src/components/Footer.tsx` |
-| `playwright.config.ts` |
-| `e2e/smoke.spec.ts` |
-| `e2e/a11y.spec.ts` |
+| `src/routes/_app/parent/index.tsx`     |
+| `src/routes/_app/parent/history.tsx`   |
+| `src/routes/_app/parent/data.tsx`      |
+| `src/routes/_app/parent.tsx`           |
+| `src/routes/_app/index.tsx`            |
+| `src/routes/_app/index.test.tsx`       |
+| `src/routes/_app/game/$gameId.tsx`     |
+| `src/routes/_app/dashboard.tsx`        |
+| `src/routes/_app.tsx`                  |
+| `src/routes/__root.tsx`                |
+| `src/routes/__root.test.tsx`           |
+| `src/router.tsx`                       |
+| `src/routeTree.gen.ts`                 |
+| `src/lib/utils.ts`                     |
+| `src/components/ui/sonner.tsx`         |
+| `src/components/ui/sheet.tsx`          |
+| `src/components/ui/card.tsx`           |
+| `src/components/ui/button.tsx`         |
+| `src/components/ui/alert-dialog.tsx`   |
+| `src/components/ThemeToggle.tsx`       |
+| `src/components/Header.tsx`            |
+| `src/components/Footer.tsx`            |
+| `playwright.config.ts`                 |
+| `e2e/smoke.spec.ts`                    |
+| `e2e/a11y.spec.ts`                     |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -900,16 +885,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -920,6 +901,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -933,6 +915,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -946,6 +929,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -959,6 +943,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -969,7 +954,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -979,6 +963,7 @@ Parameters:
   "pattern": "app_meta|migration"
 }
 ```
+
 Additional data:
 
 ```json
@@ -997,13 +982,14 @@ Additional data:
   "totalMatches": 26
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -1014,7 +1000,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -1024,6 +1009,7 @@ Parameters:
   "pattern": "GameEventBus|event"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1042,23 +1028,19 @@ Additional data:
   "totalMatches": 45
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1069,6 +1051,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1082,6 +1065,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1095,6 +1079,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1108,6 +1093,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1121,11 +1107,6 @@ I'm setting up RxDB storage with the indexeddb plugin using the standard package
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1135,6 +1116,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1148,6 +1130,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1157,11 +1140,11 @@ _**Agent (composer-2)**_
 <think><details><summary>Thought Process</summary>
 **Creating docs directory**
 
-I'm creating the docs/superpowers/plans directory and planning to use RxDB with rxdb package and dexie storage. 
+I'm creating the docs/superpowers/plans directory and planning to use RxDB with rxdb package and dexie storage.
 
 **Updating storage adapter**
 
-I'm updating the storage adapter import to use `getRxStorageDexie` as per RxDB 14+ docs and aligning with BaseSkill's data-model requirements. I'm creating a plan with 15-25 tasks for migrating to RxDB 14+ with typed schemas and migration strategies. 
+I'm updating the storage adapter import to use `getRxStorageDexie` as per RxDB 14+ docs and aligning with BaseSkill's data-model requirements. I'm creating a plan with 15-25 tasks for migrating to RxDB 14+ with typed schemas and migration strategies.
 
 **Restructuring routes**
 
@@ -1169,10 +1152,7 @@ I'm restructuring routes with TanStack file routes and implementing locale suppo
 
 _**Agent (composer-2)**_
 
-
 Creating `docs/superpowers/plans` and writing the implementation plan.
-
-
 
 _**Agent (composer-2)**_
 
@@ -1186,6 +1166,7 @@ Directory: **/Users/leocaseiro/Sites/base-skill/docs** (0 files)
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -1199,6 +1180,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1212,11 +1194,6 @@ I'm ensuring parent directories exist for new files using the Write tool's direc
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1228,17 +1205,15 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Fixing the test teardown example in the plan and updating the brainstorm to point to this plan.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1250,6 +1225,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1265,6 +1241,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1280,12 +1257,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 I'm using the **writing-plans** skill to produce this implementation plan.
 
@@ -1295,11 +1272,11 @@ I'm using the **writing-plans** skill to produce this implementation plan.
 
 It includes:
 
-- Required header (goal, architecture, tech stack) and @**superpowers/subagent-driven-development** / @**superpowers/executing-plans** pointer  
-- **File structure** table (new `src/db/*`, providers, i18n, `$locale` routes, speech, game registry, ADR)  
-- **17 ordered tasks** (deps → schemas → migrations → `DbProvider` / `useRxQuery` → ADR → event bus → i18n → locale route move → providers → theme → speech → registry → home slice → E2E) with checkboxes, commands, and concrete test/code snippets where it helps  
-- Notes on **RxDB import drift**, **regenerating `routeTree.gen.ts`**, and **M3** profile guards vs anonymous home  
-- **Post-plan review** and **execution handoff** per the skill  
+- Required header (goal, architecture, tech stack) and @**superpowers/subagent-driven-development** / @**superpowers/executing-plans** pointer
+- **File structure** table (new `src/db/*`, providers, i18n, `$locale` routes, speech, game registry, ADR)
+- **17 ordered tasks** (deps → schemas → migrations → `DbProvider` / `useRxQuery` → ADR → event bus → i18n → locale route move → providers → theme → speech → registry → home slice → E2E) with checkboxes, commands, and concrete test/code snippets where it helps
+- Notes on **RxDB import drift**, **regenerating `routeTree.gen.ts`**, and **M3** profile guards vs anonymous home
+- **Post-plan review** and **execution handoff** per the skill
 
 The brainstorm doc now **links to this plan** and refers to **`/writing-plans`** instead of `/workflows:plan`.
 
@@ -1324,14 +1301,15 @@ Why do we need Dexie? @docs/superpowers/plans/2026-03-31-milestone-2-data-layer.
 _**Agent (composer-2)**_
 
 <think><details><summary>Thought Process</summary>
-The user is asking why Dexie is listed as a dependency. Let me check what RxDB's current storage situation is. 
+The user is asking why Dexie is listed as a dependency. Let me check what RxDB's current storage situation is.
 
 In RxDB, the storage layer is pluggable. Historically, RxDB offered several storage backends:
+
 - `rxdb/plugins/storage-dexie` - uses Dexie.js as the IndexedDB wrapper
 - `rxdb/plugins/storage-indexeddb` - direct IndexedDB access (newer, premium in some versions)
 - `rxdb/plugins/storage-memory` - in-memory for tests
 
-The plan lists `dexie` as a direct dependency alongside `rxdb`. 
+The plan lists `dexie` as a direct dependency alongside `rxdb`.
 
 Looking at whether that's actually necessary, I realize that in recent RxDB versions, `dexie` is a peer dependency of the storage-dexie plugin, so it does need to be installed separately if you're using that adapter. But the real question is whether we need the Dexie storage adapter at all, or if another option would work better.
 
@@ -1363,23 +1341,17 @@ Want me to update the plan to make Dexie **conditional** (verify after install, 
 _**User**_
 
 > Want me to update the plan to make Dexie conditional (verify after install, prefer direct IndexedDB if available, fall back to Dexie)?
-Y
+> Y
 
 ---
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1390,6 +1362,7 @@ Parameters:
   "pattern": "[Dd]exie|IndexedDB|storage"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1408,23 +1381,19 @@ Additional data:
   "totalMatches": 17
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1435,6 +1404,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1448,11 +1418,6 @@ I'm adding a dedicated Storage choice section to clarify RxDB usage and avoid co
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1462,6 +1427,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1475,17 +1441,15 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Updating the plan: adding an explicit browser-storage policy, making Task 1 install `rxdb` without `dexie` by default, and revising Tasks 2 and 5.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1497,6 +1461,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1512,6 +1477,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1527,6 +1493,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1542,6 +1509,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1557,6 +1525,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1572,6 +1541,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1587,6 +1557,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1602,6 +1573,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1617,6 +1589,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1632,23 +1605,18 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1659,6 +1627,7 @@ Parameters:
   "pattern": "[Dd]exie"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1677,19 +1646,19 @@ Additional data:
   "totalMatches": 12
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what changed in `docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md`:
 
@@ -1721,10 +1690,23 @@ I undid
 
 _**Agent (composer-2)**_
 
-
 Checking the plan file after your revert so we can lock in Dexie as the standard free IndexedDB path.
 
+_**Agent (composer-2)**_
 
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
 
 _**Agent (composer-2)**_
 
@@ -1735,37 +1717,15 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
-
-_**Agent (composer-2)**_
-
-<tool-use data-tool-type="read" data-tool-name="read_file_v2">
-<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md</summary>
-
-</details>
-</tool-use>
-
-<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2**</summary>
-
-</details></tool-use>
-
-_**Agent (composer-2)**_
-
 
 Replacing the leftover conditional “Browser storage policy” with an explicit Dexie-only rationale and removing the unused `wrappedDexieStorage` import from the Task 2 code snippet.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2">
@@ -1777,6 +1737,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1792,6 +1753,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1807,6 +1769,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1822,6 +1785,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1837,6 +1801,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
@@ -1852,16 +1817,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
-
-
-
-
 
 _**Agent (composer-2)**_
 
@@ -1874,12 +1835,12 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
 
 _**Agent (composer-2)**_
-
 
 Here’s what was wrong after the partial revert: **Task 1 / package.json** were already back on **`rxdb` + `dexie`**, but the **intro still had the old “Dexie optional / prefer direct IndexedDB” policy**, which contradicted your decision.
 
@@ -1904,23 +1865,19 @@ _**User**_
 no need more than 2 seed-themes for now.
 
 make sure to commit on every step.
-Be free to ask any clarification if you need 
+Be free to ask any clarification if you need
 
 ---
 
 _**Agent (composer-2)**_
 
-
 Updating the plan: cap seed themes at two and add an explicit commit after every step. Scanning the plan for seed-theme references and steps without commits.
-
-
 
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -1931,6 +1888,7 @@ Parameters:
   "pattern": "seed|4–6|4-6|Commit|commit"
 }
 ```
+
 Additional data:
 
 ```json
@@ -1949,13 +1907,14 @@ Additional data:
   "totalMatches": 43
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
 </details></tool-use>
@@ -1969,11 +1928,6 @@ I'm reading the full file to identify remaining '4-6' or '46' patterns and tasks
 
 _**Agent (composer-2)**_
 
-
-
-
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -1983,6 +1937,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -1996,6 +1951,7 @@ _**Agent (composer-2)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>

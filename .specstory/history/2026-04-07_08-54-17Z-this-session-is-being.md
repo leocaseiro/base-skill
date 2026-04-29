@@ -9,13 +9,14 @@ _**User (2026-04-07 08:54:17Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    This session is a continuation of a long implementation task. A PR (leocaseiro/base-skill#28) was already created for the unified `<Slot>` component. The user tested the implementation and reported 4 post-PR bugs to fix:
    1. Slot tiles should have same skeuomorphic appearance (bg-card, shadow) as bank tiles
    2. Bank hole not showing when dragging bank tiles; can't drag tiles out of slots; slot should show hole when its tile is being dragged
    3. Auto-eject (lock-auto-eject mode) should animate the tile flying back to the bank, not just instantly reappear
    4. In WordSpell lock-auto-eject mode, dragging a wrong tile before auto-eject fires causes the tile to disappear from the game entirely
-   
+
    Mid-session, a regression was introduced where placed tiles became invisible in their slots. The user also gave a workflow instruction: "wait my confirmation when fixing a bug to push."
 
 2. Key Technical Concepts:
@@ -37,6 +38,7 @@ Summary:
    - **`src/components/answer-game/answer-game-reducer.ts`**
      - EJECT_TILE: clears `dragActiveTileId` when it matches the ejected tile (Issue 4 fix)
      - PLACE_TILE: clears `dragActiveTileId` when it matches the placed tile (regression fix — definitive fix for `isBeingDragged` stuck true)
+
      ```typescript
      case 'PLACE_TILE': {
        // A tile placement always ends any active drag for that tile.
@@ -65,6 +67,7 @@ Summary:
      - Added `cleanupInProgressRef = useRef(false)` to prevent re-entry
      - Modified `cleanupGhost` to clear `capturedElRef`/`capturedPointerIdRef` BEFORE calling `releasePointerCapture` (prevents lostpointercapture re-entry)
      - Added native `lostpointercapture` listener in `onPointerDown` for immediate ghost cleanup when element is removed from DOM mid-drag (Issue 4 fix)
+
      ```typescript
      const cleanupInProgressRef = useRef(false);
      
@@ -101,6 +104,7 @@ Summary:
      - Added `import { useAnswerGameDispatch }` and `dispatch = useAnswerGameDispatch()`
      - HTML5 DnD: added `onDragStart` dispatch `SET_DRAG_ACTIVE: tileId`; added `onDrop` dispatch `SET_DRAG_ACTIVE: null` (handles cancelled drags)
      - Touch: added `onDragStart` + `onDragCancel` dispatch, wrapped `onDrop` to also dispatch `SET_DRAG_ACTIVE: null`
+
      ```typescript
      return draggable({
        element,
@@ -137,6 +141,7 @@ Summary:
      - Extended animation effect to trigger eject animation (after 350ms setTimeout, `triggerEjectReturn` with `document.querySelector<HTMLElement>('[data-tile-bank]')` as target)
      - Added `dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })` in `dropTargetForElements.onDrop` for bank tile drops (belt-and-suspenders fix)
      - Effect deps: `[isWrong, tileId, config.wrongTileBehavior, dragRef]`; drop target deps: `[index, handleDrop, dispatch]`
+
      ```typescript
      const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
      
@@ -169,6 +174,7 @@ Summary:
      - Added `bg-card shadow-md` to filled button (Issue 1)
      - Added `overflow-hidden` to stateClasses (Issue 1)
      - Added hole rendering when `isBeingDragged`:
+
      ```tsx
      {isEmpty ? (
        <>{children(renderProps)}{showCursor ? <span .../> : null}</>
@@ -241,6 +247,7 @@ Summary:
    All 4 reported bugs were addressed in commit `d10f2c7` (force-pushed to `claude/bold-chatelet`). The most recent work was fixing the regression where placed tiles showed as holes:
 
    The definitive fix was adding `dragActiveTileId` clearing to the `PLACE_TILE` reducer in `answer-game-reducer.ts`:
+
    ```typescript
    // A tile placement always ends any active drag for that tile.
    const dragActiveTileId =
@@ -248,6 +255,7 @@ Summary:
        ? null
        : state.dragActiveTileId;
    ```
+
    This is included in all three return paths of the PLACE_TILE case (reject, correct, wrong-lock).
 
    The push was done with `SKIP_STORYBOOK=1 SKIP_VR=1 git push --force-with-lease` and all pre-push checks passed (355 tests, typecheck, lint, E2E).
@@ -296,84 +304,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:54:34Z)**_
  `./src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile sliding from its slot toward a target position,
-28	 * then calls onComplete. Used for auto-eject return animation.
-29	 */
-30	export const triggerEjectReturn = (
-31	  el: HTMLElement,
-32	  targetEl: HTMLElement | null,
-33	  onComplete: () => void,
-34	): void => {
-35	  if (!targetEl) {
-36	    el.style.transition = 'opacity 300ms ease-in';
-37	    el.style.opacity = '0';
-38	    el.addEventListener(
-39	      'transitionend',
-40	      () => {
-41	        el.style.removeProperty('transition');
-42	        el.style.removeProperty('opacity');
-43	        onComplete();
-44	      },
-45	      { once: true },
-46	    );
-47	    return;
-48	  }
-49	
-50	  const slotRect = el.getBoundingClientRect();
-51	  const bankRect = targetEl.getBoundingClientRect();
-52	  const deltaX =
-53	    bankRect.left +
-54	    bankRect.width / 2 -
-55	    (slotRect.left + slotRect.width / 2);
-56	  const deltaY =
-57	    bankRect.top +
-58	    bankRect.height / 2 -
-59	    (slotRect.top + slotRect.height / 2);
-60	
-61	  el.style.transition =
-62	    'transform 300ms ease-in, opacity 300ms ease-in';
-63	  el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
-64	  el.style.opacity = '0.7';
-65	
-66	  el.addEventListener(
-67	    'transitionend',
-68	    () => {
-69	      el.style.removeProperty('transition');
-70	      el.style.removeProperty('transform');
-71	      el.style.removeProperty('opacity');
-72	      onComplete();
-73	    },
-74	    { once: true },
-75	  );
-76	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile sliding from its slot toward a target position,
+28  * then calls onComplete. Used for auto-eject return animation.
+29  */
+30 export const triggerEjectReturn = (
+31   el: HTMLElement,
+32   targetEl: HTMLElement | null,
+33   onComplete: () => void,
+34 ): void => {
+35   if (!targetEl) {
+36     el.style.transition = 'opacity 300ms ease-in';
+37     el.style.opacity = '0';
+38     el.addEventListener(
+39       'transitionend',
+40       () => {
+41         el.style.removeProperty('transition');
+42         el.style.removeProperty('opacity');
+43         onComplete();
+44       },
+45       { once: true },
+46     );
+47     return;
+48   }
+49 
+50   const slotRect = el.getBoundingClientRect();
+51   const bankRect = targetEl.getBoundingClientRect();
+52   const deltaX =
+53     bankRect.left +
+54     bankRect.width / 2 -
+55     (slotRect.left + slotRect.width / 2);
+56   const deltaY =
+57     bankRect.top +
+58     bankRect.height / 2 -
+59     (slotRect.top + slotRect.height / 2);
+60 
+61   el.style.transition =
+62     'transform 300ms ease-in, opacity 300ms ease-in';
+63   el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+64   el.style.opacity = '0.7';
+65 
+66   el.addEventListener(
+67     'transitionend',
+68     () => {
+69       el.style.removeProperty('transition');
+70       el.style.removeProperty('transform');
+71       el.style.removeProperty('opacity');
+72       onComplete();
+73     },
+74     { once: true },
+75   );
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:54:46Z)**_
@@ -385,101 +394,102 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:54:46Z)**_
  `./src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { useSlotBehavior } from './useSlotBehavior';
-2	import type { SlotRenderProps } from './useSlotBehavior';
-3	import type { ReactNode, Ref } from 'react';
-4	
-5	interface SlotProps {
-6	  index: number;
-7	  as?: 'li' | 'span' | 'div';
-8	  className?: string;
-9	  children: (props: SlotRenderProps) => ReactNode;
-10	}
-11	
-12	export const Slot = ({
-13	  index,
-14	  as: Tag = 'li',
-15	  className,
-16	  children,
-17	}: SlotProps) => {
-18	  const {
-19	    renderProps,
-20	    slotRef,
-21	    dragRef,
-22	    handleClick,
-23	    pointerHandlers,
-24	    isBeingDragged,
-25	  } = useSlotBehavior(index);
-26	
-27	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-28	
-29	  const ariaLabel = isEmpty
-30	    ? `Slot ${index + 1}, empty`
-31	    : `Slot ${index + 1}, filled with ${label}`;
-32	
-33	  const stateClasses = [
-34	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-35	    isEmpty && !isActive
-36	      ? 'border-border'
-37	      : isEmpty && isActive
-38	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-39	        : isWrong
-40	          ? 'border-destructive bg-destructive/10 text-destructive'
-41	          : 'border-primary bg-primary/10 text-primary',
-42	  ]
-43	    .filter(Boolean)
-44	    .join(' ');
-45	
-46	  return (
-47	    <Tag
-48	      ref={
-49	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-50	      }
-51	      aria-label={ariaLabel}
-52	      data-zone-index={index}
-53	      className={[stateClasses, className].filter(Boolean).join(' ')}
-54	    >
-55	      {isEmpty ? (
-56	        <>
-57	          {children(renderProps)}
-58	          {showCursor ? (
-59	            <span
-60	              aria-hidden="true"
-61	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-62	            />
-63	          ) : null}
-64	        </>
-65	      ) : isBeingDragged ? (
-66	        <div
-67	          className="size-full bg-muted/30 shadow-inner"
-68	          aria-hidden="true"
-69	        />
-70	      ) : (
-71	        <button
-72	          ref={dragRef}
-73	          type="button"
-74	          className="flex size-full touch-none select-none cursor-grab items-center justify-center bg-card shadow-md"
-75	          onClick={handleClick}
-76	          onPointerDown={pointerHandlers.onPointerDown}
-77	          onPointerMove={pointerHandlers.onPointerMove}
-78	          onPointerUp={pointerHandlers.onPointerUp}
-79	          onPointerCancel={pointerHandlers.onPointerCancel}
-80	        >
-81	          {children(renderProps)}
-82	        </button>
-83	      )}
-84	    </Tag>
-85	  );
-86	};
+1 import { useSlotBehavior } from './useSlotBehavior';
+2 import type { SlotRenderProps } from './useSlotBehavior';
+3 import type { ReactNode, Ref } from 'react';
+4 
+5 interface SlotProps {
+6   index: number;
+7   as?: 'li' | 'span' | 'div';
+8   className?: string;
+9   children: (props: SlotRenderProps) => ReactNode;
+10 }
+11 
+12 export const Slot = ({
+13   index,
+14   as: Tag = 'li',
+15   className,
+16   children,
+17 }: SlotProps) => {
+18   const {
+19     renderProps,
+20     slotRef,
+21     dragRef,
+22     handleClick,
+23     pointerHandlers,
+24     isBeingDragged,
+25   } = useSlotBehavior(index);
+26 
+27   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+28 
+29   const ariaLabel = isEmpty
+30     ? `Slot ${index + 1}, empty`
+31     : `Slot ${index + 1}, filled with ${label}`;
+32 
+33   const stateClasses = [
+34     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+35     isEmpty && !isActive
+36       ? 'border-border'
+37       : isEmpty && isActive
+38         ? 'border-primary ring-2 ring-primary ring-offset-2'
+39         : isWrong
+40           ? 'border-destructive bg-destructive/10 text-destructive'
+41           : 'border-primary bg-primary/10 text-primary',
+42   ]
+43     .filter(Boolean)
+44     .join(' ');
+45 
+46   return (
+47     <Tag
+48       ref={
+49         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+50       }
+51       aria-label={ariaLabel}
+52       data-zone-index={index}
+53       className={[stateClasses, className].filter(Boolean).join(' ')}
+54     >
+55       {isEmpty ? (
+56         <>
+57           {children(renderProps)}
+58           {showCursor ? (
+59             <span
+60               aria-hidden="true"
+61               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+62             />
+63           ) : null}
+64         </>
+65       ) : isBeingDragged ? (
+66         <div
+67           className="size-full bg-muted/30 shadow-inner"
+68           aria-hidden="true"
+69         />
+70       ) : (
+71         <button
+72           ref={dragRef}
+73           type="button"
+74           className="flex size-full touch-none select-none cursor-grab items-center justify-center bg-card shadow-md"
+75           onClick={handleClick}
+76           onPointerDown={pointerHandlers.onPointerDown}
+77           onPointerMove={pointerHandlers.onPointerMove}
+78           onPointerUp={pointerHandlers.onPointerUp}
+79           onPointerCancel={pointerHandlers.onPointerCancel}
+80         >
+81           {children(renderProps)}
+82         </button>
+83       )}
+84     </Tag>
+85   );
+86 };
 87
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:25Z)**_
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:27Z)**_
 
-Found the bug. The slot has `overflow-hidden` in its state classes, so when `triggerEjectReturn` applies `transform: translate(...)` to the button *inside* the slot, the movement gets clipped by the parent — the tile slides visually within the slot box instead of flying out.
+Found the bug. The slot has `overflow-hidden` in its state classes, so when `triggerEjectReturn` applies `transform: translate(...)` to the button _inside_ the slot, the movement gets clipped by the parent — the tile slides visually within the slot box instead of flying out.
 
 The fix: create a fixed-position ghost element (like the touch drag ghost) that sits outside the DOM tree, animate that toward the bank, hide the original immediately.
 
@@ -491,6 +501,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:55:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:38Z)**_
@@ -504,27 +515,28 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:55:39Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-138	      triggerShake(el);
-139	
-140	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-141	        // After the shake settles, animate the tile flying back toward the bank.
-142	        // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
-143	        const timerId = setTimeout(() => {
-144	          const tileEl = dragRef.current;
-145	          if (!tileEl) return;
-146	          const bankEl =
-147	            document.querySelector<HTMLElement>('[data-tile-bank]');
-148	          triggerEjectReturn(tileEl, bankEl, () => {
-149	            // Keep the tile invisible in its slot until EJECT_TILE clears it.
-150	            tileEl.style.opacity = '0';
-151	          });
-152	        }, 350);
-153	        return () => clearTimeout(timerId);
-154	      }
-155	    } else if (freshlyPlaced && !isWrong) {
-156	      triggerPop(el);
-157	    }
+138       triggerShake(el);
+139 
+140       if (config.wrongTileBehavior === 'lock-auto-eject') {
+141         // After the shake settles, animate the tile flying back toward the bank.
+142         // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
+143         const timerId = setTimeout(() => {
+144           const tileEl = dragRef.current;
+145           if (!tileEl) return;
+146           const bankEl =
+147             document.querySelector<HTMLElement>('[data-tile-bank]');
+148           triggerEjectReturn(tileEl, bankEl, () => {
+149             // Keep the tile invisible in its slot until EJECT_TILE clears it.
+150             tileEl.style.opacity = '0';
+151           });
+152         }, 350);
+153         return () => clearTimeout(timerId);
+154       }
+155     } else if (freshlyPlaced && !isWrong) {
+156       triggerPop(el);
+157     }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:43Z)**_
@@ -535,6 +547,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:55:43Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:48Z)**_
@@ -550,6 +563,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.36s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:54Z)**_
@@ -572,6 +586,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:55:57Z)**_
@@ -582,6 +597,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:55:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:56:09Z)**_
@@ -607,6 +623,7 @@ Done in 7.11s.
 
 Done in 0.96s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:56:12Z)**_
@@ -647,9 +664,9 @@ The user did not describe a specific issue. Read the debug log and summarize any
 ## Settings
 
 Remember that settings are in:
-* user - /Users/leocaseiro/.claude/settings.json
-* project - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.json
-* local - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.local.json
+- user - /Users/leocaseiro/.claude/settings.json
+- project - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.json
+- local - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.local.json
 
 ## Instructions
 
@@ -658,7 +675,6 @@ Remember that settings are in:
 3. Consider launching the claude-code-guide subagent to understand the relevant Claude Code features
 4. Explain what you found in plain language
 5. Suggest concrete fixes or next steps
-
 
 ---
 
@@ -712,6 +728,7 @@ Find all EJECT_TILE dispatch sites
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts:142:        // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTileEvaluation.test.tsx:115:  it('lock-auto-eject: EJECT_TILE fires after 1000ms for wrong tile', () => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:59:02Z)**_
@@ -721,87 +738,88 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:59:02Z)**_
  `./src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile flying from its slot toward the tile bank,
-28	 * then calls onComplete. Uses a fixed-position ghost so the animation
-29	 * escapes any overflow-hidden ancestors on the slot element.
-30	 */
-31	export const triggerEjectReturn = (
-32	  el: HTMLElement,
-33	  targetEl: HTMLElement | null,
-34	  onComplete: () => void,
-35	): void => {
-36	  const elRect = el.getBoundingClientRect();
-37	
-38	  // Clone into a fixed-position ghost so it can travel beyond overflow-hidden parents
-39	  const ghost = el.cloneNode(true) as HTMLElement;
-40	  ghost.style.position = 'fixed';
-41	  ghost.style.top = `${elRect.top}px`;
-42	  ghost.style.left = `${elRect.left}px`;
-43	  ghost.style.width = `${elRect.width}px`;
-44	  ghost.style.height = `${elRect.height}px`;
-45	  ghost.style.margin = '0';
-46	  ghost.style.zIndex = '9999';
-47	  ghost.style.pointerEvents = 'none';
-48	  document.body.append(ghost);
-49	
-50	  // Hide the original immediately so only the ghost is visible
-51	  el.style.opacity = '0';
-52	
-53	  const cleanup = () => {
-54	    ghost.remove();
-55	    onComplete();
-56	  };
-57	
-58	  if (!targetEl) {
-59	    ghost.style.transition = 'opacity 300ms ease-in';
-60	    void ghost.offsetWidth;
-61	    ghost.style.opacity = '0';
-62	    ghost.addEventListener('transitionend', cleanup, { once: true });
-63	    return;
-64	  }
-65	
-66	  const bankRect = targetEl.getBoundingClientRect();
-67	  const deltaX =
-68	    bankRect.left + bankRect.width / 2 - (elRect.left + elRect.width / 2);
-69	  const deltaY =
-70	    bankRect.top + bankRect.height / 2 - (elRect.top + elRect.height / 2);
-71	
-72	  ghost.style.transition =
-73	    'transform 300ms ease-in, opacity 300ms ease-in';
-74	  void ghost.offsetWidth;
-75	  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
-76	  ghost.style.opacity = '0.7';
-77	
-78	  ghost.addEventListener('transitionend', cleanup, { once: true });
-79	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile flying from its slot toward the tile bank,
+28  * then calls onComplete. Uses a fixed-position ghost so the animation
+29  * escapes any overflow-hidden ancestors on the slot element.
+30  */
+31 export const triggerEjectReturn = (
+32   el: HTMLElement,
+33   targetEl: HTMLElement | null,
+34   onComplete: () => void,
+35 ): void => {
+36   const elRect = el.getBoundingClientRect();
+37 
+38   // Clone into a fixed-position ghost so it can travel beyond overflow-hidden parents
+39   const ghost = el.cloneNode(true) as HTMLElement;
+40   ghost.style.position = 'fixed';
+41   ghost.style.top = `${elRect.top}px`;
+42   ghost.style.left = `${elRect.left}px`;
+43   ghost.style.width = `${elRect.width}px`;
+44   ghost.style.height = `${elRect.height}px`;
+45   ghost.style.margin = '0';
+46   ghost.style.zIndex = '9999';
+47   ghost.style.pointerEvents = 'none';
+48   document.body.append(ghost);
+49 
+50   // Hide the original immediately so only the ghost is visible
+51   el.style.opacity = '0';
+52 
+53   const cleanup = () => {
+54     ghost.remove();
+55     onComplete();
+56   };
+57 
+58   if (!targetEl) {
+59     ghost.style.transition = 'opacity 300ms ease-in';
+60     void ghost.offsetWidth;
+61     ghost.style.opacity = '0';
+62     ghost.addEventListener('transitionend', cleanup, { once: true });
+63     return;
+64   }
+65 
+66   const bankRect = targetEl.getBoundingClientRect();
+67   const deltaX =
+68     bankRect.left + bankRect.width / 2 - (elRect.left + elRect.width / 2);
+69   const deltaY =
+70     bankRect.top + bankRect.height / 2 - (elRect.top + elRect.height / 2);
+71 
+72   ghost.style.transition =
+73     'transform 300ms ease-in, opacity 300ms ease-in';
+74   void ghost.offsetWidth;
+75   ghost.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+76   ghost.style.opacity = '0.7';
+77 
+78   ghost.addEventListener('transitionend', cleanup, { once: true });
+79 };
 80
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:59:41Z)**_
@@ -813,131 +831,132 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:59:42Z)**_
  `./src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTouchDrag } from './useTouchDrag';
-5	import type { TouchDragHandlers } from './useTouchDrag';
-6	import type { RefObject } from 'react';
-7	
-8	export interface SlotTileDrag extends TouchDragHandlers {
-9	  dragRef: RefObject<HTMLButtonElement | null>;
-10	}
-11	
-12	interface UseSlotTileDragOptions {
-13	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-14	  tileId: string | null;
-15	  label: string | null;
-16	  zoneIndex: number;
-17	  /**
-18	   * Called when the dragged tile is dropped on a target zone.
-19	   * REMOVE_TILE is dispatched before this callback, so the tile is back
-20	   * in the bank and can be placed normally.
-21	   */
-22	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-23	}
-24	
-25	/**
-26	 * Enables an occupied slot tile to be dragged back to the bank or to another
-27	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-28	 *
-29	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-30	 * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
-31	 * dispatched first (returning the tile to the bank) then onDrop is called so
-32	 * the drop target can place it normally. On cancel or missed drop, the tile
-33	 * snaps back via SET_DRAG_ACTIVE with tileId: null.
-34	 */
-35	export const useSlotTileDrag = ({
-36	  tileId,
-37	  label,
-38	  zoneIndex,
-39	  onDrop,
-40	}: UseSlotTileDragOptions): SlotTileDrag => {
-41	  const dispatch = useAnswerGameDispatch();
-42	  const dragRef = useRef<HTMLButtonElement>(null);
-43	
-44	  // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
-45	  const onDropRef = useRef(onDrop);
-46	  useEffect(() => {
-47	    onDropRef.current = onDrop;
-48	  }, [onDrop]);
-49	
-50	  // HTML5 DnD — desktop
-51	  useEffect(() => {
-52	    if (!tileId) return;
-53	    const element = dragRef.current;
-54	    if (!element) return;
-55	    const currentTileId = tileId;
-56	    const currentZoneIndex = zoneIndex;
-57	    return draggable({
-58	      element,
-59	      // Include sourceZoneIndex so the drop target can identify slot-tile drags
-60	      // and defer placement to this hook's onDrop handler.
-61	      getInitialData: () => ({
-62	        tileId: currentTileId,
-63	        sourceZoneIndex: currentZoneIndex,
-64	      }),
-65	      onDragStart: () =>
-66	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-67	      onDrop: ({ location }) => {
-68	        const targets = location.current.dropTargets;
-69	        if (targets.length > 0) {
-70	          // Confirmed drop on a zone: remove tile from source slot first,
-71	          // then place via the onDrop callback.
-72	          const targetZoneIndex = targets[0]?.data['zoneIndex'];
-73	          if (typeof targetZoneIndex === 'number') {
-74	            dispatch({
-75	              type: 'REMOVE_TILE',
-76	              zoneIndex: currentZoneIndex,
-77	            });
-78	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-79	            onDropRef.current(currentTileId, targetZoneIndex);
-80	          } else {
-81	            // Drop target exists but has no zoneIndex — treat as cancel.
-82	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-83	          }
-84	        } else {
-85	          // No drop target — cancel, tile snaps back.
-86	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-87	        }
-88	      },
-89	    });
-90	  }, [tileId, zoneIndex, dispatch]);
-91	
-92	  // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
-93	  const handleTouchDrop = useCallback(
-94	    (droppedTileId: string, targetZoneIndex: number) => {
-95	      dispatch({ type: 'REMOVE_TILE', zoneIndex });
-96	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-97	      onDrop(droppedTileId, targetZoneIndex);
-98	    },
-99	    [dispatch, zoneIndex, onDrop],
-100	  );
-101	
-102	  // Pointer-events drag — touch / mobile
-103	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-104	    useTouchDrag({
-105	      tileId: tileId ?? '',
-106	      label: label ?? '',
-107	      onDragStart: tileId
-108	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-109	        : undefined,
-110	      onDragCancel: tileId
-111	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })
-112	        : undefined,
-113	      onDrop: handleTouchDrop,
-114	    });
-115	
-116	  return {
-117	    dragRef,
-118	    onPointerDown,
-119	    onPointerMove,
-120	    onPointerUp,
-121	    onPointerCancel,
-122	  };
-123	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTouchDrag } from './useTouchDrag';
+5 import type { TouchDragHandlers } from './useTouchDrag';
+6 import type { RefObject } from 'react';
+7 
+8 export interface SlotTileDrag extends TouchDragHandlers {
+9   dragRef: RefObject<HTMLButtonElement | null>;
+10 }
+11 
+12 interface UseSlotTileDragOptions {
+13   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+14   tileId: string | null;
+15   label: string | null;
+16   zoneIndex: number;
+17   /**
+18    * Called when the dragged tile is dropped on a target zone.
+19    * REMOVE_TILE is dispatched before this callback, so the tile is back
+20    * in the bank and can be placed normally.
+21    */
+22   onDrop: (tileId: string, targetZoneIndex: number) => void;
+23 }
+24 
+25 /**
+26  * Enables an occupied slot tile to be dragged back to the bank or to another
+27  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+28  *
+29  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+30  * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
+31  * dispatched first (returning the tile to the bank) then onDrop is called so
+32  * the drop target can place it normally. On cancel or missed drop, the tile
+33  * snaps back via SET_DRAG_ACTIVE with tileId: null.
+34  */
+35 export const useSlotTileDrag = ({
+36   tileId,
+37   label,
+38   zoneIndex,
+39   onDrop,
+40 }: UseSlotTileDragOptions): SlotTileDrag => {
+41   const dispatch = useAnswerGameDispatch();
+42   const dragRef = useRef<HTMLButtonElement>(null);
+43 
+44   // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
+45   const onDropRef = useRef(onDrop);
+46   useEffect(() => {
+47     onDropRef.current = onDrop;
+48   }, [onDrop]);
+49 
+50   // HTML5 DnD — desktop
+51   useEffect(() => {
+52     if (!tileId) return;
+53     const element = dragRef.current;
+54     if (!element) return;
+55     const currentTileId = tileId;
+56     const currentZoneIndex = zoneIndex;
+57     return draggable({
+58       element,
+59       // Include sourceZoneIndex so the drop target can identify slot-tile drags
+60       // and defer placement to this hook's onDrop handler.
+61       getInitialData: () => ({
+62         tileId: currentTileId,
+63         sourceZoneIndex: currentZoneIndex,
+64       }),
+65       onDragStart: () =>
+66         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+67       onDrop: ({ location }) => {
+68         const targets = location.current.dropTargets;
+69         if (targets.length > 0) {
+70           // Confirmed drop on a zone: remove tile from source slot first,
+71           // then place via the onDrop callback.
+72           const targetZoneIndex = targets[0]?.data['zoneIndex'];
+73           if (typeof targetZoneIndex === 'number') {
+74             dispatch({
+75               type: 'REMOVE_TILE',
+76               zoneIndex: currentZoneIndex,
+77             });
+78             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+79             onDropRef.current(currentTileId, targetZoneIndex);
+80           } else {
+81             // Drop target exists but has no zoneIndex — treat as cancel.
+82             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+83           }
+84         } else {
+85           // No drop target — cancel, tile snaps back.
+86           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+87         }
+88       },
+89     });
+90   }, [tileId, zoneIndex, dispatch]);
+91 
+92   // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
+93   const handleTouchDrop = useCallback(
+94     (droppedTileId: string, targetZoneIndex: number) => {
+95       dispatch({ type: 'REMOVE_TILE', zoneIndex });
+96       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+97       onDrop(droppedTileId, targetZoneIndex);
+98     },
+99     [dispatch, zoneIndex, onDrop],
+100   );
+101 
+102   // Pointer-events drag — touch / mobile
+103   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+104     useTouchDrag({
+105       tileId: tileId ?? '',
+106       label: label ?? '',
+107       onDragStart: tileId
+108         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+109         : undefined,
+110       onDragCancel: tileId
+111         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })
+112         : undefined,
+113       onDrop: handleTouchDrop,
+114     });
+115 
+116   return {
+117     dragRef,
+118     onPointerDown,
+119     onPointerMove,
+120     onPointerUp,
+121     onPointerCancel,
+122   };
+123 };
 124
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:00:19Z)**_
@@ -960,6 +979,7 @@ Find files with z-index usage
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/Header.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:00:21Z)**_
@@ -987,6 +1007,7 @@ Show z-index usage with line numbers
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:73:      className="fixed inset-0 z-40 flex flex-col items-center justify-start overflow-y-auto bg-background/95 px-5 pb-8 pt-20"
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/Header.tsx:258:    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-lg">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:01:11Z)**_
@@ -1004,6 +1025,7 @@ Check for stacking context creators in WordSpell
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx:47:  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/WordSpell/WordSpell.tsx:34:    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:01:13Z)**_
@@ -1032,6 +1054,7 @@ Check for stacking context creators in answer-game
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts:41:    opacity: '0.95',
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts:43:    transform: 'scale(1.08)',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:02:56Z)**_
@@ -1045,6 +1068,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:03:10Z)**_
 ```text
 File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:02:58Z)**_
@@ -1065,6 +1089,7 @@ Show how WordSpell renders Slot children
                 >
                   {({ label }) => (
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:03:14Z)**_
@@ -1095,6 +1120,7 @@ Show WordSpell slot render prop content
         </AnswerGame.Choices>
       </div>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:03:44Z)**_
@@ -1113,6 +1139,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:04:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:04:13Z)**_
@@ -1133,6 +1160,7 @@ Done in 2.29s.
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:04:22Z)**_
@@ -1149,6 +1177,7 @@ Show lint error details
   1 error and 0 warnings potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:04:26Z)**_
@@ -1159,6 +1188,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:04:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:04:39Z)**_
@@ -1182,6 +1212,7 @@ Done in 6.92s.
 
 Done in 0.96s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:04:46Z)**_

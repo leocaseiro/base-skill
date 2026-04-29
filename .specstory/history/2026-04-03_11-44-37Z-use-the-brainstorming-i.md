@@ -14,8 +14,9 @@ I have a WIP PR for the /feat-word-spell-number-match, but I see a few bugs, and
 Can you provide a proper plan of what is missing?
 
 Some missing features:
+
 1) the `Daniel` voice only works starting the second time we use the SpeechOut. (first is the wrong voice).
-2) the sounds are not playing on drag tiles (only on click). 
+2) the sounds are not playing on drag tiles (only on click).
 
 3) There isn't not sound on sucessful for each letter (/Users/leocaseiro/Music/Downloads/wrong-button-sound-2_NWM.mp3 for error and /Users/leocaseiro/Music/Downloads/audioblocks-positive-correct-answer_HYHfgGMU0wU_NWM.mp3 for success)
 
@@ -27,8 +28,8 @@ Some missing features:
 
 7) the type settings is not working
 
-8) I wanted to add the customisations for each game to toggle: 
-a. distractions on/off, 
+8) I wanted to add the customisations for each game to toggle:
+a. distractions on/off,
 b. distractions quantity
 c. inputMethod (type or drag)
 d. totalRounds
@@ -41,7 +42,7 @@ j. wrongTileBehavior
 
 9) there is a weird bug on the WordSpell if I use the click only, sometimes it moves to the last caracter, even though the middle is not yet put.
 
-10) can we use https://www.kirilv.com/canvas-confetti/ for the confetti? they have a very nice Realist and/or random effect, we use the simple one for each round 1-3 seconds, and the 10-15 seconds for the end of the level.
+10) can we use <https://www.kirilv.com/canvas-confetti/> for the confetti? they have a very nice Realist and/or random effect, we use the simple one for each round 1-3 seconds, and the 10-15 seconds for the end of the level.
 
 11) When the tts is disabled, shouldn't display the sound/button
 
@@ -49,23 +50,23 @@ j. wrongTileBehavior
 
 13) We should have instructions for the game read out lot (it's okay to have in text too)
 
-12) Let's create a game for ascending/descending (configurable), where we select the range, and if we have skip or not skip numbers, quantity of numbers. called SortNumbers
+14) Let's create a game for ascending/descending (configurable), where we select the range, and if we have skip or not skip numbers, quantity of numbers. called SortNumbers
 
-13) review anything else missing for the latest implementation that is either on @docs/superpowers/plans/2026-04-03-answer-game-primitive.md or @docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md  
+15) review anything else missing for the latest implementation that is either on @docs/superpowers/plans/2026-04-03-answer-game-primitive.md or @docs/superpowers/specs/2026-04-03-word-spell-number-match-design.md  
 
-14) I can't find the SpeechSynthesis voice selector when opening the settings menu drawer
+16) I can't find the SpeechSynthesis voice selector when opening the settings menu drawer
 
-15) the settings volume and Speec rate aren't changing anything,
+17) the settings volume and Speec rate aren't changing anything,
 
-16) when changing the language, the voice speech should also say the word in the language.
+18) when changing the language, the voice speech should also say the word in the language.
 
-17) Some content is not translated, such as Play, Undo, Pause, Exit
+19) Some content is not translated, such as Play, Undo, Pause, Exit
 
-18) the button that navigate back to home is changing the language back to English. `/src/components/game/GameShell.tsx:60:9`
+20) the button that navigate back to home is changing the language back to English. `/src/components/game/GameShell.tsx:60:9`
 
-19) theme names should be translated too
+21) theme names should be translated too
 
-20) bookmarks should be sorted at the top.
+22) bookmarks should be sorted at the top.
 
 ---
 
@@ -252,7 +253,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:44:43Z)**_
@@ -278,6 +278,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:44:43Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:44:46Z)**_
@@ -332,6 +333,7 @@ test-setup.ts
 types
 vite-env.d.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:44:55Z)**_
@@ -345,6 +347,7 @@ Get commits in word-spell-number-match worktree branch
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:44:59Z)**_
@@ -358,6 +361,7 @@ Get commits on feat-word-spell-number-match branch vs master
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:00Z)**_
@@ -380,6 +384,7 @@ build-numeral-round.test.ts
 build-numeral-round.ts
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:03Z)**_
@@ -396,6 +401,7 @@ OrderedLetterSlots
 WordSpell
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:03Z)**_
@@ -430,6 +436,7 @@ game
 questions
 ui
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:06Z)**_
@@ -468,6 +475,7 @@ GameShell.stories.tsx
 GameShell.test.tsx
 GameShell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:06Z)**_
@@ -486,6 +494,7 @@ ImageQuestion
 TextQuestion
 index.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:11Z)**_
@@ -536,6 +545,7 @@ export const AnswerGame = Object.assign(AnswerGameRoot, {
   Choices,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:12Z)**_
@@ -600,6 +610,7 @@ export const AnswerGameProvider = ({
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:15Z)**_
@@ -712,6 +723,7 @@ export function answerGameReducer(
       const newZones = state.zones.map((z, i) =>
         i === action.zoneIndex ? newZone : z,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:16Z)**_
@@ -793,6 +805,7 @@ export type AnswerGameAction =
   | { type: 'COMPLETE_GAME' }
   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:19Z)**_
@@ -958,6 +971,7 @@ export const GameShell = ({
   </GameEngineProvider>
 );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:20Z)**_
@@ -1220,6 +1234,7 @@ export const WordSpell = ({ config }: WordSpellProps) => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:24Z)**_
@@ -1261,6 +1276,7 @@ export function useGameTTS(): GameTTS {
   return { speakTile, speakPrompt };
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:25Z)**_
@@ -1283,6 +1299,7 @@ speech
 theme
 utils.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:28Z)**_
@@ -1328,6 +1345,7 @@ export function isSpeechOutputAvailable(): boolean {
   ).speechSynthesis;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:29Z)**_
@@ -1391,6 +1409,7 @@ export const LetterTileBank = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:32Z)**_
@@ -1432,6 +1451,7 @@ export function getVoicesForLanguage(
   );
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:33Z)**_
@@ -1508,6 +1528,7 @@ export const GameOverOverlay = ({
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:38Z)**_
@@ -1713,6 +1734,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
   component: RouteComponent,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:39Z)**_
@@ -1760,6 +1782,7 @@ export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:44Z)**_
@@ -1802,6 +1825,7 @@ export const AudioButton = ({ prompt }: AudioButtonProps) => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:44Z)**_
@@ -1821,6 +1845,7 @@ __root.test.tsx
 __root.tsx
 index.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:48Z)**_
@@ -1900,6 +1925,7 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:49Z)**_
@@ -1916,6 +1942,7 @@ i18n.test.ts
 i18n.ts
 locales
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:52Z)**_
@@ -1930,6 +1957,7 @@ Check i18n locales
 en
 pt-BR
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:53Z)**_
@@ -1951,6 +1979,7 @@ Find settings/drawer related files
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/routes/$locale/_app/parent/index.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/routes/$locale/_app/parent.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:56Z)**_
@@ -2063,6 +2092,7 @@ const HeaderMenuPanel = ({
             id="drawer-speechRate"
             min={0.5}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:45:57Z)**_
@@ -2210,6 +2240,7 @@ export const Route = createFileRoute('/$locale/_app/settings')({
   component: SettingsScreen,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:00Z)**_
@@ -2322,6 +2353,7 @@ export const Header = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:01Z)**_
@@ -2384,6 +2416,7 @@ describe('useSettings', () => {
     const { result } = renderHook(() => useSettingsUnderTest(), {
       wrapper: makeWrapper(db),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:05Z)**_
@@ -2456,6 +2489,7 @@ export function getGameEventBus(): GameEventBus {
   return singleton;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:05Z)**_
@@ -2548,14 +2582,17 @@ const NumberMatchSession = ({
       const { tiles, zones } = buildNumeralRound(value, {
         tileBankMode: numberMatchConfig.tileBankMode,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:09Z)**_
 
 <think><details><summary>Thought Process</summary>
 I now have a good understanding of the current implementation. Let me look at a couple more things:
+
 1. The plan document mentioned
 2. The docs/superpowers/plans for answer-game-primitive
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:10Z)**_
@@ -2580,6 +2617,7 @@ List plans and specs
 2026-04-03-speech-voice-selection-design.md
 2026-04-03-word-spell-number-match-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:11Z)**_
@@ -2632,6 +2670,7 @@ Read English common translations
     "remove": "Remove bookmark"
   }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:14Z)**_
@@ -2655,6 +2694,7 @@ encouragements.json
 games.json
 settings.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:15Z)**_
@@ -2747,6 +2787,7 @@ Workers must read these before touching any file:
 
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:20Z)**_
@@ -2858,6 +2899,7 @@ export interface WordSpellConfig extends AnswerGameConfig {
   rounds: WordSpellRound[];
 }
 ```
+
 ```
 </details></tool-use>
 
@@ -2882,6 +2924,7 @@ Read games translations
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:24Z)**_
@@ -2905,6 +2948,7 @@ Check useSettings demo for voice settings
 13:      <div>speechRate: {settings.speechRate}</div>
 14:      <div>ttsEnabled: {String(settings.ttsEnabled)}</div>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:27Z)**_
@@ -2918,6 +2962,7 @@ Check if voice selector is in Header
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:31Z)**_
@@ -2942,6 +2987,7 @@ Check Header for voice/TTS settings
 103:            value={[speechRate]}
 105:              void update({ speechRate: v });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:46:31Z)**_
@@ -3116,47 +3162,56 @@ export const Header = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:47:00Z)**_
 
 <think><details><summary>Thought Process</summary>
-Now I have a thorough understanding of the codebase. Let me now organize my findings and present a comprehensive plan to the user. 
+Now I have a thorough understanding of the codebase. Let me now organize my findings and present a comprehensive plan to the user.
 
 Let me categorize the 20 issues into groups:
 
 **Group 1: Audio/Sound bugs (1, 2, 3, 4, 5)**
+
 - Issue 1: Daniel voice only works on second TTS call (voices not loaded yet)
 - Issue 2: Sounds not playing on drag, only on click
 - Issue 3: Sound for correct/incorrect tile placement
 - Issue 4: Sound for each correct round (applause)
 
-
 - Issue 5: Happy tune at game end
 
 **Group 2: UI/Progress (6)**
+
 - Issue 6: Round progress bar not updating
 
 **Group 3: Settings/Type mode (7, 8)**
+
 - Issue 7: Type input not working
 - Issue 8: Game customization settings (distractions, inputMethod, totalRounds, etc.)
 
 **Group 4: WordSpell bug (9)**
+
 - Issue 9: Click mode jumps to last slot
 
 **Group 5: Confetti (10)**
+
 - Issue 10: canvas-confetti for round and game end
 
 **Group 6: TTS UI (11, 12, 13)**
+
 - Issue 11: Hide TTS controls when disabled, auto-speak on round start, and read out game instructions
 
 **Group 7: New game**
+
 - Issue 12: SortNumbers game with ascending/descending modes
 
 **Group 8: Spec review**
+
 - Issue 13: Validate implementation against spec
 
 **Group 9: Settings/i18n bugs (14-20)**
+
 - Issue 14: Voice selector missing from header settings
 - Issue 15: Volume and speech rate sliders not working
 - Issue 16: Language changes should update TTS voice
@@ -3242,7 +3297,6 @@ The brainstorming process says: "Present design → get approval → Write desig
 
 But the brainstorming skill has a hard gate: "Do NOT invoke any implementation skill...until you have presented a design and the user has approved it." This means I need at minimum to present the design for each group and get their approval before writing plans.
 
-
 I can work around this by presenting a condensed design summary for each group instead of a full spec document, getting quick confirmation, then moving straight to writing plans. The user's comment about being happy to clarify as we go suggests they're comfortable with this approach and trust the direction we're heading.
 
 Looking at the groups I need to organize: Sound & TTS features, Progress & Confetti, Game Settings & Customisation, i18n and routing fixes, and WordSpell bugs plus instructions. I'll present these as a compact overview, get a single approval, then invoke writing-plans for each one.
@@ -3259,9 +3313,11 @@ But the brainstorming hard gate requires me to present the design for each group
 ## Proposed Design — All Groups
 
 ### A+B: Sound Engine + TTS Wiring
+
 **Root cause of issue #1:** `SpeechSynthesis.getVoices()` is async on first load — `speak()` calls it synchronously before voices populate. Fix: `onvoiceschanged` listener + retry. Also, `volume` and `speechRate` from settings are read but never passed to `SpeechSynthesisUtterance`.
 
 **Design:**
+
 - Enhance `SpeechOutput.ts`: accept optional `{ rate, volume, voice }` options, add a `getVoicesReady()` promise that resolves when voices are populated
 - `useGameTTS` reads `speechRate`/`volume`/`preferredVoiceURI` from `useSettings()` and passes them to `speak()`
 - Add `useRoundTTS` hook: auto-speaks the round prompt on `roundIndex` change when `ttsEnabled`
@@ -3273,9 +3329,11 @@ But the brainstorming hard gate requires me to present the design for each group
 ---
 
 ### C: Progress & Confetti
+
 **Root cause of #6:** `GameShell` computes `roundDisplay = state.roundIndex + 1` from `GameEngineProvider` state, but `WordSpell`/`NumberMatch` manage their own `roundIndex` inside `AnswerGameProvider`. The two states are disconnected.
 
 **Design:**
+
 - Pass `roundIndex` + `totalRounds` as props down to the game components, or lift the progress bar into `AnswerGame` (reads from `useAnswerGameContext()`) — prefer lifting since `GameShell` is used for all games
 - Alternatively: `WordSpell`/`NumberMatch` dispatch `UNDO` to `GameEngineProvider` when `ADVANCE_ROUND` fires — keeps both in sync
 - Replace `ScoreAnimation` with `canvas-confetti`: short burst (1–2s) on `round-complete`, long rain (10–15s) on `game-over`
@@ -3284,9 +3342,11 @@ But the brainstorming hard gate requires me to present the design for each group
 ---
 
 ### D: Game Settings & Customisation
+
 **Root cause of #7 (type mode):** `inputMethod: 'type'` is in config but `OrderedLetterSlots` only renders drop targets, never an `<input>`. **Root cause of #14 (voice selector):** `HeaderMenuPanel` has volume/rate/language/theme but no voice selector.  **Root cause of #15:** `speak()` ignores `rate` and `volume` from settings.
 
 **Design:**
+
 - Add `useKeyboardInput` hook in `OrderedLetterSlots` — when `inputMethod === 'type'`, render a hidden `<input>` capturing keystrokes, dispatches `PLACE_TILE` for matching letters
 - Add voice `<Select>` to `HeaderMenuPanel` (same as `/settings` route but in the drawer)
 - Wire `speechRate`/`volume` from `useSettings()` into `speak()` via `useGameTTS`
@@ -3295,9 +3355,11 @@ But the brainstorming hard gate requires me to present the design for each group
 ---
 
 ### E: i18n / Routing Bugs
+
 **Root cause of #18:** `GameShell.tsx:43` hardcodes `const locale = 'en'` — `handleExit` navigates to `/$locale` with `'en'`, ignoring the actual locale.
 
 **Design:**
+
 - `GameShell`: use `useParams({ from: '/$locale' })` to get `locale` (same pattern `NumberMatch` already uses)
 - Add `games` i18n namespace keys: `play`, `undo`, `pause`, `exit`; update `GameShell` footer buttons
 - Theme names: store a `name_en`/`name_pt-BR` map in the `ThemeDoc`, or add a `themes` i18n namespace; `HeaderMenuPanel` renders translated name
@@ -3306,20 +3368,24 @@ But the brainstorming hard gate requires me to present the design for each group
 ---
 
 ### F+G: WordSpell Click Bug + Game Instructions
-**Root cause of #9:** `useAutoNextSlot` advances `activeSlotIndex` to the next *empty* slot after the current one (`findIndex(i > zoneIndex)`) — so clicking a tile always targets slot index 0, 1, 2 in order. The bug is likely that after an eject, `activeSlotIndex` jumps to the end. Need to investigate: does `EJECT_TILE` reset `activeSlotIndex` correctly?
+
+**Root cause of #9:** `useAutoNextSlot` advances `activeSlotIndex` to the next _empty_ slot after the current one (`findIndex(i > zoneIndex)`) — so clicking a tile always targets slot index 0, 1, 2 in order. The bug is likely that after an eject, `activeSlotIndex` jumps to the end. Need to investigate: does `EJECT_TILE` reset `activeSlotIndex` correctly?
 
 **Design:**
+
 - Fix `EJECT_TILE` in reducer: after ejecting, recalculate `activeSlotIndex` as the first unfilled zone (not just `action.zoneIndex`)
 - Game instructions: add an `InstructionsOverlay` component shown on `phase === 'instructions'` (before first round starts), reads instructions text from `games.json` i18n namespace, has a "Let's go!" button, auto-reads via TTS
 
 ---
 
 ### H: Bookmarks
+
 **Design:** In the catalog query (home route), fetch `bookmarks` from RxDB alongside games, then sort the results so bookmarked `gameId`s appear first. No schema changes needed.
 
 ---
 
 ### I: SortNumbers (New Game)
+
 **Design:** New game in `src/games/sort-numbers/`. Config: `range { min, max }`, `direction: 'ascending' | 'descending'`, `allowSkips: boolean`, `quantity: number`. Player sees N scrambled number tiles and must arrange them in order. Built on `AnswerGame` primitive with `OrderedNumberSlots` and `NumberTileBank`. Shares `MatchingPairZones` concept but enforces sequential ordering.
 
 ---
@@ -3343,13 +3409,14 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:51:21Z)**_
 The user is adding more context about issue E - when changing language, we should stay on the same route, not navigate to the home page. Let me understand the current implementation better.
 
 From what I saw:
-1. `GameShell.tsx:43` hardcodes `const locale = 'en'` 
+
+1. `GameShell.tsx:43` hardcodes `const locale = 'en'`
 2. The `Header.tsx` `switchLocale` function navigates to `'/$locale'` (home) when changing language
 3. The `settings.tsx` `handleLocaleChange` navigates to `'/$locale/settings'`
 4. The footer also likely has a locale dropdown
 
-
 5. The solution is to use TanStack Router's `navigate({ params: { locale: newLocale } })` to update just the locale parameter while preserving the current route. I should check the Footer implementation to see if it follows the same pattern.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:51:21Z)**_
@@ -3427,6 +3494,7 @@ export const Footer = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:51:32Z)**_
@@ -3439,7 +3507,7 @@ Good. Now I can see the issue clearly:
 3. **settings.tsx**: `handleLocaleChange` navigates to `'/$locale/settings'` - at least stays on settings
 4. **GameShell.tsx**: hardcodes `const locale = 'en'`
 
-The fix for all locale-switching functions is to use TanStack Router's `navigate` with the current route but different params. 
+The fix for all locale-switching functions is to use TanStack Router's `navigate` with the current route but different params.
 
 In TanStack Router, I can stay on the same route and just swap the locale param by calling navigate with only the params object, letting the router keep the current path intact.
 </details></think>
@@ -3534,6 +3602,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -3554,6 +3623,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -3624,6 +3694,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -3632,6 +3703,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -3662,13 +3734,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -3682,10 +3755,10 @@ Let me write a comprehensive plan. Let me first review all the files I need to u
 **Group E: i18n / Routing Bugs**
 
 Files to touch:
+
 1. `src/components/Footer.tsx` - fix `switchLocale` to use params fn
 2. `src/components/Header.tsx` - fix `switchLocale` to use params fn, add voice selector to drawer
 3. `src/routes/$locale/_app/settings.tsx` - fix `handleLocaleChange` to use params fn
-
 
 4. `src/components/game/GameShell.tsx` - fix hardcoded locale and translate the game control buttons
 5. `src/lib/i18n/locales/en/games.json` - add translations for game controls
@@ -3811,6 +3884,7 @@ export const themesSchema: RxJsonSchema<ThemeDoc> = {
   additionalProperties: false,
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:23Z)**_
@@ -3841,6 +3915,7 @@ Read pt-BR settings and games translations
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:27Z)**_
@@ -3854,6 +3929,7 @@ Find theme preset IDs in DB setup
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:28Z)**_
@@ -3868,6 +3944,7 @@ Find all theme preset IDs in DB
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/db/seed-themes.ts:4:const OCEAN_ID = 'theme_ocean_preset';
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/db/seed-themes.ts:5:const FOREST_ID = 'theme_forest_preset';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:31Z)**_
@@ -3942,6 +4019,7 @@ export async function seedThemesOnce(
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:33Z)**_
@@ -3972,6 +4050,7 @@ Check GameShell for translation usage and hardcoded strings
 124:          aria-label="Exit"
 127:          ✕ Exit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:49Z)**_
@@ -3982,16 +4061,17 @@ Now I have all the context I need to write the plan. Let me write a comprehensiv
 Here's what needs to happen:
 
 **Task 1: Fix locale-switching to stay on current route**
+
 - Files: `Footer.tsx`, `Header.tsx`, `settings.tsx`
 - Change `navigate({ to: '/$locale', params: { locale: newLocale } })` to `navigate({ params: (prev) => ({ ...prev, locale: newLocale }) })`
 
 **Task 2: Fix GameShell hardcoded locale + translate buttons**
 
-
 - Files: `GameShell.tsx`, `en/games.json`, `pt-BR/games.json`
 - Replace the hardcoded locale with `useParams({ from: '/$locale' })` and add translation keys for `round`, `undo`, `pause`, and `exit` to both language files, then use `useTranslation('games')` in GameShell
 
 **Task 3: Add voice selector to Header drawer**
+
 - Files: `Header.tsx`, `en/settings.json`, `pt-BR/settings.json`
 - Implement voice state management with a listener for voice changes, add a Select dropdown to HeaderMenuPanel, and include the `voice` key in settings translations
 
@@ -4046,6 +4126,7 @@ void i18n.use(initReactI18next).init({
 // eslint-disable-next-line unicorn/prefer-export-from -- cannot use re-export syntax; i18n.use().init() must run on the local binding first
 export { i18n };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:52:56Z)**_
@@ -4098,6 +4179,7 @@ export const Route = createFileRoute('/$locale')({
   component: LocaleLayout,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:53:25Z)**_
@@ -4106,10 +4188,10 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:53:25Z)**_
 Now I have everything I need. Let me write the plan.
 
 Key observations:
+
 1. i18n language change is handled in `$locale/route.tsx` - it calls `i18n.changeLanguage(locale)` when the locale param changes. So navigating with the locale param will automatically trigger the language change. ✓
 2. `settings.tsx` has a voice selector already, but the Header drawer doesn't.
 3. `ThemeDoc.name` is always English for presets. We need a `themes` i18n namespace to translate preset names.
-
 
 4. Using `navigate({ params: (prev) => ({ ...prev, locale: newLocale }) })` will work because TanStack Router updates the route param, the locale route picks it up, and i18n.changeLanguage gets called automatically.
 
@@ -4137,7 +4219,7 @@ Now I have a complete picture. Let me write the implementation plan.
 
 Here's the full context:
 
-1. **Locale switching stays on current route**: 
+1. **Locale switching stays on current route**:
    - `Footer.tsx`, `Header.tsx`: change `navigate({ to: '/$locale', params: { locale: newLocale } })` → `navigate({ params: (prev) => ({ ...prev, locale: newLocale }) })`
    - `settings.tsx`: same fix
 
@@ -4229,6 +4311,7 @@ const initialState: GameEngineState = {
   roundIndex: 1, // round 2 of 2 (1-indexed display)
   score: 3,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:55:04Z)**_
@@ -4736,6 +4819,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:56:06Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-e-i18n-routing-bugs.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:56:23Z)**_
@@ -4744,6 +4828,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:56:23Z)**_
 Let me do the self-review now.
 
 **Spec coverage check:**
+
 1. Language change resets to home — Covered by Tasks 1, 2, 3
 2. Back button resets to English — Covered by Task 4
 3. Play/Undo/Pause/Exit untranslated — Covered by Task 4
@@ -4754,7 +4839,6 @@ Let me do the self-review now.
 All covered. ✓
 
 **Placeholder scan:**
-
 
 No TBDs or TODOs present. ✓
 
@@ -4803,12 +4887,12 @@ _**Agent (claude-sonnet-4-6 2026-04-03 11:58:14Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants to create all plans first, then run them in parallel later. So I need to write plans for all groups:
+
 - A+B: Sound Engine + TTS Wiring (issues 1, 2, 3, 4, 5, 11, 12, 16)
 - C: Progress & Confetti (issues 6, 10)
 - D: Game Settings & Customisation (issues 7, 8, 14, 15)
 - F+G: WordSpell Click Bug + Game Instructions (issues 9, 13)
 - H: Bookmarks sorted at top (issue 20)
-
 
 - I: SortNumbers new game (issue 12 duplicate)
 
@@ -4917,6 +5001,7 @@ export function useTileEvaluation(): TileEvaluation {
   return { placeTile };
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:16Z)**_
@@ -5009,6 +5094,7 @@ Read rest of answer-game-reducer
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:21Z)**_
@@ -5111,6 +5197,7 @@ export const OrderedLetterSlots = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:22Z)**_
@@ -5202,6 +5289,7 @@ const HomeScreen = () => {
     [filtered, page],
   );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:26Z)**_
@@ -5294,6 +5382,7 @@ export const Route = createFileRoute('/$locale/_app/')({
   component: HomeScreen,
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:26Z)**_
@@ -5362,6 +5451,7 @@ export function useBookmarks(): UseBookmarksResult {
   return { bookmarkedIds, toggle };
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:31Z)**_
@@ -5398,6 +5488,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
   },
 ];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:31Z)**_
@@ -5460,6 +5551,7 @@ export function useKeyboardDrag(): KeyboardDrag {
   };
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:35Z)**_
@@ -5512,6 +5604,7 @@ export function paginateCatalog<T>(
   pageSize: number,
 ): PaginateResult<T> {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:35Z)**_
@@ -5554,6 +5647,7 @@ export const GameGrid = ({
       {entries.length === 0 ? (
         <p className="py-16 text-center text-muted-foreground">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:39Z)**_
@@ -5576,6 +5670,7 @@ logo512.png
 manifest.json
 robots.txt
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:40Z)**_
@@ -5638,6 +5733,7 @@ export function useSettings(): UseSettingsResult {
 
   const settings = useMemo((): UseSettingsResult['settings'] => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:44Z)**_
@@ -5691,6 +5787,7 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
   additionalProperties: false,
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 11:58:45Z)**_
@@ -5763,6 +5860,7 @@ export interface MoveLog {
   initialContent: ResolvedContent;
   initialState: GameEngineState;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:00:16Z)**_
@@ -5774,7 +5872,6 @@ Good. Now I have all the context I need to write all the remaining plans. Let me
 2. **Plan C: Progress & Confetti** (issues 6, 10)
 3. **Plan D: Game Settings & Customisation** (issues 7, 8, 14, 15)
 4. **Plan F+G: WordSpell Click Bug + Game Instructions** (issues 9, 13)
-
 
 5. **Plan H: Bookmarks** (issue 20)
 6. **Plan I: SortNumbers** (issue 12 second)
@@ -5809,7 +5906,6 @@ Now I have enough context to write all the plans. Let me write them in parallel.
 2. **C: Progress & Confetti** - Progress bar disconnect, canvas-confetti
 3. **D: Game Settings & Customisation** - Type mode broken, per-game toggles, speech rate/volume wiring
 4. **F+G: WordSpell Click Bug + Game Instructions** - Click-mode skips to last slot, game instructions overlay
-
 
 5. **H: Bookmarks sorted at top**
 6. **I: SortNumbers new game**
@@ -5870,7 +5966,7 @@ Now looking at the click-mode bug in WordSpell—when a tile is placed correctly
 
 Examining the reducer logic more closely: when a tile is placed correctly, it calculates the next active slot by finding the first empty zone after the current one. But I need to trace through what's actually happening when multiple clicks occur in quick succession. or locked-auto-ejected. If it's wrong and `wrongTileBehavior === 'lock-auto-eject'`, the tile gets locked to that slot and `activeSlotIndex` doesn't advance. Let me trace through the code—when a wrong placement happens with lock-auto-eject, the zone marks itself as wrong and locked, but the `placedTileId` remains null since we're not actually keeping the tile there.
 
-After the auto-eject fires 1000ms later, the zone resets completely. So if I place wrongly in slot 0, `activeSlotIndex` stays at 0 and the zone briefly shows as wrong before clearing. But for correct placements, the logic searches for the next empty slot *after* the current one—so if I somehow place in slot 1 first, `activeSlotIndex` would jump ahead.
+After the auto-eject fires 1000ms later, the zone resets completely. So if I place wrongly in slot 0, `activeSlotIndex` stays at 0 and the zone briefly shows as wrong before clearing. But for correct placements, the logic searches for the next empty slot _after_ the current one—so if I somehow place in slot 1 first, `activeSlotIndex` would jump ahead.
 
 Let me trace through `buildTilesAndZones` to understand how zones and tiles are actually initialized...
 
@@ -6917,6 +7013,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:06:41Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-ab-sound-tts.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:07:31Z)**_
@@ -7346,6 +7443,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:07:31Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-c-progress-confetti.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:08:54Z)**_
@@ -8010,6 +8108,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:08:54Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-d-game-settings.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:10:08Z)**_
@@ -8592,6 +8691,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:10:08Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-fg-wordspell-bug-instructions.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:10:43Z)**_
@@ -8792,6 +8892,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:10:43Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-h-bookmarks-sort.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:14:17Z)**_
@@ -9849,6 +9950,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:14:17Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-03-group-i-sort-numbers-game.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:14:34Z)**_
@@ -9892,92 +9994,93 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:28:46Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import type { TileItem } from '@/components/answer-game/types';
-4	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-5	import { useAutoNextSlot } from '@/components/answer-game/useAutoNextSlot';
-6	import { useGameTTS } from '@/components/answer-game/useGameTTS';
-7	
-8	type TileStyle = 'dots' | 'objects' | 'fingers';
-9	
-10	/** Dot pattern fixed inside the square tile (3 columns, up to 9 dots). */
-11	const DotsTile = ({ count }: { count: number }) => (
-12	  <div
-13	    className="grid w-full grid-cols-3 place-content-center place-items-center gap-x-2.5 gap-y-2 px-0.5"
-14	    aria-hidden="true"
-15	  >
-16	    {Array.from({ length: count }, (_, i) => (
-17	      <span key={i} className="size-2.5 rounded-full bg-current" />
-18	    ))}
-19	  </div>
-20	);
-21	
-22	const NumeralTile = ({
-23	  tile,
-24	  tileStyle,
-25	}: {
-26	  tile: TileItem;
-27	  tileStyle: TileStyle;
-28	}) => {
-29	  const ref = useRef<HTMLButtonElement>(null);
-30	  const { placeInNextSlot } = useAutoNextSlot();
-31	  const { speakTile } = useGameTTS();
-32	  const numericValue = Number.parseInt(tile.value, 10);
-33	
-34	  useEffect(() => {
-35	    const element = ref.current;
-36	    if (!element) return;
-37	    return draggable({
-38	      element,
-39	      getInitialData: () => ({ tileId: tile.id }),
-40	    });
-41	  }, [tile.id]);
-42	
-43	  const handleClick = () => {
-44	    speakTile(tile.label);
-45	    placeInNextSlot(tile.id);
-46	  };
-47	
-48	  return (
-49	    <button
-50	      ref={ref}
-51	      type="button"
-52	      aria-label={`Number ${tile.label}`}
-53	      className="flex size-20 shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing"
-54	      onClick={handleClick}
-55	    >
-56	      {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-57	        <DotsTile count={numericValue} />
-58	      ) : (
-59	        <span className="text-3xl font-bold tabular-nums leading-none">
-60	          {tile.label}
-61	        </span>
-62	      )}
-63	    </button>
-64	  );
-65	};
-66	
-67	export interface NumeralTileBankProps {
-68	  tileStyle: TileStyle;
-69	}
-70	
-71	export const NumeralTileBank = ({
-72	  tileStyle,
-73	}: NumeralTileBankProps) => {
-74	  const { allTiles, bankTileIds } = useAnswerGameContext();
-75	  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-76	
-77	  return (
-78	    <div className="flex flex-wrap justify-center gap-3">
-79	      {bankTiles.map((tile) => (
-80	        <NumeralTile key={tile.id} tile={tile} tileStyle={tileStyle} />
-81	      ))}
-82	    </div>
-83	  );
-84	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import type { TileItem } from '@/components/answer-game/types';
+4 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+5 import { useAutoNextSlot } from '@/components/answer-game/useAutoNextSlot';
+6 import { useGameTTS } from '@/components/answer-game/useGameTTS';
+7 
+8 type TileStyle = 'dots' | 'objects' | 'fingers';
+9 
+10 /** Dot pattern fixed inside the square tile (3 columns, up to 9 dots). */
+11 const DotsTile = ({ count }: { count: number }) => (
+12   <div
+13     className="grid w-full grid-cols-3 place-content-center place-items-center gap-x-2.5 gap-y-2 px-0.5"
+14     aria-hidden="true"
+15   >
+16     {Array.from({ length: count }, (_, i) => (
+17       <span key={i} className="size-2.5 rounded-full bg-current" />
+18     ))}
+19   </div>
+20 );
+21 
+22 const NumeralTile = ({
+23   tile,
+24   tileStyle,
+25 }: {
+26   tile: TileItem;
+27   tileStyle: TileStyle;
+28 }) => {
+29   const ref = useRef<HTMLButtonElement>(null);
+30   const { placeInNextSlot } = useAutoNextSlot();
+31   const { speakTile } = useGameTTS();
+32   const numericValue = Number.parseInt(tile.value, 10);
+33 
+34   useEffect(() => {
+35     const element = ref.current;
+36     if (!element) return;
+37     return draggable({
+38       element,
+39       getInitialData: () => ({ tileId: tile.id }),
+40     });
+41   }, [tile.id]);
+42 
+43   const handleClick = () => {
+44     speakTile(tile.label);
+45     placeInNextSlot(tile.id);
+46   };
+47 
+48   return (
+49     <button
+50       ref={ref}
+51       type="button"
+52       aria-label={`Number ${tile.label}`}
+53       className="flex size-20 shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+54       onClick={handleClick}
+55     >
+56       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+57         <DotsTile count={numericValue} />
+58       ) : (
+59         <span className="text-3xl font-bold tabular-nums leading-none">
+60           {tile.label}
+61         </span>
+62       )}
+63     </button>
+64   );
+65 };
+66 
+67 export interface NumeralTileBankProps {
+68   tileStyle: TileStyle;
+69 }
+70 
+71 export const NumeralTileBank = ({
+72   tileStyle,
+73 }: NumeralTileBankProps) => {
+74   const { allTiles, bankTileIds } = useAnswerGameContext();
+75   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+76 
+77   return (
+78     <div className="flex flex-wrap justify-center gap-3">
+79       {bankTiles.map((tile) => (
+80         <NumeralTile key={tile.id} tile={tile} tileStyle={tileStyle} />
+81       ))}
+82     </div>
+83   );
+84 };
 85
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:28:46Z)**_
@@ -9987,80 +10090,81 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:28:46Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/build-numeral-round.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import type {
-3	  AnswerZone,
-4	  TileItem,
-5	} from '@/components/answer-game/types';
-6	
-7	export type NumeralBankOptions = {
-8	  tileBankMode: 'exact' | 'distractors';
-9	  distractorCount?: number;
-10	  range: { min: number; max: number };
-11	};
-12	
-13	function shuffleInPlace<T>(items: T[]): void {
-14	  for (let i = items.length - 1; i > 0; i--) {
-15	    const j = Math.floor(Math.random() * (i + 1));
-16	    [items[i], items[j]] = [items[j]!, items[i]!];
-17	  }
-18	}
-19	
-20	/** Distinct integers in [min, max] excluding `correct`, up to `count` values. */
-21	export function pickDistractorNumerals(
-22	  correct: number,
-23	  count: number,
-24	  min: number,
-25	  max: number,
-26	): number[] {
-27	  if (count <= 0 || min > max) return [];
-28	  const pool: number[] = [];
-29	  for (let v = min; v <= max; v++) {
-30	    if (v !== correct) pool.push(v);
-31	  }
-32	  if (pool.length === 0) return [];
-33	  shuffleInPlace(pool);
-34	  return pool.slice(0, Math.min(count, pool.length));
-35	}
-36	
-37	/**
-38	 * One answer zone (expected numeral) plus bank tiles: correct only, or correct + distractors.
-39	 */
-40	export function buildNumeralRound(
-41	  value: number,
-42	  bank: NumeralBankOptions,
-43	): { tiles: TileItem[]; zones: AnswerZone[] } {
-44	  const zone: AnswerZone = {
-45	    id: nanoid(),
-46	    index: 0,
-47	    expectedValue: String(value),
-48	    placedTileId: null,
-49	    isWrong: false,
-50	    isLocked: false,
-51	  };
-52	
-53	  const numerals: number[] = [value];
-54	  if (bank.tileBankMode === 'distractors') {
-55	    const extra = pickDistractorNumerals(
-56	      value,
-57	      bank.distractorCount ?? 0,
-58	      bank.range.min,
-59	      bank.range.max,
-60	    );
-61	    numerals.push(...extra);
-62	  }
-63	
-64	  shuffleInPlace(numerals);
-65	  const tiles: TileItem[] = numerals.map((n) => ({
-66	    id: nanoid(),
-67	    label: String(n),
-68	    value: String(n),
-69	  }));
-70	
-71	  return { tiles, zones: [zone] };
-72	}
+1 import { nanoid } from 'nanoid';
+2 import type {
+3   AnswerZone,
+4   TileItem,
+5 } from '@/components/answer-game/types';
+6 
+7 export type NumeralBankOptions = {
+8   tileBankMode: 'exact' | 'distractors';
+9   distractorCount?: number;
+10   range: { min: number; max: number };
+11 };
+12 
+13 function shuffleInPlace<T>(items: T[]): void {
+14   for (let i = items.length - 1; i > 0; i--) {
+15     const j = Math.floor(Math.random() * (i + 1));
+16     [items[i], items[j]] = [items[j]!, items[i]!];
+17   }
+18 }
+19 
+20 /** Distinct integers in [min, max] excluding `correct`, up to `count` values. */
+21 export function pickDistractorNumerals(
+22   correct: number,
+23   count: number,
+24   min: number,
+25   max: number,
+26 ): number[] {
+27   if (count <= 0 || min > max) return [];
+28   const pool: number[] = [];
+29   for (let v = min; v <= max; v++) {
+30     if (v !== correct) pool.push(v);
+31   }
+32   if (pool.length === 0) return [];
+33   shuffleInPlace(pool);
+34   return pool.slice(0, Math.min(count, pool.length));
+35 }
+36 
+37 /**
+38  * One answer zone (expected numeral) plus bank tiles: correct only, or correct + distractors.
+39  */
+40 export function buildNumeralRound(
+41   value: number,
+42   bank: NumeralBankOptions,
+43 ): { tiles: TileItem[]; zones: AnswerZone[] } {
+44   const zone: AnswerZone = {
+45     id: nanoid(),
+46     index: 0,
+47     expectedValue: String(value),
+48     placedTileId: null,
+49     isWrong: false,
+50     isLocked: false,
+51   };
+52 
+53   const numerals: number[] = [value];
+54   if (bank.tileBankMode === 'distractors') {
+55     const extra = pickDistractorNumerals(
+56       value,
+57       bank.distractorCount ?? 0,
+58       bank.range.min,
+59       bank.range.max,
+60     );
+61     numerals.push(...extra);
+62   }
+63 
+64   shuffleInPlace(numerals);
+65   const tiles: TileItem[] = numerals.map((n) => ({
+66     id: nanoid(),
+67     label: String(n),
+68     value: String(n),
+69   }));
+70 
+71   return { tiles, zones: [zone] };
+72 }
 73
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:29:16Z)**_
@@ -10075,24 +10179,24 @@ Let me think about this:
 
 **Dice layout (1-6):**
 Real dice have specific pip positions:
+
 - 1: center
 - 2: top-right, bottom-left
 - 3: top-right, center, bottom-left
 - 4: top-left, top-right, bottom-left, bottom-right
-
 
 - 5: all four corners plus center
 - 6: two columns of three on the left and right sides
 
 For a 3x3 grid, I can map these positions and then for numbers above 6, I could suggest filling additional rows or using a different visual pattern like a subitizing arrangement. I'm mapping out the dot patterns for dice faces 1-6 in a 3x3 grid, and now I need to figure out how to handle numbers 7 and above. The game config allows a range up to 12, but representing that many dots becomes visually unclear, so I'm considering alternatives like a ten-frame layout for larger numbers. in early math education. A 2×5 grid where filled cells represent the number. Easy to read because it anchors to 10. Good for 1-10.
 
-2. **Split dice**: Show two sub-dice that add up to the number (e.g., 7 = 4+3, 8 = 4+4, 9 = 5+4, 10 = 5+5, 11 = 6+5, 12 = 6+6). This is actually the domino concept. Very intuitive for young learners.
+1. **Split dice**: Show two sub-dice that add up to the number (e.g., 7 = 4+3, 8 = 4+4, 9 = 5+4, 10 = 5+5, 11 = 6+5, 12 = 6+6). This is actually the domino concept. Very intuitive for young learners.
 
-3. **Numeral with dots**: Show the numeral large on top, with a smaller dot pattern below. For 7+, just show the numeral prominently.
+2. **Numeral with dots**: Show the numeral large on top, with a smaller dot pattern below. For 7+, just show the numeral prominently.
 
-4. **Colored dot clusters**: Group dots into clusters of 5 (5 + remaining). Like tally marks but circular.
+3. **Colored dot clusters**: Group dots into clusters of 5 (5 + remaining). Like tally marks but circular.
 
-5. **Domino style**: Two dice side by side, each showing up to 6. Natural for 7-12 (7=1+6, 8=2+6, 9=3+6, 10=4+6, 11=5+6, 12=6+6). Or (7=4+3, etc.)
+4. **Domino style**: Two dice side by side, each showing up to 6. Natural for 7-12 (7=1+6, 8=2+6, 9=3+6, 10=4+6, 11=5+6, 12=6+6). Or (7=4+3, etc.)
 
 For this app targeting K-Year 2, I'd go with dice for 1-6, ten-frames for 7-10 since that's pedagogically important for understanding how to make ten, and either double ten-frames or dominoes for 11-12. I'd cap the dot-style display at 12 since anything beyond that gets unwieldy.
 
@@ -10112,6 +10216,7 @@ Here's my analysis and recommendation:
 ## Dice layout: 1–6
 
 Classic dice pips in a 3×3 grid. Positions (indexed 0–8):
+
 ```
 0  1  2
 3  4  5
@@ -10192,8 +10297,8 @@ The user likes the dice concept and wants to extend it to double dice (two dice 
 **Double dice approach:**
 
 For 7-12, we can split into two dice:
-- 7 = 1+6, 2+5, 3+4, 4+3, 5+2, 6+1
 
+- 7 = 1+6, 2+5, 3+4, 4+3, 5+2, 6+1
 
 - 8 = 2+6, 3+5, 4+4
 - 9 = 3+6, 4+5
@@ -10281,9 +10386,9 @@ Oh! The user means actual dominoes - a single tile that shows two dice faces sid
 A physical domino is rectangular, split in the middle with a line. Each half shows 0-6 pips in standard dice layout.
 
 So for 7-12:
+
 - 7 = [6|1] or [5|2] or [4|3] - pick one consistent split
 - 8 = [6|2] or [5|3] or [4|4]
-
 
 - 9 = [6|3] or [5|4]
 - 10 = [6|4] or [5|5]
@@ -10296,7 +10401,7 @@ But wait - standard dominoes max out at 6+6=12 since each half goes 0-6. The use
 
 Actually, double-twelve domino sets do exist as real products - each half can show 0-12, which means you could represent values up to 24. So the user was probably thinking of those when they said dominoes, not standard double-six sets. double-dice concept I was describing IS what they call dominoes. And they asked if we could go up to 24 with that.
 
-With standard dominoes (0-6 per face), max is 12. 
+With standard dominoes (0-6 per face), max is 12.
 With double-9 dominoes, max is 18.
 With double-12 dominoes, max is 24.
 
@@ -10348,7 +10453,7 @@ The user has confirmed: dominoes up to 12, numeral-only above 12. Now I need to 
 
 Actually, this design decision affects the `NumeralTileBank` implementation specifically, which is part of the word-spell-number-match plan. Let me update the relevant plan file.
 
-Actually, looking at the plans, the `NumeralTileBank` is in `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` which was part of the original word-spell-number-match plan (`2026-04-03-word-spell-number-match.md`). 
+Actually, looking at the plans, the `NumeralTileBank` is in `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` which was part of the original word-spell-number-match plan (`2026-04-03-word-spell-number-match.md`).
 
 The component already exists, so I need to decide whether to add this visual update task to the existing word-spell-number-match plan or create a separate focused plan for just this NumeralTileBank improvement. Since it's a specific UI enhancement to an existing component, I should integrate it into the relevant plan rather than creating a standalone one. I should add this NumeralTileBank redesign task to the existing word-spell-number-match plan since that's where the NumberMatch game implementation lives. Let me pull up that plan file to see what's already documented.
 </details></think>
@@ -10364,37 +10469,38 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:32:43Z)**_
  `./docs/superpowers/plans/2026-04-03-word-spell-number-match.md`
 
 ```text
-1	# WordSpell + NumberMatch Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Build the WordSpell and NumberMatch reference games as React compositions over the `AnswerGame` primitive, each with their own slot components (tile bank + answer zones), types, Storybook stories, i18n strings, game registry entries, and E2E/VR tests.
-6	
-7	**Architecture:** Each game is a thin composition root (`WordSpell.tsx`, `NumberMatch.tsx`) that wires `AnswerGameConfig` into `<AnswerGame>` and places game-specific slot components (`OrderedLetterSlots`, `LetterTileBank`, `MatchingPairZones`, `NumeralTileBank`) inside the named slots. Slot components are prop-free — they read all runtime data via `useAnswerGameContext()`. `AnswerGame` handles all DnD, TTS, evaluation, and event bus logic.
-8	
-9	**Tech Stack:** React 19, TypeScript strict, Pragmatic DnD (via `AnswerGame`), Tailwind CSS v4, Vitest + RTL, Playwright (E2E + VR), i18next
-10	
-11	---
-12	
-13	## Prerequisites
-14	
-15	- **AnswerGame primitive merged** (`docs/superpowers/plans/2026-04-03-answer-game-primitive.md` fully implemented and on `master`).
-16	- **M4 merged** — `GameEngineProvider` from `@/lib/game-engine` must be available.
-17	- `@atlaskit/pragmatic-drag-and-drop` already installed (done in AnswerGame plan).
-18	
-19	---
-20	
-21	## File Map
-22	
-23	| File                                                                     | Action | Responsibility                                                                 |
-24	| ------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------ |
-25	| `src/games/word-spell/types.ts`                                          | Create | `WordSpellConfig`, `WordSpellRound` extending `AnswerGameConfig`               |
-26	| `src/games/word-spell/WordSpell/WordSpell.tsx`                           | Create | Composition root: wires config into `<AnswerGame>` + question primitives       |
-27	| `src/games/word-spell/WordSpell/WordSpell.stories.tsx`                   | Create | All 4 modes × exact/distractors                                                |
-28	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`         | Create | Sequential letter/syllable/word answer zones; reads zones from context         |
-29	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx`    | Create | Renders correct number of slots; active slot is highlighted                    |
-30	| `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.stories.tsx` | Create | Empty, partially filled, complete variants                                     |
+1 # WordSpell + NumberMatch Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Build the WordSpell and NumberMatch reference games as React compositions over the `AnswerGame` primitive, each with their own slot components (tile bank + answer zones), types, Storybook stories, i18n strings, game registry entries, and E2E/VR tests.
+6 
+7 **Architecture:** Each game is a thin composition root (`WordSpell.tsx`, `NumberMatch.tsx`) that wires `AnswerGameConfig` into `<AnswerGame>` and places game-specific slot components (`OrderedLetterSlots`, `LetterTileBank`, `MatchingPairZones`, `NumeralTileBank`) inside the named slots. Slot components are prop-free — they read all runtime data via `useAnswerGameContext()`. `AnswerGame` handles all DnD, TTS, evaluation, and event bus logic.
+8 
+9 **Tech Stack:** React 19, TypeScript strict, Pragmatic DnD (via `AnswerGame`), Tailwind CSS v4, Vitest + RTL, Playwright (E2E + VR), i18next
+10 
+11 ---
+12 
+13 ## Prerequisites
+14 
+15 - **AnswerGame primitive merged** (`docs/superpowers/plans/2026-04-03-answer-game-primitive.md` fully implemented and on `master`).
+16 - **M4 merged** — `GameEngineProvider` from `@/lib/game-engine` must be available.
+17 - `@atlaskit/pragmatic-drag-and-drop` already installed (done in AnswerGame plan).
+18 
+19 ---
+20 
+21 ## File Map
+22 
+23 | File                                                                     | Action | Responsibility                                                                 |
+24 | ------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------------------ |
+25 | `src/games/word-spell/types.ts`                                          | Create | `WordSpellConfig`, `WordSpellRound` extending `AnswerGameConfig`               |
+26 | `src/games/word-spell/WordSpell/WordSpell.tsx`                           | Create | Composition root: wires config into `<AnswerGame>` + question primitives       |
+27 | `src/games/word-spell/WordSpell/WordSpell.stories.tsx`                   | Create | All 4 modes × exact/distractors                                                |
+28 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.tsx`         | Create | Sequential letter/syllable/word answer zones; reads zones from context         |
+29 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx`    | Create | Renders correct number of slots; active slot is highlighted                    |
+30 | `src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.stories.tsx` | Create | Empty, partially filled, complete variants                                     |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:32:46Z)**_
@@ -10436,6 +10542,7 @@ Check end of word-spell-number-match plan
 | Preset / bookmark UX                                       | Out of scope for this plan — tracked separately in M5 presets spec                                               |
 | Image assets (Fluent Emoji)                                | Paths referenced in config; asset bundling is a build-time concern handled by Vite code-splitting, not this plan |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:33:20Z)**_
@@ -10658,6 +10765,7 @@ EOF
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:33:28Z)**_
@@ -10679,7 +10787,7 @@ _**User (2026-04-03 12:38:03Z)**_
 
 <ide_opened_file>The user opened the file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx in the IDE. This may or may not be related to the current task.</ide_opened_file>
 
-LGTM. Loved that we can reuse. 
+LGTM. Loved that we can reuse.
 
 I also noticed that LetterTile and NumeralTile are very very similar, except for some style. Should we use slot pattern and composition to DRY or will get complicated?
 
@@ -10693,11 +10801,11 @@ The user is asking about whether to DRY up `LetterTile` and `NumeralTile` since 
 Looking at the two components:
 
 **LetterTile** (in `LetterTileBank.tsx`):
+
 - `draggable` setup with `onDragStart` TTS
 - `onClick` → `speakTile` + `placeInNextSlot`
 - Button: `size-14`, `rounded-xl`, `text-2xl font-bold`
 - Content: just `{tile.label}` text
-
 
 - **NumeralTile** (in `NumeralTileBank.tsx`):
 - `draggable` setup (no `onDragStart` TTS yet - plan A+B adds it)
@@ -10770,6 +10878,7 @@ export const LetterTileBank = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:38:54Z)**_
@@ -10778,6 +10887,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 12:38:54Z)**_
 Now I can see both clearly:
 
 **What's shared (identical logic):**
+
 - `useRef<HTMLButtonElement>(null)`
 - `useAutoNextSlot`
 - `useGameTTS`
@@ -10786,10 +10896,10 @@ Now I can see both clearly:
 - `handleClick` = speakTile + placeInNextSlot
 - Button structure: `cursor-grab`, `shadow-md`, `transition-transform`, `active:scale-95`, `active:cursor-grabbing`, `bg-card`
 
-
 - The differences are just styling (size, radius) and content rendering, while the drag-and-click-with-TTS behavior is completely identical—this is the perfect candidate for extracting into a `useDraggableTile` hook.
 - I've already implemented this pattern in `SortNumbersTileBank`, so pulling it out as a reusable hook would eliminate duplication across all three tile types.
 - I'll create the hook in `src/components/answer-game/` to handle the interaction logic, leaving the visual structure and content rendering to each individual tile component.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 12:39:02Z)**_
@@ -10828,6 +10938,7 @@ const useDraggableTile = (tile: TileItem) => {
 ```
 
 Each tile becomes:
+
 ```tsx
 const LetterTile = ({ tile }) => {
   const { ref, handleClick } = useDraggableTile(tile);
@@ -10863,7 +10974,6 @@ The user wants me to add `useDraggableTile` as a task. I need to:
 2. Update the Group A+B plan to reference `useDraggableTile` for the drag-TTS task (Task 5)
 
 Actually, since this is a new hook that needs to be created, it should be its own task. It should come before the drag-TTS task in Group A+B (or as part of that plan), and it would also replace the boilerplate in both LetterTile and NumeralTile.
-
 
 The hook will live in `src/components/answer-game/` and be used across `LetterTileBank`, `NumeralTileBank`, and `SortNumbersTileBank`, so it makes sense to add it as a refactoring task in the word-spell-number-match plan and have Group A+B Task 5 depend on it.
 </details></think>
@@ -11154,4 +11264,5 @@ PLAN
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
