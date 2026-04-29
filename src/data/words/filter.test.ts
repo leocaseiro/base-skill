@@ -60,32 +60,79 @@ describe('entryMatches', () => {
     ).toBe(true);
   });
 
-  it('graphemesAllowed: passes only when every grapheme is in the set', () => {
+  it('graphemesAllowed: passes only when every grapheme pair is in the set', () => {
     expect(
       entryMatches(hit(), {
         region: 'aus',
-        graphemesAllowed: ['c', 'a', 't'],
+        graphemesAllowed: [
+          { g: 'c', p: 'k' },
+          { g: 'a', p: 'æ' },
+          { g: 't', p: 't' },
+        ],
       }),
     ).toBe(true);
     expect(
       entryMatches(hit(), {
         region: 'aus',
-        graphemesAllowed: ['c', 'a'], // missing 't'
+        // missing { g: 't', p: 't' }
+        graphemesAllowed: [
+          { g: 'c', p: 'k' },
+          { g: 'a', p: 'æ' },
+        ],
       }),
     ).toBe(false);
   });
 
-  it('graphemesRequired: passes when at least one required is present', () => {
+  it('graphemesAllowed: rejects when grapheme matches but phoneme differs', () => {
+    // city: c/s, i/ɪ, t/t, y/i — has 'c' but as /s/, not /k/
+    const city: WordHit = {
+      word: 'city',
+      region: 'aus',
+      level: 4,
+      syllableCount: 2,
+      graphemes: [
+        { g: 'c', p: 's' },
+        { g: 'i', p: 'ɪ' },
+        { g: 't', p: 't' },
+        { g: 'y', p: 'i' },
+      ],
+      provenance: 'shipped',
+    };
+    // Allowing c/k does NOT cover c/s — city must be excluded
+    expect(
+      entryMatches(city, {
+        region: 'aus',
+        graphemesAllowed: [
+          { g: 'c', p: 'k' },
+          { g: 'i', p: 'ɪ' },
+          { g: 't', p: 't' },
+          { g: 'y', p: 'i' },
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it('graphemesRequired: passes when at least one required pair is present', () => {
     expect(
       entryMatches(hit(), {
         region: 'aus',
-        graphemesRequired: ['c'],
+        graphemesRequired: [{ g: 'c', p: 'k' }],
       }),
     ).toBe(true);
     expect(
       entryMatches(hit(), {
         region: 'aus',
-        graphemesRequired: ['sh'],
+        graphemesRequired: [{ g: 'sh', p: 'ʃ' }],
+      }),
+    ).toBe(false);
+  });
+
+  it('graphemesRequired: rejects when grapheme matches but phoneme differs', () => {
+    // cat has c/k — requiring c/s (soft-c) must not match
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: [{ g: 'c', p: 's' }],
       }),
     ).toBe(false);
   });
@@ -95,7 +142,7 @@ describe('entryMatches', () => {
     expect(
       entryMatches(hit(), {
         region: 'aus',
-        graphemesRequired: ['c'],
+        graphemesRequired: [{ g: 'c', p: 'k' }],
         phonemesRequired: ['k'],
       }),
     ).toBe(true);
@@ -117,7 +164,7 @@ describe('entryMatches', () => {
     expect(
       entryMatches(city, {
         region: 'aus',
-        graphemesRequired: ['c'],
+        graphemesRequired: [{ g: 'c', p: 'k' }],
         phonemesRequired: ['k'],
       }),
     ).toBe(false);
@@ -135,7 +182,11 @@ describe('entryMatches', () => {
     expect(
       entryMatches(tier1, {
         region: 'aus',
-        graphemesAllowed: ['c', 'a', 't'],
+        graphemesAllowed: [
+          { g: 'c', p: 'k' },
+          { g: 'a', p: 'æ' },
+          { g: 't', p: 't' },
+        ],
       }),
     ).toBe(false);
     expect(entryMatches(tier1, { region: 'aus', level: 2 })).toBe(true);
@@ -162,37 +213,27 @@ describe('filterWords (integration against seeded chunks)', () => {
   });
 
   it('Tier-2 filter excludes Tier-1-only words', async () => {
+    const { GRAPHEMES_BY_LEVEL, cumulativeGraphemes } = await import(
+      './levels'
+    );
+    const allowedPairs = cumulativeGraphemes(2);
     const result = await filterWords({
       region: 'aus',
       levels: [1, 2],
-      graphemesAllowed: [
-        's',
-        'a',
-        't',
-        'p',
-        'i',
-        'n',
-        'm',
-        'd',
-        'g',
-        'o',
-      ],
+      graphemesAllowed: allowedPairs,
     });
+    const allowedKeys = new Set(
+      allowedPairs.map((u) => `${u.g}|${u.p}`),
+    );
     for (const h of result.hits) {
       for (const g of h.graphemes ?? []) {
-        expect([
-          's',
-          'a',
-          't',
-          'p',
-          'i',
-          'n',
-          'm',
-          'd',
-          'g',
-          'o',
-        ]).toContain(g.g);
+        expect(allowedKeys.has(`${g.g}|${g.p}`)).toBe(true);
       }
+    }
+    // Sanity-check: the allowed set includes the L1+L2 graphemes
+    const allGs = new Set(allowedPairs.map((u) => u.g));
+    for (const g of GRAPHEMES_BY_LEVEL[1] ?? []) {
+      expect(allGs.has(g.g)).toBe(true);
     }
   });
 

@@ -60,12 +60,18 @@ export const entryMatches = (
   if (!hit.graphemes) return false;
 
   if (filter.graphemesAllowed) {
-    const allowed = new Set(filter.graphemesAllowed);
-    if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
+    const allowed = new Set(
+      filter.graphemesAllowed.map((u) => `${u.g}|${u.p}`),
+    );
+    if (!hit.graphemes.every((g) => allowed.has(`${g.g}|${g.p}`)))
+      return false;
   }
   if (filter.graphemesRequired) {
-    const required = new Set(filter.graphemesRequired);
-    if (!hit.graphemes.some((g) => required.has(g.g))) return false;
+    const required = new Set(
+      filter.graphemesRequired.map((u) => `${u.g}|${u.p}`),
+    );
+    if (!hit.graphemes.some((g) => required.has(`${g.g}|${g.p}`)))
+      return false;
   }
   if (filter.phonemesAllowed) {
     const allowed = new Set(filter.phonemesAllowed);
