@@ -1,13 +1,17 @@
 // Co-located preview of the WordSpell config form, driven by the real
-// `wordSpellConfigFields` registry export.
+// `wordSpellConfigFields` registry export and `WordSpellSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from 'react';
 import { fn } from 'storybook/test';
 import { wordSpellConfigFields } from './types';
+import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
+
+type Mode = 'simple' | 'advanced';
 
 type Scenario = 'picture' | 'scramble' | 'sentence-gap';
 
@@ -44,26 +48,46 @@ const scenarios: Record<Scenario, Record<string, unknown>> = {
   },
 };
 
+const simpleBaseline: Record<string, unknown> = {
+  configMode: 'simple',
+  inputMethod: 'drag',
+  level: 1,
+  phonemesAllowed: [],
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record<string, unknown>) => void;
 };
 
 const WordSpellConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element => {
+  const initial =
+    mode === 'simple' ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState<Record<string, unknown>>(
-    () => scenarios[scenario],
+    () => initial,
   );
+  const handleChange = (next: Record<string, unknown>): void => {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === 'simple') {
+    return (
+      <WordSpellSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      />
+    );
+  }
   return (
     <ConfigFormFields
       fields={wordSpellConfigFields}
       config={config}
-      onChange={(next) => {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     />
   );
 };
@@ -73,10 +97,17 @@ const meta: Meta<typeof WordSpellConfigFormHarness> = {
   component: WordSpellConfigFormHarness,
   tags: ['autodocs'],
   args: {
+    mode: 'advanced',
     scenario: 'picture',
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: 'radio' },
+      options: ['simple', 'advanced'] satisfies Mode[],
+      description:
+        'Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.',
+    },
     scenario: {
       control: { type: 'radio' },
       options: [
@@ -85,13 +116,15 @@ const meta: Meta<typeof WordSpellConfigFormHarness> = {
         'sentence-gap',
       ] satisfies Scenario[],
       description:
-        'Preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).',
+        'Advanced-mode preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).',
+      if: { arg: 'mode', eq: 'advanced' },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) => (
+  render: ({ mode, scenario, onChange }) => (
     <WordSpellConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     />
