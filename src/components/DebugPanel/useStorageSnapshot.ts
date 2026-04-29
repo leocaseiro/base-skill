@@ -4,10 +4,26 @@ import { getOrCreateDatabase } from '@/db/create-database';
 
 export interface StorageSnapshot {
   localStorage: { key: string; size: number; preview: string }[];
-  collections: { name: string; count: number }[];
+  collections: {
+    name: string;
+    count: number;
+    docs: Record<string, unknown>[];
+  }[];
   loading: boolean;
   error: string | null;
 }
+
+const docToJson = (doc: unknown): Record<string, unknown> => {
+  if (
+    typeof doc === 'object' &&
+    doc !== null &&
+    typeof (doc as { toJSON?: () => unknown }).toJSON === 'function'
+  ) {
+    const json = (doc as { toJSON: () => unknown }).toJSON();
+    return json as Record<string, unknown>;
+  }
+  return doc as Record<string, unknown>;
+};
 
 const TRACKED_COLLECTIONS: CollectionName[] = [
   'custom_games',
@@ -56,17 +72,21 @@ export const useStorageSnapshot = (
     void (async () => {
       try {
         const db = await getOrCreateDatabase();
-        const counts = await Promise.all(
+        const collections = await Promise.all(
           TRACKED_COLLECTIONS.map(async (name) => {
             const collection = db[name];
             const docs = await collection.find().exec();
-            return { name, count: docs.length };
+            return {
+              name,
+              count: docs.length,
+              docs: docs.map((d) => docToJson(d)),
+            };
           }),
         );
         if (abort.signal.aborted) return;
         setSnapshot({
           localStorage: readLocalStorage(),
-          collections: counts,
+          collections,
           loading: false,
           error: null,
         });
