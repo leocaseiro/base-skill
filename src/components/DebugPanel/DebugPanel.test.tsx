@@ -12,6 +12,16 @@ vi.mock('./useStorageSnapshot', () => ({
   }),
 }));
 
+vi.mock('./useLibraryPreview', () => ({
+  useLibraryPreview: () => ({
+    loading: false,
+    error: null,
+    hitCount: 0,
+    hits: [],
+    usedFallback: null,
+  }),
+}));
+
 const baseProps: DebugPanelProps = {
   gameId: 'word-spell',
   resolvedConfig: { totalRounds: 3, mode: 'recall' },
@@ -25,8 +35,8 @@ const baseProps: DebugPanelProps = {
   session: {
     sessionId: 'sess-1',
     seed: 'seed-1',
-    hasDraftState: true,
-    hasPersistedContent: false,
+    draftState: { phase: 'play', score: 0 },
+    persistedContent: null,
   },
   rounds: [
     { word: 'cat', emoji: '🐱' },
@@ -50,7 +60,9 @@ describe('DebugPanel', () => {
 
     expect(screen.getByText(/Resolved Config/i)).toBeInTheDocument();
     expect(screen.getByText(/totalRounds/i)).toBeInTheDocument();
-    expect(screen.getByText(/Rounds \(2\)/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Rounds in config \(2\)/i),
+    ).toBeInTheDocument();
     expect(screen.getByText('cat')).toBeInTheDocument();
     expect(screen.getByText('dog')).toBeInTheDocument();
   });
@@ -74,6 +86,34 @@ describe('DebugPanel', () => {
       screen.getByRole('button', { name: /open debug panel/i }),
     );
     expect(screen.getByText(/not a custom game/i)).toBeInTheDocument();
+  });
+
+  it('renders the Library Source section when resolvedConfig has source.filter', () => {
+    render(
+      <DebugPanel
+        {...baseProps}
+        resolvedConfig={{
+          totalRounds: 8,
+          roundsInOrder: false,
+          selectedUnits: [{ level: 1, grapheme: 'a', phoneme: 'æ' }],
+          source: {
+            filter: { region: 'aus', level: 1 },
+            limit: 8,
+          },
+        }}
+        rounds={[]}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    expect(
+      screen.getByText(/Library Source \(0 matches\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/filter returned 0 words/i),
+    ).toBeInTheDocument();
   });
 
   it('shows empty rounds placeholder when rounds array is empty', () => {
