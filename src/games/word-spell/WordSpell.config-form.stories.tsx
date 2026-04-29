@@ -10,6 +10,7 @@ import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm/WordSpell
 import type { Meta, StoryObj } from '@storybook/react';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
+import { getAdvancedHeaderRenderer } from '@/games/config-fields-registry';
 
 type Mode = 'simple' | 'advanced';
 
@@ -61,6 +62,10 @@ type HarnessProps = {
   onChange: (config: Record<string, unknown>) => void;
 };
 
+// Match `AdvancedConfigModal`: render the per-game advanced header above the
+// generic field list. WordSpell's header is `WordSpellLibrarySource`.
+const AdvancedHeader = getAdvancedHeaderRenderer('word-spell');
+
 const WordSpellConfigFormHarness = ({
   mode,
   scenario,
@@ -84,11 +89,16 @@ const WordSpellConfigFormHarness = ({
     );
   }
   return (
-    <ConfigFormFields
-      fields={wordSpellConfigFields}
-      config={config}
-      onChange={handleChange}
-    />
+    <div className="flex flex-col gap-4">
+      {AdvancedHeader && (
+        <AdvancedHeader config={config} onChange={handleChange} />
+      )}
+      <ConfigFormFields
+        fields={wordSpellConfigFields}
+        config={config}
+        onChange={handleChange}
+      />
+    </div>
   );
 };
 
