@@ -4,6 +4,7 @@ import { GAME_COLOR_KEYS } from '@/lib/game-colors';
 
 const meta: Meta<typeof GameNameChip> = {
   component: GameNameChip,
+  title: 'Components/GameNameChip',
   tags: ['autodocs'],
   parameters: {
     docs: {

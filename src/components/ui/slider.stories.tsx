@@ -5,6 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Slider> = {
   component: Slider,
+  title: 'UI/Slider',
   tags: ['autodocs'],
   args: {
     onValueChange: fn(),

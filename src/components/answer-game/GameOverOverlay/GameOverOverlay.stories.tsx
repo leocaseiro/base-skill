@@ -26,7 +26,7 @@ const retryCountForStars = (stars: number): number => {
 
 const meta: Meta<StoryArgs> = {
   component: GameOverOverlay as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/GameOverOverlay',
+  title: 'AnswerGame/GameOverOverlay',
   tags: ['autodocs'],
   args: {
     stars: 5,

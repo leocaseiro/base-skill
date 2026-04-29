@@ -12,6 +12,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: AudioButton as unknown as ComponentType<StoryArgs>,
+  title: 'Questions/AudioButton',
   tags: ['autodocs'],
   decorators: [withDb],
   parameters: {

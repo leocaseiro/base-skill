@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof Footer> = {
   component: Footer,
+  title: 'Components/Footer',
   tags: ['autodocs'],
   decorators: [withRouter],
   parameters: {

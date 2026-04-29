@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof ScoreAnimation> = {
   component: ScoreAnimation,
-  title: 'answer-game/ScoreAnimation',
+  title: 'AnswerGame/ScoreAnimation',
   tags: ['autodocs'],
   args: { visible: true },
   argTypes: {

@@ -31,6 +31,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: GameGrid as unknown as ComponentType<StoryArgs>,
+  title: 'Components/GameGrid',
   tags: ['autodocs'],
   parameters: {
     docs: {

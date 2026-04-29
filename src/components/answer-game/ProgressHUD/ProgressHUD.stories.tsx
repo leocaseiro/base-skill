@@ -20,7 +20,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: ProgressHUD as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/ProgressHUD',
+  title: 'AnswerGame/ProgressHUD',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

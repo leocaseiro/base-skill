@@ -44,6 +44,7 @@ Additional named stories are only added when a scenario genuinely **cannot** be 
 - The Playground export **must be named exactly `Playground`** (not `Default`). Every reference story in this project uses this name — see [InstructionsOverlay](../../../src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx)
 - Use `tags: ['autodocs']` in meta unless there's a reason not to
 - Do NOT import `React` — JSX transform handles it
+- Story `title:` uses **PascalCase segments separated by `/`** — e.g. `AnswerGame/InstructionsOverlay`, `Games/SortNumbers/ConfigForm`. Sidebar titles do not mirror the kebab-case filesystem; see [CLAUDE.md → Storybook Sidebar Titles](../../../CLAUDE.md#storybook-sidebar-titles).
 - Auxiliary named stories are allowed only when a scenario can't be expressed by toggling controls on `Playground` (see "When to Add Auxiliary Stories")
 
 ## File Structure
@@ -51,6 +52,27 @@ Additional named stories are only added when a scenario genuinely **cannot** be 
 ```
 src/components/MyComponent.stories.tsx
 ```
+
+### Per-game previews of generic components
+
+Some generic components (e.g. `ConfigFormFields`, `InstructionsOverlay`) are
+parameterised by per-game fixtures. Their generic story exercises the
+component's abstract rendering branches with synthetic fixtures and **must stay
+game-agnostic**. To preview a specific game's real fixture, add a co-located
+sibling story under that game's directory:
+
+```
+src/components/ConfigFormFields.stories.tsx          ← generic branches only
+src/games/sort-numbers/SortNumbers.config-form.stories.tsx
+src/games/number-match/NumberMatch.config-form.stories.tsx
+src/games/word-spell/WordSpell.config-form.stories.tsx
+```
+
+Pattern precedent: per-game `InstructionsOverlay` stories (#143). Per-game
+files import the game's actual `ConfigField[]` / fixture export — never
+hand-maintained copies — and follow the single-`Playground` pattern with a
+`scenario` select for meaningful presets. Game vocabulary stays out of the
+generic story.
 
 ## Minimal Template
 

@@ -38,6 +38,7 @@ const OfflineHarness = ({ isOffline }: StoryArgs) => {
 
 const meta: Meta<StoryArgs> = {
   component: OfflineIndicator as unknown as ComponentType<StoryArgs>,
+  title: 'Components/OfflineIndicator',
   tags: ['autodocs'],
   parameters: {
     docs: {

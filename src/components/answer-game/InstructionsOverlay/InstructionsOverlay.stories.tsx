@@ -62,7 +62,7 @@ const GAME_ID_OPTIONS = [
 
 const meta: Meta<StoryArgs> = {
   component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/InstructionsOverlay',
+  title: 'AnswerGame/InstructionsOverlay',
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
   parameters: {

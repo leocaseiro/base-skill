@@ -127,6 +127,7 @@ const scenarioData: Record<
 
 const meta: Meta<StoryArgs> = {
   component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
+  title: 'Components/ConfigFormFields',
   tags: ['autodocs'],
   parameters: {
     docs: {
