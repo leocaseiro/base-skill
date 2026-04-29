@@ -22,6 +22,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta<StoryArgs> = {
   component: DotGroupQuestion as unknown as ComponentType<StoryArgs>,
+  title: 'Questions/DotGroupQuestion',
   tags: ['autodocs'],
   decorators: [
     withDb,

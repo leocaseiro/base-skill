@@ -27,7 +27,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta<StoryArgs> = {
   component: ImageQuestion,
-  title: 'questions/ImageQuestion',
+  title: 'Questions/ImageQuestion',
   tags: ['autodocs'],
   decorators: [
     withDb,

@@ -23,6 +23,7 @@ const baseConfig: WordSpellConfig = {
 
 const meta: Meta<typeof WordSpell> = {
   component: WordSpell,
+  title: 'Games/WordSpell/WordSpell',
   tags: ['autodocs'],
   args: { config: baseConfig },
   decorators: [withDb, withRouter],

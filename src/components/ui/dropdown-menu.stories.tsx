@@ -22,6 +22,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: DropdownMenu as unknown as ComponentType<StoryArgs>,
+  title: 'UI/DropdownMenu',
   tags: ['autodocs'],
   args: {
     triggerLabel: 'Options',

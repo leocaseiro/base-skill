@@ -132,7 +132,7 @@ const PlaygroundInner = ({
 
 const meta: Meta<StoryArgs> = {
   component: SlotRow as unknown as ComponentType<StoryArgs>,
-  title: 'answer-game/Slot',
+  title: 'AnswerGame/Slot',
   tags: ['autodocs'],
   decorators: [withDb],
   args: {

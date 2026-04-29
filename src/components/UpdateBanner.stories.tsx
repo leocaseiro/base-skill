@@ -25,6 +25,7 @@ const ServiceWorkerHarness = ({
 
 const meta: Meta<StoryArgs> = {
   component: UpdateBanner as unknown as ComponentType<StoryArgs>,
+  title: 'Components/UpdateBanner',
   tags: ['autodocs'],
   decorators: [withRouter],
   parameters: {
