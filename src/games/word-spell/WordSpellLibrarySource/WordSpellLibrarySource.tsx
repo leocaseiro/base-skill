@@ -49,6 +49,7 @@ const chipsForLevel = (
 ): { value: string; label: string; units: LevelGraphemeUnit[] }[] => {
   const byPhoneme = new Map<string, LevelGraphemeUnit[]>();
   for (const u of GRAPHEMES_BY_LEVEL[level] ?? []) {
+    if (u.p === '') continue;
     const existing = byPhoneme.get(u.p);
     if (existing) existing.push(u);
     else byPhoneme.set(u.p, [u]);
