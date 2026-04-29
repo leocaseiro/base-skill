@@ -72,7 +72,7 @@ export const headerStateForLevel = (
   selected: readonly LevelGraphemeUnit[],
   maxLevel: number,
 ): LevelHeaderState => {
-  const units = unitsAt(level);
+  const units = unitsAt(level).filter((u) => u.p !== '');
   const total = units.length;
   const count = units.filter((u) =>
     selected.some((s) => sameUnit(s, u)),

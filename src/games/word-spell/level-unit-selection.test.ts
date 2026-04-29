@@ -125,9 +125,10 @@ describe('headerStateForLevel', () => {
     const sh = L4Local.find((u) => u.g === 'sh' && u.p === 'ʃ')!;
     const state: LevelHeaderState = headerStateForLevel(2, [sh], 4);
     expect(state.kind).toBe('tiles-only');
-    expect(state).toMatchObject({
-      total: GRAPHEMES_BY_LEVEL[2]!.length,
-    });
+    const visibleL2 = (GRAPHEMES_BY_LEVEL[2] ?? []).filter(
+      (u) => u.p !== '',
+    );
+    expect(state).toMatchObject({ total: visibleL2.length });
   });
 
   it('returns "not-in-scope" when level > maxLevel', () => {

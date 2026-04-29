@@ -10,8 +10,10 @@ import {
   __resetChunkCacheForTests,
 } from '@/data/words';
 
-const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
-const L2 = [...(GRAPHEMES_BY_LEVEL[2] ?? [])];
+const visible = (units: readonly LevelGraphemeUnit[]) =>
+  units.filter((u) => u.p !== '');
+const L1 = visible(GRAPHEMES_BY_LEVEL[1] ?? []);
+const L2 = visible(GRAPHEMES_BY_LEVEL[2] ?? []);
 
 const Harness = ({
   initial,
@@ -74,7 +76,10 @@ describe('WordSpellLibrarySource', () => {
     expect(l2).toHaveAttribute('aria-pressed', 'true');
     for (const u of L2) {
       const chip = screen.getByRole('button', {
-        name: new RegExp(String.raw`${u.g}.*\/${u.p}\/`, 'i'),
+        name: new RegExp(
+          String.raw`(^|, )${u.g}(,| ).*\/${u.p}\/`,
+          'i',
+        ),
       });
       expect(chip).toHaveAttribute('aria-pressed', 'true');
     }
