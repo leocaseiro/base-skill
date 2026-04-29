@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatRounds } from './format-rounds';
+import { useLibraryPreview } from './useLibraryPreview';
 import { useStorageSnapshot } from './useStorageSnapshot';
+import type { WordFilter } from '@/data/words';
 import type { Cover } from '@/games/cover-type';
 import type { JSX } from 'react';
 
@@ -15,8 +17,8 @@ export interface DebugPanelCustomGame {
 export interface DebugPanelSession {
   sessionId: string;
   seed: string;
-  hasDraftState: boolean;
-  hasPersistedContent: boolean;
+  draftState: unknown;
+  persistedContent: unknown;
 }
 
 export interface DebugPanelProps {
@@ -151,6 +153,28 @@ const RoundsTable = ({
   );
 };
 
+const extractLibrarySource = (
+  resolvedConfig: Record<string, unknown>,
+): {
+  filter: WordFilter | null;
+  source: Record<string, unknown> | null;
+  selectedUnits: unknown;
+  totalRounds: unknown;
+  roundsInOrder: unknown;
+} => {
+  const source = resolvedConfig.source as
+    | Record<string, unknown>
+    | undefined;
+  const filter = (source?.filter ?? null) as WordFilter | null;
+  return {
+    filter,
+    source: source ?? null,
+    selectedUnits: resolvedConfig.selectedUnits,
+    totalRounds: resolvedConfig.totalRounds,
+    roundsInOrder: resolvedConfig.roundsInOrder,
+  };
+};
+
 export const DebugPanel = ({
   gameId,
   resolvedConfig,
@@ -162,6 +186,15 @@ export const DebugPanel = ({
   const [open, setOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const storage = useStorageSnapshot(open);
+
+  const librarySource = useMemo(
+    () => extractLibrarySource(resolvedConfig),
+    [resolvedConfig],
+  );
+  const libraryPreview = useLibraryPreview(
+    open && librarySource.filter !== null,
+    librarySource.filter,
+  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration gate; portal target only exists on client
@@ -223,8 +256,69 @@ export const DebugPanel = ({
             <Section title="Session">
               <JsonBlock label="session" value={session} />
             </Section>
+            {librarySource.source ? (
+              <Section
+                title={`Library Source${
+                  libraryPreview.loading
+                    ? ' (loading…)'
+                    : ` (${libraryPreview.hitCount} matches)`
+                }`}
+              >
+                <JsonBlock
+                  label="librarySource"
+                  value={{
+                    source: librarySource.source,
+                    selectedUnits: librarySource.selectedUnits,
+                    totalRounds: librarySource.totalRounds,
+                    roundsInOrder: librarySource.roundsInOrder,
+                  }}
+                />
+                <p className="mb-1 mt-2 font-semibold text-zinc-300">
+                  Matched words from library
+                </p>
+                {libraryPreview.error ? (
+                  <Empty label={`(error: ${libraryPreview.error})`} />
+                ) : libraryPreview.loading ? (
+                  <Empty label="(loading…)" />
+                ) : libraryPreview.hitCount === 0 ? (
+                  <Empty label="(filter returned 0 words)" />
+                ) : (
+                  <>
+                    {libraryPreview.usedFallback ? (
+                      <p className="mb-1 text-amber-400">
+                        ⚠ fell back from{' '}
+                        {libraryPreview.usedFallback.from} →{' '}
+                        {libraryPreview.usedFallback.to}
+                      </p>
+                    ) : null}
+                    <JsonActions
+                      label="libraryHits"
+                      value={libraryPreview.hits}
+                    />
+                    <ul className="space-y-0.5 font-mono text-[11px]">
+                      {libraryPreview.hits.slice(0, 50).map((h) => (
+                        <li
+                          key={h.word}
+                          className="flex justify-between text-zinc-200"
+                        >
+                          <span>{h.word}</span>
+                          <span className="text-zinc-500">
+                            L{h.level}
+                          </span>
+                        </li>
+                      ))}
+                      {libraryPreview.hitCount > 50 ? (
+                        <li className="italic text-zinc-500">
+                          …and {libraryPreview.hitCount - 50} more
+                        </li>
+                      ) : null}
+                    </ul>
+                  </>
+                )}
+              </Section>
+            ) : null}
             <Section
-              title={`Rounds (${Array.isArray(rounds) ? rounds.length : 0})`}
+              title={`Rounds in config (${Array.isArray(rounds) ? rounds.length : 0})`}
             >
               {Array.isArray(rounds) && rounds.length > 0 ? (
                 <JsonActions label="rounds" value={rounds} />

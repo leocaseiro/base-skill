@@ -485,8 +485,8 @@ const WordSpellGameBody = ({
       session={{
         sessionId,
         seed,
-        hasDraftState: draftState !== null,
-        hasPersistedContent: persistedContent !== null,
+        draftState,
+        persistedContent,
       }}
       rounds={cfg.rounds as unknown[]}
     />
@@ -627,8 +627,8 @@ const NumberMatchGameBody = ({
       session={{
         sessionId,
         seed,
-        hasDraftState: draftState !== null,
-        hasPersistedContent: false,
+        draftState,
+        persistedContent: null,
       }}
       rounds={cfg.rounds as unknown[]}
     />
@@ -768,8 +768,8 @@ const SortNumbersGameBody = ({
       session={{
         sessionId,
         seed,
-        hasDraftState: draftState !== null,
-        hasPersistedContent: false,
+        draftState,
+        persistedContent: null,
       }}
       rounds={cfg.rounds as unknown[]}
     />
