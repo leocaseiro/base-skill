@@ -1,8 +1,6 @@
 import type { LevelGraphemeUnit } from '@/data/words';
 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
 
-export type Tri = 'checked' | 'unchecked' | 'indeterminate';
-
 const sameUnit = (
   a: LevelGraphemeUnit,
   b: LevelGraphemeUnit,
@@ -10,20 +8,6 @@ const sameUnit = (
 
 const unitsAt = (level: number): LevelGraphemeUnit[] =>
   (GRAPHEMES_BY_LEVEL[level] ?? []) as LevelGraphemeUnit[];
-
-export const triStateForLevel = (
-  level: number,
-  selected: readonly LevelGraphemeUnit[],
-): Tri => {
-  const units = unitsAt(level);
-  if (units.length === 0) return 'unchecked';
-  const onCount = units.filter((u) =>
-    selected.some((s) => sameUnit(s, u)),
-  ).length;
-  if (onCount === 0) return 'unchecked';
-  if (onCount === units.length) return 'checked';
-  return 'indeterminate';
-};
 
 export const toggleLevel = (
   level: number,

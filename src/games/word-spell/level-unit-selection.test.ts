@@ -4,7 +4,6 @@ import {
   headerStateForLevel,
   toggleLevel,
   toggleUnit,
-  triStateForLevel,
   unitLevel,
 } from './level-unit-selection';
 import type { LevelHeaderState } from './level-unit-selection';
@@ -13,24 +12,6 @@ import { GRAPHEMES_BY_LEVEL } from '@/data/words';
 
 const L1 = (GRAPHEMES_BY_LEVEL[1] ?? []) as LevelGraphemeUnit[];
 const L2 = (GRAPHEMES_BY_LEVEL[2] ?? []) as LevelGraphemeUnit[];
-
-describe('triStateForLevel', () => {
-  it('returns "unchecked" when no L1 units are selected', () => {
-    expect(triStateForLevel(1, [])).toBe('unchecked');
-  });
-
-  it('returns "checked" when every L1 unit is selected', () => {
-    expect(triStateForLevel(1, [...L1])).toBe('checked');
-  });
-
-  it('returns "indeterminate" when some L1 units are selected', () => {
-    expect(triStateForLevel(1, [L1[0]!])).toBe('indeterminate');
-  });
-
-  it('treats other levels independently', () => {
-    expect(triStateForLevel(2, [...L1])).toBe('unchecked');
-  });
-});
 
 describe('toggleLevel', () => {
   it('adds every unit at the level when next="checked"', () => {
