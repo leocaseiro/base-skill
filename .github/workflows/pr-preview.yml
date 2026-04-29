@@ -119,19 +119,100 @@ jobs:
             !pr/${{ steps.version.outputs.pr_number }}/**
           commit-message: 'deploy: PR #${{ steps.version.outputs.pr_number }} preview (${{ steps.version.outputs.version }})'
 
+      - name: Compute build metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          echo "short_sha=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+          echo "commit_subject=$(git log -1 --format='%s' HEAD)" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(TZ=Australia/Sydney date '+%Y-%m-%d %H:%M %Z')" >> "$GITHUB_OUTPUT"
+
+      - name: Build preview comment with history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.version.outputs.pr_number }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SHORT_SHA: ${{ steps.meta.outputs.short_sha }}
+          COMMIT_SUBJECT: ${{ steps.meta.outputs.commit_subject }}
+          BUILD_DATE: ${{ steps.meta.outputs.build_date }}
+        run: |
+          set -euo pipefail
+
+          APP_URL="https://leocaseiro.github.io/base-skill/pr/${PR_NUMBER}/app/"
+          DOCS_URL="https://leocaseiro.github.io/base-skill/pr/${PR_NUMBER}/docs/"
+
+          # Fetch existing sticky comment body (if any).
+          # marocchino/sticky-pull-request-comment wraps the message with
+          # <!-- pr-preview --> markers — search for that.
+          COMMENT_BODY=$(gh api "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq '[.[] | select(.body | contains("<!-- pr-preview -->"))] | last | .body // empty' 2>/dev/null || echo "")
+
+          # Extract previous build metadata from hidden markers
+          HISTORY_ROWS=""
+          if [ -n "$COMMENT_BODY" ]; then
+            PREV_SHA=$(echo "$COMMENT_BODY" | sed -n 's/.*<!-- latest-sha:\(.*\) -->.*/\1/p' | head -1)
+            PREV_VERSION=$(echo "$COMMENT_BODY" | sed -n 's/.*<!-- latest-version:\(.*\) -->.*/\1/p' | head -1)
+            PREV_DATE=$(echo "$COMMENT_BODY" | sed -n 's/.*<!-- latest-date:\(.*\) -->.*/\1/p' | head -1)
+            PREV_SUBJECT=$(echo "$COMMENT_BODY" | sed -n 's/.*<!-- latest-subject:\(.*\) -->.*/\1/p' | head -1)
+
+            if [ -n "$PREV_SHA" ]; then
+              NEW_ROW="| ${PREV_DATE} | \`${PREV_SHA}\` — ${PREV_SUBJECT} | \`${PREV_VERSION}\` |"
+            fi
+
+            # Extract existing history table rows (between markers)
+            EXISTING_ROWS=$(echo "$COMMENT_BODY" | sed -n '/<!-- history-start -->/,/<!-- history-end -->/p' \
+              | grep '^| ' | grep -v '^| Built' | grep -v '^| -' || true)
+
+            if [ -n "${NEW_ROW:-}" ] && [ -n "$EXISTING_ROWS" ]; then
+              HISTORY_ROWS="${NEW_ROW}
+          ${EXISTING_ROWS}"
+            elif [ -n "${NEW_ROW:-}" ]; then
+              HISTORY_ROWS="$NEW_ROW"
+            elif [ -n "$EXISTING_ROWS" ]; then
+              HISTORY_ROWS="$EXISTING_ROWS"
+            fi
+          fi
+
+          # Write the comment body to a file
+          {
+            cat <<EOF
+          ## Preview deployed
+
+          | Target    | URL |
+          | --------- | --- |
+          | App       | ${APP_URL} |
+          | Storybook | ${DOCS_URL} |
+
+          **Version:** \`${VERSION}\`
+          **Commit:** \`${SHORT_SHA}\` — ${COMMIT_SUBJECT}
+          **Built:** ${BUILD_DATE}
+
+          <!-- latest-sha:${SHORT_SHA} -->
+          <!-- latest-version:${VERSION} -->
+          <!-- latest-date:${BUILD_DATE} -->
+          <!-- latest-subject:${COMMIT_SUBJECT} -->
+          EOF
+
+            if [ -n "$HISTORY_ROWS" ]; then
+              HISTORY_COUNT=$(echo "$HISTORY_ROWS" | wc -l | tr -d ' ')
+              cat <<EOF
+
+          <details>
+          <summary>Build history (${HISTORY_COUNT} previous)</summary>
+
+          | Built | Commit | Version |
+          | ----- | ------ | ------- |
+          <!-- history-start -->
+          ${HISTORY_ROWS}
+          <!-- history-end -->
+
+          </details>
+          EOF
+            fi
+          } > /tmp/pr-comment.md
+
       - name: Comment PR with preview URLs
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: pr-preview
-          message: |
-            ## Preview deployed
-
-            | Target    | URL                                                                                    |
-            | --------- | -------------------------------------------------------------------------------------- |
-            | App       | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/app/  |
-            | Storybook | https://leocaseiro.github.io/base-skill/pr/${{ steps.version.outputs.pr_number }}/docs/ |
-
-            **Version:** `${{ steps.version.outputs.version }}`
-            **Commit:** `${{ github.event.pull_request.head.sha }}`
-
-            Previews are kept forever — no cleanup on close.
+          path: /tmp/pr-comment.md
