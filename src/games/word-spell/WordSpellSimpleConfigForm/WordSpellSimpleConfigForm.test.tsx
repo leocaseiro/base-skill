@@ -3,18 +3,21 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
+import type { LevelGraphemeUnit } from '@/data/words';
+import type { JSX } from 'react';
+import { GRAPHEMES_BY_LEVEL } from '@/data/words';
 
-const Harness = ({ initialLevel }: { initialLevel: number }) => {
+const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+
+const Harness = ({
+  initial,
+}: {
+  initial: LevelGraphemeUnit[];
+}): JSX.Element => {
   const [config, setConfig] = useState<Record<string, unknown>>({
     configMode: 'simple',
-    source: {
-      type: 'word-library',
-      filter: {
-        region: 'aus',
-        level: initialLevel,
-        phonemesAllowed: [],
-      },
-    },
+    selectedUnits: initial,
+    region: 'aus',
     inputMethod: 'drag',
   });
   return (
@@ -23,8 +26,8 @@ const Harness = ({ initialLevel }: { initialLevel: number }) => {
 };
 
 describe('WordSpellSimpleConfigForm', () => {
-  it('shows a chip per phoneme at the current level', () => {
-    render(<Harness initialLevel={2} />);
+  it('shows chips for grapheme-phoneme units across levels', () => {
+    render(<Harness initial={L1} />);
     expect(
       screen.getByRole('button', { name: /m \/m\//i }),
     ).toBeInTheDocument();
@@ -33,20 +36,18 @@ describe('WordSpellSimpleConfigForm', () => {
     ).toBeInTheDocument();
   });
 
-  it('flags data-invalid when no phonemes are selected', () => {
-    const { container } = render(<Harness initialLevel={2} />);
-    expect(container.firstElementChild).toHaveAttribute(
-      'data-invalid',
-      'true',
-    );
+  it('flags data-invalid when selectedUnits is empty', () => {
+    const { container } = render(<Harness initial={[]} />);
+    expect(
+      container.firstElementChild?.firstElementChild,
+    ).toHaveAttribute('data-invalid', 'true');
   });
 
   it('marks aria-pressed=true after tapping a chip', async () => {
     const user = userEvent.setup();
-    render(<Harness initialLevel={2} />);
-    await user.click(screen.getByRole('button', { name: /m \/m\//i }));
-    expect(
-      screen.getByRole('button', { name: /m \/m\//i }),
-    ).toHaveAttribute('aria-pressed', 'true');
+    render(<Harness initial={L1} />);
+    const chip = screen.getByRole('button', { name: /m \/m\//i });
+    await user.click(chip);
+    expect(chip).toHaveAttribute('aria-pressed', 'true');
   });
 });

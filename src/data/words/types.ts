@@ -54,6 +54,11 @@ export interface WordHit {
   draftId?: string;
 }
 
+export interface GraphemePairFilter {
+  g: string;
+  p: string;
+}
+
 export interface WordFilter {
   region: Region;
   level?: number;
@@ -61,8 +66,8 @@ export interface WordFilter {
   levelRange?: [number, number];
   syllableCountEq?: number;
   syllableCountRange?: [number, number];
-  graphemesAllowed?: string[];
-  graphemesRequired?: string[];
+  graphemesAllowed?: GraphemePairFilter[];
+  graphemesRequired?: GraphemePairFilter[];
   phonemesAllowed?: string[];
   phonemesRequired?: string[];
   fallbackToAus?: boolean;

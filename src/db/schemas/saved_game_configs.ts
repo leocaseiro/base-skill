@@ -14,7 +14,7 @@ export type SavedGameConfigDoc = {
 
 export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
   {
-    version: 2,
+    version: 3,
     primaryKey: 'id',
     type: 'object',
     properties: {

@@ -12,7 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { getAdvancedConfigFields } from '@/games/config-fields-registry';
+import {
+  getAdvancedConfigFields,
+  getAdvancedHeaderRenderer,
+} from '@/games/config-fields-registry';
 import {
   DEFAULT_GAME_COLOR,
   GAME_COLORS,
@@ -81,6 +84,7 @@ export const AdvancedConfigModal = ({
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const fields = getAdvancedConfigFields(gameId);
+  const HeaderRenderer = getAdvancedHeaderRenderer(gameId);
 
   const trimmedName = name.trim();
   const currentCustomGameName =
@@ -233,6 +237,9 @@ export const AdvancedConfigModal = ({
             </div>
           </div>
 
+          {HeaderRenderer && (
+            <HeaderRenderer config={config} onChange={setConfig} />
+          )}
           <ConfigFormFields
             fields={fields}
             config={config}

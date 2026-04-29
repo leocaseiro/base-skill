@@ -26,6 +26,7 @@ import {
 } from './schemas';
 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
 import type { RxDatabase } from 'rxdb';
+import { migrateWordSpellConfig } from '@/db/migrations/word-spell-multi-level';
 
 addRxPlugin(RxDBMigrationSchemaPlugin);
 
@@ -55,7 +56,12 @@ const COLLECTIONS = {
       },
     },
   },
-  custom_games: { schema: customGamesSchema },
+  custom_games: {
+    schema: customGamesSchema,
+    migrationStrategies: {
+      2: migrateWordSpellConfig,
+    },
+  },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
   settings: { schema: settingsSchema },
@@ -68,6 +74,7 @@ const COLLECTIONS = {
         color: 'indigo',
       }),
       2: (oldDoc: Record<string, unknown>) => oldDoc,
+      3: migrateWordSpellConfig,
     },
   },
   themes: { schema: themesSchema },

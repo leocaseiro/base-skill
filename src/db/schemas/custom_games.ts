@@ -13,7 +13,7 @@ export type CustomGameDoc = {
 };
 
 export const customGamesSchema: RxJsonSchema<CustomGameDoc> = {
-  version: 1,
+  version: 2,
   primaryKey: 'id',
   type: 'object',
   properties: {

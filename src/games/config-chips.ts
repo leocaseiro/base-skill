@@ -9,7 +9,7 @@ const chipsForWordSpell = (
         filter?: {
           level?: number;
           phonemesAllowed?: string[];
-          graphemesAllowed?: string[];
+          graphemesAllowed?: { g: string; p: string }[];
         };
       }
     | undefined;
@@ -18,8 +18,9 @@ const chipsForWordSpell = (
   if (typeof filter?.level === 'number') {
     chips.push(`Level ${filter.level}`);
   }
-  const sounds =
-    filter?.phonemesAllowed ?? filter?.graphemesAllowed ?? [];
+  const phonemes = filter?.phonemesAllowed;
+  const graphemes = filter?.graphemesAllowed?.map((u) => u.g);
+  const sounds = phonemes ?? graphemes ?? [];
   if (sounds.length > 0) {
     const shown = sounds.slice(0, 3).join(', ');
     chips.push(sounds.length > 3 ? `${shown}…` : shown);

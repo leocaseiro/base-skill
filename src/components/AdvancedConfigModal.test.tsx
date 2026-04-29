@@ -302,4 +302,72 @@ describe('AdvancedConfigModal', () => {
     expect(onDelete).toHaveBeenCalledWith('abc');
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('renders the level rows for word-spell games', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(
+      screen.getByRole('button', { name: /Level 1/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not render the Level select for non-word-spell games', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={{ kind: 'default' }}
+        config={{}}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(screen.queryByRole('button', { name: /Level/i })).toBeNull();
+  });
+
+  it('reveals distractorCount when WordSpell tileBankMode is distractors', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{ tileBankMode: 'distractors', distractorCount: 3 }}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(
+      screen.getByLabelText(/distractor count/i),
+    ).toBeInTheDocument();
+  });
+
+  it('hides distractorCount when WordSpell tileBankMode is exact', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        config={{ tileBankMode: 'exact' }}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    expect(screen.queryByLabelText(/distractor count/i)).toBeNull();
+  });
 });
