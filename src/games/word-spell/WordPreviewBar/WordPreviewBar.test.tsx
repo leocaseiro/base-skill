@@ -2,9 +2,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { WordPreviewBar } from './WordPreviewBar';
 import {
+  GRAPHEMES_BY_LEVEL,
   __resetChunkCacheForTests,
   cumulativeGraphemes,
-  GRAPHEMES_BY_LEVEL,
 } from '@/data/words';
 
 afterEach(() => {
