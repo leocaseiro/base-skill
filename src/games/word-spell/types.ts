@@ -1,11 +1,15 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
-import type { WordSpellSource } from '@/data/words';
+import type {
+  LevelGraphemeUnit,
+  Region,
+  WordSpellSource,
+} from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
 
 export type WordSpellSimpleConfig = {
   configMode: 'simple';
-  level: number;
-  phonemesAllowed: string[];
+  selectedUnits: LevelGraphemeUnit[];
+  region: Region;
   inputMethod: 'drag' | 'type' | 'both';
 };
 
@@ -35,7 +39,8 @@ export interface WordSpellRound {
 export interface WordSpellConfig extends AnswerGameConfig {
   component: 'WordSpell';
   configMode?: 'simple' | 'advanced';
-  mode: 'picture' | 'scramble' | 'recall' | 'sentence-gap';
+  selectedUnits?: LevelGraphemeUnit[];
+  mode: 'picture' | 'recall' | 'sentence-gap';
   /** @default 'letter' */
   tileUnit: 'letter' | 'syllable' | 'word';
   /** Explicit hand-authored rounds. Wins over `source` when both are present. */
@@ -76,10 +81,18 @@ export const wordSpellConfigFields: ConfigField[] = [
   },
   {
     type: 'number',
+    key: 'distractorCount',
+    label: 'Distractor count',
+    min: 1,
+    max: 10,
+    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+  },
+  {
+    type: 'number',
     key: 'totalRounds',
     label: 'Total rounds',
     min: 1,
-    max: 8,
+    max: 50,
   },
   {
     type: 'select',
@@ -87,7 +100,6 @@ export const wordSpellConfigFields: ConfigField[] = [
     label: 'Mode',
     options: [
       { value: 'picture', label: 'picture' },
-      { value: 'scramble', label: 'scramble' },
       { value: 'recall', label: 'recall' },
       { value: 'sentence-gap', label: 'sentence-gap' },
     ],

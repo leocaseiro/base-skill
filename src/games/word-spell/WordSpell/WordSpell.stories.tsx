@@ -45,10 +45,6 @@ export const RecallMode: Story = {
   },
 };
 
-export const ScrambleMode: Story = {
-  args: { config: { ...baseConfig, mode: 'scramble' } },
-};
-
 export const SentenceGapMode: Story = {
   args: {
     config: {

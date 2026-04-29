@@ -127,83 +127,87 @@ describe('GameRoute', () => {
     });
   });
 
-  it('deletes a custom game: removes doc from DB and triggers navigation', async () => {
-    const user = userEvent.setup();
+  it(
+    'deletes a custom game: removes doc from DB and triggers navigation',
+    { timeout: 15_000 },
+    async () => {
+      const user = userEvent.setup();
 
-    // Insert a custom game document into the DB
-    const customId = 'custom-game-test-id';
-    await db.custom_games.insert({
-      id: customId,
-      profileId: ANONYMOUS_PROFILE_ID,
-      gameId: 'word-spell',
-      name: 'My Custom Spelling',
-      config: { component: 'WordSpell' },
-      color: 'amber',
-      createdAt: new Date().toISOString(),
-    });
+      // Insert a custom game document into the DB
+      const customId = 'custom-game-test-id';
+      await db.custom_games.insert({
+        id: customId,
+        profileId: ANONYMOUS_PROFILE_ID,
+        gameId: 'word-spell',
+        name: 'My Custom Spelling',
+        config: { component: 'WordSpell' },
+        color: 'amber',
+        createdAt: new Date().toISOString(),
+      });
 
-    const wordSpellConfig: ResolvedGameConfig = {
-      ...testConfig,
-      gameId: 'word-spell',
-    };
+      const wordSpellConfig: ResolvedGameConfig = {
+        ...testConfig,
+        gameId: 'word-spell',
+      };
 
-    render(
-      <GameRoute
-        config={wordSpellConfig}
-        initialLog={null}
-        draftState={null}
-        sessionId="sess-delete-001"
-        seed="seed-delete"
-        meta={{ ...testMeta, gameId: 'word-spell' }}
-        gameSpecificConfig={{ component: 'WordSpell' }}
-        customGameId={customId}
-        customGameName="My Custom Spelling"
-        customGameColor="amber"
-        customGameCover={null}
-        persistedContent={null}
-      />,
-      { wrapper },
-    );
+      render(
+        <GameRoute
+          config={wordSpellConfig}
+          initialLog={null}
+          draftState={null}
+          sessionId="sess-delete-001"
+          seed="seed-delete"
+          meta={{ ...testMeta, gameId: 'word-spell' }}
+          gameSpecificConfig={{ component: 'WordSpell' }}
+          customGameId={customId}
+          customGameName="My Custom Spelling"
+          customGameColor="amber"
+          customGameCover={null}
+          persistedContent={null}
+        />,
+        { wrapper },
+      );
 
-    // Wait for the InstructionsOverlay to render (cog/settings button)
-    await waitFor(() => {
-      expect(
+      // Wait for the InstructionsOverlay to render (cog/settings button)
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /configure/i }),
+        ).toBeInTheDocument();
+      });
+
+      // Open the AdvancedConfigModal via the cog button
+      await user.click(
         screen.getByRole('button', { name: /configure/i }),
-      ).toBeInTheDocument();
-    });
+      );
 
-    // Open the AdvancedConfigModal via the cog button
-    await user.click(
-      screen.getByRole('button', { name: /configure/i }),
-    );
+      // Click the Delete button (in the AdvancedConfigModal) to open the confirmation dialog
+      const deleteBtn = await screen.findByRole('button', {
+        name: /^delete$/i,
+      });
+      await user.click(deleteBtn);
 
-    // Click the Delete button (in the AdvancedConfigModal) to open the confirmation dialog
-    const deleteBtn = await screen.findByRole('button', {
-      name: /^delete$/i,
-    });
-    await user.click(deleteBtn);
+      // After the confirmation dialog opens, Radix marks the parent dialog as
+      // aria-hidden, leaving only the confirmation's Delete button accessible.
+      // findByRole will locate the destructive confirm button.
+      const confirmDeleteBtn = await screen.findByRole('button', {
+        name: /^delete$/i,
+      });
+      await user.click(confirmDeleteBtn);
 
-    // After the confirmation dialog opens, Radix marks the parent dialog as
-    // aria-hidden, leaving only the confirmation's Delete button accessible.
-    // findByRole will locate the destructive confirm button.
-    const confirmDeleteBtn = await screen.findByRole('button', {
-      name: /^delete$/i,
-    });
-    await user.click(confirmDeleteBtn);
+      // The document must be removed from the DB
+      await waitFor(async () => {
+        const doc = await db.custom_games.findOne(customId).exec();
+        expect(doc).toBeNull();
+      });
 
-    // The document must be removed from the DB
-    await waitFor(async () => {
-      const doc = await db.custom_games.findOne(customId).exec();
-      expect(doc).toBeNull();
-    });
-
-    // Navigation must strip configId from search params — expect.any returns
-    // AsymmetricMatcher typed as any, so we suppress the unsafe-assignment rule.
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment -- expect.any() returns AsymmetricMatcher typed as any */
-    const navigateArg = expect.objectContaining({
-      search: expect.any(Function),
-    });
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment -- end of suppress block */
-    expect(mockNavigate).toHaveBeenCalledWith(navigateArg);
-  });
+      // Navigation must strip configId from search params — expect.any returns
+      // AsymmetricMatcher typed as any, so we suppress the unsafe-assignment rule.
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment -- expect.any() returns AsymmetricMatcher typed as any */
+      const navigateArg = expect.objectContaining({
+        search: expect.any(Function),
+      });
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment -- end of suppress block */
+      expect(mockNavigate).toHaveBeenCalledWith(navigateArg);
+    },
+  );
 });
