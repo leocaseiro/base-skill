@@ -88,6 +88,34 @@ describe('DebugPanel', () => {
     expect(screen.getByText(/not a custom game/i)).toBeInTheDocument();
   });
 
+  it('renders Live Rounds from persistedContent.wordSpellRounds for word-spell', () => {
+    render(
+      <DebugPanel
+        {...baseProps}
+        rounds={[]}
+        session={{
+          ...baseProps.session,
+          persistedContent: {
+            wordSpellRounds: [
+              { word: 'mat', emoji: '🪐' },
+              { word: 'sat', emoji: '🪑' },
+            ],
+            roundOrder: [0, 1],
+          },
+        }}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: /open debug panel/i }),
+    );
+
+    expect(
+      screen.getByText(/Live Rounds in session \(2\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText('mat')).toBeInTheDocument();
+    expect(screen.getByText('sat')).toBeInTheDocument();
+  });
+
   it('renders the Library Source section when resolvedConfig has source.filter', () => {
     render(
       <DebugPanel
