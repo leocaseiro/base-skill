@@ -9694,13 +9694,13 @@ sessionId?: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellConfigFormHarness&quot; component.
-  93 | };
-  94 |
-&gt; 95 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
-     | ^
-  96 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
-  97 |   component: WordSpellConfigFormHarness,
-  98 |   tags: [&#39;autodocs&#39;],
+  103 | };
+  104 |
+&gt; 105 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
+      | ^
+  106 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
+  107 |   component: WordSpellConfigFormHarness,
+  108 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell.config-form.stories.tsx:
 // Co-located preview of the WordSpell config form, driven by the real
@@ -9715,6 +9715,7 @@ import { WordSpellSimpleConfigForm } from &#39;./WordSpellSimpleConfigForm/WordS
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+import { getAdvancedHeaderRenderer } from &#39;@/games/config-fields-registry&#39;;
 
 type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
@@ -9766,6 +9767,10 @@ type HarnessProps = {
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
+// Match `AdvancedConfigModal`: render the per-game advanced header above the
+// generic field list. WordSpell&#39;s header is `WordSpellLibrarySource`.
+const AdvancedHeader = getAdvancedHeaderRenderer(&#39;word-spell&#39;);
+
 const WordSpellConfigFormHarness = ({
   mode,
   scenario,
@@ -9789,11 +9794,16 @@ const WordSpellConfigFormHarness = ({
     );
   }
   return (
-    &lt;ConfigFormFields
-      fields={wordSpellConfigFields}
-      config={config}
-      onChange={handleChange}
-    /&gt;
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+      {AdvancedHeader &amp;&amp; (
+        &lt;AdvancedHeader config={config} onChange={handleChange} /&gt;
+      )}
+      &lt;ConfigFormFields
+        fields={wordSpellConfigFields}
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    &lt;/div&gt;
   );
 };
 
@@ -16523,13 +16533,13 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;WordSpellConfigFormHarness&quot; component.
-  93 | };
-  94 |
-&gt; 95 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
-     | ^
-  96 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
-  97 |   component: WordSpellConfigFormHarness,
-  98 |   tags: [&#39;autodocs&#39;],
+  103 | };
+  104 |
+&gt; 105 | const meta: Meta&lt;typeof WordSpellConfigFormHarness&gt; = {
+      | ^
+  106 |   title: &#39;Games/WordSpell/ConfigForm&#39;,
+  107 |   component: WordSpellConfigFormHarness,
+  108 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/word-spell/WordSpell.config-form.stories.tsx:
 // Co-located preview of the WordSpell config form, driven by the real
@@ -16544,6 +16554,7 @@ import { WordSpellSimpleConfigForm } from &#39;./WordSpellSimpleConfigForm/WordS
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
 import type { JSX } from &#39;react&#39;;
 import { ConfigFormFields } from &#39;@/components/ConfigFormFields&#39;;
+import { getAdvancedHeaderRenderer } from &#39;@/games/config-fields-registry&#39;;
 
 type Mode = &#39;simple&#39; | &#39;advanced&#39;;
 
@@ -16595,6 +16606,10 @@ type HarnessProps = {
   onChange: (config: Record&lt;string, unknown&gt;) =&gt; void;
 };
 
+// Match `AdvancedConfigModal`: render the per-game advanced header above the
+// generic field list. WordSpell&#39;s header is `WordSpellLibrarySource`.
+const AdvancedHeader = getAdvancedHeaderRenderer(&#39;word-spell&#39;);
+
 const WordSpellConfigFormHarness = ({
   mode,
   scenario,
@@ -16618,11 +16633,16 @@ const WordSpellConfigFormHarness = ({
     );
   }
   return (
-    &lt;ConfigFormFields
-      fields={wordSpellConfigFields}
-      config={config}
-      onChange={handleChange}
-    /&gt;
+    &lt;div className=&quot;flex flex-col gap-4&quot;&gt;
+      {AdvancedHeader &amp;&amp; (
+        &lt;AdvancedHeader config={config} onChange={handleChange} /&gt;
+      )}
+      &lt;ConfigFormFields
+        fields={wordSpellConfigFields}
+        config={config}
+        onChange={handleChange}
+      /&gt;
+    &lt;/div&gt;
   );
 };
 
