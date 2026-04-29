@@ -11,17 +11,36 @@ describe('toWordSpellRound', () => {
     provenance: 'shipped',
   };
 
-  it('uses syllables joined by - when present', () => {
+  it('uses the raw word even when syllables are present', () => {
     const round = toWordSpellRound({
       ...base,
       word: 'sunset',
       syllables: ['sun', 'set'],
       syllableCount: 2,
     });
-    expect(round.word).toBe('sun-set');
+    expect(round.word).toBe('sunset');
   });
 
-  it('falls back to raw word when no syllables', () => {
+  it('uses the raw word when no syllables are present', () => {
     expect(toWordSpellRound(base).word).toBe('cat');
+  });
+
+  it('does not hyphenate multi-syllable words like "magic" or "liquid"', () => {
+    expect(
+      toWordSpellRound({
+        ...base,
+        word: 'magic',
+        syllables: ['mag', 'ic'],
+        syllableCount: 2,
+      }).word,
+    ).toBe('magic');
+    expect(
+      toWordSpellRound({
+        ...base,
+        word: 'liquid',
+        syllables: ['liq', 'uid'],
+        syllableCount: 2,
+      }).word,
+    ).toBe('liquid');
   });
 });
