@@ -66,10 +66,11 @@ Each word changes from `letter + silent letter` to a single digraph entry.
 - `silly`: `[s, i, l, l̲, y]` → `[s, i, ll, y]`
 - `sunny`: `[s, u, n, n̲, y]` → `[s, u, nn, y]`
 
-### Missing word addition
+### ~~Missing word addition~~
 
-Add `chip` to `level6.json` with encoding `[ch, i, p]` — present in the
-reference word list but absent from the curriculum data.
+~~Add `chip` to `level6.json`~~ — `chip` already exists in `level4.json` with
+correct encoding. The reference list includes it at both L4 and L6; the
+curriculum only needs it once. No action needed.
 
 ### Unchanged
 
