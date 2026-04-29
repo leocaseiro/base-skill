@@ -194,8 +194,9 @@ describe('DebugPanel', () => {
       screen.getByRole('button', { name: /open debug panel/i }),
     );
 
+    expect(screen.getByText(/^Library Source$/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Library Source \(0 matches\)/i),
+      screen.getByText(/Library Words \(0 matches\)/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/filter returned 0 words/i),
