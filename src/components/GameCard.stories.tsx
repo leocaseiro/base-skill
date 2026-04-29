@@ -30,6 +30,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: GameCard as unknown as ComponentType<StoryArgs>,
+  title: 'Components/GameCard',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

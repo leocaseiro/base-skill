@@ -65,6 +65,7 @@ const withProvider = (Story: React.ComponentType) => (
 
 const meta: Meta<typeof SortNumbersTileBank> = {
   component: SortNumbersTileBank,
+  title: 'Games/SortNumbers/SortNumbersTileBank',
   tags: ['autodocs'],
   decorators: [withDb, withProvider],
 };

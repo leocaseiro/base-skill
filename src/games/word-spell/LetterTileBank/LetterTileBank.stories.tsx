@@ -44,6 +44,7 @@ const InitProvider = ({ children }: { children: ReactNode }) => {
 
 const meta: Meta<typeof LetterTileBank> = {
   component: LetterTileBank,
+  title: 'Games/WordSpell/LetterTileBank',
   tags: ['autodocs'],
   decorators: [
     withDb,

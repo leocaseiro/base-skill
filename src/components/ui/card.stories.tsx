@@ -19,6 +19,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: Card as unknown as ComponentType<StoryArgs>,
+  title: 'UI/Card',
   tags: ['autodocs'],
   args: {
     title: 'Card Title',

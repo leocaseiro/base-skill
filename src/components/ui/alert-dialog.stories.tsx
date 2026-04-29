@@ -28,6 +28,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: AlertDialog as unknown as ComponentType<StoryArgs>,
+  title: 'UI/AlertDialog',
   tags: ['autodocs'],
   args: {
     triggerLabel: 'Delete account',

@@ -11,6 +11,7 @@ interface StoryArgs {
 
 const meta: Meta<StoryArgs> = {
   component: Label as unknown as ComponentType<StoryArgs>,
+  title: 'UI/Label',
   tags: ['autodocs'],
   args: {
     htmlFor: 'name',

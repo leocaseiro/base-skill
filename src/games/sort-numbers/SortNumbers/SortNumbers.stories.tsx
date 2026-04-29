@@ -59,6 +59,7 @@ const baseConfig: SortNumbersConfig = {
 
 const meta: Meta<StoryArgs> = {
   component: SortNumbers,
+  title: 'Games/SortNumbers/SortNumbers',
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
   args: { config: baseConfig, skinId: 'classic' },
