@@ -39,7 +39,7 @@ describe('resolveSimpleConfig', () => {
     expect(hasG('ai')).toBe(false);
   });
 
-  it('derives phonemesRequired (Y filter) from selected unit phonemes', () => {
+  it('derives graphemesRequired (Y filter) from selected unit pairs', () => {
     const simple: WordSpellSimpleConfig = {
       configMode: 'simple',
       selectedUnits: [{ g: 'sh', p: 'ʃ' }],
@@ -47,11 +47,14 @@ describe('resolveSimpleConfig', () => {
       inputMethod: 'drag',
     };
     const full = resolveSimpleConfig(simple);
-    expect(full.source?.filter.phonemesRequired).toEqual(['ʃ']);
+    expect(full.source?.filter.graphemesRequired).toEqual([
+      { g: 'sh', p: 'ʃ' },
+    ]);
+    expect(full.source?.filter.phonemesRequired).toBeUndefined();
     expect(full.source?.filter.phonemesAllowed).toBeUndefined();
   });
 
-  it('dedupes phonemes when multiple units share a phoneme', () => {
+  it('keeps each (g, p) pair distinct even when phoneme is shared', () => {
     const simple: WordSpellSimpleConfig = {
       configMode: 'simple',
       selectedUnits: [
@@ -63,7 +66,27 @@ describe('resolveSimpleConfig', () => {
       inputMethod: 'drag',
     };
     const full = resolveSimpleConfig(simple);
-    expect(full.source?.filter.phonemesRequired).toEqual(['k']);
+    expect(full.source?.filter.graphemesRequired).toEqual([
+      { g: 'c', p: 'k' },
+      { g: 'k', p: 'k' },
+      { g: 'ck', p: 'k' },
+    ]);
+  });
+
+  it('dedupes when the same (g, p) pair appears twice', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [
+        { g: 'c', p: 'k' },
+        { g: 'c', p: 'k' },
+      ],
+      region: 'aus',
+      inputMethod: 'drag',
+    };
+    const full = resolveSimpleConfig(simple);
+    expect(full.source?.filter.graphemesRequired).toEqual([
+      { g: 'c', p: 'k' },
+    ]);
   });
 
   it('falls back to L1 default when selectedUnits is empty', () => {
@@ -78,7 +101,7 @@ describe('resolveSimpleConfig', () => {
     const hasG = (g: string) => allowed.some((u) => u.g === g);
     expect(hasG('s')).toBe(true);
     expect(hasG('m')).toBe(false);
-    expect(full.source?.filter.phonemesRequired).toEqual([]);
+    expect(full.source?.filter.graphemesRequired).toEqual([]);
   });
 
   it('handles legacy { level, phonemesAllowed } shape via fallback', () => {
@@ -90,13 +113,38 @@ describe('resolveSimpleConfig', () => {
       inputMethod: 'drag',
     } as unknown as WordSpellSimpleConfig;
     const full = resolveSimpleConfig(legacy);
-    expect(full.source?.filter.phonemesRequired).toContain('s');
-    expect(full.source?.filter.phonemesRequired).toContain('m');
+    const required = full.source?.filter.graphemesRequired ?? [];
+    expect(required.some((u) => u.p === 's')).toBe(true);
+    expect(required.some((u) => u.p === 'm')).toBe(true);
     const allowed = full.source?.filter.graphemesAllowed ?? [];
     const hasG = (g: string) => allowed.some((u) => u.g === g);
     expect(hasG('s')).toBe(true);
     expect(hasG('a')).toBe(true);
     expect(hasG('m')).toBe(true);
+  });
+});
+
+describe('resolveSimpleConfig pair-based required filter', () => {
+  it('emits graphemesRequired so soft-c (c, /s/) does not pull in L1 s-words', async () => {
+    const { filterWords } = await import('@/data/words');
+    const L4 = GRAPHEMES_BY_LEVEL[4] ?? [];
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [...L4],
+      region: 'aus',
+      inputMethod: 'drag',
+    };
+    const full = resolveSimpleConfig(simple);
+    const result = await filterWords(full.source!.filter);
+    const l1Only = result.hits.filter((h) =>
+      h.graphemes?.every((g) =>
+        L1.some((u) => u.g === g.g && u.p === g.p),
+      ),
+    );
+    expect(
+      l1Only.map((h) => h.word),
+      'L4-only selection must not return pure-L1 words',
+    ).toEqual([]);
   });
 });
 

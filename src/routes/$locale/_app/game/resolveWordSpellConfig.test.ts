@@ -22,8 +22,9 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
     expect(resolved.configMode).toBe('simple');
     expect(resolved.source?.type).toBe('word-library');
     expect(resolved.source?.filter.region).toBe('aus');
-    expect(resolved.source?.filter.phonemesRequired).toContain('s');
-    expect(resolved.source?.filter.phonemesRequired).toContain('t');
+    const required = resolved.source?.filter.graphemesRequired ?? [];
+    expect(required.some((u) => u.p === 's')).toBe(true);
+    expect(required.some((u) => u.p === 't')).toBe(true);
     expect(resolved.source?.filter.graphemesAllowed).toBeDefined();
     expect(resolved.rounds ?? []).toEqual([]);
     expect(resolved.roundsInOrder).toBe(false);

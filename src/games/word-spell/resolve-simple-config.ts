@@ -1,11 +1,24 @@
 import { defaultSelection, unitLevel } from './level-unit-selection';
 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-import type { LevelGraphemeUnit } from '@/data/words';
+import type {
+  GraphemePairFilter,
+  LevelGraphemeUnit,
+} from '@/data/words';
 import { GRAPHEMES_BY_LEVEL, cumulativeGraphemes } from '@/data/words';
 
-const uniquePhonemes = (
+const uniqueGraphemePairs = (
   units: readonly LevelGraphemeUnit[],
-): string[] => [...new Set(units.map((u) => u.p))];
+): GraphemePairFilter[] => {
+  const seen = new Set<string>();
+  const out: GraphemePairFilter[] = [];
+  for (const u of units) {
+    const key = `${u.g}|${u.p}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ g: u.g, p: u.p });
+  }
+  return out;
+};
 
 const maxLevelOf = (units: readonly LevelGraphemeUnit[]): number => {
   if (units.length === 0) return 1;
@@ -46,7 +59,7 @@ export const resolveSimpleConfig = (
 
   const maxLevel = maxLevelOf(units);
   const graphemesAllowed = cumulativeGraphemes(maxLevel);
-  const phonemesRequired = uniquePhonemes(units);
+  const graphemesRequired = uniqueGraphemePairs(units);
 
   return {
     gameId: 'word-spell',
@@ -65,7 +78,7 @@ export const resolveSimpleConfig = (
       filter: {
         region,
         graphemesAllowed,
-        phonemesRequired,
+        graphemesRequired,
       },
     },
   };
