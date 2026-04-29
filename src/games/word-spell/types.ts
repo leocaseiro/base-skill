@@ -91,7 +91,7 @@ export const wordSpellConfigFields: ConfigField[] = [
     key: 'totalRounds',
     label: 'Total rounds',
     min: 1,
-    max: 8,
+    max: 50,
   },
   {
     type: 'select',
