@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -604,22 +604,22 @@
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-0-components-ui-alert-dialog-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-0-components-ui-alert-dialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-0-components-ui-alert-dialog-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-0-ui-alertdialog-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-0-ui-alertdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-0-ui-alertdialog-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/alert-dialog.stories.tsx">components-ui-alert-dialog · ./src/components/ui/alert-dialog.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/alert-dialog.stories.tsx">ui-alertdialog · ./src/components/ui/alert-dialog.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-0-components-ui-alert-dialog-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-0-components-ui-alert-dialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-0-components-ui-alert-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-0-ui-alertdialog-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-0-ui-alertdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-0-ui-alertdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -635,8 +635,8 @@
 &gt; 29 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   30 |   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
-  31 |   tags: [&#39;autodocs&#39;],
-  32 |   args: {
+  31 |   title: &#39;UI/AlertDialog&#39;,
+  32 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/alert-dialog.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -669,6 +669,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/AlertDialog&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Delete account&#39;,
@@ -1235,22 +1236,22 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AudioButton as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-2-components-questions-audiobutton-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-2-components-questions-audiobutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-2-components-questions-audiobutton-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-2-questions-audiobutton-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-2-questions-audiobutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-2-questions-audiobutton-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/AudioButton/AudioButton.stories.tsx">components-questions-audiobutton · ./src/components/questions/AudioButton/AudioButton.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/AudioButton/AudioButton.stories.tsx">questions-audiobutton · ./src/components/questions/AudioButton/AudioButton.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-2-components-questions-audiobutton-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-2-components-questions-audiobutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-2-components-questions-audiobutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-2-questions-audiobutton-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-2-questions-audiobutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-2-questions-audiobutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -1266,8 +1267,8 @@ export const Playground: Story = {
 &gt; 13 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   14 |   component: AudioButton as unknown as ComponentType&lt;StoryArgs&gt;,
-  15 |   tags: [&#39;autodocs&#39;],
-  16 |   decorators: [withDb],
+  15 |   title: &#39;Questions/AudioButton&#39;,
+  16 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/AudioButton/AudioButton.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -1284,6 +1285,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: AudioButton as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/AudioButton&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withDb],
   parameters: {
@@ -1929,13 +1931,13 @@ open: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Button</h2>
       <div class="badges">
-        <label for="c-5-components-ui-button-props" class="badge ok as-toggle">3 prop types</label>
-        <label for="c-5-components-ui-button-info" class="badge info as-toggle">1 info</label>
-        <label for="c-5-components-ui-button-stories" class="badge ok as-toggle">11 stories</label>
+        <label for="c-5-ui-button-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-5-ui-button-info" class="badge info as-toggle">1 info</label>
+        <label for="c-5-ui-button-stories" class="badge ok as-toggle">11 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/button.stories.tsx">components-ui-button · ./src/components/ui/button.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/button.stories.tsx">ui-button · ./src/components/ui/button.stories.tsx</div>
     
     
     
@@ -1943,10 +1945,10 @@ open: boolean</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-5-components-ui-button-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-5-components-ui-button-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-5-ui-button-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-5-ui-button-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-5-components-ui-button-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-5-ui-button-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -2329,22 +2331,22 @@ import { ThemeProvider } from "next-themes";</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Card as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-7-components-ui-card-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-7-components-ui-card-info" class="badge info as-toggle">1 info</label>
-        <label for="c-7-components-ui-card-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-7-ui-card-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-7-ui-card-info" class="badge info as-toggle">1 info</label>
+        <label for="c-7-ui-card-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/card.stories.tsx">components-ui-card · ./src/components/ui/card.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/card.stories.tsx">ui-card · ./src/components/ui/card.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-7-components-ui-card-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-7-components-ui-card-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-7-components-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-7-ui-card-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-7-ui-card-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-7-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -2360,8 +2362,8 @@ import { ThemeProvider } from "next-themes";</code></pre>
 &gt; 20 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   21 |   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
-  22 |   tags: [&#39;autodocs&#39;],
-  23 |   args: {
+  22 |   title: &#39;UI/Card&#39;,
+  23 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/card.stories.tsx:
 import { Button } from &#39;./button&#39;;
@@ -2385,6 +2387,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Card&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     title: &#39;Card Title&#39;,
@@ -2552,8 +2555,8 @@ export const Small: Story = {
 &gt; 128 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
   129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
-  130 |   tags: [&#39;autodocs&#39;],
-  131 |   parameters: {
+  130 |   title: &#39;Components/ConfigFormFields&#39;,
+  131 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ConfigFormFields.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -2685,6 +2688,7 @@ const scenarioData: Record&lt;
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/ConfigFormFields&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -2788,22 +2792,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-9-components-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-9-components-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-9-components-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-9-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-9-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-9-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx">components-questions-dotgroupquestion · ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx">questions-dotgroupquestion · ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-9-components-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-9-components-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-9-components-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-9-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-9-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-9-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -2819,8 +2823,8 @@ export const Playground: Story = {};
 &gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   24 |   component: DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
-  25 |   tags: [&#39;autodocs&#39;],
-  26 |   decorators: [
+  25 |   title: &#39;Questions/DotGroupQuestion&#39;,
+  26 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -2847,6 +2851,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/DotGroupQuestion&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [
     withDb,
@@ -3041,22 +3046,22 @@ open: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-11-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-11-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-11-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-11-ui-dropdownmenu-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-11-ui-dropdownmenu-info" class="badge info as-toggle">1 info</label>
+        <label for="c-11-ui-dropdownmenu-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/dropdown-menu.stories.tsx">components-ui-dropdown-menu · ./src/components/ui/dropdown-menu.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/dropdown-menu.stories.tsx">ui-dropdownmenu · ./src/components/ui/dropdown-menu.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-11-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-11-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-11-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-11-ui-dropdownmenu-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-11-ui-dropdownmenu-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-11-ui-dropdownmenu-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -3072,8 +3077,8 @@ open: boolean</code></pre>
 &gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   24 |   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
-  25 |   tags: [&#39;autodocs&#39;],
-  26 |   args: {
+  25 |   title: &#39;UI/DropdownMenu&#39;,
+  26 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/dropdown-menu.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -3100,6 +3105,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/DropdownMenu&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Options&#39;,
@@ -3635,8 +3641,8 @@ export const ReplayTrigger: Story = {
 &gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
-  33 |   tags: [&#39;autodocs&#39;],
-  34 |   parameters: {
+  33 |   title: &#39;Components/GameCard&#39;,
+  34 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/GameCard.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3671,6 +3677,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/GameCard&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     layout: &#39;centered&#39;,
@@ -3901,8 +3908,8 @@ export const Playground: Story = {};
 &gt; 32 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   33 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
-  34 |   tags: [&#39;autodocs&#39;],
-  35 |   parameters: {
+  34 |   title: &#39;Components/GameGrid&#39;,
+  35 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -3938,6 +3945,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/GameGrid&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -4874,12 +4882,12 @@ src: string</code></pre>
       <h2><span class="status-dot dot-ok"></span> Input</h2>
       <div class="badges">
         
-        <label for="c-22-components-ui-input-info" class="badge info as-toggle">1 info</label>
-        <label for="c-22-components-ui-input-stories" class="badge ok as-toggle">8 stories</label>
+        <label for="c-22-ui-input-info" class="badge info as-toggle">1 info</label>
+        <label for="c-22-ui-input-stories" class="badge ok as-toggle">8 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/input.stories.tsx">components-ui-input · ./src/components/ui/input.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/input.stories.tsx">ui-input · ./src/components/ui/input.stories.tsx</div>
     
     
     
@@ -4887,8 +4895,8 @@ src: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-22-components-ui-input-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-22-components-ui-input-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-22-ui-input-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-22-ui-input-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5335,22 +5343,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-24-components-ui-label-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-24-components-ui-label-info" class="badge info as-toggle">1 info</label>
-        <label for="c-24-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-24-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-24-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-24-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/label.stories.tsx">components-ui-label · ./src/components/ui/label.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/label.stories.tsx">ui-label · ./src/components/ui/label.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-24-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-24-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-24-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-24-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-24-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-24-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5366,8 +5374,8 @@ export const Playground: Story = {};
 &gt; 12 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   13 |   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
-  14 |   tags: [&#39;autodocs&#39;],
-  15 |   args: {
+  14 |   title: &#39;UI/Label&#39;,
+  15 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/label.stories.tsx:
 import { Input } from &#39;./input&#39;;
@@ -5383,6 +5391,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Label&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     htmlFor: &#39;name&#39;,
@@ -5462,12 +5471,12 @@ export const Default: Story = {};
       <h2><span class="status-dot dot-ok"></span> LetterTileBank</h2>
       <div class="badges">
         
-        <label for="c-25-games-word-spell-lettertilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-25-games-word-spell-lettertilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-25-games-wordspell-lettertilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-25-games-wordspell-lettertilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx">games-word-spell-lettertilebank · ./src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx</div>
+    <div class="meta" title="./src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx">games-wordspell-lettertilebank · ./src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx</div>
     
     
     
@@ -5475,8 +5484,8 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-25-games-word-spell-lettertilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-25-games-word-spell-lettertilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-25-games-wordspell-lettertilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-25-games-wordspell-lettertilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -5630,13 +5639,13 @@ onNextLevel: () =&gt; void</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumberMatch</h2>
       <div class="badges">
-        <label for="c-27-games-number-match-numbermatch-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-27-games-number-match-numbermatch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-27-games-number-match-numbermatch-stories" class="badge ok as-toggle">14 stories</label>
+        <label for="c-27-games-numbermatch-numbermatch-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-27-games-numbermatch-numbermatch-info" class="badge info as-toggle">1 info</label>
+        <label for="c-27-games-numbermatch-numbermatch-stories" class="badge ok as-toggle">14 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/number-match/NumberMatch/NumberMatch.stories.tsx">games-number-match-numbermatch · ./src/games/number-match/NumberMatch/NumberMatch.stories.tsx</div>
+    <div class="meta" title="./src/games/number-match/NumberMatch/NumberMatch.stories.tsx">games-numbermatch-numbermatch · ./src/games/number-match/NumberMatch/NumberMatch.stories.tsx</div>
     
     
     
@@ -5644,10 +5653,10 @@ onNextLevel: () =&gt; void</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-27-games-number-match-numbermatch-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-27-games-number-match-numbermatch-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-27-games-numbermatch-numbermatch-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-27-games-numbermatch-numbermatch-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-27-games-number-match-numbermatch-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-27-games-numbermatch-numbermatch-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6230,13 +6239,13 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> NumeralTileBank</h2>
       <div class="badges">
-        <label for="c-30-games-number-match-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-30-games-number-match-numeraltilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-30-games-number-match-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-30-games-numbermatch-numeraltilebank-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-30-games-numbermatch-numeraltilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-30-games-numbermatch-numeraltilebank-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx">games-number-match-numeraltilebank · ./src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx</div>
+    <div class="meta" title="./src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx">games-numbermatch-numeraltilebank · ./src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx</div>
     
     
     
@@ -6244,10 +6253,10 @@ export const Default: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-30-games-number-match-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-30-games-number-match-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-30-games-numbermatch-numeraltilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-30-games-numbermatch-numeraltilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-30-games-number-match-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-30-games-numbermatch-numeraltilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -6378,8 +6387,8 @@ tileStyle: &#39;dots&#39; | &#39;objects&#39; | &#39;fingers&#39;</code></pre>
 &gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   40 |   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
-  41 |   tags: [&#39;autodocs&#39;],
-  42 |   parameters: {
+  41 |   title: &#39;Components/OfflineIndicator&#39;,
+  42 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/OfflineIndicator.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -6422,6 +6431,7 @@ const OfflineHarness = ({ isOffline }: StoryArgs) =&gt; {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/OfflineIndicator&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -6937,22 +6947,22 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-35-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-35-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-35-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-35-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-35-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-35-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/select.stories.tsx">components-ui-select · ./src/components/ui/select.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/select.stories.tsx">ui-select · ./src/components/ui/select.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-35-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-35-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-35-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-35-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-35-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-35-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -6968,8 +6978,8 @@ export const Playground: Story = {
 &gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   23 |   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
-  24 |   tags: [&#39;autodocs&#39;],
-  25 |   args: {
+  24 |   title: &#39;UI/Select&#39;,
+  25 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/select.stories.tsx:
 import { expect, fn, userEvent, within } from &#39;storybook/test&#39;;
@@ -6995,6 +7005,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Select&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Select a fruit&#39;,
@@ -7262,22 +7273,22 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-36-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-36-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-36-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-36-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-36-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-36-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/sheet.stories.tsx">components-ui-sheet · ./src/components/ui/sheet.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/sheet.stories.tsx">ui-sheet · ./src/components/ui/sheet.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-36-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-36-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-36-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-36-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-36-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-36-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -7293,8 +7304,8 @@ export const SelectsOption: Story = {
 &gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   27 |   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
-  28 |   tags: [&#39;autodocs&#39;],
-  29 |   args: {
+  28 |   title: &#39;UI/Sheet&#39;,
+  29 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/sheet.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -7324,6 +7335,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Sheet&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     side: &#39;right&#39;,
@@ -7616,13 +7628,13 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Slider</h2>
       <div class="badges">
-        <label for="c-37-components-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-37-components-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-37-components-ui-slider-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-37-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-37-ui-slider-info" class="badge info as-toggle">1 info</label>
+        <label for="c-37-ui-slider-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/slider.stories.tsx">components-ui-slider · ./src/components/ui/slider.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/slider.stories.tsx">ui-slider · ./src/components/ui/slider.stories.tsx</div>
     
     
     
@@ -7630,10 +7642,10 @@ export const OpensAndClosesOnEscape: Story = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-37-components-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-37-components-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-37-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-37-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-37-components-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-37-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8385,13 +8397,13 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-40-games-sort-numbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-40-games-sort-numbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-games-sort-numbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
+        <label for="c-40-games-sortnumbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-40-games-sortnumbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-games-sortnumbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx">games-sort-numbers-sortnumbers · ./src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx</div>
+    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx">games-sortnumbers-sortnumbers · ./src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx</div>
     
     
     
@@ -8399,10 +8411,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-games-sort-numbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-games-sort-numbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-games-sortnumbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-games-sortnumbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-games-sort-numbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-40-games-sortnumbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8854,13 +8866,13 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbersTileBank</h2>
       <div class="badges">
-        <label for="c-42-games-sort-numbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-42-games-sort-numbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-games-sort-numbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-42-games-sortnumbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-42-games-sortnumbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-games-sortnumbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx">games-sort-numbers-sortnumberstilebank · ./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx</div>
+    <div class="meta" title="./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx">games-sortnumbers-sortnumberstilebank · ./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx</div>
     
     
     
@@ -8868,10 +8880,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-42-games-sort-numbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-games-sort-numbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-42-games-sort-numbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8951,22 +8963,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-43-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-43-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-43-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-43-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/TextQuestion/TextQuestion.stories.tsx">components-questions-textquestion · ./src/components/questions/TextQuestion/TextQuestion.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/TextQuestion/TextQuestion.stories.tsx">questions-textquestion · ./src/components/questions/TextQuestion/TextQuestion.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-43-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-43-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-43-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-43-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-43-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -8982,8 +8994,8 @@ export const Playground: Story = {};
 &gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   22 |   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
-  23 |   tags: [&#39;autodocs&#39;],
-  24 |   decorators: [
+  23 |   title: &#39;Questions/TextQuestion&#39;,
+  24 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/TextQuestion/TextQuestion.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -9008,6 +9020,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/TextQuestion&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [
     withDb,
@@ -9191,8 +9204,8 @@ export const Playground: Story = {};
 &gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   27 |   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
-  28 |   tags: [&#39;autodocs&#39;],
-  29 |   decorators: [withRouter],
+  28 |   title: &#39;Components/UpdateBanner&#39;,
+  29 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/UpdateBanner.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -9222,6 +9235,7 @@ const ServiceWorkerHarness = ({
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/UpdateBanner&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withRouter],
   parameters: {
@@ -9402,13 +9416,13 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-47-games-word-spell-wordspell-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-47-games-word-spell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-47-games-word-spell-wordspell-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-47-games-wordspell-wordspell-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-47-games-wordspell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-47-games-wordspell-wordspell-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.stories.tsx">games-word-spell-wordspell · ./src/games/word-spell/WordSpell/WordSpell.stories.tsx</div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.stories.tsx">games-wordspell-wordspell · ./src/games/word-spell/WordSpell/WordSpell.stories.tsx</div>
     
     
     
@@ -9416,10 +9430,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-47-games-word-spell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-47-games-word-spell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-47-games-wordspell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-47-games-wordspell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-47-games-word-spell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-47-games-wordspell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -10048,22 +10062,22 @@ export const HUD_Round5Of5: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-0-components-ui-alert-dialog-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-0-components-ui-alert-dialog-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-0-components-ui-alert-dialog-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-0-ui-alertdialog-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-0-ui-alertdialog-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-0-ui-alertdialog-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/alert-dialog.stories.tsx">components-ui-alert-dialog · ./src/components/ui/alert-dialog.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/alert-dialog.stories.tsx">ui-alertdialog · ./src/components/ui/alert-dialog.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-0-components-ui-alert-dialog-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-0-components-ui-alert-dialog-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-0-components-ui-alert-dialog-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-0-ui-alertdialog-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-0-ui-alertdialog-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-0-ui-alertdialog-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10079,8 +10093,8 @@ export const HUD_Round5Of5: Story = {
 &gt; 29 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   30 |   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
-  31 |   tags: [&#39;autodocs&#39;],
-  32 |   args: {
+  31 |   title: &#39;UI/AlertDialog&#39;,
+  32 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/alert-dialog.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -10113,6 +10127,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: AlertDialog as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/AlertDialog&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Delete account&#39;,
@@ -10679,22 +10694,22 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> AudioButton as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-2-components-questions-audiobutton-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-2-components-questions-audiobutton-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-2-components-questions-audiobutton-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-2-questions-audiobutton-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-2-questions-audiobutton-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-2-questions-audiobutton-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/AudioButton/AudioButton.stories.tsx">components-questions-audiobutton · ./src/components/questions/AudioButton/AudioButton.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/AudioButton/AudioButton.stories.tsx">questions-audiobutton · ./src/components/questions/AudioButton/AudioButton.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-2-components-questions-audiobutton-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-2-components-questions-audiobutton-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-2-components-questions-audiobutton-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-2-questions-audiobutton-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-2-questions-audiobutton-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-2-questions-audiobutton-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10710,8 +10725,8 @@ export const Playground: Story = {
 &gt; 13 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   14 |   component: AudioButton as unknown as ComponentType&lt;StoryArgs&gt;,
-  15 |   tags: [&#39;autodocs&#39;],
-  16 |   decorators: [withDb],
+  15 |   title: &#39;Questions/AudioButton&#39;,
+  16 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/AudioButton/AudioButton.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -10728,6 +10743,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: AudioButton as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/AudioButton&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withDb],
   parameters: {
@@ -11481,22 +11497,22 @@ import { ThemeProvider } from "next-themes";</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Card as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-5-components-ui-card-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-5-components-ui-card-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-5-components-ui-card-stories" class="badge ok as-toggle">2 stories</label>
+        <label for="c-error-5-ui-card-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-5-ui-card-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-5-ui-card-stories" class="badge ok as-toggle">2 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/card.stories.tsx">components-ui-card · ./src/components/ui/card.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/card.stories.tsx">ui-card · ./src/components/ui/card.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-5-components-ui-card-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-5-components-ui-card-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-5-components-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-5-ui-card-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-5-ui-card-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-5-ui-card-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11512,8 +11528,8 @@ import { ThemeProvider } from "next-themes";</code></pre>
 &gt; 20 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   21 |   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
-  22 |   tags: [&#39;autodocs&#39;],
-  23 |   args: {
+  22 |   title: &#39;UI/Card&#39;,
+  23 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/card.stories.tsx:
 import { Button } from &#39;./button&#39;;
@@ -11537,6 +11553,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Card as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Card&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     title: &#39;Card Title&#39;,
@@ -11704,8 +11721,8 @@ export const Small: Story = {
 &gt; 128 | const meta: Meta&lt;StoryArgs&gt; = {
       | ^
   129 |   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
-  130 |   tags: [&#39;autodocs&#39;],
-  131 |   parameters: {
+  130 |   title: &#39;Components/ConfigFormFields&#39;,
+  131 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ConfigFormFields.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -11837,6 +11854,7 @@ const scenarioData: Record&lt;
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: ConfigFormFields as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/ConfigFormFields&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -11940,22 +11958,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-7-components-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-7-components-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-7-components-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-7-questions-dotgroupquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-7-questions-dotgroupquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-7-questions-dotgroupquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx">components-questions-dotgroupquestion · ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx">questions-dotgroupquestion · ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-7-components-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-7-components-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-7-components-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-7-questions-dotgroupquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-7-questions-dotgroupquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-7-questions-dotgroupquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -11971,8 +11989,8 @@ export const Playground: Story = {};
 &gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   24 |   component: DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
-  25 |   tags: [&#39;autodocs&#39;],
-  26 |   decorators: [
+  25 |   title: &#39;Questions/DotGroupQuestion&#39;,
+  26 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -11999,6 +12017,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: DotGroupQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/DotGroupQuestion&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [
     withDb,
@@ -12093,22 +12112,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-8-components-ui-dropdown-menu-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-8-components-ui-dropdown-menu-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-8-components-ui-dropdown-menu-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-error-8-ui-dropdownmenu-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-8-ui-dropdownmenu-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-8-ui-dropdownmenu-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/dropdown-menu.stories.tsx">components-ui-dropdown-menu · ./src/components/ui/dropdown-menu.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/dropdown-menu.stories.tsx">ui-dropdownmenu · ./src/components/ui/dropdown-menu.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-8-components-ui-dropdown-menu-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-8-components-ui-dropdown-menu-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-8-components-ui-dropdown-menu-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-8-ui-dropdownmenu-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-8-ui-dropdownmenu-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-8-ui-dropdownmenu-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -12124,8 +12143,8 @@ export const Playground: Story = {};
 &gt; 23 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   24 |   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
-  25 |   tags: [&#39;autodocs&#39;],
-  26 |   args: {
+  25 |   title: &#39;UI/DropdownMenu&#39;,
+  26 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/dropdown-menu.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -12152,6 +12171,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: DropdownMenu as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/DropdownMenu&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Options&#39;,
@@ -12619,8 +12639,8 @@ export const ReplayTrigger: Story = {
 &gt; 31 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   32 |   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
-  33 |   tags: [&#39;autodocs&#39;],
-  34 |   parameters: {
+  33 |   title: &#39;Components/GameCard&#39;,
+  34 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/GameCard.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -12655,6 +12675,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameCard as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/GameCard&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     layout: &#39;centered&#39;,
@@ -12885,8 +12906,8 @@ export const Playground: Story = {};
 &gt; 32 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   33 |   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
-  34 |   tags: [&#39;autodocs&#39;],
-  35 |   parameters: {
+  34 |   title: &#39;Components/GameGrid&#39;,
+  35 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/GameGrid.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -12922,6 +12943,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: GameGrid as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/GameGrid&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -13750,22 +13772,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Label as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-15-components-ui-label-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-15-components-ui-label-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-15-components-ui-label-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-15-ui-label-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-15-ui-label-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-15-ui-label-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/label.stories.tsx">components-ui-label · ./src/components/ui/label.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/label.stories.tsx">ui-label · ./src/components/ui/label.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-15-components-ui-label-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-15-components-ui-label-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-15-components-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-15-ui-label-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-15-ui-label-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-15-ui-label-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -13781,8 +13803,8 @@ export const Playground: Story = {};
 &gt; 12 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   13 |   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
-  14 |   tags: [&#39;autodocs&#39;],
-  15 |   args: {
+  14 |   title: &#39;UI/Label&#39;,
+  15 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/label.stories.tsx:
 import { Input } from &#39;./input&#39;;
@@ -13798,6 +13820,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Label as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Label&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     htmlFor: &#39;name&#39;,
@@ -14268,8 +14291,8 @@ export const Default: Story = {};
 &gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   40 |   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
-  41 |   tags: [&#39;autodocs&#39;],
-  42 |   parameters: {
+  41 |   title: &#39;Components/OfflineIndicator&#39;,
+  42 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/OfflineIndicator.stories.tsx:
 import { useEffect } from &#39;react&#39;;
@@ -14312,6 +14335,7 @@ const OfflineHarness = ({ isOffline }: StoryArgs) =&gt; {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: OfflineIndicator as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/OfflineIndicator&#39;,
   tags: [&#39;autodocs&#39;],
   parameters: {
     docs: {
@@ -14635,22 +14659,22 @@ export const Playground: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Select as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-20-components-ui-select-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-20-components-ui-select-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-20-components-ui-select-stories" class="badge ok as-toggle">4 stories</label>
+        <label for="c-error-20-ui-select-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-20-ui-select-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-20-ui-select-stories" class="badge ok as-toggle">4 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/select.stories.tsx">components-ui-select · ./src/components/ui/select.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/select.stories.tsx">ui-select · ./src/components/ui/select.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-20-components-ui-select-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-20-components-ui-select-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-20-components-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-20-ui-select-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-20-ui-select-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-20-ui-select-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14666,8 +14690,8 @@ export const Playground: Story = {
 &gt; 22 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   23 |   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
-  24 |   tags: [&#39;autodocs&#39;],
-  25 |   args: {
+  24 |   title: &#39;UI/Select&#39;,
+  25 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/select.stories.tsx:
 import { expect, fn, userEvent, within } from &#39;storybook/test&#39;;
@@ -14693,6 +14717,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Select as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Select&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     triggerLabel: &#39;Select a fruit&#39;,
@@ -14960,22 +14985,22 @@ export const SelectsOption: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> Sheet as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-21-components-ui-sheet-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-21-components-ui-sheet-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-21-components-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-error-21-ui-sheet-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-21-ui-sheet-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-21-ui-sheet-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/ui/sheet.stories.tsx">components-ui-sheet · ./src/components/ui/sheet.stories.tsx</div>
+    <div class="meta" title="./src/components/ui/sheet.stories.tsx">ui-sheet · ./src/components/ui/sheet.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-21-components-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-21-components-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-21-components-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-21-ui-sheet-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-21-ui-sheet-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-21-ui-sheet-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -14991,8 +15016,8 @@ export const SelectsOption: Story = {
 &gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   27 |   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
-  28 |   tags: [&#39;autodocs&#39;],
-  29 |   args: {
+  28 |   title: &#39;UI/Sheet&#39;,
+  29 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/ui/sheet.stories.tsx:
 import { expect, fn, userEvent, waitFor, within } from &#39;storybook/test&#39;;
@@ -15022,6 +15047,7 @@ interface StoryArgs {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: Sheet as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;UI/Sheet&#39;,
   tags: [&#39;autodocs&#39;],
   args: {
     side: &#39;right&#39;,
@@ -15996,22 +16022,22 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-24-components-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-24-components-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-24-components-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-24-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-24-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-24-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
-    <div class="meta" title="./src/components/questions/TextQuestion/TextQuestion.stories.tsx">components-questions-textquestion · ./src/components/questions/TextQuestion/TextQuestion.stories.tsx</div>
+    <div class="meta" title="./src/components/questions/TextQuestion/TextQuestion.stories.tsx">questions-textquestion · ./src/components/questions/TextQuestion/TextQuestion.stories.tsx</div>
     
     
     
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-24-components-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-24-components-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-24-components-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-24-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-24-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-24-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -16027,8 +16053,8 @@ export const Playground: Story = {};
 &gt; 21 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   22 |   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
-  23 |   tags: [&#39;autodocs&#39;],
-  24 |   decorators: [
+  23 |   title: &#39;Questions/TextQuestion&#39;,
+  24 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/questions/TextQuestion/TextQuestion.stories.tsx:
 import { withDb } from &#39;../../../../.storybook/decorators/withDb&#39;;
@@ -16053,6 +16079,7 @@ const storyConfig: AnswerGameConfig = {
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Questions/TextQuestion&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [
     withDb,
@@ -16168,8 +16195,8 @@ export const Playground: Story = {};
 &gt; 26 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
   27 |   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
-  28 |   tags: [&#39;autodocs&#39;],
-  29 |   decorators: [withRouter],
+  28 |   title: &#39;Components/UpdateBanner&#39;,
+  29 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/UpdateBanner.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -16199,6 +16226,7 @@ const ServiceWorkerHarness = ({
 
 const meta: Meta&lt;StoryArgs&gt; = {
   component: UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;,
+  title: &#39;Components/UpdateBanner&#39;,
   tags: [&#39;autodocs&#39;],
   decorators: [withRouter],
   parameters: {
@@ -16747,19 +16775,19 @@ export const HUD_Round5Of5: Story = {
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> answer-game/Flows</h2>
+      <h2><span class="status-dot dot-ok"></span> AnswerGame/Flows</h2>
       <div class="badges">
         
-        <label for="doc-0-answer-game-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-0-answergame-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx">answer-game-flows--docs · ./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx</div>
+    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx">answergame-flows--docs · ./src/components/answer-game/AnswerGame/AnswerGame.flows.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-0-answer-game-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-0-answergame-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -16768,7 +16796,7 @@ export const HUD_Round5Of5: Story = {
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;answer-game/Flows&quot; /&gt;
+&lt;Meta title=&quot;AnswerGame/Flows&quot; /&gt;
 
 # AnswerGame — Event Flows
 
@@ -17075,19 +17103,19 @@ accidentally drop `roundIndex`, `retryCount`, or `levelIndex`.
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> answer-game/Reference</h2>
+      <h2><span class="status-dot dot-ok"></span> AnswerGame/Reference</h2>
       <div class="badges">
         
-        <label for="doc-1-answer-game-reference-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-1-answergame-reference-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx">answer-game-reference--docs · ./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx</div>
+    <div class="meta" title="./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx">answergame-reference--docs · ./src/components/answer-game/AnswerGame/AnswerGame.reference.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-1-answer-game-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-1-answergame-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -17096,7 +17124,7 @@ accidentally drop `roundIndex`, `retryCount`, or `levelIndex`.
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;answer-game/Reference&quot; /&gt;
+&lt;Meta title=&quot;AnswerGame/Reference&quot; /&gt;
 
 # AnswerGame — Reference
 
@@ -17251,19 +17279,19 @@ export const useAnswerGameDispatch = (): Dispatch&lt;AnswerGameAction&gt;
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Components/phoneme-blender/Flows</h2>
+      <h2><span class="status-dot dot-ok"></span> Components/PhonemeBlender/Flows</h2>
       <div class="badges">
         
-        <label for="doc-2-components-phoneme-blender-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-2-components-phonemeblender-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/components/phoneme-blender/PhonemeBlender.flows.mdx">components-phoneme-blender-flows--docs · ./src/components/phoneme-blender/PhonemeBlender.flows.mdx</div>
+    <div class="meta" title="./src/components/phoneme-blender/PhonemeBlender.flows.mdx">components-phonemeblender-flows--docs · ./src/components/phoneme-blender/PhonemeBlender.flows.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-2-components-phoneme-blender-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-2-components-phonemeblender-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -17272,7 +17300,7 @@ export const useAnswerGameDispatch = (): Dispatch&lt;AnswerGameAction&gt;
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;Components/phoneme-blender/Flows&quot; /&gt;
+&lt;Meta title=&quot;Components/PhonemeBlender/Flows&quot; /&gt;
 
 # PhonemeBlender — Interaction Flows
 
@@ -17656,19 +17684,19 @@ to their configs.
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> Games/word-spell/Flows</h2>
+      <h2><span class="status-dot dot-ok"></span> Games/WordSpell/Flows</h2>
       <div class="badges">
         
-        <label for="doc-7-games-word-spell-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-7-games-wordspell-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.flows.mdx">games-word-spell-flows--docs · ./src/games/word-spell/WordSpell/WordSpell.flows.mdx</div>
+    <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.flows.mdx">games-wordspell-flows--docs · ./src/games/word-spell/WordSpell/WordSpell.flows.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-7-games-word-spell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-7-games-wordspell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -17677,7 +17705,7 @@ to their configs.
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;Games/word-spell/Flows&quot; /&gt;
+&lt;Meta title=&quot;Games/WordSpell/Flows&quot; /&gt;
 
 # WordSpell — End-to-End Flows
 
@@ -17928,19 +17956,19 @@ flowchart LR
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> game-engine/Flows</h2>
+      <h2><span class="status-dot dot-ok"></span> GameEngine/Flows</h2>
       <div class="badges">
         
-        <label for="doc-8-game-engine-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-8-gameengine-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/lib/game-engine/GameEngine.flows.mdx">game-engine-flows--docs · ./src/lib/game-engine/GameEngine.flows.mdx</div>
+    <div class="meta" title="./src/lib/game-engine/GameEngine.flows.mdx">gameengine-flows--docs · ./src/lib/game-engine/GameEngine.flows.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-8-game-engine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-8-gameengine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -17949,7 +17977,7 @@ flowchart LR
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;game-engine/Flows&quot; /&gt;
+&lt;Meta title=&quot;GameEngine/Flows&quot; /&gt;
 
 # GameEngine — Flows
 
@@ -18061,19 +18089,19 @@ sequenceDiagram
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> game-engine/Reference</h2>
+      <h2><span class="status-dot dot-ok"></span> GameEngine/Reference</h2>
       <div class="badges">
         
-        <label for="doc-9-game-engine-reference-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-9-gameengine-reference-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/lib/game-engine/GameEngine.reference.mdx">game-engine-reference--docs · ./src/lib/game-engine/GameEngine.reference.mdx</div>
+    <div class="meta" title="./src/lib/game-engine/GameEngine.reference.mdx">gameengine-reference--docs · ./src/lib/game-engine/GameEngine.reference.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-9-game-engine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-9-gameengine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -18082,7 +18110,7 @@ sequenceDiagram
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;game-engine/Reference&quot; /&gt;
+&lt;Meta title=&quot;GameEngine/Reference&quot; /&gt;
 
 # GameEngine — Reference
 
@@ -18228,19 +18256,19 @@ Fields excluded from draft: `config` (reconstructed from game config), `dragActi
   aria-label="Docs">
   <div class="head">
     <div class="title">
-      <h2><span class="status-dot dot-ok"></span> game-engine/Debugging</h2>
+      <h2><span class="status-dot dot-ok"></span> GameEngine/Debugging</h2>
       <div class="badges">
         
-        <label for="doc-10-game-engine-debugging-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-10-gameengine-debugging-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
-    <div class="meta" title="./src/lib/game-engine/debugging.mdx">game-engine-debugging--docs · ./src/lib/game-engine/debugging.mdx</div>
+    <div class="meta" title="./src/lib/game-engine/debugging.mdx">gameengine-debugging--docs · ./src/lib/game-engine/debugging.mdx</div>
     
   </div>
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-10-game-engine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-10-gameengine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -18249,7 +18277,7 @@ Fields excluded from draft: `config` (reconstructed from game config), `dragActi
           <div class="mdx-content">
             <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
 
-&lt;Meta title=&quot;game-engine/Debugging&quot; /&gt;
+&lt;Meta title=&quot;GameEngine/Debugging&quot; /&gt;
 
 # Debugging the Game Engine
 
