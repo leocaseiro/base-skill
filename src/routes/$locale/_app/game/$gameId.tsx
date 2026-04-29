@@ -110,9 +110,7 @@ const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
     type: 'word-library',
     filter: {
       region: 'aus',
-      graphemesAllowed: [
-        ...new Set(cumulativeGraphemes(1).map((u) => u.g)),
-      ],
+      graphemesAllowed: cumulativeGraphemes(1),
       phonemesRequired: defaultSelection().map((u) => u.p),
     },
   },

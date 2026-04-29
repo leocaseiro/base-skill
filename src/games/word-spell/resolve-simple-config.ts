@@ -17,9 +17,6 @@ const maxLevelOf = (units: readonly LevelGraphemeUnit[]): number => {
   return max;
 };
 
-const cumulativeGraphemeForms = (level: number): string[] => [
-  ...new Set(cumulativeGraphemes(level).map((u) => u.g)),
-];
 
 const unitsFromLegacy = (
   raw: Record<string, unknown>,
@@ -49,7 +46,7 @@ export const resolveSimpleConfig = (
     typeof raw.region === 'string' ? (raw.region as 'aus') : 'aus';
 
   const maxLevel = maxLevelOf(units);
-  const graphemesAllowed = cumulativeGraphemeForms(maxLevel);
+  const graphemesAllowed = cumulativeGraphemes(maxLevel);
   const phonemesRequired = uniquePhonemes(units);
 
   return {

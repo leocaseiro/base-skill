@@ -29,13 +29,14 @@ describe('resolveSimpleConfig', () => {
       inputMethod: 'drag',
     };
     const full = resolveSimpleConfig(simple);
-    const allowed = new Set(full.source?.filter.graphemesAllowed);
-    expect(allowed.has('s')).toBe(true);
-    expect(allowed.has('a')).toBe(true);
-    expect(allowed.has('i')).toBe(true);
-    expect(allowed.has('p')).toBe(true);
-    expect(allowed.has('sh')).toBe(true);
-    expect(allowed.has('ai')).toBe(false);
+    const allowed = full.source?.filter.graphemesAllowed ?? [];
+    const hasG = (g: string) => allowed.some((u) => u.g === g);
+    expect(hasG('s')).toBe(true);
+    expect(hasG('a')).toBe(true);
+    expect(hasG('i')).toBe(true);
+    expect(hasG('p')).toBe(true);
+    expect(hasG('sh')).toBe(true);
+    expect(hasG('ai')).toBe(false);
   });
 
   it('derives phonemesRequired (Y filter) from selected unit phonemes', () => {
@@ -73,9 +74,10 @@ describe('resolveSimpleConfig', () => {
       inputMethod: 'drag',
     } as WordSpellSimpleConfig;
     const full = resolveSimpleConfig(simple);
-    const allowed = new Set(full.source?.filter.graphemesAllowed);
-    expect(allowed.has('s')).toBe(true);
-    expect(allowed.has('m')).toBe(false);
+    const allowed = full.source?.filter.graphemesAllowed ?? [];
+    const hasG = (g: string) => allowed.some((u) => u.g === g);
+    expect(hasG('s')).toBe(true);
+    expect(hasG('m')).toBe(false);
     expect(full.source?.filter.phonemesRequired).toEqual([]);
   });
 
@@ -90,10 +92,11 @@ describe('resolveSimpleConfig', () => {
     const full = resolveSimpleConfig(legacy);
     expect(full.source?.filter.phonemesRequired).toContain('s');
     expect(full.source?.filter.phonemesRequired).toContain('m');
-    const allowed = new Set(full.source?.filter.graphemesAllowed);
-    expect(allowed.has('s')).toBe(true);
-    expect(allowed.has('a')).toBe(true);
-    expect(allowed.has('m')).toBe(true);
+    const allowed = full.source?.filter.graphemesAllowed ?? [];
+    const hasG = (g: string) => allowed.some((u) => u.g === g);
+    expect(hasG('s')).toBe(true);
+    expect(hasG('a')).toBe(true);
+    expect(hasG('m')).toBe(true);
   });
 });
 
