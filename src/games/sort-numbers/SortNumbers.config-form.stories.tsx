@@ -1,15 +1,19 @@
 // Co-located preview of the SortNumbers config form, driven by the real
-// `sortNumbersConfigFields` registry export. The generic
+// `sortNumbersConfigFields` registry export and `SortNumbersSimpleConfigForm`
+// for simple-mode preview. The generic
 // `src/components/ConfigFormFields.stories.tsx` covers abstract rendering
 // branches; this story shows what a real game's form looks like end-to-end.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from 'react';
 import { fn } from 'storybook/test';
+import { SortNumbersSimpleConfigForm } from './SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
 import { sortNumbersConfigFields } from './types';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
+
+type Mode = 'simple' | 'advanced';
 
 type Scenario = 'random' | 'by-mode' | 'distractors';
 
@@ -55,26 +59,48 @@ const scenarios: Record<Scenario, Record<string, unknown>> = {
   },
 };
 
+const simpleBaseline: Record<string, unknown> = {
+  configMode: 'simple',
+  inputMethod: 'drag',
+  direction: 'ascending',
+  quantity: 5,
+  skip: { mode: 'by', step: 2, start: 2 },
+  distractors: false,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record<string, unknown>) => void;
 };
 
 const SortNumbersConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element => {
+  const initial =
+    mode === 'simple' ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState<Record<string, unknown>>(
-    () => scenarios[scenario],
+    () => initial,
   );
+  const handleChange = (next: Record<string, unknown>): void => {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === 'simple') {
+    return (
+      <SortNumbersSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      />
+    );
+  }
   return (
     <ConfigFormFields
       fields={sortNumbersConfigFields}
       config={config}
-      onChange={(next) => {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     />
   );
 };
@@ -84,10 +110,17 @@ const meta: Meta<typeof SortNumbersConfigFormHarness> = {
   component: SortNumbersConfigFormHarness,
   tags: ['autodocs'],
   args: {
+    mode: 'advanced',
     scenario: 'random',
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: 'radio' },
+      options: ['simple', 'advanced'] satisfies Mode[],
+      description:
+        'Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.',
+    },
     scenario: {
       control: { type: 'radio' },
       options: [
@@ -96,13 +129,15 @@ const meta: Meta<typeof SortNumbersConfigFormHarness> = {
         'distractors',
       ] satisfies Scenario[],
       description:
-        'Preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).',
+        'Advanced-mode preset matching SortNumbers config branches: random skip, by-mode skip (shows step + start), or distractor tile bank (shows source + count).',
+      if: { arg: 'mode', eq: 'advanced' },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) => (
+  render: ({ mode, scenario, onChange }) => (
     <SortNumbersConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     />

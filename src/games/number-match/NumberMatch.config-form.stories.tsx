@@ -1,13 +1,17 @@
 // Co-located preview of the NumberMatch config form, driven by the real
-// `numberMatchConfigFields` registry export.
+// `numberMatchConfigFields` registry export and `NumberMatchSimpleConfigForm`
+// for simple-mode preview.
 //
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from 'react';
 import { fn } from 'storybook/test';
+import { NumberMatchSimpleConfigForm } from './NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
 import { numberMatchConfigFields } from './types';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
+
+type Mode = 'simple' | 'advanced';
 
 type Scenario =
   | 'numeral-to-group'
@@ -53,26 +57,47 @@ const scenarios: Record<Scenario, Record<string, unknown>> = {
   },
 };
 
+const simpleBaseline: Record<string, unknown> = {
+  configMode: 'simple',
+  inputMethod: 'drag',
+  mode: 'numeral-to-group',
+  range: { min: 1, max: 10 },
+  distractorCount: 3,
+};
+
 type HarnessProps = {
+  mode: Mode;
   scenario: Scenario;
   onChange: (config: Record<string, unknown>) => void;
 };
 
 const NumberMatchConfigFormHarness = ({
+  mode,
   scenario,
   onChange,
 }: HarnessProps): JSX.Element => {
+  const initial =
+    mode === 'simple' ? simpleBaseline : scenarios[scenario];
   const [config, setConfig] = useState<Record<string, unknown>>(
-    () => scenarios[scenario],
+    () => initial,
   );
+  const handleChange = (next: Record<string, unknown>): void => {
+    setConfig(next);
+    onChange(next);
+  };
+  if (mode === 'simple') {
+    return (
+      <NumberMatchSimpleConfigForm
+        config={config}
+        onChange={handleChange}
+      />
+    );
+  }
   return (
     <ConfigFormFields
       fields={numberMatchConfigFields}
       config={config}
-      onChange={(next) => {
-        setConfig(next);
-        onChange(next);
-      }}
+      onChange={handleChange}
     />
   );
 };
@@ -82,10 +107,17 @@ const meta: Meta<typeof NumberMatchConfigFormHarness> = {
   component: NumberMatchConfigFormHarness,
   tags: ['autodocs'],
   args: {
+    mode: 'advanced',
     scenario: 'numeral-to-group',
     onChange: fn(),
   },
   argTypes: {
+    mode: {
+      control: { type: 'radio' },
+      options: ['simple', 'advanced'] satisfies Mode[],
+      description:
+        'Which form variant to preview: the kid-friendly Simple form or the full Advanced field list.',
+    },
     scenario: {
       control: { type: 'radio' },
       options: [
@@ -94,13 +126,15 @@ const meta: Meta<typeof NumberMatchConfigFormHarness> = {
         'with-distractors',
       ] satisfies Scenario[],
       description:
-        'Preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.',
+        'Advanced-mode preset covering NumberMatch modes: numeral↔group, cardinal↔ordinal, and a distractor-enabled config.',
+      if: { arg: 'mode', eq: 'advanced' },
     },
-    onChange: { control: false },
+    onChange: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) => (
+  render: ({ mode, scenario, onChange }) => (
     <NumberMatchConfigFormHarness
-      key={scenario}
+      key={`${mode}:${scenario}`}
+      mode={mode}
       scenario={scenario}
       onChange={onChange}
     />
