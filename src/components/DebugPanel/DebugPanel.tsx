@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatRounds } from './format-rounds';
+import { buildSortNumbersPreview } from './sort-numbers-preview';
 import { useLibraryPreview } from './useLibraryPreview';
 import { useStorageSnapshot } from './useStorageSnapshot';
 import type { WordFilter } from '@/data/words';
@@ -211,6 +212,13 @@ export const DebugPanel = ({
     () => extractLiveRounds(gameId, session.persistedContent),
     [gameId, session.persistedContent],
   );
+  const sortPreview = useMemo(
+    () =>
+      gameId === 'sort-numbers'
+        ? buildSortNumbersPreview(resolvedConfig)
+        : null,
+    [gameId, resolvedConfig],
+  );
   const libraryPreview = useLibraryPreview(
     open && librarySource.filter !== null,
     librarySource.filter,
@@ -283,6 +291,32 @@ export const DebugPanel = ({
               >
                 <JsonActions label="liveRounds" value={liveRounds} />
                 <RoundsTable gameId={gameId} rounds={liveRounds} />
+              </Section>
+            ) : null}
+            {sortPreview ? (
+              <Section
+                title={`Round Pool Preview (${sortPreview.samples.length} samples)`}
+              >
+                <p className="mb-1 text-zinc-400">
+                  Simulated by running the SortNumbers generator with
+                  the current rules. Re-open the panel to reroll random
+                  modes.
+                </p>
+                <JsonBlock label="sortPreview" value={sortPreview} />
+                <p className="mb-1 mt-2 font-semibold text-zinc-300">
+                  Sample sequences
+                </p>
+                <ul className="space-y-0.5 font-mono text-[11px]">
+                  {sortPreview.samples.map((s, i) => (
+                    <li
+                      key={s.id}
+                      className="flex justify-between text-zinc-200"
+                    >
+                      <span>#{i + 1}</span>
+                      <span>{s.sequence.join(', ')}</span>
+                    </li>
+                  ))}
+                </ul>
               </Section>
             ) : null}
             {librarySource.source ? (
