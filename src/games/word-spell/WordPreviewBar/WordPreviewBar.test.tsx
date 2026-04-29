@@ -1,11 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { WordPreviewBar } from './WordPreviewBar';
-import { __resetChunkCacheForTests } from '@/data/words';
+import {
+  __resetChunkCacheForTests,
+  cumulativeGraphemes,
+  GRAPHEMES_BY_LEVEL,
+} from '@/data/words';
 
 afterEach(() => {
   __resetChunkCacheForTests();
 });
+
+const L1_PAIRS = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+const L1_L2_PAIRS = cumulativeGraphemes(2);
 
 describe('WordPreviewBar', () => {
   it('shows a "Loading…" hint initially', () => {
@@ -13,7 +20,7 @@ describe('WordPreviewBar', () => {
       <WordPreviewBar
         filter={{
           region: 'aus',
-          graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n'],
+          graphemesAllowed: L1_PAIRS,
           phonemesRequired: ['s'],
         }}
       />,
@@ -26,7 +33,7 @@ describe('WordPreviewBar', () => {
       <WordPreviewBar
         filter={{
           region: 'aus',
-          graphemesAllowed: ['s', 'a', 't', 'p', 'i', 'n'],
+          graphemesAllowed: L1_PAIRS,
           phonemesRequired: ['s'],
         }}
       />,
@@ -45,7 +52,7 @@ describe('WordPreviewBar', () => {
       <WordPreviewBar
         filter={{
           region: 'aus',
-          graphemesAllowed: ['s'],
+          graphemesAllowed: [{ g: 's', p: 's' }],
           phonemesRequired: [],
         }}
       />,
@@ -65,38 +72,21 @@ describe('WordPreviewBar', () => {
       <WordPreviewBar
         filter={{
           region: 'aus',
-          graphemesAllowed: [
-            's',
-            'a',
-            't',
-            'p',
-            'i',
-            'n',
-            'm',
-            'd',
-            'g',
-            'o',
-            'c',
-            'k',
-            'ck',
-            'e',
-            'u',
-            'r',
-          ],
+          graphemesAllowed: L1_L2_PAIRS,
           phonemesRequired: [
             's',
-            'a',
+            'æ',
             't',
             'p',
-            'i',
+            'ɪ',
             'n',
             'm',
             'd',
             'g',
-            'o',
+            'ɒ',
             'k',
             'e',
-            'u',
+            'ʌ',
             'r',
           ],
         }}
