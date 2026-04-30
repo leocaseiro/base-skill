@@ -1,6 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { CONFUSABLE_GROUPS } from '../confusable-pair-groups';
 import { resolveSimpleConfig } from '../resolve-simple-config';
+import {
+  DEFAULT_ENABLED_FONT_IDS,
+  FONT_POOL,
+} from '../visual-variation/pools';
 import type {
   ConfusableGroup,
   ConfusableGroupChip,
@@ -113,6 +117,35 @@ export const SpotAllConfigForm = ({
     commit(next, selectedReversibles);
   };
 
+  const visualVariationEnabled =
+    current.visualVariationEnabled !== false;
+  const enabledFontIds = current.enabledFontIds ?? [
+    ...DEFAULT_ENABLED_FONT_IDS,
+  ];
+
+  const isFontEnabled = (fontId: string): boolean =>
+    enabledFontIds.includes(fontId);
+  const allFontsOn = FONT_POOL.every((f) => isFontEnabled(f.id));
+
+  const toggleVisualVariation = (): void => {
+    onChange({
+      ...current,
+      visualVariationEnabled: !visualVariationEnabled,
+    });
+  };
+
+  const toggleAllFonts = (): void => {
+    const next = allFontsOn ? [] : FONT_POOL.map((f) => f.id);
+    onChange({ ...current, enabledFontIds: next });
+  };
+
+  const toggleFont = (fontId: string): void => {
+    const next = isFontEnabled(fontId)
+      ? enabledFontIds.filter((id) => id !== fontId)
+      : [...enabledFontIds, fontId];
+    onChange({ ...current, enabledFontIds: next });
+  };
+
   const empty =
     selectedPairs.length === 0 && selectedReversibles.length === 0;
 
@@ -153,6 +186,54 @@ export const SpotAllConfigForm = ({
           </div>
         </div>
       ))}
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={toggleVisualVariation}
+          className={[
+            'rounded-lg px-3 py-2 text-left font-semibold transition-colors',
+            visualVariationEnabled
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-foreground',
+          ].join(' ')}
+        >
+          {t('spot-all-ui.config.visual-variation.label')}
+        </button>
+        {visualVariationEnabled && (
+          <>
+            <button
+              type="button"
+              onClick={toggleAllFonts}
+              className={[
+                'rounded-lg px-3 py-2 text-left text-sm font-semibold transition-colors',
+                allFontsOn
+                  ? 'bg-primary/40 text-primary-foreground'
+                  : 'bg-muted text-foreground',
+              ].join(' ')}
+            >
+              {t('spot-all-ui.config.font-pool.label')}
+            </button>
+            <div className="flex flex-wrap gap-2 pl-2">
+              {FONT_POOL.map((font) => (
+                <button
+                  key={font.id}
+                  type="button"
+                  onClick={() => toggleFont(font.id)}
+                  style={{ fontFamily: font.family }}
+                  className={[
+                    'rounded-full border px-3 py-1 text-sm',
+                    isFontEnabled(font.id)
+                      ? 'border-primary bg-primary/20'
+                      : 'border-border bg-card',
+                  ].join(' ')}
+                >
+                  {font.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
       {empty && (
         <p className="text-destructive">
           {t('spot-all-ui.config.invalid-selection')}
