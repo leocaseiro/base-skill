@@ -476,6 +476,24 @@ implementation. Mitigation in the risks table.
 registerSkin('spot-all', classicSkin);
 ```
 
+`classicSkin` (in `src/lib/skin/classic-skin.ts`) is extended with **six
+variation tokens** consumed by `COLOR_POOL` in Section 7. Naming is generic
+(`--skin-variation-N`, not `--spot-all-variation-N`) so future games can reuse
+the same palette without rename churn:
+
+```ts
+// src/lib/skin/classic-skin.ts — additions
+'--skin-variation-1': 'var(--bs-primary)',     // blue (semantic)
+'--skin-variation-2': 'var(--destructive)',    // red   (semantic)
+'--skin-variation-3': 'var(--bs-success)',     // green (semantic)
+'--skin-variation-4': 'oklch(54% 0.22 295)',   // violet — no semantic parallel
+'--skin-variation-5': 'oklch(63% 0.18 35)',    // orange — no semantic parallel
+'--skin-variation-6': 'var(--skin-tile-text)', // default text colour
+```
+
+Future skins (e.g. high-contrast) can override these six tokens to reshape the
+variation palette without touching SpotAll code.
+
 ---
 
 ## Section 5 — UI components
@@ -697,18 +715,22 @@ export const FONT_POOL = [
 ] as const;
 
 export const COLOR_POOL = [
-  '#2563eb', // blue-600
-  '#dc2626', // red-600
-  '#059669', // emerald-600
-  '#7c3aed', // violet-600
-  '#ea580c', // orange-600
-  '#0f172a', // slate-900 (default)
+  'var(--skin-variation-1)',
+  'var(--skin-variation-2)',
+  'var(--skin-variation-3)',
+  'var(--skin-variation-4)',
+  'var(--skin-variation-5)',
+  'var(--skin-variation-6)',
 ] as const;
 
 export const SIZE_POOL = [38, 42, 46, 50] as const; // px
 ```
 
-All fonts already loaded by the app (no new web-font imports).
+`COLOR_POOL` entries are CSS `var(...)` strings; the tile sets
+`style={{ color: variation.color }}` and CSS resolves the token at render time.
+The six values are defined by `classicSkin` (Section 4 — Skin registration);
+future skins can override them. All fonts already loaded by the app (no new
+web-font imports).
 
 ### Selection
 
@@ -904,18 +926,20 @@ or `src/lib/game-engine/` is modified. **No edits expected** in this PR — but
 
 ---
 
-## Section 11 — Issues to file
+## Section 11 — Follow-up issues (already filed)
 
-| ID     | Title                                                                                   | Depends on | Notes                                                                                                                                                                                                                |
-| ------ | --------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| B      | Generalise `Slot` with `mode='tap-select'` + extract `useGameRound` hook                | —          | Lets SpotAll wrap in `<AnswerGame>` like other games. Allows future "drop all correct here" variant of SpotAll because Slot stays draggable too.                                                                     |
-| C-WS   | WordSpell: adopt `useGameRound`                                                         | B          | Per-game refactor, behaviour-preserving                                                                                                                                                                              |
-| C-NM   | NumberMatch: adopt `useGameRound`                                                       | B          | Per-game refactor                                                                                                                                                                                                    |
-| C-SN   | SortNumbers: adopt `useGameRound`                                                       | B          | Per-game refactor                                                                                                                                                                                                    |
-| AG-LK  | AnswerGame: bounce animation for `lock-manual` / `lock-auto-eject` wrong-tile behaviors | —          | Independent. Currently `reject` is the only mode that animates.                                                                                                                                                      |
-| DS-FUT | Distractor library: future sources meta-issue                                           | —          | Sub-issues: `random-other` (random unrelated chars), `phonemic-confusable` (sound-similar chars, useful for WordSpell), `case-confusable` (`a↔A`, `e↔E`). Each adds one source under `src/lib/distractors/sources/`. |
+These six follow-ups were filed alongside the spec to capture work that is
+**out of scope for PR #252** but logically connected. The plan does **not**
+need to refile them — it should reference these IDs in the PR description.
 
-All six issues filed during U-Final implementation step.
+| Issue                                                       | Title                                                                                   | Depends on | Notes                                                                                                                                                                                                                |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [#257](https://github.com/leocaseiro/base-skill/issues/257) | Generalise `Slot` with `mode='tap-select'` + extract `useGameRound` hook                | —          | Lets SpotAll wrap in `<AnswerGame>` like other games. Allows future "drop all correct here" variant of SpotAll because Slot stays draggable too. **Blocks #260, #261, #262.**                                        |
+| [#258](https://github.com/leocaseiro/base-skill/issues/258) | AnswerGame: bounce animation for `lock-manual` / `lock-auto-eject` wrong-tile behaviors | —          | Independent. Currently `reject` is the only mode that animates.                                                                                                                                                      |
+| [#259](https://github.com/leocaseiro/base-skill/issues/259) | Distractor library: future sources meta-issue                                           | —          | Sub-issues: `random-other` (random unrelated chars), `phonemic-confusable` (sound-similar chars, useful for WordSpell), `case-confusable` (`a↔A`, `e↔E`). Each adds one source under `src/lib/distractors/sources/`. |
+| [#260](https://github.com/leocaseiro/base-skill/issues/260) | WordSpell: adopt `useGameRound`                                                         | #257       | Per-game refactor, behaviour-preserving                                                                                                                                                                              |
+| [#261](https://github.com/leocaseiro/base-skill/issues/261) | NumberMatch: adopt `useGameRound`                                                       | #257       | Per-game refactor                                                                                                                                                                                                    |
+| [#262](https://github.com/leocaseiro/base-skill/issues/262) | SortNumbers: adopt `useGameRound`                                                       | #257       | Per-game refactor                                                                                                                                                                                                    |
 
 ---
 
