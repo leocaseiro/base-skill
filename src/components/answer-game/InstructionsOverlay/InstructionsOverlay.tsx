@@ -228,12 +228,12 @@ export const InstructionsOverlay = ({
       onStart();
       return;
     }
+    setPlayPromptError(null);
     if (customGameId && customGameName && onUpdateCustomGame) {
-      setPlayPromptError(null);
       setCustomPlayPromptOpen(true);
       return;
     }
-    // Default game (no customGameId) — fall through to existing save-on-play dialog
+    // Default game (no customGameId or no onUpdateCustomGame) — fall through to existing save-on-play dialog
     setSaveSubmitAttempted(false);
     setSavingName(
       suggestCustomGameName(gameTitle, existingCustomGameNames),
@@ -544,10 +544,13 @@ export const InstructionsOverlay = ({
         </DialogContent>
       </Dialog>
 
-      {customGameId && customGameName && (
+      {customGameId && customGameName && onUpdateCustomGame && (
         <Dialog
           open={customPlayPromptOpen}
-          onOpenChange={setCustomPlayPromptOpen}
+          onOpenChange={(next) => {
+            setCustomPlayPromptOpen(next);
+            if (!next) setPlayPromptError(null);
+          }}
         >
           <DialogContent>
             <DialogHeader>

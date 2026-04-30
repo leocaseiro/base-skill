@@ -532,6 +532,37 @@ describe.each([
       ).toBeNull();
     });
 
+    it('dirty + custom-game without onUpdateCustomGame: save-on-play dialog fires (no custom prompt)', async () => {
+      const user = userEvent.setup();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              customGameId: 'cg1',
+              customGameName: 'Custom A',
+              onConfigChange: setConfig,
+              // no onUpdateCustomGame
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      expect(
+        screen.getByRole('button', { name: /save & play/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /update "custom a"/i }),
+      ).toBeNull();
+    });
+
     it('dirty + custom-game: Update error shows banner and does not start', async () => {
       const user = userEvent.setup();
       const onUpdateCustomGame = vi
