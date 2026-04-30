@@ -1,35 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import { resolveSimpleConfig } from './resolve-simple-config';
+import { DEFAULT_ENABLED_FONT_IDS } from './visual-variation/pools';
 
 describe('resolveSimpleConfig', () => {
-  it('maps easy preset to small mirror-focused config', () => {
-    const config = resolveSimpleConfig({
+  it('produces a SpotAllConfig from selected pairs/reversibles', () => {
+    const cfg = resolveSimpleConfig({
       configMode: 'simple',
-      difficulty: 'easy',
+      selectedConfusablePairs: [
+        { pair: ['b', 'd'], type: 'mirror-horizontal' },
+      ],
+      selectedReversibleChars: ['2'],
     });
-    expect(config.targetSetIds).toEqual(['bdpq']);
-    expect(config.correctTileCount).toBe(4);
-    expect(config.distractorCount).toBe(2);
+    expect(cfg.gameId).toBe('spot-all');
+    expect(cfg.configMode).toBe('simple');
+    expect(cfg.selectedConfusablePairs).toEqual([
+      { pair: ['b', 'd'], type: 'mirror-horizontal' },
+    ]);
+    expect(cfg.selectedReversibleChars).toEqual(['2']);
   });
 
-  it('maps hard preset to mixed relationship config', () => {
-    const config = resolveSimpleConfig({
+  it('defaults: 4 correct, 4 distractors, 6 rounds, variation enabled, all fonts', () => {
+    const cfg = resolveSimpleConfig({
       configMode: 'simple',
-      difficulty: 'hard',
+      selectedConfusablePairs: [],
+      selectedReversibleChars: [],
     });
-    expect(config.targetSetIds.length).toBeGreaterThan(3);
-    expect(config.relationshipTypes).toContain('transposition');
-    expect(config.distractorCount).toBeGreaterThan(
-      config.correctTileCount,
-    );
-  });
-
-  it('defaults medium behavior for unknown difficulty through caller fallback', () => {
-    const config = resolveSimpleConfig({
-      configMode: 'simple',
-      difficulty: 'medium',
-    });
-    expect(config.targetSetIds.length).toBeGreaterThan(1);
-    expect(config.relationshipTypes).toContain('visual-similarity');
+    expect(cfg.correctTileCount).toBe(4);
+    expect(cfg.distractorCount).toBe(4);
+    expect(cfg.totalRounds).toBe(6);
+    expect(cfg.visualVariationEnabled).toBe(true);
+    expect(cfg.enabledFontIds).toEqual([...DEFAULT_ENABLED_FONT_IDS]);
+    expect(cfg.roundsInOrder).toBe(false);
+    expect(cfg.ttsEnabled).toBe(true);
   });
 });

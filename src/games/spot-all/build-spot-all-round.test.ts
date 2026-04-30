@@ -1,114 +1,89 @@
 import { describe, expect, it } from 'vitest';
 import { buildSpotAllRound } from './build-spot-all-round';
 import type { SpotAllConfig } from './types';
+import { seededRandom } from '@/lib/seeded-random';
 
-const baseConfig: SpotAllConfig = {
+const baseConfig = (
+  overrides: Partial<SpotAllConfig> = {},
+): SpotAllConfig => ({
   gameId: 'spot-all',
   component: 'SpotAll',
-  totalRounds: 5,
+  configMode: 'simple',
+  selectedConfusablePairs: [
+    { pair: ['b', 'd'], type: 'mirror-horizontal' },
+    { pair: ['b', 'p'], type: 'mirror-vertical' },
+  ],
+  selectedReversibleChars: [],
+  correctTileCount: 3,
+  distractorCount: 2,
+  totalRounds: 1,
+  visualVariationEnabled: false,
+  enabledFontIds: [],
   roundsInOrder: false,
   ttsEnabled: true,
-  targetSetIds: ['bdpq'],
-  relationshipTypes: [
-    'mirror-horizontal',
-    'mirror-vertical',
-    'rotation-180',
-  ],
-  correctTileCount: 3,
-  distractorCount: 3,
-  visualVariationEnabled: true,
-};
+  ...overrides,
+});
 
 describe('buildSpotAllRound', () => {
-  it('builds a round with requested tile counts', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      targetSetIds: ['bdpq'],
-      correctTileCount: 3,
-      distractorCount: 3,
+  it('produces correctTileCount + distractorCount tiles', () => {
+    const r = buildSpotAllRound(baseConfig(), {
+      rng: seededRandom('s1'),
       forceTarget: 'b',
     });
+    expect(r.tiles).toHaveLength(5);
+    expect(r.correctCount).toBe(3);
+  });
 
-    expect(round.tiles).toHaveLength(6);
-    expect(round.correctCount).toBe(3);
-    expect(round.tiles.filter((tile) => tile.isCorrect)).toHaveLength(
-      3,
+  it('confusable distractors render WITHOUT a CSS transform', () => {
+    const r = buildSpotAllRound(baseConfig(), {
+      rng: seededRandom('s1'),
+      forceTarget: 'b',
+    });
+    const distractors = r.tiles.filter((t) => !t.isCorrect);
+    expect(distractors.every((t) => t.transform === undefined)).toBe(
+      true,
     );
+    expect(distractors.every((t) => t.label !== 'b')).toBe(true);
   });
 
-  it('uses confusable members for distractors', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      forceTarget: 'b',
-    });
-    const distractorLabels = round.tiles
-      .filter((tile) => !tile.isCorrect)
-      .map((tile) => tile.label);
-    for (const label of distractorLabels) {
-      expect(['d', 'p', 'q']).toContain(label);
-    }
-  });
-
-  it('gives each correct tile visual variation', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      forceTarget: 'b',
-    });
-    const variationKeys = round.tiles
-      .filter((tile) => tile.isCorrect)
-      .map(
-        (tile) =>
-          `${tile.visualVariation?.fontFamily}|${tile.visualVariation?.fontSizePx}|${tile.visualVariation?.color}`,
-      );
-    expect(new Set(variationKeys).size).toBe(3);
-  });
-
-  it('maps mirror relationships to CSS transforms', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      relationshipTypes: ['mirror-horizontal'],
-      forceTarget: 'b',
-      distractorCount: 1,
-    });
-    const distractor = round.tiles.find((tile) => !tile.isCorrect);
+  it('reversible distractors render the TARGET character with the reversal CSS transform', () => {
+    const r = buildSpotAllRound(
+      baseConfig({
+        selectedConfusablePairs: [],
+        selectedReversibleChars: ['2'],
+        distractorCount: 1,
+      }),
+      { rng: seededRandom('s1'), forceTarget: '2' },
+    );
+    const distractor = r.tiles.find((t) => !t.isCorrect);
+    expect(distractor?.label).toBe('2');
     expect(distractor?.transform).toBe('scaleX(-1)');
   });
 
-  it('supports transposition labels', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      targetSetIds: ['oa-ao'],
-      relationshipTypes: ['transposition'],
-      forceTarget: 'oa',
-      correctTileCount: 1,
-      distractorCount: 1,
-    });
-    const distractor = round.tiles.find((tile) => !tile.isCorrect);
-    expect(distractor?.label).toBe('ao');
+  it('applies visualVariation to BOTH correct and distractor tiles when enabled', () => {
+    const r = buildSpotAllRound(
+      baseConfig({
+        visualVariationEnabled: true,
+        enabledFontIds: ['andika', 'nunito'],
+      }),
+      { rng: seededRandom('s1') },
+    );
+    expect(r.tiles.every((t) => t.visualVariation !== undefined)).toBe(
+      true,
+    );
   });
 
-  it('falls back to random symbols when no confusables are found', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      forceTarget: '~',
-      correctTileCount: 2,
-      distractorCount: 2,
+  it('is deterministic when rng is seeded', () => {
+    const a = buildSpotAllRound(baseConfig(), {
+      rng: seededRandom('seed-X'),
+      forceTarget: 'b',
     });
-    const distractors = round.tiles.filter((tile) => !tile.isCorrect);
-    expect(distractors).toHaveLength(2);
-  });
-
-  it('caps distractors to available confusables', () => {
-    const round = buildSpotAllRound({
-      ...baseConfig,
-      forceTarget: '15',
-      targetSetIds: ['15-51'],
-      relationshipTypes: ['transposition'],
-      correctTileCount: 1,
-      distractorCount: 10,
+    const b = buildSpotAllRound(baseConfig(), {
+      rng: seededRandom('seed-X'),
+      forceTarget: 'b',
     });
-    expect(round.tiles.filter((tile) => !tile.isCorrect)).toHaveLength(
-      1,
+    expect(a.tiles.map((t) => t.label)).toEqual(
+      b.tiles.map((t) => t.label),
     );
   });
 });

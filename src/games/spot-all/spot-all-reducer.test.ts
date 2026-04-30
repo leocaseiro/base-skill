@@ -1,131 +1,122 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ROUND_ADVANCE_MS,
+  WRONG_COOLDOWN_MS,
   createInitialSpotAllState,
   spotAllReducer,
 } from './spot-all-reducer';
 import type { SpotAllRound } from './types';
 
-const roundA: SpotAllRound = {
+const round = (overrides?: Partial<SpotAllRound>): SpotAllRound => ({
   target: 'b',
   correctCount: 2,
   tiles: [
-    { id: 'a1', label: 'b', isCorrect: true },
-    { id: 'a2', label: 'b', isCorrect: true },
-    { id: 'a3', label: 'd', isCorrect: false },
+    { id: 'c1', label: 'b', isCorrect: true },
+    { id: 'c2', label: 'b', isCorrect: true },
+    { id: 'd1', label: 'd', isCorrect: false },
   ],
-};
+  ...overrides,
+});
 
-const roundB: SpotAllRound = {
-  target: 'p',
-  correctCount: 1,
-  tiles: [
-    { id: 'b1', label: 'p', isCorrect: true },
-    { id: 'b2', label: 'q', isCorrect: false },
-  ],
-};
-
-describe('spotAllReducer', () => {
-  it('completes a round for exact correct selection', () => {
-    let state = createInitialSpotAllState([roundA, roundB]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a2',
-    });
-    state = spotAllReducer(state, { type: 'SUBMIT' });
-    expect(state.phase).toBe('round-complete');
-    expect(state.feedback).toBe('correct');
-  });
-
-  it('marks mixed selections as incorrect', () => {
-    let state = createInitialSpotAllState([roundA, roundB]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a3',
-    });
-    state = spotAllReducer(state, { type: 'SUBMIT' });
-    expect(state.phase).toBe('playing');
-    expect(state.feedback).toBe('incorrect');
-  });
-
-  it('deselects a tile when toggled twice', () => {
-    let state = createInitialSpotAllState([roundA, roundB]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
+describe('createInitialSpotAllState', () => {
+  it('seeds rounds, picks the first round tiles, sets phase=playing', () => {
+    const r = round();
+    const state = createInitialSpotAllState([r]);
+    expect(state.roundIndex).toBe(0);
+    expect(state.tiles).toEqual(r.tiles);
     expect(state.selectedIds.size).toBe(0);
-  });
-
-  it('advances round and resets selection', () => {
-    let state = createInitialSpotAllState([roundA, roundB]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a2',
-    });
-    state = spotAllReducer(state, { type: 'SUBMIT' });
-    state = spotAllReducer(state, { type: 'ADVANCE_ROUND' });
-
-    expect(state.roundIndex).toBe(1);
-    expect(state.selectedIds.size).toBe(0);
-    expect(state.tiles.map((tile) => tile.id)).toEqual(['b1', 'b2']);
-  });
-
-  it('treats empty submit as incorrect', () => {
-    const state = spotAllReducer(createInitialSpotAllState([roundA]), {
-      type: 'SUBMIT',
-    });
-    expect(state.feedback).toBe('incorrect');
+    expect(state.wrongCooldownIds.size).toBe(0);
     expect(state.phase).toBe('playing');
+    expect(state.retryCount).toBe(0);
+  });
+});
+
+describe('spotAllReducer · TAP_TILE', () => {
+  it('selects an unselected correct tile', () => {
+    const s = createInitialSpotAllState([round()]);
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    expect(next.selectedIds.has('c1')).toBe(true);
+    expect(next.phase).toBe('playing');
   });
 
-  it('treats extra picks as incorrect', () => {
-    let state = createInitialSpotAllState([roundA]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a2',
-    });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a3',
-    });
-    state = spotAllReducer(state, { type: 'SUBMIT' });
-
-    expect(state.feedback).toBe('incorrect');
-    expect(state.phase).toBe('playing');
+  it('deselects an already-selected correct tile', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    expect(next.selectedIds.has('c1')).toBe(false);
   });
 
-  it('completes game when advancing from last round', () => {
-    let state = createInitialSpotAllState([roundA]);
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a1',
+  it('transitions phase=round-complete when last correct tile is selected', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c2' });
+    expect(next.phase).toBe('round-complete');
+  });
+
+  it('puts a wrong tile in wrongCooldownIds and increments retryCount, no selection change', () => {
+    const s = createInitialSpotAllState([round()]);
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'd1' });
+    expect(next.wrongCooldownIds.has('d1')).toBe(true);
+    expect(next.selectedIds.has('d1')).toBe(false);
+    expect(next.retryCount).toBe(1);
+  });
+
+  it('ignores TAP_TILE on a tile in cooldown', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'd1' });
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'd1' });
+    expect(next).toBe(s); // unchanged reference
+  });
+
+  it('ignores TAP_TILE when phase is not playing', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c2' });
+    // phase=round-complete now
+    const next = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'd1' });
+    expect(next).toBe(s);
+  });
+});
+
+describe('spotAllReducer · CLEAR_WRONG_COOLDOWN', () => {
+  it('removes a tile from wrongCooldownIds', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'd1' });
+    const next = spotAllReducer(s, {
+      type: 'CLEAR_WRONG_COOLDOWN',
+      tileId: 'd1',
     });
-    state = spotAllReducer(state, {
-      type: 'TOGGLE_TILE',
-      tileId: 'a2',
-    });
-    state = spotAllReducer(state, { type: 'SUBMIT' });
-    state = spotAllReducer(state, { type: 'ADVANCE_ROUND' });
-    expect(state.phase).toBe('game-over');
+    expect(next.wrongCooldownIds.has('d1')).toBe(false);
+  });
+});
+
+describe('spotAllReducer · ADVANCE_ROUND', () => {
+  it('moves to the next round, resets selection + cooldown', () => {
+    const r1 = round();
+    const r2 = round({ target: 'd' });
+    let s = createInitialSpotAllState([r1, r2]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c2' });
+    const next = spotAllReducer(s, { type: 'ADVANCE_ROUND' });
+    expect(next.roundIndex).toBe(1);
+    expect(next.tiles).toEqual(r2.tiles);
+    expect(next.selectedIds.size).toBe(0);
+    expect(next.wrongCooldownIds.size).toBe(0);
+    expect(next.phase).toBe('playing');
+  });
+
+  it('transitions to game-over when no next round exists', () => {
+    let s = createInitialSpotAllState([round()]);
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c1' });
+    s = spotAllReducer(s, { type: 'TAP_TILE', tileId: 'c2' });
+    const next = spotAllReducer(s, { type: 'ADVANCE_ROUND' });
+    expect(next.phase).toBe('game-over');
+  });
+});
+
+describe('exported timing constants', () => {
+  it('exposes WRONG_COOLDOWN_MS=600 and ROUND_ADVANCE_MS=750', () => {
+    expect(WRONG_COOLDOWN_MS).toBe(600);
+    expect(ROUND_ADVANCE_MS).toBe(750);
   });
 });
