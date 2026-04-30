@@ -3,11 +3,13 @@ import {
   cleanup,
   render,
   screen,
+  waitFor,
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
+import { toast } from 'sonner';
 import {
   afterEach,
   beforeEach,
@@ -42,6 +44,13 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
     useRouter: () => ({ invalidate }),
   };
 });
+
+vi.mock('sonner', () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}));
 
 let db: BaseSkillDatabase;
 
@@ -599,3 +608,126 @@ describe.each([
     });
   },
 );
+
+describe('InstructionsOverlay error handling', () => {
+  beforeEach(() => {
+    vi.mocked(toast.error).mockClear();
+  });
+
+  it('Update DB error from advanced modal: modal stays open, banner + toast', async () => {
+    const user = userEvent.setup();
+    const onUpdateCustomGame = vi
+      .fn()
+      .mockRejectedValue(new Error('boom'));
+    render(
+      <InstructionsOverlay
+        {...baseProps({
+          gameId: 'sort-numbers',
+          customGameId: 'cg1',
+          customGameName: 'Custom A',
+          onUpdateCustomGame,
+          config: { component: 'SortNumbers', direction: 'ascending' },
+        })}
+      />,
+      { wrapper },
+    );
+    await user.click(
+      screen.getByRole('button', { name: /configure/i }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: /update "custom a"/i }),
+    );
+    expect(
+      await screen.findByText(/couldn't update/i),
+    ).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalled();
+  });
+
+  it('Update DB error from play prompt: prompt stays open, banner + toast, onStart not called', async () => {
+    const user = userEvent.setup();
+    const onUpdateCustomGame = vi
+      .fn()
+      .mockRejectedValue(new Error('boom'));
+    const onStart = vi.fn();
+    const Harness = (): JSX.Element => {
+      const [config, setConfig] = useState<Record<string, unknown>>({
+        component: 'SortNumbers',
+        direction: 'ascending',
+        configMode: 'simple',
+        quantity: 5,
+        skip: { mode: 'by', step: 2, start: 2 },
+        inputMethod: 'drag',
+      });
+      return (
+        <InstructionsOverlay
+          {...baseProps({
+            gameId: 'sort-numbers',
+            customGameId: 'cg1',
+            customGameName: 'Custom A',
+            onUpdateCustomGame,
+            onConfigChange: setConfig,
+            onStart,
+            config,
+          })}
+        />
+      );
+    };
+    render(<Harness />, { wrapper });
+    await applySimpleEdit(user, 'sort-numbers', {
+      direction: 'descending',
+    });
+    await user.click(screen.getByRole('button', { name: /let's go/i }));
+    await user.click(
+      screen.getByRole('button', { name: /update "custom a"/i }),
+    );
+    expect(
+      await screen.findByText(/couldn't update/i),
+    ).toBeInTheDocument();
+    expect(toast.error).toHaveBeenCalled();
+    expect(onStart).not.toHaveBeenCalled();
+  });
+
+  it('Last-session write failure on Play without saving still calls onStart', async () => {
+    const user = userEvent.setup();
+    const onPersistLastSession = vi
+      .fn()
+      .mockRejectedValue(new Error('storage full'));
+    const onStart = vi.fn();
+    const Harness = (): JSX.Element => {
+      const [config, setConfig] = useState<Record<string, unknown>>({
+        component: 'SortNumbers',
+        direction: 'ascending',
+        configMode: 'simple',
+        quantity: 5,
+        skip: { mode: 'by', step: 2, start: 2 },
+        inputMethod: 'drag',
+      });
+      return (
+        <InstructionsOverlay
+          {...baseProps({
+            gameId: 'sort-numbers',
+            customGameId: 'cg1',
+            customGameName: 'Custom A',
+            onUpdateCustomGame: vi.fn(async () => {}),
+            onPersistLastSession,
+            onStart,
+            onConfigChange: setConfig,
+            config,
+          })}
+        />
+      );
+    };
+    render(<Harness />, { wrapper });
+    await applySimpleEdit(user, 'sort-numbers', {
+      direction: 'descending',
+    });
+    await user.click(screen.getByRole('button', { name: /let's go/i }));
+    await user.click(
+      screen.getByRole('button', { name: /play without saving/i }),
+    );
+    expect(onStart).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalled();
+    });
+  });
+});
