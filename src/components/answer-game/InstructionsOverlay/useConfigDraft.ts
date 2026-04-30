@@ -79,16 +79,14 @@ export const useConfigDraft = (
     initialColor,
     initialCover,
   });
-
-  useEffect(() => {
-    latestRef.current = {
-      config,
-      onConfigChange,
-      initialName,
-      initialColor,
-      initialCover,
-    };
-  });
+  // eslint-disable-next-line react-hooks/refs -- must be written during render; a useEffect creates a stale-read window for setDraft/discard/commitSaved
+  latestRef.current = {
+    config,
+    onConfigChange,
+    initialName,
+    initialColor,
+    initialCover,
+  };
 
   useEffect(() => {
     if (previousIdentityRef.current === identity) return;
