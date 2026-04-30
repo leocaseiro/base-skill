@@ -33,7 +33,7 @@ export const SpotAll = ({
   config: SpotAllConfig;
   seed?: string;
 }): JSX.Element => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('games');
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const skin = useGameSkin('spot-all');
