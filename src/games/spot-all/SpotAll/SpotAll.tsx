@@ -112,7 +112,7 @@ export const SpotAll = ({
   }, [state.wrongCooldownIds]);
 
   const handleTap = (tileId: string): void => {
-    const tile = state.tiles.find((tile) => tile.id === tileId);
+    const tile = state.tiles.find((tl) => tl.id === tileId);
     if (!tile) return;
     if (state.wrongCooldownIds.has(tileId)) return;
     if (state.phase !== 'playing') return;

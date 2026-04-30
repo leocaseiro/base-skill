@@ -165,7 +165,11 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
 const makeDefaultSpotAllConfig = (): SpotAllConfig =>
   resolveSpotAllSimpleConfig({
     configMode: 'simple',
-    difficulty: 'medium',
+    selectedConfusablePairs: [
+      { pair: ['b', 'd'], type: 'mirror-horizontal' },
+      { pair: ['p', 'q'], type: 'mirror-horizontal' },
+    ],
+    selectedReversibleChars: [],
   });
 
 export const resizeNumberMatchRounds = (
@@ -330,25 +334,19 @@ const resolveNumberMatchConfig = (
 const resolveSpotAllConfig = (
   saved: Record<string, unknown> | null,
 ): SpotAllConfig => {
-  const base = makeDefaultSpotAllConfig();
-  if (!saved || saved.component !== 'SpotAll') return base;
-  if (saved.configMode === 'simple') {
-    const difficulty =
-      saved.difficulty === 'easy' || saved.difficulty === 'hard'
-        ? saved.difficulty
-        : 'medium';
-    return resolveSpotAllSimpleConfig({
-      configMode: 'simple',
-      difficulty,
-    });
-  }
+  const fallback = makeDefaultSpotAllConfig();
+  if (!saved || typeof saved !== 'object') return fallback;
 
-  return {
-    ...base,
-    ...(saved as Partial<SpotAllConfig>),
-    gameId: 'spot-all',
-    component: 'SpotAll',
-  };
+  const merged = { ...fallback, ...saved } as SpotAllConfig;
+  if (
+    (!Array.isArray(merged.selectedConfusablePairs) ||
+      merged.selectedConfusablePairs.length === 0) &&
+    (!Array.isArray(merged.selectedReversibleChars) ||
+      merged.selectedReversibleChars.length === 0)
+  ) {
+    return fallback;
+  }
+  return merged;
 };
 
 const resolveSortNumbersConfig = (
