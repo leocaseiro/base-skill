@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useConfigDraft } from './useConfigDraft';
+import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 
 const baseInput = {
@@ -44,15 +45,35 @@ describe('useConfigDraft', () => {
 
   it('setDraft updates meta locally', () => {
     const onConfigChange = vi.fn();
-    const { result, rerender } = renderHook(() =>
+    const { result } = renderHook(() =>
       useConfigDraft({ ...baseInput, onConfigChange }),
     );
     act(() => {
       result.current.setDraft({ name: 'Skip by 5' });
     });
-    rerender();
     expect(result.current.draft.name).toBe('Skip by 5');
     expect(onConfigChange).not.toHaveBeenCalled();
+  });
+
+  it('setDraft clears cover when explicitly set to undefined', () => {
+    const onConfigChange = vi.fn();
+    const { result, rerender } = renderHook(() =>
+      useConfigDraft({ ...baseInput, onConfigChange }),
+    );
+    act(() => {
+      const cover: Cover = { kind: 'emoji', emoji: '⭐' };
+      result.current.setDraft({ cover });
+    });
+    rerender();
+    expect(result.current.draft.cover).toEqual({
+      kind: 'emoji',
+      emoji: '⭐',
+    });
+    act(() => {
+      result.current.setDraft({ cover: undefined });
+    });
+    rerender();
+    expect(result.current.draft.cover).toBeUndefined();
   });
 
   it('isDirty becomes true when draft differs from baseline', () => {
