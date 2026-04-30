@@ -44,6 +44,7 @@
   "spot-all-description": "Tap all the tiles that match the prompt — watch out for backwards and look-alike letters.",
   "spot-all-ui": {
     "prompt": "Select all the {{target}} tiles",
+    "speak-prompt": "Hear the question",
     "config": {
       "groups": {
         "mirror-horizontal": "Mirror Horizontal",

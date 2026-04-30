@@ -44,6 +44,7 @@
   "spot-all-description": "Toque em todas as peças que combinam com o pedido — cuidado com letras invertidas e parecidas.",
   "spot-all-ui": {
     "prompt": "Selecione todos os {{target}}",
+    "speak-prompt": "Ouvir a pergunta",
     "config": {
       "groups": {
         "mirror-horizontal": "Espelho Horizontal",

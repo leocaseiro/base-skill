@@ -5,12 +5,13 @@ const meta: Meta<typeof SpotAllPrompt> = {
   title: 'Games/SpotAll/SpotAllPrompt',
   component: SpotAllPrompt,
   tags: ['autodocs'],
-  args: { target: 'b' },
+  args: { target: 'b', ttsEnabled: false },
   argTypes: {
     target: {
       control: { type: 'select' },
       options: ['b', 'd', 'p', 'q', '2', '9', 'S', 'Z'],
     },
+    ttsEnabled: { control: 'boolean' },
   },
 };
 export default meta;

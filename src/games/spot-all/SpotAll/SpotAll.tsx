@@ -153,7 +153,10 @@ export const SpotAll = ({
         showFraction
         showLevel={false}
       />
-      <SpotAllPrompt target={round.target} />
+      <SpotAllPrompt
+        target={round.target}
+        ttsEnabled={config.ttsEnabled}
+      />
       <SpotAllGrid state={state} onTap={handleTap} />
       {skin.RoundCompleteEffect ? (
         <skin.RoundCompleteEffect visible={scoreVisible} />
