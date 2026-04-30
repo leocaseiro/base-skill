@@ -149,6 +149,11 @@ export const InstructionsOverlay = ({
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [savingName, setSavingName] = useState('');
   const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+  const [customPlayPromptOpen, setCustomPlayPromptOpen] =
+    useState(false);
+  const [playPromptError, setPlayPromptError] = useState<string | null>(
+    null,
+  );
   const saveNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -217,33 +222,66 @@ export const InstructionsOverlay = ({
     }
   };
 
-  // Play handlers are wired in Task 5; keep stub for now to retain
-  // existing test expectations for non-dirty default flow.
   const handlePlay = (): void => {
-    if (customGameId && customGameName && onUpdateCustomGame) {
-      void (async () => {
-        try {
-          await onUpdateCustomGame(
-            draftApi.draft.name,
-            draftApi.draft.config,
-            {
-              cover: draftApi.draft.cover,
-              color: draftApi.draft.color,
-            },
-          );
-          await persistLastSession(draftApi.draft.config);
-        } catch (error) {
-          console.error('Failed to save custom game on play', error);
-        }
-        onStart();
-      })();
+    if (!draftApi.isDirty) {
+      void persistLastSession(draftApi.draft.config);
+      onStart();
       return;
     }
+    if (customGameId && onUpdateCustomGame) {
+      setPlayPromptError(null);
+      setCustomPlayPromptOpen(true);
+      return;
+    }
+    // Default game (no customGameId) — fall through to existing save-on-play dialog
     setSaveSubmitAttempted(false);
     setSavingName(
       suggestCustomGameName(gameTitle, existingCustomGameNames),
     );
     setSaveDialogOpen(true);
+  };
+
+  const handlePromptUpdate = (): void => {
+    if (!customGameId || !onUpdateCustomGame) return;
+    void (async () => {
+      try {
+        await onUpdateCustomGame(
+          draftApi.draft.name,
+          draftApi.draft.config,
+          {
+            cover: draftApi.draft.cover,
+            color: draftApi.draft.color,
+          },
+        );
+        await persistLastSession(draftApi.draft.config);
+        draftApi.commitSaved(draftApi.draft);
+        setCustomPlayPromptOpen(false);
+        setPlayPromptError(null);
+        onStart();
+      } catch (error) {
+        console.error('Failed to update custom game on play', error);
+        const message = t('instructions.updateError', {
+          defaultValue: "Couldn't update — try again.",
+        });
+        setPlayPromptError(message);
+        toast.error(message);
+      }
+    })();
+  };
+
+  const handlePromptSaveAsNew = (): void => {
+    setCustomPlayPromptOpen(false);
+    setSaveSubmitAttempted(false);
+    setSavingName(
+      suggestCustomGameName(gameTitle, existingCustomGameNames),
+    );
+    setSaveDialogOpen(true);
+  };
+
+  const handlePromptPlayWithoutSaving = (): void => {
+    void persistLastSession(draftApi.draft.config);
+    setCustomPlayPromptOpen(false);
+    onStart();
   };
 
   const saveOnPlayError: string | null = (() => {
@@ -505,6 +543,62 @@ export const InstructionsOverlay = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {customGameId && customGameName && (
+        <Dialog
+          open={customPlayPromptOpen}
+          onOpenChange={setCustomPlayPromptOpen}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {t('instructions.customPlayPromptTitle', {
+                  name: customGameName,
+                  defaultValue: `Save changes to "${customGameName}"?`,
+                })}
+              </DialogTitle>
+            </DialogHeader>
+            {playPromptError && (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive"
+              >
+                {playPromptError}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handlePromptUpdate}
+                className="rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+              >
+                {t('instructions.updateCustomGame', {
+                  name: customGameName,
+                  defaultValue: `Update "${customGameName}"`,
+                })}
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptSaveAsNew}
+                className="rounded-lg border border-input bg-background py-2 text-sm font-semibold"
+              >
+                {t('instructions.saveAsNew', {
+                  defaultValue: 'Save as new custom game',
+                })}
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptPlayWithoutSaving}
+                className="rounded-lg border border-input bg-background py-2 text-sm"
+              >
+                {t('instructions.playWithoutSaving', {
+                  defaultValue: 'Play without saving',
+                })}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>,
     document.body,
   );

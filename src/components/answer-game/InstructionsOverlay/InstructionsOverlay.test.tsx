@@ -330,3 +330,206 @@ describe.each([
     });
   },
 );
+
+describe.each([
+  {
+    gameId: 'word-spell' as const,
+    initialConfig: {
+      component: 'WordSpell',
+      mode: 'recall',
+      inputMethod: 'drag',
+    },
+    simpleEdit: { inputMethod: 'type' },
+  },
+  {
+    gameId: 'sort-numbers' as const,
+    initialConfig: {
+      component: 'SortNumbers',
+      direction: 'ascending',
+      configMode: 'simple',
+      quantity: 5,
+      skip: { mode: 'by', step: 2, start: 2 },
+      inputMethod: 'drag',
+    },
+    simpleEdit: { direction: 'descending' },
+  },
+  {
+    gameId: 'number-match' as const,
+    initialConfig: {
+      component: 'NumberMatch',
+      mode: 'numeral-to-group',
+      inputMethod: 'drag',
+      range: { min: 1, max: 12 },
+      tileBankMode: 'distractors',
+      distractorCount: 2,
+      rounds: [{ value: 3 }],
+      totalRounds: 1,
+    },
+    simpleEdit: { inputMethod: 'type' },
+  },
+])(
+  'InstructionsOverlay play prompt ($gameId)',
+  ({ gameId, initialConfig, simpleEdit }) => {
+    it('clean play (no edits) skips prompt and starts immediately', async () => {
+      const user = userEvent.setup();
+      const onStart = vi.fn();
+      const onPersistLastSession = vi.fn();
+      render(
+        <InstructionsOverlay
+          {...baseProps({
+            gameId,
+            config: initialConfig,
+            customGameId: 'cg1',
+            customGameName: 'Custom A',
+            onStart,
+            onPersistLastSession,
+            onUpdateCustomGame: vi.fn(async () => {}),
+          })}
+        />,
+        { wrapper },
+      );
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      expect(onStart).toHaveBeenCalled();
+      expect(onPersistLastSession).toHaveBeenCalledWith(initialConfig);
+    });
+
+    it('dirty + custom-game: prompt shows Update / Save as new / Play without saving', async () => {
+      const user = userEvent.setup();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              customGameId: 'cg1',
+              customGameName: 'Custom A',
+              onConfigChange: setConfig,
+              onUpdateCustomGame: vi.fn(async () => {}),
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      expect(
+        screen.getByRole('button', { name: /update "custom a"/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /save as new/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /play without saving/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('dirty + custom-game: Update commits and starts', async () => {
+      const user = userEvent.setup();
+      const onUpdateCustomGame = vi.fn(async () => {});
+      const onPersistLastSession = vi.fn();
+      const onStart = vi.fn();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              customGameId: 'cg1',
+              customGameName: 'Custom A',
+              onConfigChange: setConfig,
+              onUpdateCustomGame,
+              onPersistLastSession,
+              onStart,
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      await user.click(
+        screen.getByRole('button', { name: /update "custom a"/i }),
+      );
+      expect(onUpdateCustomGame).toHaveBeenCalled();
+      expect(onPersistLastSession).toHaveBeenCalled();
+      expect(onStart).toHaveBeenCalled();
+    });
+
+    it('dirty + custom-game: Play without saving persists last-session and starts; no update', async () => {
+      const user = userEvent.setup();
+      const onUpdateCustomGame = vi.fn(async () => {});
+      const onPersistLastSession = vi.fn();
+      const onStart = vi.fn();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              customGameId: 'cg1',
+              customGameName: 'Custom A',
+              onConfigChange: setConfig,
+              onUpdateCustomGame,
+              onPersistLastSession,
+              onStart,
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      await user.click(
+        screen.getByRole('button', { name: /play without saving/i }),
+      );
+      expect(onUpdateCustomGame).not.toHaveBeenCalled();
+      expect(onPersistLastSession).toHaveBeenCalled();
+      expect(onStart).toHaveBeenCalled();
+    });
+
+    it('dirty + default game: existing 2-action prompt fires', async () => {
+      const user = userEvent.setup();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              onConfigChange: setConfig,
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      expect(
+        screen.getByRole('button', { name: /save & play/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /play without saving/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: /update/i }),
+      ).toBeNull();
+    });
+  },
+);
