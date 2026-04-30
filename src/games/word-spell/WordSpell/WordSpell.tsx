@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { buildSentenceGapRound } from '../build-sentence-gap-round';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
 import { useLibraryRounds } from '../useLibraryRounds';
+import { buildTilesAndZones } from './build-tiles-and-zones';
 import {
   buildWordSpellInitialContent,
   hasWordSpellPersistedContent,
@@ -43,47 +44,6 @@ import { buildRoundOrder } from '@/games/build-round-order';
 import { getGameEventBus } from '@/lib/game-event-bus';
 import { useGameSkin } from '@/lib/skin';
 import { DbContext } from '@/providers/DbProvider';
-
-function segmentsForWord(
-  word: string,
-  tileUnit: WordSpellConfig['tileUnit'],
-): string[] {
-  const trimmed = word.trim();
-  if (tileUnit === 'word') return [trimmed];
-  if (tileUnit === 'syllable') {
-    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-    return parts.length > 0 ? parts : [trimmed];
-  }
-  return [...trimmed.toLowerCase()];
-}
-
-function buildTilesAndZones(
-  word: string,
-  tileUnit: WordSpellConfig['tileUnit'],
-): {
-  tiles: TileItem[];
-  zones: AnswerZone[];
-} {
-  const segments = segmentsForWord(word, tileUnit);
-  const values = segments.map((s) =>
-    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-  );
-  const zones: AnswerZone[] = values.map((value, i) => ({
-    id: `z${i}`,
-    index: i,
-    expectedValue: value,
-    placedTileId: null,
-    isWrong: false,
-    isLocked: false,
-  }));
-  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-  const tiles: TileItem[] = shuffled.map((value) => ({
-    id: nanoid(),
-    label: value,
-    value,
-  }));
-  return { tiles, zones };
-}
 
 interface WordSpellProps {
   config: WordSpellConfig;
