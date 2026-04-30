@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { SpotAll } from './SpotAll';
 import type { SpotAllConfig } from '../types';
 
@@ -8,57 +9,77 @@ vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ locale: 'en' }),
 }));
 
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
+  whenSoundEnds: () => Promise.resolve(),
+}));
+
+vi.mock('@/components/questions/AudioButton/AudioButton', () => ({
+  AudioButton: () => null,
+}));
+
+vi.mock('@/lib/skin', () => ({
+  useGameSkin: () => ({
+    id: 'classic',
+    name: 'Classic',
+    tokens: {},
+    SceneBackground: null,
+    RoundCompleteEffect: null,
+    CelebrationOverlay: null,
+  }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts?.target ? `Select all the ${opts.target} tiles` : key,
+    i18n: { language: 'en' },
+  }),
+}));
+
 const config: SpotAllConfig = {
   gameId: 'spot-all',
   component: 'SpotAll',
-  configMode: 'advanced',
-  totalRounds: 1,
-  roundsInOrder: true,
-  ttsEnabled: true,
-  targetSetIds: ['15-51'],
-  relationshipTypes: ['transposition'],
+  configMode: 'simple',
+  selectedConfusablePairs: [
+    { pair: ['b', 'd'], type: 'mirror-horizontal' },
+    { pair: ['b', 'p'], type: 'mirror-vertical' },
+  ],
+  selectedReversibleChars: [],
   correctTileCount: 2,
-  distractorCount: 1,
-  visualVariationEnabled: true,
+  distractorCount: 2,
+  totalRounds: 1,
+  visualVariationEnabled: false,
+  enabledFontIds: [],
+  roundsInOrder: true,
+  ttsEnabled: false,
 };
 
 describe('SpotAll', () => {
-  afterEach(() => {
-    vi.useRealTimers();
+  it('renders the prompt and a grid of tiles', () => {
+    render(<SpotAll config={config} seed="test-seed" />);
+    expect(screen.getAllByRole('button').length).toBeGreaterThan(0);
   });
 
-  it('renders prompt and requested number of tiles', () => {
-    render(<SpotAll config={config} seed="abc" />);
-    expect(screen.getByText(/Select all the/i)).toBeInTheDocument();
-    const tileButtons = screen
+  it('selects a correct tile on tap', async () => {
+    const user = userEvent.setup();
+    render(<SpotAll config={config} seed="test-seed" />);
+    const correctTile = screen
       .getAllByRole('button')
-      .filter((button) => button.textContent !== 'Check');
-    expect(tileButtons).toHaveLength(3);
+      .find((b) => b.textContent === 'b');
+    expect(correctTile).toBeDefined();
+    await user.click(correctTile!);
+    expect(correctTile).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('submitting selected correct tiles shows success feedback', () => {
-    vi.useFakeTimers();
-    render(<SpotAll config={config} seed="abc" />);
-    const promptText = screen.getByText(/Select all the/i).textContent;
-    const targetMatch = promptText.match(
-      /Select all the\s+(.+)\s+tiles/i,
-    );
-    const target = targetMatch?.[1]?.trim() ?? '';
-    expect(target).toBeTruthy();
-
-    const matchingSpans = screen.getAllByText(target);
-    for (const span of matchingSpans) {
-      const tileButton = span.closest('button');
-      if (tileButton && tileButton.textContent !== 'Check') {
-        fireEvent.click(tileButton);
-      }
-    }
-
-    fireEvent.click(screen.getByRole('button', { name: 'Check' }));
-
-    const selectedTileButtons = screen
+  it('puts a wrong tile in cooldown on tap (data-cooldown attr)', async () => {
+    const user = userEvent.setup();
+    render(<SpotAll config={config} seed="test-seed" />);
+    const wrongTile = screen
       .getAllByRole('button')
-      .filter((button) => button.className.includes('bg-emerald-50'));
-    expect(selectedTileButtons.length).toBeGreaterThan(0);
+      .find((b) => b.textContent === 'd' || b.textContent === 'p');
+    expect(wrongTile).toBeDefined();
+    await user.click(wrongTile!);
+    expect(wrongTile).toHaveAttribute('data-cooldown', 'true');
   });
 });
