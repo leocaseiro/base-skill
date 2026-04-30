@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -9391,13 +9391,13 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  37 | });
-  38 |
-&gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
+  35 | });
+  36 |
+&gt; 37 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  40 |   title: &#39;Games/SpotAll/SpotAllTile&#39;,
-  41 |   component: SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;,
-  42 |   tags: [&#39;autodocs&#39;],
+  38 |   title: &#39;Games/SpotAll/SpotAllTile&#39;,
+  39 |   component: SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;,
+  40 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/spot-all/SpotAllTile/SpotAllTile.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -9421,7 +9421,6 @@ type StoryArgs = {
   transform: CssTransform | &#39;none&#39;;
   fontFamily: FontFamily;
   fontSizePx: number;
-  color: string;
   onTap: () =&gt; void;
 };
 
@@ -9434,7 +9433,6 @@ const toTile = (args: StoryArgs): SpotAllTileData =&gt; ({
     fontFamily:
       args.fontFamily === &#39;inherit&#39; ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,
-    color: args.color,
   },
 });
 
@@ -9449,7 +9447,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     transform: &#39;none&#39;,
     fontFamily: &#39;inherit&#39;,
     fontSizePx: 32,
-    color: &#39;var(--skin-tile-text)&#39;,
     onTap: fn(),
   },
   argTypes: {
@@ -9478,7 +9475,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     fontSizePx: {
       control: { type: &#39;range&#39;, min: 16, max: 64, step: 2 },
     },
-    color: { control: &#39;color&#39; },
   },
   render: (args) =&gt; (
     &lt;SpotAllTile
@@ -17064,13 +17060,13 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  37 | });
-  38 |
-&gt; 39 | const meta: Meta&lt;StoryArgs&gt; = {
+  35 | });
+  36 |
+&gt; 37 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  40 |   title: &#39;Games/SpotAll/SpotAllTile&#39;,
-  41 |   component: SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;,
-  42 |   tags: [&#39;autodocs&#39;],
+  38 |   title: &#39;Games/SpotAll/SpotAllTile&#39;,
+  39 |   component: SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;,
+  40 |   tags: [&#39;autodocs&#39;],
 
 ./src/games/spot-all/SpotAllTile/SpotAllTile.stories.tsx:
 import { fn } from &#39;storybook/test&#39;;
@@ -17094,7 +17090,6 @@ type StoryArgs = {
   transform: CssTransform | &#39;none&#39;;
   fontFamily: FontFamily;
   fontSizePx: number;
-  color: string;
   onTap: () =&gt; void;
 };
 
@@ -17107,7 +17102,6 @@ const toTile = (args: StoryArgs): SpotAllTileData =&gt; ({
     fontFamily:
       args.fontFamily === &#39;inherit&#39; ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,
-    color: args.color,
   },
 });
 
@@ -17122,7 +17116,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     transform: &#39;none&#39;,
     fontFamily: &#39;inherit&#39;,
     fontSizePx: 32,
-    color: &#39;var(--skin-tile-text)&#39;,
     onTap: fn(),
   },
   argTypes: {
@@ -17151,7 +17144,6 @@ const meta: Meta&lt;StoryArgs&gt; = {
     fontSizePx: {
       control: { type: &#39;range&#39;, min: 16, max: 64, step: 2 },
     },
-    color: { control: &#39;color&#39; },
   },
   render: (args) =&gt; (
     &lt;SpotAllTile
