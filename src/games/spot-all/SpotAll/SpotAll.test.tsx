@@ -14,8 +14,13 @@ vi.mock('@/lib/audio/AudioFeedback', () => ({
   whenSoundEnds: () => Promise.resolve(),
 }));
 
-vi.mock('@/components/questions/AudioButton/AudioButton', () => ({
-  AudioButton: () => null,
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({ settings: { speechRate: 1, volume: 0.8 } }),
+}));
+
+vi.mock('@/lib/speech/SpeechOutput', () => ({
+  speak: vi.fn(),
+  isSpeechActive: () => false,
 }));
 
 vi.mock('@/lib/skin', () => ({
