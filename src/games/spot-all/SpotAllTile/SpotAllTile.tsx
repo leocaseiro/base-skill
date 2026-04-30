@@ -1,5 +1,6 @@
 import type { SpotAllTile as SpotAllTileData } from '../types';
-import type { JSX } from 'react';
+import type { CSSProperties, JSX } from 'react';
+import { tileStyle } from '@/components/answer-game/styles';
 import { cn } from '@/lib/utils';
 
 export interface SpotAllTileProps {
@@ -14,33 +15,44 @@ export const SpotAllTile = ({
   isSelected,
   inCooldown,
   onTap,
-}: SpotAllTileProps): JSX.Element => (
-  <button
-    type="button"
-    onClick={onTap}
-    disabled={inCooldown}
-    aria-pressed={isSelected}
-    data-cooldown={inCooldown || undefined}
-    className={cn(
-      'flex min-h-24 min-w-24 items-center justify-center rounded-[var(--skin-tile-radius)] border-2 px-3 py-2 transition-all',
-      'bg-[var(--skin-tile-bg)] text-[var(--skin-tile-text)] border-[var(--skin-tile-border)] shadow-[var(--skin-tile-shadow)]',
-      isSelected &&
-        'border-[var(--skin-correct-border)] bg-[var(--skin-correct-bg)]',
-      inCooldown &&
-        'border-[var(--skin-wrong-border)] bg-[var(--skin-wrong-bg)] animate-[shake_300ms_ease-in-out]',
-    )}
-  >
-    <span
-      style={{
-        fontFamily: tile.visualVariation?.fontFamily,
-        fontSize: tile.visualVariation?.fontSizePx,
-        color: tile.visualVariation?.color,
-        transform: tile.transform,
-        display: 'inline-block',
-      }}
-      className="font-bold leading-none"
+}: SpotAllTileProps): JSX.Element => {
+  const stateStyle: CSSProperties = isSelected
+    ? {
+        background: 'var(--skin-correct-bg)',
+        borderColor: 'var(--skin-correct-border)',
+      }
+    : inCooldown
+      ? {
+          background: 'var(--skin-wrong-bg)',
+          borderColor: 'var(--skin-wrong-border)',
+        }
+      : { borderColor: 'transparent' };
+
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      disabled={inCooldown}
+      aria-pressed={isSelected}
+      data-cooldown={inCooldown || undefined}
+      className={cn(
+        'flex min-h-24 min-w-24 items-center justify-center rounded-xl border-2 px-3 py-2 transition-all',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        inCooldown && 'animate-[shake_300ms_ease-in-out]',
+      )}
+      style={{ ...tileStyle(), ...stateStyle }}
     >
-      {tile.label}
-    </span>
-  </button>
-);
+      <span
+        style={{
+          fontFamily: tile.visualVariation?.fontFamily,
+          fontSize: tile.visualVariation?.fontSizePx,
+          transform: tile.transform,
+          display: 'inline-block',
+        }}
+        className="font-bold leading-none"
+      >
+        {tile.label}
+      </span>
+    </button>
+  );
+};

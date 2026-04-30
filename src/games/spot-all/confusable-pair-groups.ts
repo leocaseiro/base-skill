@@ -1,4 +1,7 @@
-import type { RelationshipType } from '@/data/confusables/types';
+import type {
+  RelationshipType,
+  ReversibleTransform,
+} from '@/data/confusables/types';
 import {
   getAllReversibles,
   getAllSets,
@@ -9,7 +12,11 @@ export type ConfusableGroupId = RelationshipType | 'reversible';
 export type ConfusableGroupChip =
   | { kind: 'pair'; pair: [string, string]; type: RelationshipType }
   | { kind: 'tripleSet'; members: readonly [string, string, string] }
-  | { kind: 'reversible'; char: string };
+  | {
+      kind: 'reversible';
+      char: string;
+      transform: ReversibleTransform;
+    };
 
 export interface ConfusableGroup {
   id: ConfusableGroupId;
@@ -67,6 +74,7 @@ const buildReversibleChips = (): ConfusableGroupChip[] =>
   getAllReversibles().map((r) => ({
     kind: 'reversible' as const,
     char: r.char,
+    transform: r.transform,
   }));
 
 const RELATIONSHIP_GROUPS = buildRelationshipGroups();

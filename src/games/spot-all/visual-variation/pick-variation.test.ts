@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { pickVariation } from './pick-variation';
-import { COLOR_POOL, FONT_POOL, SIZE_POOL } from './pools';
+import { FONT_POOL, SIZE_POOL } from './pools';
 import { seededRandom } from '@/lib/seeded-random';
 
 describe('pickVariation', () => {
@@ -16,12 +16,11 @@ describe('pickVariation', () => {
     expect(a).toEqual(b);
   });
 
-  it('picks color from COLOR_POOL and size from SIZE_POOL', () => {
+  it('picks size from SIZE_POOL', () => {
     const v = pickVariation(
       seededRandom('seed-1'),
       FONT_POOL.map((f) => f.id),
     );
-    expect(COLOR_POOL).toContain(v.color);
     expect(SIZE_POOL).toContain(v.fontSizePx);
   });
 
@@ -38,6 +37,5 @@ describe('pickVariation', () => {
     const v = pickVariation(seededRandom('seed-1'), []);
     expect(v.fontFamily).toBeUndefined();
     expect(SIZE_POOL).toContain(v.fontSizePx);
-    expect(COLOR_POOL).toContain(v.color);
   });
 });

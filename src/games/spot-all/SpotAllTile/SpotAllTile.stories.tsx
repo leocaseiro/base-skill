@@ -19,7 +19,6 @@ type StoryArgs = {
   transform: CssTransform | 'none';
   fontFamily: FontFamily;
   fontSizePx: number;
-  color: string;
   onTap: () => void;
 };
 
@@ -32,7 +31,6 @@ const toTile = (args: StoryArgs): SpotAllTileData => ({
     fontFamily:
       args.fontFamily === 'inherit' ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,
-    color: args.color,
   },
 });
 
@@ -47,7 +45,6 @@ const meta: Meta<StoryArgs> = {
     transform: 'none',
     fontFamily: 'inherit',
     fontSizePx: 32,
-    color: 'var(--skin-tile-text)',
     onTap: fn(),
   },
   argTypes: {
@@ -76,7 +73,6 @@ const meta: Meta<StoryArgs> = {
     fontSizePx: {
       control: { type: 'range', min: 16, max: 64, step: 2 },
     },
-    color: { control: 'color' },
   },
   render: (args) => (
     <SpotAllTile
