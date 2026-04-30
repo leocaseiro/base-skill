@@ -56,8 +56,10 @@ export const buildSpotAllRound = (
       : undefined,
   }));
 
+  const safeCorrectCount = Math.max(1, config.correctTileCount);
+
   const correctTiles: SpotAllTile[] = Array.from(
-    { length: config.correctTileCount },
+    { length: safeCorrectCount },
     () => ({
       id: nanoid(),
       label: target,
