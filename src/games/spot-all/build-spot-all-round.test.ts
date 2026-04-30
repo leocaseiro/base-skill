@@ -73,6 +73,17 @@ describe('buildSpotAllRound', () => {
     );
   });
 
+  it('guarantees at least 1 correct tile even when correctTileCount is 0', () => {
+    const r = buildSpotAllRound(baseConfig({ correctTileCount: 0 }), {
+      rng: seededRandom('s1'),
+      forceTarget: 'b',
+    });
+    expect(
+      r.tiles.filter((t) => t.isCorrect).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(r.correctCount).toBeGreaterThanOrEqual(1);
+  });
+
   it('is deterministic when rng is seeded', () => {
     const a = buildSpotAllRound(baseConfig(), {
       rng: seededRandom('seed-X'),
