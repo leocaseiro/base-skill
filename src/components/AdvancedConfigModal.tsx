@@ -73,7 +73,7 @@ export const AdvancedConfigModal = ({
   const isCustomGame = mode.kind === 'customGame';
   const namesTaken = new Set(
     existingCustomGameNames.filter(
-      (n) => !isCustomGame || n !== value.name,
+      (n) => !isCustomGame || n !== trimmedName,
     ),
   );
 

@@ -242,6 +242,63 @@ describe('AdvancedConfigModal', () => {
       screen.getByRole('button', { name: /save as new/i }),
     );
     expect(onSaveNew).toHaveBeenCalledTimes(1);
+    expect(onSaveNew).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'My Sort',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- nested expect.objectContaining returns any
+        config: expect.objectContaining({ configMode: 'advanced' }),
+      }),
+    );
+  });
+
+  it('stamps configMode: "advanced" on Update payload', async () => {
+    const user = userEvent.setup();
+    const onUpdate = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={customGameMode}
+        value={draftFor({
+          config: { direction: 'ascending', configMode: 'simple' },
+        })}
+        onChange={vi.fn()}
+        onCancel={() => {}}
+        onUpdate={onUpdate}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+    await user.click(
+      screen.getByRole('button', { name: /update "skip by 2"/i }),
+    );
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- nested expect.objectContaining returns any
+        config: expect.objectContaining({ configMode: 'advanced' }),
+      }),
+    );
+  });
+
+  it('shows an inline error banner when errorMessage is set', () => {
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="sort-numbers"
+        mode={{ kind: 'default' }}
+        value={draftFor()}
+        onChange={vi.fn()}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+        errorMessage="Couldn't save — try again."
+      />,
+      { wrapper },
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Couldn't save — try again.",
+    );
   });
 
   it('propagates field changes via onChange (config patch)', async () => {

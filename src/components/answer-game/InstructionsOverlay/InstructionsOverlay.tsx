@@ -8,6 +8,7 @@ import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
+import { useConfigDraft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import { GameCover } from '@/components/GameCover';
 import {
   Dialog,
@@ -169,6 +170,15 @@ export const InstructionsOverlay = ({
         } as const)
       : ({ kind: 'default' } as const);
 
+  const { draft, setDraft } = useConfigDraft({
+    config,
+    onConfigChange,
+    initialName: customGameName ?? '',
+    initialColor: customGameColor,
+    initialCover: cover,
+    identity: customGameId ?? '',
+  });
+
   const handlePlay = () => {
     if (customGameId && customGameName && onUpdateCustomGame) {
       void (async () => {
@@ -305,7 +315,8 @@ export const InstructionsOverlay = ({
         onOpenChange={setModalOpen}
         gameId={gameId}
         mode={modalMode}
-        config={config}
+        value={draft}
+        onChange={setDraft}
         existingCustomGameNames={existingCustomGameNames}
         onCancel={() => setModalOpen(false)}
         onDelete={
