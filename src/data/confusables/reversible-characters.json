@@ -1,0 +1,11 @@
+[
+  { "char": "2", "transform": "mirror-horizontal" },
+  { "char": "3", "transform": "mirror-horizontal" },
+  { "char": "5", "transform": "mirror-horizontal" },
+  { "char": "6", "transform": "mirror-horizontal" },
+  { "char": "7", "transform": "mirror-horizontal" },
+  { "char": "9", "transform": "mirror-horizontal" },
+  { "char": "J", "transform": "mirror-horizontal" },
+  { "char": "S", "transform": "mirror-horizontal" },
+  { "char": "Z", "transform": "mirror-horizontal" }
+]

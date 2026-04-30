@@ -16,3 +16,13 @@ export interface ConfusableSet {
   members: string[];
   relationships: ConfusableRelationship[];
 }
+
+export type ReversibleTransform =
+  | 'mirror-horizontal'
+  | 'mirror-vertical'
+  | 'rotation-180';
+
+export interface ReversibleCharacter {
+  char: string;
+  transform: ReversibleTransform;
+}

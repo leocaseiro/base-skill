@@ -1,8 +1,11 @@
 import confusableSetsJson from './confusable-sets.json';
+import reversibleCharactersJson from './reversible-characters.json';
 import type {
   ConfusableRelationship,
   ConfusableSet,
   RelationshipType,
+  ReversibleCharacter,
+  ReversibleTransform,
 } from './types';
 
 const RELATIONSHIP_TYPES: ReadonlySet<RelationshipType> = new Set([
@@ -48,6 +51,23 @@ const normalizeSet = (
 const CONFUSABLE_SETS: ConfusableSet[] = confusableSetsJson.map((set) =>
   normalizeSet(set),
 );
+
+const REVERSIBLE_TRANSFORMS: ReadonlySet<ReversibleTransform> = new Set(
+  ['mirror-horizontal', 'mirror-vertical', 'rotation-180'],
+);
+
+const isReversibleTransform = (
+  value: string,
+): value is ReversibleTransform =>
+  REVERSIBLE_TRANSFORMS.has(value as ReversibleTransform);
+
+const REVERSIBLE_CHARACTERS: readonly ReversibleCharacter[] =
+  reversibleCharactersJson
+    .filter((entry) => isReversibleTransform(entry.transform))
+    .map((entry) => ({
+      char: entry.char,
+      transform: entry.transform as ReversibleTransform,
+    }));
 
 let memberToSetIndexes: Map<string, number[]> | null = null;
 
@@ -127,3 +147,14 @@ export const getConfusablesFor = (
 
   return [...results];
 };
+
+export const getAllReversibles = (): ReversibleCharacter[] =>
+  REVERSIBLE_CHARACTERS.map((r) => ({ ...r }));
+
+export const getReversalTransform = (
+  char: string,
+): ReversibleCharacter | undefined =>
+  REVERSIBLE_CHARACTERS.find((r) => r.char === char);
+
+export const isReversible = (char: string): boolean =>
+  REVERSIBLE_CHARACTERS.some((r) => r.char === char);
