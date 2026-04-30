@@ -30,7 +30,6 @@ import { cumulativeGraphemes } from '@/data/words';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
-import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
 import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
@@ -444,7 +443,13 @@ const WordSpellGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -466,10 +471,6 @@ const WordSpellGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -541,6 +542,9 @@ const WordSpellGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -586,7 +590,13 @@ const NumberMatchGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -608,10 +618,6 @@ const NumberMatchGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -683,6 +689,9 @@ const NumberMatchGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -727,7 +736,13 @@ const SortNumbersGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -749,10 +764,6 @@ const SortNumbersGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -824,6 +835,9 @@ const SortNumbersGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
