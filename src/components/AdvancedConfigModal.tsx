@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
@@ -16,23 +17,13 @@ import {
   getAdvancedConfigFields,
   getAdvancedHeaderRenderer,
 } from '@/games/config-fields-registry';
-import {
-  DEFAULT_GAME_COLOR,
-  GAME_COLORS,
-  GAME_COLOR_KEYS,
-} from '@/lib/game-colors';
+import { GAME_COLORS, GAME_COLOR_KEYS } from '@/lib/game-colors';
 
 export type AdvancedConfigModalMode =
   | { kind: 'default' }
-  | {
-      kind: 'customGame';
-      configId: string;
-      name: string;
-      color: GameColorKey;
-      cover: Cover | undefined;
-    };
+  | { kind: 'customGame'; configId: string };
 
-type SavePayload = {
+export type SavePayload = {
   configId?: string;
   name: string;
   color: GameColorKey;
@@ -45,14 +36,15 @@ type AdvancedConfigModalProps = {
   onOpenChange: (next: boolean) => void;
   gameId: string;
   mode: AdvancedConfigModalMode;
-  config: Record<string, unknown>;
+  value: Draft;
+  onChange: (patch: Partial<Draft>) => void;
   onCancel: () => void;
   onUpdate?: (payload: SavePayload) => void;
   onSaveNew: (payload: SavePayload) => void;
-  /** Invoked when the user confirms deletion of the current custom game. */
   onDelete?: (configId: string) => Promise<void> | void;
-  /** Names of existing custom games for this game — used to surface duplicate-name errors inline. */
   existingCustomGameNames?: readonly string[];
+  /** Optional inline error banner (shown when set). */
+  errorMessage?: string | null;
 };
 
 export const AdvancedConfigModal = ({
@@ -60,25 +52,16 @@ export const AdvancedConfigModal = ({
   onOpenChange,
   gameId,
   mode,
-  config: initialConfig,
+  value,
+  onChange,
   onCancel,
   onUpdate,
   onSaveNew,
   onDelete,
   existingCustomGameNames = [],
+  errorMessage,
 }: AdvancedConfigModalProps): JSX.Element => {
   const { t } = useTranslation('games');
-  const [config, setConfig] =
-    useState<Record<string, unknown>>(initialConfig);
-  const [cover, setCover] = useState<Cover | undefined>(
-    mode.kind === 'customGame' ? mode.cover : undefined,
-  );
-  const [name, setName] = useState<string>(
-    mode.kind === 'customGame' ? mode.name : '',
-  );
-  const [color, setColor] = useState<GameColorKey>(
-    mode.kind === 'customGame' ? mode.color : DEFAULT_GAME_COLOR,
-  );
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -86,11 +69,12 @@ export const AdvancedConfigModal = ({
   const fields = getAdvancedConfigFields(gameId);
   const HeaderRenderer = getAdvancedHeaderRenderer(gameId);
 
-  const trimmedName = name.trim();
-  const currentCustomGameName =
-    mode.kind === 'customGame' ? mode.name : null;
+  const trimmedName = value.name.trim();
+  const isCustomGame = mode.kind === 'customGame';
   const namesTaken = new Set(
-    existingCustomGameNames.filter((n) => n !== currentCustomGameName),
+    existingCustomGameNames.filter(
+      (n) => !isCustomGame || n !== trimmedName,
+    ),
   );
 
   const nameError: string | null = (() => {
@@ -106,44 +90,37 @@ export const AdvancedConfigModal = ({
   })();
 
   const saveNewInvalid = nameError !== null;
-  const updateIsRename =
-    currentCustomGameName !== null &&
-    trimmedName !== currentCustomGameName;
-  const updateInvalid = updateIsRename && nameError !== null;
+  const updateInvalid = nameError !== null;
   const showNameError = submitAttempted && nameError !== null;
 
-  const payload: SavePayload = {
-    configId: mode.kind === 'customGame' ? mode.configId : undefined,
+  const buildPayload = (): SavePayload => ({
+    configId: isCustomGame ? mode.configId : undefined,
     name: trimmedName,
-    color,
-    cover,
-    // Saving from the advanced modal marks the config as advanced — otherwise
-    // a lingering `configMode: 'simple'` causes the route resolver to rebuild
-    // the config from simple-form fields only, wiping advanced-only choices
-    // like wrongTileBehavior on reload.
-    config: { ...config, configMode: 'advanced' },
-  };
+    color: value.color,
+    cover: value.cover,
+    config: { ...value.config, configMode: 'advanced' },
+  });
 
-  const handleSaveNew = () => {
+  const handleSaveNew = (): void => {
     setSubmitAttempted(true);
     if (saveNewInvalid) {
       nameInputRef.current?.focus();
       return;
     }
-    onSaveNew(payload);
+    onSaveNew(buildPayload());
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = (): void => {
     if (!onUpdate) return;
     setSubmitAttempted(true);
     if (updateInvalid) {
       nameInputRef.current?.focus();
       return;
     }
-    onUpdate(payload);
+    onUpdate(buildPayload());
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = (): void => {
     if (mode.kind !== 'customGame' || !onDelete) return;
     void (async () => {
       try {
@@ -160,14 +137,15 @@ export const AdvancedConfigModal = ({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {mode.kind === 'customGame'
-              ? mode.name
-              : 'Advanced settings'}
+            {isCustomGame ? value.name : 'Advanced settings'}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
-          <CoverPicker value={cover} onChange={setCover} />
+          <CoverPicker
+            value={value.cover}
+            onChange={(next) => onChange({ cover: next })}
+          />
 
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold uppercase text-muted-foreground">
@@ -178,8 +156,8 @@ export const AdvancedConfigModal = ({
             <input
               ref={nameInputRef}
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={value.name}
+              onChange={(e) => onChange({ name: e.target.value })}
               placeholder="e.g. Skip by 2"
               aria-invalid={showNameError}
               aria-describedby={
@@ -215,20 +193,23 @@ export const AdvancedConfigModal = ({
                   key={key}
                   type="button"
                   aria-label={key}
-                  aria-pressed={color === key}
-                  onClick={() => setColor(key)}
+                  aria-pressed={value.color === key}
+                  onClick={() => onChange({ color: key })}
                   className="h-8 w-8 rounded-full border-2 transition-transform hover:scale-110"
                   style={{
                     background: GAME_COLORS[key].playBg,
                     borderColor:
-                      color === key
+                      value.color === key
                         ? GAME_COLORS[key].playBg
                         : 'transparent',
                     outline:
-                      color === key ? '3px solid white' : undefined,
-                    outlineOffset: color === key ? '-4px' : undefined,
+                      value.color === key
+                        ? '3px solid white'
+                        : undefined,
+                    outlineOffset:
+                      value.color === key ? '-4px' : undefined,
                     boxShadow:
-                      color === key
+                      value.color === key
                         ? `0 0 0 2px ${GAME_COLORS[key].playBg}`
                         : undefined,
                   }}
@@ -238,16 +219,28 @@ export const AdvancedConfigModal = ({
           </div>
 
           {HeaderRenderer && (
-            <HeaderRenderer config={config} onChange={setConfig} />
+            <HeaderRenderer
+              config={value.config}
+              onChange={(next) => onChange({ config: next })}
+            />
           )}
           <ConfigFormFields
             fields={fields}
-            config={config}
-            onChange={setConfig}
+            config={value.config}
+            onChange={(next) => onChange({ config: next })}
           />
 
+          {errorMessage && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive"
+            >
+              {errorMessage}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2 border-t border-border pt-3">
-            {mode.kind === 'customGame' && onDelete && (
+            {isCustomGame && onDelete && (
               <button
                 type="button"
                 onClick={() => setConfirmDeleteOpen(true)}
@@ -264,7 +257,7 @@ export const AdvancedConfigModal = ({
             >
               {t('instructions.cancel', { defaultValue: 'Cancel' })}
             </button>
-            {mode.kind === 'customGame' && onUpdate && (
+            {isCustomGame && onUpdate && (
               <button
                 type="button"
                 onClick={handleUpdate}
@@ -272,8 +265,8 @@ export const AdvancedConfigModal = ({
                 className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
               >
                 {t('instructions.updateCustomGame', {
-                  name: mode.name,
-                  defaultValue: `Update "${mode.name}"`,
+                  name: value.name,
+                  defaultValue: `Update "${value.name}"`,
                 })}
               </button>
             )}
@@ -282,9 +275,9 @@ export const AdvancedConfigModal = ({
               onClick={handleSaveNew}
               aria-disabled={saveNewInvalid}
               className={`flex-1 rounded-lg py-2 text-sm font-bold ${
-                mode.kind === 'default'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border border-input bg-background'
+                isCustomGame
+                  ? 'border border-input bg-background'
+                  : 'bg-primary text-primary-foreground'
               }`}
             >
               {t('instructions.saveAsNew', {
@@ -295,7 +288,7 @@ export const AdvancedConfigModal = ({
         </div>
       </DialogContent>
 
-      {mode.kind === 'customGame' && onDelete && (
+      {isCustomGame && onDelete && (
         <Dialog
           open={confirmDeleteOpen}
           onOpenChange={setConfirmDeleteOpen}
@@ -304,8 +297,8 @@ export const AdvancedConfigModal = ({
             <DialogHeader>
               <DialogTitle>
                 {t('instructions.deleteConfirmTitle', {
-                  name: mode.name,
-                  defaultValue: `Delete "${mode.name}"?`,
+                  name: value.name,
+                  defaultValue: `Delete "${value.name}"?`,
                 })}
               </DialogTitle>
             </DialogHeader>

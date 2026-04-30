@@ -4,6 +4,8 @@ import { Settings as SettingsIcon, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { useConfigDraft } from './useConfigDraft';
 import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
@@ -101,6 +103,10 @@ type InstructionsOverlayProps = {
     extras?: { cover?: Cover; color?: GameColorKey },
   ) => Promise<void>;
   onDeleteCustomGame?: (configId: string) => Promise<void>;
+  /** Persist current draft as the "last session" snapshot for this gameId. */
+  onPersistLastSession?: (
+    config: Record<string, unknown>,
+  ) => Promise<void> | void;
   existingCustomGameNames?: readonly string[];
   isBookmarked?: boolean;
   onToggleBookmark?: () => void;
@@ -121,6 +127,7 @@ export const InstructionsOverlay = ({
   onSaveCustomGame,
   onUpdateCustomGame,
   onDeleteCustomGame,
+  onPersistLastSession,
   existingCustomGameNames = [],
   isBookmarked,
   onToggleBookmark,
@@ -130,15 +137,30 @@ export const InstructionsOverlay = ({
     from: '/$locale/game/$gameId',
   });
   const router = useRouter();
+
+  const draftApi = useConfigDraft({
+    config,
+    onConfigChange,
+    initialName: customGameName ?? '',
+    initialColor: customGameColor,
+    initialCover: cover,
+    identity: customGameId ?? 'default',
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [savingName, setSavingName] = useState('');
   const [saveSubmitAttempted, setSaveSubmitAttempted] = useState(false);
+  const [customPlayPromptOpen, setCustomPlayPromptOpen] =
+    useState(false);
+  const [playPromptError, setPlayPromptError] = useState<string | null>(
+    null,
+  );
   const saveNameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (saveDialogOpen) {
-      // Defer so the Radix Dialog finishes mounting before we grab focus.
       const id = globalThis.setTimeout(
         () => saveNameRef.current?.focus(),
         0,
@@ -156,44 +178,115 @@ export const InstructionsOverlay = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
   }, []);
 
-  const settingsColors = GAME_COLORS[customGameColor];
-  const resolvedCover = resolveCover({ cover }, gameId);
+  const settingsColors = GAME_COLORS[draftApi.draft.color];
+  const resolvedCover = resolveCover(
+    { cover: draftApi.draft.cover },
+    gameId,
+  );
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
   const playable = isPlayableConfig(gameId, config);
 
   const modalMode =
-    customGameId && customGameName
-      ? ({
-          kind: 'customGame',
-          configId: customGameId,
-          name: customGameName,
-          color: customGameColor,
-          cover,
-        } as const)
+    customGameId && draftApi.draft.name
+      ? ({ kind: 'customGame', configId: customGameId } as const)
       : ({ kind: 'default' } as const);
 
-  const handlePlay = () => {
+  const handleOpenModal = (): void => {
+    draftApi.openModalSnapshot();
+    setModalError(null);
+    setModalOpen(true);
+  };
+
+  const handleModalOpenChange = (next: boolean): void => {
+    if (!next) {
+      draftApi.discard();
+    }
+    setModalOpen(next);
+  };
+
+  const handleCancel = (): void => {
+    draftApi.discard();
+    setModalOpen(false);
+  };
+
+  const persistLastSession = async (
+    nextConfig: Record<string, unknown>,
+  ): Promise<void> => {
+    if (!onPersistLastSession) return;
+    try {
+      await onPersistLastSession(nextConfig);
+    } catch (error) {
+      console.error('Failed to persist last-session config', error);
+      toast.error(
+        t('instructions.persistLastSessionError', {
+          defaultValue: "Couldn't remember settings",
+        }),
+      );
+    }
+  };
+
+  const handlePlay = (): void => {
     if (!playable) return;
-    if (customGameId && customGameName && onUpdateCustomGame) {
-      void (async () => {
-        try {
-          await onUpdateCustomGame(customGameName, config, {
-            cover,
-            color: customGameColor,
-          });
-        } catch (error) {
-          console.error('Failed to save custom game on play', error);
-        }
-        onStart();
-      })();
+    if (!draftApi.isDirty) {
+      void persistLastSession(draftApi.draft.config);
+      onStart();
       return;
     }
+    setPlayPromptError(null);
+    if (customGameId && customGameName && onUpdateCustomGame) {
+      setCustomPlayPromptOpen(true);
+      return;
+    }
+    // Default game (no customGameId or no onUpdateCustomGame) — fall through to existing save-on-play dialog
     setSaveSubmitAttempted(false);
     setSavingName(
       suggestCustomGameName(gameTitle, existingCustomGameNames),
     );
     setSaveDialogOpen(true);
+  };
+
+  const handlePromptUpdate = (): void => {
+    if (!customGameId || !onUpdateCustomGame) return;
+    void (async () => {
+      try {
+        await onUpdateCustomGame(
+          draftApi.draft.name,
+          draftApi.draft.config,
+          {
+            cover: draftApi.draft.cover,
+            color: draftApi.draft.color,
+          },
+        );
+        await persistLastSession(draftApi.draft.config);
+        draftApi.commitSaved(draftApi.draft);
+        setCustomPlayPromptOpen(false);
+        setPlayPromptError(null);
+        onStart();
+      } catch (error) {
+        console.error('Failed to update custom game on play', error);
+        const message = t('instructions.updateError', {
+          defaultValue: "Couldn't update — try again.",
+        });
+        setPlayPromptError(message);
+        toast.error(message);
+      }
+    })();
+  };
+
+  const handlePromptSaveAsNew = (): void => {
+    setCustomPlayPromptOpen(false);
+    setSaveSubmitAttempted(false);
+    setSavingName(
+      suggestCustomGameName(gameTitle, existingCustomGameNames),
+    );
+    setSaveDialogOpen(true);
+  };
+
+  const handlePromptPlayWithoutSaving = (): void => {
+    void persistLastSession(draftApi.draft.config);
+    setCustomPlayPromptOpen(false);
+    onStart();
   };
 
   const saveOnPlayError: string | null = (() => {
@@ -211,7 +304,7 @@ export const InstructionsOverlay = ({
   const showSaveOnPlayError =
     saveSubmitAttempted && saveOnPlayError !== null;
 
-  const handleSaveAndPlay = () => {
+  const handleSaveAndPlay = (): void => {
     setSaveSubmitAttempted(true);
     if (saveOnPlayError !== null) {
       saveNameRef.current?.focus();
@@ -222,10 +315,11 @@ export const InstructionsOverlay = ({
       try {
         const newId = await onSaveCustomGame({
           name: trimmed,
-          color: customGameColor,
-          config,
-          cover,
+          color: draftApi.draft.color,
+          config: draftApi.draft.config,
+          cover: draftApi.draft.cover,
         });
+        await persistLastSession(draftApi.draft.config);
         setSaveDialogOpen(false);
         await navigate({
           search: (prev) => ({ ...prev, configId: newId }),
@@ -237,7 +331,8 @@ export const InstructionsOverlay = ({
     })();
   };
 
-  const handlePlayWithoutSaving = () => {
+  const handlePlayWithoutSaving = (): void => {
+    void persistLastSession(draftApi.draft.config);
     setSaveDialogOpen(false);
     onStart();
   };
@@ -249,13 +344,11 @@ export const InstructionsOverlay = ({
       className="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-background/95 px-5 pb-8 pt-24"
     >
       <div className="mx-auto flex w-full max-w-sm flex-col overflow-hidden rounded-3xl bg-card shadow-lg md:max-w-2xl">
-        {/* 1. Hero cover */}
         <div className="flex justify-center bg-muted/40 p-4">
           <GameCover cover={resolvedCover} size="hero" />
         </div>
 
         <div className="flex flex-col gap-4 p-4">
-          {/* 2. Title row + bookmark + cog — matches GameCard heading/subtitle order */}
           <div className="flex items-center justify-between gap-2">
             <div>
               <h2
@@ -277,16 +370,14 @@ export const InstructionsOverlay = ({
             <HeaderActions
               isBookmarked={isBookmarked}
               onToggleBookmark={onToggleBookmark}
-              onOpenSettings={() => setModalOpen(true)}
+              onOpenSettings={handleOpenModal}
             />
           </div>
 
-          {/* 3. Instructions text */}
           <p className="text-center text-base font-semibold text-foreground leading-relaxed">
             {text}
           </p>
 
-          {/* 4. Let's go button */}
           <button
             type="button"
             onClick={handlePlay}
@@ -297,24 +388,27 @@ export const InstructionsOverlay = ({
             {t('instructions.lets-go')}
           </button>
 
-          {/* 5. Simple settings form (always expanded) */}
           {SimpleForm && (
             <div className="border-t border-border pt-4">
-              <SimpleForm config={config} onChange={onConfigChange} />
+              <SimpleForm
+                config={draftApi.draft.config}
+                onChange={(next) => draftApi.setDraft({ config: next })}
+              />
             </div>
           )}
         </div>
       </div>
 
-      {/* Advanced config modal (opened by cog button) */}
       <AdvancedConfigModal
         open={modalOpen}
-        onOpenChange={setModalOpen}
+        onOpenChange={handleModalOpenChange}
         gameId={gameId}
         mode={modalMode}
-        config={config}
+        value={draftApi.draft}
+        onChange={(patch) => draftApi.setDraft(patch)}
         existingCustomGameNames={existingCustomGameNames}
-        onCancel={() => setModalOpen(false)}
+        errorMessage={modalError}
+        onCancel={handleCancel}
         onDelete={
           customGameId && onDeleteCustomGame
             ? onDeleteCustomGame
@@ -329,14 +423,25 @@ export const InstructionsOverlay = ({
                 config: payload.config,
                 cover: payload.cover,
               });
-              onConfigChange(payload.config);
+              await persistLastSession(payload.config);
+              draftApi.commitSaved({
+                config: payload.config,
+                name: payload.name,
+                color: payload.color,
+                cover: payload.cover,
+              });
               setModalOpen(false);
+              setModalError(null);
               await navigate({
                 search: (prev) => ({ ...prev, configId: newId }),
               });
             } catch (error) {
-              // Surface duplicate-name and similar errors; keep modal open.
               console.error('Failed to save custom game', error);
+              const message = t('instructions.saveError', {
+                defaultValue: "Couldn't save — try again.",
+              });
+              setModalError(message);
+              toast.error(message);
             }
           })();
         }}
@@ -353,14 +458,26 @@ export const InstructionsOverlay = ({
                         color: payload.color,
                       },
                     );
-                    onConfigChange(payload.config);
+                    await persistLastSession(payload.config);
+                    draftApi.commitSaved({
+                      config: payload.config,
+                      name: payload.name,
+                      color: payload.color,
+                      cover: payload.cover,
+                    });
                     setModalOpen(false);
+                    setModalError(null);
                     await router.invalidate();
                   } catch (error) {
                     console.error(
                       'Failed to update custom game',
                       error,
                     );
+                    const message = t('instructions.updateError', {
+                      defaultValue: "Couldn't update — try again.",
+                    });
+                    setModalError(message);
+                    toast.error(message);
                   }
                 })();
               }
@@ -368,7 +485,6 @@ export const InstructionsOverlay = ({
         }
       />
 
-      {/* Save-on-play prompt for default (non-custom-game) games */}
       <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -434,6 +550,65 @@ export const InstructionsOverlay = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {customGameId && customGameName && onUpdateCustomGame && (
+        <Dialog
+          open={customPlayPromptOpen}
+          onOpenChange={(next) => {
+            setCustomPlayPromptOpen(next);
+            if (!next) setPlayPromptError(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {t('instructions.customPlayPromptTitle', {
+                  name: customGameName,
+                  defaultValue: `Save changes to "${customGameName}"?`,
+                })}
+              </DialogTitle>
+            </DialogHeader>
+            {playPromptError && (
+              <div
+                role="alert"
+                className="rounded-lg border border-destructive bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive"
+              >
+                {playPromptError}
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handlePromptUpdate}
+                className="rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+              >
+                {t('instructions.updateCustomGame', {
+                  name: customGameName,
+                  defaultValue: `Update "${customGameName}"`,
+                })}
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptSaveAsNew}
+                className="rounded-lg border border-input bg-background py-2 text-sm font-semibold"
+              >
+                {t('instructions.saveAsNew', {
+                  defaultValue: 'Save as new custom game',
+                })}
+              </button>
+              <button
+                type="button"
+                onClick={handlePromptPlayWithoutSaving}
+                className="rounded-lg border border-input bg-background py-2 text-sm"
+              >
+                {t('instructions.playWithoutSaving', {
+                  defaultValue: 'Play without saving',
+                })}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>,
     document.body,
   );
