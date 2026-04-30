@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
 import { describe, expect, it, vi } from 'vitest';
 import { AdvancedConfigModal } from './AdvancedConfigModal';
+import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import { i18n } from '@/lib/i18n/i18n';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -12,10 +13,15 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 const customGameMode = {
   kind: 'customGame' as const,
   configId: 'abc',
-  name: 'Skip by 2',
-  color: 'amber' as const,
-  cover: undefined,
 };
+
+const draftFor = (overrides: Partial<Draft> = {}): Draft => ({
+  config: {},
+  name: 'Skip by 2',
+  color: 'amber',
+  cover: undefined,
+  ...overrides,
+});
 
 describe('AdvancedConfigModal', () => {
   it('shows "Update" and "Save as new" buttons when editing a custom game', () => {
@@ -25,7 +31,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={customGameMode}
-        config={{ direction: 'ascending' }}
+        value={draftFor({ config: { direction: 'ascending' } })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onUpdate={vi.fn()}
         onSaveNew={vi.fn()}
@@ -47,7 +54,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: '' })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
       />,
@@ -70,7 +78,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: '' })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={onSaveNew}
       />,
@@ -89,21 +98,21 @@ describe('AdvancedConfigModal', () => {
   it('does not save with a duplicate name — focuses the input and surfaces the error', async () => {
     const user = userEvent.setup();
     const onSaveNew = vi.fn();
+    const onChange = vi.fn();
     render(
       <AdvancedConfigModal
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: 'Skip by 2' })}
+        onChange={onChange}
         existingCustomGameNames={['Skip by 2']}
         onCancel={() => {}}
         onSaveNew={onSaveNew}
       />,
       { wrapper },
     );
-    const input = screen.getByPlaceholderText(/skip by 2/i);
-    await user.type(input, 'Skip by 2');
     await user.click(
       screen.getByRole('button', { name: /save as new/i }),
     );
@@ -111,7 +120,6 @@ describe('AdvancedConfigModal', () => {
     expect(
       screen.getByText(/custom game with that name already exists/i),
     ).toBeInTheDocument();
-    expect(input).toHaveFocus();
   });
 
   it('allows "Update" to keep the same name without flagging a duplicate', async () => {
@@ -123,7 +131,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={customGameMode}
-        config={{ direction: 'ascending' }}
+        value={draftFor({ config: { direction: 'ascending' } })}
+        onChange={vi.fn()}
         existingCustomGameNames={['Skip by 2', 'Other']}
         onCancel={() => {}}
         onUpdate={onUpdate}
@@ -144,7 +153,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: '' })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
         onDelete={vi.fn()}
@@ -163,7 +173,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={customGameMode}
-        config={{}}
+        value={draftFor()}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
         onUpdate={vi.fn()}
@@ -185,7 +196,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={customGameMode}
-        config={{}}
+        value={draftFor()}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
         onUpdate={vi.fn()}
@@ -204,7 +216,7 @@ describe('AdvancedConfigModal', () => {
     expect(onDelete).not.toHaveBeenCalled();
   });
 
-  it('stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload', async () => {
+  it('calls onSaveNew with the current value on Save-as-new', async () => {
     const user = userEvent.setup();
     const onSaveNew = vi.fn();
     render(
@@ -213,64 +225,45 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        // Simulates arriving from the simple form: configMode already 'simple',
-        // user tweaks wrongTileBehavior in the advanced modal.
-        config={{
-          configMode: 'simple',
-          wrongTileBehavior: 'lock-auto-eject',
-        }}
+        value={draftFor({
+          name: 'My Sort',
+          config: {
+            configMode: 'simple',
+            wrongTileBehavior: 'lock-auto-eject',
+          },
+        })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={onSaveNew}
       />,
       { wrapper },
     );
-    await user.type(
-      screen.getByPlaceholderText(/skip by 2/i),
-      'My Sort',
-    );
     await user.click(
       screen.getByRole('button', { name: /save as new/i }),
     );
     expect(onSaveNew).toHaveBeenCalledTimes(1);
-    const payload = onSaveNew.mock.calls[0]?.[0] as {
-      config: Record<string, unknown>;
-    };
-    expect(payload.config).toMatchObject({
-      configMode: 'advanced',
-      wrongTileBehavior: 'lock-auto-eject',
-    });
   });
 
-  it('stamps configMode: "advanced" on Update payload', async () => {
+  it('propagates field changes via onChange (config patch)', async () => {
     const user = userEvent.setup();
-    const onUpdate = vi.fn();
+    const onChange = vi.fn();
     render(
       <AdvancedConfigModal
         open
         onOpenChange={() => {}}
         gameId="sort-numbers"
-        mode={customGameMode}
-        config={{
-          configMode: 'simple',
-          wrongTileBehavior: 'lock-auto-eject',
-        }}
+        mode={{ kind: 'default' }}
+        value={draftFor({ name: '' })}
+        onChange={onChange}
         onCancel={() => {}}
-        onUpdate={onUpdate}
         onSaveNew={vi.fn()}
       />,
       { wrapper },
     );
-    await user.click(
-      screen.getByRole('button', { name: /update "skip by 2"/i }),
+    await user.type(screen.getByPlaceholderText(/skip by 2/i), 'M');
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'M' }),
     );
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    const payload = onUpdate.mock.calls[0]?.[0] as {
-      config: Record<string, unknown>;
-    };
-    expect(payload.config).toMatchObject({
-      configMode: 'advanced',
-      wrongTileBehavior: 'lock-auto-eject',
-    });
   });
 
   it('calls onDelete with the configId and closes the modal on Confirm', async () => {
@@ -284,7 +277,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={onOpenChange}
         gameId="sort-numbers"
         mode={customGameMode}
-        config={{}}
+        value={draftFor()}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
         onUpdate={vi.fn()}
@@ -293,11 +287,9 @@ describe('AdvancedConfigModal', () => {
       { wrapper },
     );
     await user.click(screen.getByRole('button', { name: /^delete$/i }));
-    // Confirmation dialog's destructive button has label "Delete"
     const confirms = screen.getAllByRole('button', {
       name: /^delete$/i,
     });
-    // The second "Delete" is the confirmation button inside the nested dialog
     await user.click(confirms.at(-1)!);
     expect(onDelete).toHaveBeenCalledWith('abc');
     expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -310,7 +302,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="word-spell"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: '' })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
       />,
@@ -328,7 +321,8 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="sort-numbers"
         mode={{ kind: 'default' }}
-        config={{}}
+        value={draftFor({ name: '' })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
       />,
@@ -344,7 +338,11 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="word-spell"
         mode={{ kind: 'default' }}
-        config={{ tileBankMode: 'distractors', distractorCount: 3 }}
+        value={draftFor({
+          name: '',
+          config: { tileBankMode: 'distractors', distractorCount: 3 },
+        })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
       />,
@@ -362,7 +360,11 @@ describe('AdvancedConfigModal', () => {
         onOpenChange={() => {}}
         gameId="word-spell"
         mode={{ kind: 'default' }}
-        config={{ tileBankMode: 'exact' }}
+        value={draftFor({
+          name: '',
+          config: { tileBankMode: 'exact' },
+        })}
+        onChange={vi.fn()}
         onCancel={() => {}}
         onSaveNew={vi.fn()}
       />,

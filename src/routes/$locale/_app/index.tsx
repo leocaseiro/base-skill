@@ -5,8 +5,8 @@ import {
 } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import type { CustomGameDoc } from '@/db/schemas/custom_games';
-import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
@@ -26,14 +26,8 @@ type ModalState =
       gameId: string;
       mode:
         | { kind: 'default' }
-        | {
-            kind: 'customGame';
-            configId: string;
-            name: string;
-            color: GameColorKey;
-            cover: Cover | undefined;
-          };
-      config: Record<string, unknown>;
+        | { kind: 'customGame'; configId: string };
+      draft: Draft;
     };
 
 const HomeScreen = (): JSX.Element => {
@@ -70,7 +64,12 @@ const HomeScreen = (): JSX.Element => {
       kind: 'open',
       gameId,
       mode: { kind: 'default' },
-      config: lastDoc?.config ?? {},
+      draft: {
+        config: lastDoc?.config ?? {},
+        name: '',
+        color: 'indigo',
+        cover: undefined,
+      },
     });
   };
 
@@ -78,14 +77,13 @@ const HomeScreen = (): JSX.Element => {
     setModal({
       kind: 'open',
       gameId,
-      mode: {
-        kind: 'customGame',
-        configId: doc.id,
+      mode: { kind: 'customGame', configId: doc.id },
+      draft: {
+        config: doc.config,
         name: doc.name,
         color: doc.color as GameColorKey,
         cover: doc.cover,
       },
-      config: doc.config,
     });
   };
 
@@ -150,7 +148,14 @@ const HomeScreen = (): JSX.Element => {
           }}
           gameId={modal.gameId}
           mode={modal.mode}
-          config={modal.config}
+          value={modal.draft}
+          onChange={(patch) =>
+            setModal((prev) =>
+              prev.kind === 'open'
+                ? { ...prev, draft: { ...prev.draft, ...patch } }
+                : prev,
+            )
+          }
           existingCustomGameNames={customGames
             .filter((d) => d.gameId === modal.gameId)
             .map((d) => d.name)}
