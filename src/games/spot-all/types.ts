@@ -1,22 +1,18 @@
+import type { SpotAllVisualVariation } from './visual-variation/pick-variation';
 import type { RelationshipType } from '@/data/confusables/types';
 import type { ConfigField } from '@/lib/config-fields';
+import type { CssTransform } from '@/lib/distractors/types';
 
-export type SpotAllSimpleConfig = {
-  configMode: 'simple';
-  difficulty: 'easy' | 'medium' | 'hard';
-};
-
-export interface SpotAllVisualVariation {
-  fontFamily: string;
-  fontSizePx: number;
-  color: string;
+export interface SelectedConfusablePair {
+  pair: [string, string];
+  type: RelationshipType;
 }
 
 export interface SpotAllTile {
   id: string;
   label: string;
   isCorrect: boolean;
-  transform?: string;
+  transform?: CssTransform;
   visualVariation?: SpotAllVisualVariation;
 }
 
@@ -30,14 +26,21 @@ export interface SpotAllConfig {
   gameId: 'spot-all';
   component: 'SpotAll';
   configMode?: 'simple' | 'advanced';
-  totalRounds: number;
-  roundsInOrder?: boolean;
-  ttsEnabled: boolean;
-  targetSetIds: string[];
-  relationshipTypes: RelationshipType[];
+  selectedConfusablePairs: SelectedConfusablePair[];
+  selectedReversibleChars: string[];
   correctTileCount: number;
   distractorCount: number;
+  totalRounds: number;
   visualVariationEnabled: boolean;
+  enabledFontIds: string[];
+  roundsInOrder: boolean;
+  ttsEnabled: boolean;
+}
+
+export interface SpotAllSimpleConfig {
+  configMode: 'simple';
+  selectedConfusablePairs: SelectedConfusablePair[];
+  selectedReversibleChars: string[];
 }
 
 export const spotAllConfigFields: ConfigField[] = [
@@ -67,4 +70,6 @@ export const spotAllConfigFields: ConfigField[] = [
     key: 'visualVariationEnabled',
     label: 'Visual variation',
   },
+  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
 ];

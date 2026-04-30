@@ -1,23 +1,26 @@
 import type { SpotAllRound, SpotAllTile } from './types';
 
 export type SpotAllPhase = 'playing' | 'round-complete' | 'game-over';
-export type SpotAllFeedback = 'none' | 'correct' | 'incorrect';
 
 export interface SpotAllState {
   rounds: SpotAllRound[];
   roundIndex: number;
   tiles: SpotAllTile[];
   selectedIds: Set<string>;
+  wrongCooldownIds: Set<string>;
   phase: SpotAllPhase;
-  feedback: SpotAllFeedback;
+  retryCount: number;
 }
 
 export type SpotAllAction =
   | { type: 'INIT_ROUNDS'; rounds: SpotAllRound[] }
-  | { type: 'TOGGLE_TILE'; tileId: string }
-  | { type: 'SUBMIT' }
+  | { type: 'TAP_TILE'; tileId: string }
+  | { type: 'CLEAR_WRONG_COOLDOWN'; tileId: string }
   | { type: 'ADVANCE_ROUND' }
   | { type: 'COMPLETE_GAME' };
+
+export const WRONG_COOLDOWN_MS = 600;
+export const ROUND_ADVANCE_MS = 750;
 
 export const createInitialSpotAllState = (
   rounds: SpotAllRound[],
@@ -26,30 +29,10 @@ export const createInitialSpotAllState = (
   roundIndex: 0,
   tiles: rounds[0]?.tiles ?? [],
   selectedIds: new Set<string>(),
+  wrongCooldownIds: new Set<string>(),
   phase: 'playing',
-  feedback: 'none',
+  retryCount: 0,
 });
-
-const evaluateSelection = (state: SpotAllState): SpotAllState => {
-  const correctIds = new Set(
-    state.tiles.filter((tile) => tile.isCorrect).map((tile) => tile.id),
-  );
-  if (correctIds.size === 0 || state.selectedIds.size === 0) {
-    return { ...state, feedback: 'incorrect', phase: 'playing' };
-  }
-
-  if (state.selectedIds.size !== correctIds.size) {
-    return { ...state, feedback: 'incorrect', phase: 'playing' };
-  }
-
-  for (const selectedId of state.selectedIds) {
-    if (!correctIds.has(selectedId)) {
-      return { ...state, feedback: 'incorrect', phase: 'playing' };
-    }
-  }
-
-  return { ...state, feedback: 'correct', phase: 'round-complete' };
-};
 
 export const spotAllReducer = (
   state: SpotAllState,
@@ -59,51 +42,64 @@ export const spotAllReducer = (
     case 'INIT_ROUNDS': {
       return createInitialSpotAllState(action.rounds);
     }
-    case 'TOGGLE_TILE': {
-      if (state.phase === 'game-over') return state;
-      const nextSelected = new Set(state.selectedIds);
-      if (nextSelected.has(action.tileId)) {
-        nextSelected.delete(action.tileId);
-      } else {
-        nextSelected.add(action.tileId);
+    case 'TAP_TILE': {
+      if (state.phase !== 'playing') return state;
+      if (state.wrongCooldownIds.has(action.tileId)) return state;
+
+      const tile = state.tiles.find((t) => t.id === action.tileId);
+      if (!tile) return state;
+
+      if (tile.isCorrect && state.selectedIds.has(action.tileId)) {
+        const next = new Set(state.selectedIds);
+        next.delete(action.tileId);
+        return { ...state, selectedIds: next };
       }
+
+      if (tile.isCorrect) {
+        const next = new Set(state.selectedIds);
+        next.add(action.tileId);
+        const allCorrect = state.tiles
+          .filter((t) => t.isCorrect)
+          .every((t) => next.has(t.id));
+        return {
+          ...state,
+          selectedIds: next,
+          phase: allCorrect ? 'round-complete' : 'playing',
+        };
+      }
+
+      const cooldown = new Set(state.wrongCooldownIds);
+      cooldown.add(action.tileId);
       return {
         ...state,
-        selectedIds: nextSelected,
-        feedback: 'none',
-        phase: 'playing',
+        wrongCooldownIds: cooldown,
+        retryCount: state.retryCount + 1,
       };
     }
-    case 'SUBMIT': {
-      if (state.phase === 'game-over') return state;
-      return evaluateSelection(state);
+    case 'CLEAR_WRONG_COOLDOWN': {
+      if (!state.wrongCooldownIds.has(action.tileId)) return state;
+      const next = new Set(state.wrongCooldownIds);
+      next.delete(action.tileId);
+      return { ...state, wrongCooldownIds: next };
     }
     case 'ADVANCE_ROUND': {
       if (state.phase !== 'round-complete') return state;
-      const nextRoundIndex = state.roundIndex + 1;
-      const nextRound = state.rounds[nextRoundIndex];
+      const nextIndex = state.roundIndex + 1;
+      const nextRound = state.rounds[nextIndex];
       if (!nextRound) {
-        return {
-          ...state,
-          phase: 'game-over',
-          feedback: 'none',
-          selectedIds: new Set<string>(),
-        };
+        return { ...state, phase: 'game-over' };
       }
       return {
         ...state,
-        roundIndex: nextRoundIndex,
+        roundIndex: nextIndex,
         tiles: nextRound.tiles,
         selectedIds: new Set<string>(),
+        wrongCooldownIds: new Set<string>(),
         phase: 'playing',
-        feedback: 'none',
       };
     }
     case 'COMPLETE_GAME': {
-      return {
-        ...state,
-        phase: 'game-over',
-      };
+      return { ...state, phase: 'game-over' };
     }
     default: {
       return state;

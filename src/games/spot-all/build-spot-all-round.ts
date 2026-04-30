@@ -1,170 +1,82 @@
 import { nanoid } from 'nanoid';
-import type {
-  SpotAllConfig,
-  SpotAllRound,
-  SpotAllTile,
-  SpotAllVisualVariation,
-} from './types';
-import type { RelationshipType } from '@/data/confusables/types';
-import { getAllSets } from '@/data/confusables/query';
+import { pickVariation } from './visual-variation/pick-variation';
+import type { SpotAllConfig, SpotAllRound, SpotAllTile } from './types';
+import type { DistractorSourceContext } from '@/lib/distractors/types';
+import { composeDistractors } from '@/lib/distractors/compose';
+import { listSources } from '@/lib/distractors/registry';
 
-type BuildSpotAllRoundOptions = SpotAllConfig & {
+export interface BuildSpotAllRoundOptions {
+  rng?: () => number;
   forceTarget?: string;
-};
+}
 
-type DistractorCandidate = {
-  label: string;
-  relationshipType: RelationshipType;
-};
+const pickTarget = (
+  config: SpotAllConfig,
+  rng: () => number,
+  forceTarget?: string,
+): string => {
+  if (forceTarget) return forceTarget;
 
-const FALLBACK_DISTRACTORS = [
-  'A',
-  'B',
-  'C',
-  'D',
-  'E',
-  'F',
-  'G',
-  'H',
-  'J',
-  'K',
-];
-
-const VISUAL_VARIATIONS: readonly SpotAllVisualVariation[] = [
-  { fontFamily: 'serif', fontSizePx: 42, color: '#2563eb' },
-  { fontFamily: 'monospace', fontSizePx: 48, color: '#dc2626' },
-  { fontFamily: 'sans-serif', fontSizePx: 44, color: '#059669' },
-  { fontFamily: 'cursive', fontSizePx: 46, color: '#7c3aed' },
-  { fontFamily: 'system-ui', fontSizePx: 40, color: '#ea580c' },
-];
-
-const transformForType = (
-  type: RelationshipType,
-): string | undefined => {
-  switch (type) {
-    case 'mirror-horizontal': {
-      return 'scaleX(-1)';
-    }
-    case 'mirror-vertical': {
-      return 'scaleY(-1)';
-    }
-    case 'rotation-180': {
-      return 'rotate(180deg)';
-    }
-    default: {
-      return undefined;
-    }
-  }
-};
-
-const shuffle = <T>(items: T[]): T[] => {
-  const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j]!, copy[i]!];
-  }
-  return copy;
-};
-
-const pickTarget = (config: BuildSpotAllRoundOptions): string => {
-  if (config.forceTarget) return config.forceTarget;
-
-  const sets = getAllSets().filter(
-    (set) =>
-      config.targetSetIds.length === 0 ||
-      config.targetSetIds.includes(set.id),
+  const pairChars = config.selectedConfusablePairs.flatMap(
+    (p) => p.pair,
   );
-  const members = sets.flatMap((set) => set.members);
-  if (members.length === 0) return 'b';
-  return members[Math.floor(Math.random() * members.length)]!;
-};
-
-const gatherDistractorCandidates = (
-  target: string,
-  config: BuildSpotAllRoundOptions,
-): DistractorCandidate[] => {
-  const filteredSets = getAllSets().filter(
-    (set) =>
-      set.members.includes(target) &&
-      (config.targetSetIds.length === 0 ||
-        config.targetSetIds.includes(set.id)),
-  );
-
-  const out: DistractorCandidate[] = [];
-  for (const set of filteredSets) {
-    for (const relationship of set.relationships) {
-      if (!config.relationshipTypes.includes(relationship.type))
-        continue;
-
-      const [left, right] = relationship.pair;
-      if (left === target) {
-        out.push({
-          label: right,
-          relationshipType: relationship.type,
-        });
-      } else if (right === target) {
-        out.push({
-          label: left,
-          relationshipType: relationship.type,
-        });
-      }
-    }
-  }
-
-  const dedup = new Map<string, DistractorCandidate>();
-  for (const candidate of out) {
-    if (!dedup.has(candidate.label))
-      dedup.set(candidate.label, candidate);
-  }
-  return [...dedup.values()];
+  const reversibleChars = config.selectedReversibleChars;
+  const pool = [...new Set([...pairChars, ...reversibleChars])];
+  if (pool.length === 0) return 'b';
+  return pool[Math.floor(rng() * pool.length)]!;
 };
 
 export const buildSpotAllRound = (
-  config: BuildSpotAllRoundOptions,
+  config: SpotAllConfig,
+  options: BuildSpotAllRoundOptions = {},
 ): SpotAllRound => {
-  const target = pickTarget(config);
-  const candidates = gatherDistractorCandidates(target, config);
+  const rng = options.rng ?? Math.random;
+  const target = pickTarget(config, rng, options.forceTarget);
 
-  const distractorCount =
-    candidates.length > 0
-      ? Math.min(config.distractorCount, candidates.length)
-      : config.distractorCount;
+  const ctx: DistractorSourceContext = {
+    selectedConfusablePairs: config.selectedConfusablePairs,
+    selectedReversibleChars: config.selectedReversibleChars,
+  };
 
-  const distractorTiles: SpotAllTile[] =
-    candidates.length > 0
-      ? shuffle(candidates)
-          .slice(0, distractorCount)
-          .map((candidate) => ({
-            id: nanoid(),
-            label: candidate.label,
-            isCorrect: false,
-            transform: transformForType(candidate.relationshipType),
-          }))
-      : shuffle(FALLBACK_DISTRACTORS)
-          .filter((symbol) => symbol !== target)
-          .slice(0, distractorCount)
-          .map((label) => ({
-            id: nanoid(),
-            label,
-            isCorrect: false,
-          }));
+  const candidates = composeDistractors(
+    listSources(),
+    target,
+    ctx,
+    config.distractorCount,
+    rng,
+  );
+
+  const distractorTiles: SpotAllTile[] = candidates.map((c) => ({
+    id: nanoid(),
+    label: c.label,
+    isCorrect: false,
+    transform: c.transform,
+    visualVariation: config.visualVariationEnabled
+      ? pickVariation(rng, config.enabledFontIds)
+      : undefined,
+  }));
 
   const correctTiles: SpotAllTile[] = Array.from(
     { length: config.correctTileCount },
-    (_, index) => ({
+    () => ({
       id: nanoid(),
       label: target,
       isCorrect: true,
       visualVariation: config.visualVariationEnabled
-        ? VISUAL_VARIATIONS[index % VISUAL_VARIATIONS.length]
+        ? pickVariation(rng, config.enabledFontIds)
         : undefined,
     }),
   );
 
-  const tiles = shuffle([...correctTiles, ...distractorTiles]);
-  return {
-    target,
-    tiles,
-    correctCount: correctTiles.length,
-  };
+  const tiles = shuffle([...correctTiles, ...distractorTiles], rng);
+  return { target, tiles, correctCount: correctTiles.length };
+};
+
+const shuffle = <T>(items: T[], rng: () => number): T[] => {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
 };
