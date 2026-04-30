@@ -72,7 +72,14 @@ export const SpotAllConfigForm = ({
       selectedConfusablePairs: nextPairs,
       selectedReversibleChars: nextReversibles,
     });
-    onChange({ ...current, ...resolved });
+    // resolved provides defaults; current overrides with any user-customised
+    // advanced fields (correctTileCount, distractorCount, totalRounds, etc.)
+    onChange({
+      ...resolved,
+      ...current,
+      selectedConfusablePairs: nextPairs,
+      selectedReversibleChars: nextReversibles,
+    });
   };
 
   const toggleChip = (chip: ConfusableGroupChip): void => {
