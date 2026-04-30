@@ -9,6 +9,7 @@ import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import { shuffleAvoidingOrder } from '@/lib/shuffle.js';
 
 export function buildDistractorPool(
   sequence: number[],
@@ -86,16 +87,16 @@ export function buildSortRound(
       ]
     : [...numbers];
 
-  // Shuffle tiles (Fisher-Yates)
-  for (let i = allNumbers.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [allNumbers[i], allNumbers[j]] = [allNumbers[j]!, allNumbers[i]!];
-  }
+  const correctOrderStrings = sorted.map(String);
+  const shuffledNumbers = shuffleAvoidingOrder(
+    allNumbers.map(String),
+    correctOrderStrings,
+  );
 
-  const tiles: TileItem[] = allNumbers.map((n) => ({
+  const tiles: TileItem[] = shuffledNumbers.map((n) => ({
     id: nanoid(),
-    label: String(n),
-    value: String(n),
+    label: n,
+    value: n,
   }));
 
   return { tiles, zones };
