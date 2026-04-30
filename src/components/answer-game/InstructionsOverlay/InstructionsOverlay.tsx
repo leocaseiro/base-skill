@@ -228,7 +228,7 @@ export const InstructionsOverlay = ({
       onStart();
       return;
     }
-    if (customGameId && onUpdateCustomGame) {
+    if (customGameId && customGameName && onUpdateCustomGame) {
       setPlayPromptError(null);
       setCustomPlayPromptOpen(true);
       return;

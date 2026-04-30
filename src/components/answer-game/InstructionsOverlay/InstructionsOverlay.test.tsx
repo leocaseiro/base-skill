@@ -531,5 +531,40 @@ describe.each([
         screen.queryByRole('button', { name: /update/i }),
       ).toBeNull();
     });
+
+    it('dirty + custom-game: Update error shows banner and does not start', async () => {
+      const user = userEvent.setup();
+      const onUpdateCustomGame = vi
+        .fn()
+        .mockRejectedValue(new Error('boom'));
+      const onStart = vi.fn();
+      const Harness = (): JSX.Element => {
+        const [config, setConfig] =
+          useState<Record<string, unknown>>(initialConfig);
+        return (
+          <InstructionsOverlay
+            {...baseProps({
+              gameId,
+              config,
+              customGameId: 'cg1',
+              customGameName: 'Custom A',
+              onConfigChange: setConfig,
+              onUpdateCustomGame,
+              onStart,
+            })}
+          />
+        );
+      };
+      render(<Harness />, { wrapper });
+      await applySimpleEdit(user, gameId, simpleEdit);
+      await user.click(
+        screen.getByRole('button', { name: /let's go/i }),
+      );
+      await user.click(
+        screen.getByRole('button', { name: /update "custom a"/i }),
+      );
+      expect(await screen.findByRole('alert')).toBeInTheDocument();
+      expect(onStart).not.toHaveBeenCalled();
+    });
   },
 );
