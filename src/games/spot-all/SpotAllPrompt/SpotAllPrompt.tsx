@@ -1,15 +1,18 @@
+import { useTranslation } from 'react-i18next';
 import type { JSX } from 'react';
+import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 
 export const SpotAllPrompt = ({
   target,
 }: {
   target: string;
-}): JSX.Element => (
-  <p className="text-center text-2xl font-semibold text-foreground">
-    Select all the{' '}
-    <span className="rounded bg-primary/10 px-2 py-1 font-bold text-primary">
-      {target}
-    </span>{' '}
-    tiles
-  </p>
-);
+}): JSX.Element => {
+  const { t } = useTranslation();
+  const prompt = t('spot-all-ui.prompt', { target });
+  return (
+    <p className="text-center text-2xl font-semibold text-foreground">
+      {prompt}
+      <AudioButton prompt={prompt} />
+    </p>
+  );
+};
