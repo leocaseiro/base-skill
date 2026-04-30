@@ -43,6 +43,40 @@ describe('isPlayableConfig — word-spell', () => {
       }),
     ).toBe(true);
   });
+
+  it('returns true for advanced default configs that supply a library source', () => {
+    expect(
+      isPlayableConfig('word-spell', {
+        mode: 'recall',
+        source: {
+          type: 'word-library',
+          filter: { region: 'aus', graphemesRequired: [] },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('returns true for advanced configs with explicit rounds', () => {
+    expect(
+      isPlayableConfig('word-spell', {
+        mode: 'recall',
+        rounds: [{ word: 'cat' }],
+      }),
+    ).toBe(true);
+  });
+
+  it('returns false when selectedUnits is explicitly empty (user cleared chips)', () => {
+    expect(
+      isPlayableConfig('word-spell', {
+        mode: 'recall',
+        selectedUnits: [],
+        source: {
+          type: 'word-library',
+          filter: { region: 'aus' },
+        },
+      }),
+    ).toBe(false);
+  });
 });
 
 describe('isPlayableConfig — non-word-spell games', () => {
