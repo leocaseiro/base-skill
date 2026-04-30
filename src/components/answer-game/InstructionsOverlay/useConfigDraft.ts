@@ -10,7 +10,8 @@ export type Draft = {
   cover: Cover | undefined;
 };
 
-type Meta = {
+// config is owned by the parent; only name/color/cover live in state
+type LocalMeta = {
   name: string;
   color: GameColorKey;
   cover: Cover | undefined;
@@ -53,7 +54,7 @@ export const useConfigDraft = (
     identity,
   } = input;
 
-  const [meta, setMeta] = useState<Meta>({
+  const [meta, setMeta] = useState<LocalMeta>({
     name: initialName,
     color: initialColor,
     cover: initialCover,
@@ -125,15 +126,11 @@ export const useConfigDraft = (
     if (patch.config !== undefined) {
       latestRef.current.onConfigChange(patch.config);
     }
-    if (
-      patch.name !== undefined ||
-      patch.color !== undefined ||
-      patch.cover !== undefined
-    ) {
+    if ('name' in patch || 'color' in patch || 'cover' in patch) {
       setMeta((prev) => ({
         name: patch.name ?? prev.name,
         color: patch.color ?? prev.color,
-        cover: patch.cover === undefined ? prev.cover : patch.cover,
+        cover: 'cover' in patch ? patch.cover : prev.cover,
       }));
     }
   };
