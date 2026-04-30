@@ -39,7 +39,7 @@ export const SpotAllConfigForm = ({
   config: Record<string, unknown>;
   onChange: (config: Record<string, unknown>) => void;
 }): JSX.Element => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('games');
   const current = config as FormConfig;
   const selectedPairs = current.selectedConfusablePairs ?? [];
   const selectedReversibles = current.selectedReversibleChars ?? [];
