@@ -1,1 +1,0 @@
-import{j as s}from"./main-DYlfjFna.js";const o=()=>s.jsxs("div",{className:"p-8",children:[s.jsx("h1",{className:"text-2xl font-bold",children:"Session History"}),s.jsx("p",{className:"mt-2 text-muted-foreground",children:"Review past learning sessions."})]});export{o as component};
