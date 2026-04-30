@@ -95,6 +95,22 @@ describe('WordSpellSimpleConfigForm Picture toggle', () => {
     expect(sChip).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('does not show any level chips as selected while Picture is active, even if config.selectedUnits is stale', () => {
+    // Simulates the legacy advanced <select> writing mode='picture' while
+    // selectedUnits stays populated (e.g. user came from recall and only
+    // changed mode via the dropdown). Display must follow mode, not data.
+    render(<Harness initial={L1} initialMode="picture" />);
+    expect(
+      screen.getByRole('button', { name: /^picture/i }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      screen.getByRole('button', { name: /^s \/s\/$/ }),
+    ).toHaveAttribute('aria-pressed', 'false');
+    expect(
+      screen.getByRole('button', { name: /^t \/t\/$/ }),
+    ).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('toggling Picture off (back to recall) defaults the selection to Level 1', async () => {
     const user = userEvent.setup();
     render(<Harness initial={[]} initialMode="picture" />);

@@ -26,10 +26,15 @@ const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 const readSelected = (
   config: Record<string, unknown>,
 ): LevelGraphemeUnit[] => {
+  // Picture mode has no level scope. Always display an empty selection
+  // regardless of what selectedUnits the data layer carries — that way
+  // toggling mode through the legacy advanced <select> (which only writes
+  // config.mode) doesn't leave levels highlighted underneath the Picture
+  // toggle, or vice versa.
+  if (config.mode === 'picture') return [];
   const raw = config.selectedUnits;
-  return Array.isArray(raw)
-    ? (raw as LevelGraphemeUnit[])
-    : defaultSelection();
+  if (Array.isArray(raw)) return raw as LevelGraphemeUnit[];
+  return defaultSelection();
 };
 
 const readRegion = (config: Record<string, unknown>): Region =>
