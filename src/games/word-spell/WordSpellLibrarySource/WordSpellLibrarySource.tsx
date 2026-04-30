@@ -7,6 +7,7 @@ import {
 } from '../level-unit-selection';
 import { resolveSimpleConfig } from '../resolve-simple-config';
 import { WordPreviewBar } from '../WordPreviewBar/WordPreviewBar';
+import type { WordSpellConfig } from '../types';
 import type {
   LevelGraphemeUnit,
   Region,
@@ -33,6 +34,16 @@ const readSelected = (
 
 const readRegion = (config: Record<string, unknown>): Region =>
   typeof config.region === 'string' ? (config.region as Region) : 'aus';
+
+const readMode = (
+  config: Record<string, unknown>,
+): WordSpellConfig['mode'] | undefined => {
+  const raw = config.mode;
+  if (raw === 'picture' || raw === 'recall' || raw === 'sentence-gap') {
+    return raw;
+  }
+  return undefined;
+};
 
 const maxLevelOf = (units: readonly LevelGraphemeUnit[]): number => {
   if (units.length === 0) return 1;
@@ -106,6 +117,32 @@ const headerBgClass = (
     }
   }
 };
+
+const PictureRow = ({
+  active,
+  onClick,
+}: {
+  active: boolean;
+  onClick: () => void;
+}): JSX.Element => (
+  <div className="flex flex-col gap-2">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex items-center justify-between rounded-md px-3 py-2 text-sm font-semibold ${
+        active
+          ? 'bg-primary text-primary-foreground'
+          : 'bg-muted text-foreground'
+      }`}
+    >
+      <span>Picture</span>
+      <span className="text-xs font-normal" aria-hidden="true">
+        🖼️ image-prompted words
+      </span>
+    </button>
+  </div>
+);
 
 const LevelRow = ({
   level,
@@ -198,11 +235,28 @@ export const WordSpellLibrarySource = ({
 }: Props): JSX.Element => {
   const selected = readSelected(config);
   const region = readRegion(config);
-  const invalid = selected.length === 0;
+  const mode = readMode(config);
+  const pictureMode = mode === 'picture';
+  const invalid = !pictureMode && selected.length === 0;
   const maxLevel = maxLevelOf(selected);
 
+  // Any level/chip toggle implies recall mode — picture mode has no level scope
+  // and switching back to recall via a level click should also commit the user's
+  // intended level selection in one step.
   const setSelected = (next: LevelGraphemeUnit[]) => {
-    onChange({ ...config, selectedUnits: next });
+    onChange({ ...config, selectedUnits: next, mode: 'recall' });
+  };
+
+  const togglePicture = () => {
+    if (pictureMode) {
+      onChange({
+        ...config,
+        mode: 'recall',
+        selectedUnits: defaultSelection(),
+      });
+      return;
+    }
+    onChange({ ...config, mode: 'picture', selectedUnits: [] });
   };
 
   return (
@@ -210,6 +264,7 @@ export const WordSpellLibrarySource = ({
       className="flex flex-col gap-4"
       data-invalid={invalid ? 'true' : 'false'}
     >
+      <PictureRow active={pictureMode} onClick={togglePicture} />
       {LEVELS.map((n) => (
         <LevelRow
           key={n}

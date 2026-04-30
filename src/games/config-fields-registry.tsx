@@ -72,3 +72,20 @@ export const getAdvancedHeaderRenderer = (
     }
   }
 };
+
+/**
+ * True when the config is sufficient to start play. Validation is per-game so
+ * unrelated games can't gate each other. Today only word-spell guards against
+ * empty-level recall configs; other games are always valid.
+ */
+export const isPlayableConfig = (
+  gameId: string,
+  config: Record<string, unknown>,
+): boolean => {
+  if (gameId !== 'word-spell') return true;
+  if (config.mode === 'picture' || config.mode === 'sentence-gap') {
+    return true;
+  }
+  const units = config.selectedUnits;
+  return Array.isArray(units) && units.length > 0;
+};

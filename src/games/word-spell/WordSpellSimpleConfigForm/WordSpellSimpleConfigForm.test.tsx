@@ -11,14 +11,17 @@ const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
 
 const Harness = ({
   initial,
+  initialMode,
 }: {
   initial: LevelGraphemeUnit[];
+  initialMode?: 'picture' | 'recall';
 }): JSX.Element => {
   const [config, setConfig] = useState<Record<string, unknown>>({
     configMode: 'simple',
     selectedUnits: initial,
     region: 'aus',
     inputMethod: 'drag',
+    ...(initialMode ? { mode: initialMode } : {}),
   });
   return (
     <WordSpellSimpleConfigForm config={config} onChange={setConfig} />
@@ -36,11 +39,20 @@ describe('WordSpellSimpleConfigForm', () => {
     ).toBeInTheDocument();
   });
 
-  it('flags data-invalid when selectedUnits is empty', () => {
+  it('flags data-invalid when selectedUnits is empty and mode is not picture', () => {
     const { container } = render(<Harness initial={[]} />);
     expect(
       container.firstElementChild?.firstElementChild,
     ).toHaveAttribute('data-invalid', 'true');
+  });
+
+  it('is valid when no levels are selected but picture mode is active', () => {
+    const { container } = render(
+      <Harness initial={[]} initialMode="picture" />,
+    );
+    expect(
+      container.firstElementChild?.firstElementChild,
+    ).toHaveAttribute('data-invalid', 'false');
   });
 
   it('marks aria-pressed=true after tapping a chip', async () => {
@@ -49,5 +61,52 @@ describe('WordSpellSimpleConfigForm', () => {
     const chip = screen.getByRole('button', { name: /m \/m\//i });
     await user.click(chip);
     expect(chip).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('WordSpellSimpleConfigForm Picture toggle', () => {
+  it('renders the Picture toggle button', () => {
+    render(<Harness initial={L1} />);
+    expect(
+      screen.getByRole('button', { name: /^picture/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('clicking Picture clears level chips and pressing it switches mode', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={L1} />);
+    const sChip = screen.getByRole('button', { name: /^s \/s\/$/ });
+    expect(sChip).toHaveAttribute('aria-pressed', 'true');
+    const picture = screen.getByRole('button', { name: /^picture/i });
+    await user.click(picture);
+    expect(picture).toHaveAttribute('aria-pressed', 'true');
+    // The Level 1 's' chip should be off after selecting Picture.
+    expect(sChip).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('clicking a level chip while Picture is active switches back to recall', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={[]} initialMode="picture" />);
+    const picture = screen.getByRole('button', { name: /^picture/i });
+    expect(picture).toHaveAttribute('aria-pressed', 'true');
+    const sChip = screen.getByRole('button', { name: /^s \/s\/$/ });
+    await user.click(sChip);
+    expect(picture).toHaveAttribute('aria-pressed', 'false');
+    expect(sChip).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('toggling Picture off (back to recall) defaults the selection to Level 1', async () => {
+    const user = userEvent.setup();
+    render(<Harness initial={[]} initialMode="picture" />);
+    const picture = screen.getByRole('button', { name: /^picture/i });
+    await user.click(picture);
+    expect(picture).toHaveAttribute('aria-pressed', 'false');
+    // Sample a couple of Level 1 chips to confirm the L1 default kicked in.
+    expect(
+      screen.getByRole('button', { name: /^s \/s\/$/ }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      screen.getByRole('button', { name: /^t \/t\/$/ }),
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 });
