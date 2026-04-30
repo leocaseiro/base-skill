@@ -11,6 +11,12 @@ export type WordSpellSimpleConfig = {
   selectedUnits: LevelGraphemeUnit[];
   region: Region;
   inputMethod: 'drag' | 'type' | 'both';
+  /**
+   * Simple form supports two kid-friendly modes:
+   *  - 'recall': pick one or more level grapheme units; word library filtered to that scope
+   *  - 'picture': image-prompted rounds, no level selection required
+   */
+  mode?: 'picture' | 'recall';
 };
 
 export interface GapDefinition {

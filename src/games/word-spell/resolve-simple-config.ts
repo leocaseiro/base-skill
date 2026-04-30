@@ -56,17 +56,23 @@ export const resolveSimpleConfig = (
     : unitsFromLegacy(raw);
   const region =
     typeof raw.region === 'string' ? (raw.region as 'aus') : 'aus';
+  const mode: 'picture' | 'recall' =
+    simple.mode === 'picture' ? 'picture' : 'recall';
 
-  const maxLevel = maxLevelOf(units);
+  // Picture mode rounds use cumulative graphemes from every level so the
+  // image-prompted word pool is as broad as possible without a required-grapheme
+  // gate forcing irrelevant level selections.
+  const maxLevel = mode === 'picture' ? 8 : maxLevelOf(units);
   const graphemesAllowed = cumulativeGraphemes(maxLevel);
-  const graphemesRequired = uniqueGraphemePairs(units);
+  const graphemesRequired =
+    mode === 'picture' ? [] : uniqueGraphemePairs(units);
 
   return {
     gameId: 'word-spell',
     component: 'WordSpell',
     configMode: 'simple',
     selectedUnits: units,
-    mode: 'recall',
+    mode,
     tileUnit: 'letter',
     inputMethod: simple.inputMethod,
     wrongTileBehavior: 'lock-manual',
@@ -90,6 +96,8 @@ export const advancedToSimple = (
 ): WordSpellSimpleConfig => {
   const filter = config.source?.filter;
   const region = filter?.region ?? 'aus';
+  const mode: 'picture' | 'recall' =
+    config.mode === 'picture' ? 'picture' : 'recall';
 
   if (
     typeof filter?.level === 'number' &&
@@ -108,13 +116,15 @@ export const advancedToSimple = (
       selectedUnits: out,
       region,
       inputMethod: config.inputMethod,
+      mode,
     };
   }
 
   return {
     configMode: 'simple',
-    selectedUnits: defaultSelection(),
+    selectedUnits: mode === 'picture' ? [] : defaultSelection(),
     region,
     inputMethod: config.inputMethod,
+    mode,
   };
 };

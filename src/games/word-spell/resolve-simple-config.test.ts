@@ -21,6 +21,36 @@ describe('resolveSimpleConfig', () => {
     expect(full.source?.filter.region).toBe('aus');
   });
 
+  it('honors mode=picture from the simple config', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [],
+      region: 'aus',
+      inputMethod: 'drag',
+      mode: 'picture',
+    };
+    const full = resolveSimpleConfig(simple);
+    expect(full.mode).toBe('picture');
+  });
+
+  it('picture mode opens the filter to all levels and skips required graphemes', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [],
+      region: 'aus',
+      inputMethod: 'drag',
+      mode: 'picture',
+    };
+    const full = resolveSimpleConfig(simple);
+    const allowed = full.source?.filter.graphemesAllowed ?? [];
+    const required = full.source?.filter.graphemesRequired ?? [];
+    const hasG = (g: string) => allowed.some((u) => u.g === g);
+    // Cumulative through L8: L1's 's' AND a higher-level grapheme should be present.
+    expect(hasG('s')).toBe(true);
+    expect(hasG('sh')).toBe(true);
+    expect(required).toEqual([]);
+  });
+
   it('derives cumulative graphemesAllowed from maxLevel of selectedUnits', () => {
     const simple: WordSpellSimpleConfig = {
       configMode: 'simple',
@@ -190,5 +220,23 @@ describe('advancedToSimple', () => {
     } as WordSpellConfig;
     const simple = advancedToSimple(config);
     expect(simple.selectedUnits).toEqual(L1);
+  });
+
+  it('preserves picture mode and clears the level selection', () => {
+    const config = {
+      gameId: 'word-spell',
+      component: 'WordSpell',
+      mode: 'picture',
+      tileUnit: 'letter',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-manual',
+      ttsEnabled: true,
+      roundsInOrder: false,
+      totalRounds: 4,
+      tileBankMode: 'exact',
+    } as WordSpellConfig;
+    const simple = advancedToSimple(config);
+    expect(simple.mode).toBe('picture');
+    expect(simple.selectedUnits).toEqual([]);
   });
 });

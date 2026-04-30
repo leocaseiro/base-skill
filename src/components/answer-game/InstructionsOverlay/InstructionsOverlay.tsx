@@ -15,7 +15,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+import {
+  getSimpleConfigFormRenderer,
+  isPlayableConfig,
+} from '@/games/config-fields-registry';
 import { resolveCover } from '@/games/cover';
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
@@ -157,6 +160,7 @@ export const InstructionsOverlay = ({
   const resolvedCover = resolveCover({ cover }, gameId);
 
   const SimpleForm = getSimpleConfigFormRenderer(gameId);
+  const playable = isPlayableConfig(gameId, config);
 
   const modalMode =
     customGameId && customGameName
@@ -170,6 +174,7 @@ export const InstructionsOverlay = ({
       : ({ kind: 'default' } as const);
 
   const handlePlay = () => {
+    if (!playable) return;
     if (customGameId && customGameName && onUpdateCustomGame) {
       void (async () => {
         try {
@@ -285,7 +290,9 @@ export const InstructionsOverlay = ({
           <button
             type="button"
             onClick={handlePlay}
-            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95"
+            disabled={!playable}
+            aria-disabled={!playable}
+            className="h-14 w-full rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md active:scale-95 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
           >
             {t('instructions.lets-go')}
           </button>
