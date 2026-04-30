@@ -147,7 +147,7 @@ export const SpotAllConfigForm = ({
                     : 'border-border bg-card',
                 ].join(' ')}
               >
-                {chipLabel(chip)}
+                <ChipLabel chip={chip} />
               </button>
             ))}
           </div>
@@ -169,8 +169,31 @@ const chipKey = (chip: ConfusableGroupChip): string => {
   return `rev:${chip.char}`;
 };
 
-const chipLabel = (chip: ConfusableGroupChip): string => {
-  if (chip.kind === 'pair') return `${chip.pair[0]} ↔ ${chip.pair[1]}`;
-  if (chip.kind === 'tripleSet') return chip.members.join(', ');
-  return `${chip.char} ↔ ${chip.char}\u0304`;
+const REVERSIBLE_CSS_TRANSFORM: Record<string, string> = {
+  'mirror-horizontal': 'scaleX(-1)',
+  'mirror-vertical': 'scaleY(-1)',
+  'rotation-180': 'rotate(180deg)',
+};
+
+const ChipLabel = ({
+  chip,
+}: {
+  chip: ConfusableGroupChip;
+}): JSX.Element => {
+  if (chip.kind === 'pair')
+    return <>{`${chip.pair[0]} ↔ ${chip.pair[1]}`}</>;
+  if (chip.kind === 'tripleSet') return <>{chip.members.join(', ')}</>;
+  const cssTransform =
+    REVERSIBLE_CSS_TRANSFORM[chip.transform] ?? 'scaleX(-1)';
+  return (
+    <>
+      {chip.char} ↔{' '}
+      <span
+        style={{ display: 'inline-block', transform: cssTransform }}
+        aria-hidden="true"
+      >
+        {chip.char}
+      </span>
+    </>
+  );
 };
