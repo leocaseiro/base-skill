@@ -72,3 +72,32 @@ export const getAdvancedHeaderRenderer = (
     }
   }
 };
+
+/**
+ * True when the config is sufficient to start play. Validation is per-game so
+ * unrelated games can't gate each other.
+ *
+ * For WordSpell the only invalid shape we currently care about is "recall mode
+ * with the simple-form library source but zero selected units" — that's the
+ * state #264 explicitly wants to block. Picture / sentence-gap modes are
+ * always playable (no level scope), and any advanced config that has already
+ * resolved a library source or carries explicit rounds is also playable.
+ */
+export const isPlayableConfig = (
+  gameId: string,
+  config: Record<string, unknown>,
+): boolean => {
+  if (gameId !== 'word-spell') return true;
+  if (config.mode === 'picture' || config.mode === 'sentence-gap') {
+    return true;
+  }
+  const units = config.selectedUnits;
+  if (Array.isArray(units) && units.length > 0) return true;
+  // Empty/missing selectedUnits is only invalid for the simple-form path.
+  // Advanced configs with an already-shaped source or explicit rounds remain
+  // playable so we don't gate default game entries on every site load.
+  if (Array.isArray(units) && units.length === 0) return false;
+  if (config.source !== undefined) return true;
+  const rounds = config.rounds;
+  return Array.isArray(rounds) && rounds.length > 0;
+};
