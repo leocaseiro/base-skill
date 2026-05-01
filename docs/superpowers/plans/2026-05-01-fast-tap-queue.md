@@ -76,7 +76,7 @@ export interface GameEvaluateEvent extends BaseGameEvent {
   /** Index of the slot the tile was placed into. */
   zoneIndex: number;
   /** Expected value for the target slot — provides confusion pair for SRS. */
-  expected: string;
+  expected?: string;
 }
 ```
 
@@ -84,7 +84,7 @@ export interface GameEvaluateEvent extends BaseGameEvent {
 
 Run: `yarn typecheck`
 
-Expected: Type errors in files that emit `game:evaluate` without `expected` (useTileEvaluation.ts, possibly useDraggableTile.ts). This is expected — we fix those emits in Tasks 3 and 5.
+Expected: PASS — `expected` is optional, so existing emit sites compile without changes. Tasks 3 and 5 add the field at all emit sites for completeness.
 
 - [ ] **Step 4: Commit**
 
@@ -372,6 +372,8 @@ const placeTile = useCallback(
       playSound(correct ? 'correct' : 'wrong', 0.8);
     }
 
+    // Drag path only — tap/click rejects are handled in useDraggableTile.handleClick
+    // (placeInNextSlot pre-validates and never calls placeTile on rejection)
     if (!correct && state.config.wrongTileBehavior === 'reject') {
       dispatch({ type: 'REJECT_TAP', tileId, zoneIndex });
     } else {
@@ -452,6 +454,13 @@ This is the core fix. Changes:
 4. Drain logic removes entries the reducer has applied
 5. Clear on round transitions via `useEffect`
 6. Remove `isWrong` early-return guard (superseded by pre-validation)
+
+**UX change note:** For `lock-auto-eject` tap, wrong tiles now shake in the bank
+instead of traveling to the slot and bouncing back. This is a deliberate change:
+bank-side rejection gives faster feedback (~0ms vs ~600ms round-trip animation),
+avoids the stale-closure race entirely for wrong tiles, and reduces visual noise.
+The slot-bounce UX is preserved for drag (user chose the slot explicitly) and
+for `lock-manual` (wrong tiles still land).
 
 - [ ] **Step 1: Write failing tests**
 
@@ -593,6 +602,10 @@ describe('useAutoNextSlot', () => {
   });
 
   describe('pre-validation', () => {
+    // Both lock-auto-eject and reject return rejected:true identically here.
+    // The behavioral difference (auto-eject vs reject-dispatch) occurs only
+    // when pre-validation passes and placeTile is called — which never happens
+    // on rejection since placeInNextSlot returns early.
     it('rejects wrong tile in lock-auto-eject mode', () => {
       const Wrapper = createWrapper(gameConfig);
       const { result } = renderHook(() => useHarness(), {
@@ -749,6 +762,60 @@ describe('useAutoNextSlot', () => {
       expect(res).toEqual({ placed: true, zoneIndex: 1, rejected: false });
       expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
     });
+
+    it('treats isWrong slot with no placedTileId as available (pre-validation supersedes guard)', () => {
+      const wrongZones: AnswerZone[] = [
+        {
+          ...answerZones[0],
+          placedTileId: null,
+          isWrong: true,
+          isLocked: false,
+        },
+        answerZones[1],
+        answerZones[2],
+      ];
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tileItems, wrongZones),
+        { wrapper: Wrapper },
+      );
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t1');
+      });
+
+      expect(res).toEqual({ placed: true, zoneIndex: 0, rejected: false });
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+    });
+  });
+
+  describe('no slot available', () => {
+    it('returns placed: false, zoneIndex: -1, rejected: false when all slots full', () => {
+      const fullZones: AnswerZone[] = answerZones.map((z) => ({
+        ...z,
+        placedTileId: 'tX',
+        isLocked: true,
+      }));
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tileItems, fullZones),
+        { wrapper: Wrapper },
+      );
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t1');
+      });
+
+      expect(res).toEqual({
+        placed: false,
+        zoneIndex: -1,
+        rejected: false,
+      });
+    });
   });
 });
 ```
@@ -778,6 +845,8 @@ export interface AutoNextSlot {
   placeInNextSlot: (tileId: string) => PlaceResult;
 }
 
+// Module-scoped: shared across all hook instances on the page (single AnswerGame
+// instance assumed). For multi-instance support, lift to AnswerGameProvider context.
 let pendingPlacements: Array<{ tileId: string; zoneIndex: number }> =
   [];
 
@@ -793,7 +862,7 @@ export const useAutoNextSlot = (): AutoNextSlot => {
 
   useEffect(() => {
     clearPendingPlacements();
-  }, [roundIndex]);
+  }, [roundIndex, zones.length]);
 
   const placeInNextSlot = useCallback(
     (tileId: string): PlaceResult => {
@@ -844,7 +913,7 @@ export const useAutoNextSlot = (): AutoNextSlot => {
       }
 
       pendingPlacements.push({ tileId, zoneIndex: targetIndex });
-      placeTile(tileId, targetIndex);
+      void placeTile(tileId, targetIndex);
       return { placed: true, zoneIndex: targetIndex, rejected: false };
     },
     [
@@ -870,7 +939,17 @@ Expected: PASS
 
 Run: `npx vitest run src/components/answer-game/`
 
-Expected: PASS (some `useDraggableTile` tests may need updates due to changed `placeInNextSlot` return type — address in Task 5).
+Expected: PASS. If `useDraggableTile` tests fail because `placeInNextSlot` now returns `PlaceResult` instead of `void`, update the mock in `useDraggableTile.test.tsx` to return a default `PlaceResult`:
+
+```typescript
+const mockPlaceInNextSlot = vi.fn().mockReturnValue({
+  placed: true,
+  zoneIndex: 0,
+  rejected: false,
+});
+```
+
+Re-run and confirm PASS before proceeding.
 
 - [ ] **Step 6: Commit**
 
@@ -959,13 +1038,18 @@ beforeEach(() => {
   mockDispatch.mockClear();
   mockEmit.mockClear();
   mockTriggerShake.mockClear();
+  mockPlaceTile.mockReset();
   vi.mocked(playSound).mockClear();
+  mockWrongTileBehavior = 'lock-auto-eject';
 });
 ```
 
-Update `useAnswerGameContext` mock to include `allTiles` and zone data for pre-validation testing:
+Update `useAnswerGameContext` mock to include `allTiles`, zone data, and a
+module-scope `mockWrongTileBehavior` variable (forward-compatible with Task 6):
 
 ```typescript
+let mockWrongTileBehavior = 'lock-auto-eject';
+
 vi.mock('./useAnswerGameContext', () => ({
   useAnswerGameContext: () => ({
     config: {
@@ -973,7 +1057,7 @@ vi.mock('./useAnswerGameContext', () => ({
       ttsEnabled: true,
       totalRounds: 1,
       gameId: 'test',
-      wrongTileBehavior: 'lock-auto-eject',
+      wrongTileBehavior: mockWrongTileBehavior,
       tileBankMode: 'exact',
     },
     zones: [
@@ -1010,7 +1094,7 @@ describe('handleClick reject path', () => {
 
     // Simulate shake in progress
     const button = document.createElement('button');
-    button.classList.add('animate-shake');
+    button.dataset.shaking = 'true';
     Object.defineProperty(result.current.ref, 'current', {
       value: button,
       writable: true,
@@ -1116,21 +1200,23 @@ Replace the `handleClick` function (lines 129-132):
 
 ```typescript
 const handleClick = () => {
-  if (ref.current?.classList.contains('animate-shake')) return;
+  if (ref.current?.dataset.shaking) return;
 
   speakTile(tile.label);
   const result = placeInNextSlot(tile.id);
 
   if (result.rejected && ref.current) {
+    ref.current.dataset.shaking = 'true';
     triggerShake(ref.current);
     const el = ref.current;
-    el.style.background = 'var(--skin-wrong-bg)';
-    el.style.borderColor = 'var(--skin-wrong-border)';
+    el.style.background = 'var(--skin-wrong-bg, #f87171)';
+    el.style.borderColor = 'var(--skin-wrong-border, #ef4444)';
     el.addEventListener(
       'animationend',
       () => {
         el.style.background = '';
         el.style.borderColor = '';
+        delete el.dataset.shaking;
       },
       { once: true },
     );
@@ -1139,6 +1225,7 @@ const handleClick = () => {
       playSound('wrong', 0.8);
     }
 
+    // Tap/click path only — drag rejects are handled in useTileEvaluation.placeTile
     dispatch({
       type: 'REJECT_TAP',
       tileId: tile.id,
@@ -1207,46 +1294,9 @@ vi.mock('./useTouchDrag', () => ({
 }));
 ```
 
-Then update the `useAnswerGameContext` mock to accept a config override for
-`wrongTileBehavior`. The simplest way: change the existing mock to use a
-module-scope variable:
-
-```typescript
-let mockWrongTileBehavior = 'lock-auto-eject';
-
-vi.mock('./useAnswerGameContext', () => ({
-  useAnswerGameContext: () => ({
-    config: {
-      inputMethod: 'drag',
-      ttsEnabled: true,
-      totalRounds: 1,
-      gameId: 'test',
-      wrongTileBehavior: mockWrongTileBehavior,
-      tileBankMode: 'exact',
-    },
-    zones: [
-      {
-        id: 'z0',
-        index: 0,
-        expectedValue: 'C',
-        placedTileId: null,
-        isWrong: false,
-        isLocked: false,
-      },
-    ],
-    allTiles: [
-      { id: 't1', label: 'C', value: 'C' },
-      { id: 't2', label: 'X', value: 'X' },
-    ],
-    bankTileIds: ['t1', 't2'],
-    activeSlotIndex: 0,
-    roundIndex: 0,
-    retryCount: 0,
-    phase: 'playing',
-    dragActiveTileId: null,
-  }),
-}));
-```
+The `useAnswerGameContext` mock with `mockWrongTileBehavior` variable was already
+set up in Task 5 — no changes needed here. The `beforeEach` resets it to
+`'lock-auto-eject'`, so tests can override per-describe.
 
 Add the drag-reject test:
 
@@ -1322,8 +1372,8 @@ In `useDraggableTile.ts`, update the touch drag `onDrop` handler (lines 105-108)
           requestAnimationFrame(() => {
             if (ref.current) {
               triggerShake(ref.current);
-              ref.current.style.background = 'var(--skin-wrong-bg)';
-              ref.current.style.borderColor = 'var(--skin-wrong-border)';
+              ref.current.style.background = 'var(--skin-wrong-bg, #f87171)';
+              ref.current.style.borderColor = 'var(--skin-wrong-border, #ef4444)';
               ref.current.addEventListener(
                 'animationend',
                 () => {
@@ -1406,3 +1456,32 @@ Verify against the spec's behavior matrix:
 Run: `git push`
 
 Expected: CI passes all required checks.
+
+---
+
+## Task 8: Update architecture docs
+
+**Files:**
+
+- Modify: `src/components/answer-game/AnswerGame/AnswerGame.flows.mdx`
+
+Per CLAUDE.md: "When modifying game state logic — any file in
+`src/components/answer-game/` — update the co-located `.mdx` docs in the
+same PR."
+
+- [ ] **Step 1: Run the architecture docs skill**
+
+Run: `/update-architecture-docs`
+
+Update `AnswerGame.flows.mdx` to reflect:
+
+1. The new `REJECT_TAP` branch in the tile placement flow
+2. The pre-validation path (bank-side reject for tap/click)
+3. The `pendingPlacements` write-ahead log in the slot-targeting sequence
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/components/answer-game/AnswerGame/AnswerGame.flows.mdx
+git commit -m "docs(answer-game): update architecture docs for pre-validation and REJECT_TAP (#276)"
+```
