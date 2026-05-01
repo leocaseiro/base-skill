@@ -3,6 +3,7 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
+import { flashBankTileRejectFeedback } from './bank-tile-reject-feedback';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useAutoNextSlot } from './useAutoNextSlot';
@@ -12,7 +13,9 @@ import { useTouchDrag } from './useTouchDrag';
 import type { TileItem } from './types';
 import type { TouchDragHandlers } from './useTouchDrag';
 import type { RefObject } from 'react';
+import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
+import { resolveSkin } from '@/lib/skin';
 
 export interface DraggableTile extends TouchDragHandlers {
   ref: RefObject<HTMLButtonElement | null>;
@@ -31,6 +34,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   const { speakTile } = useGameTTS();
   const speakTileRef = useRef(speakTile);
   const { placeTile } = useTileEvaluation();
+  const skin = resolveSkin(state.config.gameId, state.config.skin);
 
   useEffect(() => {
     speakTileRef.current = speakTile;
@@ -104,7 +108,17 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
       onDrop: (droppedTileId, zoneIndex) => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-        placeTile(droppedTileId, zoneIndex);
+        const { correct } = placeTile(droppedTileId, zoneIndex);
+        if (
+          !correct &&
+          stateRef.current.config.wrongTileBehavior === 'reject'
+        ) {
+          requestAnimationFrame(() => {
+            flashBankTileRejectFeedback(droppedTileId, {
+              element: ref.current,
+            });
+          });
+        }
       },
       onDropOnBank: () =>
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
@@ -127,8 +141,46 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
     });
 
   const handleClick = () => {
+    if (ref.current?.dataset.shaking) return;
+
     speakTile(tile.label);
-    placeInNextSlot(tile.id);
+    const result = placeInNextSlot(tile.id);
+
+    const bankEl = ref.current;
+    if (result.rejected && bankEl) {
+      bankEl.dataset.shaking = 'true';
+      flashBankTileRejectFeedback(tile.id, {
+        element: bankEl,
+        onAnimationEnd: () => {
+          delete bankEl.dataset.shaking;
+        },
+      });
+
+      if (!skin.suppressDefaultSounds) {
+        playSound('wrong', 0.8);
+      }
+
+      // Tap/click path only — drag rejects are handled in useTileEvaluation.placeTile
+      dispatch({
+        type: 'REJECT_TAP',
+        tileId: tile.id,
+        zoneIndex: result.zoneIndex,
+      });
+
+      getGameEventBus().emit({
+        type: 'game:evaluate',
+        gameId: state.config.gameId,
+        sessionId: '',
+        profileId: '',
+        timestamp: Date.now(),
+        roundIndex: state.roundIndex,
+        answer: tile.id,
+        correct: false,
+        nearMiss: false,
+        zoneIndex: result.zoneIndex,
+        expected: state.zones[result.zoneIndex]?.expectedValue ?? '',
+      });
+    }
   };
 
   return {

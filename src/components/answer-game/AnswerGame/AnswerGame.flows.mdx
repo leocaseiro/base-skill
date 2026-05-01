@@ -38,6 +38,20 @@ sequenceDiagram
   end
 ```
 
+### Tap / click via `useAutoNextSlot` (ordered slots)
+
+Bank **tap** (not drag) goes through `useDraggableTile.handleClick` → `useAutoNextSlot.placeInNextSlot`:
+
+1. **`pendingPlacements`** (module-scoped write-ahead log) records `{ tileId, zoneIndex }` before React applies `PLACE_TILE`, so rapid taps see prior claims synchronously.
+2. Entries are **drained** when `zones[entry.zoneIndex].placedTileId === entry.tileId`. The queue is **cleared** on round transitions (`roundIndex` / `zones.length` changes in `useEffect`).
+3. **Pre-validation**: for `reject` and `lock-auto-eject`, wrong tiles never call `placeTile`; `handleClick` applies bank shake + wrong sound + **`REJECT_TAP`** + `game:evaluate` (with `expected`). For **`lock-manual`**, there is no bank pre-validation — wrong tiles still flow through `PLACE_TILE` into the slot.
+
+### `REJECT_TAP`
+
+Reducer increments **`retryCount`** only (no zone or bank mutation). Dispatched from **`handleClick`** on bank-side rejection, and from **`useTileEvaluation.placeTile`** for drag-drop wrong tiles when `wrongTileBehavior === 'reject'`.
+
+Wrong bank feedback (**shake + wrong colors**) uses **`flashBankTileRejectFeedback`** so the tile matches **`Slot`** wrong styling (`border-2` equivalent and **`--skin-wrong-*`** tokens). **Touch** drops invoke it from **`useDraggableTile`** (after `requestAnimationFrame`). **Pragmatic drag-and-drop** bank→slot drops invoke it from **`useSlotBehavior.handleDrop`** when `placeTile` returns incorrect in **`reject`** mode (same helper, resolved via **`data-tile-bank-hole`**).
+
 ---
 
 ## 2. Wrong Tile Auto-Eject

@@ -55,6 +55,8 @@ export interface GameEvaluateEvent extends BaseGameEvent {
   nearMiss: boolean;
   /** Index of the slot the tile was placed into. */
   zoneIndex: number;
+  /** Expected value for the target slot — provides confusion pair for SRS. */
+  expected?: string;
 }
 
 export interface GameScoreEvent extends BaseGameEvent {

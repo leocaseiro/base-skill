@@ -16,8 +16,9 @@ import type { ReactNode } from 'react';
 import { playSound } from '@/lib/audio/AudioFeedback';
 import { __resetSkinRegistryForTests, registerSkin } from '@/lib/skin';
 
+const mockEmit = vi.fn();
 vi.mock('@/lib/game-event-bus', () => ({
-  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+  getGameEventBus: () => ({ emit: mockEmit, subscribe: vi.fn() }),
 }));
 
 vi.mock('@/lib/audio/AudioFeedback', () => ({
@@ -82,6 +83,7 @@ describe('useTileEvaluation', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    mockEmit.mockClear();
   });
   afterEach(() => vi.useRealTimers());
 
@@ -179,5 +181,74 @@ describe('useTileEvaluation', () => {
     });
 
     expect(playSound).not.toHaveBeenCalled();
+  });
+
+  describe('expected field on game:evaluate', () => {
+    it('includes expected value from zone in placeTile emit', () => {
+      const { result } = renderHook(() => useTileEvaluationHarness(), {
+        wrapper: createWrapper(baseConfig),
+      });
+      act(() => result.current.placeTile('t1', 0));
+
+      expect(mockEmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'game:evaluate',
+          expected: 'C',
+        }),
+      );
+    });
+  });
+
+  describe('placeTile return value', () => {
+    it('returns { correct: true } for correct placement', () => {
+      const { result } = renderHook(() => useTileEvaluationHarness(), {
+        wrapper: createWrapper(baseConfig),
+      });
+      let returnVal: { correct: boolean } | undefined;
+      act(() => {
+        returnVal = result.current.placeTile('t1', 0);
+      });
+
+      expect(returnVal).toEqual({ correct: true });
+    });
+
+    it('returns { correct: false } for wrong placement', () => {
+      const { result } = renderHook(() => useTileEvaluationHarness(), {
+        wrapper: createWrapper(baseConfig),
+      });
+      let returnVal: { correct: boolean } | undefined;
+      act(() => {
+        returnVal = result.current.placeTile('t2', 0);
+      });
+
+      expect(returnVal).toEqual({ correct: false });
+    });
+  });
+
+  describe('reject mode dispatches REJECT_TAP', () => {
+    it('dispatches REJECT_TAP instead of PLACE_TILE for wrong tile in reject mode', () => {
+      const rejectConfig: AnswerGameConfig = {
+        ...baseConfig,
+        wrongTileBehavior: 'reject',
+      };
+
+      const { result } = renderHook(() => useTileEvaluationHarness(), {
+        wrapper: createWrapper(rejectConfig),
+      });
+      act(() => result.current.placeTile('t2', 0));
+
+      expect(result.current.state.retryCount).toBe(1);
+      expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+    });
+
+    it('dispatches PLACE_TILE for wrong tile in lock-auto-eject mode', () => {
+      const { result } = renderHook(() => useTileEvaluationHarness(), {
+        wrapper: createWrapper(baseConfig),
+      });
+      act(() => result.current.placeTile('t2', 0));
+
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t2');
+      expect(result.current.state.zones[0]?.isWrong).toBe(true);
+    });
   });
 });

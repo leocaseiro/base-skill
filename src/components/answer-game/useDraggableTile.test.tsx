@@ -1,8 +1,9 @@
 import { act, render, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
 import { useDraggableTile } from './useDraggableTile';
 import type { AnswerGameConfig } from './types';
+import { playSound } from '@/lib/audio/AudioFeedback';
 
 const mockDraggable = vi.fn().mockReturnValue(() => {});
 const mockDropTargetForElements = vi.fn().mockReturnValue(() => {});
@@ -13,7 +14,11 @@ vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
     mockDropTargetForElements(...args),
 }));
 
-const mockPlaceInNextSlot = vi.fn();
+const mockPlaceInNextSlot = vi.fn().mockReturnValue({
+  placed: true,
+  zoneIndex: 0,
+  rejected: false,
+});
 const mockSpeakTile = vi.fn();
 
 vi.mock('./useAutoNextSlot', () => ({
@@ -27,6 +32,8 @@ vi.mock('./useGameTTS', () => ({
   }),
 }));
 
+let mockWrongTileBehavior = 'lock-auto-eject';
+
 vi.mock('./useAnswerGameContext', () => ({
   useAnswerGameContext: () => ({
     config: {
@@ -34,12 +41,24 @@ vi.mock('./useAnswerGameContext', () => ({
       ttsEnabled: true,
       totalRounds: 1,
       gameId: 'test',
-      wrongTileBehavior: 'lock-auto-eject',
+      wrongTileBehavior: mockWrongTileBehavior,
       tileBankMode: 'exact',
     },
-    zones: [],
-    allTiles: [],
-    bankTileIds: [],
+    zones: [
+      {
+        id: 'z0',
+        index: 0,
+        expectedValue: 'C',
+        placedTileId: null,
+        isWrong: false,
+        isLocked: false,
+      },
+    ],
+    allTiles: [
+      { id: 't1', label: 'C', value: 'C' },
+      { id: 't2', label: 'X', value: 'X' },
+    ],
+    bankTileIds: ['t1', 't2'],
     activeSlotIndex: 0,
     roundIndex: 0,
     retryCount: 0,
@@ -60,9 +79,26 @@ vi.mock('./useTileEvaluation', () => ({
   useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
 }));
 
-// Capture the options passed to useTouchDrag so tests can invoke the touch
-// callbacks directly without simulating real pointer events.
+vi.mock('@/lib/audio/AudioFeedback', () => ({
+  playSound: vi.fn(),
+}));
+
+const mockTriggerShake = vi.fn();
+vi.mock('./Slot/slot-animations', () => ({
+  triggerShake: (...args: unknown[]) => mockTriggerShake(...args),
+}));
+
+vi.mock('@/lib/skin', () => ({
+  resolveSkin: () => ({ suppressDefaultSounds: false }),
+}));
+
+const mockEmit = vi.fn();
+vi.mock('@/lib/game-event-bus', () => ({
+  getGameEventBus: () => ({ emit: mockEmit, subscribe: vi.fn() }),
+}));
+
 type CapturedTouchDragOptions = {
+  onDrop?: (tileId: string, zoneIndex: number) => void;
   onDropOnBank?: () => void;
   onDropOnBankTile?: (bankTileId: string) => void;
 };
@@ -105,6 +141,22 @@ const DraggableHost = () => {
 
 describe('useDraggableTile', () => {
   const tile = { id: 't1', label: 'C', value: 'c' };
+
+  beforeEach(() => {
+    capturedTouchDragOptions = null;
+    mockPlaceInNextSlot.mockClear().mockReturnValue({
+      placed: true,
+      zoneIndex: 0,
+      rejected: false,
+    });
+    mockSpeakTile.mockClear();
+    mockDispatch.mockClear();
+    mockEmit.mockClear();
+    mockTriggerShake.mockClear();
+    mockPlaceTile.mockReset();
+    vi.mocked(playSound).mockClear();
+    mockWrongTileBehavior = 'lock-auto-eject';
+  });
 
   it('returns a ref, handleClick, and touch handlers', () => {
     const { result } = renderHook(() => useDraggableTile(tile));
@@ -153,9 +205,6 @@ describe('useDraggableTile', () => {
 
   describe('touch drag — onDropOnBank', () => {
     it('clears drag state when bank tile is released back onto the bank', () => {
-      // Regression: dragging a bank tile a few pixels then releasing within the
-      // bank left dragActiveTileId set, making the tile permanently faded and
-      // uninteractable. onDropOnBank must reset the active drag state.
       capturedTouchDragOptions = null;
       mockDispatch.mockClear();
 
@@ -176,8 +225,6 @@ describe('useDraggableTile', () => {
 
   describe('touch drag — onDropOnBankTile', () => {
     it('clears drag state when bank tile is dropped onto another bank tile hole', () => {
-      // Same regression path — dropping on a bank tile hole also left
-      // dragActiveTileId set when onDropOnBankTile was not provided.
       capturedTouchDragOptions = null;
       mockDispatch.mockClear();
 
@@ -193,6 +240,138 @@ describe('useDraggableTile', () => {
         type: 'SET_DRAG_ACTIVE',
         tileId: null,
       });
+    });
+  });
+
+  describe('handleClick reject path', () => {
+    it('does not speak or place when tile is already shaking', () => {
+      const shakeTile = { id: 't1', label: 'C', value: 'C' };
+      const { result } = renderHook(() => useDraggableTile(shakeTile));
+
+      const button = document.createElement('button');
+      button.dataset.shaking = 'true';
+      Object.defineProperty(result.current.ref, 'current', {
+        value: button,
+        writable: true,
+      });
+
+      act(() => result.current.handleClick());
+
+      expect(mockSpeakTile).not.toHaveBeenCalled();
+      expect(mockPlaceInNextSlot).not.toHaveBeenCalled();
+    });
+
+    it('dispatches REJECT_TAP and plays wrong sound on rejection', () => {
+      mockPlaceInNextSlot.mockReturnValue({
+        placed: false,
+        zoneIndex: 0,
+        rejected: true,
+      });
+
+      const rejectTile = { id: 't2', label: 'X', value: 'X' };
+      const { result } = renderHook(() => useDraggableTile(rejectTile));
+
+      const button = document.createElement('button');
+      Object.defineProperty(result.current.ref, 'current', {
+        value: button,
+        writable: true,
+      });
+
+      act(() => result.current.handleClick());
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'REJECT_TAP',
+        tileId: 't2',
+        zoneIndex: 0,
+      });
+      expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
+    });
+
+    it('emits game:evaluate with expected field on rejection', () => {
+      mockPlaceInNextSlot.mockReturnValue({
+        placed: false,
+        zoneIndex: 0,
+        rejected: true,
+      });
+
+      const rejectTile = { id: 't2', label: 'X', value: 'X' };
+      const { result } = renderHook(() => useDraggableTile(rejectTile));
+
+      const button = document.createElement('button');
+      Object.defineProperty(result.current.ref, 'current', {
+        value: button,
+        writable: true,
+      });
+
+      act(() => result.current.handleClick());
+
+      expect(mockEmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'game:evaluate',
+          answer: 't2',
+          correct: false,
+          expected: 'C',
+          zoneIndex: 0,
+        }),
+      );
+    });
+
+    it('does not dispatch REJECT_TAP on successful placement', () => {
+      const okTile = { id: 't1', label: 'C', value: 'C' };
+      const { result } = renderHook(() => useDraggableTile(okTile));
+
+      act(() => result.current.handleClick());
+
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'REJECT_TAP' }),
+      );
+    });
+  });
+
+  describe('touch drag reject path', () => {
+    it('calls triggerShake on bank tile when drag-drop is rejected in reject mode', () => {
+      const rafSpy = vi
+        .spyOn(globalThis, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback) => {
+          cb(0);
+          return 0;
+        });
+      try {
+        mockWrongTileBehavior = 'reject';
+        mockPlaceTile.mockReturnValue({ correct: false });
+
+        const rejectTile = { id: 't2', label: 'X', value: 'X' };
+        const { result } = renderHook(() =>
+          useDraggableTile(rejectTile),
+        );
+
+        const button = document.createElement('button');
+        Object.defineProperty(result.current.ref, 'current', {
+          value: button,
+          writable: true,
+        });
+
+        const onDrop = capturedTouchDragOptions?.onDrop;
+        expect(onDrop).toBeDefined();
+        act(() => onDrop?.('t2', 0));
+
+        expect(mockTriggerShake).toHaveBeenCalledWith(button);
+      } finally {
+        rafSpy.mockRestore();
+        mockWrongTileBehavior = 'lock-auto-eject';
+      }
+    });
+
+    it('does not shake when wrong tile is dropped in lock-auto-eject mode', () => {
+      mockPlaceTile.mockReturnValue({ correct: false });
+
+      const rejectTile = { id: 't2', label: 'X', value: 'X' };
+      renderHook(() => useDraggableTile(rejectTile));
+
+      const onDrop = capturedTouchDragOptions?.onDrop;
+      act(() => onDrop?.('t2', 0));
+
+      expect(mockTriggerShake).not.toHaveBeenCalled();
     });
   });
 });
