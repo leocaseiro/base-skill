@@ -19,7 +19,10 @@ unaffected (user targets a specific slot).
 ### Pre-validation on tap/click
 
 When a bank tile is tapped (not dragged), check the tile's value against the
-target slot's `expectedValue` **before** dispatching `PLACE_TILE`. Behavior
+target slot's `expectedValue` **before** dispatching `PLACE_TILE`.
+Pre-validation reads `expectedValue` from `zones[computedTargetIndex]`, where
+`computedTargetIndex` is the next empty slot accounting for pending placements
+in the ref (not the stale `activeSlotIndex` from the closure). Behavior
 varies by `wrongTileBehavior`:
 
 | `wrongTileBehavior` | Tap/click (new)                                          | Drag (unchanged)                                    |
@@ -35,14 +38,20 @@ where there was none.
 
 ### Input buffer for rapid correct taps
 
-A ref-based pending-placements queue in `useAutoNextSlot` prevents the
-stale-closure race:
+A shared ref-based pending-placements queue prevents the stale-closure race.
+The ref must be shared across all hook instances — either lifted to
+`AnswerGameProvider` context or stored at module scope — so that concurrent
+taps from different tile components see each other's pending claims.
 
 - Maintain a `pendingPlacements` ref (`Array<{ tileId: string; zoneIndex: number }>`)
 - When `placeInNextSlot` is called, compute the target slot accounting for
   both current `zones` state AND pending placements in the ref
 - Push the placement into the ref, then dispatch `PLACE_TILE`
-- On re-render (when `zones` updates), drain entries the reducer has applied
+- Drain condition: on re-render, remove entries where
+  `zones[entry.zoneIndex].placedTileId === entry.tileId` (the reducer has
+  applied them)
+- Clear the ref entirely on `INIT_ROUND`, `ADVANCE_ROUND`, and
+  `ADVANCE_LEVEL` to prevent stale entries across rounds
 
 The ref is synchronous (no React batching delay) — a write-ahead log that
 lets the second tap see slot 0 is claimed and correctly target slot 1. No
@@ -54,18 +63,36 @@ lets the second tap see slot 0 is claimed and correctly target slot 1. No
 `<button>` ref when pre-validation rejects a tap. Same `animate-shake` CSS
 class (300ms oscillate-X) — no new keyframes.
 
-For the red flash: briefly apply a CSS class (e.g. `is-wrong`) to the bank
-tile button for the duration of the shake animation (~300ms), using the
-existing `--skin-wrong-bg` or `--skin-wrong-border` CSS variables so it
-matches the slot wrong-tile styling. Remove the class on `animationend`.
+For the red flash: briefly apply a CSS class (`is-wrong`) to the bank tile
+button for the duration of the shake animation (~300ms), using the existing
+`--skin-wrong-bg` and `--skin-wrong-border` CSS variables so it matches the
+slot wrong-tile styling. Remove the class on `animationend`. Add the
+`.is-wrong` styles to the existing DraggableTile CSS module (co-located with
+the component) — no new stylesheet needed.
+
+**Throttle on rapid re-tap:** If the bank tile already has `animate-shake`
+(a shake is in progress), ignore subsequent taps. This prevents restarting
+the animation mid-cycle, which would orphan the `animationend` listener and
+leave the `is-wrong` class permanently applied.
+
+`useAutoNextSlot.placeInNextSlot` returns
+`{ placed: boolean; zoneIndex: number; rejected: boolean }` instead of
+`void`, so callers can branch on the outcome.
 
 Flow in `useDraggableTile.handleClick`:
 
 1. `speakTile(tile.label)` (unchanged)
-2. Call pre-validation: check tile value against target slot's `expectedValue`
-3. Wrong + not `lock-manual`: `triggerShake(ref.current)`, play wrong sound,
-   dispatch `REJECT_TAP`
-4. Correct: push to pending ref, dispatch `PLACE_TILE`
+2. Call `placeInNextSlot(tile.id)` — pre-validates tile value against
+   `zones[computedTargetIndex].expectedValue`
+3. If `rejected` and not `lock-manual`: `triggerShake(ref.current)`, play
+   wrong sound, dispatch `REJECT_TAP` with `zoneIndex` from the result
+4. If `placed`: tile is pushed to pending ref and `PLACE_TILE` dispatched
+
+Pre-validation supersedes the existing `isWrong` early-return guard
+(`if (zones[activeSlotIndex]?.isWrong) return`) for tap/click paths — the
+tile is checked at the bank before reaching the reducer. The `isWrong` guard
+remains active for drag and `lock-manual` paths where tiles still land in
+slots.
 
 ### New `REJECT_TAP` reducer action
 
@@ -98,15 +125,14 @@ algorithm) implementation.
 
 ## Files to modify
 
-| File                                                 | Change                                                                                     |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `src/components/answer-game/types.ts`                | Add `REJECT_TAP` action                                                                    |
-| `src/types/game-events.ts`                           | Add `expected` field to `GameEvaluateEvent`                                                |
-| `src/components/answer-game/answer-game-reducer.ts`  | Handle `REJECT_TAP` (increment retryCount)                                                 |
-| `src/components/answer-game/useAutoNextSlot.ts`      | Add pending-placements ref, pre-validation logic                                           |
-| `src/components/answer-game/useDraggableTile.ts`     | Pre-validate on click, shake on reject, emit event                                         |
-| `src/components/answer-game/useTileEvaluation.ts`    | Add `expected` to all `game:evaluate` emits, add reject feedback for `reject` mode on drag |
-| `src/components/answer-game/Slot/useSlotBehavior.ts` | No changes expected                                                                        |
+| File                                                | Change                                                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `src/components/answer-game/types.ts`               | Add `REJECT_TAP` action                                                                    |
+| `src/types/game-events.ts`                          | Add `expected` field to `GameEvaluateEvent`                                                |
+| `src/components/answer-game/answer-game-reducer.ts` | Handle `REJECT_TAP` (increment retryCount)                                                 |
+| `src/components/answer-game/useAutoNextSlot.ts`     | Add pending-placements ref, pre-validation logic                                           |
+| `src/components/answer-game/useDraggableTile.ts`    | Pre-validate on click, shake on reject, emit event                                         |
+| `src/components/answer-game/useTileEvaluation.ts`   | Add `expected` to all `game:evaluate` emits, add reject feedback for `reject` mode on drag |
 
 ## Scope
 
@@ -129,3 +155,10 @@ algorithm) implementation.
 - Keyboard/type input path (`typeTile`)
 - SRS consumer implementation (future — this ensures the data shape is ready)
 - iOS-specific investigation (fix is platform-agnostic)
+
+## Open Questions
+
+- **Screen reader announcements for rejected taps:** Should the shake +
+  red flash be accompanied by an `aria-live` announcement (e.g. "Wrong
+  tile") so screen reader users get equivalent feedback? Deferred from
+  doc review — not blocking for initial implementation.
