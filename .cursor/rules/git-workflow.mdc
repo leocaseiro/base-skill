@@ -45,6 +45,7 @@ git check-ignore -q worktrees || git check-ignore -q .worktrees
 - **Every task** (code, tests, Storybook, **plans, specs, markdown docs**) goes through a branch in a worktree unless the user opts out in the message.
 - Open **Cursor’s workspace folder** as `./worktrees/<name>` when possible so tools default to the correct tree.
 - After merge to `master`, remove the worktree: `git worktree remove ./worktrees/<name>`.
+- **Full paths in output:** When referencing files in messages, always print the **full path including the worktree directory** (e.g. `worktrees/my-branch/docs/plans/foo.md`), not just the repo-relative path. Relative paths are ambiguous across worktrees.
 
 ## Commits (baby steps)
 
