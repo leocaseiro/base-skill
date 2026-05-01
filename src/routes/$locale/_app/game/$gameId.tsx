@@ -10,10 +10,7 @@ import type {
 } from '@/games/number-match/types';
 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
 import type { SpotAllConfig } from '@/games/spot-all/types';
-import type {
-  WordSpellConfig,
-  WordSpellRound,
-} from '@/games/word-spell/types';
+import type { WordSpellConfig } from '@/games/word-spell/types';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
@@ -82,22 +79,6 @@ interface GameRouteLoaderData {
   persistedContent: Record<string, unknown> | null;
 }
 
-const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-  { word: 'cat', emoji: '🐱' },
-  { word: 'dog', emoji: '🐶' },
-  { word: 'sun', emoji: '☀️' },
-  { word: 'pin', emoji: '📌' },
-  { word: 'sad', emoji: '☹️' },
-  { word: 'ant', emoji: '🐜' },
-  { word: 'can', emoji: '🥫' },
-  { word: 'mum', emoji: '🤱' },
-];
-
-const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-};
-
 const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
   component: 'WordSpell',
@@ -133,7 +114,13 @@ const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
-  rounds: sliceWordSpellRounds(8),
+  source: {
+    type: 'word-library',
+    filter: {
+      region: 'aus',
+      hasVisual: true,
+    },
+  },
 };
 
 /**
@@ -153,7 +140,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   tileBankMode: 'distractors',
   distractorCount: 2,
   totalRounds: 3,
-  // Deterministic order by default — see DEFAULT_PICTURE_CONFIG comment.
+  // Deterministic order by default — keeps VR baselines stable (see note above).
   roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
@@ -286,7 +273,7 @@ export const resolveWordSpellConfig = (
 
   // Mode invariant:
   // recall  ⇒ source defined ∧ rounds undefined
-  // picture ⇒ rounds defined ∧ source undefined
+  // picture ⇒ explicit rounds ⇒ honor rounds (drop source); else source with hasVisual ∧ rounds undefined
   if (merged.mode === 'recall') {
     if (merged.rounds) {
       const { rounds: _ignored, ...rest } = merged;
@@ -296,17 +283,25 @@ export const resolveWordSpellConfig = (
   }
 
   // mode === 'picture' (or 'sentence-gap' — treat as picture for default fallback)
+  // picture with explicit rounds ⇒ honor them, drop source
+  if (Array.isArray(merged.rounds) && merged.rounds.length > 0) {
+    const { source: _ignored, ...rest } = merged;
+    return rest as WordSpellConfig;
+  }
+  // picture without explicit rounds ⇒ source with hasVisual, drop rounds
   const picture = { ...merged };
-  if (picture.source) {
-    delete picture.source;
+  if (picture.rounds) {
+    delete picture.rounds;
   }
-  if (!Array.isArray(picture.rounds) || picture.rounds.length === 0) {
-    picture.rounds = sliceWordSpellRounds(8);
-  }
-  picture.totalRounds = Math.min(
-    picture.rounds.length,
-    WORD_SPELL_ROUND_POOL.length,
-  );
+  picture.source = picture.source
+    ? {
+        ...picture.source,
+        filter: { ...picture.source.filter, hasVisual: true },
+      }
+    : {
+        type: 'word-library',
+        filter: { region: 'aus', hasVisual: true },
+      };
   return picture;
 };
 
