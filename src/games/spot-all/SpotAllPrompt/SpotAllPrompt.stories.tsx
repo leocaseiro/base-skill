@@ -1,3 +1,4 @@
+import { withDb } from '../../../../.storybook/decorators/withDb';
 import { SpotAllPrompt } from './SpotAllPrompt';
 import type { Meta, StoryObj } from '@storybook/react';
 
@@ -5,6 +6,7 @@ const meta: Meta<typeof SpotAllPrompt> = {
   title: 'Games/SpotAll/SpotAllPrompt',
   component: SpotAllPrompt,
   tags: ['autodocs'],
+  decorators: [withDb],
   args: { target: 'b', ttsEnabled: false },
   argTypes: {
     target: {
