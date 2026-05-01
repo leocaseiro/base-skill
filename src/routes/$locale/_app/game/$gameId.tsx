@@ -293,20 +293,17 @@ export const resolveWordSpellConfig = (
     const { source: _ignored, ...rest } = merged;
     return rest;
   }
-  // picture without explicit rounds ⇒ source with hasVisual, drop rounds
+  // picture without explicit rounds ⇒ source with hasVisual only, drop rounds
+  // Strip grapheme constraints — picture mode uses the full word pool.
   const picture = { ...merged };
   if (picture.rounds) {
     delete picture.rounds;
   }
-  picture.source = picture.source
-    ? {
-        ...picture.source,
-        filter: { ...picture.source.filter, hasVisual: true },
-      }
-    : {
-        type: 'word-library',
-        filter: { region: 'aus', hasVisual: true },
-      };
+  const pictureRegion = picture.source?.filter.region ?? 'aus';
+  picture.source = {
+    type: 'word-library',
+    filter: { region: pictureRegion, hasVisual: true },
+  };
   return picture;
 };
 
