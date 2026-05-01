@@ -26,7 +26,7 @@ export const SpotAllTile = ({
           background: 'var(--skin-wrong-bg)',
           borderColor: 'var(--skin-wrong-border)',
         }
-      : { borderColor: 'transparent' };
+      : {};
 
   return (
     <button
@@ -36,8 +36,8 @@ export const SpotAllTile = ({
       aria-pressed={isSelected}
       data-cooldown={inCooldown || undefined}
       className={cn(
-        'flex min-h-24 min-w-24 items-center justify-center rounded-xl border-2 px-3 py-2 transition-all',
-        'outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2',
+        'flex min-h-24 min-w-24 items-center justify-center rounded-xl border-2 border-transparent px-3 py-2 transition-[background-color,border-color,transform]',
+        'outline-none focus-visible:border-primary',
         inCooldown && 'animate-[shake_300ms_ease-in-out]',
       )}
       style={{ ...tileStyle(), ...stateStyle }}

@@ -9,7 +9,7 @@ export const SpotAllGrid = ({
   state: SpotAllState;
   onTap: (tileId: string) => void;
 }): JSX.Element => (
-  <div className="grid w-full grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
+  <div className="flex w-full max-w-full flex-wrap justify-center gap-3">
     {state.tiles.map((tile) => (
       <SpotAllTile
         key={tile.id}
