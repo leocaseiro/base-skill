@@ -64,6 +64,12 @@ describe('filterSignature', () => {
     expect(filterSignature(a)).not.toBe(filterSignature(b));
   });
 
+  it('produces different signatures when hasVisual differs', () => {
+    const a: WordFilter = { region: 'aus', hasVisual: true };
+    const b: WordFilter = { region: 'aus' };
+    expect(filterSignature(a)).not.toBe(filterSignature(b));
+  });
+
   it('treats undefined array fields and empty arrays the same as omission', () => {
     const a: WordFilter = { region: 'aus', level: 2 };
     const b: WordFilter = {

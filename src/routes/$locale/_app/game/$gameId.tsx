@@ -286,7 +286,7 @@ export const resolveWordSpellConfig = (
   // picture with explicit rounds ⇒ honor them, drop source
   if (Array.isArray(merged.rounds) && merged.rounds.length > 0) {
     const { source: _ignored, ...rest } = merged;
-    return rest as WordSpellConfig;
+    return rest;
   }
   // picture without explicit rounds ⇒ source with hasVisual, drop rounds
   const picture = { ...merged };

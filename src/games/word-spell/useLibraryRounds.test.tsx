@@ -203,7 +203,7 @@ describe('useLibraryRounds', () => {
       expect(result.current.isLoading).toBe(false);
     });
     // Fallback retried without hasVisual, so we get level 8 words without emoji
-    expect(result.current.rounds.length).toBeGreaterThan(0);
+    expect(result.current.rounds).toHaveLength(3);
     expect(
       result.current.rounds.some((r) => !r.emoji && !r.image),
     ).toBe(true);
