@@ -77,6 +77,7 @@ export interface WordFilter {
   phonemesAllowed?: string[];
   phonemesRequired?: string[];
   fallbackToAus?: boolean;
+  hasVisual?: boolean;
 }
 
 export interface FilterResult {
