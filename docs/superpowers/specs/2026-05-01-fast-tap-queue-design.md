@@ -54,6 +54,11 @@ lets the second tap see slot 0 is claimed and correctly target slot 1. No
 `<button>` ref when pre-validation rejects a tap. Same `animate-shake` CSS
 class (300ms oscillate-X) — no new keyframes.
 
+For the red flash: briefly apply a CSS class (e.g. `is-wrong`) to the bank
+tile button for the duration of the shake animation (~300ms), using the
+existing `--skin-wrong-bg` or `--skin-wrong-border` CSS variables so it
+matches the slot wrong-tile styling. Remove the class on `animationend`.
+
 Flow in `useDraggableTile.handleClick`:
 
 1. `speakTile(tile.label)` (unchanged)
