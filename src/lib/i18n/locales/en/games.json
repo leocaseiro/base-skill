@@ -21,6 +21,7 @@
     "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
     "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
     "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
+    "spot-all": "Tap every tile that shows the highlighted character. Some tiles look similar but are flipped or different — only tap the correct ones.",
     "lets-go": "Let's go!",
     "settings": "⚙️ Settings",
     "advanced": "Advanced",
@@ -38,6 +39,24 @@
     "saveAndPlay": "Save & play",
     "playWithoutSaving": "Play without saving",
     "configure": "Configure"
+  },
+  "spot-all": "Spot the Match!",
+  "spot-all-description": "Tap all the tiles that match the prompt — watch out for backwards and look-alike letters.",
+  "spot-all-ui": {
+    "prompt": "Select all the {{target}} tiles",
+    "speak-prompt": "Hear the question",
+    "config": {
+      "groups": {
+        "mirror-horizontal": "Mirror Horizontal",
+        "mirror-vertical": "Mirror Vertical",
+        "rotation-180": "Rotation 180°",
+        "visual-similarity": "Visual Similarity",
+        "transposition": "Transposition",
+        "reversible": "Reversible (self-mirror)"
+      },
+      "tile-styles": { "label": "Tile styles" },
+      "invalid-selection": "Pick at least one group to play"
+    }
   },
   "sort-numbers-ui": {
     "ascending-label": "Going Up!",

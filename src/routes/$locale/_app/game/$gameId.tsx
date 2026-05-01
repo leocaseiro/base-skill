@@ -9,6 +9,7 @@ import type {
   NumberMatchRound,
 } from '@/games/number-match/types';
 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+import type { SpotAllConfig } from '@/games/spot-all/types';
 import type {
   WordSpellConfig,
   WordSpellRound,
@@ -37,6 +38,8 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { resolveSimpleConfig as resolveSpotAllSimpleConfig } from '@/games/spot-all/resolve-simple-config';
+import { SpotAll } from '@/games/spot-all/SpotAll/SpotAll';
 import { defaultSelection } from '@/games/word-spell/level-unit-selection';
 import { resolveSimpleConfig as resolveWordSpellSimpleConfig } from '@/games/word-spell/resolve-simple-config';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
@@ -158,6 +161,16 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   range: { min: 1, max: 12 },
   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
 });
+
+const makeDefaultSpotAllConfig = (): SpotAllConfig =>
+  resolveSpotAllSimpleConfig({
+    configMode: 'simple',
+    selectedConfusablePairs: [
+      { pair: ['b', 'd'], type: 'mirror-horizontal' },
+      { pair: ['p', 'q'], type: 'mirror-horizontal' },
+    ],
+    selectedReversibleChars: [],
+  });
 
 export const resizeNumberMatchRounds = (
   prev: NumberMatchRound[],
@@ -315,6 +328,24 @@ const resolveNumberMatchConfig = (
     targetLen,
     merged.range,
   );
+  return merged;
+};
+
+const resolveSpotAllConfig = (
+  saved: Record<string, unknown> | null,
+): SpotAllConfig => {
+  const fallback = makeDefaultSpotAllConfig();
+  if (!saved || typeof saved !== 'object') return fallback;
+
+  const merged = { ...fallback, ...saved } as SpotAllConfig;
+  if (
+    (!Array.isArray(merged.selectedConfusablePairs) ||
+      merged.selectedConfusablePairs.length === 0) &&
+    (!Array.isArray(merged.selectedReversibleChars) ||
+      merged.selectedReversibleChars.length === 0)
+  ) {
+    return fallback;
+  }
   return merged;
 };
 
@@ -712,6 +743,148 @@ const NumberMatchGameBody = ({
   );
 };
 
+const SpotAllGameBody = ({
+  gameId,
+  sessionId,
+  seed,
+  draftState,
+  gameSpecificConfig,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
+  debug,
+}: {
+  gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
+  gameSpecificConfig: Record<string, unknown> | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
+  debug: boolean;
+}): JSX.Element => {
+  const { t } = useTranslation('games');
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
+    () =>
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
+  );
+  const initial = useMemo(
+    () => resolveSpotAllConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [cfg, setCfg] = useState(initial);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        draftState: null,
+        persistedContent: null,
+      }}
+      rounds={[]}
+    />
+  ) : null;
+
+  if (showInstructions) {
+    return (
+      <>
+        <InstructionsOverlay
+          text={t('instructions.spot-all')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('spot-all')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={(config) =>
+            setCfg(resolveSpotAllConfig(config))
+          }
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({
+              gameId,
+              name,
+              color,
+              config,
+              cover,
+            })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
+        />
+        {debugPanel}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SpotAll config={cfg} seed={seed} />
+      {debugPanel}
+    </>
+  );
+};
+
 const SortNumbersGameBody = ({
   gameId,
   sessionId,
@@ -921,6 +1094,23 @@ const GameBody = ({
   if (gameId === 'number-match') {
     return (
       <NumberMatchGameBody
+        gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        draftState={draftState}
+        gameSpecificConfig={gameSpecificConfig}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
+        debug={debug}
+      />
+    );
+  }
+
+  if (gameId === 'spot-all') {
+    return (
+      <SpotAllGameBody
         gameId={gameId}
         sessionId={sessionId}
         seed={seed}
