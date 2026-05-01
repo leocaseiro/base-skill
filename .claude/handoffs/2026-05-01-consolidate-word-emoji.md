@@ -5,7 +5,7 @@
 **Worktree:** worktrees/issue-277-consolidate-word-emoji
 **Worktree path:** /Users/leocaseiro/Sites/base-skill/worktrees/issue-277-consolidate-word-emoji
 **Git status:** clean
-**Last commit:** f02b8f9d docs(brainstorm): apply review findings to consolidate-word-emoji spec (#277)
+**Last commit:** d2a654dc docs(plan): consolidate word and emoji data implementation plan (#277)
 **PR:** #281 — open
 
 ## Resume command
@@ -19,12 +19,12 @@ cd worktrees/issue-277-consolidate-word-emoji
 ## Current state
 
 **Task:** Embed optional `emoji` and `image` fields into curriculum JSON so picture mode uses library-sourced rounds instead of a hardcoded 8-word pool.
-**Phase:** planning
-**Progress:** Requirements doc complete and reviewed. Next step is `ce-plan` to produce an implementation plan.
+**Phase:** ready to execute
+**Progress:** Requirements doc and implementation plan complete and reviewed. Ready for execution.
 
 ## What we did
 
-Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) for consolidating word and emoji data. Ran `ce-doc-review` with 5 reviewer personas, applied 6 findings, and deferred 1 (totalRounds silent truncation — SRS will address this later). Supersedes issue #266 with a comment linking it to #277.
+Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) for consolidating word and emoji data. Ran `ce-doc-review` on both the requirements doc and the implementation plan. Supersedes issue #266 with a comment linking it to #277. Implementation plan written with 9 TDD tasks, reviewed with 5 reviewer personas (5 findings resolved: 2 fixed, 2 skipped, 1 noted as known limitation).
 
 ## Decisions made
 
@@ -39,6 +39,7 @@ Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) f
 ## Spec / Plan
 
 - docs/brainstorms/2026-05-01-consolidate-word-emoji-requirements.md
+- docs/superpowers/plans/2026-05-01-consolidate-word-emoji.md
 
 ## Key files
 
@@ -55,14 +56,13 @@ Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) f
 
 ## Open questions / blockers
 
-- [ ] What are the correct IPA transcription and grapheme mappings for "mum" in `aus` region? (affects R6, needs research during planning)
-- [ ] Should the default picture-mode `WordFilter` constrain to specific levels/graphemes, or pull from all levels that have visuals? (affects R8)
+- [x] "mum" IPA/graphemes: `/mʌm/` with graphemes `m/m`, `u/ʌ`, `m/m` (resolved — follows pattern of "mug")
+- [x] Default picture-mode filter scope: Pull from all levels with visuals, `region: 'aus'` + `hasVisual: true` (resolved)
 
 ## Next steps
 
-1. [ ] Review and merge PR #281 (requirements doc)
-2. [ ] Run `ce-plan` to produce an implementation plan from the requirements
-3. [ ] Execute the plan using TDD (tests first for each requirement)
+1. [ ] Review and merge PR #281 (requirements doc + plan)
+2. [ ] Execute the plan using TDD — choose subagent-driven or inline execution
 
 ## Context to remember
 
