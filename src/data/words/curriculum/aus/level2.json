@@ -478,6 +478,26 @@
     ]
   },
   {
+    "word": "mum",
+    "level": 2,
+    "ipa": "mʌm",
+    "graphemes": [
+      {
+        "g": "m",
+        "p": "m"
+      },
+      {
+        "g": "u",
+        "p": "ʌ"
+      },
+      {
+        "g": "m",
+        "p": "m"
+      }
+    ],
+    "emoji": "🤱"
+  },
+  {
     "word": "net",
     "level": 2,
     "ipa": "net",
