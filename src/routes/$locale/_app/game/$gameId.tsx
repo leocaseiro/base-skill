@@ -493,9 +493,11 @@ const WordSpellGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(
-    draftState === null,
-  );
+  // When draftState is null the user saw the instructions overlay,
+  // so there is nothing to resume — discard stale persisted content.
+  const hasResumableDraft = draftState !== null;
+  const [showInstructions, setShowInstructions] =
+    useState(!hasResumableDraft);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -584,10 +586,10 @@ const WordSpellGameBody = ({
       <WordSpell
         key={cfg.inputMethod}
         config={cfg}
-        initialState={draftState ?? undefined}
+        initialState={hasResumableDraft ? draftState : undefined}
         sessionId={sessionId}
         seed={seed}
-        persistedContent={persistedContent}
+        persistedContent={hasResumableDraft ? persistedContent : null}
       />
       {debugPanel}
     </>

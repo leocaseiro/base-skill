@@ -353,7 +353,6 @@ export const WordSpell = ({
         .exec();
 
       if (cancellation.isCancelled || !doc) return;
-      if (hasWordSpellPersistedContent(doc.initialContent)) return;
 
       const patch = buildWordSpellInitialContent({
         rounds: resolvedRounds,
