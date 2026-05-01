@@ -3,4 +3,6 @@ import type { WordSpellRound } from '@/games/word-spell/types';
 
 export const toWordSpellRound = (hit: WordHit): WordSpellRound => ({
   word: hit.word,
+  emoji: hit.emoji,
+  image: hit.image,
 });

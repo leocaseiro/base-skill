@@ -10,10 +10,7 @@ import type {
 } from '@/games/number-match/types';
 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
 import type { SpotAllConfig } from '@/games/spot-all/types';
-import type {
-  WordSpellConfig,
-  WordSpellRound,
-} from '@/games/word-spell/types';
+import type { WordSpellConfig } from '@/games/word-spell/types';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
@@ -82,22 +79,6 @@ interface GameRouteLoaderData {
   persistedContent: Record<string, unknown> | null;
 }
 
-const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-  { word: 'cat', emoji: '🐱' },
-  { word: 'dog', emoji: '🐶' },
-  { word: 'sun', emoji: '☀️' },
-  { word: 'pin', emoji: '📌' },
-  { word: 'sad', emoji: '☹️' },
-  { word: 'ant', emoji: '🐜' },
-  { word: 'can', emoji: '🥫' },
-  { word: 'mum', emoji: '🤱' },
-];
-
-const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-};
-
 const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
   component: 'WordSpell',
@@ -133,7 +114,13 @@ const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
-  rounds: sliceWordSpellRounds(8),
+  source: {
+    type: 'word-library',
+    filter: {
+      region: 'aus',
+      hasVisual: true,
+    },
+  },
 };
 
 /**
@@ -153,7 +140,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   tileBankMode: 'distractors',
   distractorCount: 2,
   totalRounds: 3,
-  // Deterministic order by default — see DEFAULT_PICTURE_CONFIG comment.
+  // Deterministic order by default — keeps VR baselines stable (see note above).
   roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
@@ -274,7 +261,12 @@ export const resolveWordSpellConfig = (
 
   // When the picker set selectedUnits, re-derive source.filter so
   // the filter stays in sync even in advanced mode.
-  if (Array.isArray(merged.selectedUnits) && merged.source) {
+  // Picture mode ignores selectedUnits entirely (no grapheme scope).
+  if (
+    merged.mode !== 'picture' &&
+    Array.isArray(merged.selectedUnits) &&
+    merged.source
+  ) {
     const derived = resolveWordSpellSimpleConfig({
       configMode: 'simple',
       selectedUnits: merged.selectedUnits,
@@ -286,7 +278,7 @@ export const resolveWordSpellConfig = (
 
   // Mode invariant:
   // recall  ⇒ source defined ∧ rounds undefined
-  // picture ⇒ rounds defined ∧ source undefined
+  // picture ⇒ explicit rounds ⇒ honor rounds (drop source); else source with hasVisual ∧ rounds undefined
   if (merged.mode === 'recall') {
     if (merged.rounds) {
       const { rounds: _ignored, ...rest } = merged;
@@ -296,17 +288,22 @@ export const resolveWordSpellConfig = (
   }
 
   // mode === 'picture' (or 'sentence-gap' — treat as picture for default fallback)
+  // picture with explicit rounds ⇒ honor them, drop source
+  if (Array.isArray(merged.rounds) && merged.rounds.length > 0) {
+    const { source: _ignored, ...rest } = merged;
+    return rest;
+  }
+  // picture without explicit rounds ⇒ source with hasVisual only, drop rounds
+  // Strip grapheme constraints — picture mode uses the full word pool.
   const picture = { ...merged };
-  if (picture.source) {
-    delete picture.source;
+  if (picture.rounds) {
+    delete picture.rounds;
   }
-  if (!Array.isArray(picture.rounds) || picture.rounds.length === 0) {
-    picture.rounds = sliceWordSpellRounds(8);
-  }
-  picture.totalRounds = Math.min(
-    picture.rounds.length,
-    WORD_SPELL_ROUND_POOL.length,
-  );
+  const pictureRegion = picture.source?.filter.region ?? 'aus';
+  picture.source = {
+    type: 'word-library',
+    filter: { region: pictureRegion, hasVisual: true },
+  };
   return picture;
 };
 
@@ -496,9 +493,11 @@ const WordSpellGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(
-    draftState === null,
-  );
+  // When draftState is null the user saw the instructions overlay,
+  // so there is nothing to resume — discard stale persisted content.
+  const hasResumableDraft = draftState !== null;
+  const [showInstructions, setShowInstructions] =
+    useState(!hasResumableDraft);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
@@ -587,10 +586,10 @@ const WordSpellGameBody = ({
       <WordSpell
         key={cfg.inputMethod}
         config={cfg}
-        initialState={draftState ?? undefined}
+        initialState={hasResumableDraft ? draftState : undefined}
         sessionId={sessionId}
         seed={seed}
-        persistedContent={persistedContent}
+        persistedContent={hasResumableDraft ? persistedContent : null}
       />
       {debugPanel}
     </>

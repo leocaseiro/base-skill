@@ -20,6 +20,8 @@ export interface CurriculumEntry {
   level: number;
   ipa: string;
   graphemes: Grapheme[];
+  emoji?: string;
+  image?: string;
 }
 
 export type Provenance = 'shipped' | 'draft';
@@ -36,6 +38,8 @@ export interface DraftEntry {
   syllableCount: number;
   graphemes: Grapheme[];
   variants?: string[];
+  emoji?: string;
+  image?: string;
   ritaKnown: boolean;
   createdAt: string;
   updatedAt: string;
@@ -50,6 +54,8 @@ export interface WordHit {
   variants?: string[];
   ipa?: string;
   graphemes?: Grapheme[];
+  emoji?: string;
+  image?: string;
   provenance: Provenance;
   draftId?: string;
 }
@@ -71,6 +77,7 @@ export interface WordFilter {
   phonemesAllowed?: string[];
   phonemesRequired?: string[];
   fallbackToAus?: boolean;
+  hasVisual?: boolean;
 }
 
 export interface FilterResult {

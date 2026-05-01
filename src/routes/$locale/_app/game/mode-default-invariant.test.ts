@@ -11,9 +11,10 @@ const assertRecallInvariant = (cfg: WordSpellConfig) => {
 
 const assertPictureInvariant = (cfg: WordSpellConfig) => {
   expect(cfg.mode).toBe('picture');
-  expect(cfg.rounds).toBeDefined();
-  expect(cfg.rounds!.length).toBeGreaterThan(0);
-  expect(cfg.source).toBeUndefined();
+  expect(cfg.source).toBeDefined();
+  expect(cfg.source?.type).toBe('word-library');
+  expect(cfg.source?.filter.hasVisual).toBe(true);
+  expect(cfg.rounds).toBeUndefined();
 };
 
 describe('mode-default invariant', () => {
@@ -31,7 +32,7 @@ describe('mode-default invariant', () => {
     );
   });
 
-  it('saved with only mode=picture → picture + rounds, no source', () => {
+  it('saved with only mode=picture → picture + source with hasVisual', () => {
     assertPictureInvariant(
       resolveWordSpellConfig({
         component: 'WordSpell',
@@ -59,11 +60,26 @@ describe('mode-default invariant', () => {
     assertRecallInvariant(cfg);
   });
 
-  it('saved with mode=picture + leaked source → source dropped', () => {
+  it('saved with mode=picture + explicit rounds → honors saved rounds', () => {
+    const rounds = [{ word: 'cat', emoji: '🐱' }];
     const cfg = resolveWordSpellConfig({
       component: 'WordSpell',
       configMode: 'advanced',
       mode: 'picture',
+      rounds,
+    });
+    expect(cfg.mode).toBe('picture');
+    expect(cfg.rounds).toEqual(rounds);
+    expect(cfg.source).toBeUndefined();
+  });
+
+  it('saved with mode=picture + rounds + leaked source → honors rounds, drops source', () => {
+    const rounds = [{ word: 'cat', emoji: '🐱' }];
+    const cfg = resolveWordSpellConfig({
+      component: 'WordSpell',
+      configMode: 'advanced',
+      mode: 'picture',
+      rounds,
       source: {
         type: 'word-library',
         filter: {
@@ -71,9 +87,10 @@ describe('mode-default invariant', () => {
           graphemesAllowed: [{ g: 's', p: 's' }],
         },
       },
-      rounds: [{ word: 'cat', emoji: '🐱' }],
     });
-    assertPictureInvariant(cfg);
+    expect(cfg.mode).toBe('picture');
+    expect(cfg.rounds).toEqual(rounds);
+    expect(cfg.source).toBeUndefined();
   });
 
   it('simple-mode saved config always resolves to recall + library', () => {
