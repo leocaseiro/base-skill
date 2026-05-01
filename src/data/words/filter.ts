@@ -52,35 +52,36 @@ export const entryMatches = (
   )
     return false;
 
+  const ga = filter.graphemesAllowed;
+  const gr = filter.graphemesRequired;
+  const pa = filter.phonemesAllowed;
+  const pr = filter.phonemesRequired;
+
   const hasGraphemeFilter =
-    filter.graphemesAllowed !== undefined ||
-    filter.graphemesRequired !== undefined ||
-    filter.phonemesAllowed !== undefined ||
-    filter.phonemesRequired !== undefined;
+    (ga !== undefined && ga.length > 0) ||
+    (gr !== undefined && gr.length > 0) ||
+    (pa !== undefined && pa.length > 0) ||
+    (pr !== undefined && pr.length > 0);
 
   if (!hasGraphemeFilter) return true;
   if (!hit.graphemes) return false;
 
-  if (filter.graphemesAllowed) {
-    const allowed = new Set(
-      filter.graphemesAllowed.map((u) => `${u.g}|${u.p}`),
-    );
+  if (ga && ga.length > 0) {
+    const allowed = new Set(ga.map((u) => `${u.g}|${u.p}`));
     if (!hit.graphemes.every((g) => allowed.has(`${g.g}|${g.p}`)))
       return false;
   }
-  if (filter.graphemesRequired) {
-    const required = new Set(
-      filter.graphemesRequired.map((u) => `${u.g}|${u.p}`),
-    );
+  if (gr && gr.length > 0) {
+    const required = new Set(gr.map((u) => `${u.g}|${u.p}`));
     if (!hit.graphemes.some((g) => required.has(`${g.g}|${g.p}`)))
       return false;
   }
-  if (filter.phonemesAllowed) {
-    const allowed = new Set(filter.phonemesAllowed);
+  if (pa && pa.length > 0) {
+    const allowed = new Set(pa);
     if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
   }
-  if (filter.phonemesRequired) {
-    const required = new Set(filter.phonemesRequired);
+  if (pr && pr.length > 0) {
+    const required = new Set(pr);
     if (!hit.graphemes.some((g) => required.has(g.p))) return false;
   }
 
