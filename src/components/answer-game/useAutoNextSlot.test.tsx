@@ -1,10 +1,14 @@
 import { act, renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AnswerGameProvider } from './AnswerGameProvider';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-import { useAutoNextSlot } from './useAutoNextSlot';
+import {
+  clearPendingPlacements,
+  useAutoNextSlot,
+} from './useAutoNextSlot';
 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+import type { PlaceResult } from './useAutoNextSlot';
 import type { ReactNode } from 'react';
 
 vi.mock('@/lib/game-event-bus', () => ({
@@ -27,6 +31,7 @@ const gameConfig: AnswerGameConfig = {
 const tileItems: TileItem[] = [
   { id: 't1', label: 'C', value: 'C' },
   { id: 't2', label: 'A', value: 'A' },
+  { id: 't3', label: 'T', value: 'T' },
 ];
 
 const answerZones: AnswerZone[] = [
@@ -46,215 +51,321 @@ const answerZones: AnswerZone[] = [
     isWrong: false,
     isLocked: false,
   },
+  {
+    id: 'z2',
+    index: 2,
+    expectedValue: 'T',
+    placedTileId: null,
+    isWrong: false,
+    isLocked: false,
+  },
 ];
 
-function useHarness() {
+beforeEach(() => {
+  clearPendingPlacements();
+});
+
+function createWrapper(config: AnswerGameConfig) {
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+  );
+  Wrapper.displayName = 'AutoNextSlotTestWrapper';
+  return Wrapper;
+}
+
+function useHarness(
+  tiles: TileItem[] = tileItems,
+  zones: AnswerZone[] = answerZones,
+) {
   const dispatch = useAnswerGameDispatch();
   const state = useAnswerGameContext();
   if (state.zones.length === 0)
-    dispatch({
-      type: 'INIT_ROUND',
-      tiles: tileItems,
-      zones: answerZones,
-    });
+    dispatch({ type: 'INIT_ROUND', tiles, zones });
   const { placeInNextSlot } = useAutoNextSlot();
   return { state, placeInNextSlot };
 }
 
-const Wrapper = ({ children }: { children: ReactNode }) => (
-  <AnswerGameProvider config={gameConfig}>
-    {children}
-  </AnswerGameProvider>
-);
-
 describe('useAutoNextSlot', () => {
-  it('places tile in activeSlotIndex zone', () => {
-    const { result } = renderHook(() => useHarness(), {
-      wrapper: Wrapper,
-    });
-    act(() => result.current.placeInNextSlot('t1'));
-    expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
-  });
+  describe('basic placement', () => {
+    it('places correct tile in activeSlotIndex zone', () => {
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
 
-  it('advances activeSlotIndex after correct placement', () => {
-    const { result } = renderHook(() => useHarness(), {
-      wrapper: Wrapper,
-    });
-    expect(result.current.state.activeSlotIndex).toBe(0);
-    act(() => result.current.placeInNextSlot('t1'));
-    expect(result.current.state.activeSlotIndex).toBe(1);
-  });
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t1');
+      });
 
-  it('skips locked zones when finding the next available slot', () => {
-    const lockedZoneConfig: AnswerGameConfig = {
-      ...gameConfig,
-    };
-    const lockedZones: AnswerZone[] = [
-      {
-        id: 'z0',
-        index: 0,
-        expectedValue: 'C',
-        placedTileId: null,
-        isWrong: false,
-        isLocked: true,
-      },
-      {
-        id: 'z1',
-        index: 1,
-        expectedValue: 'A',
-        placedTileId: null,
-        isWrong: false,
-        isLocked: false,
-      },
-    ];
-
-    function useHarnessWithLockedZone() {
-      const dispatch = useAnswerGameDispatch();
-      const state = useAnswerGameContext();
-      if (state.zones.length === 0)
-        dispatch({
-          type: 'INIT_ROUND',
-          tiles: tileItems,
-          zones: lockedZones,
-        });
-      const { placeInNextSlot } = useAutoNextSlot();
-      return { state, placeInNextSlot };
-    }
-
-    const LockedWrapper = ({ children }: { children: ReactNode }) => (
-      <AnswerGameProvider config={lockedZoneConfig}>
-        {children}
-      </AnswerGameProvider>
-    );
-
-    const { result } = renderHook(() => useHarnessWithLockedZone(), {
-      wrapper: LockedWrapper,
+      expect(res).toEqual({
+        placed: true,
+        zoneIndex: 0,
+        rejected: false,
+      });
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
     });
 
-    // Zone 0 is locked, so tile should go to zone 1
-    // t2 has value 'A' which matches zone 1's expectedValue 'A'
-    act(() => result.current.placeInNextSlot('t2'));
-    expect(result.current.state.zones[0]?.placedTileId).toBeNull();
-    expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
-  });
+    it('advances activeSlotIndex after correct placement', () => {
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
 
-  it('blocks placement when active slot is in wrong state (double-tap guard)', () => {
-    // Scenario: wrong tile was just placed in zone 0 (lock-auto-eject) —
-    // isWrong=true, placedTileId=null. A second tap should NOT advance to zone 1.
-    const wrongZones: AnswerZone[] = [
-      {
-        id: 'z0',
-        index: 0,
-        expectedValue: 'C',
-        placedTileId: null,
-        isWrong: true,
-        isLocked: true,
-      },
-      {
-        id: 'z1',
-        index: 1,
-        expectedValue: 'A',
-        placedTileId: null,
-        isWrong: false,
-        isLocked: false,
-      },
-    ];
-
-    function useHarnessWithWrongZone() {
-      const dispatch = useAnswerGameDispatch();
-      const state = useAnswerGameContext();
-      if (state.zones.length === 0)
-        dispatch({
-          type: 'INIT_ROUND',
-          tiles: tileItems,
-          zones: wrongZones,
-        });
-      const { placeInNextSlot } = useAutoNextSlot();
-      return { state, placeInNextSlot };
-    }
-
-    const WrongWrapper = ({ children }: { children: ReactNode }) => (
-      <AnswerGameProvider config={gameConfig}>
-        {children}
-      </AnswerGameProvider>
-    );
-
-    const { result } = renderHook(() => useHarnessWithWrongZone(), {
-      wrapper: WrongWrapper,
+      expect(result.current.state.activeSlotIndex).toBe(0);
+      act(() => result.current.placeInNextSlot('t1'));
+      expect(result.current.state.activeSlotIndex).toBe(1);
     });
 
-    act(() => result.current.placeInNextSlot('t2'));
-    // Zone 1 must stay empty — the guard blocked the placement
-    expect(result.current.state.zones[1]?.placedTileId).toBeNull();
+    it('skips locked zones when finding the next available slot', () => {
+      const lockedZones: AnswerZone[] = [
+        { ...answerZones[0]!, isLocked: true },
+        answerZones[1]!,
+        answerZones[2]!,
+      ];
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tileItems, lockedZones),
+        { wrapper: Wrapper },
+      );
+
+      act(() => result.current.placeInNextSlot('t2'));
+      expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+      expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
+    });
   });
 
-  it('wraps around to fill earlier empty slots after out-of-order drag placement', () => {
-    // Replicates "cat" scenario: user drags 'a' to slot 1, taps 't' into slot 2,
-    // then taps 'c' — activeSlotIndex is 2 (or beyond) but slot 0 is still empty.
-    // placeInNextSlot must wrap around and place 'c' in zone 0.
-    const threeZones: AnswerZone[] = [
-      {
-        id: 'z0',
-        index: 0,
-        expectedValue: 'C',
-        placedTileId: null, // still empty
-        isWrong: false,
-        isLocked: false,
-      },
-      {
-        id: 'z1',
-        index: 1,
-        expectedValue: 'A',
-        placedTileId: 't2', // already filled out-of-order
-        isWrong: false,
-        isLocked: false,
-      },
-      {
-        id: 'z2',
-        index: 2,
-        expectedValue: 'X',
-        placedTileId: null,
-        isWrong: false,
-        isLocked: false,
-      },
-    ];
+  describe('pre-validation', () => {
+    it('rejects wrong tile in lock-auto-eject mode', () => {
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
 
-    const threeItems: TileItem[] = [
-      { id: 't1', label: 'C', value: 'C' },
-      { id: 't2', label: 'A', value: 'A' },
-      { id: 't3', label: 'X', value: 'X' },
-    ];
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t2');
+      });
 
-    function useHarnessThreeZones() {
-      const dispatch = useAnswerGameDispatch();
-      const state = useAnswerGameContext();
-      if (state.zones.length === 0) {
-        dispatch({
-          type: 'INIT_ROUND',
-          tiles: threeItems,
-          zones: threeZones,
-        });
-        // Simulate activeSlotIndex already at 2 (as if zone 1 was filled via drag)
-        dispatch({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      expect(res).toEqual({
+        placed: false,
+        zoneIndex: 0,
+        rejected: true,
+      });
+      expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+    });
+
+    it('rejects wrong tile in reject mode', () => {
+      const rejectConfig: AnswerGameConfig = {
+        ...gameConfig,
+        wrongTileBehavior: 'reject',
+      };
+      const Wrapper = createWrapper(rejectConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t2');
+      });
+
+      expect(res).toEqual({
+        placed: false,
+        zoneIndex: 0,
+        rejected: true,
+      });
+      expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+    });
+
+    it('allows wrong tile through in lock-manual mode (no pre-validation)', () => {
+      const manualConfig: AnswerGameConfig = {
+        ...gameConfig,
+        wrongTileBehavior: 'lock-manual',
+      };
+      const Wrapper = createWrapper(manualConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t2');
+      });
+
+      expect(res).toEqual({
+        placed: true,
+        zoneIndex: 0,
+        rejected: false,
+      });
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t2');
+    });
+  });
+
+  describe('pending placements queue', () => {
+    it('prevents double-placement on rapid taps (stale closure fix)', () => {
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
+
+      act(() => {
+        result.current.placeInNextSlot('t1');
+        result.current.placeInNextSlot('t2');
+      });
+
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+      expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
+    });
+
+    it('handles three rapid correct taps', () => {
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(() => useHarness(), {
+        wrapper: Wrapper,
+      });
+
+      act(() => {
+        result.current.placeInNextSlot('t1');
+        result.current.placeInNextSlot('t2');
+        result.current.placeInNextSlot('t3');
+      });
+
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+      expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
+      expect(result.current.state.zones[2]?.placedTileId).toBe('t3');
+    });
+  });
+
+  describe('wrap-around', () => {
+    it('wraps around to fill earlier empty slots', () => {
+      const threeZones: AnswerZone[] = [
+        { ...answerZones[0]!, placedTileId: null },
+        { ...answerZones[1]!, placedTileId: 't2' },
+        { ...answerZones[2]!, placedTileId: null },
+      ];
+
+      const Wrapper = createWrapper(gameConfig);
+
+      function useHarnessWrap() {
+        const dispatch = useAnswerGameDispatch();
+        const state = useAnswerGameContext();
+        if (state.zones.length === 0) {
+          dispatch({
+            type: 'INIT_ROUND',
+            tiles: tileItems,
+            zones: threeZones,
+          });
+          dispatch({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+        }
+        const { placeInNextSlot } = useAutoNextSlot();
+        return { state, placeInNextSlot };
       }
-      const { placeInNextSlot } = useAutoNextSlot();
-      return { state, placeInNextSlot };
-    }
 
-    const ThreeWrapper = ({ children }: { children: ReactNode }) => (
-      <AnswerGameProvider config={gameConfig}>
-        {children}
-      </AnswerGameProvider>
-    );
+      const { result } = renderHook(() => useHarnessWrap(), {
+        wrapper: Wrapper,
+      });
 
-    const { result } = renderHook(() => useHarnessThreeZones(), {
-      wrapper: ThreeWrapper,
+      act(() => result.current.placeInNextSlot('t3'));
+      act(() => result.current.placeInNextSlot('t1'));
+
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+    });
+  });
+
+  describe('isWrong guard removal', () => {
+    it('places correct tile in next slot even when active slot is wrong (lock-auto-eject drag)', () => {
+      const wrongZones: AnswerZone[] = [
+        {
+          ...answerZones[0]!,
+          placedTileId: 'tX',
+          isWrong: true,
+          isLocked: true,
+        },
+        answerZones[1]!,
+        answerZones[2]!,
+      ];
+
+      const tilesWithX: TileItem[] = [
+        ...tileItems,
+        { id: 'tX', label: 'X', value: 'X' },
+      ];
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tilesWithX, wrongZones),
+        { wrapper: Wrapper },
+      );
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t2');
+      });
+
+      expect(res).toEqual({
+        placed: true,
+        zoneIndex: 1,
+        rejected: false,
+      });
+      expect(result.current.state.zones[1]?.placedTileId).toBe('t2');
     });
 
-    // activeSlotIndex is 2; zones[2] is empty so first call fills zone 2
-    act(() => result.current.placeInNextSlot('t3'));
-    // Now zones[0] is still empty and activeSlotIndex should wrap around
-    act(() => result.current.placeInNextSlot('t1'));
-    expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+    it('treats isWrong slot with no placedTileId as available (pre-validation supersedes guard)', () => {
+      const wrongZones: AnswerZone[] = [
+        {
+          ...answerZones[0]!,
+          placedTileId: null,
+          isWrong: true,
+          isLocked: false,
+        },
+        answerZones[1]!,
+        answerZones[2]!,
+      ];
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tileItems, wrongZones),
+        { wrapper: Wrapper },
+      );
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t1');
+      });
+
+      expect(res).toEqual({
+        placed: true,
+        zoneIndex: 0,
+        rejected: false,
+      });
+      expect(result.current.state.zones[0]?.placedTileId).toBe('t1');
+    });
+  });
+
+  describe('no slot available', () => {
+    it('returns placed: false, zoneIndex: -1, rejected: false when all slots full', () => {
+      const fullZones: AnswerZone[] = answerZones.map((z) => ({
+        ...z,
+        placedTileId: 'tX',
+        isLocked: true,
+      }));
+
+      const Wrapper = createWrapper(gameConfig);
+      const { result } = renderHook(
+        () => useHarness(tileItems, fullZones),
+        { wrapper: Wrapper },
+      );
+
+      let res: PlaceResult | undefined;
+      act(() => {
+        res = result.current.placeInNextSlot('t1');
+      });
+
+      expect(res).toEqual({
+        placed: false,
+        zoneIndex: -1,
+        rejected: false,
+      });
+    });
   });
 });

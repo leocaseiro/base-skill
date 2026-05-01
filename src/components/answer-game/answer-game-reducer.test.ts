@@ -851,4 +851,46 @@ describe('answerGameReducer', () => {
       expect(next.dragHoverBankTileId).toBeNull();
     });
   });
+
+  describe('REJECT_TAP', () => {
+    it('increments retryCount without mutating zones or bank', () => {
+      const state = answerGameReducer(makeInitialState(config), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+
+      const next = answerGameReducer(state, {
+        type: 'REJECT_TAP',
+        tileId: 't2',
+        zoneIndex: 0,
+      });
+
+      expect(next.retryCount).toBe(state.retryCount + 1);
+      expect(next.zones).toEqual(state.zones);
+      expect(next.bankTileIds).toEqual(state.bankTileIds);
+      expect(next.activeSlotIndex).toBe(state.activeSlotIndex);
+      expect(next.phase).toBe('playing');
+    });
+
+    it('preserves existing retryCount accumulation', () => {
+      let state = answerGameReducer(makeInitialState(config), {
+        type: 'INIT_ROUND',
+        tiles,
+        zones,
+      });
+      state = answerGameReducer(state, {
+        type: 'REJECT_TAP',
+        tileId: 't2',
+        zoneIndex: 0,
+      });
+      state = answerGameReducer(state, {
+        type: 'REJECT_TAP',
+        tileId: 't2',
+        zoneIndex: 0,
+      });
+
+      expect(state.retryCount).toBe(2);
+    });
+  });
 });

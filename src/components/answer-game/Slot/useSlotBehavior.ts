@@ -1,5 +1,6 @@
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useCallback, useEffect, useRef } from 'react';
+import { flashBankTileRejectFeedback } from '../bank-tile-reject-feedback';
 import { useAnswerGameContext } from '../useAnswerGameContext';
 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
 import { useSlotTileDrag } from '../useSlotTileDrag';
@@ -172,7 +173,15 @@ export const useSlotBehavior = (
         });
         return;
       }
-      placeTile(droppedTileId, targetZoneIndex);
+      const { correct } = placeTile(droppedTileId, targetZoneIndex);
+      if (
+        !correct &&
+        stateRef.current.config.wrongTileBehavior === 'reject'
+      ) {
+        requestAnimationFrame(() => {
+          flashBankTileRejectFeedback(droppedTileId);
+        });
+      }
     },
     [placeTile, zones, dispatch, allTiles],
   );

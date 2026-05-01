@@ -103,6 +103,13 @@ export function answerGameReducer(
       };
     }
 
+    case 'REJECT_TAP': {
+      return {
+        ...state,
+        retryCount: state.retryCount + 1,
+      };
+    }
+
     case 'PLACE_TILE': {
       const tile = state.allTiles.find((t) => t.id === action.tileId);
       const zone = state.zones[action.zoneIndex];

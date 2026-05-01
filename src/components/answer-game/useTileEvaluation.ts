@@ -7,7 +7,10 @@ import { getGameEventBus } from '@/lib/game-event-bus';
 import { resolveSkin } from '@/lib/skin';
 
 export interface TileEvaluation {
-  placeTile: (tileId: string, zoneIndex: number) => void;
+  placeTile: (
+    tileId: string,
+    zoneIndex: number,
+  ) => { correct: boolean };
   /**
    * Place a free-typed value into a slot. Creates a virtual tile when
    * no matching bank tile exists. Used with lock-manual / lock-auto-eject
@@ -22,16 +25,23 @@ export function useTileEvaluation(): TileEvaluation {
   const skin = resolveSkin(state.config.gameId, state.config.skin);
 
   const placeTile = useCallback(
-    (tileId: string, zoneIndex: number) => {
+    (tileId: string, zoneIndex: number): { correct: boolean } => {
       const tile = state.allTiles.find((t) => t.id === tileId);
       const zone = state.zones[zoneIndex];
-      if (!tile || !zone) return;
+      if (!tile || !zone) return { correct: false };
 
       const correct = tile.value === zone.expectedValue;
       if (!skin.suppressDefaultSounds) {
         playSound(correct ? 'correct' : 'wrong', 0.8);
       }
-      dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
+
+      // Drag path only — tap/click rejects are handled in useDraggableTile.handleClick
+      // (placeInNextSlot pre-validates and never calls placeTile on rejection)
+      if (!correct && state.config.wrongTileBehavior === 'reject') {
+        dispatch({ type: 'REJECT_TAP', tileId, zoneIndex });
+      } else {
+        dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
+      }
 
       getGameEventBus().emit({
         type: 'game:evaluate',
@@ -44,7 +54,10 @@ export function useTileEvaluation(): TileEvaluation {
         correct,
         nearMiss: false,
         zoneIndex,
+        expected: zone.expectedValue,
       });
+
+      return { correct };
     },
     [state, dispatch, skin],
   );
@@ -77,6 +90,7 @@ export function useTileEvaluation(): TileEvaluation {
         correct,
         nearMiss: false,
         zoneIndex,
+        expected: zone.expectedValue,
       });
     },
     [state, dispatch, skin],
