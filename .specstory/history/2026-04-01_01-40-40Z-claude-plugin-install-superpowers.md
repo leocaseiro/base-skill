@@ -7,6 +7,7 @@
 _**User (2026-04-01 01:40:40Z)**_
 
 <ide_selection>The user selected the lines 93 to 110 from /Users/leocaseiro/Sites/base-skill/docs/baseskill_milestone_breakdown_85146c93.plan.md:
+
 ## Milestone 2 -- Data Layer and Core Infrastructure
 
 Set up RxDB and the foundational systems that everything else depends on.
@@ -25,7 +26,6 @@ Set up RxDB and the foundational systems that everything else depends on.
 - **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
 - **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
 
-
 This may or may not be related to the current task.</ide_selection>
 
 claude plugin install superpowers@claude-plugins-official
@@ -41,7 +41,6 @@ This looks like a slash command or CLI command. Let me think about this - the us
 
 Actually, looking at this more carefully, this seems like the user is asking me to run or help with the command `claude plugin install superpowers@claude-plugins-official`. This doesn't look like a standard Claude Code command I'm familiar with. The user might be confused, or this might be referencing a new feature.
 
-
 I should check the claude-code-guide agent to see if there's a plugin system available in Claude Code.
 </details></think>
 
@@ -54,6 +53,7 @@ Check Claude Code plugin system
 ```text
 The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). STOP what you are doing and wait for the user to tell you how to proceed.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-01 01:40:48Z)**_
@@ -1907,6 +1907,7 @@ This map uses a hierarchical structure:
   * Trust and safety
   * Security vulnerability reporting
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-01 01:40:52Z)**_
@@ -1935,7 +1936,6 @@ _**User (2026-04-01 01:48:19Z)**_
 _**User (2026-04-01 01:48:19Z)**_
 
 Tell your human partner that this command is deprecated and will be removed in the next major release. They should ask you to use the "superpowers brainstorming" skill instead.
-
 
 ---
 
@@ -2114,7 +2114,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:36Z)**_
@@ -2134,7 +2133,6 @@ The user has invoked the superpowers:brainstorming skill. I need to follow the c
 
 First, let me set up tasks and explore the project context. The user hasn't told me what they want to brainstorm yet, so I need to understand the context first and then ask what they want to brainstorm.
 
-
 I'll start by creating tasks and diving into the project files to understand what we're working with, then I can ask what specific problem or feature they want to brainstorm about.
 </details></think>
 
@@ -2153,6 +2151,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:48:36Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:39Z)**_
@@ -2198,6 +2197,7 @@ docs/brainstorms/2026-03-31-milestone-2-brainstorm.md
 docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md
 docs/data-model.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:46Z)**_
@@ -2220,6 +2220,7 @@ f488094 feat(milestone-1): complete project scaffolding and CI/CD pipeline
 d68cce7 feat: initial commit
 e7676ec chore: add .gitignore with .worktrees exclusion
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:49Z)**_
@@ -2229,817 +2230,818 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:48:49Z)**_
  `./docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md`
 
 ```text
-1	# Milestone 2 — Data Layer and Core Infrastructure Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use @superpowers/subagent-driven-development (recommended) or @superpowers/executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Ship RxDB (all collections, migrations, React hooks), document the TanStack Query decision, and deliver internal event bus, locale-prefixed i18n, RxDB-backed theme engine with static default, speech wrappers, plus a static game registry — matching [docs/brainstorms/2026-03-31-milestone-2-brainstorm.md](../brainstorms/2026-03-31-milestone-2-brainstorm.md) and [docs/data-model.md](../data-model.md).
-6	
-7	**Architecture:** Single IndexedDB-backed RxDB database (`baseskill-data`) owns all persisted user data. React accesses data through a `DbProvider` and small reactive hooks (no `@tanstack/react-query` in M2). Locale lives in the URL (`/en`, `/pt-BR`); default redirect from `/` → `/en`. Built-in CSS variables provide default theme before DB; RxDB `themes` collection seeds **exactly two** preset rows for M2 (expand later); runtime injection for signed-in users. Event bus is an in-process typed pub/sub aligned with `docs/game-engine.md`, internal-only in M2.
-8	
-9	**Tech Stack:** React 19, TanStack Router (hash history), Vite 7, Vitest + RTL, RxDB with **Dexie-backed persistence** (`rxdb` + `dexie` + `rxdb/plugins/storage-dexie`) for the browser, **getRxStorageMemory()** for unit tests, `react-i18next`, `nanoid` (if not already present), `fake-indexeddb` (devDep for tests).
-10	
-11	**Git discipline (mandatory):** After **each** numbered step below that creates or edits files, **`git add` those paths and `git commit`** with a focused message **before** starting the next step. Pure verification steps (`yarn test`, `yarn typecheck`, manual smoke) need **no** commit if the tree is still clean; if you fix files to get green, **commit the fix** immediately. **Do not** batch multiple steps into one commit.
-12	
-13	**Persistence choice:** RxDB’s **native IndexedDB storage plugin is premium**; this project stays on the **free** stack. **Always use Dexie** as the IndexedDB layer via the official Dexie storage plugin. That still satisfies `docs/data-model.md` (“IndexedDB via RxDB”) — Dexie is the implementation path, not a duplicate store. Note in `docs/architecture.md` that we intentionally use Dexie storage rather than RxDB’s premium IndexedDB adapter.
-14	
-15	**Spec / context to keep open while coding:** [docs/data-model.md](../data-model.md), [docs/game-engine.md](../game-engine.md) §3 (event bus), [docs/i18n.md](../i18n.md), [docs/ui-ux.md](../ui-ux.md) (theme tokens), [docs/testing-strategy.md](../testing-strategy.md), [docs/architecture.md](../architecture.md).
-16	
-17	---
-18	
-19	## File structure (create / modify)
-20	
-21	| Path                                            | Responsibility                                                                                                                                                                |
-22	| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-23	| `package.json`                                  | Add `rxdb`, `dexie`, `react-i18next`, `i18next`; devDeps `fake-indexeddb`, `@types/`\* if needed; `nanoid` if missing.                                                        |
-24	| `src/db/types.ts`                               | Exported `BaseSkillDatabase` / collection name union.                                                                                                                         |
-25	| `src/db/schemas/*.ts`                           | One module per collection: RxDB-compatible `RxJsonSchema` literals transcribed from `docs/data-model.md` §2.1–2.10.                                                           |
-26	| `src/db/schemas/index.ts`                       | Re-exports + `MAX_SCHEMA_VERSION` helper (see data-model §6).                                                                                                                 |
-27	| `src/db/create-database.ts`                     | `createRxDatabase`, `addCollections`; tests = memory; production = `wrappedDexieStorage` / `getRxStorageDexie` (exact API per installed `rxdb`).                              |
-28	| `src/db/migrations.ts`                          | `checkVersionAndMigrate(db)`: ensure `app_meta` singleton, run RxDB migration strategies, update `rxdbSchemaVersion` / `lastMigrationAt`.                                     |
-29	| `src/db/seed-themes.ts`                         | Insert 2 preset `themes` docs if missing (ids stable; match `docs/ui-ux.md`).                                                                                                 |
-30	| `src/db/index.ts`                               | Public factory: `getOrCreateDatabase(): Promise<BaseSkillDatabase>`.                                                                                                          |
-31	| `src/providers/DbProvider.tsx`                  | React context: db instance, `isReady`, error state.                                                                                                                           |
-32	| `src/db/hooks/useRxDB.ts`                       | Consume context.                                                                                                                                                              |
-33	| `src/db/hooks/useRxQuery.ts`                    | Generic hook: subscribe to RxDB `Observable` / `.subscribe`, cleanup on unmount (use `useSyncExternalStore` or subscription + `useState`).                                    |
-34	| `src/lib/game-event-bus.ts`                     | `GameEventBus` implementation + `createGameEventBus()` singleton.                                                                                                             |
-35	| `src/types/game-events.ts`                      | `GameEvent`, `GameEventType`, narrow event interfaces (subset OK for M2; expand in M4).                                                                                       |
-36	| `src/lib/game-event-bus.md`                     | Short “future public API” note (internal-only M2).                                                                                                                            |
-37	| `src/lib/i18n/i18n.ts`                          | `i18next` instance, resources, default `lng`.                                                                                                                                 |
-38	| `src/lib/i18n/locales/en/*.json`                | Namespace files: `common`, `games`, `settings`, `encouragements`.                                                                                                             |
-39	| `src/lib/i18n/locales/pt-BR/*.json`             | Same keys as `en` (real or stub translations).                                                                                                                                |
-40	| `src/routes/index.tsx`                          | Root index: `redirect` to `/$locale` with `locale: 'en'`.                                                                                                                     |
-41	| `src/routes/$locale/route.tsx`                  | Layout: `beforeLoad` validate `locale ∈ { en, 'pt-BR' }`, sync `i18n.changeLanguage`, `<Outlet />`.                                                                           |
-42	| `src/routes/$locale/_app.tsx`                   | Moved from `src/routes/_app.tsx`; fix `createFileRoute` path.                                                                                                                 |
-43	| `src/routes/$locale/_app/*`                     | Move entire `src/routes/_app/` tree here; update every `createFileRoute('...')` string to new route id (run dev to regenerate `routeTree.gen.ts`).                            |
-44	| `src/lib/theme/css-vars.ts`                     | Map RxDB theme document → `--bs-*` / `--sea-*` assignments on `document.documentElement`.                                                                                     |
-45	| `src/lib/theme/default-tokens.ts`               | Static fallback map when DB empty or anonymous.                                                                                                                               |
-46	| `src/providers/ThemeRuntimeProvider.tsx`        | Subscribe to active theme (from settings/profile when present; else default), call `applyThemeCssVars`.                                                                       |
-47	| `src/lib/speech/SpeechOutput.ts`                | TTS wrapper: `speak`, `cancel`, feature detect.                                                                                                                               |
-48	| `src/lib/speech/SpeechInput.ts`                 | STT wrapper: `start`/`stop`, permissions, feature detect.                                                                                                                     |
-49	| `src/lib/speech/voices.ts`                      | Enumerate voices filtered by language.                                                                                                                                        |
-50	| `src/games/registry.ts`                         | Static `{ id, titleKey, ... }[]` for catalog (i18n keys into `games` namespace).                                                                                              |
-51	| `docs/adrs/0001-rxdb-without-tanstack-query.md` | Decision record: defer Query until M6; hooks pattern summary.                                                                                                                 |
-52	| `docs/architecture.md`                          | Short delta: bootstrap exceptions (URL locale, static theme), DbProvider, event bus location, **RxDB persistence via Dexie** (free tier; premium IndexedDB adapter not used). |
-53	| `src/routes/__root.tsx`                         | Trim `THEME_INIT_SCRIPT` localStorage usage per brainstorm; keep minimal `prefers-color-scheme` class for first paint if still needed, or delegate to static tokens only.     |
-54	| `src/components/ThemeToggle.tsx`                | Stop persisting theme to `localStorage`; wire to runtime provider / “auto” vs stored preference rules from `docs/ui-ux.md`.                                                   |
-55	| `src/test-setup.ts`                             | Register `fake-indexeddb/auto` before tests.                                                                                                                                  |
-56	| `vitest.config.ts`                              | Unchanged unless test globs need `src/db/**/*.test.ts`.                                                                                                                       |
-57	| `e2e/smoke.spec.ts`                             | Assert navigation under `#/en/...` (hash router).                                                                                                                             |
-58	
-59	---
-60	
-61	## Dependency order
-62	
-63	1. **SYNC:** deps → schemas → `create-database` + migrations → `DbProvider` + hooks → ADR.
-64	2. **ASYNC (after DB creates successfully in dev):** event bus, i18n + routes, theme + seed, speech, game registry — can parallelize across agents once `src/db/index.ts` API is stable.
-65	3. **Integration last:** compose providers in root layout, fix E2E.
-66	
-67	---
-68	
-69	### Task 1: Dependencies and test IndexedDB shim
-70	
-71	**Files:**
-72	
-73	- Modify: `package.json`
-74	- Modify: `src/test-setup.ts`
-75	- Test: `src/db/setup-validation.test.ts` (new)
-76	- **Step 1: Add packages**
-77	
-78	Run:
-79	
-80	```bash
-81	cd /Users/leocaseiro/Sites/base-skill && yarn add rxdb dexie react-i18next i18next nanoid
-82	yarn add -D fake-indexeddb
-83	```
-84	
-85	Expected: `yarn.lock` updates; no peer warnings unresolved (resolve per Yarn output).
-86	
-87	**Commit:**
-88	
-89	```bash
-90	git add package.json yarn.lock
-91	git commit -m "chore(deps): add rxdb, dexie, i18n, nanoid, fake-indexeddb"
-92	```
-93	
-94	- **Step 2: Register fake IndexedDB globally for Vitest**
-95	
-96	In `src/test-setup.ts`, prepend:
-97	
-98	```typescript
-99	import 'fake-indexeddb/auto'
-100	import '@testing-library/jest-dom'
-101	```
-102	
-103	**Commit:**
-104	
-105	```bash
-106	git add src/test-setup.ts
-107	git commit -m "chore(test): register fake-indexeddb in vitest setup"
-108	```
-109	
-110	- **Step 3: Add IndexedDB smoke test**
-111	
-112	Create `src/db/setup-validation.test.ts`:
-113	
-114	```typescript
-115	import { describe, it, expect } from 'vitest'
-116	
-117	describe('test environment', () => {
-118	  it('indexedDB is available', () => {
-119	    expect(indexedDB).toBeDefined()
-120	  })
-121	})
-122	```
-123	
-124	**Commit:**
-125	
-126	```bash
-127	git add src/db/setup-validation.test.ts
-128	git commit -m "test(db): assert indexedDB available in test env"
-129	```
-130	
-131	- **Step 4: Run test**
-132	
-133	Run: `yarn test src/db/setup-validation.test.ts`  
-134	Expected: **PASS** (no commit if clean).
-135	
-136	---
-137	
-138	### Task 2: RxDB database factory (memory in tests) + first collection
-139	
-140	**Files:**
-141	
-142	- Create: `src/db/types.ts`
-143	- Create: `src/db/schemas/app-meta.ts`
-144	- Create: `src/db/create-database.ts`
-145	- Create: `src/db/index.ts`
-146	- Test: `src/db/create-database.test.ts`
-147	
-148	Use **memory storage** in this task. **Dexie** is wired in **Task 5** for production (verify import paths against installed `rxdb` version).
-149	
-150	- **Step 1: Write failing test — create DB and add `app_meta`**
-151	
-152	`src/db/create-database.test.ts`:
-153	
-154	```typescript
-155	import { afterEach, describe, expect, it } from 'vitest'
-156	import { createTestDatabase, destroyTestDatabase } from './create-database'
-157	
-158	describe('createTestDatabase', () => {
-159	  let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined
-160	  afterEach(async () => {
-161	    if (db) await destroyTestDatabase(db)
-162	    db = undefined
-163	  })
-164	
-165	  it('creates app_meta collection', async () => {
-166	    db = await createTestDatabase()
-167	    expect(db.app_meta).toBeDefined()
-168	  })
-169	})
-170	```
-171	
-172	Export `createTestDatabase` / `destroyTestDatabase` from `create-database.ts` using **memory storage** for unit tests only; production path uses Dexie.
-173	
-174	Run: `yarn test src/db/create-database.test.ts`  
-175	Expected: **FAIL** (module missing). No commit if nothing new to save; if you add a temporary stub to compile, **commit that stub** before Step 2.
-176	
-177	**Commit** (failing test + **minimal** `create-database.ts` / `index.ts` stubs so the test file type-checks and Vitest can collect it — e.g. `createTestDatabase` missing or throwing until Step 3):
-178	
-179	```bash
-180	git add src/db/create-database.test.ts src/db/create-database.ts src/db/schemas/app-meta.ts src/db/types.ts src/db/index.ts
-181	git commit -m "test(db): failing test for createTestDatabase with app_meta"
-182	```
-183	
-184	- **Step 2: Implement minimal `app_meta` schema**
-185	
-186	Transcribe `docs/data-model.md` §2.10 into `src/db/schemas/app-meta.ts` as `export const appMetaSchema = { ... }` with `version: 0`, `primaryKey: 'id'`, `type: 'object'`, `properties` / `required` matching the doc. No `additionalProperties` if RxDB version disallows — follow RxDB json-schema rules.
-187	
-188	**Commit:**
-189	
-190	```bash
-191	git add src/db/schemas/app-meta.ts
-192	git commit -m "feat(db): add app_meta RxJSON schema"
-193	```
-194	
-195	- **Step 3: Implement `createTestDatabase` only** (`getOrCreateDatabase` + Dexie in Task 5)
-196	
-197	`src/db/create-database.ts` skeleton:
-198	
-199	```typescript
-200	import { createRxDatabase, type RxDatabase, type RxCollection } from 'rxdb'
-201	import { getRxStorageMemory } from 'rxdb/plugins/storage-memory'
-202	import { appMetaSchema } from './schemas/app-meta'
-203	
-204	export type AppMetaDoc = {
-205	  id: 'singleton'
-206	  appVersion: string
-207	  rxdbSchemaVersion: number
-208	  lastMigrationAt: string | null
-209	  installId: string
-210	}
-211	
-212	// eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- RxDB collection map
-213	type Collections = {
-214	  app_meta: RxCollection<AppMetaDoc>
-215	}
-216	
-217	export type BaseSkillDatabase = RxDatabase<Collections>
-218	
-219	const DB_NAME = 'baseskill-data-test'
-220	
-221	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-222	  const db = await createRxDatabase<BaseSkillDatabase>({
-223	    name: DB_NAME + Math.random(),
-224	    storage: getRxStorageMemory(),
-225	    multiInstance: false,
-226	    ignoreDuplicate: true,
-227	  })
-228	  await db.addCollections({
-229	    app_meta: { schema: appMetaSchema },
-230	  })
-231	  return db
-232	}
-233	
-234	export async function destroyTestDatabase(
-235	  db?: BaseSkillDatabase,
-236	): Promise<void> {
-237	  if (db) await db.remove()
-238	}
-239	```
-240	
-241	**Note:** Replace imports with the exact APIs from your installed `rxdb` version (use `@plugin-compound-engineering-context7` / RxDB docs if build fails).
-242	
-243	Run: `yarn test src/db/create-database.test.ts`  
-244	Expected: **PASS**
-245	
-246	**Commit:**
-247	
-248	```bash
-249	git add src/db/create-database.ts src/db/types.ts src/db/index.ts
-250	git commit -m "feat(db): createTestDatabase with memory storage and app_meta"
-251	```
-252	
-253	- **Step 4: `yarn typecheck`**
-254	
-255	Run: `yarn typecheck`  
-256	Expected: **PASS** (commit any type fixes immediately if you touched files).
-257	
-258	---
-259	
-260	### Task 3: All remaining collection schemas + `addCollections`
-261	
-262	**Files:**
-263	
-264	- Create: `src/db/schemas/profiles.ts` … `sync-meta.ts` (one file per collection from data-model §2.1–2.9)
-265	- Create: `src/db/schemas/index.ts`
-266	- Modify: `src/db/create-database.ts`
-267	- Modify: `src/db/types.ts`
-268	- Test: extend `src/db/create-database.test.ts`
-269	- **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
-270	
-271	**Commit:**
-272	
-273	```bash
-274	git add src/db/schemas/
-275	git commit -m "feat(db): add RxJSON schemas for remaining collections"
-276	```
-277	
-278	- **Step 2: Register collections** in `create-database.ts` / `types.ts` and extend `create-database.test.ts` with `it('adds all collections', …)` asserting each `db[collectionName]` exists.
-279	
-280	**Commit:**
-281	
-282	```bash
-283	git add src/db/create-database.ts src/db/types.ts src/db/create-database.test.ts
-284	git commit -m "feat(db): register all collections in createTestDatabase"
-285	```
-286	
-287	- **Step 3: Run tests**
-288	
-289	Run: `yarn test src/db/create-database.test.ts`  
-290	Expected: **PASS** (commit any fixes before continuing).
-291	
-292	---
-293	
-294	### Task 4: Migrations + `app_meta` bootstrap
-295	
-296	**Files:**
-297	
-298	- Create: `src/db/migrations.ts`
-299	- Modify: `src/db/create-database.ts` (call migrations after `addCollections`)
-300	- Test: `src/db/migrations.test.ts`
-301	- **Step 1: Write failing test**
-302	
-303	`migrations.test.ts`: after `createTestDatabase()`, call `ensureAppMetaSingleton(db)`, then `findOne('singleton')` returns doc with `rxdbSchemaVersion === MAX_SCHEMA_VERSION` and non-empty `installId`.
-304	
-305	Run: `yarn test src/db/migrations.test.ts` — expect **FAIL**.
-306	
-307	**Commit:**
-308	
-309	```bash
-310	git add src/db/migrations.test.ts
-311	git commit -m "test(db): failing tests for app_meta bootstrap and migrations"
-312	```
-313	
-314	- **Step 2: Implement** per `docs/data-model.md` §6–9: RxDB `migrationStrategies` on each collection (start with identity `old => old` for version 0 only). `ensureAppMetaSingleton` inserts row if missing using `package.json` version for `appVersion`.
-315	
-316	**Commit:**
-317	
-318	```bash
-319	git add src/db/migrations.ts src/db/create-database.ts
-320	git commit -m "feat(db): app_meta bootstrap and migration framework"
-321	```
-322	
-323	- **Step 3: Run tests + typecheck**
-324	
-325	Run: `yarn test src/db/migrations.test.ts && yarn typecheck`  
-326	Expected: **PASS** (commit any fixes immediately).
-327	
-328	---
-329	
-330	### Task 5: Production database entry + Dexie storage
-331	
-332	**Files:**
-333	
-334	- Modify: `src/db/create-database.ts`
-335	- Modify: `src/db/index.ts`
-336	- Test: optional `src/db/production-database.browser.test.ts` (skip in CI if flaky; or manual QA step documented)
-337	- **Step 1: Export `getOrCreateDatabase()`** using **fixed** `name: 'baseskill-data'`, `wrappedDexieStorage` / `getRxStorageDexie` for browser, `multiInstance: false`.
-338	
-339	**Commit:**
-340	
-341	```bash
-342	git add src/db/create-database.ts src/db/index.ts
-343	git commit -m "feat(db): production Dexie storage and getOrCreateDatabase"
-344	```
-345	
-346	- **Step 2: Manual smoke** — `yarn dev`, confirm IndexedDB in DevTools. Remove any temporary `console.log` (or guard with `import.meta.env.DEV`); **commit** if that edit touched files.
-347	
-348	---
-349	
-350	### Task 6: `DbProvider` + `useRxDB`
-351	
-352	**Files:**
-353	
-354	- Create: `src/providers/DbProvider.tsx`
-355	- Create: `src/db/hooks/useRxDB.ts`
-356	- Test: `src/providers/DbProvider.test.tsx`
-357	- **Step 1: Write failing test** — render provider with mocked `getOrCreateDatabase`, assert children see ready state.
-358	
-359	**Commit:**
-360	
-361	```bash
-362	git add src/providers/DbProvider.test.tsx
-363	git commit -m "test(db): failing tests for DbProvider"
-364	```
-365	
-366	- **Step 2: Implement** provider: `useEffect` calls `getOrCreateDatabase`, sets state, provides `{ db, error, isReady }`; add `useRxDB`.
-367	
-368	**Commit:**
-369	
-370	```bash
-371	git add src/providers/DbProvider.tsx src/db/hooks/useRxDB.ts
-372	git commit -m "feat(db): DbProvider and useRxDB context"
-373	```
-374	
-375	- **Step 3: Run**
-376	
-377	Run: `yarn test src/providers/DbProvider.test.tsx`  
-378	Expected: **PASS** (commit fixes if any).
-379	
-380	---
-381	
-382	### Task 7: Reactive `useRxQuery` hook
-383	
-384	**Files:**
-385	
-386	- Create: `src/db/hooks/useRxQuery.ts`
-387	- Test: `src/db/hooks/useRxQuery.test.tsx`
-388	- **Step 1: Write test** — insert doc into `themes` via memory db, hook subscribes to `find().$`, assert UI updates after second insert.
-389	
-390	**Commit:**
-391	
-392	```bash
-393	git add src/db/hooks/useRxQuery.test.tsx
-394	git commit -m "test(db): useRxQuery reactive subscription"
-395	```
-396	
-397	- **Step 2: Implement** hook with proper cleanup (`subscription.unsubscribe()`).
-398	
-399	**Commit:**
-400	
-401	```bash
-402	git add src/db/hooks/useRxQuery.ts
-403	git commit -m "feat(db): useRxQuery hook"
-404	```
-405	
-406	- **Step 3: Run**
-407	
-408	Run: `yarn test src/db/hooks/useRxQuery.test.tsx`  
-409	Expected: **PASS** (commit fixes if any).
-410	
-411	---
-412	
-413	### Task 8: ADR — TanStack Query deferred
-414	
-415	**Files:**
-416	
-417	- Create: `docs/adrs/0001-rxdb-without-tanstack-query.md`
-418	- Modify: `docs/architecture.md` (link ADR; 1 short paragraph on data access)
-419	- **Step 1: Write ADR** — Context, Decision (defer `@tanstack/react-query` until M6 network layer), Consequences (hooks-only pattern, no duplicate cache).
-420	
-421	**Commit:**
-422	
-423	```bash
-424	git add docs/adrs/0001-rxdb-without-tanstack-query.md
-425	git commit -m "docs: ADR defer TanStack Query until cloud sync milestone"
-426	```
-427	
-428	- **Step 2: Update `docs/architecture.md`** — link ADR; short paragraph on data access + Dexie persistence.
-429	
-430	**Commit:**
-431	
-432	```bash
-433	git add docs/architecture.md
-434	git commit -m "docs(architecture): link RxDB ADR and persistence notes"
-435	```
-436	
-437	---
-438	
-439	### Task 9: Game event bus (internal)
-440	
-441	**Files:**
-442	
-443	- Create: `src/types/game-events.ts`
-444	- Create: `src/lib/game-event-bus.ts`
-445	- Create: `src/lib/game-event-bus.md`
-446	- Test: `src/lib/game-event-bus.test.ts`
-447	- **Step 1: Add `game-events` types + failing tests** — `emit` delivers to exact type subscribers; `game:*` receives all; unsubscribe stops delivery.
-448	
-449	**Commit:**
-450	
-451	```bash
-452	git add src/types/game-events.ts src/lib/game-event-bus.test.ts
-453	git commit -m "test(events): GameEventBus failing tests"
-454	```
-455	
-456	- **Step 2: Implement** typed bus (sync dispatch is fine for M2) + `game-event-bus.md`.
-457	
-458	**Commit:**
-459	
-460	```bash
-461	git add src/lib/game-event-bus.ts src/lib/game-event-bus.md
-462	git commit -m "feat(events): internal GameEventBus with wildcard subscribe"
-463	```
-464	
-465	- **Step 3: Run**
-466	
-467	Run: `yarn test src/lib/game-event-bus.test.ts`  
-468	Expected: **PASS** (commit fixes if any).
-469	
-470	---
-471	
-472	### Task 10: i18n resources + instance
-473	
-474	**Files:**
-475	
-476	- Create: `src/lib/i18n/i18n.ts`
-477	- Create: `src/lib/i18n/locales/en/common.json` (etc.)
-478	- Create: `src/lib/i18n/locales/pt-BR/common.json` (etc.)
-479	- Test: `src/lib/i18n/i18n.test.ts`
-480	- **Step 1: Write test** — `i18n.t('common:appName')` returns string for both langs (test may fail until Step 2 fills resources).
-481	
-482	**Commit:**
-483	
-484	```bash
-485	git add src/lib/i18n/i18n.test.ts
-486	git commit -m "test(i18n): assert translations resolve for en and pt-BR"
-487	```
-488	
-489	- **Step 2: Add** `i18n.ts` + namespace JSON files (minimal keys: `appName`, `home.title`, a few game titles).
-490	
-491	**Commit:**
-492	
-493	```bash
-494	git add src/lib/i18n/
-495	git commit -m "feat(i18n): react-i18next setup with en and pt-BR namespaces"
-496	```
-497	
-498	- **Step 3: Run**
-499	
-500	Run: `yarn test src/lib/i18n/i18n.test.ts`  
-501	Expected: **PASS** (commit fixes if any).
-502	
-503	---
-504	
-505	### Task 11: Locale route segment + move `_app` tree
-506	
-507	**Files:**
-508	
-509	- Create: `src/routes/index.tsx`
-510	- Create: `src/routes/$locale/route.tsx`
-511	- Move: `src/routes/_app.tsx` → `src/routes/$locale/_app.tsx`
-512	- Move: `src/routes/_app/`** → `src/routes/$locale/\_app/**`
-513	- Delete: empty `src/routes/_app/` if unused
-514	- Modify: every moved route’s `createFileRoute(...)` path (TanStack will error until paths match; use `yarn dev` to see expected ids)
-515	- Test: update `src/routes/_app/index.test.tsx` path → `src/routes/$locale/_app/index.test.tsx`; fix imports
-516	- Modify: `src/routes/__root.test.tsx` if fullPath assertions exist
-517	- **Step 1: Add root redirect**
-518	
-519	`src/routes/index.tsx`:
-520	
-521	```typescript
-522	import { createFileRoute, redirect } from '@tanstack/react-router'
-523	
-524	export const Route = createFileRoute('/')({
-525	  beforeLoad: () => {
-526	    throw redirect({ to: '/$locale', params: { locale: 'en' }, replace: true })
-527	  },
-528	})
-529	```
-530	
-531	**Commit:**
-532	
-533	```bash
-534	git add src/routes/index.tsx
-535	git commit -m "feat(router): redirect / to default locale en"
-536	```
-537	
-538	- **Step 2: Locale layout** validates param and sets language:
-539	
-540	```typescript
-541	import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
-542	import i18n from '@/lib/i18n/i18n'
-543	
-544	const LOCALES = ['en', 'pt-BR'] as const
-545	export type AppLocale = (typeof LOCALES)[number]
-546	
-547	export const Route = createFileRoute('/$locale')({
-548	  beforeLoad: ({ params }) => {
-549	    if (!LOCALES.includes(params.locale as AppLocale)) {
-550	      throw redirect({ to: '/$locale', params: { locale: 'en' }, replace: true })
-551	    }
-552	  },
-553	  component: LocaleLayout,
-554	})
-555	
-556	function LocaleLayout() {
-557	  const { locale } = Route.useParams()
-558	  void i18n.changeLanguage(locale)
-559	  return <Outlet />
-560	}
-561	```
-562	
-563	**Commit:**
-564	
-565	```bash
-566	git add 'src/routes/$locale/route.tsx'
-567	git commit -m "feat(router): locale layout and i18n sync"
-568	```
-569	
-570	- **Step 3: Move `src/routes/\_app/**`→`src/routes/$locale/\_app/**`**; fix every `createFileRoute('…')` id; update tests (`__root.test.tsx`, etc.); run `yarn dev` to regenerate `routeTree.gen.ts`.
-571	
-572	**Commit:**
-573	
-574	```bash
-575	git add src/routes/ src/routeTree.gen.ts
-576	git commit -m "feat(router): nest app routes under locale segment"
-577	```
-578	
-579	- **Step 4: Verify**
-580	
-581	Run: `yarn typecheck && yarn test`  
-582	Expected: **PASS** (commit any fixes immediately).
-583	
-584	---
-585	
-586	### Task 12: Wire `I18nextProvider` + `DbProvider` in app shell
-587	
-588	**Files:**
-589	
-590	- Modify: `src/routes/$locale/_app.tsx` (or `src/routes/__root.tsx` — prefer `_app` so `html lang` can stay dynamic via a tiny effect setting `document.documentElement.lang`)
-591	- Modify: app entry if needed (`src/start.ts` / router mount — follow existing TanStack Start pattern)
-592	- **Step 1: Wrap** `<Outlet />` with `I18nextProvider` and `DbProvider` (order: `DbProvider` outer if games read DB from shell later).
-593	
-594	**Commit:**
-595	
-596	```bash
-597	git add 'src/routes/$locale/_app.tsx'
-598	git commit -m "feat(app): compose DbProvider and I18nextProvider in shell"
-599	```
-600	
-601	- **Step 2: Test** smoke render in `src/routes/$locale/_app.test.tsx` (optional).
-602	
-603	**Commit** (skip if you did not add/change files):
-604	
-605	```bash
-606	git add 'src/routes/$locale/_app.test.tsx'
-607	git commit -m "test(app): smoke render with providers"
-608	```
-609	
-610	- **Step 3: Run**
-611	
-612	Run: `yarn test` (scoped to new test if needed)  
-613	Expected: **PASS** (commit fixes if any).
-614	
-615	---
-616	
-617	### Task 13: Theme seed + runtime CSS variables
-618	
-619	**Files:**
-620	
-621	- Create: `src/db/seed-themes.ts`
-622	- Create: `src/lib/theme/default-tokens.ts`
-623	- Create: `src/lib/theme/css-vars.ts`
-624	- Create: `src/providers/ThemeRuntimeProvider.tsx`
-625	- Modify: `src/providers/DbProvider.tsx` or `_app.tsx` — call `seedThemesOnce(db)` after ready
-626	- Modify: `src/routes/__root.tsx` — reduce/remove `localStorage` theme script per brainstorm
-627	- Modify: `src/components/ThemeToggle.tsx`
-628	- Test: `src/lib/theme/css-vars.test.ts`
-629	- **Step 1: Test** — `applyThemeCssVars` sets `--bs-background` (or your token names from `src/styles.css`) on a detached `HTMLElement`.
-630	
-631	**Commit:**
-632	
-633	```bash
-634	git add src/lib/theme/css-vars.test.ts
-635	git commit -m "test(theme): applyThemeCssVars maps tokens to element"
-636	```
-637	
-638	- **Step 2: Implement** `css-vars.ts` + `default-tokens.ts` (static fallback when DB empty / anonymous).
-639	
-640	**Commit:**
-641	
-642	```bash
-643	git add src/lib/theme/css-vars.ts src/lib/theme/default-tokens.ts
-644	git commit -m "feat(theme): CSS variable application and default tokens"
-645	```
-646	
-647	- **Step 3: Seed presets** — `src/db/seed-themes.ts` inserts **exactly two** preset `themes` documents if missing (stable ids; derived from `docs/ui-ux.md` / `src/styles.css`). **Do not** add more presets in M2.
-648	
-649	**Commit:**
-650	
-651	```bash
-652	git add src/db/seed-themes.ts
-653	git commit -m "feat(theme): seed two preset themes in RxDB"
-654	```
-655	
-656	- **Step 4: Runtime provider + shell** — `ThemeRuntimeProvider`; call `seedThemesOnce(db)` after DB ready; trim `__root.tsx` theme script; update `ThemeToggle.tsx`.
-657	
-658	**Commit:**
-659	
-660	```bash
-661	git add src/providers/ThemeRuntimeProvider.tsx src/providers/DbProvider.tsx src/routes/__root.tsx src/components/ThemeToggle.tsx 'src/routes/$locale/_app.tsx'
-662	git commit -m "feat(theme): runtime provider, seed on init, toggle without localStorage mirror"
-663	```
-664	
-665	- **Step 5: Run**
-666	
-667	Run: `yarn test src/lib/theme/`  
-668	Expected: **PASS** (commit fixes if any).
-669	
-670	---
-671	
-672	### Task 14: Speech wrappers
-673	
-674	**Files:**
-675	
-676	- Create: `src/lib/speech/SpeechOutput.ts`
-677	- Create: `src/lib/speech/SpeechInput.ts`
-678	- Create: `src/lib/speech/voices.ts`
-679	- Test: `src/lib/speech/SpeechOutput.test.ts` (mock `speechSynthesis` per `docs/testing-strategy.md`)
-680	- **Step 1: Tests first** — when `speechSynthesis` undefined, `speak` no-ops without throw.
-681	
-682	**Commit:**
-683	
-684	```bash
-685	git add src/lib/speech/SpeechOutput.test.ts
-686	git commit -m "test(speech): SpeechOutput safe when API missing"
-687	```
-688	
-689	- **Step 2: Implement** `SpeechOutput.ts`, `SpeechInput.ts`, `voices.ts`.
-690	
-691	**Commit:**
-692	
-693	```bash
-694	git add src/lib/speech/
-695	git commit -m "feat(speech): TTS and STT wrappers with safe fallbacks"
-696	```
-697	
-698	- **Step 3: Run**
-699	
-700	Run: `yarn test src/lib/speech/`  
-701	Expected: **PASS** (commit fixes if any).
-702	
-703	---
-704	
-705	### Task 15: Static game registry
-706	
-707	**Files:**
-708	
-709	- Create: `src/games/registry.ts`
-710	- Test: `src/games/registry.test.ts`
-711	- **Step 1: Test** — minimal assertion on `GAME_CATALOG` length / shape.
-712	
-713	**Commit:**
-714	
-715	```bash
-716	git add src/games/registry.test.ts
-717	git commit -m "test(games): static game catalog shape"
-718	```
-719	
-720	- **Step 2: Implement** `GAME_CATALOG` with stable `id` and `titleKey` for i18n.
-721	
-722	**Commit:**
-723	
-724	```bash
-725	git add src/games/registry.ts
-726	git commit -m "feat(games): static catalog registry for anonymous browsing"
-727	```
-728	
-729	- **Step 3: Run**
-730	
-731	Run: `yarn test src/games/registry.test.ts`  
-732	Expected: **PASS** (commit fixes if any).
-733	
-734	---
-735	
-736	### Task 16: Homepage uses catalog + i18n (minimal M2 vertical slice)
-737	
-738	**Files:**
-739	
-740	- Modify: `src/routes/$locale/_app/index.tsx`
-741	- **Step 1: Render** list from `GAME_CATALOG` with `useTranslation('games')`.
-742	
-743	**Commit:**
-744	
-745	```bash
-746	git add 'src/routes/$locale/_app/index.tsx'
-747	git commit -m "feat(home): show static game list with i18n under locale route"
-748	```
-749	
-750	- **Step 2: Run**
-751	
-752	Run: `yarn test` (and any route tests)  
-753	Expected: **PASS** (commit fixes if any).
-754	
-755	---
-756	
-757	### Task 17: E2E and lint gate
-758	
-759	**Files:**
-760	
-761	- Modify: `e2e/smoke.spec.ts`, `e2e/a11y.spec.ts` if URLs assumed `/`
-762	- **Step 1: Update** Playwright paths to `/#/en` or full hash paths your router uses.
-763	
-764	**Commit:**
-765	
-766	```bash
-767	git add e2e/
-768	git commit -m "test(e2e): align Playwright with locale-prefixed routes"
-769	```
-770	
-771	- **Step 2: Full gate**
-772	
-773	Run:
-774	
-775	```bash
-776	yarn lint && yarn typecheck && yarn test && yarn test:e2e
-777	```
-778	
-779	Expected: all **PASS** (commit any lint/type fixes immediately if needed).
-780	
-781	---
-782	
-783	## Post-plan review (recommended)
-784	
-785	1. Dispatch a **plan-document-reviewer** subagent with: this file path + brainstorm path `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`.
-786	2. Fix any gaps (e.g. missing `session_history` indexes from data-model §10).
-787	3. Max 3 review iterations, then ask a human.
-788	
-789	---
-790	
-791	## Execution handoff
-792	
-793	**Plan complete and saved to `docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md`.**
-794	
-795	**1. Subagent-Driven (recommended)** — Fresh subagent per task, review between tasks: use @superpowers/subagent-driven-development.
-796	
-797	**2. Inline Execution** — Batch tasks in this session with checkpoints: use @superpowers/executing-plans.
-798	
-799	**Which approach do you want?**
-800	
-801	---
-802	
-803	## Notes
-804	
-805	- **Git:** The **Git discipline** paragraph at the top is binding; each file-changing step below ends with an explicit **Commit** block — follow it in order.
-806	- **Milestone 3 prep:** Brainstorm requires anonymous homepage + full game list without profile; this plan only adds **static** catalog UI. Removing profile-first `beforeLoad` guards is **explicitly M3** work — do not block M2 on redesigning all M3 routes.
-807	- **RxDB API drift:** If imports fail, consult current RxDB docs (`rxdb` version in `yarn.lock`) and adjust `create-database.ts` in one focused commit.
-808	- **Dexie vs premium IndexedDB:** Do not adopt RxDB’s premium IndexedDB-only adapter; Dexie + `storage-dexie` is the supported **free** persistence path for this repo.
-809	- **Regenerated files:** Never hand-edit `src/routeTree.gen.ts`; fix file-route paths and run dev/build.
+1 # Milestone 2 — Data Layer and Core Infrastructure Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use @superpowers/subagent-driven-development (recommended) or @superpowers/executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Ship RxDB (all collections, migrations, React hooks), document the TanStack Query decision, and deliver internal event bus, locale-prefixed i18n, RxDB-backed theme engine with static default, speech wrappers, plus a static game registry — matching [docs/brainstorms/2026-03-31-milestone-2-brainstorm.md](../brainstorms/2026-03-31-milestone-2-brainstorm.md) and [docs/data-model.md](../data-model.md).
+6 
+7 **Architecture:** Single IndexedDB-backed RxDB database (`baseskill-data`) owns all persisted user data. React accesses data through a `DbProvider` and small reactive hooks (no `@tanstack/react-query` in M2). Locale lives in the URL (`/en`, `/pt-BR`); default redirect from `/` → `/en`. Built-in CSS variables provide default theme before DB; RxDB `themes` collection seeds **exactly two** preset rows for M2 (expand later); runtime injection for signed-in users. Event bus is an in-process typed pub/sub aligned with `docs/game-engine.md`, internal-only in M2.
+8 
+9 **Tech Stack:** React 19, TanStack Router (hash history), Vite 7, Vitest + RTL, RxDB with **Dexie-backed persistence** (`rxdb` + `dexie` + `rxdb/plugins/storage-dexie`) for the browser, **getRxStorageMemory()** for unit tests, `react-i18next`, `nanoid` (if not already present), `fake-indexeddb` (devDep for tests).
+10 
+11 **Git discipline (mandatory):** After **each** numbered step below that creates or edits files, **`git add` those paths and `git commit`** with a focused message **before** starting the next step. Pure verification steps (`yarn test`, `yarn typecheck`, manual smoke) need **no** commit if the tree is still clean; if you fix files to get green, **commit the fix** immediately. **Do not** batch multiple steps into one commit.
+12 
+13 **Persistence choice:** RxDB’s **native IndexedDB storage plugin is premium**; this project stays on the **free** stack. **Always use Dexie** as the IndexedDB layer via the official Dexie storage plugin. That still satisfies `docs/data-model.md` (“IndexedDB via RxDB”) — Dexie is the implementation path, not a duplicate store. Note in `docs/architecture.md` that we intentionally use Dexie storage rather than RxDB’s premium IndexedDB adapter.
+14 
+15 **Spec / context to keep open while coding:** [docs/data-model.md](../data-model.md), [docs/game-engine.md](../game-engine.md) §3 (event bus), [docs/i18n.md](../i18n.md), [docs/ui-ux.md](../ui-ux.md) (theme tokens), [docs/testing-strategy.md](../testing-strategy.md), [docs/architecture.md](../architecture.md).
+16 
+17 ---
+18 
+19 ## File structure (create / modify)
+20 
+21 | Path                                            | Responsibility                                                                                                                                                                |
+22 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+23 | `package.json`                                  | Add `rxdb`, `dexie`, `react-i18next`, `i18next`; devDeps `fake-indexeddb`, `@types/`\* if needed; `nanoid` if missing.                                                        |
+24 | `src/db/types.ts`                               | Exported `BaseSkillDatabase` / collection name union.                                                                                                                         |
+25 | `src/db/schemas/*.ts`                           | One module per collection: RxDB-compatible `RxJsonSchema` literals transcribed from `docs/data-model.md` §2.1–2.10.                                                           |
+26 | `src/db/schemas/index.ts`                       | Re-exports + `MAX_SCHEMA_VERSION` helper (see data-model §6).                                                                                                                 |
+27 | `src/db/create-database.ts`                     | `createRxDatabase`, `addCollections`; tests = memory; production = `wrappedDexieStorage` / `getRxStorageDexie` (exact API per installed `rxdb`).                              |
+28 | `src/db/migrations.ts`                          | `checkVersionAndMigrate(db)`: ensure `app_meta` singleton, run RxDB migration strategies, update `rxdbSchemaVersion` / `lastMigrationAt`.                                     |
+29 | `src/db/seed-themes.ts`                         | Insert 2 preset `themes` docs if missing (ids stable; match `docs/ui-ux.md`).                                                                                                 |
+30 | `src/db/index.ts`                               | Public factory: `getOrCreateDatabase(): Promise<BaseSkillDatabase>`.                                                                                                          |
+31 | `src/providers/DbProvider.tsx`                  | React context: db instance, `isReady`, error state.                                                                                                                           |
+32 | `src/db/hooks/useRxDB.ts`                       | Consume context.                                                                                                                                                              |
+33 | `src/db/hooks/useRxQuery.ts`                    | Generic hook: subscribe to RxDB `Observable` / `.subscribe`, cleanup on unmount (use `useSyncExternalStore` or subscription + `useState`).                                    |
+34 | `src/lib/game-event-bus.ts`                     | `GameEventBus` implementation + `createGameEventBus()` singleton.                                                                                                             |
+35 | `src/types/game-events.ts`                      | `GameEvent`, `GameEventType`, narrow event interfaces (subset OK for M2; expand in M4).                                                                                       |
+36 | `src/lib/game-event-bus.md`                     | Short “future public API” note (internal-only M2).                                                                                                                            |
+37 | `src/lib/i18n/i18n.ts`                          | `i18next` instance, resources, default `lng`.                                                                                                                                 |
+38 | `src/lib/i18n/locales/en/*.json`                | Namespace files: `common`, `games`, `settings`, `encouragements`.                                                                                                             |
+39 | `src/lib/i18n/locales/pt-BR/*.json`             | Same keys as `en` (real or stub translations).                                                                                                                                |
+40 | `src/routes/index.tsx`                          | Root index: `redirect` to `/$locale` with `locale: 'en'`.                                                                                                                     |
+41 | `src/routes/$locale/route.tsx`                  | Layout: `beforeLoad` validate `locale ∈ { en, 'pt-BR' }`, sync `i18n.changeLanguage`, `<Outlet />`.                                                                           |
+42 | `src/routes/$locale/_app.tsx`                   | Moved from `src/routes/_app.tsx`; fix `createFileRoute` path.                                                                                                                 |
+43 | `src/routes/$locale/_app/*`                     | Move entire `src/routes/_app/` tree here; update every `createFileRoute('...')` string to new route id (run dev to regenerate `routeTree.gen.ts`).                            |
+44 | `src/lib/theme/css-vars.ts`                     | Map RxDB theme document → `--bs-*` / `--sea-*` assignments on `document.documentElement`.                                                                                     |
+45 | `src/lib/theme/default-tokens.ts`               | Static fallback map when DB empty or anonymous.                                                                                                                               |
+46 | `src/providers/ThemeRuntimeProvider.tsx`        | Subscribe to active theme (from settings/profile when present; else default), call `applyThemeCssVars`.                                                                       |
+47 | `src/lib/speech/SpeechOutput.ts`                | TTS wrapper: `speak`, `cancel`, feature detect.                                                                                                                               |
+48 | `src/lib/speech/SpeechInput.ts`                 | STT wrapper: `start`/`stop`, permissions, feature detect.                                                                                                                     |
+49 | `src/lib/speech/voices.ts`                      | Enumerate voices filtered by language.                                                                                                                                        |
+50 | `src/games/registry.ts`                         | Static `{ id, titleKey, ... }[]` for catalog (i18n keys into `games` namespace).                                                                                              |
+51 | `docs/adrs/0001-rxdb-without-tanstack-query.md` | Decision record: defer Query until M6; hooks pattern summary.                                                                                                                 |
+52 | `docs/architecture.md`                          | Short delta: bootstrap exceptions (URL locale, static theme), DbProvider, event bus location, **RxDB persistence via Dexie** (free tier; premium IndexedDB adapter not used). |
+53 | `src/routes/__root.tsx`                         | Trim `THEME_INIT_SCRIPT` localStorage usage per brainstorm; keep minimal `prefers-color-scheme` class for first paint if still needed, or delegate to static tokens only.     |
+54 | `src/components/ThemeToggle.tsx`                | Stop persisting theme to `localStorage`; wire to runtime provider / “auto” vs stored preference rules from `docs/ui-ux.md`.                                                   |
+55 | `src/test-setup.ts`                             | Register `fake-indexeddb/auto` before tests.                                                                                                                                  |
+56 | `vitest.config.ts`                              | Unchanged unless test globs need `src/db/**/*.test.ts`.                                                                                                                       |
+57 | `e2e/smoke.spec.ts`                             | Assert navigation under `#/en/...` (hash router).                                                                                                                             |
+58 
+59 ---
+60 
+61 ## Dependency order
+62 
+63 1. **SYNC:** deps → schemas → `create-database` + migrations → `DbProvider` + hooks → ADR.
+64 2. **ASYNC (after DB creates successfully in dev):** event bus, i18n + routes, theme + seed, speech, game registry — can parallelize across agents once `src/db/index.ts` API is stable.
+65 3. **Integration last:** compose providers in root layout, fix E2E.
+66 
+67 ---
+68 
+69 ### Task 1: Dependencies and test IndexedDB shim
+70 
+71 **Files:**
+72 
+73 - Modify: `package.json`
+74 - Modify: `src/test-setup.ts`
+75 - Test: `src/db/setup-validation.test.ts` (new)
+76 - **Step 1: Add packages**
+77 
+78 Run:
+79 
+80 ```bash
+81 cd /Users/leocaseiro/Sites/base-skill && yarn add rxdb dexie react-i18next i18next nanoid
+82 yarn add -D fake-indexeddb
+83 ```
+84 
+85 Expected: `yarn.lock` updates; no peer warnings unresolved (resolve per Yarn output).
+86 
+87 **Commit:**
+88 
+89 ```bash
+90 git add package.json yarn.lock
+91 git commit -m "chore(deps): add rxdb, dexie, i18n, nanoid, fake-indexeddb"
+92 ```
+93 
+94 - **Step 2: Register fake IndexedDB globally for Vitest**
+95 
+96 In `src/test-setup.ts`, prepend:
+97 
+98 ```typescript
+99 import 'fake-indexeddb/auto'
+100 import '@testing-library/jest-dom'
+101 ```
+102 
+103 **Commit:**
+104 
+105 ```bash
+106 git add src/test-setup.ts
+107 git commit -m "chore(test): register fake-indexeddb in vitest setup"
+108 ```
+109 
+110 - **Step 3: Add IndexedDB smoke test**
+111 
+112 Create `src/db/setup-validation.test.ts`:
+113 
+114 ```typescript
+115 import { describe, it, expect } from 'vitest'
+116 
+117 describe('test environment', () => {
+118   it('indexedDB is available', () => {
+119     expect(indexedDB).toBeDefined()
+120   })
+121 })
+122 ```
+123 
+124 **Commit:**
+125 
+126 ```bash
+127 git add src/db/setup-validation.test.ts
+128 git commit -m "test(db): assert indexedDB available in test env"
+129 ```
+130 
+131 - **Step 4: Run test**
+132 
+133 Run: `yarn test src/db/setup-validation.test.ts`  
+134 Expected: **PASS** (no commit if clean).
+135 
+136 ---
+137 
+138 ### Task 2: RxDB database factory (memory in tests) + first collection
+139 
+140 **Files:**
+141 
+142 - Create: `src/db/types.ts`
+143 - Create: `src/db/schemas/app-meta.ts`
+144 - Create: `src/db/create-database.ts`
+145 - Create: `src/db/index.ts`
+146 - Test: `src/db/create-database.test.ts`
+147 
+148 Use **memory storage** in this task. **Dexie** is wired in **Task 5** for production (verify import paths against installed `rxdb` version).
+149 
+150 - **Step 1: Write failing test — create DB and add `app_meta`**
+151 
+152 `src/db/create-database.test.ts`:
+153 
+154 ```typescript
+155 import { afterEach, describe, expect, it } from 'vitest'
+156 import { createTestDatabase, destroyTestDatabase } from './create-database'
+157 
+158 describe('createTestDatabase', () => {
+159   let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined
+160   afterEach(async () => {
+161     if (db) await destroyTestDatabase(db)
+162     db = undefined
+163   })
+164 
+165   it('creates app_meta collection', async () => {
+166     db = await createTestDatabase()
+167     expect(db.app_meta).toBeDefined()
+168   })
+169 })
+170 ```
+171 
+172 Export `createTestDatabase` / `destroyTestDatabase` from `create-database.ts` using **memory storage** for unit tests only; production path uses Dexie.
+173 
+174 Run: `yarn test src/db/create-database.test.ts`  
+175 Expected: **FAIL** (module missing). No commit if nothing new to save; if you add a temporary stub to compile, **commit that stub** before Step 2.
+176 
+177 **Commit** (failing test + **minimal** `create-database.ts` / `index.ts` stubs so the test file type-checks and Vitest can collect it — e.g. `createTestDatabase` missing or throwing until Step 3):
+178 
+179 ```bash
+180 git add src/db/create-database.test.ts src/db/create-database.ts src/db/schemas/app-meta.ts src/db/types.ts src/db/index.ts
+181 git commit -m "test(db): failing test for createTestDatabase with app_meta"
+182 ```
+183 
+184 - **Step 2: Implement minimal `app_meta` schema**
+185 
+186 Transcribe `docs/data-model.md` §2.10 into `src/db/schemas/app-meta.ts` as `export const appMetaSchema = { ... }` with `version: 0`, `primaryKey: 'id'`, `type: 'object'`, `properties` / `required` matching the doc. No `additionalProperties` if RxDB version disallows — follow RxDB json-schema rules.
+187 
+188 **Commit:**
+189 
+190 ```bash
+191 git add src/db/schemas/app-meta.ts
+192 git commit -m "feat(db): add app_meta RxJSON schema"
+193 ```
+194 
+195 - **Step 3: Implement `createTestDatabase` only** (`getOrCreateDatabase` + Dexie in Task 5)
+196 
+197 `src/db/create-database.ts` skeleton:
+198 
+199 ```typescript
+200 import { createRxDatabase, type RxDatabase, type RxCollection } from 'rxdb'
+201 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory'
+202 import { appMetaSchema } from './schemas/app-meta'
+203 
+204 export type AppMetaDoc = {
+205   id: 'singleton'
+206   appVersion: string
+207   rxdbSchemaVersion: number
+208   lastMigrationAt: string | null
+209   installId: string
+210 }
+211 
+212 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- RxDB collection map
+213 type Collections = {
+214   app_meta: RxCollection<AppMetaDoc>
+215 }
+216 
+217 export type BaseSkillDatabase = RxDatabase<Collections>
+218 
+219 const DB_NAME = 'baseskill-data-test'
+220 
+221 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+222   const db = await createRxDatabase<BaseSkillDatabase>({
+223     name: DB_NAME + Math.random(),
+224     storage: getRxStorageMemory(),
+225     multiInstance: false,
+226     ignoreDuplicate: true,
+227   })
+228   await db.addCollections({
+229     app_meta: { schema: appMetaSchema },
+230   })
+231   return db
+232 }
+233 
+234 export async function destroyTestDatabase(
+235   db?: BaseSkillDatabase,
+236 ): Promise<void> {
+237   if (db) await db.remove()
+238 }
+239 ```
+240 
+241 **Note:** Replace imports with the exact APIs from your installed `rxdb` version (use `@plugin-compound-engineering-context7` / RxDB docs if build fails).
+242 
+243 Run: `yarn test src/db/create-database.test.ts`  
+244 Expected: **PASS**
+245 
+246 **Commit:**
+247 
+248 ```bash
+249 git add src/db/create-database.ts src/db/types.ts src/db/index.ts
+250 git commit -m "feat(db): createTestDatabase with memory storage and app_meta"
+251 ```
+252 
+253 - **Step 4: `yarn typecheck`**
+254 
+255 Run: `yarn typecheck`  
+256 Expected: **PASS** (commit any type fixes immediately if you touched files).
+257 
+258 ---
+259 
+260 ### Task 3: All remaining collection schemas + `addCollections`
+261 
+262 **Files:**
+263 
+264 - Create: `src/db/schemas/profiles.ts` … `sync-meta.ts` (one file per collection from data-model §2.1–2.9)
+265 - Create: `src/db/schemas/index.ts`
+266 - Modify: `src/db/create-database.ts`
+267 - Modify: `src/db/types.ts`
+268 - Test: extend `src/db/create-database.test.ts`
+269 - **Step 1: Transcribe schemas** from `docs/data-model.md` for `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`. Export `MAX_SCHEMA_VERSION` in `schemas/index.ts` using the same formula as the doc §6.
+270 
+271 **Commit:**
+272 
+273 ```bash
+274 git add src/db/schemas/
+275 git commit -m "feat(db): add RxJSON schemas for remaining collections"
+276 ```
+277 
+278 - **Step 2: Register collections** in `create-database.ts` / `types.ts` and extend `create-database.test.ts` with `it('adds all collections', …)` asserting each `db[collectionName]` exists.
+279 
+280 **Commit:**
+281 
+282 ```bash
+283 git add src/db/create-database.ts src/db/types.ts src/db/create-database.test.ts
+284 git commit -m "feat(db): register all collections in createTestDatabase"
+285 ```
+286 
+287 - **Step 3: Run tests**
+288 
+289 Run: `yarn test src/db/create-database.test.ts`  
+290 Expected: **PASS** (commit any fixes before continuing).
+291 
+292 ---
+293 
+294 ### Task 4: Migrations + `app_meta` bootstrap
+295 
+296 **Files:**
+297 
+298 - Create: `src/db/migrations.ts`
+299 - Modify: `src/db/create-database.ts` (call migrations after `addCollections`)
+300 - Test: `src/db/migrations.test.ts`
+301 - **Step 1: Write failing test**
+302 
+303 `migrations.test.ts`: after `createTestDatabase()`, call `ensureAppMetaSingleton(db)`, then `findOne('singleton')` returns doc with `rxdbSchemaVersion === MAX_SCHEMA_VERSION` and non-empty `installId`.
+304 
+305 Run: `yarn test src/db/migrations.test.ts` — expect **FAIL**.
+306 
+307 **Commit:**
+308 
+309 ```bash
+310 git add src/db/migrations.test.ts
+311 git commit -m "test(db): failing tests for app_meta bootstrap and migrations"
+312 ```
+313 
+314 - **Step 2: Implement** per `docs/data-model.md` §6–9: RxDB `migrationStrategies` on each collection (start with identity `old => old` for version 0 only). `ensureAppMetaSingleton` inserts row if missing using `package.json` version for `appVersion`.
+315 
+316 **Commit:**
+317 
+318 ```bash
+319 git add src/db/migrations.ts src/db/create-database.ts
+320 git commit -m "feat(db): app_meta bootstrap and migration framework"
+321 ```
+322 
+323 - **Step 3: Run tests + typecheck**
+324 
+325 Run: `yarn test src/db/migrations.test.ts && yarn typecheck`  
+326 Expected: **PASS** (commit any fixes immediately).
+327 
+328 ---
+329 
+330 ### Task 5: Production database entry + Dexie storage
+331 
+332 **Files:**
+333 
+334 - Modify: `src/db/create-database.ts`
+335 - Modify: `src/db/index.ts`
+336 - Test: optional `src/db/production-database.browser.test.ts` (skip in CI if flaky; or manual QA step documented)
+337 - **Step 1: Export `getOrCreateDatabase()`** using **fixed** `name: 'baseskill-data'`, `wrappedDexieStorage` / `getRxStorageDexie` for browser, `multiInstance: false`.
+338 
+339 **Commit:**
+340 
+341 ```bash
+342 git add src/db/create-database.ts src/db/index.ts
+343 git commit -m "feat(db): production Dexie storage and getOrCreateDatabase"
+344 ```
+345 
+346 - **Step 2: Manual smoke** — `yarn dev`, confirm IndexedDB in DevTools. Remove any temporary `console.log` (or guard with `import.meta.env.DEV`); **commit** if that edit touched files.
+347 
+348 ---
+349 
+350 ### Task 6: `DbProvider` + `useRxDB`
+351 
+352 **Files:**
+353 
+354 - Create: `src/providers/DbProvider.tsx`
+355 - Create: `src/db/hooks/useRxDB.ts`
+356 - Test: `src/providers/DbProvider.test.tsx`
+357 - **Step 1: Write failing test** — render provider with mocked `getOrCreateDatabase`, assert children see ready state.
+358 
+359 **Commit:**
+360 
+361 ```bash
+362 git add src/providers/DbProvider.test.tsx
+363 git commit -m "test(db): failing tests for DbProvider"
+364 ```
+365 
+366 - **Step 2: Implement** provider: `useEffect` calls `getOrCreateDatabase`, sets state, provides `{ db, error, isReady }`; add `useRxDB`.
+367 
+368 **Commit:**
+369 
+370 ```bash
+371 git add src/providers/DbProvider.tsx src/db/hooks/useRxDB.ts
+372 git commit -m "feat(db): DbProvider and useRxDB context"
+373 ```
+374 
+375 - **Step 3: Run**
+376 
+377 Run: `yarn test src/providers/DbProvider.test.tsx`  
+378 Expected: **PASS** (commit fixes if any).
+379 
+380 ---
+381 
+382 ### Task 7: Reactive `useRxQuery` hook
+383 
+384 **Files:**
+385 
+386 - Create: `src/db/hooks/useRxQuery.ts`
+387 - Test: `src/db/hooks/useRxQuery.test.tsx`
+388 - **Step 1: Write test** — insert doc into `themes` via memory db, hook subscribes to `find().$`, assert UI updates after second insert.
+389 
+390 **Commit:**
+391 
+392 ```bash
+393 git add src/db/hooks/useRxQuery.test.tsx
+394 git commit -m "test(db): useRxQuery reactive subscription"
+395 ```
+396 
+397 - **Step 2: Implement** hook with proper cleanup (`subscription.unsubscribe()`).
+398 
+399 **Commit:**
+400 
+401 ```bash
+402 git add src/db/hooks/useRxQuery.ts
+403 git commit -m "feat(db): useRxQuery hook"
+404 ```
+405 
+406 - **Step 3: Run**
+407 
+408 Run: `yarn test src/db/hooks/useRxQuery.test.tsx`  
+409 Expected: **PASS** (commit fixes if any).
+410 
+411 ---
+412 
+413 ### Task 8: ADR — TanStack Query deferred
+414 
+415 **Files:**
+416 
+417 - Create: `docs/adrs/0001-rxdb-without-tanstack-query.md`
+418 - Modify: `docs/architecture.md` (link ADR; 1 short paragraph on data access)
+419 - **Step 1: Write ADR** — Context, Decision (defer `@tanstack/react-query` until M6 network layer), Consequences (hooks-only pattern, no duplicate cache).
+420 
+421 **Commit:**
+422 
+423 ```bash
+424 git add docs/adrs/0001-rxdb-without-tanstack-query.md
+425 git commit -m "docs: ADR defer TanStack Query until cloud sync milestone"
+426 ```
+427 
+428 - **Step 2: Update `docs/architecture.md`** — link ADR; short paragraph on data access + Dexie persistence.
+429 
+430 **Commit:**
+431 
+432 ```bash
+433 git add docs/architecture.md
+434 git commit -m "docs(architecture): link RxDB ADR and persistence notes"
+435 ```
+436 
+437 ---
+438 
+439 ### Task 9: Game event bus (internal)
+440 
+441 **Files:**
+442 
+443 - Create: `src/types/game-events.ts`
+444 - Create: `src/lib/game-event-bus.ts`
+445 - Create: `src/lib/game-event-bus.md`
+446 - Test: `src/lib/game-event-bus.test.ts`
+447 - **Step 1: Add `game-events` types + failing tests** — `emit` delivers to exact type subscribers; `game:*` receives all; unsubscribe stops delivery.
+448 
+449 **Commit:**
+450 
+451 ```bash
+452 git add src/types/game-events.ts src/lib/game-event-bus.test.ts
+453 git commit -m "test(events): GameEventBus failing tests"
+454 ```
+455 
+456 - **Step 2: Implement** typed bus (sync dispatch is fine for M2) + `game-event-bus.md`.
+457 
+458 **Commit:**
+459 
+460 ```bash
+461 git add src/lib/game-event-bus.ts src/lib/game-event-bus.md
+462 git commit -m "feat(events): internal GameEventBus with wildcard subscribe"
+463 ```
+464 
+465 - **Step 3: Run**
+466 
+467 Run: `yarn test src/lib/game-event-bus.test.ts`  
+468 Expected: **PASS** (commit fixes if any).
+469 
+470 ---
+471 
+472 ### Task 10: i18n resources + instance
+473 
+474 **Files:**
+475 
+476 - Create: `src/lib/i18n/i18n.ts`
+477 - Create: `src/lib/i18n/locales/en/common.json` (etc.)
+478 - Create: `src/lib/i18n/locales/pt-BR/common.json` (etc.)
+479 - Test: `src/lib/i18n/i18n.test.ts`
+480 - **Step 1: Write test** — `i18n.t('common:appName')` returns string for both langs (test may fail until Step 2 fills resources).
+481 
+482 **Commit:**
+483 
+484 ```bash
+485 git add src/lib/i18n/i18n.test.ts
+486 git commit -m "test(i18n): assert translations resolve for en and pt-BR"
+487 ```
+488 
+489 - **Step 2: Add** `i18n.ts` + namespace JSON files (minimal keys: `appName`, `home.title`, a few game titles).
+490 
+491 **Commit:**
+492 
+493 ```bash
+494 git add src/lib/i18n/
+495 git commit -m "feat(i18n): react-i18next setup with en and pt-BR namespaces"
+496 ```
+497 
+498 - **Step 3: Run**
+499 
+500 Run: `yarn test src/lib/i18n/i18n.test.ts`  
+501 Expected: **PASS** (commit fixes if any).
+502 
+503 ---
+504 
+505 ### Task 11: Locale route segment + move `_app` tree
+506 
+507 **Files:**
+508 
+509 - Create: `src/routes/index.tsx`
+510 - Create: `src/routes/$locale/route.tsx`
+511 - Move: `src/routes/_app.tsx` → `src/routes/$locale/_app.tsx`
+512 - Move: `src/routes/_app/`** → `src/routes/$locale/\_app/**`
+513 - Delete: empty `src/routes/_app/` if unused
+514 - Modify: every moved route’s `createFileRoute(...)` path (TanStack will error until paths match; use `yarn dev` to see expected ids)
+515 - Test: update `src/routes/_app/index.test.tsx` path → `src/routes/$locale/_app/index.test.tsx`; fix imports
+516 - Modify: `src/routes/__root.test.tsx` if fullPath assertions exist
+517 - **Step 1: Add root redirect**
+518 
+519 `src/routes/index.tsx`:
+520 
+521 ```typescript
+522 import { createFileRoute, redirect } from '@tanstack/react-router'
+523 
+524 export const Route = createFileRoute('/')({
+525   beforeLoad: () => {
+526     throw redirect({ to: '/$locale', params: { locale: 'en' }, replace: true })
+527   },
+528 })
+529 ```
+530 
+531 **Commit:**
+532 
+533 ```bash
+534 git add src/routes/index.tsx
+535 git commit -m "feat(router): redirect / to default locale en"
+536 ```
+537 
+538 - **Step 2: Locale layout** validates param and sets language:
+539 
+540 ```typescript
+541 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+542 import i18n from '@/lib/i18n/i18n'
+543 
+544 const LOCALES = ['en', 'pt-BR'] as const
+545 export type AppLocale = (typeof LOCALES)[number]
+546 
+547 export const Route = createFileRoute('/$locale')({
+548   beforeLoad: ({ params }) => {
+549     if (!LOCALES.includes(params.locale as AppLocale)) {
+550       throw redirect({ to: '/$locale', params: { locale: 'en' }, replace: true })
+551     }
+552   },
+553   component: LocaleLayout,
+554 })
+555 
+556 function LocaleLayout() {
+557   const { locale } = Route.useParams()
+558   void i18n.changeLanguage(locale)
+559   return <Outlet />
+560 }
+561 ```
+562 
+563 **Commit:**
+564 
+565 ```bash
+566 git add 'src/routes/$locale/route.tsx'
+567 git commit -m "feat(router): locale layout and i18n sync"
+568 ```
+569 
+570 - **Step 3: Move `src/routes/\_app/**`→`src/routes/$locale/\_app/**`**; fix every `createFileRoute('…')` id; update tests (`__root.test.tsx`, etc.); run `yarn dev` to regenerate `routeTree.gen.ts`.
+571 
+572 **Commit:**
+573 
+574 ```bash
+575 git add src/routes/ src/routeTree.gen.ts
+576 git commit -m "feat(router): nest app routes under locale segment"
+577 ```
+578 
+579 - **Step 4: Verify**
+580 
+581 Run: `yarn typecheck && yarn test`  
+582 Expected: **PASS** (commit any fixes immediately).
+583 
+584 ---
+585 
+586 ### Task 12: Wire `I18nextProvider` + `DbProvider` in app shell
+587 
+588 **Files:**
+589 
+590 - Modify: `src/routes/$locale/_app.tsx` (or `src/routes/__root.tsx` — prefer `_app` so `html lang` can stay dynamic via a tiny effect setting `document.documentElement.lang`)
+591 - Modify: app entry if needed (`src/start.ts` / router mount — follow existing TanStack Start pattern)
+592 - **Step 1: Wrap** `<Outlet />` with `I18nextProvider` and `DbProvider` (order: `DbProvider` outer if games read DB from shell later).
+593 
+594 **Commit:**
+595 
+596 ```bash
+597 git add 'src/routes/$locale/_app.tsx'
+598 git commit -m "feat(app): compose DbProvider and I18nextProvider in shell"
+599 ```
+600 
+601 - **Step 2: Test** smoke render in `src/routes/$locale/_app.test.tsx` (optional).
+602 
+603 **Commit** (skip if you did not add/change files):
+604 
+605 ```bash
+606 git add 'src/routes/$locale/_app.test.tsx'
+607 git commit -m "test(app): smoke render with providers"
+608 ```
+609 
+610 - **Step 3: Run**
+611 
+612 Run: `yarn test` (scoped to new test if needed)  
+613 Expected: **PASS** (commit fixes if any).
+614 
+615 ---
+616 
+617 ### Task 13: Theme seed + runtime CSS variables
+618 
+619 **Files:**
+620 
+621 - Create: `src/db/seed-themes.ts`
+622 - Create: `src/lib/theme/default-tokens.ts`
+623 - Create: `src/lib/theme/css-vars.ts`
+624 - Create: `src/providers/ThemeRuntimeProvider.tsx`
+625 - Modify: `src/providers/DbProvider.tsx` or `_app.tsx` — call `seedThemesOnce(db)` after ready
+626 - Modify: `src/routes/__root.tsx` — reduce/remove `localStorage` theme script per brainstorm
+627 - Modify: `src/components/ThemeToggle.tsx`
+628 - Test: `src/lib/theme/css-vars.test.ts`
+629 - **Step 1: Test** — `applyThemeCssVars` sets `--bs-background` (or your token names from `src/styles.css`) on a detached `HTMLElement`.
+630 
+631 **Commit:**
+632 
+633 ```bash
+634 git add src/lib/theme/css-vars.test.ts
+635 git commit -m "test(theme): applyThemeCssVars maps tokens to element"
+636 ```
+637 
+638 - **Step 2: Implement** `css-vars.ts` + `default-tokens.ts` (static fallback when DB empty / anonymous).
+639 
+640 **Commit:**
+641 
+642 ```bash
+643 git add src/lib/theme/css-vars.ts src/lib/theme/default-tokens.ts
+644 git commit -m "feat(theme): CSS variable application and default tokens"
+645 ```
+646 
+647 - **Step 3: Seed presets** — `src/db/seed-themes.ts` inserts **exactly two** preset `themes` documents if missing (stable ids; derived from `docs/ui-ux.md` / `src/styles.css`). **Do not** add more presets in M2.
+648 
+649 **Commit:**
+650 
+651 ```bash
+652 git add src/db/seed-themes.ts
+653 git commit -m "feat(theme): seed two preset themes in RxDB"
+654 ```
+655 
+656 - **Step 4: Runtime provider + shell** — `ThemeRuntimeProvider`; call `seedThemesOnce(db)` after DB ready; trim `__root.tsx` theme script; update `ThemeToggle.tsx`.
+657 
+658 **Commit:**
+659 
+660 ```bash
+661 git add src/providers/ThemeRuntimeProvider.tsx src/providers/DbProvider.tsx src/routes/__root.tsx src/components/ThemeToggle.tsx 'src/routes/$locale/_app.tsx'
+662 git commit -m "feat(theme): runtime provider, seed on init, toggle without localStorage mirror"
+663 ```
+664 
+665 - **Step 5: Run**
+666 
+667 Run: `yarn test src/lib/theme/`  
+668 Expected: **PASS** (commit fixes if any).
+669 
+670 ---
+671 
+672 ### Task 14: Speech wrappers
+673 
+674 **Files:**
+675 
+676 - Create: `src/lib/speech/SpeechOutput.ts`
+677 - Create: `src/lib/speech/SpeechInput.ts`
+678 - Create: `src/lib/speech/voices.ts`
+679 - Test: `src/lib/speech/SpeechOutput.test.ts` (mock `speechSynthesis` per `docs/testing-strategy.md`)
+680 - **Step 1: Tests first** — when `speechSynthesis` undefined, `speak` no-ops without throw.
+681 
+682 **Commit:**
+683 
+684 ```bash
+685 git add src/lib/speech/SpeechOutput.test.ts
+686 git commit -m "test(speech): SpeechOutput safe when API missing"
+687 ```
+688 
+689 - **Step 2: Implement** `SpeechOutput.ts`, `SpeechInput.ts`, `voices.ts`.
+690 
+691 **Commit:**
+692 
+693 ```bash
+694 git add src/lib/speech/
+695 git commit -m "feat(speech): TTS and STT wrappers with safe fallbacks"
+696 ```
+697 
+698 - **Step 3: Run**
+699 
+700 Run: `yarn test src/lib/speech/`  
+701 Expected: **PASS** (commit fixes if any).
+702 
+703 ---
+704 
+705 ### Task 15: Static game registry
+706 
+707 **Files:**
+708 
+709 - Create: `src/games/registry.ts`
+710 - Test: `src/games/registry.test.ts`
+711 - **Step 1: Test** — minimal assertion on `GAME_CATALOG` length / shape.
+712 
+713 **Commit:**
+714 
+715 ```bash
+716 git add src/games/registry.test.ts
+717 git commit -m "test(games): static game catalog shape"
+718 ```
+719 
+720 - **Step 2: Implement** `GAME_CATALOG` with stable `id` and `titleKey` for i18n.
+721 
+722 **Commit:**
+723 
+724 ```bash
+725 git add src/games/registry.ts
+726 git commit -m "feat(games): static catalog registry for anonymous browsing"
+727 ```
+728 
+729 - **Step 3: Run**
+730 
+731 Run: `yarn test src/games/registry.test.ts`  
+732 Expected: **PASS** (commit fixes if any).
+733 
+734 ---
+735 
+736 ### Task 16: Homepage uses catalog + i18n (minimal M2 vertical slice)
+737 
+738 **Files:**
+739 
+740 - Modify: `src/routes/$locale/_app/index.tsx`
+741 - **Step 1: Render** list from `GAME_CATALOG` with `useTranslation('games')`.
+742 
+743 **Commit:**
+744 
+745 ```bash
+746 git add 'src/routes/$locale/_app/index.tsx'
+747 git commit -m "feat(home): show static game list with i18n under locale route"
+748 ```
+749 
+750 - **Step 2: Run**
+751 
+752 Run: `yarn test` (and any route tests)  
+753 Expected: **PASS** (commit fixes if any).
+754 
+755 ---
+756 
+757 ### Task 17: E2E and lint gate
+758 
+759 **Files:**
+760 
+761 - Modify: `e2e/smoke.spec.ts`, `e2e/a11y.spec.ts` if URLs assumed `/`
+762 - **Step 1: Update** Playwright paths to `/#/en` or full hash paths your router uses.
+763 
+764 **Commit:**
+765 
+766 ```bash
+767 git add e2e/
+768 git commit -m "test(e2e): align Playwright with locale-prefixed routes"
+769 ```
+770 
+771 - **Step 2: Full gate**
+772 
+773 Run:
+774 
+775 ```bash
+776 yarn lint && yarn typecheck && yarn test && yarn test:e2e
+777 ```
+778 
+779 Expected: all **PASS** (commit any lint/type fixes immediately if needed).
+780 
+781 ---
+782 
+783 ## Post-plan review (recommended)
+784 
+785 1. Dispatch a **plan-document-reviewer** subagent with: this file path + brainstorm path `docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`.
+786 2. Fix any gaps (e.g. missing `session_history` indexes from data-model §10).
+787 3. Max 3 review iterations, then ask a human.
+788 
+789 ---
+790 
+791 ## Execution handoff
+792 
+793 **Plan complete and saved to `docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md`.**
+794 
+795 **1. Subagent-Driven (recommended)** — Fresh subagent per task, review between tasks: use @superpowers/subagent-driven-development.
+796 
+797 **2. Inline Execution** — Batch tasks in this session with checkpoints: use @superpowers/executing-plans.
+798 
+799 **Which approach do you want?**
+800 
+801 ---
+802 
+803 ## Notes
+804 
+805 - **Git:** The **Git discipline** paragraph at the top is binding; each file-changing step below ends with an explicit **Commit** block — follow it in order.
+806 - **Milestone 3 prep:** Brainstorm requires anonymous homepage + full game list without profile; this plan only adds **static** catalog UI. Removing profile-first `beforeLoad` guards is **explicitly M3** work — do not block M2 on redesigning all M3 routes.
+807 - **RxDB API drift:** If imports fail, consult current RxDB docs (`rxdb` version in `yarn.lock`) and adjust `create-database.ts` in one focused commit.
+808 - **Dexie vs premium IndexedDB:** Do not adopt RxDB’s premium IndexedDB-only adapter; Dexie + `storage-dexie` is the supported **free** persistence path for this repo.
+809 - **Regenerated files:** Never hand-edit `src/routeTree.gen.ts`; fix file-route paths and run dev/build.
 810
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:49Z)**_
@@ -3049,90 +3051,91 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:48:49Z)**_
  `./docs/brainstorms/2026-03-31-milestone-2-brainstorm.md`
 
 ```text
-1	# Brainstorm: Milestone 2 — Data Layer and Core Infrastructure
-2	
-3	**Date:** 2026-03-31  
-4	**Source:** [baseskill_milestone_breakdown_85146c93.plan.md](../baseskill_milestone_breakdown_85146c93.plan.md) (Milestone 2)  
-5	**Status:** Implementation plan captured — see [docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md](../superpowers/plans/2026-03-31-milestone-2-data-layer.md).
-6	
-7	---
-8	
-9	## What We're Building
-10	
-11	Milestone 2 establishes the **local-first data plane** and **cross-cutting services** everything else depends on.
-12	
-13	**SYNC (ordered):**
-14	
-15	1. **RxDB** — All collections from `docs/data-model.md`: `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`; IndexedDB storage; schemas aligned with JSON Schema + version fields.
-16	2. **Migrations** — Framework driven by `app_meta` (and RxDB migration hooks) so schema changes are explicit and testable.
-17	3. **React integration** — Hooks (or thin wrappers) so UI subscribes reactively to queries and collections without leaking RxDB types into every component.
-18	4. **TanStack Query decision** — Document whether Query adds value on top of RxDB for this app, or whether custom hooks over RxDB observables are sufficient through Milestone 6+.
-19	
-20	**ASYNC (after RxDB is initialized; can parallelize across people/agents):**
-21	
-22	- **Event bus / plugin hooks** — Pub/sub for **first-party** core + games only in M2; **document** future extension points without committing to a stable third-party API yet (see `docs/game-engine.md` / `docs/architecture.md`).
-23	- **i18n** — `en` + `pt-BR`, namespaces (`common`, `games`, `settings`, `encouragements`); **locale in the URL** (e.g. `/en/...`, `/pt-BR/...`) via TanStack Router, aligned with shareable links and history.
-24	- **Theme engine** — Themes loaded from RxDB `themes` collection; seed **two** presets for M2 (more later); CSS variable injection; clone/edit flows for custom themes. **Anonymous users** still get a **built-in default theme** (static design tokens) before/without RxDB hydration.
-25	- **Speech** — `SpeechOutput` (TTS), `SpeechInput` (STT), voice enumeration, graceful degradation when APIs are missing or denied.
-26	
-27	**Repo reality today:** No `rxdb` in `package.json` yet; `src/routes/__root.tsx` and `ThemeToggle` use `localStorage` for light/dark. `docs/data-model.md` states user-facing data must go through RxDB — M2 should **replace or narrow** localStorage usage so it does not contradict the authoritative data model (system/bootstrap exceptions should be explicit and minimal).
-28	
-29	**Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, bookmarks, parent overrides), not casual browsing. _Note:_ `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
-30	
-31	---
-32	
-33	## Why This Approach
-34	
-35	- **Single local source of truth** matches the PRD/architecture path to offline-first and later cloud sync (M6): investing in correct schemas and migrations now avoids rework.
-36	- **Ordered SYNC** reduces risk: hooks and the TanStack Query decision depend on stable DB shape and migration story.
-37	- **Parallel ASYNC** after DB init improves throughput without blocking the critical path, as long as shared contracts (e.g. event names, theme token shape) are agreed early from `docs/ui-ux.md` / `docs/game-engine.md`.
-38	
-39	---
-40	
-41	## Approaches: TanStack Query vs RxDB-Only (M2 decision)
-42	
-43	| Approach                         | Summary                                                                                                                                 | Pros                                                                                          | Cons                                                                                                                                       | Best when                                                                                                       |
-44	| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-45	| **A — RxDB-first hooks**         | Custom hooks wrap observables / `toObservable` patterns; components subscribe via React state or small `useSyncExternalStore` adapters. | Fewer deps; model matches “live” data; no duplicate cache layer; aligns with `data-model.md`. | Team must own hook patterns and testing recipes.                                                                                           | **Default recommendation** for BaseSkill through M5: almost all state is local and reactive.                    |
-46	| **B — TanStack Query as façade** | `useQuery` + `queryFn` snapshots from RxDB, or experimental observable integration where available.                                     | Familiar async/cache API for developers coming from server-first apps.                        | RxDB is already reactive; double bookkeeping and stale closure bugs unless carefully designed; poor fit for high-frequency session events. | Large app with heavy server fetch mix **after** M6; not needed for pure local RxDB in M2–M5.                    |
-47	| **C — Hybrid boundary**          | RxDB hooks for local collections; TanStack Query reserved for **network** (OAuth, Drive/OneDrive metadata later).                       | Clear separation: local reactive vs remote request/response.                                  | Two mental models; need lint/docs so local data never goes only through Query.                                                             | **Adopt at M6** when cloud APIs land; optionally add `@tanstack/react-query` then, not as a prerequisite in M2. |
-48	
-49	**Recommendation:** **Approach A** for Milestone 2–5; capture the decision in a short ADR or `docs/architecture.md` delta. Revisit **C** when implementing Milestone 6 cloud sync if remote calls benefit from Query’s request deduplication and status surfaces.
-50	
-51	---
-52	
-53	## Key Decisions
-54	
-55	1. **Data access:** Implement **RxDB-only** reactive reads/writes per `docs/data-model.md` for **persisted** profile/settings/theme/bookmarks/progress. **Exceptions (documented in architecture):** (a) **URL locale** is authoritative for language segment (`/en/…`, `/pt-BR/…`); **default locale `en`** when navigating from `/` (redirect to `/en/…` or equivalent). (b) **Built-in default theme** via static CSS variables / app shell so the UI is correct before RxDB opens. (c) Optional tiny allowlist later (e.g. migration flags) — avoid duplicating RxDB fields in `localStorage` for signed-in users.
-56	2. **TanStack Query:** **Defer** adding `@tanstack/react-query` until cloud/network features justify it; M2 “evaluate” step = written decision + hook conventions, not necessarily a new dependency.
-57	3. **Theme transition:** Plan explicit cutover from current `localStorage` theme mode to **RxDB-backed themes** + CSS variables for users with persisted settings, while keeping a **static default theme** for anonymous and first-paint. Preserve `prefers-color-scheme` / “auto” behavior per `docs/ui-ux.md` where product still requires it.
-58	4. **Event bus:** Implement as **separate module** from RxDB (events are not a substitute for persisted state); align with game-engine spec for session recording. **M2 scope:** **internal-only** (core + bundled games); extension points **documented** for later; **no** versioned third-party registration API in this milestone.
-59	5. **Testing:** Follow `docs/testing-strategy.md` — real RxDB in tests where practical, `fake-indexeddb`, speech API mocks for speech services.
-60	6. **i18n routing:** **Locale in the URL** (`/en/...`, `/pt-BR/...`); `react-i18next` (or chosen stack) stays in sync with the active route segment. **Default language `en`:** e.g. root path redirects into `/en/...` so unauthenticated users always land on a defined locale without RxDB.
-61	7. **Anonymous browsing:** **Homepage + full game catalog** available **without** an active profile; game list comes from the **static registry** (or equivalent) until/unless product later ties visibility to RxDB. Profile required only for per-child flows (progress, session history, parent settings, etc.).
-62	
-63	---
-64	
-65	## Open Questions
-66	
-67	_None._
-68	
-69	---
-70	
-71	## Resolved Questions
-72	
-73	1. **Milestone 2 “done” scope:** **Full scope (A).** All SYNC items and all four ASYNC areas (event bus, i18n, theme engine, speech) ship in the same milestone closure.
-74	2. **Locale in URLs:** **A — locale in the path.** Use URL segments for `en` and `pt-BR` (shareable links, clearer navigation); integrate with TanStack Router and i18n.
-75	3. **Bootstrap / defaults:** **Default theme** = built-in static tokens (full UI before RxDB). **Default language** = `en` via routing (redirect from `/` into `/en/...`). **No profile required** to view homepage and full game list; RxDB holds per-profile data when the user engages deeper. Persisted theme/language preferences live in RxDB when tied to profiles/families; do not mirror them in `localStorage` for signed-in users.
-76	4. **Plugin / event-bus surface:** **A — simple for now.** M2 is **internal-only**; document where a public plugin API might land later; defer stable third-party contracts.
-77	
-78	---
-79	
-80	## Next Steps
-81	
-82	Use **`/writing-plans`** (or the saved plan) for execution. Plan: [docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md](../superpowers/plans/2026-03-31-milestone-2-data-layer.md). Reconcile **Milestone 3** route guards and `docs/ui-ux.md` with **anonymous homepage + game catalog** when implementing M3.
+1 # Brainstorm: Milestone 2 — Data Layer and Core Infrastructure
+2 
+3 **Date:** 2026-03-31  
+4 **Source:** [baseskill_milestone_breakdown_85146c93.plan.md](../baseskill_milestone_breakdown_85146c93.plan.md) (Milestone 2)  
+5 **Status:** Implementation plan captured — see [docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md](../superpowers/plans/2026-03-31-milestone-2-data-layer.md).
+6 
+7 ---
+8 
+9 ## What We're Building
+10 
+11 Milestone 2 establishes the **local-first data plane** and **cross-cutting services** everything else depends on.
+12 
+13 **SYNC (ordered):**
+14 
+15 1. **RxDB** — All collections from `docs/data-model.md`: `profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`; IndexedDB storage; schemas aligned with JSON Schema + version fields.
+16 2. **Migrations** — Framework driven by `app_meta` (and RxDB migration hooks) so schema changes are explicit and testable.
+17 3. **React integration** — Hooks (or thin wrappers) so UI subscribes reactively to queries and collections without leaking RxDB types into every component.
+18 4. **TanStack Query decision** — Document whether Query adds value on top of RxDB for this app, or whether custom hooks over RxDB observables are sufficient through Milestone 6+.
+19 
+20 **ASYNC (after RxDB is initialized; can parallelize across people/agents):**
+21 
+22 - **Event bus / plugin hooks** — Pub/sub for **first-party** core + games only in M2; **document** future extension points without committing to a stable third-party API yet (see `docs/game-engine.md` / `docs/architecture.md`).
+23 - **i18n** — `en` + `pt-BR`, namespaces (`common`, `games`, `settings`, `encouragements`); **locale in the URL** (e.g. `/en/...`, `/pt-BR/...`) via TanStack Router, aligned with shareable links and history.
+24 - **Theme engine** — Themes loaded from RxDB `themes` collection; seed **two** presets for M2 (more later); CSS variable injection; clone/edit flows for custom themes. **Anonymous users** still get a **built-in default theme** (static design tokens) before/without RxDB hydration.
+25 - **Speech** — `SpeechOutput` (TTS), `SpeechInput` (STT), voice enumeration, graceful degradation when APIs are missing or denied.
+26 
+27 **Repo reality today:** No `rxdb` in `package.json` yet; `src/routes/__root.tsx` and `ThemeToggle` use `localStorage` for light/dark. `docs/data-model.md` states user-facing data must go through RxDB — M2 should **replace or narrow** localStorage usage so it does not contradict the authoritative data model (system/bootstrap exceptions should be explicit and minimal).
+28 
+29 **Product constraint (pre-profile):** Users are **not** required to pick a profile (“signed in”) to see a **usable homepage with the full game list**. Locale and theme must have **sensible defaults** so that screen is fully styled and translated. Profile (and RxDB-backed settings) gate **per-child** features (progress, bookmarks, parent overrides), not casual browsing. _Note:_ `docs/baseskill_milestone_breakdown_85146c93.plan.md` / `docs/ui-ux.md` currently lean profile-first in places; **Milestone 3 routing and guards** should be updated during planning so they match this constraint.
+30 
+31 ---
+32 
+33 ## Why This Approach
+34 
+35 - **Single local source of truth** matches the PRD/architecture path to offline-first and later cloud sync (M6): investing in correct schemas and migrations now avoids rework.
+36 - **Ordered SYNC** reduces risk: hooks and the TanStack Query decision depend on stable DB shape and migration story.
+37 - **Parallel ASYNC** after DB init improves throughput without blocking the critical path, as long as shared contracts (e.g. event names, theme token shape) are agreed early from `docs/ui-ux.md` / `docs/game-engine.md`.
+38 
+39 ---
+40 
+41 ## Approaches: TanStack Query vs RxDB-Only (M2 decision)
+42 
+43 | Approach                         | Summary                                                                                                                                 | Pros                                                                                          | Cons                                                                                                                                       | Best when                                                                                                       |
+44 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+45 | **A — RxDB-first hooks**         | Custom hooks wrap observables / `toObservable` patterns; components subscribe via React state or small `useSyncExternalStore` adapters. | Fewer deps; model matches “live” data; no duplicate cache layer; aligns with `data-model.md`. | Team must own hook patterns and testing recipes.                                                                                           | **Default recommendation** for BaseSkill through M5: almost all state is local and reactive.                    |
+46 | **B — TanStack Query as façade** | `useQuery` + `queryFn` snapshots from RxDB, or experimental observable integration where available.                                     | Familiar async/cache API for developers coming from server-first apps.                        | RxDB is already reactive; double bookkeeping and stale closure bugs unless carefully designed; poor fit for high-frequency session events. | Large app with heavy server fetch mix **after** M6; not needed for pure local RxDB in M2–M5.                    |
+47 | **C — Hybrid boundary**          | RxDB hooks for local collections; TanStack Query reserved for **network** (OAuth, Drive/OneDrive metadata later).                       | Clear separation: local reactive vs remote request/response.                                  | Two mental models; need lint/docs so local data never goes only through Query.                                                             | **Adopt at M6** when cloud APIs land; optionally add `@tanstack/react-query` then, not as a prerequisite in M2. |
+48 
+49 **Recommendation:** **Approach A** for Milestone 2–5; capture the decision in a short ADR or `docs/architecture.md` delta. Revisit **C** when implementing Milestone 6 cloud sync if remote calls benefit from Query’s request deduplication and status surfaces.
+50 
+51 ---
+52 
+53 ## Key Decisions
+54 
+55 1. **Data access:** Implement **RxDB-only** reactive reads/writes per `docs/data-model.md` for **persisted** profile/settings/theme/bookmarks/progress. **Exceptions (documented in architecture):** (a) **URL locale** is authoritative for language segment (`/en/…`, `/pt-BR/…`); **default locale `en`** when navigating from `/` (redirect to `/en/…` or equivalent). (b) **Built-in default theme** via static CSS variables / app shell so the UI is correct before RxDB opens. (c) Optional tiny allowlist later (e.g. migration flags) — avoid duplicating RxDB fields in `localStorage` for signed-in users.
+56 2. **TanStack Query:** **Defer** adding `@tanstack/react-query` until cloud/network features justify it; M2 “evaluate” step = written decision + hook conventions, not necessarily a new dependency.
+57 3. **Theme transition:** Plan explicit cutover from current `localStorage` theme mode to **RxDB-backed themes** + CSS variables for users with persisted settings, while keeping a **static default theme** for anonymous and first-paint. Preserve `prefers-color-scheme` / “auto” behavior per `docs/ui-ux.md` where product still requires it.
+58 4. **Event bus:** Implement as **separate module** from RxDB (events are not a substitute for persisted state); align with game-engine spec for session recording. **M2 scope:** **internal-only** (core + bundled games); extension points **documented** for later; **no** versioned third-party registration API in this milestone.
+59 5. **Testing:** Follow `docs/testing-strategy.md` — real RxDB in tests where practical, `fake-indexeddb`, speech API mocks for speech services.
+60 6. **i18n routing:** **Locale in the URL** (`/en/...`, `/pt-BR/...`); `react-i18next` (or chosen stack) stays in sync with the active route segment. **Default language `en`:** e.g. root path redirects into `/en/...` so unauthenticated users always land on a defined locale without RxDB.
+61 7. **Anonymous browsing:** **Homepage + full game catalog** available **without** an active profile; game list comes from the **static registry** (or equivalent) until/unless product later ties visibility to RxDB. Profile required only for per-child flows (progress, session history, parent settings, etc.).
+62 
+63 ---
+64 
+65 ## Open Questions
+66 
+67 _None._
+68 
+69 ---
+70 
+71 ## Resolved Questions
+72 
+73 1. **Milestone 2 “done” scope:** **Full scope (A).** All SYNC items and all four ASYNC areas (event bus, i18n, theme engine, speech) ship in the same milestone closure.
+74 2. **Locale in URLs:** **A — locale in the path.** Use URL segments for `en` and `pt-BR` (shareable links, clearer navigation); integrate with TanStack Router and i18n.
+75 3. **Bootstrap / defaults:** **Default theme** = built-in static tokens (full UI before RxDB). **Default language** = `en` via routing (redirect from `/` into `/en/...`). **No profile required** to view homepage and full game list; RxDB holds per-profile data when the user engages deeper. Persisted theme/language preferences live in RxDB when tied to profiles/families; do not mirror them in `localStorage` for signed-in users.
+76 4. **Plugin / event-bus surface:** **A — simple for now.** M2 is **internal-only**; document where a public plugin API might land later; defer stable third-party contracts.
+77 
+78 ---
+79 
+80 ## Next Steps
+81 
+82 Use **`/writing-plans`** (or the saved plan) for execution. Plan: [docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md](../superpowers/plans/2026-03-31-milestone-2-data-layer.md). Reconcile **Milestone 3** route guards and `docs/ui-ux.md` with **anonymous homepage + game catalog** when implementing M3.
 83
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:48:58Z)**_
@@ -3141,10 +3144,10 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:48:58Z)**_
 Now I have a good picture of the project. This is the "base-skill" project - an educational game platform for children. Milestone 1 (scaffolding) is done, Milestone 2 (Data Layer) has a brainstorm doc and an implementation plan already written.
 
 The user has invoked the brainstorming skill but hasn't told me what they want to brainstorm about. I need to ask them. The project context is clear:
+
 - base-skill: educational game platform
 - M1 done (scaffolding)
 - M2 (Data Layer) has a plan already written: docs/superpowers/plans/2026-03-31-milestone-2-data-layer.md
-
 
 - M3 is likely next, but they could want to brainstorm something else entirely
 
@@ -3174,7 +3177,7 @@ The user wants to review milestones 1 and 2 and check what's missing to complete
 
 Actually, the user opened the milestone breakdown plan file and wants to review milestones 1 and 2. Let me read that file and the current codebase state to understand what's been done.
 
-Wait, the brainstorming skill has a HARD-GATE saying not to take implementation actions before presenting a design and getting approval. 
+Wait, the brainstorming skill has a HARD-GATE saying not to take implementation actions before presenting a design and getting approval.
 
 I'm realizing this is more of an audit task than a brainstorming session, but since the brainstorming skill is active, I should follow its process and present findings for approval rather than diving straight into implementation.
 
@@ -3188,107 +3191,108 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:49:10Z)**_
  `./docs/baseskill_milestone_breakdown_85146c93.plan.md`
 
 ```text
-1	---
-2	name: BaseSkill Milestone Breakdown
-3	overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
-4	todos:
-5	  - id: m0-design-docs
-6	    content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
-7	    status: pending
-8	  - id: m1-scaffolding
-9	    content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
-10	    status: pending
-11	  - id: m2-data-layer
-12	    content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
-13	    status: pending
-14	  - id: m3-app-shell
-15	    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
-16	    status: pending
-17	  - id: m4-game-engine
-18	    content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
-19	    status: pending
-20	  - id: m5-reference-games
-21	    content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
-22	    status: pending
-23	  - id: m6-cloud-sync
-24	    content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
-25	    status: pending
-26	  - id: m7-parent-features
-27	    content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
-28	    status: pending
-29	  - id: m8-polish
-30	    content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
-31	    status: pending
-32	isProject: false
-33	---
-34	
-35	# BaseSkill: PRD to Completion Milestone Breakdown
-36	
-37	**Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
-38	
-39	This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
-40	
-41	---
-42	
-43	## Milestone 0 -- Design Documents (SYNC prerequisite)
-44	
-45	Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
-46	
-47	**ASYNC work streams:**
-48	
-49	- `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
-50	- `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
-51	- `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
-52	- `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
-53	- `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
-54	- `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
-55	- `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
-56	- `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
-57	- `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
-58	
-59	**SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
-60	
-61	---
-62	
-63	## Milestone 1 -- Project Scaffolding and CI/CD
-64	
-65	Bootstrap the repository and get a green CI pipeline on an empty app shell.
-66	
-67	**SYNC (sequential):**
-68	
-69	1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
-70	2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
-71	3. Set up TanStack Router nested layouts for app shell / game shell / settings
-72	4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
-73	5. Add `LICENSE` (GPL v3)
-74	6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
-75	7. Set up Vitest + React Testing Library
-76	8. Set up Playwright (empty E2E suite)
-77	9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
-78	10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
-79	11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
-80	12. App versioning: semver stamp in build output
-81	
-82	**Key TanStack decisions:**
-83	
-84	- Use TanStack Router's file-based routing convention (`routes/` directory)
-85	- Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
-86	- Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
-87	- Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
-88	
-89	**Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
-90	
-91	---
-92	
-93	## Milestone 2 -- Data Layer and Core Infrastructure
-94	
-95	Set up RxDB and the foundational systems that everything else depends on.
-96	
-97	**SYNC (must complete in order):**
-98	
-99	1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
-100	2. Schema migration framework (version tracking via `app_meta`)
+1 ---
+2 name: BaseSkill Milestone Breakdown
+3 overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
+4 todos:
+5   - id: m0-design-docs
+6     content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
+7     status: pending
+8   - id: m1-scaffolding
+9     content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
+10     status: pending
+11   - id: m2-data-layer
+12     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
+13     status: pending
+14   - id: m3-app-shell
+15     content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
+16     status: pending
+17   - id: m4-game-engine
+18     content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
+19     status: pending
+20   - id: m5-reference-games
+21     content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
+22     status: pending
+23   - id: m6-cloud-sync
+24     content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
+25     status: pending
+26   - id: m7-parent-features
+27     content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
+28     status: pending
+29   - id: m8-polish
+30     content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
+31     status: pending
+32 isProject: false
+33 ---
+34 
+35 # BaseSkill: PRD to Completion Milestone Breakdown
+36 
+37 **Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
+38 
+39 This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
+40 
+41 ---
+42 
+43 ## Milestone 0 -- Design Documents (SYNC prerequisite)
+44 
+45 Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
+46 
+47 **ASYNC work streams:**
+48 
+49 - `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
+50 - `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
+51 - `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
+52 - `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
+53 - `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
+54 - `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
+55 - `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
+56 - `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
+57 - `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
+58 
+59 **SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
+60 
+61 ---
+62 
+63 ## Milestone 1 -- Project Scaffolding and CI/CD
+64 
+65 Bootstrap the repository and get a green CI pipeline on an empty app shell.
+66 
+67 **SYNC (sequential):**
+68 
+69 1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
+70 2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
+71 3. Set up TanStack Router nested layouts for app shell / game shell / settings
+72 4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
+73 5. Add `LICENSE` (GPL v3)
+74 6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
+75 7. Set up Vitest + React Testing Library
+76 8. Set up Playwright (empty E2E suite)
+77 9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
+78 10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
+79 11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
+80 12. App versioning: semver stamp in build output
+81 
+82 **Key TanStack decisions:**
+83 
+84 - Use TanStack Router's file-based routing convention (`routes/` directory)
+85 - Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
+86 - Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
+87 - Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
+88 
+89 **Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
+90 
+91 ---
+92 
+93 ## Milestone 2 -- Data Layer and Core Infrastructure
+94 
+95 Set up RxDB and the foundational systems that everything else depends on.
+96 
+97 **SYNC (must complete in order):**
+98 
+99 1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
+100 2. Schema migration framework (version tracking via `app_meta`)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:49:12Z)**_
@@ -3311,6 +3315,7 @@ test-setup.ts
 vite-env.d.ts
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:49:16Z)**_
@@ -3391,6 +3396,7 @@ _app.tsx
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:49:29Z)**_
@@ -3415,6 +3421,7 @@ smoke.spec.ts
 ---
 utils.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:49:43Z)**_
@@ -3423,12 +3430,13 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:49:43Z)**_
 Now I have a good picture. Let me analyze the state:
 
 **Milestone 0 (Design Docs):**
+
 - All design docs present: docs/prd.md, docs/architecture.md, docs/data-model.md, docs/game-engine.md, docs/ui-ux.md, docs/i18n.md, docs/accessibility.md, docs/testing-strategy.md, docs/ci-cd.md ✅
 
 **Milestone 1 (Scaffolding):**
 Let me check each item:
-1. ✅ TanStack Start + Router scaffolded (files exist)
 
+1. ✅ TanStack Start + Router scaffolded (files exist)
 
 2. Need to verify TypeScript strict mode
 3. ✅ Routes structure exists (nested layouts)
@@ -3502,12 +3510,14 @@ deploy.yml
 e2e.yml
 visual-regression.yml
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:49:50Z)**_
 
 <think><details><summary>Thought Process</summary>
 I'm now in Plan mode. I need to:
+
 1. Continue exploring the codebase to understand what's missing for M1 and M2
 2. Write a plan file
 3. Call ExitPlanMode
@@ -3515,10 +3525,10 @@ I'm now in Plan mode. I need to:
 I've already gathered enough context. Let me also check tsconfig for strict mode and the vite.config for static output, then write the plan.
 
 Actually, let me also check the milestone breakdown more carefully for M1 items I haven't verified:
+
 - TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule)
 - shadcn/ui ✅
 - LICENSE ✅
-
 
 - ESLint/Prettier ✅
 - Vitest + RTL ✅
@@ -3586,6 +3596,7 @@ Check TypeScript strict settings and ESLint no-any rule
     "noImplicitAny": true,
     "strictNullChecks": true,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:50:00Z)**_
@@ -3605,6 +3616,7 @@ import { version } from './package.json'
 ===
   "version": "0.1.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:50:05Z)**_
@@ -3623,6 +3635,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
               cacheName: 'gstatic-fonts-cache',
 ===
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:50:21Z)**_
@@ -3649,6 +3662,7 @@ import { version } from './package.json'
       },
     }),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:50:38Z)**_
@@ -3659,10 +3673,10 @@ Good. Now I have a comprehensive picture of both milestones. Let me summarize:
 **Milestone 0 (Design Docs):** ✅ All design docs are present.
 
 **Milestone 1 (Scaffolding):** Let me go through each item:
+
 1. ✅ TanStack Start + Router scaffolded
 2. ✅ TypeScript strict mode (`noImplicitAny: true`, `strict: true`, `@typescript-eslint/no-explicit-any: error`)
 3. ✅ Nested layouts (routes structure has `_app`, game, parent routes)
-
 
 4. ✅ shadcn/ui, GPL v3 license, ESLint + Prettier, Vitest + React Testing Library, and Playwright for e2e testing are all in place. GitHub Actions workflows are configured for CI, deployment, e2e, and visual regression testing. The project is set up as a static SPA with vite-plugin-pwa for PWA support.
 5. ✅ App versioning is pulling from package.json.
@@ -3766,6 +3780,7 @@ The M2 plan is complete and ready. Invoke the `superpowers:executing-plans` or `
 ```text
 File created successfully at: /Users/leocaseiro/.claude/plans/wiggly-hopping-moonbeam.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:51:06Z)**_
@@ -3783,6 +3798,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 01:51:06Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 01:51:09Z)**_

@@ -6,7 +6,7 @@
 
 _**User (2026-04-28 04:41:53Z)**_
 
-review the https://github.com/leocaseiro/base-skill/issues/125 and lets start working on the next Tier(s).
+review the <https://github.com/leocaseiro/base-skill/issues/125> and lets start working on the next Tier(s).
 
 ---
 
@@ -24,6 +24,7 @@ _**Agent (claude-sonnet-4-6 2026-04-28 04:42:01Z)**_
 ```text
 Launching skill: resync
 ```
+
 </details></tool-use>
 
 ---
@@ -96,7 +97,6 @@ Wait for the user's decision. Do not resume prior work until they respond.
 - If `gh` is unauthenticated, surface the error and stop at step 2 rather than guessing.
 - Keep the whole report under ~25 lines. The user invokes this to re-ground quickly, not to read a novel.
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:03Z)**_
@@ -130,6 +130,7 @@ master
 ---
 ---AHEAD---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:09Z)**_
@@ -143,6 +144,7 @@ List open PRs
 ```text
 [{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"handoff-cleanup-local-branches-2026-04-28","isDraft":false,"number":201,"title":"docs(handoff): local branch and worktree cleanup — 2026-04-28","updatedAt":"2026-04-28T04:38:56Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"audit/storybook-controls","isDraft":false,"number":200,"title":"audit(storybook): controls audit for UI components + write-storybook skill update","updatedAt":"2026-04-28T04:34:32Z"}]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:12Z)**_
@@ -160,15 +162,15 @@ View issue #125 details
 `gh issue view 125 --repo leocaseiro/base-skill`
 
 ```text
-title:	Storybook controls audit — rollout tracker (26 remaining story files)
-state:	OPEN
-author:	leocaseiro (Leo Caseiro)
-labels:	
-comments:	1
-assignees:	
-projects:	
-milestone:	
-number:	125
+title: Storybook controls audit — rollout tracker (26 remaining story files)
+state: OPEN
+author: leocaseiro (Leo Caseiro)
+labels: 
+comments: 1
+assignees: 
+projects: 
+milestone: 
+number: 125
 --
 ## Purpose
 
@@ -301,6 +303,7 @@ Each batch spawns its own spec → plan → subagent-driven execution cycle.
 - Policy source: [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md)
 - Pilot spec: `docs/superpowers/specs/2026-04-17-audit-storybook-ui-controls-design.md`
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:16Z)**_
@@ -318,10 +321,10 @@ View issue #125 comments
 `gh issue view 125 --repo leocaseiro/base-skill --comments`
 
 ```text
-author:	leocaseiro
-association:	owner
-edited:	false
-status:	none
+author: leocaseiro
+association: owner
+edited: false
+status: none
 --
   Tier 1 — Trivial (stub-sized, few props)                                                                                                                                          
                              
@@ -365,6 +368,7 @@ status:	none
   26. lib/audio/AudioFeedback.stories.tsx (248) — large but self-contained; could slot into Tier 3 if mostly button variants   
 --
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:20Z)**_
@@ -376,19 +380,19 @@ View PR #200 details
 `gh pr view 200 --repo leocaseiro/base-skill`
 
 ```text
-title:	audit(storybook): controls audit for UI components + write-storybook skill update
-state:	OPEN
-author:	leocaseiro (Leo Caseiro)
-labels:	
-assignees:	
-reviewers:	
-projects:	
-milestone:	
-number:	200
-url:	https://github.com/leocaseiro/base-skill/pull/200
-additions:	1
-deletions:	0
-auto-merge:	disabled
+title: audit(storybook): controls audit for UI components + write-storybook skill update
+state: OPEN
+author: leocaseiro (Leo Caseiro)
+labels: 
+assignees: 
+reviewers: 
+projects: 
+milestone: 
+number: 200
+url: https://github.com/leocaseiro/base-skill/pull/200
+additions: 1
+deletions: 0
+auto-merge: disabled
 --
 ## Summary
 
@@ -406,6 +410,7 @@ auto-merge:	disabled
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:42:44Z)**_
@@ -475,6 +480,7 @@ src/components/GameGrid.stories.tsx
 src/components/GameNameChip.stories.tsx
 src/stories/ThemeShowcase.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:02Z)**_
@@ -535,6 +541,7 @@ Check for existing tier/storybook branches
   remotes/origin/stories/word-library-explorer-audit
   remotes/origin/stories/word-library-explorer-audit_2
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:04Z)**_
@@ -554,6 +561,7 @@ Check commits on tier3 plan branch
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:07Z)**_
@@ -565,8 +573,9 @@ Check if tier3 plan has a PR
 `gh pr list --state all --head plan/tier3-storybook-audit --repo leocaseiro/base-skill 2>&1`
 
 ```text
-150	docs(plan): Tier 3 Storybook controls audit	plan/tier3-storybook-audit	MERGED	2026-04-21T21:06:01Z
+150 docs(plan): Tier 3 Storybook controls audit plan/tier3-storybook-audit MERGED 2026-04-21T21:06:01Z
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:09Z)**_
@@ -593,6 +602,7 @@ Find tier 3 plan documents
 ./.git/logs/refs/remotes/origin/docs/handoff-tier3
 ./.git/logs/refs/remotes/origin/plan/tier3-storybook-audit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:16Z)**_
@@ -602,1166 +612,1167 @@ _**Agent (claude-sonnet-4-6 2026-04-28 04:53:16Z)**_
  `./docs/superpowers/plans/2026-04-22-storybook-audit-tier3-plan.md`
 
 ```text
-1	# Tier 3 Storybook Controls Audit — Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Retrofit the 5 Tier-3 Storybook files (4 root `src/components/*` + 1 `src/stories/ThemeShowcase.stories.tsx`) to the single-Default Playground pattern and Controls Policy defined in [`.claude/skills/write-storybook/SKILL.md`](../../../.claude/skills/write-storybook/SKILL.md) (as updated in PR #155) and the 10 rollout gates in issue #125.
-6	
-7	**Architecture:** Two waves of independent subagents, one worktree/branch/PR per file. No shared files are touched across tasks — each task is fully self-contained, so the 5 tasks are safe to run in parallel in principle. Serialising into two waves (3 files → review checkpoint → 2 files) limits review load and catches pattern drift before Wave 2 starts. Each task writes exactly one `.stories.tsx` file, runs `yarn typecheck` + `yarn lint`, commits, pushes, and opens a PR against `master`.
-8	
-9	**Tech Stack:** Storybook 10.3.3 (`@storybook/react-vite`), `storybook/test` subpath (exposes `fn`), `@storybook/addon-a11y` (global `a11y.test: 'error'`), `react-i18next` (wired globally via `.storybook/preview.tsx` — stories don't need a decorator), TanStack Router (only for `ThemeShowcase` via `withRouter`).
-10	
-11	**Canonical references:**
-12	
-13	- Controls policy: `.claude/skills/write-storybook/SKILL.md`
-14	- Playground pattern spec: `.claude/skills/write-storybook/SKILL.md` — "Playground Pattern" + "When to Add Auxiliary Stories" sections (added in PR #155)
-15	- Global skin decorator: `.storybook/decorators.tsx` `withDefaultSkin` (added in PR #154) — already applied to every story; Tier 3 stories inherit it automatically and must NOT add a per-file skin wrapper
-16	- Shell-slim Default reference: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` (post-#154; per-file skin wrapper removed)
-17	- Trigger-button pattern reference (for callbacks the Controls panel can't invoke): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
-18	- Batch 2 retrofit precedent: `docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`
-19	- Colour keys: `src/lib/game-colors.ts` exports `GAME_COLOR_KEYS` and `GameColorKey`
-20	- Tracking issue: #125
-21	
-22	---
-23	
-24	## Shared Conventions (applies to every task)
-25	
-26	- **One worktree per file.** From the repo root on `master`:
-27	
-28	  ```bash
-29	  git worktree add ./worktrees/stories-tier3-<slug> -b stories/<slug>-audit master
-30	  cd ./worktrees/stories-tier3-<slug> && yarn install
-31	  ```
-32	
-33	  Slugs: `game-grid`, `game-card`, `game-name-chip`, `config-form-fields`, `theme-showcase`.
-34	
-35	- **Skin wrapping is global (PR #154).** The `withDefaultSkin` decorator in `.storybook/preview.tsx` wraps every story in `<div className="game-container skin-classic" style={classicSkin.tokens}>`. No Tier 3 task adds a per-file skin wrapper — doing so would create a double-wrap. None of the 5 target components consume `--skin-*` tokens themselves, so the global decorator's effect is inert for their visuals; we simply inherit it.
-36	- **Handler wiring.** Every callback prop wired via `args: { onFoo: fn(), ... }` from `storybook/test` and hidden from the Controls panel via `argTypes: { onFoo: { table: { disable: true } } }`. Do not use `argTypes: { onFoo: { action: '…' } }`. Do not rely on the global `argTypesRegex` alone — react-docgen does not expand DOM-extended prop types, so the regex matches nothing for most handler props.
-37	- **`StoryArgs` pattern.** When the component takes complex object props or has docgen-inferred rows we want to hide, declare an explicit `interface StoryArgs { … }` with controllable args, mark shadowed raw props as `?: never`, and double-cast `component: Foo as unknown as ComponentType<StoryArgs>`. See `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` for the canonical shape.
-38	- **Controls map (reminder).** Enum / union → `control: { type: 'select' }` + `options` (or `'radio'` for ≤4 options); boolean → `control: 'boolean'`; bounded number → `control: { type: 'range', min, max, step }`; free text → `control: 'text'`; callback → disabled in Controls and wired via `fn()` in `args`; JSX / complex object → `control: false` or `table: { disable: true }`. Never a raw JSON control for an enumerable domain.
-39	- **Single-Default Playground pattern (PR #155).** Every Tier 3 file ships exactly one `Default: Story = {}` driven by proper interactive controls. Auxiliary named stories are added only for scenarios the Playground's controls cannot express — the skill's "When to Add Auxiliary Stories" section enumerates legitimate exceptions (surveys like `AllColors`, pinned themes or viewports for `play()` assertions, stateful trigger-button wrappers). Enum-per-value, state-variant, and edge-case snapshots that a control toggle reaches are NOT legitimate auxiliaries — delete them. Story name is `Default` (not `Playground`); "Playground" is the conceptual label per the skill.
-40	- **Dark-mode stories.** The theme toolbar (registered globally in `.storybook/preview.tsx`) lets reviewers toggle themes interactively — do not add `DefaultDark` / `WithXDark` duplicates. Pin a story to a specific theme only when the variant exercises something theme-specific that the toolbar can't reproduce in one tap (surveys like `AllColorsDark`, VR baseline stories like `ThemeShowcase`'s 4 theme-pinned stories). Prefer `globals: { theme: '<name>' }` over the legacy `withDarkMode` decorator.
-41	- **Import order (ESLint `import/order`).** Value imports alphabetical → relative imports alphabetical → `storybook/test` → `@storybook/react` type import → `react` / JSX type imports last. If lint complains, regroup.
-42	- **Per-task verification (always before commit).** `yarn typecheck` → exit 0; `yarn lint` → exit 0. Do **not** run `yarn test:storybook` per file — too slow; the full run lives in CI when the PR opens.
-43	- **Optional local visual check.** Each subagent may (but is not required to) start a Storybook on a free port (6106+) inside its worktree and navigate to the target stories in a browser — or run a Playwright script to screenshot them — before writing diffs. Kill the Storybook process when done. Use the workflow from `.claude/skills/write-storybook/SKILL.md` ("Running Storybook Tests"). Skip this step if Docker/Storybook bootstrap is flaky; the CI `yarn test:storybook` run is the authoritative gate.
-44	- **Commit message shape.** `stories(<area>/<name>): retrofit per single-Default Playground`. Body lists the gates applied and any variant dropped with reason. Co-authored trailer.
-45	- **One commit per file. One PR per file.** PRs always target `master`. Push freely for Tier 3 (feature work). If the push triggers an automation that auto-opens a PR, edit that PR's title/body instead of creating a new one.
-46	- **Markdown.** No Markdown edits expected in these tasks. Skip `yarn fix:md`.
-47	- **Do not extract shared helpers across tasks.** Each story file is self-contained — keep fixtures + wrapper components inline. Shared-helper drift is the main risk if Wave 1 and Wave 2 run in parallel; avoid by design.
-48	
-49	---
-50	
-51	## Wave 1 — 3 parallel subagents
-52	
-53	Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once, pushes, opens a PR. After all three PRs are approved (or at minimum code-reviewed), proceed to the Wave 1 Checkpoint.
-54	
-55	---
-56	
-57	### Task 1: Retrofit `GameGrid.stories.tsx`
-58	
-59	**Files:**
-60	
-61	- Create worktree: `./worktrees/stories-tier3-game-grid` on branch `stories/game-grid-audit`
-62	- Modify: `src/components/GameGrid.stories.tsx`
-63	- Read (for context): `src/components/GameGrid.tsx`, `src/components/GameCard.tsx`, `src/components/GameGrid.test.tsx`
-64	
-65	**Gates applied (from issue #125):**
-66	
-67	- Gate 1 — Controls map to something visible: `cards: ReactNode[]` is invisible as a control; hidden and derived from `cardCount` range.
-68	- Gate 3 — Handler wiring: sample cards inside the render use `fn()` spies on `onPlay` / `onOpenCog`.
-69	- Gate 4 — Global skin (PR #154) — no per-file wrapper.
-70	- Gate 5 — Hide shadowed docgen row for `cards`.
-71	- Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) collapse into the single `Default` Playground — `cardCount` range (0–12) reaches every state from Controls in one click; no scenario exports are needed.
-72	- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Edge cases (empty / many) reachable via the `cardCount` range — no separate exports. No interactive component → no `play()`.
-73	
-74	**Steps:**
-75	
-76	- [ ] **Step 1: Create worktree.**
-77	
-78	  ```bash
-79	  git worktree add ./worktrees/stories-tier3-game-grid -b stories/game-grid-audit master
-80	  cd ./worktrees/stories-tier3-game-grid && yarn install
-81	  ```
-82	
-83	- [ ] **Step 2: Replace `src/components/GameGrid.stories.tsx`** with:
-84	
-85	  ```tsx
-86	  import { fn } from 'storybook/test';
-87	
-88	  import { GameCard } from './GameCard';
-89	  import { GameGrid } from './GameGrid';
-90	  import type { ComponentType } from 'react';
-91	  import type { Meta, StoryObj } from '@storybook/react';
-92	
-93	  interface StoryArgs {
-94	    cardCount: number;
-95	    // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
-96	    cards?: never;
-97	  }
-98	
-99	  const meta: Meta<StoryArgs> = {
-100	    component: GameGrid as unknown as ComponentType<StoryArgs>,
-101	    tags: ['autodocs'],
-102	    args: {
-103	      cardCount: 3,
-104	    },
-105	    argTypes: {
-106	      cardCount: {
-107	        control: { type: 'range', min: 0, max: 12, step: 1 },
-108	      },
-109	      cards: { table: { disable: true } },
-110	    },
-111	    render: ({ cardCount }) => (
-112	      <GameGrid
-113	        cards={Array.from({ length: cardCount }, (_, i) => (
-114	          <GameCard
-115	            key={`card-${String(i)}`}
-116	            variant="default"
-117	            gameId="sort-numbers"
-118	            title={`Card ${String(i + 1)}`}
-119	            chips={['K', '1', '2']}
-120	            onPlay={fn()}
-121	            onOpenCog={fn()}
-122	          />
-123	        ))}
-124	      />
-125	    ),
-126	  };
-127	  export default meta;
-128	
-129	  type Story = StoryObj<StoryArgs>;
-130	
-131	  export const Default: Story = {};
-132	  ```
-133	
-134	- [ ] **Step 3: Verify.** Run in the worktree:
-135	
-136	  ```bash
-137	  yarn typecheck
-138	  yarn lint
-139	  ```
-140	
-141	  Both must exit 0. If `import/order` fails, regroup per the Shared Conventions rule.
-142	
-143	- [ ] **Step 4: Commit.**
-144	
-145	  ```bash
-146	  git add src/components/GameGrid.stories.tsx
-147	  git commit -m "$(cat <<'EOF'
-148	  stories(components/GameGrid): retrofit per single-Default Playground
-149	
-150	  StoryArgs exposes a cardCount range (0–12); cards is shadowed and
-151	  hidden from Controls. Sample GameCards inside the render wire
-152	  onPlay/onOpenCog to fn() spies. Single Default story per the
-153	  Playground pattern in .claude/skills/write-storybook/SKILL.md
-154	  (added in PR #155).
-155	
-156	  Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-157	  EOF
-158	  )"
-159	  ```
-160	
-161	- [ ] **Step 5: Push and open PR.**
-162	
-163	  ```bash
-164	  git push -u origin stories/game-grid-audit
-165	  gh pr create --base master --title "stories(components/GameGrid): retrofit per single-Default Playground" --body "$(cat <<'EOF'
-166	  ## Summary
-167	
-168	  Tier 3, file 1 of 5 — retrofits `src/components/GameGrid.stories.tsx` to the single-Default Playground pattern defined in
-169	  [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md) (added in PR #155) and
-170	  the Controls Policy in issue #125.
-171	
-172	  - `cardCount` range (0–12) drives how many GameCards render.
-173	  - `cards` is shadowed (`?: never` + `table: { disable: true }`) — never meaningful as a control.
-174	  - Sample cards wire `onPlay` / `onOpenCog` to `fn()` spies.
-175	  - Single `Default` story — the `cardCount` range reaches every prior state (0, 3, 12).
-176	  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
-177	
-178	  Closes part of #125.
-179	
-180	  ## Test plan
-181	
-182	  - [ ] `yarn typecheck` green
-183	  - [ ] `yarn lint` green
-184	  - [ ] `yarn test:storybook` green (runs in CI)
-185	  - [ ] Controls panel drives the single `Default` export (cardCount slider reaches 0, 3, and 12 cards visibly)
-186	  EOF
-187	  )"
-188	  ```
-189	
-190	---
-191	
-192	### Task 2: Retrofit `GameCard.stories.tsx`
-193	
-194	**Files:**
-195	
-196	- Create worktree: `./worktrees/stories-tier3-game-card` on branch `stories/game-card-audit`
-197	- Modify: `src/components/GameCard.stories.tsx`
-198	- Read (for context): `src/components/GameCard.tsx`, `src/components/GameCard.test.tsx`, `src/lib/game-colors.ts`
-199	
-200	**Gates applied:**
-201	
-202	- Gate 1 — Controls map: `variant` union, `customGameColor` enum, `isBookmarked` boolean, `bookmarkable` derived-boolean (controls whether `onToggleBookmark` is passed).
-203	- Gate 2 — Structured inputs: `variant` → radio, `customGameColor` → select of `GAME_COLOR_KEYS`, `chipsText` → free text (split on commas → `chips: string[]`).
-204	- Gate 3 — Handler wiring: convert `{ action: '…' }` → `fn()` in `args`; hide from Controls. Call `fn()` inside `render` for per-render spy instances (OK for Actions-only; no play() stories here).
-205	- Gate 4 — Global skin (PR #154) — no per-file wrapper.
-206	- Gate 5 — Hide shadowed docgen rows for `chips`, `cover`, `onPlay`, `onOpenCog`, `onToggleBookmark`.
-207	- Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Default` Playground — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7; keep only `Default`.
-208	- Gate 7 — Real-game parity: in production, `GameCard` renders inside `GameGrid`'s responsive columns (~260–300px wide at xl/2xl breakpoints). In isolation it has no width constraint and stretches to the full canvas, so the cover image dominates. The `Default` story's `render` wraps the card in `<div className="w-64">` (256px) and the meta pins `parameters: { layout: 'centered' }` so the card renders at a realistic grid-cell size, centred in the preview.
-209	- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
-210	
-211	**Steps:**
-212	
-213	- [ ] **Step 1: Create worktree.**
-214	
-215	  ```bash
-216	  git worktree add ./worktrees/stories-tier3-game-card -b stories/game-card-audit master
-217	  cd ./worktrees/stories-tier3-game-card && yarn install
-218	  ```
-219	
-220	- [ ] **Step 2: Replace `src/components/GameCard.stories.tsx`** with:
-221	
-222	  ```tsx
-223	  import { fn } from 'storybook/test';
-224	
-225	  import { GameCard } from './GameCard';
-226	  import { GAME_COLOR_KEYS } from '@/lib/game-colors';
-227	  import type { GameColorKey } from '@/lib/game-colors';
-228	  import type { ComponentType } from 'react';
-229	  import type { Meta, StoryObj } from '@storybook/react';
-230	
-231	  type Variant = 'default' | 'customGame';
-232	
-233	  interface StoryArgs {
-234	    variant: Variant;
-235	    gameId: string;
-236	    title: string;
-237	    chipsText: string;
-238	    customGameName: string;
-239	    customGameColor: GameColorKey;
-240	    bookmarkable: boolean;
-241	    isBookmarked: boolean;
-242	    // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
-243	    chips?: never;
-244	    cover?: never;
-245	    onPlay?: never;
-246	    onOpenCog?: never;
-247	    onToggleBookmark?: never;
-248	  }
-249	
-250	  const meta: Meta<StoryArgs> = {
-251	    component: GameCard as unknown as ComponentType<StoryArgs>,
-252	    tags: ['autodocs'],
-253	    parameters: { layout: 'centered' },
-254	    args: {
-255	      variant: 'default',
-256	      gameId: 'sort-numbers',
-257	      title: 'Count in Order',
-258	      chipsText: '🚀 Up, 5 numbers, 2s',
-259	      customGameName: 'Skip by 2',
-260	      customGameColor: 'indigo',
-261	      bookmarkable: false,
-262	      isBookmarked: false,
-263	    },
-264	    argTypes: {
-265	      variant: {
-266	        control: { type: 'radio' },
-267	        options: ['default', 'customGame'] satisfies Variant[],
-268	      },
-269	      gameId: { control: 'text' },
-270	      title: { control: 'text' },
-271	      chipsText: { control: 'text' },
-272	      customGameName: { control: 'text' },
-273	      customGameColor: {
-274	        control: { type: 'select' },
-275	        options: GAME_COLOR_KEYS,
-276	      },
-277	      bookmarkable: { control: 'boolean' },
-278	      isBookmarked: { control: 'boolean' },
-279	      chips: { table: { disable: true } },
-280	      cover: { table: { disable: true } },
-281	      onPlay: { table: { disable: true } },
-282	      onOpenCog: { table: { disable: true } },
-283	      onToggleBookmark: { table: { disable: true } },
-284	    },
-285	    render: ({
-286	      variant,
-287	      gameId,
-288	      title,
-289	      chipsText,
-290	      customGameName,
-291	      customGameColor,
-292	      bookmarkable,
-293	      isBookmarked,
-294	    }) => {
-295	      const chips = chipsText
-296	        .split(',')
-297	        .map((s) => s.trim())
-298	        .filter(Boolean);
-299	
-300	      const bookmarkProps = bookmarkable
-301	        ? { isBookmarked, onToggleBookmark: fn() }
-302	        : {};
-303	
-304	      // w-64 (256px) ≈ a typical GameGrid cell width at xl/2xl breakpoints.
-305	      // Without this wrapper GameCard stretches to the full canvas and the
-306	      // cover image dwarfs the card chrome.
-307	      return (
-308	        <div className="w-64">
-309	          {variant === 'customGame' ? (
-310	            <GameCard
-311	              variant="customGame"
-312	              gameId={gameId}
-313	              title={title}
-314	              chips={chips}
-315	              customGameName={customGameName || 'Custom'}
-316	              customGameColor={customGameColor}
-317	              onPlay={fn()}
-318	              onOpenCog={fn()}
-319	              {...bookmarkProps}
-320	            />
-321	          ) : (
-322	            <GameCard
-323	              variant="default"
-324	              gameId={gameId}
-325	              title={title}
-326	              chips={chips}
-327	              onPlay={fn()}
-328	              onOpenCog={fn()}
-329	              {...bookmarkProps}
-330	            />
-331	          )}
-332	        </div>
-333	      );
-334	    },
-335	  };
-336	  export default meta;
-337	
-338	  type Story = StoryObj<StoryArgs>;
-339	
-340	  export const Default: Story = {};
-341	
-342	  // deleted-for-reference — every prior export is reachable from Default's Controls:
-343	  //   CustomGame               → variant='customGame', customGameColor='amber'
-344	  //   CustomGamePurple         → variant='customGame', customGameColor='purple', chipsText='⬇️ Down, 10 numbers, 3s'
-345	  //   NotBookmarked            → bookmarkable=true, isBookmarked=false
-346	  //   Bookmarked               → bookmarkable=true, isBookmarked=true
-347	  //   NotBookmarkedCustomGame  → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=false
-348	  //   BookmarkedCustomGame     → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=true
-349	  ```
-350	
-351	- [ ] **Step 3: Verify.**
-352	
-353	  ```bash
-354	  yarn typecheck
-355	  yarn lint
-356	  ```
-357	
-358	  Both must exit 0. The discriminated union in `GameCardProps` is the most likely source of a typecheck error — if so, the `variant === 'customGame'` branch in `render` is the source of truth; align the `customGameName` / `customGameColor` requirements there.
-359	
-360	- [ ] **Step 4: Commit.**
-361	
-362	  ```bash
-363	  git add src/components/GameCard.stories.tsx
-364	  git commit -m "$(cat <<'EOF'
-365	  stories(components/GameCard): retrofit per single-Default Playground
-366	
-367	  StoryArgs with proper controls: variant radio, customGameColor select
-368	  from GAME_COLOR_KEYS, chipsText split on commas, isBookmarked +
-369	  bookmarkable booleans. All handlers (onPlay, onOpenCog,
-370	  onToggleBookmark) wired via fn() in render; hidden from Controls via
-371	  table.disable. Shadowed raw props (chips, cover, onPlay, onOpenCog,
-372	  onToggleBookmark) hidden via ?: never + table.disable.
-373	
-374	  Collapse the 7 prior scenario exports into a single Default story —
-375	  variant radio, customGameColor select, bookmarkable + isBookmarked
-376	  booleans, and chipsText text reach every prior state from Controls
-377	  in ≤2 clicks. Matches the single-Default Playground pattern in
-378	  .claude/skills/write-storybook/SKILL.md (added in PR #155).
-379	
-380	  Render realism: wrap the card in <div className="w-64"> (256px ≈ a
-381	  typical GameGrid cell width at xl/2xl breakpoints) and pin
-382	  parameters.layout to 'centered' so the card renders at a realistic
-383	  size instead of stretching to the full Storybook canvas.
-384	
-385	  Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-386	  EOF
-387	  )"
-388	  ```
-389	
-390	- [ ] **Step 5: Push and open PR.**
-391	
-392	  ```bash
-393	  git push -u origin stories/game-card-audit
-394	  gh pr create --base master --title "stories(components/GameCard): retrofit per single-Default Playground" --body "$(cat <<'EOF'
-395	  ## Summary
-396	
-397	  Tier 3, file 2 of 5 — retrofits `src/components/GameCard.stories.tsx` to the single-Default Playground pattern
-398	  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
-399	
-400	  - `variant` radio, `customGameColor` select from `GAME_COLOR_KEYS`, `chipsText` splits on commas.
-401	  - `isBookmarked` + `bookmarkable` expose the full bookmark matrix via args.
-402	  - Handlers wired via `fn()` in the render function; raw prop rows hidden from Controls.
-403	  - Collapse 7 prior scenario exports into a single `Default` story — every prior state is reachable from Controls in ≤2 clicks.
-404	  - Render realism: card is wrapped in `<div className="w-64">` (~grid-cell size) and the meta pins `layout: 'centered'` so it no longer stretches to the full canvas (the pre-retrofit story rendered at ~1200px wide, dominated by the cover image).
-405	  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
-406	
-407	  Closes part of #125.
-408	
-409	  ## Test plan
-410	
-411	  - [ ] `yarn typecheck` green
-412	  - [ ] `yarn lint` green
-413	  - [ ] `yarn test:storybook` green (runs in CI)
-414	  - [ ] Controls panel drives variant / customGameColor / bookmark combinations
-415	  - [ ] Card renders at realistic grid-cell width (not stretched to full canvas)
-416	  EOF
-417	  )"
-418	  ```
-419	
-420	---
-421	
-422	### Task 3: Retrofit `GameNameChip.stories.tsx`
-423	
-424	**Files:**
-425	
-426	- Create worktree: `./worktrees/stories-tier3-game-name-chip` on branch `stories/game-name-chip-audit`
-427	- Modify: `src/components/GameNameChip.stories.tsx`
-428	- Read (for context): `src/components/GameNameChip.tsx`, `src/components/GameNameChip.test.tsx`, `src/lib/game-colors.ts`, `.storybook/decorators.tsx` (verifies the legacy `withDarkMode` export)
-429	
-430	**Gates applied:**
-431	
-432	- Gate 1 — Controls map to something visible: add controls for `title`, `customGameName`, `customGameColor`, `subject`.
-433	- Gate 2 — Structured inputs: `customGameColor` → select.
-434	- Gate 3 — Handler wiring: N/A (no callbacks on `GameNameChipProps`).
-435	- Gate 4 — Global skin (PR #154) — no per-file wrapper. Note that `--game-play` + `game-bg` / `game-text` are the game-colors palette, not skin tokens; they live at the component level and are unaffected by the global decorator.
-436	- Gate 5 — N/A (no shadowed props — all props are primitive and controllable).
-437	- Gate 6 — Collapse: drop `Default` (keep as the canonical name — see below), `WithCustomGame` (reachable via `customGameName` + `customGameColor` controls), `WithSubject` (reachable via `subject` control), and the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark` — theme toolbar covers dark review). Drop `AllColorsDark` too — a single toolbar flip reproduces it. Keep the single `Default` Playground + `AllColors` (12-colour survey is NOT reachable from Controls in one click; per the skill's "When to Add Auxiliary Stories", surveys are a legitimate auxiliary).
-438	- Gate 8 — Single-Default pattern (PR #155): one `Default` Playground + one legitimate auxiliary (`AllColors`). Per-value enum (`customGameColor`) and state variants (custom-game on/off, subject on/off) are reachable from Controls without separate exports.
-439	- Gate 9 — Decorators: no `withDb` / `withRouter` needed.
-440	
-441	**Steps:**
-442	
-443	- [ ] **Step 1: Create worktree.**
-444	
-445	  ```bash
-446	  git worktree add ./worktrees/stories-tier3-game-name-chip -b stories/game-name-chip-audit master
-447	  cd ./worktrees/stories-tier3-game-name-chip && yarn install
-448	  ```
-449	
-450	- [ ] **Step 2: Replace `src/components/GameNameChip.stories.tsx`** with:
-451	
-452	  ```tsx
-453	  import { GameNameChip } from './GameNameChip';
-454	  import { GAME_COLOR_KEYS } from '@/lib/game-colors';
-455	  import type { Meta, StoryObj } from '@storybook/react';
-456	
-457	  const meta: Meta<typeof GameNameChip> = {
-458	    component: GameNameChip,
-459	    tags: ['autodocs'],
-460	    args: {
-461	      title: 'Word Spell',
-462	    },
-463	    argTypes: {
-464	      title: { control: 'text' },
-465	      customGameName: { control: 'text' },
-466	      customGameColor: {
-467	        control: { type: 'select' },
-468	        options: GAME_COLOR_KEYS,
-469	      },
-470	      subject: { control: 'text' },
-471	    },
-472	  };
-473	  export default meta;
-474	
-475	  type Story = StoryObj<typeof GameNameChip>;
-476	
-477	  export const Default: Story = {};
-478	
-479	  export const AllColors: Story = {
-480	    render: () => (
-481	      <div className="flex flex-col gap-2">
-482	        {GAME_COLOR_KEYS.map((color) => (
-483	          <GameNameChip
-484	            key={color}
-485	            title="Word Spell"
-486	            customGameName={color}
-487	            customGameColor={color}
-488	          />
-489	        ))}
-490	      </div>
-491	    ),
-492	  };
-493	  ```
-494	
-495	- [ ] **Step 3: Verify.**
-496	
-497	  ```bash
-498	  yarn typecheck
-499	  yarn lint
-500	  ```
-501	
-502	  Both must exit 0. If lint flags the `GameColorKey` import as unused, it's because we dropped all `customGameColor`-typed scenario args in the collapse — the cleanup is already reflected in Step 2's code block.
-503	
-504	- [ ] **Step 4: Commit.**
-505	
-506	  ```bash
-507	  git add src/components/GameNameChip.stories.tsx
-508	  git commit -m "$(cat <<'EOF'
-509	  stories(components/GameNameChip): retrofit per single-Default Playground
-510	
-511	  Add argTypes controls for title, customGameName, customGameColor
-512	  (select from GAME_COLOR_KEYS), subject. Collapse to Default +
-513	  AllColors — drop WithCustomGame, WithSubject, DefaultDark,
-514	  WithCustomGameDark, WithSubjectDark, AllColorsDark. WithCustomGame
-515	  and WithSubject are reachable from Controls; the four *Dark variants
-516	  are reachable by a theme-toolbar flip. Keep AllColors as a 12-colour
-517	  palette survey — a legitimate auxiliary per the skill's "When to
-518	  Add Auxiliary Stories" section (PR #155): it's not reachable from
-519	  Controls in one click.
-520	
-521	  Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-522	  EOF
-523	  )"
-524	  ```
-525	
-526	- [ ] **Step 5: Push and open PR.**
-527	
-528	  ```bash
-529	  git push -u origin stories/game-name-chip-audit
-530	  gh pr create --base master --title "stories(components/GameNameChip): retrofit per single-Default Playground" --body "$(cat <<'EOF'
-531	  ## Summary
-532	
-533	  Tier 3, file 3 of 5 — retrofits `src/components/GameNameChip.stories.tsx` to the single-Default Playground pattern
-534	  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
-535	
-536	  - `customGameColor` → select from `GAME_COLOR_KEYS`; `title`, `customGameName`, `subject` → text controls.
-537	  - Collapse to `Default` + `AllColors` only. Drop `WithCustomGame`, `WithSubject` (reachable from Controls) and all 4 `*Dark` variants (theme toolbar reproduces them).
-538	  - Kept `AllColors` as a legitimate auxiliary per the skill's "When to Add Auxiliary Stories" — a 12-colour palette survey is NOT reachable from Controls in one click.
-539	  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
-540	
-541	  Closes part of #125.
-542	
-543	  ## Test plan
-544	
-545	  - [ ] `yarn typecheck` green
-546	  - [ ] `yarn lint` green
-547	  - [ ] `yarn test:storybook` green (runs in CI)
-548	  - [ ] Controls panel drives customGameColor select across all 12 keys
-549	  EOF
-550	  )"
-551	  ```
-552	
-553	---
-554	
-555	## Wave 1 Checkpoint
-556	
-557	Before dispatching Wave 2, confirm the reviewer has approved (or at minimum reviewed) all three Wave 1 PRs. In particular:
-558	
-559	- The `StoryArgs` double-cast (`as unknown as ComponentType<StoryArgs>`) and `?: never` pattern are applied correctly.
-560	- `fn()` wiring works inside the render function for handlers that would otherwise collide with StoryArgs (GameCard / GameGrid).
-561	- No `withDarkMode` decorator in any new story (GameNameChip).
-562	- No per-file skin wrapper added anywhere — the global `withDefaultSkin` decorator (PR #154) handles it. If a Wave 1 PR contains a `<div className="game-container skin-...">` wrapper, it's a bug and must be removed.
-563	
-564	If any of these patterns diverges between the three PRs, reconcile by editing this plan's Wave 2 tasks before dispatching, so Tasks 4 and 5 use the agreed shape.
-565	
-566	If all three land cleanly, proceed.
-567	
-568	---
-569	
-570	## Wave 2 — 2 parallel subagents
-571	
-572	Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, one commit, one PR.
-573	
-574	---
-575	
-576	### Task 4: Retrofit `ConfigFormFields.stories.tsx`
-577	
-578	**Files:**
-579	
-580	- Create worktree: `./worktrees/stories-tier3-config-form-fields` on branch `stories/config-form-fields-audit`
-581	- Modify: `src/components/ConfigFormFields.stories.tsx`
-582	- Read (for context): `src/components/ConfigFormFields.tsx`, `src/components/ConfigFormFields.test.tsx`, `src/lib/config-fields.ts` (if present — check for `ConfigField` union shape)
-583	
-584	**Gates applied:**
-585	
-586	- Gate 1 — Controls map: `fields` and `config` are complex objects → hidden from Controls, driven by a `scenario` select.
-587	- Gate 2 — Structured inputs: `scenario` → select with 5 generic presets (one per rendering branch of `ConfigFormFields.tsx`: primitive field types, nested types, dual select-or-number, visibleWhen-hidden, visibleWhen-shown). No game-specific vocabulary in this generic story file — per-game fixtures are an additive follow-up in #153.
-588	- Gate 3 — Handler wiring: `onChange` wired to `fn()` in `args`; hidden from Controls.
-589	- Gate 4 — Global skin (PR #154) — no per-file wrapper.
-590	- Gate 5 — Hide shadowed rows for `fields`, `config`.
-591	- Gate 6 — Collapse + genericise: the 4 SortNumbers-flavoured scenario exports + `AllFieldTypesDark` all reduce to a single `Default` Playground. Simultaneously, the SortNumbers-specific `sortFields` fixture is REPLACED by 4 small generic fixtures (one per rendering branch of `ConfigFormFields.tsx`), each selectable via the `scenario` control. Per-game fixtures (SortNumbers, NumberMatch, etc.) live in their own co-located stories under `src/games/<game>/` — added additively in #153.
-592	- Gate 8 — Single-Default pattern (PR #155): one `Default` story. Every rendering branch (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown) is reachable from the scenario select — no separate exports.
-593	- Gate 9 — Decorators: N/A (no router/DB deps).
-594	
-595	**Steps:**
-596	
-597	- [ ] **Step 1: Create worktree.**
-598	
-599	  ```bash
-600	  git worktree add ./worktrees/stories-tier3-config-form-fields -b stories/config-form-fields-audit master
-601	  cd ./worktrees/stories-tier3-config-form-fields && yarn install
-602	  ```
-603	
-604	- [ ] **Step 2: Replace `src/components/ConfigFormFields.stories.tsx`** with:
-605	
-606	  ```tsx
-607	  import { fn } from 'storybook/test';
-608	
-609	  import { ConfigFormFields } from './ConfigFormFields';
-610	  import type { ConfigField } from '@/lib/config-fields';
-611	  import type { ComponentType } from 'react';
-612	  import type { Meta, StoryObj } from '@storybook/react';
-613	
-614	  type Scenario =
-615	    | 'primitive-types'
-616	    | 'nested-types'
-617	    | 'nested-select-or-number'
-618	    | 'visible-when-hidden'
-619	    | 'visible-when-shown';
-620	
-621	  interface StoryArgs {
-622	    scenario: Scenario;
-623	    onChange: (config: Record<string, unknown>) => void;
-624	    // Shadowed raw props — driven by scenario; hidden from Controls.
-625	    fields?: never;
-626	    config?: never;
-627	  }
-628	
-629	  // Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
-630	  // Per-game fixtures (SortNumbers etc.) live in co-located game stories
-631	  // under src/games/<game>/ (see #153), not here.
-632	
-633	  const primitiveFields: ConfigField[] = [
-634	    {
-635	      type: 'select',
-636	      key: 'size',
-637	      label: 'Size',
-638	      options: [
-639	        { value: 'small', label: 'Small' },
-640	        { value: 'medium', label: 'Medium' },
-641	        { value: 'large', label: 'Large' },
-642	      ],
-643	    },
-644	    {
-645	      type: 'number',
-646	      key: 'count',
-647	      label: 'Count',
-648	      min: 1,
-649	      max: 20,
-650	    },
-651	    {
-652	      type: 'checkbox',
-653	      key: 'enabled',
-654	      label: 'Enabled',
-655	    },
-656	  ];
-657	
-658	  const nestedFields: ConfigField[] = [
-659	    {
-660	      type: 'nested-select',
-661	      key: 'group',
-662	      subKey: 'mode',
-663	      label: 'Group mode',
-664	      options: [
-665	        { value: 'auto', label: 'Auto' },
-666	        { value: 'manual', label: 'Manual' },
-667	      ],
-668	    },
-669	    {
-670	      type: 'nested-number',
-671	      key: 'group',
-672	      subKey: 'size',
-673	      label: 'Group size',
-674	      min: 1,
-675	      max: 10,
-676	    },
-677	  ];
-678	
-679	  const selectOrNumberFields: ConfigField[] = [
-680	    {
-681	      type: 'nested-select-or-number',
-682	      key: 'range',
-683	      subKey: 'max',
-684	      label: 'Max range',
-685	      min: 1,
-686	      max: 100,
-687	    },
-688	  ];
-689	
-690	  const visibleWhenFields: ConfigField[] = [
-691	    {
-692	      type: 'select',
-693	      key: 'mode',
-694	      label: 'Mode',
-695	      options: [
-696	        { value: 'simple', label: 'Simple' },
-697	        { value: 'advanced', label: 'Advanced' },
-698	      ],
-699	    },
-700	    {
-701	      type: 'nested-number',
-702	      key: 'advanced',
-703	      subKey: 'threshold',
-704	      label: 'Threshold',
-705	      min: 1,
-706	      max: 100,
-707	      visibleWhen: { key: 'mode', value: 'advanced' },
-708	    },
-709	  ];
-710	
-711	  const scenarioData: Record<
-712	    Scenario,
-713	    { fields: ConfigField[]; config: Record<string, unknown> }
-714	  > = {
-715	    'primitive-types': {
-716	      fields: primitiveFields,
-717	      config: { size: 'medium', count: 5, enabled: true },
-718	    },
-719	    'nested-types': {
-720	      fields: nestedFields,
-721	      config: { group: { mode: 'auto', size: 4 } },
-722	    },
-723	    'nested-select-or-number': {
-724	      fields: selectOrNumberFields,
-725	      config: { range: { max: 10 } },
-726	    },
-727	    'visible-when-hidden': {
-728	      fields: visibleWhenFields,
-729	      config: { mode: 'simple', advanced: { threshold: 50 } },
-730	    },
-731	    'visible-when-shown': {
-732	      fields: visibleWhenFields,
-733	      config: { mode: 'advanced', advanced: { threshold: 50 } },
-734	    },
-735	  };
-736	
-737	  const meta: Meta<StoryArgs> = {
-738	    component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
-739	    tags: ['autodocs'],
-740	    args: {
-741	      scenario: 'primitive-types',
-742	      onChange: fn(),
-743	    },
-744	    argTypes: {
-745	      scenario: {
-746	        control: { type: 'select' },
-747	        options: [
-748	          'primitive-types',
-749	          'nested-types',
-750	          'nested-select-or-number',
-751	          'visible-when-hidden',
-752	          'visible-when-shown',
-753	        ] satisfies Scenario[],
-754	      },
-755	      onChange: { table: { disable: true } },
-756	      fields: { table: { disable: true } },
-757	      config: { table: { disable: true } },
-758	    },
-759	    render: ({ scenario, onChange }) => {
-760	      const { fields, config } = scenarioData[scenario];
-761	      return (
-762	        <ConfigFormFields
-763	          fields={fields}
-764	          config={config}
-765	          onChange={onChange}
-766	        />
-767	      );
-768	    },
-769	  };
-770	  export default meta;
-771	
-772	  type Story = StoryObj<StoryArgs>;
-773	
-774	  export const Default: Story = {};
-775	
-776	  // The prior 4 scenario exports (AllFieldTypes + 3 SortNumbers presets) and
-777	  // AllFieldTypesDark are all removed. The `scenario` select in Controls
-778	  // reaches every rendering branch of ConfigFormFields generically. Per-game
-779	  // form previews (SortNumbers' real fixtures, NumberMatch, WordSpell, etc.)
-780	  // live as co-located stories in each game's src/games/<game>/ directory —
-781	  // see issue #153 for the additive follow-up.
-782	  ```
-783	
-784	- [ ] **Step 3: Verify.**
-785	
-786	  ```bash
-787	  yarn typecheck
-788	  yarn lint
-789	  ```
-790	
-791	  Both must exit 0. If the `ConfigField` import path differs, adjust — `src/lib/config-fields.ts` is the canonical module based on the existing story's import.
-792	
-793	- [ ] **Step 4: Commit.**
-794	
-795	  ```bash
-796	  git add src/components/ConfigFormFields.stories.tsx
-797	  git commit -m "$(cat <<'EOF'
-798	  stories(components/ConfigFormFields): retrofit per single-Default Playground
-799	
-800	  StoryArgs with scenario select (primitive-types / nested-types /
-801	  nested-select-or-number / visible-when-hidden / visible-when-shown)
-802	  — each preset exercises one rendering branch of ConfigFormFields.tsx
-803	  with generic field fixtures. onChange wired to fn() spy and hidden
-804	  from Controls. Complex props (fields, config) shadowed via ?: never
-805	  + table.disable.
-806	
-807	  Collapse the 4 prior SortNumbers-flavoured scenario exports +
-808	  AllFieldTypesDark into a single Default story — the scenario select
-809	  reaches every rendering branch from Controls in one click; the theme
-810	  toolbar reproduces dark. Simultaneously replace the SortNumbers-
-811	  specific sortFields fixture with 4 generic fixtures; the SortNumbers
-812	  fixtures now only belong in their own co-located game story (added
-813	  additively in #153). Matches the single-Default Playground pattern
-814	  in the skill (added in PR #155).
-815	
-816	  Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-817	  EOF
-818	  )"
-819	  ```
-820	
-821	- [ ] **Step 5: Push and open PR.**
-822	
-823	  ```bash
-824	  git push -u origin stories/config-form-fields-audit
-825	  gh pr create --base master --title "stories(components/ConfigFormFields): retrofit per single-Default Playground" --body "$(cat <<'EOF'
-826	  ## Summary
-827	
-828	  Tier 3, file 4 of 5 — retrofits `src/components/ConfigFormFields.stories.tsx` to the single-Default Playground pattern
-829	  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
-830	
-831	  - `scenario` select in Controls drives 5 generic presets — one per rendering branch of `ConfigFormFields.tsx` (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown). No game-specific vocabulary.
-832	  - `onChange` wired to `fn()`; hidden from Controls.
-833	  - Complex props (`fields`, `config`) shadowed via `?: never` + `table.disable`.
-834	  - Collapse the 4 prior SortNumbers-flavoured scenario exports + `AllFieldTypesDark` into a single `Default` story, and replace the SortNumbers-specific `sortFields` fixture with 5 generic fixtures. Theme toolbar reproduces dark.
-835	  - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
-836	  - Follow-up tracked in #153 is now additive: add per-game `*.config-form.stories.tsx` files (SortNumbers, NumberMatch, etc.) using each game's real fixtures, mirroring PR #143's `InstructionsOverlay` per-game pattern. No further edits to this generic story are required by #153.
-837	
-838	  Closes part of #125.
-839	
-840	  ## Test plan
-841	
-842	  - [ ] `yarn typecheck` green
-843	  - [ ] `yarn lint` green
-844	  - [ ] `yarn test:storybook` green (runs in CI)
-845	  - [ ] scenario select on the `Default` story cycles through all 5 generic branches (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown); theme toolbar cycles dark/light
-846	  EOF
-847	  )"
-848	  ```
-849	
-850	---
-851	
-852	### Task 5: Retrofit `ThemeShowcase.stories.tsx`
-853	
-854	**Files:**
-855	
-856	- Create worktree: `./worktrees/stories-tier3-theme-showcase` on branch `stories/theme-showcase-audit`
-857	- Modify: `src/stories/ThemeShowcase.stories.tsx`
-858	- Read (for context): `src/components/game/GameShell.tsx`, `src/lib/game-engine/types.ts` (confirm `GameEngineState`, `ResolvedContent`, `ResolvedGameConfig`, `SessionMeta` shapes still match)
-859	
-860	**Gates applied:**
-861	
-862	- Gate 1 — Controls map: none of the `GameShell` props are meaningful to control in this showcase context (they're fixtures); hide all of them.
-863	- Gate 3 — Handler wiring: N/A (no callbacks on `GameShell`; `ShowcaseBody`'s inline `onChange={() => {}}` stays inside the fixture).
-864	- Gate 4 — Global skin (PR #154) — no per-file wrapper. `ThemeShowcase` is a theme-token showcase; the skin decorator's CSS vars don't conflict with theme-token rendering.
-865	- Gate 5 — Hide shadowed rows for `config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`.
-866	- Gate 6 — Collapse: drop 3 of the 4 theme-pinned stories (OceanDark, ForestLight, ForestDark). The theme toolbar (5 themes registered globally in `.storybook/preview.tsx`) lets the reviewer cycle through every theme from the single `Default` story in one tap each. VR in this project is Playwright-driven (`e2e/visual.spec.ts`) — Storybook stories do not double as VR baselines, so the "distinct snapshots" argument doesn't hold.
-867	- Gate 8 — Single-Default pattern (PR #155): one `Default` story. The toolbar provides the per-theme "different views" control.
-868	- Gate 9 — Decorators: `withDb` + `withRouter` (already present; keep).
-869	
-870	**Steps:**
-871	
-872	- [ ] **Step 1: Create worktree.**
-873	
-874	  ```bash
-875	  git worktree add ./worktrees/stories-tier3-theme-showcase -b stories/theme-showcase-audit master
-876	  cd ./worktrees/stories-tier3-theme-showcase && yarn install
-877	  ```
-878	
-879	- [ ] **Step 2: Replace `src/stories/ThemeShowcase.stories.tsx`** with:
-880	
-881	  ```tsx
-882	  import { withDb } from '../../.storybook/decorators/withDb';
-883	  import { withRouter } from '../../.storybook/decorators/withRouter';
-884	  import type { ConfigField } from '@/lib/config-fields';
-885	  import type {
-886	    GameEngineState,
-887	    ResolvedContent,
-888	    ResolvedGameConfig,
-889	    SessionMeta,
-890	  } from '@/lib/game-engine/types';
-891	  import type { Meta, StoryObj } from '@storybook/react';
-892	  import { ConfigFormFields } from '@/components/ConfigFormFields';
-893	  import { GameShell } from '@/components/game/GameShell';
-894	  import { GameNameChip } from '@/components/GameNameChip';
-895	
-896	  // ── GameShell fixture data ────────────────────────────────────────────────
-897	
-898	  const content: ResolvedContent = {
-899	    rounds: [
-900	      {
-901	        id: 'r1',
-902	        prompt: { en: 'Sort the numbers' },
-903	        correctAnswer: '1',
-904	      },
-905	    ],
-906	  };
-907	
-908	  const shellConfig: ResolvedGameConfig = {
-909	    gameId: 'theme-showcase',
-910	    title: { en: 'Theme Showcase' },
-911	    gradeBand: 'year1-2',
-912	    maxRounds: 3,
-913	    maxRetries: 1,
-914	    maxUndoDepth: 3,
-915	    timerVisible: true,
-916	    timerDurationSeconds: 60,
-917	    difficulty: 'medium',
-918	  };
-919	
-920	  const initialState: GameEngineState = {
-921	    phase: 'playing',
-922	    roundIndex: 0,
-923	    score: 0,
-924	    streak: 0,
-925	    retryCount: 0,
-926	    content,
-927	    currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-928	  };
-929	
-930	  const sessionMeta: SessionMeta = {
-931	    profileId: 'storybook-user',
-932	    gameId: 'theme-showcase',
-933	    gradeBand: 'year1-2',
-934	    seed: 'storybook-seed',
-935	    initialContent: content,
-936	    initialState,
-937	  };
-938	
-939	  // ── Custom game component fixture data ──────────────────────────────────────
-940	
-941	  const configFields: ConfigField[] = [
-942	    {
-943	      type: 'select',
-944	      key: 'inputMethod',
-945	      label: 'Input method',
-946	      options: [
-947	        { value: 'drag', label: 'Drag' },
-948	        { value: 'type', label: 'Type' },
-949	      ],
-950	    },
-951	    {
-952	      type: 'number',
-953	      key: 'totalRounds',
-954	      label: 'Total rounds',
-955	      min: 1,
-956	      max: 20,
-957	    },
-958	    {
-959	      type: 'checkbox',
-960	      key: 'ttsEnabled',
-961	      label: 'Text-to-speech',
-962	    },
-963	  ];
-964	
-965	  // ── Story body ────────────────────────────────────────────────────────────
-966	
-967	  const ShowcaseBody = () => (
-968	    <div className="flex flex-col gap-4 p-4">
-969	      <GameNameChip
-970	        title="Sort Numbers"
-971	        customGameName="Easy Numbers"
-972	        customGameColor="teal"
-973	      />
-974	      <GameNameChip title="Word Spell" subject="reading" />
-975	      <ConfigFormFields
-976	        fields={configFields}
-977	        config={{
-978	          inputMethod: 'drag',
-979	          totalRounds: 8,
-980	          ttsEnabled: true,
-981	        }}
-982	        onChange={() => {}}
-983	      />
-984	    </div>
-985	  );
-986	
-987	  // ── Meta ──────────────────────────────────────────────────────────────────
-988	
-989	  const meta = {
-990	    component: GameShell,
-991	    title: 'Pages/ThemeShowcase',
-992	    tags: ['autodocs'],
-993	    decorators: [withDb, withRouter],
-994	    parameters: {
-995	      layout: 'fullscreen',
-996	      docs: {
-997	        description: {
-998	          component:
-999	            'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the 5 registered themes via the toolbar. The global `withDefaultSkin` decorator wraps the preview — unaffected here because this file renders against theme tokens, not skin tokens.',
-1000	        },
-1001	      },
-1002	    },
-1003	    args: {
-1004	      config: shellConfig,
-1005	      moves: {},
-1006	      initialState,
-1007	      sessionId: 'showcase-session',
-1008	      meta: sessionMeta,
-1009	      children: <ShowcaseBody />,
-1010	    },
-1011	    argTypes: {
-1012	      config: { table: { disable: true } },
-1013	      moves: { table: { disable: true } },
-1014	      initialState: { table: { disable: true } },
-1015	      sessionId: { table: { disable: true } },
-1016	      meta: { table: { disable: true } },
-1017	      initialLog: { table: { disable: true } },
-1018	      children: { table: { disable: true } },
-1019	    },
-1020	  } satisfies Meta<typeof GameShell>;
-1021	  export default meta;
-1022	
-1023	  type Story = StoryObj<typeof GameShell>;
-1024	
-1025	  export const Default: Story = {};
-1026	
-1027	  // deleted-for-reference — the theme toolbar reproduces every prior pin in one tap:
-1028	  //   OceanLight  → toolbar theme='light'  (default)
-1029	  //   OceanDark   → toolbar theme='dark'
-1030	  //   ForestLight → toolbar theme='forest-light'
-1031	  //   ForestDark  → toolbar theme='forest-dark'
-1032	  ```
-1033	
-1034	- [ ] **Step 3: Verify.**
-1035	
-1036	  ```bash
-1037	  yarn typecheck
-1038	  yarn lint
-1039	  ```
-1040	
-1041	  Both must exit 0. The `satisfies Meta<typeof GameShell>` means docgen sees every real prop — `argTypes.table.disable` on the 7 hidden props is what actually removes them from the Controls panel. If any of the fixture type shapes (`GameEngineState`, `ResolvedContent`, `ResolvedGameConfig`, `SessionMeta`) has drifted since the previous version of the file, align to the current `src/lib/game-engine/types.ts`.
-1042	
-1043	- [ ] **Step 4: Commit.**
-1044	
-1045	  ```bash
-1046	  git add src/stories/ThemeShowcase.stories.tsx
-1047	  git commit -m "$(cat <<'EOF'
-1048	  stories(stories/ThemeShowcase): retrofit per single-Default Playground
-1049	
-1050	  Hide all 7 GameShell-prop docgen rows from the Controls panel
-1051	  (config, moves, initialState, sessionId, meta, initialLog, children)
-1052	  via argTypes.table.disable. Collapse the 4 theme-pinned exports
-1053	  (OceanLight, OceanDark, ForestLight, ForestDark) into a single
-1054	  Default story — the theme toolbar reproduces each pin in one tap.
-1055	  VR in this project is Playwright (e2e/visual.spec.ts), not Storybook,
-1056	  so the "distinct VR snapshots" argument doesn't hold. Matches the
-1057	  single-Default Playground pattern in the skill (added in PR #155).
-1058	
-1059	  Skin wrapping handled globally by the withDefaultSkin decorator
-1060	  (PR #154). Docs description updated to note the theme-toolbar
-1061	  workflow.
-1062	
-1063	  Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-1064	  EOF
-1065	  )"
-1066	  ```
-1067	
-1068	- [ ] **Step 5: Push and open PR.**
-1069	
-1070	  ```bash
-1071	  git push -u origin stories/theme-showcase-audit
-1072	  gh pr create --base master --title "stories(stories/ThemeShowcase): retrofit per single-Default Playground" --body "$(cat <<'EOF'
-1073	  ## Summary
-1074	
-1075	  Tier 3, file 5 of 5 — retrofits `src/stories/ThemeShowcase.stories.tsx` to the single-Default Playground pattern
-1076	  ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
-1077	
-1078	  - Hide all 7 GameShell-prop rows from Controls (`config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`) via `argTypes.table.disable`.
-1079	  - Collapse the 4 theme-pinned exports into a single `Default` — the theme toolbar reproduces every pin in one tap. VR is Playwright (`e2e/visual.spec.ts`), not Storybook, so a distinct-snapshot-per-story argument doesn't apply.
-1080	  - Skin wrapping handled globally by `withDefaultSkin` (PR #154); no per-file wrapper.
-1081	
-1082	  Closes part of #125.
-1083	
-1084	  ## Test plan
-1085	
-1086	  - [ ] `yarn typecheck` green
-1087	  - [ ] `yarn lint` green
-1088	  - [ ] `yarn test:storybook` green (runs in CI)
-1089	  - [ ] Controls panel is empty on the `Default` story (all 7 docgen rows hidden)
-1090	  - [ ] Theme toolbar cycles through all 5 registered themes on the single `Default` story
-1091	  EOF
-1092	  )"
-1093	  ```
-1094	
-1095	---
-1096	
-1097	## Post-PR cleanup
-1098	
-1099	After all 5 PRs merge:
-1100	
-1101	- [ ] **Update issue #125.** Tick the 5 boxes in the issue body:
-1102	
-1103	  ```text
-1104	  - [x] ConfigFormFields.stories.tsx
-1105	  - [x] GameCard.stories.tsx
-1106	  - [x] GameGrid.stories.tsx
-1107	  - [x] GameNameChip.stories.tsx
-1108	  - [x] stories/ThemeShowcase.stories.tsx
-1109	  ```
-1110	
-1111	  ```bash
-1112	  gh issue view 125 --json body --jq '.body' > /tmp/issue-125-body.md
-1113	  # Edit the 5 checkboxes in /tmp/issue-125-body.md, then:
-1114	  gh issue edit 125 --body-file /tmp/issue-125-body.md
-1115	  ```
-1116	
-1117	- [ ] **Remove merged worktrees.** The repo's `.husky` / `prune-merged-worktrees` script runs on post-merge, but verify:
-1118	
-1119	  ```bash
-1120	  git worktree list | grep stories-tier3
-1121	  # If any remain after their PR merges:
-1122	  git worktree remove worktrees/stories-tier3-<slug>
-1123	  ```
-1124	
-1125	- [ ] **Plan's own worktree.** Remove this plan's worktree after the plan PR merges:
-1126	
-1127	  ```bash
-1128	  git worktree remove worktrees/plan-tier3-storybook-audit
-1129	  ```
-1130	
-1131	---
-1132	
-1133	## Scope explicitly excluded
-1134	
-1135	- Any `.md` / docs edits outside this plan file.
-1136	- Any changes to `.storybook/preview.tsx`, `.storybook/decorators.tsx`, or global Storybook config.
-1137	- Retrofitting the remaining 4 root-components files (`Footer`, `Header`, `OfflineIndicator`, `ThemeToggle`, `UpdateBanner`) — they are still in the Tier 5 / Batch 5 bucket on #125 and should get their own plan.
-1138	- Adding per-game `*.config-form.stories.tsx` files (e.g. `src/games/sort-numbers/SortNumbers.config-form.stories.tsx`) using each game's real `ConfigField[]` fixtures — tracked in #153 as an additive follow-up, mirroring #143's per-game `InstructionsOverlay` pattern. Task 4 ships the generic `ConfigFormFields` story with 5 generic fixtures only; no SortNumbers vocabulary — so #153 adds new files without needing to remove anything from the generic story.
-1139	
-1140	---
-1141	
-1142	## Upstream work already merged (informs this plan)
-1143	
-1144	- **PR #154** — `classicSkin` is now applied globally via `withDefaultSkin` in `.storybook/preview.tsx`. No Tier 3 task adds a per-file skin wrapper. Per-file wrappers previously present on `AnswerGame`, `ProgressHUD`, `Slot` were removed in #154; they are the current shell-slim references.
-1145	- **PR #155** — The `.claude/skills/write-storybook/SKILL.md` skill now has explicit "Playground Pattern" + "When to Add Auxiliary Stories" sections. Every Tier 3 task ships a single `Default` story and auxiliary exports only when the Controls panel can't reach the scenario (e.g., Task 3's `AllColors` palette survey).
-1146	
-1147	---
-1148	
-1149	## Self-review
-1150	
-1151	- **Spec coverage:** The 5 Tier 3 files named in #125 are each covered by exactly one task (Tasks 1–5). Each task applies the 10 gates from #125 (mapping shown in the "Gates applied" block). ✓
-1152	- **Placeholders:** No `TBD`, `TODO`, "implement later", "appropriate error handling", or stub-only steps. Every code block is complete and runnable. ✓
-1153	- **Type consistency:** `StoryArgs` double-cast uses `ComponentType<StoryArgs>` consistently. `GAME_COLOR_KEYS` imported from `@/lib/game-colors` in Tasks 2 and 3. `ConfigField` import path matches the existing story file in Task 4. `GameEngineState` / `ResolvedContent` / `ResolvedGameConfig` / `SessionMeta` import paths preserved from the existing ThemeShowcase file in Task 5. ✓
-1154	- **Cross-task coupling:** None. Each task touches exactly one file and pins its own worktree. ✓
-1155	- **Single-Default Playground consistency (PR #155):** Every task ships a single `Default` story (the Playground) plus auxiliary stories only for scenarios the Controls panel or theme toolbar can't reach. Task 1 (GameGrid): `Default` only. Task 2 (GameCard): `Default` only. Task 3 (GameNameChip): `Default` + `AllColors` survey (12-colour palette — Controls can't reach it in one click; legitimate auxiliary per the skill). Task 4 (ConfigFormFields): `Default` only — the `scenario` select covers every `visibleWhen` branch. Task 5 (ThemeShowcase): `Default` only — the theme toolbar cycles through all 5 themes. ✓
-1156	- **Skin wrapping (PR #154):** Zero per-file wrappers added; every story inherits `withDefaultSkin` from `.storybook/preview.tsx`. ✓
-1157	
-1158	Plan is ready for execution handoff.
+1 # Tier 3 Storybook Controls Audit — Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Retrofit the 5 Tier-3 Storybook files (4 root `src/components/*` + 1 `src/stories/ThemeShowcase.stories.tsx`) to the single-Default Playground pattern and Controls Policy defined in [`.claude/skills/write-storybook/SKILL.md`](../../../.claude/skills/write-storybook/SKILL.md) (as updated in PR #155) and the 10 rollout gates in issue #125.
+6 
+7 **Architecture:** Two waves of independent subagents, one worktree/branch/PR per file. No shared files are touched across tasks — each task is fully self-contained, so the 5 tasks are safe to run in parallel in principle. Serialising into two waves (3 files → review checkpoint → 2 files) limits review load and catches pattern drift before Wave 2 starts. Each task writes exactly one `.stories.tsx` file, runs `yarn typecheck` + `yarn lint`, commits, pushes, and opens a PR against `master`.
+8 
+9 **Tech Stack:** Storybook 10.3.3 (`@storybook/react-vite`), `storybook/test` subpath (exposes `fn`), `@storybook/addon-a11y` (global `a11y.test: 'error'`), `react-i18next` (wired globally via `.storybook/preview.tsx` — stories don't need a decorator), TanStack Router (only for `ThemeShowcase` via `withRouter`).
+10 
+11 **Canonical references:**
+12 
+13 - Controls policy: `.claude/skills/write-storybook/SKILL.md`
+14 - Playground pattern spec: `.claude/skills/write-storybook/SKILL.md` — "Playground Pattern" + "When to Add Auxiliary Stories" sections (added in PR #155)
+15 - Global skin decorator: `.storybook/decorators.tsx` `withDefaultSkin` (added in PR #154) — already applied to every story; Tier 3 stories inherit it automatically and must NOT add a per-file skin wrapper
+16 - Shell-slim Default reference: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` (post-#154; per-file skin wrapper removed)
+17 - Trigger-button pattern reference (for callbacks the Controls panel can't invoke): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+18 - Batch 2 retrofit precedent: `docs/superpowers/plans/2026-04-21-audit-storybook-answer-game-plan.md`
+19 - Colour keys: `src/lib/game-colors.ts` exports `GAME_COLOR_KEYS` and `GameColorKey`
+20 - Tracking issue: #125
+21 
+22 ---
+23 
+24 ## Shared Conventions (applies to every task)
+25 
+26 - **One worktree per file.** From the repo root on `master`:
+27 
+28   ```bash
+29   git worktree add ./worktrees/stories-tier3-<slug> -b stories/<slug>-audit master
+30   cd ./worktrees/stories-tier3-<slug> && yarn install
+31   ```
+32 
+33   Slugs: `game-grid`, `game-card`, `game-name-chip`, `config-form-fields`, `theme-showcase`.
+34 
+35 - **Skin wrapping is global (PR #154).** The `withDefaultSkin` decorator in `.storybook/preview.tsx` wraps every story in `<div className="game-container skin-classic" style={classicSkin.tokens}>`. No Tier 3 task adds a per-file skin wrapper — doing so would create a double-wrap. None of the 5 target components consume `--skin-*` tokens themselves, so the global decorator's effect is inert for their visuals; we simply inherit it.
+36 - **Handler wiring.** Every callback prop wired via `args: { onFoo: fn(), ... }` from `storybook/test` and hidden from the Controls panel via `argTypes: { onFoo: { table: { disable: true } } }`. Do not use `argTypes: { onFoo: { action: '…' } }`. Do not rely on the global `argTypesRegex` alone — react-docgen does not expand DOM-extended prop types, so the regex matches nothing for most handler props.
+37 - **`StoryArgs` pattern.** When the component takes complex object props or has docgen-inferred rows we want to hide, declare an explicit `interface StoryArgs { … }` with controllable args, mark shadowed raw props as `?: never`, and double-cast `component: Foo as unknown as ComponentType<StoryArgs>`. See `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx` for the canonical shape.
+38 - **Controls map (reminder).** Enum / union → `control: { type: 'select' }` + `options` (or `'radio'` for ≤4 options); boolean → `control: 'boolean'`; bounded number → `control: { type: 'range', min, max, step }`; free text → `control: 'text'`; callback → disabled in Controls and wired via `fn()` in `args`; JSX / complex object → `control: false` or `table: { disable: true }`. Never a raw JSON control for an enumerable domain.
+39 - **Single-Default Playground pattern (PR #155).** Every Tier 3 file ships exactly one `Default: Story = {}` driven by proper interactive controls. Auxiliary named stories are added only for scenarios the Playground's controls cannot express — the skill's "When to Add Auxiliary Stories" section enumerates legitimate exceptions (surveys like `AllColors`, pinned themes or viewports for `play()` assertions, stateful trigger-button wrappers). Enum-per-value, state-variant, and edge-case snapshots that a control toggle reaches are NOT legitimate auxiliaries — delete them. Story name is `Default` (not `Playground`); "Playground" is the conceptual label per the skill.
+40 - **Dark-mode stories.** The theme toolbar (registered globally in `.storybook/preview.tsx`) lets reviewers toggle themes interactively — do not add `DefaultDark` / `WithXDark` duplicates. Pin a story to a specific theme only when the variant exercises something theme-specific that the toolbar can't reproduce in one tap (surveys like `AllColorsDark`, VR baseline stories like `ThemeShowcase`'s 4 theme-pinned stories). Prefer `globals: { theme: '<name>' }` over the legacy `withDarkMode` decorator.
+41 - **Import order (ESLint `import/order`).** Value imports alphabetical → relative imports alphabetical → `storybook/test` → `@storybook/react` type import → `react` / JSX type imports last. If lint complains, regroup.
+42 - **Per-task verification (always before commit).** `yarn typecheck` → exit 0; `yarn lint` → exit 0. Do **not** run `yarn test:storybook` per file — too slow; the full run lives in CI when the PR opens.
+43 - **Optional local visual check.** Each subagent may (but is not required to) start a Storybook on a free port (6106+) inside its worktree and navigate to the target stories in a browser — or run a Playwright script to screenshot them — before writing diffs. Kill the Storybook process when done. Use the workflow from `.claude/skills/write-storybook/SKILL.md` ("Running Storybook Tests"). Skip this step if Docker/Storybook bootstrap is flaky; the CI `yarn test:storybook` run is the authoritative gate.
+44 - **Commit message shape.** `stories(<area>/<name>): retrofit per single-Default Playground`. Body lists the gates applied and any variant dropped with reason. Co-authored trailer.
+45 - **One commit per file. One PR per file.** PRs always target `master`. Push freely for Tier 3 (feature work). If the push triggers an automation that auto-opens a PR, edit that PR's title/body instead of creating a new one.
+46 - **Markdown.** No Markdown edits expected in these tasks. Skip `yarn fix:md`.
+47 - **Do not extract shared helpers across tasks.** Each story file is self-contained — keep fixtures + wrapper components inline. Shared-helper drift is the main risk if Wave 1 and Wave 2 run in parallel; avoid by design.
+48 
+49 ---
+50 
+51 ## Wave 1 — 3 parallel subagents
+52 
+53 Dispatch Tasks 1, 2, 3 concurrently. Each writes its own worktree, commits once, pushes, opens a PR. After all three PRs are approved (or at minimum code-reviewed), proceed to the Wave 1 Checkpoint.
+54 
+55 ---
+56 
+57 ### Task 1: Retrofit `GameGrid.stories.tsx`
+58 
+59 **Files:**
+60 
+61 - Create worktree: `./worktrees/stories-tier3-game-grid` on branch `stories/game-grid-audit`
+62 - Modify: `src/components/GameGrid.stories.tsx`
+63 - Read (for context): `src/components/GameGrid.tsx`, `src/components/GameCard.tsx`, `src/components/GameGrid.test.tsx`
+64 
+65 **Gates applied (from issue #125):**
+66 
+67 - Gate 1 — Controls map to something visible: `cards: ReactNode[]` is invisible as a control; hidden and derived from `cardCount` range.
+68 - Gate 3 — Handler wiring: sample cards inside the render use `fn()` spies on `onPlay` / `onOpenCog`.
+69 - Gate 4 — Global skin (PR #154) — no per-file wrapper.
+70 - Gate 5 — Hide shadowed docgen row for `cards`.
+71 - Gate 6 — Collapse: 2 existing stories (`Default`, `Empty`) collapse into the single `Default` Playground — `cardCount` range (0–12) reaches every state from Controls in one click; no scenario exports are needed.
+72 - Gate 8 — Single-Default pattern (PR #155): one `Default` story. Edge cases (empty / many) reachable via the `cardCount` range — no separate exports. No interactive component → no `play()`.
+73 
+74 **Steps:**
+75 
+76 - [ ] **Step 1: Create worktree.**
+77 
+78   ```bash
+79   git worktree add ./worktrees/stories-tier3-game-grid -b stories/game-grid-audit master
+80   cd ./worktrees/stories-tier3-game-grid && yarn install
+81   ```
+82 
+83 - [ ] **Step 2: Replace `src/components/GameGrid.stories.tsx`** with:
+84 
+85   ```tsx
+86   import { fn } from 'storybook/test';
+87 
+88   import { GameCard } from './GameCard';
+89   import { GameGrid } from './GameGrid';
+90   import type { ComponentType } from 'react';
+91   import type { Meta, StoryObj } from '@storybook/react';
+92 
+93   interface StoryArgs {
+94     cardCount: number;
+95     // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
+96     cards?: never;
+97   }
+98 
+99   const meta: Meta<StoryArgs> = {
+100     component: GameGrid as unknown as ComponentType<StoryArgs>,
+101     tags: ['autodocs'],
+102     args: {
+103       cardCount: 3,
+104     },
+105     argTypes: {
+106       cardCount: {
+107         control: { type: 'range', min: 0, max: 12, step: 1 },
+108       },
+109       cards: { table: { disable: true } },
+110     },
+111     render: ({ cardCount }) => (
+112       <GameGrid
+113         cards={Array.from({ length: cardCount }, (_, i) => (
+114           <GameCard
+115             key={`card-${String(i)}`}
+116             variant="default"
+117             gameId="sort-numbers"
+118             title={`Card ${String(i + 1)}`}
+119             chips={['K', '1', '2']}
+120             onPlay={fn()}
+121             onOpenCog={fn()}
+122           />
+123         ))}
+124       />
+125     ),
+126   };
+127   export default meta;
+128 
+129   type Story = StoryObj<StoryArgs>;
+130 
+131   export const Default: Story = {};
+132   ```
+133 
+134 - [ ] **Step 3: Verify.** Run in the worktree:
+135 
+136   ```bash
+137   yarn typecheck
+138   yarn lint
+139   ```
+140 
+141   Both must exit 0. If `import/order` fails, regroup per the Shared Conventions rule.
+142 
+143 - [ ] **Step 4: Commit.**
+144 
+145   ```bash
+146   git add src/components/GameGrid.stories.tsx
+147   git commit -m "$(cat <<'EOF'
+148   stories(components/GameGrid): retrofit per single-Default Playground
+149 
+150   StoryArgs exposes a cardCount range (0–12); cards is shadowed and
+151   hidden from Controls. Sample GameCards inside the render wire
+152   onPlay/onOpenCog to fn() spies. Single Default story per the
+153   Playground pattern in .claude/skills/write-storybook/SKILL.md
+154   (added in PR #155).
+155 
+156   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+157   EOF
+158   )"
+159   ```
+160 
+161 - [ ] **Step 5: Push and open PR.**
+162 
+163   ```bash
+164   git push -u origin stories/game-grid-audit
+165   gh pr create --base master --title "stories(components/GameGrid): retrofit per single-Default Playground" --body "$(cat <<'EOF'
+166   ## Summary
+167 
+168   Tier 3, file 1 of 5 — retrofits `src/components/GameGrid.stories.tsx` to the single-Default Playground pattern defined in
+169   [`.claude/skills/write-storybook/SKILL.md`](../blob/master/.claude/skills/write-storybook/SKILL.md) (added in PR #155) and
+170   the Controls Policy in issue #125.
+171 
+172   - `cardCount` range (0–12) drives how many GameCards render.
+173   - `cards` is shadowed (`?: never` + `table: { disable: true }`) — never meaningful as a control.
+174   - Sample cards wire `onPlay` / `onOpenCog` to `fn()` spies.
+175   - Single `Default` story — the `cardCount` range reaches every prior state (0, 3, 12).
+176   - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
+177 
+178   Closes part of #125.
+179 
+180   ## Test plan
+181 
+182   - [ ] `yarn typecheck` green
+183   - [ ] `yarn lint` green
+184   - [ ] `yarn test:storybook` green (runs in CI)
+185   - [ ] Controls panel drives the single `Default` export (cardCount slider reaches 0, 3, and 12 cards visibly)
+186   EOF
+187   )"
+188   ```
+189 
+190 ---
+191 
+192 ### Task 2: Retrofit `GameCard.stories.tsx`
+193 
+194 **Files:**
+195 
+196 - Create worktree: `./worktrees/stories-tier3-game-card` on branch `stories/game-card-audit`
+197 - Modify: `src/components/GameCard.stories.tsx`
+198 - Read (for context): `src/components/GameCard.tsx`, `src/components/GameCard.test.tsx`, `src/lib/game-colors.ts`
+199 
+200 **Gates applied:**
+201 
+202 - Gate 1 — Controls map: `variant` union, `customGameColor` enum, `isBookmarked` boolean, `bookmarkable` derived-boolean (controls whether `onToggleBookmark` is passed).
+203 - Gate 2 — Structured inputs: `variant` → radio, `customGameColor` → select of `GAME_COLOR_KEYS`, `chipsText` → free text (split on commas → `chips: string[]`).
+204 - Gate 3 — Handler wiring: convert `{ action: '…' }` → `fn()` in `args`; hide from Controls. Call `fn()` inside `render` for per-render spy instances (OK for Actions-only; no play() stories here).
+205 - Gate 4 — Global skin (PR #154) — no per-file wrapper.
+206 - Gate 5 — Hide shadowed docgen rows for `chips`, `cover`, `onPlay`, `onOpenCog`, `onToggleBookmark`.
+207 - Gate 6 — Collapse: 7 existing scenario exports (Default, CustomGame, CustomGamePurple, NotBookmarked, Bookmarked, NotBookmarkedCustomGame, BookmarkedCustomGame) all reduce to arg tweaks on a single `Default` Playground — the `variant` radio, `customGameColor` select, `bookmarkable` + `isBookmarked` booleans, and `chipsText` text control reach every state from Controls in ≤2 clicks. Drop all 7; keep only `Default`.
+208 - Gate 7 — Real-game parity: in production, `GameCard` renders inside `GameGrid`'s responsive columns (~260–300px wide at xl/2xl breakpoints). In isolation it has no width constraint and stretches to the full canvas, so the cover image dominates. The `Default` story's `render` wraps the card in `<div className="w-64">` (256px) and the meta pins `parameters: { layout: 'centered' }` so the card renders at a realistic grid-cell size, centred in the preview.
+209 - Gate 8 — Single-Default pattern (PR #155): one `Default` story. Enum-per-value (variant), state variants (bookmark on/off), and colour variations are all reachable from the Controls panel — no separate exports.
+210 
+211 **Steps:**
+212 
+213 - [ ] **Step 1: Create worktree.**
+214 
+215   ```bash
+216   git worktree add ./worktrees/stories-tier3-game-card -b stories/game-card-audit master
+217   cd ./worktrees/stories-tier3-game-card && yarn install
+218   ```
+219 
+220 - [ ] **Step 2: Replace `src/components/GameCard.stories.tsx`** with:
+221 
+222   ```tsx
+223   import { fn } from 'storybook/test';
+224 
+225   import { GameCard } from './GameCard';
+226   import { GAME_COLOR_KEYS } from '@/lib/game-colors';
+227   import type { GameColorKey } from '@/lib/game-colors';
+228   import type { ComponentType } from 'react';
+229   import type { Meta, StoryObj } from '@storybook/react';
+230 
+231   type Variant = 'default' | 'customGame';
+232 
+233   interface StoryArgs {
+234     variant: Variant;
+235     gameId: string;
+236     title: string;
+237     chipsText: string;
+238     customGameName: string;
+239     customGameColor: GameColorKey;
+240     bookmarkable: boolean;
+241     isBookmarked: boolean;
+242     // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
+243     chips?: never;
+244     cover?: never;
+245     onPlay?: never;
+246     onOpenCog?: never;
+247     onToggleBookmark?: never;
+248   }
+249 
+250   const meta: Meta<StoryArgs> = {
+251     component: GameCard as unknown as ComponentType<StoryArgs>,
+252     tags: ['autodocs'],
+253     parameters: { layout: 'centered' },
+254     args: {
+255       variant: 'default',
+256       gameId: 'sort-numbers',
+257       title: 'Count in Order',
+258       chipsText: '🚀 Up, 5 numbers, 2s',
+259       customGameName: 'Skip by 2',
+260       customGameColor: 'indigo',
+261       bookmarkable: false,
+262       isBookmarked: false,
+263     },
+264     argTypes: {
+265       variant: {
+266         control: { type: 'radio' },
+267         options: ['default', 'customGame'] satisfies Variant[],
+268       },
+269       gameId: { control: 'text' },
+270       title: { control: 'text' },
+271       chipsText: { control: 'text' },
+272       customGameName: { control: 'text' },
+273       customGameColor: {
+274         control: { type: 'select' },
+275         options: GAME_COLOR_KEYS,
+276       },
+277       bookmarkable: { control: 'boolean' },
+278       isBookmarked: { control: 'boolean' },
+279       chips: { table: { disable: true } },
+280       cover: { table: { disable: true } },
+281       onPlay: { table: { disable: true } },
+282       onOpenCog: { table: { disable: true } },
+283       onToggleBookmark: { table: { disable: true } },
+284     },
+285     render: ({
+286       variant,
+287       gameId,
+288       title,
+289       chipsText,
+290       customGameName,
+291       customGameColor,
+292       bookmarkable,
+293       isBookmarked,
+294     }) => {
+295       const chips = chipsText
+296         .split(',')
+297         .map((s) => s.trim())
+298         .filter(Boolean);
+299 
+300       const bookmarkProps = bookmarkable
+301         ? { isBookmarked, onToggleBookmark: fn() }
+302         : {};
+303 
+304       // w-64 (256px) ≈ a typical GameGrid cell width at xl/2xl breakpoints.
+305       // Without this wrapper GameCard stretches to the full canvas and the
+306       // cover image dwarfs the card chrome.
+307       return (
+308         <div className="w-64">
+309           {variant === 'customGame' ? (
+310             <GameCard
+311               variant="customGame"
+312               gameId={gameId}
+313               title={title}
+314               chips={chips}
+315               customGameName={customGameName || 'Custom'}
+316               customGameColor={customGameColor}
+317               onPlay={fn()}
+318               onOpenCog={fn()}
+319               {...bookmarkProps}
+320             />
+321           ) : (
+322             <GameCard
+323               variant="default"
+324               gameId={gameId}
+325               title={title}
+326               chips={chips}
+327               onPlay={fn()}
+328               onOpenCog={fn()}
+329               {...bookmarkProps}
+330             />
+331           )}
+332         </div>
+333       );
+334     },
+335   };
+336   export default meta;
+337 
+338   type Story = StoryObj<StoryArgs>;
+339 
+340   export const Default: Story = {};
+341 
+342   // deleted-for-reference — every prior export is reachable from Default's Controls:
+343   //   CustomGame               → variant='customGame', customGameColor='amber'
+344   //   CustomGamePurple         → variant='customGame', customGameColor='purple', chipsText='⬇️ Down, 10 numbers, 3s'
+345   //   NotBookmarked            → bookmarkable=true, isBookmarked=false
+346   //   Bookmarked               → bookmarkable=true, isBookmarked=true
+347   //   NotBookmarkedCustomGame  → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=false
+348   //   BookmarkedCustomGame     → variant='customGame', customGameColor='amber', bookmarkable=true, isBookmarked=true
+349   ```
+350 
+351 - [ ] **Step 3: Verify.**
+352 
+353   ```bash
+354   yarn typecheck
+355   yarn lint
+356   ```
+357 
+358   Both must exit 0. The discriminated union in `GameCardProps` is the most likely source of a typecheck error — if so, the `variant === 'customGame'` branch in `render` is the source of truth; align the `customGameName` / `customGameColor` requirements there.
+359 
+360 - [ ] **Step 4: Commit.**
+361 
+362   ```bash
+363   git add src/components/GameCard.stories.tsx
+364   git commit -m "$(cat <<'EOF'
+365   stories(components/GameCard): retrofit per single-Default Playground
+366 
+367   StoryArgs with proper controls: variant radio, customGameColor select
+368   from GAME_COLOR_KEYS, chipsText split on commas, isBookmarked +
+369   bookmarkable booleans. All handlers (onPlay, onOpenCog,
+370   onToggleBookmark) wired via fn() in render; hidden from Controls via
+371   table.disable. Shadowed raw props (chips, cover, onPlay, onOpenCog,
+372   onToggleBookmark) hidden via ?: never + table.disable.
+373 
+374   Collapse the 7 prior scenario exports into a single Default story —
+375   variant radio, customGameColor select, bookmarkable + isBookmarked
+376   booleans, and chipsText text reach every prior state from Controls
+377   in ≤2 clicks. Matches the single-Default Playground pattern in
+378   .claude/skills/write-storybook/SKILL.md (added in PR #155).
+379 
+380   Render realism: wrap the card in <div className="w-64"> (256px ≈ a
+381   typical GameGrid cell width at xl/2xl breakpoints) and pin
+382   parameters.layout to 'centered' so the card renders at a realistic
+383   size instead of stretching to the full Storybook canvas.
+384 
+385   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+386   EOF
+387   )"
+388   ```
+389 
+390 - [ ] **Step 5: Push and open PR.**
+391 
+392   ```bash
+393   git push -u origin stories/game-card-audit
+394   gh pr create --base master --title "stories(components/GameCard): retrofit per single-Default Playground" --body "$(cat <<'EOF'
+395   ## Summary
+396 
+397   Tier 3, file 2 of 5 — retrofits `src/components/GameCard.stories.tsx` to the single-Default Playground pattern
+398   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
+399 
+400   - `variant` radio, `customGameColor` select from `GAME_COLOR_KEYS`, `chipsText` splits on commas.
+401   - `isBookmarked` + `bookmarkable` expose the full bookmark matrix via args.
+402   - Handlers wired via `fn()` in the render function; raw prop rows hidden from Controls.
+403   - Collapse 7 prior scenario exports into a single `Default` story — every prior state is reachable from Controls in ≤2 clicks.
+404   - Render realism: card is wrapped in `<div className="w-64">` (~grid-cell size) and the meta pins `layout: 'centered'` so it no longer stretches to the full canvas (the pre-retrofit story rendered at ~1200px wide, dominated by the cover image).
+405   - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
+406 
+407   Closes part of #125.
+408 
+409   ## Test plan
+410 
+411   - [ ] `yarn typecheck` green
+412   - [ ] `yarn lint` green
+413   - [ ] `yarn test:storybook` green (runs in CI)
+414   - [ ] Controls panel drives variant / customGameColor / bookmark combinations
+415   - [ ] Card renders at realistic grid-cell width (not stretched to full canvas)
+416   EOF
+417   )"
+418   ```
+419 
+420 ---
+421 
+422 ### Task 3: Retrofit `GameNameChip.stories.tsx`
+423 
+424 **Files:**
+425 
+426 - Create worktree: `./worktrees/stories-tier3-game-name-chip` on branch `stories/game-name-chip-audit`
+427 - Modify: `src/components/GameNameChip.stories.tsx`
+428 - Read (for context): `src/components/GameNameChip.tsx`, `src/components/GameNameChip.test.tsx`, `src/lib/game-colors.ts`, `.storybook/decorators.tsx` (verifies the legacy `withDarkMode` export)
+429 
+430 **Gates applied:**
+431 
+432 - Gate 1 — Controls map to something visible: add controls for `title`, `customGameName`, `customGameColor`, `subject`.
+433 - Gate 2 — Structured inputs: `customGameColor` → select.
+434 - Gate 3 — Handler wiring: N/A (no callbacks on `GameNameChipProps`).
+435 - Gate 4 — Global skin (PR #154) — no per-file wrapper. Note that `--game-play` + `game-bg` / `game-text` are the game-colors palette, not skin tokens; they live at the component level and are unaffected by the global decorator.
+436 - Gate 5 — N/A (no shadowed props — all props are primitive and controllable).
+437 - Gate 6 — Collapse: drop `Default` (keep as the canonical name — see below), `WithCustomGame` (reachable via `customGameName` + `customGameColor` controls), `WithSubject` (reachable via `subject` control), and the 3 `*Dark` duplicates (`DefaultDark`, `WithCustomGameDark`, `WithSubjectDark` — theme toolbar covers dark review). Drop `AllColorsDark` too — a single toolbar flip reproduces it. Keep the single `Default` Playground + `AllColors` (12-colour survey is NOT reachable from Controls in one click; per the skill's "When to Add Auxiliary Stories", surveys are a legitimate auxiliary).
+438 - Gate 8 — Single-Default pattern (PR #155): one `Default` Playground + one legitimate auxiliary (`AllColors`). Per-value enum (`customGameColor`) and state variants (custom-game on/off, subject on/off) are reachable from Controls without separate exports.
+439 - Gate 9 — Decorators: no `withDb` / `withRouter` needed.
+440 
+441 **Steps:**
+442 
+443 - [ ] **Step 1: Create worktree.**
+444 
+445   ```bash
+446   git worktree add ./worktrees/stories-tier3-game-name-chip -b stories/game-name-chip-audit master
+447   cd ./worktrees/stories-tier3-game-name-chip && yarn install
+448   ```
+449 
+450 - [ ] **Step 2: Replace `src/components/GameNameChip.stories.tsx`** with:
+451 
+452   ```tsx
+453   import { GameNameChip } from './GameNameChip';
+454   import { GAME_COLOR_KEYS } from '@/lib/game-colors';
+455   import type { Meta, StoryObj } from '@storybook/react';
+456 
+457   const meta: Meta<typeof GameNameChip> = {
+458     component: GameNameChip,
+459     tags: ['autodocs'],
+460     args: {
+461       title: 'Word Spell',
+462     },
+463     argTypes: {
+464       title: { control: 'text' },
+465       customGameName: { control: 'text' },
+466       customGameColor: {
+467         control: { type: 'select' },
+468         options: GAME_COLOR_KEYS,
+469       },
+470       subject: { control: 'text' },
+471     },
+472   };
+473   export default meta;
+474 
+475   type Story = StoryObj<typeof GameNameChip>;
+476 
+477   export const Default: Story = {};
+478 
+479   export const AllColors: Story = {
+480     render: () => (
+481       <div className="flex flex-col gap-2">
+482         {GAME_COLOR_KEYS.map((color) => (
+483           <GameNameChip
+484             key={color}
+485             title="Word Spell"
+486             customGameName={color}
+487             customGameColor={color}
+488           />
+489         ))}
+490       </div>
+491     ),
+492   };
+493   ```
+494 
+495 - [ ] **Step 3: Verify.**
+496 
+497   ```bash
+498   yarn typecheck
+499   yarn lint
+500   ```
+501 
+502   Both must exit 0. If lint flags the `GameColorKey` import as unused, it's because we dropped all `customGameColor`-typed scenario args in the collapse — the cleanup is already reflected in Step 2's code block.
+503 
+504 - [ ] **Step 4: Commit.**
+505 
+506   ```bash
+507   git add src/components/GameNameChip.stories.tsx
+508   git commit -m "$(cat <<'EOF'
+509   stories(components/GameNameChip): retrofit per single-Default Playground
+510 
+511   Add argTypes controls for title, customGameName, customGameColor
+512   (select from GAME_COLOR_KEYS), subject. Collapse to Default +
+513   AllColors — drop WithCustomGame, WithSubject, DefaultDark,
+514   WithCustomGameDark, WithSubjectDark, AllColorsDark. WithCustomGame
+515   and WithSubject are reachable from Controls; the four *Dark variants
+516   are reachable by a theme-toolbar flip. Keep AllColors as a 12-colour
+517   palette survey — a legitimate auxiliary per the skill's "When to
+518   Add Auxiliary Stories" section (PR #155): it's not reachable from
+519   Controls in one click.
+520 
+521   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+522   EOF
+523   )"
+524   ```
+525 
+526 - [ ] **Step 5: Push and open PR.**
+527 
+528   ```bash
+529   git push -u origin stories/game-name-chip-audit
+530   gh pr create --base master --title "stories(components/GameNameChip): retrofit per single-Default Playground" --body "$(cat <<'EOF'
+531   ## Summary
+532 
+533   Tier 3, file 3 of 5 — retrofits `src/components/GameNameChip.stories.tsx` to the single-Default Playground pattern
+534   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
+535 
+536   - `customGameColor` → select from `GAME_COLOR_KEYS`; `title`, `customGameName`, `subject` → text controls.
+537   - Collapse to `Default` + `AllColors` only. Drop `WithCustomGame`, `WithSubject` (reachable from Controls) and all 4 `*Dark` variants (theme toolbar reproduces them).
+538   - Kept `AllColors` as a legitimate auxiliary per the skill's "When to Add Auxiliary Stories" — a 12-colour palette survey is NOT reachable from Controls in one click.
+539   - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
+540 
+541   Closes part of #125.
+542 
+543   ## Test plan
+544 
+545   - [ ] `yarn typecheck` green
+546   - [ ] `yarn lint` green
+547   - [ ] `yarn test:storybook` green (runs in CI)
+548   - [ ] Controls panel drives customGameColor select across all 12 keys
+549   EOF
+550   )"
+551   ```
+552 
+553 ---
+554 
+555 ## Wave 1 Checkpoint
+556 
+557 Before dispatching Wave 2, confirm the reviewer has approved (or at minimum reviewed) all three Wave 1 PRs. In particular:
+558 
+559 - The `StoryArgs` double-cast (`as unknown as ComponentType<StoryArgs>`) and `?: never` pattern are applied correctly.
+560 - `fn()` wiring works inside the render function for handlers that would otherwise collide with StoryArgs (GameCard / GameGrid).
+561 - No `withDarkMode` decorator in any new story (GameNameChip).
+562 - No per-file skin wrapper added anywhere — the global `withDefaultSkin` decorator (PR #154) handles it. If a Wave 1 PR contains a `<div className="game-container skin-...">` wrapper, it's a bug and must be removed.
+563 
+564 If any of these patterns diverges between the three PRs, reconcile by editing this plan's Wave 2 tasks before dispatching, so Tasks 4 and 5 use the agreed shape.
+565 
+566 If all three land cleanly, proceed.
+567 
+568 ---
+569 
+570 ## Wave 2 — 2 parallel subagents
+571 
+572 Dispatch Tasks 4 and 5 concurrently. Same discipline as Wave 1: own worktree, one commit, one PR.
+573 
+574 ---
+575 
+576 ### Task 4: Retrofit `ConfigFormFields.stories.tsx`
+577 
+578 **Files:**
+579 
+580 - Create worktree: `./worktrees/stories-tier3-config-form-fields` on branch `stories/config-form-fields-audit`
+581 - Modify: `src/components/ConfigFormFields.stories.tsx`
+582 - Read (for context): `src/components/ConfigFormFields.tsx`, `src/components/ConfigFormFields.test.tsx`, `src/lib/config-fields.ts` (if present — check for `ConfigField` union shape)
+583 
+584 **Gates applied:**
+585 
+586 - Gate 1 — Controls map: `fields` and `config` are complex objects → hidden from Controls, driven by a `scenario` select.
+587 - Gate 2 — Structured inputs: `scenario` → select with 5 generic presets (one per rendering branch of `ConfigFormFields.tsx`: primitive field types, nested types, dual select-or-number, visibleWhen-hidden, visibleWhen-shown). No game-specific vocabulary in this generic story file — per-game fixtures are an additive follow-up in #153.
+588 - Gate 3 — Handler wiring: `onChange` wired to `fn()` in `args`; hidden from Controls.
+589 - Gate 4 — Global skin (PR #154) — no per-file wrapper.
+590 - Gate 5 — Hide shadowed rows for `fields`, `config`.
+591 - Gate 6 — Collapse + genericise: the 4 SortNumbers-flavoured scenario exports + `AllFieldTypesDark` all reduce to a single `Default` Playground. Simultaneously, the SortNumbers-specific `sortFields` fixture is REPLACED by 4 small generic fixtures (one per rendering branch of `ConfigFormFields.tsx`), each selectable via the `scenario` control. Per-game fixtures (SortNumbers, NumberMatch, etc.) live in their own co-located stories under `src/games/<game>/` — added additively in #153.
+592 - Gate 8 — Single-Default pattern (PR #155): one `Default` story. Every rendering branch (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown) is reachable from the scenario select — no separate exports.
+593 - Gate 9 — Decorators: N/A (no router/DB deps).
+594 
+595 **Steps:**
+596 
+597 - [ ] **Step 1: Create worktree.**
+598 
+599   ```bash
+600   git worktree add ./worktrees/stories-tier3-config-form-fields -b stories/config-form-fields-audit master
+601   cd ./worktrees/stories-tier3-config-form-fields && yarn install
+602   ```
+603 
+604 - [ ] **Step 2: Replace `src/components/ConfigFormFields.stories.tsx`** with:
+605 
+606   ```tsx
+607   import { fn } from 'storybook/test';
+608 
+609   import { ConfigFormFields } from './ConfigFormFields';
+610   import type { ConfigField } from '@/lib/config-fields';
+611   import type { ComponentType } from 'react';
+612   import type { Meta, StoryObj } from '@storybook/react';
+613 
+614   type Scenario =
+615     | 'primitive-types'
+616     | 'nested-types'
+617     | 'nested-select-or-number'
+618     | 'visible-when-hidden'
+619     | 'visible-when-shown';
+620 
+621   interface StoryArgs {
+622     scenario: Scenario;
+623     onChange: (config: Record<string, unknown>) => void;
+624     // Shadowed raw props — driven by scenario; hidden from Controls.
+625     fields?: never;
+626     config?: never;
+627   }
+628 
+629   // Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+630   // Per-game fixtures (SortNumbers etc.) live in co-located game stories
+631   // under src/games/<game>/ (see #153), not here.
+632 
+633   const primitiveFields: ConfigField[] = [
+634     {
+635       type: 'select',
+636       key: 'size',
+637       label: 'Size',
+638       options: [
+639         { value: 'small', label: 'Small' },
+640         { value: 'medium', label: 'Medium' },
+641         { value: 'large', label: 'Large' },
+642       ],
+643     },
+644     {
+645       type: 'number',
+646       key: 'count',
+647       label: 'Count',
+648       min: 1,
+649       max: 20,
+650     },
+651     {
+652       type: 'checkbox',
+653       key: 'enabled',
+654       label: 'Enabled',
+655     },
+656   ];
+657 
+658   const nestedFields: ConfigField[] = [
+659     {
+660       type: 'nested-select',
+661       key: 'group',
+662       subKey: 'mode',
+663       label: 'Group mode',
+664       options: [
+665         { value: 'auto', label: 'Auto' },
+666         { value: 'manual', label: 'Manual' },
+667       ],
+668     },
+669     {
+670       type: 'nested-number',
+671       key: 'group',
+672       subKey: 'size',
+673       label: 'Group size',
+674       min: 1,
+675       max: 10,
+676     },
+677   ];
+678 
+679   const selectOrNumberFields: ConfigField[] = [
+680     {
+681       type: 'nested-select-or-number',
+682       key: 'range',
+683       subKey: 'max',
+684       label: 'Max range',
+685       min: 1,
+686       max: 100,
+687     },
+688   ];
+689 
+690   const visibleWhenFields: ConfigField[] = [
+691     {
+692       type: 'select',
+693       key: 'mode',
+694       label: 'Mode',
+695       options: [
+696         { value: 'simple', label: 'Simple' },
+697         { value: 'advanced', label: 'Advanced' },
+698       ],
+699     },
+700     {
+701       type: 'nested-number',
+702       key: 'advanced',
+703       subKey: 'threshold',
+704       label: 'Threshold',
+705       min: 1,
+706       max: 100,
+707       visibleWhen: { key: 'mode', value: 'advanced' },
+708     },
+709   ];
+710 
+711   const scenarioData: Record<
+712     Scenario,
+713     { fields: ConfigField[]; config: Record<string, unknown> }
+714   > = {
+715     'primitive-types': {
+716       fields: primitiveFields,
+717       config: { size: 'medium', count: 5, enabled: true },
+718     },
+719     'nested-types': {
+720       fields: nestedFields,
+721       config: { group: { mode: 'auto', size: 4 } },
+722     },
+723     'nested-select-or-number': {
+724       fields: selectOrNumberFields,
+725       config: { range: { max: 10 } },
+726     },
+727     'visible-when-hidden': {
+728       fields: visibleWhenFields,
+729       config: { mode: 'simple', advanced: { threshold: 50 } },
+730     },
+731     'visible-when-shown': {
+732       fields: visibleWhenFields,
+733       config: { mode: 'advanced', advanced: { threshold: 50 } },
+734     },
+735   };
+736 
+737   const meta: Meta<StoryArgs> = {
+738     component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
+739     tags: ['autodocs'],
+740     args: {
+741       scenario: 'primitive-types',
+742       onChange: fn(),
+743     },
+744     argTypes: {
+745       scenario: {
+746         control: { type: 'select' },
+747         options: [
+748           'primitive-types',
+749           'nested-types',
+750           'nested-select-or-number',
+751           'visible-when-hidden',
+752           'visible-when-shown',
+753         ] satisfies Scenario[],
+754       },
+755       onChange: { table: { disable: true } },
+756       fields: { table: { disable: true } },
+757       config: { table: { disable: true } },
+758     },
+759     render: ({ scenario, onChange }) => {
+760       const { fields, config } = scenarioData[scenario];
+761       return (
+762         <ConfigFormFields
+763           fields={fields}
+764           config={config}
+765           onChange={onChange}
+766         />
+767       );
+768     },
+769   };
+770   export default meta;
+771 
+772   type Story = StoryObj<StoryArgs>;
+773 
+774   export const Default: Story = {};
+775 
+776   // The prior 4 scenario exports (AllFieldTypes + 3 SortNumbers presets) and
+777   // AllFieldTypesDark are all removed. The `scenario` select in Controls
+778   // reaches every rendering branch of ConfigFormFields generically. Per-game
+779   // form previews (SortNumbers' real fixtures, NumberMatch, WordSpell, etc.)
+780   // live as co-located stories in each game's src/games/<game>/ directory —
+781   // see issue #153 for the additive follow-up.
+782   ```
+783 
+784 - [ ] **Step 3: Verify.**
+785 
+786   ```bash
+787   yarn typecheck
+788   yarn lint
+789   ```
+790 
+791   Both must exit 0. If the `ConfigField` import path differs, adjust — `src/lib/config-fields.ts` is the canonical module based on the existing story's import.
+792 
+793 - [ ] **Step 4: Commit.**
+794 
+795   ```bash
+796   git add src/components/ConfigFormFields.stories.tsx
+797   git commit -m "$(cat <<'EOF'
+798   stories(components/ConfigFormFields): retrofit per single-Default Playground
+799 
+800   StoryArgs with scenario select (primitive-types / nested-types /
+801   nested-select-or-number / visible-when-hidden / visible-when-shown)
+802   — each preset exercises one rendering branch of ConfigFormFields.tsx
+803   with generic field fixtures. onChange wired to fn() spy and hidden
+804   from Controls. Complex props (fields, config) shadowed via ?: never
+805   + table.disable.
+806 
+807   Collapse the 4 prior SortNumbers-flavoured scenario exports +
+808   AllFieldTypesDark into a single Default story — the scenario select
+809   reaches every rendering branch from Controls in one click; the theme
+810   toolbar reproduces dark. Simultaneously replace the SortNumbers-
+811   specific sortFields fixture with 4 generic fixtures; the SortNumbers
+812   fixtures now only belong in their own co-located game story (added
+813   additively in #153). Matches the single-Default Playground pattern
+814   in the skill (added in PR #155).
+815 
+816   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+817   EOF
+818   )"
+819   ```
+820 
+821 - [ ] **Step 5: Push and open PR.**
+822 
+823   ```bash
+824   git push -u origin stories/config-form-fields-audit
+825   gh pr create --base master --title "stories(components/ConfigFormFields): retrofit per single-Default Playground" --body "$(cat <<'EOF'
+826   ## Summary
+827 
+828   Tier 3, file 4 of 5 — retrofits `src/components/ConfigFormFields.stories.tsx` to the single-Default Playground pattern
+829   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
+830 
+831   - `scenario` select in Controls drives 5 generic presets — one per rendering branch of `ConfigFormFields.tsx` (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown). No game-specific vocabulary.
+832   - `onChange` wired to `fn()`; hidden from Controls.
+833   - Complex props (`fields`, `config`) shadowed via `?: never` + `table.disable`.
+834   - Collapse the 4 prior SortNumbers-flavoured scenario exports + `AllFieldTypesDark` into a single `Default` story, and replace the SortNumbers-specific `sortFields` fixture with 5 generic fixtures. Theme toolbar reproduces dark.
+835   - Skin wrapping is handled by the global `withDefaultSkin` decorator (PR #154); no per-file wrapper.
+836   - Follow-up tracked in #153 is now additive: add per-game `*.config-form.stories.tsx` files (SortNumbers, NumberMatch, etc.) using each game's real fixtures, mirroring PR #143's `InstructionsOverlay` per-game pattern. No further edits to this generic story are required by #153.
+837 
+838   Closes part of #125.
+839 
+840   ## Test plan
+841 
+842   - [ ] `yarn typecheck` green
+843   - [ ] `yarn lint` green
+844   - [ ] `yarn test:storybook` green (runs in CI)
+845   - [ ] scenario select on the `Default` story cycles through all 5 generic branches (primitive / nested / select-or-number / visibleWhen hidden / visibleWhen shown); theme toolbar cycles dark/light
+846   EOF
+847   )"
+848   ```
+849 
+850 ---
+851 
+852 ### Task 5: Retrofit `ThemeShowcase.stories.tsx`
+853 
+854 **Files:**
+855 
+856 - Create worktree: `./worktrees/stories-tier3-theme-showcase` on branch `stories/theme-showcase-audit`
+857 - Modify: `src/stories/ThemeShowcase.stories.tsx`
+858 - Read (for context): `src/components/game/GameShell.tsx`, `src/lib/game-engine/types.ts` (confirm `GameEngineState`, `ResolvedContent`, `ResolvedGameConfig`, `SessionMeta` shapes still match)
+859 
+860 **Gates applied:**
+861 
+862 - Gate 1 — Controls map: none of the `GameShell` props are meaningful to control in this showcase context (they're fixtures); hide all of them.
+863 - Gate 3 — Handler wiring: N/A (no callbacks on `GameShell`; `ShowcaseBody`'s inline `onChange={() => {}}` stays inside the fixture).
+864 - Gate 4 — Global skin (PR #154) — no per-file wrapper. `ThemeShowcase` is a theme-token showcase; the skin decorator's CSS vars don't conflict with theme-token rendering.
+865 - Gate 5 — Hide shadowed rows for `config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`.
+866 - Gate 6 — Collapse: drop 3 of the 4 theme-pinned stories (OceanDark, ForestLight, ForestDark). The theme toolbar (5 themes registered globally in `.storybook/preview.tsx`) lets the reviewer cycle through every theme from the single `Default` story in one tap each. VR in this project is Playwright-driven (`e2e/visual.spec.ts`) — Storybook stories do not double as VR baselines, so the "distinct snapshots" argument doesn't hold.
+867 - Gate 8 — Single-Default pattern (PR #155): one `Default` story. The toolbar provides the per-theme "different views" control.
+868 - Gate 9 — Decorators: `withDb` + `withRouter` (already present; keep).
+869 
+870 **Steps:**
+871 
+872 - [ ] **Step 1: Create worktree.**
+873 
+874   ```bash
+875   git worktree add ./worktrees/stories-tier3-theme-showcase -b stories/theme-showcase-audit master
+876   cd ./worktrees/stories-tier3-theme-showcase && yarn install
+877   ```
+878 
+879 - [ ] **Step 2: Replace `src/stories/ThemeShowcase.stories.tsx`** with:
+880 
+881   ```tsx
+882   import { withDb } from '../../.storybook/decorators/withDb';
+883   import { withRouter } from '../../.storybook/decorators/withRouter';
+884   import type { ConfigField } from '@/lib/config-fields';
+885   import type {
+886     GameEngineState,
+887     ResolvedContent,
+888     ResolvedGameConfig,
+889     SessionMeta,
+890   } from '@/lib/game-engine/types';
+891   import type { Meta, StoryObj } from '@storybook/react';
+892   import { ConfigFormFields } from '@/components/ConfigFormFields';
+893   import { GameShell } from '@/components/game/GameShell';
+894   import { GameNameChip } from '@/components/GameNameChip';
+895 
+896   // ── GameShell fixture data ────────────────────────────────────────────────
+897 
+898   const content: ResolvedContent = {
+899     rounds: [
+900       {
+901         id: 'r1',
+902         prompt: { en: 'Sort the numbers' },
+903         correctAnswer: '1',
+904       },
+905     ],
+906   };
+907 
+908   const shellConfig: ResolvedGameConfig = {
+909     gameId: 'theme-showcase',
+910     title: { en: 'Theme Showcase' },
+911     gradeBand: 'year1-2',
+912     maxRounds: 3,
+913     maxRetries: 1,
+914     maxUndoDepth: 3,
+915     timerVisible: true,
+916     timerDurationSeconds: 60,
+917     difficulty: 'medium',
+918   };
+919 
+920   const initialState: GameEngineState = {
+921     phase: 'playing',
+922     roundIndex: 0,
+923     score: 0,
+924     streak: 0,
+925     retryCount: 0,
+926     content,
+927     currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+928   };
+929 
+930   const sessionMeta: SessionMeta = {
+931     profileId: 'storybook-user',
+932     gameId: 'theme-showcase',
+933     gradeBand: 'year1-2',
+934     seed: 'storybook-seed',
+935     initialContent: content,
+936     initialState,
+937   };
+938 
+939   // ── Custom game component fixture data ──────────────────────────────────────
+940 
+941   const configFields: ConfigField[] = [
+942     {
+943       type: 'select',
+944       key: 'inputMethod',
+945       label: 'Input method',
+946       options: [
+947         { value: 'drag', label: 'Drag' },
+948         { value: 'type', label: 'Type' },
+949       ],
+950     },
+951     {
+952       type: 'number',
+953       key: 'totalRounds',
+954       label: 'Total rounds',
+955       min: 1,
+956       max: 20,
+957     },
+958     {
+959       type: 'checkbox',
+960       key: 'ttsEnabled',
+961       label: 'Text-to-speech',
+962     },
+963   ];
+964 
+965   // ── Story body ────────────────────────────────────────────────────────────
+966 
+967   const ShowcaseBody = () => (
+968     <div className="flex flex-col gap-4 p-4">
+969       <GameNameChip
+970         title="Sort Numbers"
+971         customGameName="Easy Numbers"
+972         customGameColor="teal"
+973       />
+974       <GameNameChip title="Word Spell" subject="reading" />
+975       <ConfigFormFields
+976         fields={configFields}
+977         config={{
+978           inputMethod: 'drag',
+979           totalRounds: 8,
+980           ttsEnabled: true,
+981         }}
+982         onChange={() => {}}
+983       />
+984     </div>
+985   );
+986 
+987   // ── Meta ──────────────────────────────────────────────────────────────────
+988 
+989   const meta = {
+990     component: GameShell,
+991     title: 'Pages/ThemeShowcase',
+992     tags: ['autodocs'],
+993     decorators: [withDb, withRouter],
+994     parameters: {
+995       layout: 'fullscreen',
+996       docs: {
+997         description: {
+998           component:
+999             'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the 5 registered themes via the toolbar. The global `withDefaultSkin` decorator wraps the preview — unaffected here because this file renders against theme tokens, not skin tokens.',
+1000         },
+1001       },
+1002     },
+1003     args: {
+1004       config: shellConfig,
+1005       moves: {},
+1006       initialState,
+1007       sessionId: 'showcase-session',
+1008       meta: sessionMeta,
+1009       children: <ShowcaseBody />,
+1010     },
+1011     argTypes: {
+1012       config: { table: { disable: true } },
+1013       moves: { table: { disable: true } },
+1014       initialState: { table: { disable: true } },
+1015       sessionId: { table: { disable: true } },
+1016       meta: { table: { disable: true } },
+1017       initialLog: { table: { disable: true } },
+1018       children: { table: { disable: true } },
+1019     },
+1020   } satisfies Meta<typeof GameShell>;
+1021   export default meta;
+1022 
+1023   type Story = StoryObj<typeof GameShell>;
+1024 
+1025   export const Default: Story = {};
+1026 
+1027   // deleted-for-reference — the theme toolbar reproduces every prior pin in one tap:
+1028   //   OceanLight  → toolbar theme='light'  (default)
+1029   //   OceanDark   → toolbar theme='dark'
+1030   //   ForestLight → toolbar theme='forest-light'
+1031   //   ForestDark  → toolbar theme='forest-dark'
+1032   ```
+1033 
+1034 - [ ] **Step 3: Verify.**
+1035 
+1036   ```bash
+1037   yarn typecheck
+1038   yarn lint
+1039   ```
+1040 
+1041   Both must exit 0. The `satisfies Meta<typeof GameShell>` means docgen sees every real prop — `argTypes.table.disable` on the 7 hidden props is what actually removes them from the Controls panel. If any of the fixture type shapes (`GameEngineState`, `ResolvedContent`, `ResolvedGameConfig`, `SessionMeta`) has drifted since the previous version of the file, align to the current `src/lib/game-engine/types.ts`.
+1042 
+1043 - [ ] **Step 4: Commit.**
+1044 
+1045   ```bash
+1046   git add src/stories/ThemeShowcase.stories.tsx
+1047   git commit -m "$(cat <<'EOF'
+1048   stories(stories/ThemeShowcase): retrofit per single-Default Playground
+1049 
+1050   Hide all 7 GameShell-prop docgen rows from the Controls panel
+1051   (config, moves, initialState, sessionId, meta, initialLog, children)
+1052   via argTypes.table.disable. Collapse the 4 theme-pinned exports
+1053   (OceanLight, OceanDark, ForestLight, ForestDark) into a single
+1054   Default story — the theme toolbar reproduces each pin in one tap.
+1055   VR in this project is Playwright (e2e/visual.spec.ts), not Storybook,
+1056   so the "distinct VR snapshots" argument doesn't hold. Matches the
+1057   single-Default Playground pattern in the skill (added in PR #155).
+1058 
+1059   Skin wrapping handled globally by the withDefaultSkin decorator
+1060   (PR #154). Docs description updated to note the theme-toolbar
+1061   workflow.
+1062 
+1063   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+1064   EOF
+1065   )"
+1066   ```
+1067 
+1068 - [ ] **Step 5: Push and open PR.**
+1069 
+1070   ```bash
+1071   git push -u origin stories/theme-showcase-audit
+1072   gh pr create --base master --title "stories(stories/ThemeShowcase): retrofit per single-Default Playground" --body "$(cat <<'EOF'
+1073   ## Summary
+1074 
+1075   Tier 3, file 5 of 5 — retrofits `src/stories/ThemeShowcase.stories.tsx` to the single-Default Playground pattern
+1076   ([skill](../blob/master/.claude/skills/write-storybook/SKILL.md) — added in PR #155) and the Controls Policy in issue #125.
+1077 
+1078   - Hide all 7 GameShell-prop rows from Controls (`config`, `moves`, `initialState`, `sessionId`, `meta`, `initialLog`, `children`) via `argTypes.table.disable`.
+1079   - Collapse the 4 theme-pinned exports into a single `Default` — the theme toolbar reproduces every pin in one tap. VR is Playwright (`e2e/visual.spec.ts`), not Storybook, so a distinct-snapshot-per-story argument doesn't apply.
+1080   - Skin wrapping handled globally by `withDefaultSkin` (PR #154); no per-file wrapper.
+1081 
+1082   Closes part of #125.
+1083 
+1084   ## Test plan
+1085 
+1086   - [ ] `yarn typecheck` green
+1087   - [ ] `yarn lint` green
+1088   - [ ] `yarn test:storybook` green (runs in CI)
+1089   - [ ] Controls panel is empty on the `Default` story (all 7 docgen rows hidden)
+1090   - [ ] Theme toolbar cycles through all 5 registered themes on the single `Default` story
+1091   EOF
+1092   )"
+1093   ```
+1094 
+1095 ---
+1096 
+1097 ## Post-PR cleanup
+1098 
+1099 After all 5 PRs merge:
+1100 
+1101 - [ ] **Update issue #125.** Tick the 5 boxes in the issue body:
+1102 
+1103   ```text
+1104   - [x] ConfigFormFields.stories.tsx
+1105   - [x] GameCard.stories.tsx
+1106   - [x] GameGrid.stories.tsx
+1107   - [x] GameNameChip.stories.tsx
+1108   - [x] stories/ThemeShowcase.stories.tsx
+1109   ```
+1110 
+1111   ```bash
+1112   gh issue view 125 --json body --jq '.body' > /tmp/issue-125-body.md
+1113   # Edit the 5 checkboxes in /tmp/issue-125-body.md, then:
+1114   gh issue edit 125 --body-file /tmp/issue-125-body.md
+1115   ```
+1116 
+1117 - [ ] **Remove merged worktrees.** The repo's `.husky` / `prune-merged-worktrees` script runs on post-merge, but verify:
+1118 
+1119   ```bash
+1120   git worktree list | grep stories-tier3
+1121   # If any remain after their PR merges:
+1122   git worktree remove worktrees/stories-tier3-<slug>
+1123   ```
+1124 
+1125 - [ ] **Plan's own worktree.** Remove this plan's worktree after the plan PR merges:
+1126 
+1127   ```bash
+1128   git worktree remove worktrees/plan-tier3-storybook-audit
+1129   ```
+1130 
+1131 ---
+1132 
+1133 ## Scope explicitly excluded
+1134 
+1135 - Any `.md` / docs edits outside this plan file.
+1136 - Any changes to `.storybook/preview.tsx`, `.storybook/decorators.tsx`, or global Storybook config.
+1137 - Retrofitting the remaining 4 root-components files (`Footer`, `Header`, `OfflineIndicator`, `ThemeToggle`, `UpdateBanner`) — they are still in the Tier 5 / Batch 5 bucket on #125 and should get their own plan.
+1138 - Adding per-game `*.config-form.stories.tsx` files (e.g. `src/games/sort-numbers/SortNumbers.config-form.stories.tsx`) using each game's real `ConfigField[]` fixtures — tracked in #153 as an additive follow-up, mirroring #143's per-game `InstructionsOverlay` pattern. Task 4 ships the generic `ConfigFormFields` story with 5 generic fixtures only; no SortNumbers vocabulary — so #153 adds new files without needing to remove anything from the generic story.
+1139 
+1140 ---
+1141 
+1142 ## Upstream work already merged (informs this plan)
+1143 
+1144 - **PR #154** — `classicSkin` is now applied globally via `withDefaultSkin` in `.storybook/preview.tsx`. No Tier 3 task adds a per-file skin wrapper. Per-file wrappers previously present on `AnswerGame`, `ProgressHUD`, `Slot` were removed in #154; they are the current shell-slim references.
+1145 - **PR #155** — The `.claude/skills/write-storybook/SKILL.md` skill now has explicit "Playground Pattern" + "When to Add Auxiliary Stories" sections. Every Tier 3 task ships a single `Default` story and auxiliary exports only when the Controls panel can't reach the scenario (e.g., Task 3's `AllColors` palette survey).
+1146 
+1147 ---
+1148 
+1149 ## Self-review
+1150 
+1151 - **Spec coverage:** The 5 Tier 3 files named in #125 are each covered by exactly one task (Tasks 1–5). Each task applies the 10 gates from #125 (mapping shown in the "Gates applied" block). ✓
+1152 - **Placeholders:** No `TBD`, `TODO`, "implement later", "appropriate error handling", or stub-only steps. Every code block is complete and runnable. ✓
+1153 - **Type consistency:** `StoryArgs` double-cast uses `ComponentType<StoryArgs>` consistently. `GAME_COLOR_KEYS` imported from `@/lib/game-colors` in Tasks 2 and 3. `ConfigField` import path matches the existing story file in Task 4. `GameEngineState` / `ResolvedContent` / `ResolvedGameConfig` / `SessionMeta` import paths preserved from the existing ThemeShowcase file in Task 5. ✓
+1154 - **Cross-task coupling:** None. Each task touches exactly one file and pins its own worktree. ✓
+1155 - **Single-Default Playground consistency (PR #155):** Every task ships a single `Default` story (the Playground) plus auxiliary stories only for scenarios the Controls panel or theme toolbar can't reach. Task 1 (GameGrid): `Default` only. Task 2 (GameCard): `Default` only. Task 3 (GameNameChip): `Default` + `AllColors` survey (12-colour palette — Controls can't reach it in one click; legitimate auxiliary per the skill). Task 4 (ConfigFormFields): `Default` only — the `scenario` select covers every `visibleWhen` branch. Task 5 (ThemeShowcase): `Default` only — the theme toolbar cycles through all 5 themes. ✓
+1156 - **Skin wrapping (PR #154):** Zero per-file wrappers added; every story inherits `withDefaultSkin` from `.storybook/preview.tsx`. ✓
+1157 
+1158 Plan is ready for execution handoff.
 1159
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:16Z)**_
@@ -1771,72 +1782,73 @@ _**Agent (claude-sonnet-4-6 2026-04-28 04:53:16Z)**_
  `./.claude/handoffs/2026-04-23-tier3-wave1-dispatch.md`
 
 ```text
-1	# Handoff: Tier 3 Storybook audit — dispatch Wave 1
-2	
-3	**Date:** 2026-04-23
-4	**Branch:** docs/handoff-next-tier
-5	**Worktree:** worktrees/docs-handoff-next-tier
-6	**Status of prior handoff:** `.claude/handoffs/2026-04-22-tier3-storybook-audit-execution.md` (PR #166, merged) remains the canonical plan-level handoff. This doc is a thin "start here next session" pointer built after Tier 2 fully shipped.
-7	
-8	## Resume command
-9	
-10	```bash
-11	/resync
-12	cat docs/superpowers/plans/2026-04-22-storybook-audit-tier3-plan.md
-13	cat .claude/handoffs/2026-04-22-tier3-storybook-audit-execution.md
-14	# Then dispatch Wave 1 (3 parallel worktrees, 1 per file):
-15	#   stories/game-grid-audit      → worktrees/stories-tier3-game-grid
-16	#   stories/game-card-audit      → worktrees/stories-tier3-game-card
-17	#   stories/game-name-chip-audit → worktrees/stories-tier3-game-name-chip
-18	```
-19	
-20	## Current state
-21	
-22	**Task:** Tier 3 Storybook audit (5 files). Plan PR #150 merged 2026-04-22. Execution not started.
-23	**Phase:** ready to dispatch Wave 1.
-24	**Tier 2 (questions):** fully shipped — #159 TextQuestion, #160 ImageQuestion, #161 AudioButton, #162 DotGroupQuestion, #163 WordLibraryExplorer (Misc bucket). Issue #125 checkboxes for all five ticked.
-25	**Tier 3 (this batch):** zero commits to the 5 target files on master. All 5 checkboxes on #125 still empty.
-26	
-27	## Decision still open
-28	
-29	- [ ] **Execution mode:** subagent-driven-development (fresh subagent per task + review between) **vs** inline executing-plans (batch with checkpoints). Plan supports either.
-30	- [ ] **Wave cadence:** 2 waves with checkpoint (plan default — Wave 1 = 3 parallel, Wave 2 = 2 parallel) **vs** full 5-way parallel (mechanically safe, no shared files). User hadn't chosen when PR #150 merged.
-31	
-32	## Files for Wave 1
-33	
-34	- `src/components/GameGrid.stories.tsx` — Task 1
-35	- `src/components/GameCard.stories.tsx` — Task 2 (needs `w-64` wrapper + `layout: centered` per plan)
-36	- `src/components/GameNameChip.stories.tsx` — Task 3 (keep `AllColors` auxiliary; everything else collapses to single `Default`)
-37	
-38	## Files for Wave 2
-39	
-40	- `src/components/ConfigFormFields.stories.tsx` — Task 4 (generic fixtures: primitive-types, nested-types, nested-select-or-number, visible-when-hidden, visible-when-shown)
-41	- `src/stories/ThemeShowcase.stories.tsx` — Task 5
-42	
-43	## Canonical references
-44	
-45	- Plan: `docs/superpowers/plans/2026-04-22-storybook-audit-tier3-plan.md`
-46	- Pattern docs: `.claude/skills/write-storybook/SKILL.md` (Playground / single-`Default` pattern — #155)
-47	- Shell-slim example: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
-48	- Trigger-button example (for callbacks Controls can't invoke): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
-49	- Global skin decorator: `.storybook/decorators.tsx` → `withDefaultSkin` (#154) — **do not add per-file skin wrappers**, double-wraps
-50	- Rollout tracker: #125
-51	
-52	## Follow-up queued (not this session)
-53	
-54	- Issue #153 — additive per-game `*.config-form.stories.tsx` (SortNumbers/NumberMatch/WordSpell), mirroring #143 InstructionsOverlay split. Start only after Tier 3 merges.
-55	
-56	## Context to remember
-57	
-58	- **Master advanced 40 commits since Tier 3 plan merged** (releases v0.13.0 → v0.14.1, WordLibraryExplorer mobile + PhonemeBlender, the five Tier 2 PRs). None touch Tier 3 files, so plan is still accurate — but always `/resync` before dispatching.
-59	- **Worktree gate** for every file edit (including docs). `master` is protected.
-60	- **Baby-step commits** preferred over single mega-commits (CLAUDE.md; #156, #164).
-61	- **Force-pushing feature branches is fine; master is protected.** When plan-branch gets behind master and needs rebasing: `git rebase --onto origin/<branch> <old-base>` then `git push --force-with-lease`.
-62	- **VR baselines:** none of the 5 Tier 3 files have VR snapshots; don't expect VR diffs on first push.
-63	- **PR automation:** pushes may auto-open a PR; edit the auto-created PR rather than creating a new one.
-64	- **Tier numbering is author's, not the repo's** — #125 doesn't label tiers explicitly. This "Tier 3" = the 5 files named above, per plan PR #150.
+1 # Handoff: Tier 3 Storybook audit — dispatch Wave 1
+2 
+3 **Date:** 2026-04-23
+4 **Branch:** docs/handoff-next-tier
+5 **Worktree:** worktrees/docs-handoff-next-tier
+6 **Status of prior handoff:** `.claude/handoffs/2026-04-22-tier3-storybook-audit-execution.md` (PR #166, merged) remains the canonical plan-level handoff. This doc is a thin "start here next session" pointer built after Tier 2 fully shipped.
+7 
+8 ## Resume command
+9 
+10 ```bash
+11 /resync
+12 cat docs/superpowers/plans/2026-04-22-storybook-audit-tier3-plan.md
+13 cat .claude/handoffs/2026-04-22-tier3-storybook-audit-execution.md
+14 # Then dispatch Wave 1 (3 parallel worktrees, 1 per file):
+15 #   stories/game-grid-audit      → worktrees/stories-tier3-game-grid
+16 #   stories/game-card-audit      → worktrees/stories-tier3-game-card
+17 #   stories/game-name-chip-audit → worktrees/stories-tier3-game-name-chip
+18 ```
+19 
+20 ## Current state
+21 
+22 **Task:** Tier 3 Storybook audit (5 files). Plan PR #150 merged 2026-04-22. Execution not started.
+23 **Phase:** ready to dispatch Wave 1.
+24 **Tier 2 (questions):** fully shipped — #159 TextQuestion, #160 ImageQuestion, #161 AudioButton, #162 DotGroupQuestion, #163 WordLibraryExplorer (Misc bucket). Issue #125 checkboxes for all five ticked.
+25 **Tier 3 (this batch):** zero commits to the 5 target files on master. All 5 checkboxes on #125 still empty.
+26 
+27 ## Decision still open
+28 
+29 - [ ] **Execution mode:** subagent-driven-development (fresh subagent per task + review between) **vs** inline executing-plans (batch with checkpoints). Plan supports either.
+30 - [ ] **Wave cadence:** 2 waves with checkpoint (plan default — Wave 1 = 3 parallel, Wave 2 = 2 parallel) **vs** full 5-way parallel (mechanically safe, no shared files). User hadn't chosen when PR #150 merged.
+31 
+32 ## Files for Wave 1
+33 
+34 - `src/components/GameGrid.stories.tsx` — Task 1
+35 - `src/components/GameCard.stories.tsx` — Task 2 (needs `w-64` wrapper + `layout: centered` per plan)
+36 - `src/components/GameNameChip.stories.tsx` — Task 3 (keep `AllColors` auxiliary; everything else collapses to single `Default`)
+37 
+38 ## Files for Wave 2
+39 
+40 - `src/components/ConfigFormFields.stories.tsx` — Task 4 (generic fixtures: primitive-types, nested-types, nested-select-or-number, visible-when-hidden, visible-when-shown)
+41 - `src/stories/ThemeShowcase.stories.tsx` — Task 5
+42 
+43 ## Canonical references
+44 
+45 - Plan: `docs/superpowers/plans/2026-04-22-storybook-audit-tier3-plan.md`
+46 - Pattern docs: `.claude/skills/write-storybook/SKILL.md` (Playground / single-`Default` pattern — #155)
+47 - Shell-slim example: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+48 - Trigger-button example (for callbacks Controls can't invoke): `src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
+49 - Global skin decorator: `.storybook/decorators.tsx` → `withDefaultSkin` (#154) — **do not add per-file skin wrappers**, double-wraps
+50 - Rollout tracker: #125
+51 
+52 ## Follow-up queued (not this session)
+53 
+54 - Issue #153 — additive per-game `*.config-form.stories.tsx` (SortNumbers/NumberMatch/WordSpell), mirroring #143 InstructionsOverlay split. Start only after Tier 3 merges.
+55 
+56 ## Context to remember
+57 
+58 - **Master advanced 40 commits since Tier 3 plan merged** (releases v0.13.0 → v0.14.1, WordLibraryExplorer mobile + PhonemeBlender, the five Tier 2 PRs). None touch Tier 3 files, so plan is still accurate — but always `/resync` before dispatching.
+59 - **Worktree gate** for every file edit (including docs). `master` is protected.
+60 - **Baby-step commits** preferred over single mega-commits (CLAUDE.md; #156, #164).
+61 - **Force-pushing feature branches is fine; master is protected.** When plan-branch gets behind master and needs rebasing: `git rebase --onto origin/<branch> <old-base>` then `git push --force-with-lease`.
+62 - **VR baselines:** none of the 5 Tier 3 files have VR snapshots; don't expect VR diffs on first push.
+63 - **PR automation:** pushes may auto-open a PR; edit the auto-created PR rather than creating a new one.
+64 - **Tier numbering is author's, not the repo's** — #125 doesn't label tiers explicitly. This "Tier 3" = the 5 files named above, per plan PR #150.
 65
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:23Z)**_
@@ -1856,6 +1868,7 @@ Check for any PRs targeting tier 3 files
 ```text
 [{"headRefName":"design/kid-friendly-homepage","number":108,"state":"MERGED","title":"feat(homepage): kid-friendly homepage + simple config"},{"headRefName":"feat/game-config-ui-redesign","number":22,"state":"MERGED","title":"feat: game config UI redesign (hide during gameplay, homepage chips, instructions redesign)"},{"headRefName":"feat/saved-game-configs","number":19,"state":"MERGED","title":"feat: saved game configurations (replace bookmarks)"},{"headRefName":"stories/instructions-overlay-audit","number":141,"state":"MERGED","title":"stories(answer-game/InstructionsOverlay): collapse to Playground + derive custom-game mode"},{"headRefName":"audit/storybook-controls","number":124,"state":"MERGED","title":"stories(ui): audit retrofit per new controls policy"}]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 04:53:28Z)**_
@@ -1934,12 +1947,14 @@ digraph when_to_use {
 ```
 
 **Use when:**
+
 - 3+ test files failing with different root causes
 - Multiple subsystems broken independently
 - Each problem can be understood without context from others
 - No shared state between investigations
 
 **Don't use when:**
+
 - Failures are related (fix one might fix others)
 - Need to understand full system state
 - Agents would interfere with each other
@@ -1949,6 +1964,7 @@ digraph when_to_use {
 ### 1. Identify Independent Domains
 
 Group failures by what's broken:
+
 - File A tests: Tool approval flow
 - File B tests: Batch completion behavior
 - File C tests: Abort functionality
@@ -1958,6 +1974,7 @@ Each domain is independent - fixing tool approval doesn't affect abort tests.
 ### 2. Create Focused Agent Tasks
 
 Each agent gets:
+
 - **Specific scope:** One test file or subsystem
 - **Clear goal:** Make these tests pass
 - **Constraints:** Don't change other code
@@ -1976,6 +1993,7 @@ Task("Fix tool-approval-race-conditions.test.ts failures")
 ### 4. Review and Integrate
 
 When agents return:
+
 - Read each summary
 - Verify fixes don't conflict
 - Run full test suite
@@ -1984,6 +2002,7 @@ When agents return:
 ## Agent Prompt Structure
 
 Good agent prompts are:
+
 1. **Focused** - One clear problem domain
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?
@@ -2035,6 +2054,7 @@ Return: Summary of what you found and what you fixed.
 **Scenario:** 6 test failures across 3 files after major refactoring
 
 **Failures:**
+
 - agent-tool-abort.test.ts: 3 failures (timing issues)
 - batch-completion-behavior.test.ts: 2 failures (tools not executing)
 - tool-approval-race-conditions.test.ts: 1 failure (execution count = 0)
@@ -2042,6 +2062,7 @@ Return: Summary of what you found and what you fixed.
 **Decision:** Independent domains - abort logic separate from batch completion separate from race conditions
 
 **Dispatch:**
+
 ```
 Agent 1 → Fix agent-tool-abort.test.ts
 Agent 2 → Fix batch-completion-behavior.test.ts
@@ -2049,6 +2070,7 @@ Agent 3 → Fix tool-approval-race-conditions.test.ts
 ```
 
 **Results:**
+
 - Agent 1: Replaced timeouts with event-based waiting
 - Agent 2: Fixed event structure bug (threadId in wrong place)
 - Agent 3: Added wait for async tool execution to complete
@@ -2067,6 +2089,7 @@ Agent 3 → Fix tool-approval-race-conditions.test.ts
 ## Verification
 
 After agents return:
+
 1. **Review each summary** - Understand what changed
 2. **Check for conflicts** - Did agents edit same code?
 3. **Run full suite** - Verify all fixes work together
@@ -2075,12 +2098,12 @@ After agents return:
 ## Real-World Impact
 
 From debugging session (2025-10-03):
+
 - 6 failures across 3 files
 - 3 agents dispatched in parallel
 - All investigations completed concurrently
 - All fixes integrated successfully
 - Zero conflicts between agent changes
-
 
 ---
 
@@ -2115,6 +2138,7 @@ List existing worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay              ccdeca82 [stories/instructions-overlay-audit]
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner                       a69cf440 [tools/phoneme-tuner]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 05:38:02Z)**_
@@ -2137,6 +2161,7 @@ Do not duplicate this agent's work — avoid working with the same files or topi
 output_file: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/a39f64d4ee6cc6a97.output
 Do NOT Read or tail this file via the shell tool — it is the full sub-agent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-28 05:38:24Z)**_
@@ -2144,20 +2169,24 @@ _**Agent - sidechain (2026-04-28 05:38:24Z)**_
 You are retrofitting one Storybook story file to the "single-Default Playground" pattern. Work only in the worktree you create — do not touch any other files.
 
 ## Project root
+
 `/Users/leocaseiro/Sites/base-skill`
 
 ## Your task
+
 Retrofit `src/components/GameGrid.stories.tsx` to the single-Default Playground pattern.
 
 ## Setup
 
 From the project root, run:
+
 ```bash
 git worktree add ./worktrees/stories-tier3-game-grid -b stories/game-grid-audit master
 cd ./worktrees/stories-tier3-game-grid && yarn install
 ```
 
 ## Context to read first (inside worktree)
+
 - `src/components/GameGrid.tsx` — understand props
 - `src/components/GameCard.tsx` — understand props needed for sample cards
 - `src/components/GameGrid.stories.tsx` — current file (will be replaced)
@@ -2220,12 +2249,14 @@ export const Default: Story = {};
 ## Verification
 
 Run inside the worktree:
+
 ```bash
 yarn typecheck
 yarn lint
 ```
 
 Both must exit 0. Fix any issues — common ones:
+
 - `import/order` lint rule: reorder imports (value imports alphabetical, then relative imports alphabetical, then `storybook/test`, then `@storybook/react` type import, then `react`/JSX type imports last)
 - Missing required props on `GameCard` — check `GameCard.tsx` and add them
 - If `GameCard` doesn't have an `onOpenCog` prop, remove it
@@ -2278,7 +2309,6 @@ EOF
 
 Report back: PR URL, whether typecheck/lint passed first try or what you had to fix, and the final import order used.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:26Z)**_
 
 I'll work through this systematically. Let me start by setting up the worktree and reading the relevant files.
@@ -2295,6 +2325,7 @@ Create git worktree for game-grid audit branch
 Preparing worktree (new branch 'stories/game-grid-audit')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
@@ -2312,6 +2343,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 10.12s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
@@ -2321,19 +2353,20 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
  `./src/components/GameGrid.tsx`
 
 ```text
-1	import type { JSX, ReactNode } from 'react';
-2	
-3	type GameGridProps = {
-4	  cards: ReactNode[];
-5	};
-6	
-7	export const GameGrid = ({ cards }: GameGridProps): JSX.Element => (
-8	  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-9	    {cards}
-10	  </div>
-11	);
+1 import type { JSX, ReactNode } from 'react';
+2 
+3 type GameGridProps = {
+4   cards: ReactNode[];
+5 };
+6 
+7 export const GameGrid = ({ cards }: GameGridProps): JSX.Element => (
+8   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+9     {cards}
+10   </div>
+11 );
 12
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
@@ -2343,148 +2376,149 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
  `./src/components/GameCard.tsx`
 
 ```text
-1	import {
-2	  CircleDashed,
-3	  CircleDot,
-4	  SettingsIcon,
-5	  Star,
-6	} from 'lucide-react';
-7	import { useTranslation } from 'react-i18next';
-8	import type { Cover } from '@/games/cover-type';
-9	import type { GameColorKey } from '@/lib/game-colors';
-10	import type { JSX } from 'react';
-11	import { GameCover } from '@/components/GameCover';
-12	import { resolveDefaultCover } from '@/games/cover';
-13	
-14	type Common = {
-15	  gameId: string;
-16	  title: string;
-17	  chips: string[];
-18	  cover?: Cover;
-19	  onPlay: () => void;
-20	  onOpenCog: () => void;
-21	  /** Bookmark state — when both `isBookmarked` and `onToggleBookmark` are provided, a Star toggle renders in the cover top-right. */
-22	  isBookmarked?: boolean;
-23	  onToggleBookmark?: () => void;
-24	};
-25	
-26	type DefaultVariant = Common & { variant: 'default' };
-27	type CustomGameVariant = Common & {
-28	  variant: 'customGame';
-29	  customGameName: string;
-30	  customGameColor: GameColorKey;
-31	};
-32	
-33	type GameCardProps = DefaultVariant | CustomGameVariant;
-34	
-35	export const GameCard = (props: GameCardProps): JSX.Element => {
-36	  const { t } = useTranslation('common');
-37	  const {
-38	    gameId,
-39	    title,
-40	    chips,
-41	    onPlay,
-42	    onOpenCog,
-43	    isBookmarked,
-44	    onToggleBookmark,
-45	  } = props;
-46	  const cover =
-47	    props.cover === undefined
-48	      ? resolveDefaultCover(gameId)
-49	      : props.cover;
-50	
-51	  const isCustom = props.variant === 'customGame';
-52	  const headingText = isCustom ? props.customGameName : title;
-53	  const subtitleText = isCustom ? title : undefined;
-54	
-55	  return (
-56	    <div
-57	      className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
-58	      data-card-type={isCustom ? 'customGame' : 'default'}
-59	    >
-60	      <button
-61	        type="button"
-62	        aria-label={`Play ${headingText}`}
-63	        onClick={onPlay}
-64	        className="flex flex-col text-left active:scale-[0.98]"
-65	      >
-66	        <div className="relative p-2">
-67	          <GameCover cover={cover} size="card" />
-68	        </div>
-69	
-70	        <div className="flex flex-col gap-1 px-3 pb-3">
-71	          <h2 className="flex items-center gap-1.5 text-sm font-bold leading-tight text-foreground">
-72	            {isCustom ? (
-73	              <CircleDot
-74	                size={14}
-75	                aria-hidden="true"
-76	                className="shrink-0 text-muted-foreground"
-77	              />
-78	            ) : (
-79	              <CircleDashed
-80	                size={14}
-81	                aria-hidden="true"
-82	                className="shrink-0 text-muted-foreground"
-83	              />
-84	            )}
-85	            {headingText}
-86	          </h2>
-87	          {subtitleText && (
-88	            <p className="text-xs italic text-muted-foreground">
-89	              {subtitleText}
-90	            </p>
-91	          )}
-92	          <div className="flex flex-wrap gap-1 pt-1">
-93	            {chips.map((chip) => (
-94	              <span
-95	                key={chip}
-96	                className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground"
-97	              >
-98	                {chip}
-99	              </span>
-100	            ))}
-101	          </div>
-102	        </div>
-103	      </button>
-104	
-105	      {onToggleBookmark && (
-106	        <button
-107	          type="button"
-108	          aria-label={
-109	            isBookmarked
-110	              ? t('bookmark.remove', {
-111	                  defaultValue: 'Remove bookmark',
-112	                })
-113	              : t('bookmark.add', { defaultValue: 'Add bookmark' })
-114	          }
-115	          aria-pressed={isBookmarked ?? false}
-116	          onClick={(e) => {
-117	            e.stopPropagation();
-118	            onToggleBookmark();
-119	          }}
-120	          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
-121	        >
-122	          <Star
-123	            size={14}
-124	            aria-hidden="true"
-125	            fill={isBookmarked ? 'currentColor' : 'none'}
-126	          />
-127	        </button>
-128	      )}
-129	
-130	      <button
-131	        type="button"
-132	        aria-label="Settings"
-133	        onClick={onOpenCog}
-134	        className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground shadow"
-135	      >
-136	        <SettingsIcon size={14} />
-137	      </button>
-138	    </div>
-139	  );
-140	};
+1 import {
+2   CircleDashed,
+3   CircleDot,
+4   SettingsIcon,
+5   Star,
+6 } from 'lucide-react';
+7 import { useTranslation } from 'react-i18next';
+8 import type { Cover } from '@/games/cover-type';
+9 import type { GameColorKey } from '@/lib/game-colors';
+10 import type { JSX } from 'react';
+11 import { GameCover } from '@/components/GameCover';
+12 import { resolveDefaultCover } from '@/games/cover';
+13 
+14 type Common = {
+15   gameId: string;
+16   title: string;
+17   chips: string[];
+18   cover?: Cover;
+19   onPlay: () => void;
+20   onOpenCog: () => void;
+21   /** Bookmark state — when both `isBookmarked` and `onToggleBookmark` are provided, a Star toggle renders in the cover top-right. */
+22   isBookmarked?: boolean;
+23   onToggleBookmark?: () => void;
+24 };
+25 
+26 type DefaultVariant = Common & { variant: 'default' };
+27 type CustomGameVariant = Common & {
+28   variant: 'customGame';
+29   customGameName: string;
+30   customGameColor: GameColorKey;
+31 };
+32 
+33 type GameCardProps = DefaultVariant | CustomGameVariant;
+34 
+35 export const GameCard = (props: GameCardProps): JSX.Element => {
+36   const { t } = useTranslation('common');
+37   const {
+38     gameId,
+39     title,
+40     chips,
+41     onPlay,
+42     onOpenCog,
+43     isBookmarked,
+44     onToggleBookmark,
+45   } = props;
+46   const cover =
+47     props.cover === undefined
+48       ? resolveDefaultCover(gameId)
+49       : props.cover;
+50 
+51   const isCustom = props.variant === 'customGame';
+52   const headingText = isCustom ? props.customGameName : title;
+53   const subtitleText = isCustom ? title : undefined;
+54 
+55   return (
+56     <div
+57       className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
+58       data-card-type={isCustom ? 'customGame' : 'default'}
+59     >
+60       <button
+61         type="button"
+62         aria-label={`Play ${headingText}`}
+63         onClick={onPlay}
+64         className="flex flex-col text-left active:scale-[0.98]"
+65       >
+66         <div className="relative p-2">
+67           <GameCover cover={cover} size="card" />
+68         </div>
+69 
+70         <div className="flex flex-col gap-1 px-3 pb-3">
+71           <h2 className="flex items-center gap-1.5 text-sm font-bold leading-tight text-foreground">
+72             {isCustom ? (
+73               <CircleDot
+74                 size={14}
+75                 aria-hidden="true"
+76                 className="shrink-0 text-muted-foreground"
+77               />
+78             ) : (
+79               <CircleDashed
+80                 size={14}
+81                 aria-hidden="true"
+82                 className="shrink-0 text-muted-foreground"
+83               />
+84             )}
+85             {headingText}
+86           </h2>
+87           {subtitleText && (
+88             <p className="text-xs italic text-muted-foreground">
+89               {subtitleText}
+90             </p>
+91           )}
+92           <div className="flex flex-wrap gap-1 pt-1">
+93             {chips.map((chip) => (
+94               <span
+95                 key={chip}
+96                 className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground"
+97               >
+98                 {chip}
+99               </span>
+100             ))}
+101           </div>
+102         </div>
+103       </button>
+104 
+105       {onToggleBookmark && (
+106         <button
+107           type="button"
+108           aria-label={
+109             isBookmarked
+110               ? t('bookmark.remove', {
+111                   defaultValue: 'Remove bookmark',
+112                 })
+113               : t('bookmark.add', { defaultValue: 'Add bookmark' })
+114           }
+115           aria-pressed={isBookmarked ?? false}
+116           onClick={(e) => {
+117             e.stopPropagation();
+118             onToggleBookmark();
+119           }}
+120           className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
+121         >
+122           <Star
+123             size={14}
+124             aria-hidden="true"
+125             fill={isBookmarked ? 'currentColor' : 'none'}
+126           />
+127         </button>
+128       )}
+129 
+130       <button
+131         type="button"
+132         aria-label="Settings"
+133         onClick={onOpenCog}
+134         className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground shadow"
+135       >
+136         <SettingsIcon size={14} />
+137       </button>
+138     </div>
+139   );
+140 };
 141
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
@@ -2494,60 +2528,61 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:41Z)**_
  `./src/components/GameGrid.stories.tsx`
 
 ```text
-1	import { GameCard } from './GameCard';
-2	import { GameGrid } from './GameGrid';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const SAMPLE_CARDS = [
-6	  <GameCard
-7	    key="wordspell"
-8	    variant="default"
-9	    gameId="word-spell"
-10	    title="Word Spell"
-11	    chips={['PK', 'K']}
-12	    onPlay={() => {}}
-13	    onOpenCog={() => {}}
-14	  />,
-15	  <GameCard
-16	    key="numbermatch"
-17	    variant="default"
-18	    gameId="number-match"
-19	    title="Match the Number"
-20	    chips={['1', '2']}
-21	    onPlay={() => {}}
-22	    onOpenCog={() => {}}
-23	  />,
-24	  <GameCard
-25	    key="sortnumbers"
-26	    variant="default"
-27	    gameId="sort-numbers"
-28	    title="Sort Numbers"
-29	    chips={['K', '1']}
-30	    onPlay={() => {}}
-31	    onOpenCog={() => {}}
-32	  />,
-33	];
-34	
-35	const meta: Meta<typeof GameGrid> = {
-36	  component: GameGrid,
-37	  tags: ['autodocs'],
-38	  args: {
-39	    cards: SAMPLE_CARDS,
-40	  },
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<typeof GameGrid>;
-45	
-46	export const Default: Story = {};
-47	
-48	export const Empty: Story = {
-49	  args: {
-50	    cards: [],
-51	  },
-52	};
+1 import { GameCard } from './GameCard';
+2 import { GameGrid } from './GameGrid';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const SAMPLE_CARDS = [
+6   <GameCard
+7     key="wordspell"
+8     variant="default"
+9     gameId="word-spell"
+10     title="Word Spell"
+11     chips={['PK', 'K']}
+12     onPlay={() => {}}
+13     onOpenCog={() => {}}
+14   />,
+15   <GameCard
+16     key="numbermatch"
+17     variant="default"
+18     gameId="number-match"
+19     title="Match the Number"
+20     chips={['1', '2']}
+21     onPlay={() => {}}
+22     onOpenCog={() => {}}
+23   />,
+24   <GameCard
+25     key="sortnumbers"
+26     variant="default"
+27     gameId="sort-numbers"
+28     title="Sort Numbers"
+29     chips={['K', '1']}
+30     onPlay={() => {}}
+31     onOpenCog={() => {}}
+32   />,
+33 ];
+34 
+35 const meta: Meta<typeof GameGrid> = {
+36   component: GameGrid,
+37   tags: ['autodocs'],
+38   args: {
+39     cards: SAMPLE_CARDS,
+40   },
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<typeof GameGrid>;
+45 
+46 export const Default: Story = {};
+47 
+48 export const Empty: Story = {
+49   args: {
+50     cards: [],
+51   },
+52 };
 53
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:44Z)**_
@@ -2568,6 +2603,7 @@ Do not duplicate this agent's work — avoid working with the same files or topi
 output_file: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/ab4d8242c12d021bb.output
 Do NOT Read or tail this file via the shell tool — it is the full sub-agent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-28 05:38:48Z)**_
@@ -2575,20 +2611,24 @@ _**Agent - sidechain (2026-04-28 05:38:48Z)**_
 You are retrofitting one Storybook story file to the "single-Default Playground" pattern. Work only in the worktree you create — do not touch any other files.
 
 ## Project root
+
 `/Users/leocaseiro/Sites/base-skill`
 
 ## Your task
+
 Retrofit `src/components/GameCard.stories.tsx` to the single-Default Playground pattern.
 
 ## Setup
 
 From the project root, run:
+
 ```bash
 git worktree add ./worktrees/stories-tier3-game-card -b stories/game-card-audit master
 cd ./worktrees/stories-tier3-game-card && yarn install
 ```
 
 ## Context to read first (inside worktree)
+
 - `src/components/GameCard.tsx` — understand all props, especially the discriminated union on `variant`
 - `src/lib/game-colors.ts` — find `GAME_COLOR_KEYS` array and `GameColorKey` type
 - `src/components/GameCard.stories.tsx` — current file (will be replaced)
@@ -2716,6 +2756,7 @@ export const Default: Story = {};
 ```
 
 **Important adaptations:**
+
 - If `GameCard.tsx` doesn't have a `cover` prop, remove `cover?: never` from `StoryArgs` and its `argTypes` entry.
 - If `GameCard.tsx` doesn't have `onOpenCog`, remove it everywhere.
 - If the `customGame` variant has different required props, adjust accordingly — check the discriminated union carefully.
@@ -2787,7 +2828,6 @@ EOF
 
 Report back: PR URL, whether typecheck/lint passed first try or what you had to fix, and any prop-type adaptations made vs. the template.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:50Z)**_
 
 I'll work through this task step by step. Let me start by reading the relevant files to understand the props.
@@ -2850,6 +2890,7 @@ export const Default: Story = {};
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
@@ -2859,148 +2900,149 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
  `./src/components/GameCard.tsx`
 
 ```text
-1	import {
-2	  CircleDashed,
-3	  CircleDot,
-4	  SettingsIcon,
-5	  Star,
-6	} from 'lucide-react';
-7	import { useTranslation } from 'react-i18next';
-8	import type { Cover } from '@/games/cover-type';
-9	import type { GameColorKey } from '@/lib/game-colors';
-10	import type { JSX } from 'react';
-11	import { GameCover } from '@/components/GameCover';
-12	import { resolveDefaultCover } from '@/games/cover';
-13	
-14	type Common = {
-15	  gameId: string;
-16	  title: string;
-17	  chips: string[];
-18	  cover?: Cover;
-19	  onPlay: () => void;
-20	  onOpenCog: () => void;
-21	  /** Bookmark state — when both `isBookmarked` and `onToggleBookmark` are provided, a Star toggle renders in the cover top-right. */
-22	  isBookmarked?: boolean;
-23	  onToggleBookmark?: () => void;
-24	};
-25	
-26	type DefaultVariant = Common & { variant: 'default' };
-27	type CustomGameVariant = Common & {
-28	  variant: 'customGame';
-29	  customGameName: string;
-30	  customGameColor: GameColorKey;
-31	};
-32	
-33	type GameCardProps = DefaultVariant | CustomGameVariant;
-34	
-35	export const GameCard = (props: GameCardProps): JSX.Element => {
-36	  const { t } = useTranslation('common');
-37	  const {
-38	    gameId,
-39	    title,
-40	    chips,
-41	    onPlay,
-42	    onOpenCog,
-43	    isBookmarked,
-44	    onToggleBookmark,
-45	  } = props;
-46	  const cover =
-47	    props.cover === undefined
-48	      ? resolveDefaultCover(gameId)
-49	      : props.cover;
-50	
-51	  const isCustom = props.variant === 'customGame';
-52	  const headingText = isCustom ? props.customGameName : title;
-53	  const subtitleText = isCustom ? title : undefined;
-54	
-55	  return (
-56	    <div
-57	      className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
-58	      data-card-type={isCustom ? 'customGame' : 'default'}
-59	    >
-60	      <button
-61	        type="button"
-62	        aria-label={`Play ${headingText}`}
-63	        onClick={onPlay}
-64	        className="flex flex-col text-left active:scale-[0.98]"
-65	      >
-66	        <div className="relative p-2">
-67	          <GameCover cover={cover} size="card" />
-68	        </div>
-69	
-70	        <div className="flex flex-col gap-1 px-3 pb-3">
-71	          <h2 className="flex items-center gap-1.5 text-sm font-bold leading-tight text-foreground">
-72	            {isCustom ? (
-73	              <CircleDot
-74	                size={14}
-75	                aria-hidden="true"
-76	                className="shrink-0 text-muted-foreground"
-77	              />
-78	            ) : (
-79	              <CircleDashed
-80	                size={14}
-81	                aria-hidden="true"
-82	                className="shrink-0 text-muted-foreground"
-83	              />
-84	            )}
-85	            {headingText}
-86	          </h2>
-87	          {subtitleText && (
-88	            <p className="text-xs italic text-muted-foreground">
-89	              {subtitleText}
-90	            </p>
-91	          )}
-92	          <div className="flex flex-wrap gap-1 pt-1">
-93	            {chips.map((chip) => (
-94	              <span
-95	                key={chip}
-96	                className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground"
-97	              >
-98	                {chip}
-99	              </span>
-100	            ))}
-101	          </div>
-102	        </div>
-103	      </button>
-104	
-105	      {onToggleBookmark && (
-106	        <button
-107	          type="button"
-108	          aria-label={
-109	            isBookmarked
-110	              ? t('bookmark.remove', {
-111	                  defaultValue: 'Remove bookmark',
-112	                })
-113	              : t('bookmark.add', { defaultValue: 'Add bookmark' })
-114	          }
-115	          aria-pressed={isBookmarked ?? false}
-116	          onClick={(e) => {
-117	            e.stopPropagation();
-118	            onToggleBookmark();
-119	          }}
-120	          className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
-121	        >
-122	          <Star
-123	            size={14}
-124	            aria-hidden="true"
-125	            fill={isBookmarked ? 'currentColor' : 'none'}
-126	          />
-127	        </button>
-128	      )}
-129	
-130	      <button
-131	        type="button"
-132	        aria-label="Settings"
-133	        onClick={onOpenCog}
-134	        className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground shadow"
-135	      >
-136	        <SettingsIcon size={14} />
-137	      </button>
-138	    </div>
-139	  );
-140	};
+1 import {
+2   CircleDashed,
+3   CircleDot,
+4   SettingsIcon,
+5   Star,
+6 } from 'lucide-react';
+7 import { useTranslation } from 'react-i18next';
+8 import type { Cover } from '@/games/cover-type';
+9 import type { GameColorKey } from '@/lib/game-colors';
+10 import type { JSX } from 'react';
+11 import { GameCover } from '@/components/GameCover';
+12 import { resolveDefaultCover } from '@/games/cover';
+13 
+14 type Common = {
+15   gameId: string;
+16   title: string;
+17   chips: string[];
+18   cover?: Cover;
+19   onPlay: () => void;
+20   onOpenCog: () => void;
+21   /** Bookmark state — when both `isBookmarked` and `onToggleBookmark` are provided, a Star toggle renders in the cover top-right. */
+22   isBookmarked?: boolean;
+23   onToggleBookmark?: () => void;
+24 };
+25 
+26 type DefaultVariant = Common & { variant: 'default' };
+27 type CustomGameVariant = Common & {
+28   variant: 'customGame';
+29   customGameName: string;
+30   customGameColor: GameColorKey;
+31 };
+32 
+33 type GameCardProps = DefaultVariant | CustomGameVariant;
+34 
+35 export const GameCard = (props: GameCardProps): JSX.Element => {
+36   const { t } = useTranslation('common');
+37   const {
+38     gameId,
+39     title,
+40     chips,
+41     onPlay,
+42     onOpenCog,
+43     isBookmarked,
+44     onToggleBookmark,
+45   } = props;
+46   const cover =
+47     props.cover === undefined
+48       ? resolveDefaultCover(gameId)
+49       : props.cover;
+50 
+51   const isCustom = props.variant === 'customGame';
+52   const headingText = isCustom ? props.customGameName : title;
+53   const subtitleText = isCustom ? title : undefined;
+54 
+55   return (
+56     <div
+57       className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-sm"
+58       data-card-type={isCustom ? 'customGame' : 'default'}
+59     >
+60       <button
+61         type="button"
+62         aria-label={`Play ${headingText}`}
+63         onClick={onPlay}
+64         className="flex flex-col text-left active:scale-[0.98]"
+65       >
+66         <div className="relative p-2">
+67           <GameCover cover={cover} size="card" />
+68         </div>
+69 
+70         <div className="flex flex-col gap-1 px-3 pb-3">
+71           <h2 className="flex items-center gap-1.5 text-sm font-bold leading-tight text-foreground">
+72             {isCustom ? (
+73               <CircleDot
+74                 size={14}
+75                 aria-hidden="true"
+76                 className="shrink-0 text-muted-foreground"
+77               />
+78             ) : (
+79               <CircleDashed
+80                 size={14}
+81                 aria-hidden="true"
+82                 className="shrink-0 text-muted-foreground"
+83               />
+84             )}
+85             {headingText}
+86           </h2>
+87           {subtitleText && (
+88             <p className="text-xs italic text-muted-foreground">
+89               {subtitleText}
+90             </p>
+91           )}
+92           <div className="flex flex-wrap gap-1 pt-1">
+93             {chips.map((chip) => (
+94               <span
+95                 key={chip}
+96                 className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground"
+97               >
+98                 {chip}
+99               </span>
+100             ))}
+101           </div>
+102         </div>
+103       </button>
+104 
+105       {onToggleBookmark && (
+106         <button
+107           type="button"
+108           aria-label={
+109             isBookmarked
+110               ? t('bookmark.remove', {
+111                   defaultValue: 'Remove bookmark',
+112                 })
+113               : t('bookmark.add', { defaultValue: 'Add bookmark' })
+114           }
+115           aria-pressed={isBookmarked ?? false}
+116           onClick={(e) => {
+117             e.stopPropagation();
+118             onToggleBookmark();
+119           }}
+120           className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-card/80 text-foreground shadow"
+121         >
+122           <Star
+123             size={14}
+124             aria-hidden="true"
+125             fill={isBookmarked ? 'currentColor' : 'none'}
+126           />
+127         </button>
+128       )}
+129 
+130       <button
+131         type="button"
+132         aria-label="Settings"
+133         onClick={onOpenCog}
+134         className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground shadow"
+135       >
+136         <SettingsIcon size={14} />
+137       </button>
+138     </div>
+139   );
+140 };
 141
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
@@ -3010,48 +3052,49 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
  `./src/lib/game-colors.ts`
 
 ```text
-1	// src/lib/game-colors.ts
-2	export const GAME_COLOR_KEYS = [
-3	  'indigo',
-4	  'teal',
-5	  'rose',
-6	  'amber',
-7	  'sky',
-8	  'lime',
-9	  'purple',
-10	  'orange',
-11	  'pink',
-12	  'emerald',
-13	  'slate',
-14	  'cyan',
-15	] as const;
-16	
-17	export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
-18	
-19	export type ColorTokens = {
-20	  border: string; // used for selected ring in colour picker
-21	  playBg: string; // primary colour — all other uses derived from this via CSS utility classes
-22	  text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
-23	};
-24	
-25	export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
-26	  indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
-27	  teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
-28	  rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
-29	  amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
-30	  sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
-31	  lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
-32	  purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
-33	  orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
-34	  pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
-35	  emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
-36	  slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
-37	  cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
-38	};
-39	
-40	export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
+1 // src/lib/game-colors.ts
+2 export const GAME_COLOR_KEYS = [
+3   'indigo',
+4   'teal',
+5   'rose',
+6   'amber',
+7   'sky',
+8   'lime',
+9   'purple',
+10   'orange',
+11   'pink',
+12   'emerald',
+13   'slate',
+14   'cyan',
+15 ] as const;
+16 
+17 export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
+18 
+19 export type ColorTokens = {
+20   border: string; // used for selected ring in colour picker
+21   playBg: string; // primary colour — all other uses derived from this via CSS utility classes
+22   text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
+23 };
+24 
+25 export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
+26   indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
+27   teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
+28   rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
+29   amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
+30   sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
+31   lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
+32   purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
+33   orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
+34   pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
+35   emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
+36   slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
+37   cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
+38 };
+39 
+40 export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
 41
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
@@ -3061,87 +3104,88 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:51Z)**_
  `./src/components/GameCard.stories.tsx`
 
 ```text
-1	import { GameCard } from './GameCard';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	
-4	const meta: Meta<typeof GameCard> = {
-5	  component: GameCard,
-6	  tags: ['autodocs'],
-7	  args: {
-8	    gameId: 'sort-numbers',
-9	    title: 'Count in Order',
-10	    chips: ['🚀 Up', '5 numbers', '2s'],
-11	  },
-12	  argTypes: {
-13	    onPlay: { action: 'played' },
-14	    onOpenCog: { action: 'cogOpened' },
-15	    onToggleBookmark: { action: 'bookmarkToggled' },
-16	  },
-17	};
-18	export default meta;
-19	
-20	type Story = StoryObj<typeof GameCard>;
-21	
-22	export const Default: Story = {
-23	  args: {
-24	    variant: 'default',
-25	  },
-26	};
-27	
-28	export const CustomGame: Story = {
-29	  args: {
-30	    variant: 'customGame',
-31	    customGameName: 'Skip by 2',
-32	    customGameColor: 'amber',
-33	  },
-34	};
-35	
-36	export const CustomGamePurple: Story = {
-37	  args: {
-38	    variant: 'customGame',
-39	    customGameName: 'Big to Small',
-40	    customGameColor: 'purple',
-41	    chips: ['⬇️ Down', '10 numbers', '3s'],
-42	  },
-43	};
-44	
-45	export const NotBookmarked: Story = {
-46	  args: {
-47	    variant: 'default',
-48	    isBookmarked: false,
-49	    onToggleBookmark: () => {},
-50	  },
-51	};
-52	
-53	export const Bookmarked: Story = {
-54	  args: {
-55	    variant: 'default',
-56	    isBookmarked: true,
-57	    onToggleBookmark: () => {},
-58	  },
-59	};
-60	
-61	export const NotBookmarkedCustomGame: Story = {
-62	  args: {
-63	    variant: 'customGame',
-64	    customGameName: 'Skip by 2',
-65	    customGameColor: 'amber',
-66	    isBookmarked: false,
-67	    onToggleBookmark: () => {},
-68	  },
-69	};
-70	
-71	export const BookmarkedCustomGame: Story = {
-72	  args: {
-73	    variant: 'customGame',
-74	    customGameName: 'Skip by 2',
-75	    customGameColor: 'amber',
-76	    isBookmarked: true,
-77	    onToggleBookmark: () => {},
-78	  },
-79	};
+1 import { GameCard } from './GameCard';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 
+4 const meta: Meta<typeof GameCard> = {
+5   component: GameCard,
+6   tags: ['autodocs'],
+7   args: {
+8     gameId: 'sort-numbers',
+9     title: 'Count in Order',
+10     chips: ['🚀 Up', '5 numbers', '2s'],
+11   },
+12   argTypes: {
+13     onPlay: { action: 'played' },
+14     onOpenCog: { action: 'cogOpened' },
+15     onToggleBookmark: { action: 'bookmarkToggled' },
+16   },
+17 };
+18 export default meta;
+19 
+20 type Story = StoryObj<typeof GameCard>;
+21 
+22 export const Default: Story = {
+23   args: {
+24     variant: 'default',
+25   },
+26 };
+27 
+28 export const CustomGame: Story = {
+29   args: {
+30     variant: 'customGame',
+31     customGameName: 'Skip by 2',
+32     customGameColor: 'amber',
+33   },
+34 };
+35 
+36 export const CustomGamePurple: Story = {
+37   args: {
+38     variant: 'customGame',
+39     customGameName: 'Big to Small',
+40     customGameColor: 'purple',
+41     chips: ['⬇️ Down', '10 numbers', '3s'],
+42   },
+43 };
+44 
+45 export const NotBookmarked: Story = {
+46   args: {
+47     variant: 'default',
+48     isBookmarked: false,
+49     onToggleBookmark: () => {},
+50   },
+51 };
+52 
+53 export const Bookmarked: Story = {
+54   args: {
+55     variant: 'default',
+56     isBookmarked: true,
+57     onToggleBookmark: () => {},
+58   },
+59 };
+60 
+61 export const NotBookmarkedCustomGame: Story = {
+62   args: {
+63     variant: 'customGame',
+64     customGameName: 'Skip by 2',
+65     customGameColor: 'amber',
+66     isBookmarked: false,
+67     onToggleBookmark: () => {},
+68   },
+69 };
+70 
+71 export const BookmarkedCustomGame: Story = {
+72   args: {
+73     variant: 'customGame',
+74     customGameName: 'Skip by 2',
+75     customGameColor: 'amber',
+76     isBookmarked: true,
+77     onToggleBookmark: () => {},
+78   },
+79 };
 80
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:52Z)**_
@@ -3151,60 +3195,61 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:52Z)**_
  `./worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx`
 
 ```text
-1	import { GameCard } from './GameCard';
-2	import { GameGrid } from './GameGrid';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const SAMPLE_CARDS = [
-6	  <GameCard
-7	    key="wordspell"
-8	    variant="default"
-9	    gameId="word-spell"
-10	    title="Word Spell"
-11	    chips={['PK', 'K']}
-12	    onPlay={() => {}}
-13	    onOpenCog={() => {}}
-14	  />,
-15	  <GameCard
-16	    key="numbermatch"
-17	    variant="default"
-18	    gameId="number-match"
-19	    title="Match the Number"
-20	    chips={['1', '2']}
-21	    onPlay={() => {}}
-22	    onOpenCog={() => {}}
-23	  />,
-24	  <GameCard
-25	    key="sortnumbers"
-26	    variant="default"
-27	    gameId="sort-numbers"
-28	    title="Sort Numbers"
-29	    chips={['K', '1']}
-30	    onPlay={() => {}}
-31	    onOpenCog={() => {}}
-32	  />,
-33	];
-34	
-35	const meta: Meta<typeof GameGrid> = {
-36	  component: GameGrid,
-37	  tags: ['autodocs'],
-38	  args: {
-39	    cards: SAMPLE_CARDS,
-40	  },
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<typeof GameGrid>;
-45	
-46	export const Default: Story = {};
-47	
-48	export const Empty: Story = {
-49	  args: {
-50	    cards: [],
-51	  },
-52	};
+1 import { GameCard } from './GameCard';
+2 import { GameGrid } from './GameGrid';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const SAMPLE_CARDS = [
+6   <GameCard
+7     key="wordspell"
+8     variant="default"
+9     gameId="word-spell"
+10     title="Word Spell"
+11     chips={['PK', 'K']}
+12     onPlay={() => {}}
+13     onOpenCog={() => {}}
+14   />,
+15   <GameCard
+16     key="numbermatch"
+17     variant="default"
+18     gameId="number-match"
+19     title="Match the Number"
+20     chips={['1', '2']}
+21     onPlay={() => {}}
+22     onOpenCog={() => {}}
+23   />,
+24   <GameCard
+25     key="sortnumbers"
+26     variant="default"
+27     gameId="sort-numbers"
+28     title="Sort Numbers"
+29     chips={['K', '1']}
+30     onPlay={() => {}}
+31     onOpenCog={() => {}}
+32   />,
+33 ];
+34 
+35 const meta: Meta<typeof GameGrid> = {
+36   component: GameGrid,
+37   tags: ['autodocs'],
+38   args: {
+39     cards: SAMPLE_CARDS,
+40   },
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<typeof GameGrid>;
+45 
+46 export const Default: Story = {};
+47 
+48 export const Empty: Story = {
+49   args: {
+50     cards: [],
+51   },
+52 };
 53
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:38:54Z)**_
@@ -3223,6 +3268,7 @@ Create git worktree for game-card-audit branch
 Preparing worktree (new branch 'stories/game-card-audit')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:06Z)**_
@@ -3240,6 +3286,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 7.32s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:01Z)**_
@@ -3300,6 +3347,7 @@ export const Default: Story = {};
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:02Z)**_
@@ -3320,6 +3368,7 @@ Do not duplicate this agent's work — avoid working with the same files or topi
 output_file: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/ad479afd32179bded.output
 Do NOT Read or tail this file via the shell tool — it is the full sub-agent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-28 05:39:02Z)**_
@@ -3327,20 +3376,24 @@ _**Agent - sidechain (2026-04-28 05:39:02Z)**_
 You are retrofitting one Storybook story file to the "single-Default Playground" pattern. Work only in the worktree you create — do not touch any other files.
 
 ## Project root
+
 `/Users/leocaseiro/Sites/base-skill`
 
 ## Your task
+
 Retrofit `src/components/GameNameChip.stories.tsx` to the single-Default Playground pattern.
 
 ## Setup
 
 From the project root, run:
+
 ```bash
 git worktree add ./worktrees/stories-tier3-game-name-chip -b stories/game-name-chip-audit master
 cd ./worktrees/stories-tier3-game-name-chip && yarn install
 ```
 
 ## Context to read first (inside worktree)
+
 - `src/components/GameNameChip.tsx` — understand all props
 - `src/lib/game-colors.ts` — find `GAME_COLOR_KEYS` array
 - `src/components/GameNameChip.stories.tsx` — current file (will be replaced)
@@ -3393,6 +3446,7 @@ export const AllColors: Story = {
 ```
 
 **Important adaptations:**
+
 - Check `GameNameChip.tsx` for the actual prop names. If `customGameColor` isn't a prop, remove it from `argTypes`. If `subject` isn't a prop, remove it.
 - If `GAME_COLOR_KEYS` has a different export name in `game-colors.ts`, use the actual name.
 - The `AllColors` auxiliary story is kept because a 12-colour palette survey is NOT reachable from Controls in one click — this is a legitimate auxiliary per the Playground pattern.
@@ -3458,7 +3512,6 @@ EOF
 
 Report back: PR URL, whether typecheck/lint passed first try or what you had to fix, and how many stories were in the original file vs. the final file.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:06Z)**_
 
 <tool-use data-tool-type="shell" data-tool-name="Bash"><details>
@@ -3472,6 +3525,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.75s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:04Z)**_
@@ -3490,6 +3544,7 @@ Create git worktree for game-name-chip audit
 Preparing worktree (new branch 'stories/game-name-chip-audit')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:08Z)**_
@@ -3511,6 +3566,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 8.98s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:22Z)**_
@@ -3535,6 +3591,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:19Z)**_
@@ -3544,58 +3601,59 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:19Z)**_
  `./worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.tsx`
 
 ```text
-1	import type { GameColorKey } from '@/lib/game-colors';
-2	import type { JSX } from 'react';
-3	import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
-4	
-5	type GameNameChipProps = {
-6	  title: string;
-7	  customGameName?: string;
-8	  customGameColor?: GameColorKey;
-9	  subject?: string;
-10	};
-11	
-12	export const GameNameChip = ({
-13	  title,
-14	  customGameName,
-15	  customGameColor = DEFAULT_GAME_COLOR,
-16	  subject,
-17	}: GameNameChipProps): JSX.Element => {
-18	  const colors = customGameName
-19	    ? GAME_COLORS[customGameColor]
-20	    : GAME_COLORS.slate;
-21	
-22	  return (
-23	    <div
-24	      className="overflow-hidden rounded-xl border"
-25	      style={
-26	        {
-27	          borderColor: colors.border,
-28	          '--game-play': colors.playBg,
-29	        } as React.CSSProperties
-30	      }
-31	    >
-32	      <div className="game-bg flex min-h-12 items-center gap-2 px-3">
-33	        <span className="game-text text-sm font-bold">{title}</span>
-34	        {customGameName && (
-35	          <span
-36	            className="game-bg game-text rounded border px-2 py-0.5 text-xs font-semibold"
-37	            style={{ borderColor: colors.border }}
-38	          >
-39	            {customGameName}
-40	          </span>
-41	        )}
-42	        {!customGameName && subject && (
-43	          <span className="game-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
-44	            {subject}
-45	          </span>
-46	        )}
-47	      </div>
-48	    </div>
-49	  );
-50	};
+1 import type { GameColorKey } from '@/lib/game-colors';
+2 import type { JSX } from 'react';
+3 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
+4 
+5 type GameNameChipProps = {
+6   title: string;
+7   customGameName?: string;
+8   customGameColor?: GameColorKey;
+9   subject?: string;
+10 };
+11 
+12 export const GameNameChip = ({
+13   title,
+14   customGameName,
+15   customGameColor = DEFAULT_GAME_COLOR,
+16   subject,
+17 }: GameNameChipProps): JSX.Element => {
+18   const colors = customGameName
+19     ? GAME_COLORS[customGameColor]
+20     : GAME_COLORS.slate;
+21 
+22   return (
+23     <div
+24       className="overflow-hidden rounded-xl border"
+25       style={
+26         {
+27           borderColor: colors.border,
+28           '--game-play': colors.playBg,
+29         } as React.CSSProperties
+30       }
+31     >
+32       <div className="game-bg flex min-h-12 items-center gap-2 px-3">
+33         <span className="game-text text-sm font-bold">{title}</span>
+34         {customGameName && (
+35           <span
+36             className="game-bg game-text rounded border px-2 py-0.5 text-xs font-semibold"
+37             style={{ borderColor: colors.border }}
+38           >
+39             {customGameName}
+40           </span>
+41         )}
+42         {!customGameName && subject && (
+43           <span className="game-bg rounded px-2 py-0.5 text-xs font-medium text-muted-foreground">
+44             {subject}
+45           </span>
+46         )}
+47       </div>
+48     </div>
+49   );
+50 };
 51
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:20Z)**_
@@ -3605,48 +3663,49 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:20Z)**_
  `./worktrees/stories-tier3-game-name-chip/src/lib/game-colors.ts`
 
 ```text
-1	// src/lib/game-colors.ts
-2	export const GAME_COLOR_KEYS = [
-3	  'indigo',
-4	  'teal',
-5	  'rose',
-6	  'amber',
-7	  'sky',
-8	  'lime',
-9	  'purple',
-10	  'orange',
-11	  'pink',
-12	  'emerald',
-13	  'slate',
-14	  'cyan',
-15	] as const;
-16	
-17	export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
-18	
-19	export type ColorTokens = {
-20	  border: string; // used for selected ring in colour picker
-21	  playBg: string; // primary colour — all other uses derived from this via CSS utility classes
-22	  text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
-23	};
-24	
-25	export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
-26	  indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
-27	  teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
-28	  rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
-29	  amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
-30	  sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
-31	  lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
-32	  purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
-33	  orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
-34	  pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
-35	  emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
-36	  slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
-37	  cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
-38	};
-39	
-40	export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
+1 // src/lib/game-colors.ts
+2 export const GAME_COLOR_KEYS = [
+3   'indigo',
+4   'teal',
+5   'rose',
+6   'amber',
+7   'sky',
+8   'lime',
+9   'purple',
+10   'orange',
+11   'pink',
+12   'emerald',
+13   'slate',
+14   'cyan',
+15 ] as const;
+16 
+17 export type GameColorKey = (typeof GAME_COLOR_KEYS)[number];
+18 
+19 export type ColorTokens = {
+20   border: string; // used for selected ring in colour picker
+21   playBg: string; // primary colour — all other uses derived from this via CSS utility classes
+22   text: string; // contrast-safe colour for text on light card backgrounds (≥3:1 large bold)
+23 };
+24 
+25 export const GAME_COLORS: Record<GameColorKey, ColorTokens> = {
+26   indigo: { border: '#c7d2fe', playBg: '#6366f1', text: '#4338ca' },
+27   teal: { border: '#99f6e4', playBg: '#14b8a6', text: '#0f766e' },
+28   rose: { border: '#fecdd3', playBg: '#f43f5e', text: '#be123c' },
+29   amber: { border: '#fde68a', playBg: '#f59e0b', text: '#b45309' },
+30   sky: { border: '#bae6fd', playBg: '#0ea5e9', text: '#0369a1' },
+31   lime: { border: '#d9f99d', playBg: '#84cc16', text: '#4d7c0f' },
+32   purple: { border: '#e9d5ff', playBg: '#a855f7', text: '#7e22ce' },
+33   orange: { border: '#fed7aa', playBg: '#f97316', text: '#c2410c' },
+34   pink: { border: '#fbcfe8', playBg: '#ec4899', text: '#be185d' },
+35   emerald: { border: '#a7f3d0', playBg: '#10b981', text: '#047857' },
+36   slate: { border: '#cbd5e1', playBg: '#64748b', text: '#334155' },
+37   cyan: { border: '#a5f3fc', playBg: '#06b6d4', text: '#0e7490' },
+38 };
+39 
+40 export const DEFAULT_GAME_COLOR: GameColorKey = 'indigo';
 41
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:21Z)**_
@@ -3656,87 +3715,88 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:21Z)**_
  `./worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx`
 
 ```text
-1	import { withDarkMode } from '../../.storybook/decorators';
-2	import { GameNameChip } from './GameNameChip';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const meta: Meta<typeof GameNameChip> = {
-6	  component: GameNameChip,
-7	  tags: ['autodocs'],
-8	  args: {
-9	    title: 'Word Spell',
-10	  },
-11	};
-12	export default meta;
-13	
-14	type Story = StoryObj<typeof GameNameChip>;
-15	
-16	export const Default: Story = {};
-17	
-18	export const DefaultDark: Story = {
-19	  decorators: [withDarkMode],
-20	};
-21	
-22	export const WithCustomGame: Story = {
-23	  args: {
-24	    customGameName: 'Easy Mode',
-25	    customGameColor: 'indigo',
-26	  },
-27	};
-28	
-29	export const WithCustomGameDark: Story = {
-30	  args: {
-31	    customGameName: 'Easy Mode',
-32	    customGameColor: 'indigo',
-33	  },
-34	  decorators: [withDarkMode],
-35	};
-36	
-37	export const WithSubject: Story = {
-38	  args: { subject: 'reading' },
-39	};
-40	
-41	export const WithSubjectDark: Story = {
-42	  args: { subject: 'reading' },
-43	  decorators: [withDarkMode],
-44	};
-45	
-46	export const AllColors: Story = {
-47	  render: () => (
-48	    <div className="flex flex-col gap-2">
-49	      {(
-50	        [
-51	          'indigo',
-52	          'teal',
-53	          'rose',
-54	          'amber',
-55	          'sky',
-56	          'lime',
-57	          'purple',
-58	          'orange',
-59	          'pink',
-60	          'emerald',
-61	          'slate',
-62	          'cyan',
-63	        ] as const
-64	      ).map((color) => (
-65	        <GameNameChip
-66	          key={color}
-67	          title="Word Spell"
-68	          customGameName={color}
-69	          customGameColor={color}
-70	        />
-71	      ))}
-72	    </div>
-73	  ),
-74	};
-75	
-76	export const AllColorsDark: Story = {
-77	  ...AllColors,
-78	  decorators: [withDarkMode],
-79	};
+1 import { withDarkMode } from '../../.storybook/decorators';
+2 import { GameNameChip } from './GameNameChip';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const meta: Meta<typeof GameNameChip> = {
+6   component: GameNameChip,
+7   tags: ['autodocs'],
+8   args: {
+9     title: 'Word Spell',
+10   },
+11 };
+12 export default meta;
+13 
+14 type Story = StoryObj<typeof GameNameChip>;
+15 
+16 export const Default: Story = {};
+17 
+18 export const DefaultDark: Story = {
+19   decorators: [withDarkMode],
+20 };
+21 
+22 export const WithCustomGame: Story = {
+23   args: {
+24     customGameName: 'Easy Mode',
+25     customGameColor: 'indigo',
+26   },
+27 };
+28 
+29 export const WithCustomGameDark: Story = {
+30   args: {
+31     customGameName: 'Easy Mode',
+32     customGameColor: 'indigo',
+33   },
+34   decorators: [withDarkMode],
+35 };
+36 
+37 export const WithSubject: Story = {
+38   args: { subject: 'reading' },
+39 };
+40 
+41 export const WithSubjectDark: Story = {
+42   args: { subject: 'reading' },
+43   decorators: [withDarkMode],
+44 };
+45 
+46 export const AllColors: Story = {
+47   render: () => (
+48     <div className="flex flex-col gap-2">
+49       {(
+50         [
+51           'indigo',
+52           'teal',
+53           'rose',
+54           'amber',
+55           'sky',
+56           'lime',
+57           'purple',
+58           'orange',
+59           'pink',
+60           'emerald',
+61           'slate',
+62           'cyan',
+63         ] as const
+64       ).map((color) => (
+65         <GameNameChip
+66           key={color}
+67           title="Word Spell"
+68           customGameName={color}
+69           customGameColor={color}
+70         />
+71       ))}
+72     </div>
+73   ),
+74 };
+75 
+76 export const AllColorsDark: Story = {
+77   ...AllColors,
+78   decorators: [withDarkMode],
+79 };
 80
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:21Z)**_
@@ -3866,6 +3926,7 @@ export const Default: Story = {};
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:23Z)**_
@@ -3875,92 +3936,94 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:23Z)**_
  `./worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx`
 
 ```text
-1	import { GameCard } from './GameCard';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	
-4	const meta: Meta<typeof GameCard> = {
-5	  component: GameCard,
-6	  tags: ['autodocs'],
-7	  args: {
-8	    gameId: 'sort-numbers',
-9	    title: 'Count in Order',
-10	    chips: ['🚀 Up', '5 numbers', '2s'],
-11	  },
-12	  argTypes: {
-13	    onPlay: { action: 'played' },
-14	    onOpenCog: { action: 'cogOpened' },
-15	    onToggleBookmark: { action: 'bookmarkToggled' },
-16	  },
-17	};
-18	export default meta;
-19	
-20	type Story = StoryObj<typeof GameCard>;
-21	
-22	export const Default: Story = {
-23	  args: {
-24	    variant: 'default',
-25	  },
-26	};
-27	
-28	export const CustomGame: Story = {
-29	  args: {
-30	    variant: 'customGame',
-31	    customGameName: 'Skip by 2',
-32	    customGameColor: 'amber',
-33	  },
-34	};
-35	
-36	export const CustomGamePurple: Story = {
-37	  args: {
-38	    variant: 'customGame',
-39	    customGameName: 'Big to Small',
-40	    customGameColor: 'purple',
-41	    chips: ['⬇️ Down', '10 numbers', '3s'],
-42	  },
-43	};
-44	
-45	export const NotBookmarked: Story = {
-46	  args: {
-47	    variant: 'default',
-48	    isBookmarked: false,
-49	    onToggleBookmark: () => {},
-50	  },
-51	};
-52	
-53	export const Bookmarked: Story = {
-54	  args: {
-55	    variant: 'default',
-56	    isBookmarked: true,
-57	    onToggleBookmark: () => {},
-58	  },
-59	};
-60	
-61	export const NotBookmarkedCustomGame: Story = {
-62	  args: {
-63	    variant: 'customGame',
-64	    customGameName: 'Skip by 2',
-65	    customGameColor: 'amber',
-66	    isBookmarked: false,
-67	    onToggleBookmark: () => {},
-68	  },
-69	};
-70	
-71	export const BookmarkedCustomGame: Story = {
-72	  args: {
-73	    variant: 'customGame',
-74	    customGameName: 'Skip by 2',
-75	    customGameColor: 'amber',
-76	    isBookmarked: true,
-77	    onToggleBookmark: () => {},
-78	  },
-79	};
+1 import { GameCard } from './GameCard';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 
+4 const meta: Meta<typeof GameCard> = {
+5   component: GameCard,
+6   tags: ['autodocs'],
+7   args: {
+8     gameId: 'sort-numbers',
+9     title: 'Count in Order',
+10     chips: ['🚀 Up', '5 numbers', '2s'],
+11   },
+12   argTypes: {
+13     onPlay: { action: 'played' },
+14     onOpenCog: { action: 'cogOpened' },
+15     onToggleBookmark: { action: 'bookmarkToggled' },
+16   },
+17 };
+18 export default meta;
+19 
+20 type Story = StoryObj<typeof GameCard>;
+21 
+22 export const Default: Story = {
+23   args: {
+24     variant: 'default',
+25   },
+26 };
+27 
+28 export const CustomGame: Story = {
+29   args: {
+30     variant: 'customGame',
+31     customGameName: 'Skip by 2',
+32     customGameColor: 'amber',
+33   },
+34 };
+35 
+36 export const CustomGamePurple: Story = {
+37   args: {
+38     variant: 'customGame',
+39     customGameName: 'Big to Small',
+40     customGameColor: 'purple',
+41     chips: ['⬇️ Down', '10 numbers', '3s'],
+42   },
+43 };
+44 
+45 export const NotBookmarked: Story = {
+46   args: {
+47     variant: 'default',
+48     isBookmarked: false,
+49     onToggleBookmark: () => {},
+50   },
+51 };
+52 
+53 export const Bookmarked: Story = {
+54   args: {
+55     variant: 'default',
+56     isBookmarked: true,
+57     onToggleBookmark: () => {},
+58   },
+59 };
+60 
+61 export const NotBookmarkedCustomGame: Story = {
+62   args: {
+63     variant: 'customGame',
+64     customGameName: 'Skip by 2',
+65     customGameColor: 'amber',
+66     isBookmarked: false,
+67     onToggleBookmark: () => {},
+68   },
+69 };
+70 
+71 export const BookmarkedCustomGame: Story = {
+72   args: {
+73     variant: 'customGame',
+74     customGameName: 'Skip by 2',
+75     customGameColor: 'amber',
+76     isBookmarked: true,
+77     onToggleBookmark: () => {},
+78   },
+79 };
 80
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:25Z)**_
 
 Now I have all the information I need. Let me verify the props:
+
 - `title`: string (required)
 - `customGameName`: string (optional)
 - `customGameColor`: GameColorKey (optional)
@@ -3986,6 +4049,7 @@ Do not duplicate this agent's work — avoid working with the same files or topi
 output_file: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/a1b8cfbc7533780f2.output
 Do NOT Read or tail this file via the shell tool — it is the full sub-agent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-28 05:39:27Z)**_
@@ -3993,20 +4057,24 @@ _**Agent - sidechain (2026-04-28 05:39:27Z)**_
 You are retrofitting one Storybook story file to the "single-Default Playground" pattern. Work only in the worktree you create — do not touch any other files.
 
 ## Project root
+
 `/Users/leocaseiro/Sites/base-skill`
 
 ## Your task
+
 Retrofit `src/components/ConfigFormFields.stories.tsx` to the single-Default Playground pattern.
 
 ## Setup
 
 From the project root, run:
+
 ```bash
 git worktree add ./worktrees/stories-tier3-config-form-fields -b stories/config-form-fields-audit master
 cd ./worktrees/stories-tier3-config-form-fields && yarn install
 ```
 
 ## Context to read first (inside worktree)
+
 - `src/components/ConfigFormFields.tsx` — understand props (`fields`, `config`, `onChange`)
 - `src/lib/config-fields.ts` (or wherever `ConfigField` is defined — check the existing stories file import) — understand the `ConfigField` union type shape precisely
 - `src/components/ConfigFormFields.stories.tsx` — current file to understand what's there
@@ -4186,6 +4254,7 @@ export const Default: Story = {};
 ```
 
 **Adaptation rules (important):**
+
 1. Read `src/lib/config-fields.ts` first. Match every `type:` value in the fixtures to what actually exists in the `ConfigField` union. If `'nested-select'` doesn't exist but something similar does, use the real type name.
 2. If `ConfigFormFields` doesn't accept a `config` prop (maybe it uses different naming), adjust accordingly.
 3. If `visibleWhen` has a different shape in the real type, use the actual shape.
@@ -4255,7 +4324,6 @@ EOF
 
 Report back: PR URL, whether typecheck/lint passed, what adaptations were needed vs. the template (especially any `ConfigField` type changes), and what the actual `ConfigField` union types are.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:29Z)**_
 
 <tool-use data-tool-type="write" data-tool-name="Edit"><details>
@@ -4264,6 +4332,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:29Z)**_
@@ -4322,6 +4391,7 @@ export const AllColors: Story = {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:31Z)**_
@@ -4336,6 +4406,7 @@ Create worktree for the config form fields audit branch
 Preparing worktree (new branch 'stories/config-form-fields-audit')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:48Z)**_
@@ -4351,6 +4422,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 16.95s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:31Z)**_
@@ -4370,6 +4442,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.64s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:42Z)**_
@@ -4387,6 +4460,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 8.52s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:52Z)**_
@@ -4411,6 +4485,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:44Z)**_
@@ -4540,6 +4615,7 @@ export const Default: Story = {};
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:44Z)**_
@@ -4549,155 +4625,156 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:44Z)**_
  `./worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.stories.tsx`
 
 ```text
-1	import { withDarkMode } from '../../.storybook/decorators';
-2	import { ConfigFormFields } from './ConfigFormFields';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	import type { Meta, StoryObj } from '@storybook/react';
-5	
-6	const allFields: ConfigField[] = [
-7	  {
-8	    type: 'select',
-9	    key: 'mode',
-10	    label: 'Mode',
-11	    options: [
-12	      { value: 'picture', label: 'Picture' },
-13	      { value: 'text', label: 'Text' },
-14	    ],
-15	  },
-16	  {
-17	    type: 'number',
-18	    key: 'totalRounds',
-19	    label: 'Total rounds',
-20	    min: 1,
-21	    max: 20,
-22	  },
-23	  {
-24	    type: 'checkbox',
-25	    key: 'ttsEnabled',
-26	    label: 'Text-to-speech',
-27	  },
-28	];
-29	
-30	const meta: Meta<typeof ConfigFormFields> = {
-31	  component: ConfigFormFields,
-32	  tags: ['autodocs'],
-33	  args: {
-34	    fields: allFields,
-35	    config: { mode: 'picture', totalRounds: 8, ttsEnabled: true },
-36	    onChange: () => {},
-37	  },
-38	  argTypes: {
-39	    onChange: { action: 'changed' },
-40	  },
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<typeof ConfigFormFields>;
-45	
-46	export const AllFieldTypes: Story = {};
-47	
-48	export const AllFieldTypesDark: Story = {
-49	  decorators: [withDarkMode],
-50	};
-51	
-52	const sortFields: ConfigField[] = [
-53	  {
-54	    type: 'nested-select',
-55	    key: 'skip',
-56	    subKey: 'mode',
-57	    label: 'Skip mode',
-58	    options: [
-59	      { value: 'random', label: 'random' },
-60	      { value: 'consecutive', label: 'consecutive' },
-61	      { value: 'by', label: 'by' },
-62	    ],
-63	  },
-64	  {
-65	    type: 'nested-number',
-66	    key: 'skip',
-67	    subKey: 'step',
-68	    label: 'Skip step',
-69	    min: 2,
-70	    max: 100,
-71	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-72	  },
-73	  {
-74	    type: 'nested-select',
-75	    key: 'skip',
-76	    subKey: 'start',
-77	    label: 'Skip start',
-78	    options: [
-79	      { value: 'range-min', label: 'range-min' },
-80	      { value: 'random', label: 'random' },
-81	    ],
-82	    visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
-83	  },
-84	  {
-85	    type: 'select',
-86	    key: 'tileBankMode',
-87	    label: 'Tile bank mode',
-88	    options: [
-89	      { value: 'exact', label: 'exact' },
-90	      { value: 'distractors', label: 'distractors' },
-91	    ],
-92	  },
-93	  {
-94	    type: 'nested-select',
-95	    key: 'distractors',
-96	    subKey: 'source',
-97	    label: 'Distractor source',
-98	    options: [
-99	      { value: 'random', label: 'random' },
-100	      { value: 'gaps-only', label: 'gaps-only' },
-101	      { value: 'full-range', label: 'full-range' },
-102	    ],
-103	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-104	  },
-105	  {
-106	    type: 'nested-select-or-number',
-107	    key: 'distractors',
-108	    subKey: 'count',
-109	    label: 'Distractor count',
-110	    min: 1,
-111	    max: 20,
-112	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-113	  },
-114	];
-115	
-116	export const SortNumbersFieldsExact: Story = {
-117	  args: {
-118	    fields: sortFields,
-119	    config: {
-120	      skip: { mode: 'random' },
-121	      tileBankMode: 'exact',
-122	      distractors: { source: 'random', count: 2 },
-123	    },
-124	  },
-125	};
-126	
-127	export const SortNumbersFieldsByMode: Story = {
-128	  args: {
-129	    fields: sortFields,
-130	    config: {
-131	      skip: { mode: 'by', step: 5, start: 'range-min' },
-132	      tileBankMode: 'exact',
-133	      distractors: { source: 'random', count: 2 },
-134	    },
-135	  },
-136	};
-137	
-138	export const SortNumbersFieldsDistractors: Story = {
-139	  args: {
-140	    fields: sortFields,
-141	    config: {
-142	      skip: { mode: 'random' },
-143	      tileBankMode: 'distractors',
-144	      distractors: { source: 'gaps-only', count: 3 },
-145	    },
-146	  },
-147	};
+1 import { withDarkMode } from '../../.storybook/decorators';
+2 import { ConfigFormFields } from './ConfigFormFields';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 import type { Meta, StoryObj } from '@storybook/react';
+5 
+6 const allFields: ConfigField[] = [
+7   {
+8     type: 'select',
+9     key: 'mode',
+10     label: 'Mode',
+11     options: [
+12       { value: 'picture', label: 'Picture' },
+13       { value: 'text', label: 'Text' },
+14     ],
+15   },
+16   {
+17     type: 'number',
+18     key: 'totalRounds',
+19     label: 'Total rounds',
+20     min: 1,
+21     max: 20,
+22   },
+23   {
+24     type: 'checkbox',
+25     key: 'ttsEnabled',
+26     label: 'Text-to-speech',
+27   },
+28 ];
+29 
+30 const meta: Meta<typeof ConfigFormFields> = {
+31   component: ConfigFormFields,
+32   tags: ['autodocs'],
+33   args: {
+34     fields: allFields,
+35     config: { mode: 'picture', totalRounds: 8, ttsEnabled: true },
+36     onChange: () => {},
+37   },
+38   argTypes: {
+39     onChange: { action: 'changed' },
+40   },
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<typeof ConfigFormFields>;
+45 
+46 export const AllFieldTypes: Story = {};
+47 
+48 export const AllFieldTypesDark: Story = {
+49   decorators: [withDarkMode],
+50 };
+51 
+52 const sortFields: ConfigField[] = [
+53   {
+54     type: 'nested-select',
+55     key: 'skip',
+56     subKey: 'mode',
+57     label: 'Skip mode',
+58     options: [
+59       { value: 'random', label: 'random' },
+60       { value: 'consecutive', label: 'consecutive' },
+61       { value: 'by', label: 'by' },
+62     ],
+63   },
+64   {
+65     type: 'nested-number',
+66     key: 'skip',
+67     subKey: 'step',
+68     label: 'Skip step',
+69     min: 2,
+70     max: 100,
+71     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+72   },
+73   {
+74     type: 'nested-select',
+75     key: 'skip',
+76     subKey: 'start',
+77     label: 'Skip start',
+78     options: [
+79       { value: 'range-min', label: 'range-min' },
+80       { value: 'random', label: 'random' },
+81     ],
+82     visibleWhen: { key: 'skip', subKey: 'mode', value: 'by' },
+83   },
+84   {
+85     type: 'select',
+86     key: 'tileBankMode',
+87     label: 'Tile bank mode',
+88     options: [
+89       { value: 'exact', label: 'exact' },
+90       { value: 'distractors', label: 'distractors' },
+91     ],
+92   },
+93   {
+94     type: 'nested-select',
+95     key: 'distractors',
+96     subKey: 'source',
+97     label: 'Distractor source',
+98     options: [
+99       { value: 'random', label: 'random' },
+100       { value: 'gaps-only', label: 'gaps-only' },
+101       { value: 'full-range', label: 'full-range' },
+102     ],
+103     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+104   },
+105   {
+106     type: 'nested-select-or-number',
+107     key: 'distractors',
+108     subKey: 'count',
+109     label: 'Distractor count',
+110     min: 1,
+111     max: 20,
+112     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+113   },
+114 ];
+115 
+116 export const SortNumbersFieldsExact: Story = {
+117   args: {
+118     fields: sortFields,
+119     config: {
+120       skip: { mode: 'random' },
+121       tileBankMode: 'exact',
+122       distractors: { source: 'random', count: 2 },
+123     },
+124   },
+125 };
+126 
+127 export const SortNumbersFieldsByMode: Story = {
+128   args: {
+129     fields: sortFields,
+130     config: {
+131       skip: { mode: 'by', step: 5, start: 'range-min' },
+132       tileBankMode: 'exact',
+133       distractors: { source: 'random', count: 2 },
+134     },
+135   },
+136 };
+137 
+138 export const SortNumbersFieldsDistractors: Story = {
+139   args: {
+140     fields: sortFields,
+141     config: {
+142       skip: { mode: 'random' },
+143       tileBankMode: 'distractors',
+144       distractors: { source: 'gaps-only', count: 3 },
+145     },
+146   },
+147 };
 148
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:44Z)**_
@@ -4707,243 +4784,244 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:44Z)**_
  `./worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.tsx`
 
 ```text
-1	// src/components/ConfigFormFields.tsx
-2	import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
-3	import type { JSX } from 'react';
-4	
-5	const isFieldVisible = (
-6	  field: ConfigField,
-7	  config: Record<string, unknown>,
-8	): boolean => {
-9	  const vw: VisibleWhen | undefined =
-10	    'visibleWhen' in field ? field.visibleWhen : undefined;
-11	  if (!vw) return true;
-12	  const { key, subKey, value } = vw;
-13	  const configValue = subKey
-14	    ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
-15	    : config[key];
-16	  return configValue === value;
-17	};
-18	
-19	type ConfigFormFieldsProps = {
-20	  fields: ConfigField[];
-21	  config: Record<string, unknown>;
-22	  onChange: (config: Record<string, unknown>) => void;
-23	};
-24	
-25	export const ConfigFormFields = ({
-26	  fields,
-27	  config,
-28	  onChange,
-29	}: ConfigFormFieldsProps): JSX.Element => (
-30	  <div className="flex flex-col gap-3">
-31	    {fields.map((field) => {
-32	      if (!isFieldVisible(field, config)) return null;
-33	
-34	      if (field.type === 'select') {
-35	        return (
-36	          <label
-37	            key={field.key}
-38	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-39	          >
-40	            {field.label}
-41	            <select
-42	              aria-label={field.label}
-43	              value={String(config[field.key] ?? '')}
-44	              onChange={(e) =>
-45	                onChange({ ...config, [field.key]: e.target.value })
-46	              }
-47	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-48	            >
-49	              {field.options.map((opt) => (
-50	                <option key={opt.value} value={opt.value}>
-51	                  {opt.label}
-52	                </option>
-53	              ))}
-54	            </select>
-55	          </label>
-56	        );
-57	      }
-58	
-59	      if (field.type === 'nested-select') {
-60	        const nested = config[field.key] as
-61	          | Record<string, unknown>
-62	          | undefined;
-63	        return (
-64	          <label
-65	            key={`${field.key}.${field.subKey}`}
-66	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-67	          >
-68	            {field.label}
-69	            <select
-70	              aria-label={field.label}
-71	              value={String(nested?.[field.subKey] ?? '')}
-72	              onChange={(e) =>
-73	                onChange({
-74	                  ...config,
-75	                  [field.key]: {
-76	                    ...nested,
-77	                    [field.subKey]: e.target.value,
-78	                  },
-79	                })
-80	              }
-81	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-82	            >
-83	              {field.options.map((opt) => (
-84	                <option key={opt.value} value={opt.value}>
-85	                  {opt.label}
-86	                </option>
-87	              ))}
-88	            </select>
-89	          </label>
-90	        );
-91	      }
-92	
-93	      if (field.type === 'nested-select-or-number') {
-94	        const nested = config[field.key] as
-95	          | Record<string, unknown>
-96	          | undefined;
-97	        const currentValue = nested?.[field.subKey];
-98	        const selectOptions = field.options ?? [
-99	          { value: 'all', label: 'all' },
-100	        ];
-101	        const isStringOption =
-102	          typeof currentValue === 'string' &&
-103	          selectOptions.some((o) => o.value === currentValue);
-104	        return (
-105	          <div
-106	            key={`${field.key}.${field.subKey}`}
-107	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-108	          >
-109	            <span>{field.label}</span>
-110	            <div className="flex gap-2">
-111	              <select
-112	                aria-label={`${field.label} type`}
-113	                value={isStringOption ? String(currentValue) : 'number'}
-114	                onChange={(e) => {
-115	                  const val = e.target.value;
-116	                  const next = val === 'number' ? field.min : val;
-117	                  onChange({
-118	                    ...config,
-119	                    [field.key]: { ...nested, [field.subKey]: next },
-120	                  });
-121	                }}
-122	                className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-123	              >
-124	                {selectOptions.map((opt) => (
-125	                  <option key={opt.value} value={opt.value}>
-126	                    {opt.label}
-127	                  </option>
-128	                ))}
-129	                <option value="number">number</option>
-130	              </select>
-131	              {!isStringOption && (
-132	                <input
-133	                  type="number"
-134	                  aria-label={`${field.label} value`}
-135	                  value={
-136	                    typeof currentValue === 'number'
-137	                      ? currentValue
-138	                      : field.min
-139	                  }
-140	                  min={field.min}
-141	                  max={field.max}
-142	                  onChange={(e) =>
-143	                    onChange({
-144	                      ...config,
-145	                      [field.key]: {
-146	                        ...nested,
-147	                        [field.subKey]: Number(e.target.value),
-148	                      },
-149	                    })
-150	                  }
-151	                  className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-152	                />
-153	              )}
-154	            </div>
-155	          </div>
-156	        );
-157	      }
-158	
-159	      if (field.type === 'nested-number') {
-160	        const nested = config[field.key] as
-161	          | Record<string, unknown>
-162	          | undefined;
-163	        return (
-164	          <label
-165	            key={`${field.key}.${field.subKey}`}
-166	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-167	          >
-168	            {field.label}
-169	            <input
-170	              type="number"
-171	              aria-label={field.label}
-172	              value={Number(nested?.[field.subKey] ?? field.min)}
-173	              min={field.min}
-174	              max={field.max}
-175	              onChange={(e) =>
-176	                onChange({
-177	                  ...config,
-178	                  [field.key]: {
-179	                    ...nested,
-180	                    [field.subKey]: Number(e.target.value),
-181	                  },
-182	                })
-183	              }
-184	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-185	            />
-186	          </label>
-187	        );
-188	      }
-189	
-190	      if (field.type === 'number') {
-191	        return (
-192	          <label
-193	            key={field.key}
-194	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-195	          >
-196	            {field.label}
-197	            <input
-198	              type="number"
-199	              aria-label={field.label}
-200	              value={Number(config[field.key] ?? field.min)}
-201	              min={field.min}
-202	              max={field.max}
-203	              onChange={(e) =>
-204	                onChange({
-205	                  ...config,
-206	                  [field.key]: Number(e.target.value),
-207	                })
-208	              }
-209	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-210	            />
-211	          </label>
-212	        );
-213	      }
-214	
-215	      // checkbox
-216	      return (
-217	        <label
-218	          key={field.key}
-219	          className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
-220	        >
-221	          <input
-222	            type="checkbox"
-223	            aria-label={field.label}
-224	            checked={Boolean(config[field.key])}
-225	            onChange={(e) =>
-226	              onChange({ ...config, [field.key]: e.target.checked })
-227	            }
-228	            className="h-5 w-5 accent-primary"
-229	          />
-230	          {field.label}
-231	        </label>
-232	      );
-233	    })}
-234	  </div>
-235	);
+1 // src/components/ConfigFormFields.tsx
+2 import type { ConfigField, VisibleWhen } from '@/lib/config-fields';
+3 import type { JSX } from 'react';
+4 
+5 const isFieldVisible = (
+6   field: ConfigField,
+7   config: Record<string, unknown>,
+8 ): boolean => {
+9   const vw: VisibleWhen | undefined =
+10     'visibleWhen' in field ? field.visibleWhen : undefined;
+11   if (!vw) return true;
+12   const { key, subKey, value } = vw;
+13   const configValue = subKey
+14     ? (config[key] as Record<string, unknown> | undefined)?.[subKey]
+15     : config[key];
+16   return configValue === value;
+17 };
+18 
+19 type ConfigFormFieldsProps = {
+20   fields: ConfigField[];
+21   config: Record<string, unknown>;
+22   onChange: (config: Record<string, unknown>) => void;
+23 };
+24 
+25 export const ConfigFormFields = ({
+26   fields,
+27   config,
+28   onChange,
+29 }: ConfigFormFieldsProps): JSX.Element => (
+30   <div className="flex flex-col gap-3">
+31     {fields.map((field) => {
+32       if (!isFieldVisible(field, config)) return null;
+33 
+34       if (field.type === 'select') {
+35         return (
+36           <label
+37             key={field.key}
+38             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+39           >
+40             {field.label}
+41             <select
+42               aria-label={field.label}
+43               value={String(config[field.key] ?? '')}
+44               onChange={(e) =>
+45                 onChange({ ...config, [field.key]: e.target.value })
+46               }
+47               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+48             >
+49               {field.options.map((opt) => (
+50                 <option key={opt.value} value={opt.value}>
+51                   {opt.label}
+52                 </option>
+53               ))}
+54             </select>
+55           </label>
+56         );
+57       }
+58 
+59       if (field.type === 'nested-select') {
+60         const nested = config[field.key] as
+61           | Record<string, unknown>
+62           | undefined;
+63         return (
+64           <label
+65             key={`${field.key}.${field.subKey}`}
+66             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+67           >
+68             {field.label}
+69             <select
+70               aria-label={field.label}
+71               value={String(nested?.[field.subKey] ?? '')}
+72               onChange={(e) =>
+73                 onChange({
+74                   ...config,
+75                   [field.key]: {
+76                     ...nested,
+77                     [field.subKey]: e.target.value,
+78                   },
+79                 })
+80               }
+81               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+82             >
+83               {field.options.map((opt) => (
+84                 <option key={opt.value} value={opt.value}>
+85                   {opt.label}
+86                 </option>
+87               ))}
+88             </select>
+89           </label>
+90         );
+91       }
+92 
+93       if (field.type === 'nested-select-or-number') {
+94         const nested = config[field.key] as
+95           | Record<string, unknown>
+96           | undefined;
+97         const currentValue = nested?.[field.subKey];
+98         const selectOptions = field.options ?? [
+99           { value: 'all', label: 'all' },
+100         ];
+101         const isStringOption =
+102           typeof currentValue === 'string' &&
+103           selectOptions.some((o) => o.value === currentValue);
+104         return (
+105           <div
+106             key={`${field.key}.${field.subKey}`}
+107             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+108           >
+109             <span>{field.label}</span>
+110             <div className="flex gap-2">
+111               <select
+112                 aria-label={`${field.label} type`}
+113                 value={isStringOption ? String(currentValue) : 'number'}
+114                 onChange={(e) => {
+115                   const val = e.target.value;
+116                   const next = val === 'number' ? field.min : val;
+117                   onChange({
+118                     ...config,
+119                     [field.key]: { ...nested, [field.subKey]: next },
+120                   });
+121                 }}
+122                 className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+123               >
+124                 {selectOptions.map((opt) => (
+125                   <option key={opt.value} value={opt.value}>
+126                     {opt.label}
+127                   </option>
+128                 ))}
+129                 <option value="number">number</option>
+130               </select>
+131               {!isStringOption && (
+132                 <input
+133                   type="number"
+134                   aria-label={`${field.label} value`}
+135                   value={
+136                     typeof currentValue === 'number'
+137                       ? currentValue
+138                       : field.min
+139                   }
+140                   min={field.min}
+141                   max={field.max}
+142                   onChange={(e) =>
+143                     onChange({
+144                       ...config,
+145                       [field.key]: {
+146                         ...nested,
+147                         [field.subKey]: Number(e.target.value),
+148                       },
+149                     })
+150                   }
+151                   className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+152                 />
+153               )}
+154             </div>
+155           </div>
+156         );
+157       }
+158 
+159       if (field.type === 'nested-number') {
+160         const nested = config[field.key] as
+161           | Record<string, unknown>
+162           | undefined;
+163         return (
+164           <label
+165             key={`${field.key}.${field.subKey}`}
+166             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+167           >
+168             {field.label}
+169             <input
+170               type="number"
+171               aria-label={field.label}
+172               value={Number(nested?.[field.subKey] ?? field.min)}
+173               min={field.min}
+174               max={field.max}
+175               onChange={(e) =>
+176                 onChange({
+177                   ...config,
+178                   [field.key]: {
+179                     ...nested,
+180                     [field.subKey]: Number(e.target.value),
+181                   },
+182                 })
+183               }
+184               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+185             />
+186           </label>
+187         );
+188       }
+189 
+190       if (field.type === 'number') {
+191         return (
+192           <label
+193             key={field.key}
+194             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+195           >
+196             {field.label}
+197             <input
+198               type="number"
+199               aria-label={field.label}
+200               value={Number(config[field.key] ?? field.min)}
+201               min={field.min}
+202               max={field.max}
+203               onChange={(e) =>
+204                 onChange({
+205                   ...config,
+206                   [field.key]: Number(e.target.value),
+207                 })
+208               }
+209               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+210             />
+211           </label>
+212         );
+213       }
+214 
+215       // checkbox
+216       return (
+217         <label
+218           key={field.key}
+219           className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
+220         >
+221           <input
+222             type="checkbox"
+223             aria-label={field.label}
+224             checked={Boolean(config[field.key])}
+225             onChange={(e) =>
+226               onChange({ ...config, [field.key]: e.target.checked })
+227             }
+228             className="h-5 w-5 accent-primary"
+229           />
+230           {field.label}
+231         </label>
+232       );
+233     })}
+234   </div>
+235 );
 236
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:46Z)**_
@@ -4967,6 +5045,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 4.22s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:48Z)**_
@@ -4976,70 +5055,71 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:48Z)**_
  `./worktrees/stories-tier3-config-form-fields/src/lib/config-fields.ts`
 
 ```text
-1	// src/lib/config-fields.ts
-2	export type VisibleWhen = {
-3	  key: string;
-4	  subKey?: string;
-5	  value: unknown;
-6	};
-7	
-8	export type ConfigField =
-9	  | {
-10	      type: 'select';
-11	      key: string;
-12	      label: string;
-13	      options: { value: string; label: string }[];
-14	      visibleWhen?: VisibleWhen;
-15	    }
-16	  | {
-17	      type: 'number';
-18	      key: string;
-19	      label: string;
-20	      min: number;
-21	      max: number;
-22	      visibleWhen?: VisibleWhen;
-23	    }
-24	  | {
-25	      /** A number field that reads/writes from a nested object: config[key][subKey] */
-26	      type: 'nested-number';
-27	      key: string;
-28	      subKey: string;
-29	      label: string;
-30	      min: number;
-31	      max: number;
-32	      visibleWhen?: VisibleWhen;
-33	    }
-34	  | {
-35	      /** A select that reads/writes from a nested object: config[key][subKey] */
-36	      type: 'nested-select';
-37	      key: string;
-38	      subKey: string;
-39	      label: string;
-40	      options: { value: string; label: string }[];
-41	      visibleWhen?: VisibleWhen;
-42	    }
-43	  | {
-44	      /**
-45	       * A hybrid field: a type-selector ('all' | 'number') plus a number input
-46	       * when the current value is numeric. Reads/writes config[key][subKey].
-47	       */
-48	      type: 'nested-select-or-number';
-49	      key: string;
-50	      subKey: string;
-51	      label: string;
-52	      min: number;
-53	      max: number;
-54	      options?: { value: string; label: string }[];
-55	      visibleWhen?: VisibleWhen;
-56	    }
-57	  | {
-58	      type: 'checkbox';
-59	      key: string;
-60	      label: string;
-61	      visibleWhen?: VisibleWhen;
-62	    };
+1 // src/lib/config-fields.ts
+2 export type VisibleWhen = {
+3   key: string;
+4   subKey?: string;
+5   value: unknown;
+6 };
+7 
+8 export type ConfigField =
+9   | {
+10       type: 'select';
+11       key: string;
+12       label: string;
+13       options: { value: string; label: string }[];
+14       visibleWhen?: VisibleWhen;
+15     }
+16   | {
+17       type: 'number';
+18       key: string;
+19       label: string;
+20       min: number;
+21       max: number;
+22       visibleWhen?: VisibleWhen;
+23     }
+24   | {
+25       /** A number field that reads/writes from a nested object: config[key][subKey] */
+26       type: 'nested-number';
+27       key: string;
+28       subKey: string;
+29       label: string;
+30       min: number;
+31       max: number;
+32       visibleWhen?: VisibleWhen;
+33     }
+34   | {
+35       /** A select that reads/writes from a nested object: config[key][subKey] */
+36       type: 'nested-select';
+37       key: string;
+38       subKey: string;
+39       label: string;
+40       options: { value: string; label: string }[];
+41       visibleWhen?: VisibleWhen;
+42     }
+43   | {
+44       /**
+45        * A hybrid field: a type-selector ('all' | 'number') plus a number input
+46        * when the current value is numeric. Reads/writes config[key][subKey].
+47        */
+48       type: 'nested-select-or-number';
+49       key: string;
+50       subKey: string;
+51       label: string;
+52       min: number;
+53       max: number;
+54       options?: { value: string; label: string }[];
+55       visibleWhen?: VisibleWhen;
+56     }
+57   | {
+58       type: 'checkbox';
+59       key: string;
+60       label: string;
+61       visibleWhen?: VisibleWhen;
+62     };
 63
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:50Z)**_
@@ -5119,6 +5199,7 @@ export default [
       // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
       'eslint-comments/require-description': 'error',
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:53Z)**_
@@ -5149,6 +5230,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )" 2>&1
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:39:56Z)**_
@@ -5205,6 +5287,7 @@ Check import/order ESLint rule configuration
       "always"
     ],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 05:39:59Z)**_
@@ -5221,6 +5304,7 @@ Do not duplicate this agent's work — avoid working with the same files or topi
 output_file: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/acb3deacf7998cf48.output
 Do NOT Read or tail this file via the shell tool — it is the full sub-agent JSONL transcript and reading it will overflow your context. If the user asks for progress, say the agent is still running; you'll get a completion notification.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-28 05:39:59Z)**_
@@ -5228,20 +5312,24 @@ _**Agent - sidechain (2026-04-28 05:39:59Z)**_
 You are retrofitting one Storybook story file to the "single-Default Playground" pattern. Work only in the worktree you create — do not touch any other files.
 
 ## Project root
+
 `/Users/leocaseiro/Sites/base-skill`
 
 ## Your task
+
 Retrofit `src/stories/ThemeShowcase.stories.tsx` to the single-Default Playground pattern.
 
 ## Setup
 
 From the project root, run:
+
 ```bash
 git worktree add ./worktrees/stories-tier3-theme-showcase -b stories/theme-showcase-audit master
 cd ./worktrees/stories-tier3-theme-showcase && yarn install
 ```
 
 ## Context to read first (inside worktree — critical)
+
 - `src/stories/ThemeShowcase.stories.tsx` — current file, study the exact imports, types used, and fixture shapes
 - `src/lib/game-engine/types.ts` — verify the exact shapes of `GameEngineState`, `ResolvedContent`, `ResolvedGameConfig`, `SessionMeta` (these may have changed)
 - `src/components/game/GameShell.tsx` — understand what props it takes
@@ -5347,6 +5435,7 @@ export const Default: Story = {};
 ```
 
 **Adaptation rules (critical):**
+
 1. Copy the exact fixture values from the current `ThemeShowcase.stories.tsx` for `content`, `shellConfig`, `initialState`, `sessionMeta`, `configFields`.
 2. Cross-check each fixture field against the current types in `src/lib/game-engine/types.ts`. If a field was renamed or removed, update accordingly.
 3. If `withDb`/`withRouter` are imported from different paths in the current file, keep those paths.
@@ -5412,7 +5501,6 @@ EOF
 
 Report back: PR URL, whether typecheck/lint passed, what type adaptations were needed (especially any `GameEngineState`/`ResolvedContent` field changes), and how many named story exports were in the original vs. final file.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:01Z)**_
 
 I'll start by reading the relevant files to understand the current state before making changes.
@@ -5426,149 +5514,150 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:02Z)**_
  `./src/stories/ThemeShowcase.stories.tsx`
 
 ```text
-1	import { withDb } from '../../.storybook/decorators/withDb';
-2	import { withRouter } from '../../.storybook/decorators/withRouter';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	import type {
-5	  GameEngineState,
-6	  ResolvedContent,
-7	  ResolvedGameConfig,
-8	  SessionMeta,
-9	} from '@/lib/game-engine/types';
-10	import type { Meta, StoryObj } from '@storybook/react';
-11	import { ConfigFormFields } from '@/components/ConfigFormFields';
-12	import { GameShell } from '@/components/game/GameShell';
-13	import { GameNameChip } from '@/components/GameNameChip';
-14	
-15	// ── GameShell fixture data ────────────────────────────────────────────────
-16	
-17	const content: ResolvedContent = {
-18	  rounds: [
-19	    {
-20	      id: 'r1',
-21	      prompt: { en: 'Sort the numbers' },
-22	      correctAnswer: '1',
-23	    },
-24	  ],
-25	};
-26	
-27	const shellConfig: ResolvedGameConfig = {
-28	  gameId: 'theme-showcase',
-29	  title: { en: 'Theme Showcase' },
-30	  gradeBand: 'year1-2',
-31	  maxRounds: 3,
-32	  maxRetries: 1,
-33	  maxUndoDepth: 3,
-34	  timerVisible: true,
-35	  timerDurationSeconds: 60,
-36	  difficulty: 'medium',
-37	};
-38	
-39	const initialState: GameEngineState = {
-40	  phase: 'playing',
-41	  roundIndex: 0,
-42	  score: 0,
-43	  streak: 0,
-44	  retryCount: 0,
-45	  content,
-46	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-47	};
-48	
-49	const sessionMeta: SessionMeta = {
-50	  profileId: 'storybook-user',
-51	  gameId: 'theme-showcase',
-52	  gradeBand: 'year1-2',
-53	  seed: 'storybook-seed',
-54	  initialContent: content,
-55	  initialState,
-56	};
-57	
-58	// ── Custom game component fixture data ──────────────────────────────────────
-59	
-60	const configFields: ConfigField[] = [
-61	  {
-62	    type: 'select',
-63	    key: 'inputMethod',
-64	    label: 'Input method',
-65	    options: [
-66	      { value: 'drag', label: 'Drag' },
-67	      { value: 'type', label: 'Type' },
-68	    ],
-69	  },
-70	  {
-71	    type: 'number',
-72	    key: 'totalRounds',
-73	    label: 'Total rounds',
-74	    min: 1,
-75	    max: 20,
-76	  },
-77	  {
-78	    type: 'checkbox',
-79	    key: 'ttsEnabled',
-80	    label: 'Text-to-speech',
-81	  },
-82	];
-83	
-84	// ── Story body ────────────────────────────────────────────────────────────
-85	
-86	const ShowcaseBody = () => (
-87	  <div className="flex flex-col gap-4 p-4">
-88	    <GameNameChip
-89	      title="Sort Numbers"
-90	      customGameName="Easy Numbers"
-91	      customGameColor="teal"
-92	    />
-93	    <GameNameChip title="Word Spell" subject="reading" />
-94	    <ConfigFormFields
-95	      fields={configFields}
-96	      config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
-97	      onChange={() => {}}
-98	    />
-99	  </div>
-100	);
-101	
-102	// ── Meta ──────────────────────────────────────────────────────────────────
-103	
-104	const meta = {
-105	  component: GameShell,
-106	  title: 'Pages/ThemeShowcase',
-107	  tags: ['autodocs'],
-108	  decorators: [withDb, withRouter],
-109	  parameters: {
-110	    layout: 'fullscreen',
-111	  },
-112	  args: {
-113	    config: shellConfig,
-114	    moves: {},
-115	    initialState,
-116	    sessionId: 'showcase-session',
-117	    meta: sessionMeta,
-118	    children: <ShowcaseBody />,
-119	  },
-120	} satisfies Meta<typeof GameShell>;
-121	export default meta;
-122	
-123	type Story = StoryObj<typeof GameShell>;
-124	
-125	// ── 4 locked-theme VR stories ─────────────────────────────────────────────
-126	
-127	export const OceanLight: Story = {
-128	  parameters: { globals: { theme: 'light' } },
-129	};
-130	
-131	export const OceanDark: Story = {
-132	  parameters: { globals: { theme: 'dark' } },
-133	};
-134	
-135	export const ForestLight: Story = {
-136	  parameters: { globals: { theme: 'forest-light' } },
-137	};
-138	
-139	export const ForestDark: Story = {
-140	  parameters: { globals: { theme: 'forest-dark' } },
-141	};
+1 import { withDb } from '../../.storybook/decorators/withDb';
+2 import { withRouter } from '../../.storybook/decorators/withRouter';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 import type {
+5   GameEngineState,
+6   ResolvedContent,
+7   ResolvedGameConfig,
+8   SessionMeta,
+9 } from '@/lib/game-engine/types';
+10 import type { Meta, StoryObj } from '@storybook/react';
+11 import { ConfigFormFields } from '@/components/ConfigFormFields';
+12 import { GameShell } from '@/components/game/GameShell';
+13 import { GameNameChip } from '@/components/GameNameChip';
+14 
+15 // ── GameShell fixture data ────────────────────────────────────────────────
+16 
+17 const content: ResolvedContent = {
+18   rounds: [
+19     {
+20       id: 'r1',
+21       prompt: { en: 'Sort the numbers' },
+22       correctAnswer: '1',
+23     },
+24   ],
+25 };
+26 
+27 const shellConfig: ResolvedGameConfig = {
+28   gameId: 'theme-showcase',
+29   title: { en: 'Theme Showcase' },
+30   gradeBand: 'year1-2',
+31   maxRounds: 3,
+32   maxRetries: 1,
+33   maxUndoDepth: 3,
+34   timerVisible: true,
+35   timerDurationSeconds: 60,
+36   difficulty: 'medium',
+37 };
+38 
+39 const initialState: GameEngineState = {
+40   phase: 'playing',
+41   roundIndex: 0,
+42   score: 0,
+43   streak: 0,
+44   retryCount: 0,
+45   content,
+46   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+47 };
+48 
+49 const sessionMeta: SessionMeta = {
+50   profileId: 'storybook-user',
+51   gameId: 'theme-showcase',
+52   gradeBand: 'year1-2',
+53   seed: 'storybook-seed',
+54   initialContent: content,
+55   initialState,
+56 };
+57 
+58 // ── Custom game component fixture data ──────────────────────────────────────
+59 
+60 const configFields: ConfigField[] = [
+61   {
+62     type: 'select',
+63     key: 'inputMethod',
+64     label: 'Input method',
+65     options: [
+66       { value: 'drag', label: 'Drag' },
+67       { value: 'type', label: 'Type' },
+68     ],
+69   },
+70   {
+71     type: 'number',
+72     key: 'totalRounds',
+73     label: 'Total rounds',
+74     min: 1,
+75     max: 20,
+76   },
+77   {
+78     type: 'checkbox',
+79     key: 'ttsEnabled',
+80     label: 'Text-to-speech',
+81   },
+82 ];
+83 
+84 // ── Story body ────────────────────────────────────────────────────────────
+85 
+86 const ShowcaseBody = () => (
+87   <div className="flex flex-col gap-4 p-4">
+88     <GameNameChip
+89       title="Sort Numbers"
+90       customGameName="Easy Numbers"
+91       customGameColor="teal"
+92     />
+93     <GameNameChip title="Word Spell" subject="reading" />
+94     <ConfigFormFields
+95       fields={configFields}
+96       config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
+97       onChange={() => {}}
+98     />
+99   </div>
+100 );
+101 
+102 // ── Meta ──────────────────────────────────────────────────────────────────
+103 
+104 const meta = {
+105   component: GameShell,
+106   title: 'Pages/ThemeShowcase',
+107   tags: ['autodocs'],
+108   decorators: [withDb, withRouter],
+109   parameters: {
+110     layout: 'fullscreen',
+111   },
+112   args: {
+113     config: shellConfig,
+114     moves: {},
+115     initialState,
+116     sessionId: 'showcase-session',
+117     meta: sessionMeta,
+118     children: <ShowcaseBody />,
+119   },
+120 } satisfies Meta<typeof GameShell>;
+121 export default meta;
+122 
+123 type Story = StoryObj<typeof GameShell>;
+124 
+125 // ── 4 locked-theme VR stories ─────────────────────────────────────────────
+126 
+127 export const OceanLight: Story = {
+128   parameters: { globals: { theme: 'light' } },
+129 };
+130 
+131 export const OceanDark: Story = {
+132   parameters: { globals: { theme: 'dark' } },
+133 };
+134 
+135 export const ForestLight: Story = {
+136   parameters: { globals: { theme: 'forest-light' } },
+137 };
+138 
+139 export const ForestDark: Story = {
+140   parameters: { globals: { theme: 'forest-dark' } },
+141 };
 142
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:03Z)**_
@@ -5578,98 +5667,99 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:03Z)**_
  `./src/lib/game-engine/types.ts`
 
 ```text
-1	// src/lib/game-engine/types.ts
-2	import type { GradeBand } from '@/types/game-events';
-3	
-4	export type GamePhase =
-5	  | 'idle'
-6	  | 'loading'
-7	  | 'instructions'
-8	  | 'playing'
-9	  | 'evaluating'
-10	  | 'scoring'
-11	  | 'next-round'
-12	  | 'retry'
-13	  | 'game-over';
-14	
-15	export interface RoundDefinition {
-16	  id: string;
-17	  prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
-18	  correctAnswer: string;
-19	  distractors?: string[];
-20	}
-21	
-22	export interface ResolvedContent {
-23	  rounds: RoundDefinition[];
-24	}
-25	
-26	export interface RoundState {
-27	  roundId: string;
-28	  answer: string | null;
-29	  hintsUsed: number;
-30	}
-31	
-32	export interface GameEngineState {
-33	  phase: GamePhase;
-34	  roundIndex: number;
-35	  score: number;
-36	  streak: number;
-37	  retryCount: number;
-38	  content: ResolvedContent;
-39	  currentRound: RoundState;
-40	}
-41	
-42	export type MoveType =
-43	  | 'SUBMIT_ANSWER'
-44	  | 'REQUEST_HINT'
-45	  | 'SKIP_INSTRUCTIONS'
-46	  | 'UNDO';
-47	
-48	export interface Move {
-49	  type: MoveType | string; // string allows game-specific types in M5
-50	  args: Record<string, string | number | boolean>;
-51	  timestamp: number;
-52	}
-53	
-54	export interface MoveLog {
-55	  gameId: string;
-56	  sessionId: string;
-57	  profileId: string;
-58	  seed: string;
-59	  initialContent: ResolvedContent;
-60	  initialState: GameEngineState;
-61	  moves: Move[];
-62	}
-63	
-64	export interface ResolvedGameConfig {
-65	  gameId: string;
-66	  title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
-67	  gradeBand: GradeBand;
-68	  maxRounds: number;
-69	  maxRetries: number;
-70	  maxUndoDepth: number | null; // null = unlimited; 0 = no undo
-71	  timerVisible: boolean;
-72	  timerDurationSeconds: number | null;
-73	  difficulty: string;
-74	}
-75	
-76	export type MoveHandler = (
-77	  state: GameEngineState,
-78	  args: Move['args'],
-79	) => GameEngineState;
-80	
-81	export interface SessionMeta {
-82	  profileId: string;
-83	  gameId: string;
-84	  gradeBand: GradeBand;
-85	  seed: string;
-86	  initialContent: ResolvedContent;
-87	  initialState: GameEngineState;
-88	}
-89	
-90	export { type GradeBand } from '@/types/game-events';
+1 // src/lib/game-engine/types.ts
+2 import type { GradeBand } from '@/types/game-events';
+3 
+4 export type GamePhase =
+5   | 'idle'
+6   | 'loading'
+7   | 'instructions'
+8   | 'playing'
+9   | 'evaluating'
+10   | 'scoring'
+11   | 'next-round'
+12   | 'retry'
+13   | 'game-over';
+14 
+15 export interface RoundDefinition {
+16   id: string;
+17   prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
+18   correctAnswer: string;
+19   distractors?: string[];
+20 }
+21 
+22 export interface ResolvedContent {
+23   rounds: RoundDefinition[];
+24 }
+25 
+26 export interface RoundState {
+27   roundId: string;
+28   answer: string | null;
+29   hintsUsed: number;
+30 }
+31 
+32 export interface GameEngineState {
+33   phase: GamePhase;
+34   roundIndex: number;
+35   score: number;
+36   streak: number;
+37   retryCount: number;
+38   content: ResolvedContent;
+39   currentRound: RoundState;
+40 }
+41 
+42 export type MoveType =
+43   | 'SUBMIT_ANSWER'
+44   | 'REQUEST_HINT'
+45   | 'SKIP_INSTRUCTIONS'
+46   | 'UNDO';
+47 
+48 export interface Move {
+49   type: MoveType | string; // string allows game-specific types in M5
+50   args: Record<string, string | number | boolean>;
+51   timestamp: number;
+52 }
+53 
+54 export interface MoveLog {
+55   gameId: string;
+56   sessionId: string;
+57   profileId: string;
+58   seed: string;
+59   initialContent: ResolvedContent;
+60   initialState: GameEngineState;
+61   moves: Move[];
+62 }
+63 
+64 export interface ResolvedGameConfig {
+65   gameId: string;
+66   title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
+67   gradeBand: GradeBand;
+68   maxRounds: number;
+69   maxRetries: number;
+70   maxUndoDepth: number | null; // null = unlimited; 0 = no undo
+71   timerVisible: boolean;
+72   timerDurationSeconds: number | null;
+73   difficulty: string;
+74 }
+75 
+76 export type MoveHandler = (
+77   state: GameEngineState,
+78   args: Move['args'],
+79 ) => GameEngineState;
+80 
+81 export interface SessionMeta {
+82   profileId: string;
+83   gameId: string;
+84   gradeBand: GradeBand;
+85   seed: string;
+86   initialContent: ResolvedContent;
+87   initialState: GameEngineState;
+88 }
+89 
+90 export { type GradeBand } from '@/types/game-events';
 91
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:04Z)**_
@@ -5677,11 +5767,13 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:04Z)**_
 The import/order groups are: builtin, external, internal, parent, sibling, index, object, type. `@storybook/react` is external, `@/lib/game-colors` is internal, and `./GameNameChip` is sibling. The type import (`import type`) should go in the "type" group which comes last.
 
 So the correct order is:
+
 1. `@storybook/react` type import (external type → goes in type group) — but wait, the error says type import should come BEFORE `@/lib/game-colors`. Let me re-read.
 
 The error message says: "`@storybook/react` type import should occur before import of `@/lib/game-colors`". With `sortTypesGroup: false`, type imports are sorted within their original groups. So `import type { Meta, StoryObj } from '@storybook/react'` is an external type import (group: external/type), and it should come before `@/lib/game-colors` which is internal.
 
 The correct order should be:
+
 1. `import type { Meta, StoryObj } from '@storybook/react'` (external)
 2. `import { GAME_COLOR_KEYS } from '@/lib/game-colors'` (internal)
 3. `import { GameNameChip } from './GameNameChip'` (sibling)
@@ -5712,6 +5804,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:06Z)**_
@@ -5721,162 +5814,163 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:06Z)**_
  `./src/components/game/GameShell.tsx`
 
 ```text
-1	// src/components/game/GameShell.tsx
-2	import { useNavigate, useParams } from '@tanstack/react-router';
-3	import { X } from 'lucide-react';
-4	import { useState } from 'react';
-5	import { createPortal } from 'react-dom';
-6	import { useTranslation } from 'react-i18next';
-7	import type {
-8	  GameEngineState,
-9	  MoveHandler,
-10	  MoveLog,
-11	  ResolvedGameConfig,
-12	  SessionMeta,
-13	} from '@/lib/game-engine/types';
-14	import type { JSX, ReactNode } from 'react';
-15	import {
-16	  AlertDialog,
-17	  AlertDialogAction,
-18	  AlertDialogCancel,
-19	  AlertDialogContent,
-20	  AlertDialogDescription,
-21	  AlertDialogFooter,
-22	  AlertDialogHeader,
-23	  AlertDialogTitle,
-24	} from '@/components/ui/alert-dialog';
-25	import { useRxDB } from '@/db/hooks/useRxDB';
-26	import { GameEngineProvider } from '@/lib/game-engine/index';
-27	
-28	export interface GameShellProps {
-29	  config: ResolvedGameConfig;
-30	  moves: Record<string, MoveHandler>;
-31	  initialState: GameEngineState;
-32	  sessionId: string;
-33	  meta: SessionMeta;
-34	  initialLog?: MoveLog;
-35	  children: ReactNode;
-36	}
-37	
-38	interface GameShellChromeProps {
-39	  config: ResolvedGameConfig;
-40	  sessionId: string;
-41	  children: ReactNode;
-42	}
-43	
-44	const GameShellChrome = ({
-45	  config,
-46	  sessionId,
-47	  children,
-48	}: GameShellChromeProps): JSX.Element => {
-49	  const navigate = useNavigate();
-50	  const { t } = useTranslation('games');
-51	  const { locale } = useParams({ from: '/$locale' });
-52	  const { db } = useRxDB();
-53	  const [exitOpen, setExitOpen] = useState(false);
-54	
-55	  const handleConfirmExit = async () => {
-56	    if (db) {
-57	      const doc = await db.session_history_index
-58	        .findOne(sessionId)
-59	        .exec();
-60	      if (doc && doc.status === 'in-progress') {
-61	        await doc.incrementalPatch({ status: 'abandoned' });
-62	      }
-63	    }
-64	    void navigate({ to: '/$locale', params: { locale } });
-65	  };
-66	
-67	  const showTimer =
-68	    config.timerVisible && config.timerDurationSeconds !== null;
-69	
-70	  // Portaled to `body` so the close control stays above the instructions overlay
-71	  // (also portaled, z-40). z-[45] is below the exit AlertDialog (z-50).
-72	  const topChrome = (
-73	    <div className="pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))]">
-74	      {showTimer ? (
-75	        <div
-76	          className="pointer-events-none text-sm tabular-nums text-foreground"
-77	          data-testid="game-timer"
-78	        >
-79	          ⏱ {config.timerDurationSeconds}s
-80	        </div>
-81	      ) : (
-82	        <span className="min-w-0 flex-1" aria-hidden />
-83	      )}
-84	      <button
-85	        className="pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-86	        type="button"
-87	        onClick={() => setExitOpen(true)}
-88	        aria-label={t('shell.exit')}
-89	      >
-90	        <X aria-hidden className="size-5" strokeWidth={2.25} />
-91	      </button>
-92	    </div>
-93	  );
-94	
-95	  return (
-96	    <div className="relative flex h-full flex-col">
-97	      {createPortal(topChrome, document.body)}
-98	
-99	      {/* Game area (div, not main — app layout already has a single page <main>) */}
-100	      <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pt-[max(4.5rem,calc(env(safe-area-inset-top,0px)+3.25rem))]">
-101	        <div className="flex w-full flex-1 flex-col items-center justify-center">
-102	          {children}
-103	        </div>
-104	      </div>
-105	
-106	      {/* Exit confirmation */}
-107	      <AlertDialog open={exitOpen} onOpenChange={setExitOpen}>
-108	        <AlertDialogContent>
-109	          <AlertDialogHeader>
-110	            <AlertDialogTitle>Want to leave the game?</AlertDialogTitle>
-111	            <AlertDialogDescription>
-112	              That&apos;s okay! You can start a new game from the home
-113	              screen.
-114	            </AlertDialogDescription>
-115	          </AlertDialogHeader>
-116	          <AlertDialogFooter>
-117	            <AlertDialogCancel>Keep Playing</AlertDialogCancel>
-118	            <AlertDialogAction
-119	              variant="destructive"
-120	              onClick={() => {
-121	                void handleConfirmExit();
-122	              }}
-123	            >
-124	              Leave Game
-125	            </AlertDialogAction>
-126	          </AlertDialogFooter>
-127	        </AlertDialogContent>
-128	      </AlertDialog>
-129	    </div>
-130	  );
-131	};
-132	
-133	export const GameShell = ({
-134	  config,
-135	  moves,
-136	  initialState,
-137	  sessionId,
-138	  meta,
-139	  initialLog,
-140	  children,
-141	}: GameShellProps): JSX.Element => (
-142	  <GameEngineProvider
-143	    config={config}
-144	    moves={moves}
-145	    initialState={initialState}
-146	    sessionId={sessionId}
-147	    meta={meta}
-148	    initialLog={initialLog}
-149	  >
-150	    <GameShellChrome config={config} sessionId={sessionId}>
-151	      {children}
-152	    </GameShellChrome>
-153	  </GameEngineProvider>
-154	);
+1 // src/components/game/GameShell.tsx
+2 import { useNavigate, useParams } from '@tanstack/react-router';
+3 import { X } from 'lucide-react';
+4 import { useState } from 'react';
+5 import { createPortal } from 'react-dom';
+6 import { useTranslation } from 'react-i18next';
+7 import type {
+8   GameEngineState,
+9   MoveHandler,
+10   MoveLog,
+11   ResolvedGameConfig,
+12   SessionMeta,
+13 } from '@/lib/game-engine/types';
+14 import type { JSX, ReactNode } from 'react';
+15 import {
+16   AlertDialog,
+17   AlertDialogAction,
+18   AlertDialogCancel,
+19   AlertDialogContent,
+20   AlertDialogDescription,
+21   AlertDialogFooter,
+22   AlertDialogHeader,
+23   AlertDialogTitle,
+24 } from '@/components/ui/alert-dialog';
+25 import { useRxDB } from '@/db/hooks/useRxDB';
+26 import { GameEngineProvider } from '@/lib/game-engine/index';
+27 
+28 export interface GameShellProps {
+29   config: ResolvedGameConfig;
+30   moves: Record<string, MoveHandler>;
+31   initialState: GameEngineState;
+32   sessionId: string;
+33   meta: SessionMeta;
+34   initialLog?: MoveLog;
+35   children: ReactNode;
+36 }
+37 
+38 interface GameShellChromeProps {
+39   config: ResolvedGameConfig;
+40   sessionId: string;
+41   children: ReactNode;
+42 }
+43 
+44 const GameShellChrome = ({
+45   config,
+46   sessionId,
+47   children,
+48 }: GameShellChromeProps): JSX.Element => {
+49   const navigate = useNavigate();
+50   const { t } = useTranslation('games');
+51   const { locale } = useParams({ from: '/$locale' });
+52   const { db } = useRxDB();
+53   const [exitOpen, setExitOpen] = useState(false);
+54 
+55   const handleConfirmExit = async () => {
+56     if (db) {
+57       const doc = await db.session_history_index
+58         .findOne(sessionId)
+59         .exec();
+60       if (doc && doc.status === 'in-progress') {
+61         await doc.incrementalPatch({ status: 'abandoned' });
+62       }
+63     }
+64     void navigate({ to: '/$locale', params: { locale } });
+65   };
+66 
+67   const showTimer =
+68     config.timerVisible && config.timerDurationSeconds !== null;
+69 
+70   // Portaled to `body` so the close control stays above the instructions overlay
+71   // (also portaled, z-40). z-[45] is below the exit AlertDialog (z-50).
+72   const topChrome = (
+73     <div className="pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))]">
+74       {showTimer ? (
+75         <div
+76           className="pointer-events-none text-sm tabular-nums text-foreground"
+77           data-testid="game-timer"
+78         >
+79           ⏱ {config.timerDurationSeconds}s
+80         </div>
+81       ) : (
+82         <span className="min-w-0 flex-1" aria-hidden />
+83       )}
+84       <button
+85         className="pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+86         type="button"
+87         onClick={() => setExitOpen(true)}
+88         aria-label={t('shell.exit')}
+89       >
+90         <X aria-hidden className="size-5" strokeWidth={2.25} />
+91       </button>
+92     </div>
+93   );
+94 
+95   return (
+96     <div className="relative flex h-full flex-col">
+97       {createPortal(topChrome, document.body)}
+98 
+99       {/* Game area (div, not main — app layout already has a single page <main>) */}
+100       <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pt-[max(4.5rem,calc(env(safe-area-inset-top,0px)+3.25rem))]">
+101         <div className="flex w-full flex-1 flex-col items-center justify-center">
+102           {children}
+103         </div>
+104       </div>
+105 
+106       {/* Exit confirmation */}
+107       <AlertDialog open={exitOpen} onOpenChange={setExitOpen}>
+108         <AlertDialogContent>
+109           <AlertDialogHeader>
+110             <AlertDialogTitle>Want to leave the game?</AlertDialogTitle>
+111             <AlertDialogDescription>
+112               That&apos;s okay! You can start a new game from the home
+113               screen.
+114             </AlertDialogDescription>
+115           </AlertDialogHeader>
+116           <AlertDialogFooter>
+117             <AlertDialogCancel>Keep Playing</AlertDialogCancel>
+118             <AlertDialogAction
+119               variant="destructive"
+120               onClick={() => {
+121                 void handleConfirmExit();
+122               }}
+123             >
+124               Leave Game
+125             </AlertDialogAction>
+126           </AlertDialogFooter>
+127         </AlertDialogContent>
+128       </AlertDialog>
+129     </div>
+130   );
+131 };
+132 
+133 export const GameShell = ({
+134   config,
+135   moves,
+136   initialState,
+137   sessionId,
+138   meta,
+139   initialLog,
+140   children,
+141 }: GameShellProps): JSX.Element => (
+142   <GameEngineProvider
+143     config={config}
+144     moves={moves}
+145     initialState={initialState}
+146     sessionId={sessionId}
+147     meta={meta}
+148     initialLog={initialLog}
+149   >
+150     <GameShellChrome config={config} sessionId={sessionId}>
+151       {children}
+152     </GameShellChrome>
+153   </GameEngineProvider>
+154 );
 155
 ```
+
 </details></tool-use>
 
 ---
@@ -5919,6 +6013,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:08Z)**_
@@ -5937,6 +6032,7 @@ Create git worktree for the theme showcase audit branch
 Preparing worktree (new branch 'stories/theme-showcase-audit')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:12Z)**_
@@ -6110,6 +6206,7 @@ export const Default: Story = {};
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:23Z)**_
@@ -6127,6 +6224,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 10.04s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:14Z)**_
@@ -6146,6 +6244,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 4.70s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:17Z)**_
@@ -6213,11 +6312,13 @@ Check import/order ESLint rule configuration
   {
     files: ['**/*.{ts,tsx}'],
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:22Z)**_
 
 The ESLint rule groups imports in order: `builtin`, `external`, `internal`, `parent`, `sibling`, `index`, `object`, `type`. The `@/lib/game-colors` is an internal path alias, and type imports go last. I need to reorder imports so that:
+
 1. Value imports: `storybook/test` (external), `./GameCard` (sibling), `@/lib/game-colors` (internal)
 2. Type imports: all `type` imports last
 
@@ -6236,6 +6337,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 17.93s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:24Z)**_
@@ -6246,6 +6348,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:26Z)**_
@@ -6275,6 +6378,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:30Z)**_
@@ -6294,6 +6398,7 @@ Check recent commits to confirm successful commit
 be6d9186 docs: add word authoring spec and plan (#198)
 6ba916d5 docs: add word authoring spec and plan
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:35Z)**_
@@ -6317,6 +6422,7 @@ const meta: Meta<typeof GameNameChip> = {
   },
 [This command modified 1 file you've previously read: worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:32Z)**_
@@ -6341,6 +6447,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        stories/game-grid-audit -> stories/game-grid-audit
 branch 'stories/game-grid-audit' set up to track 'origin/stories/game-grid-audit'.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:37Z)**_
@@ -6360,6 +6467,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 17.44s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:40Z)**_
@@ -6514,6 +6622,7 @@ export const Default: Story = {};
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:42Z)**_
@@ -6527,149 +6636,150 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:43Z)**_
  `./worktrees/stories-tier3-theme-showcase/src/stories/ThemeShowcase.stories.tsx`
 
 ```text
-1	import { withDb } from '../../.storybook/decorators/withDb';
-2	import { withRouter } from '../../.storybook/decorators/withRouter';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	import type {
-5	  GameEngineState,
-6	  ResolvedContent,
-7	  ResolvedGameConfig,
-8	  SessionMeta,
-9	} from '@/lib/game-engine/types';
-10	import type { Meta, StoryObj } from '@storybook/react';
-11	import { ConfigFormFields } from '@/components/ConfigFormFields';
-12	import { GameShell } from '@/components/game/GameShell';
-13	import { GameNameChip } from '@/components/GameNameChip';
-14	
-15	// ── GameShell fixture data ────────────────────────────────────────────────
-16	
-17	const content: ResolvedContent = {
-18	  rounds: [
-19	    {
-20	      id: 'r1',
-21	      prompt: { en: 'Sort the numbers' },
-22	      correctAnswer: '1',
-23	    },
-24	  ],
-25	};
-26	
-27	const shellConfig: ResolvedGameConfig = {
-28	  gameId: 'theme-showcase',
-29	  title: { en: 'Theme Showcase' },
-30	  gradeBand: 'year1-2',
-31	  maxRounds: 3,
-32	  maxRetries: 1,
-33	  maxUndoDepth: 3,
-34	  timerVisible: true,
-35	  timerDurationSeconds: 60,
-36	  difficulty: 'medium',
-37	};
-38	
-39	const initialState: GameEngineState = {
-40	  phase: 'playing',
-41	  roundIndex: 0,
-42	  score: 0,
-43	  streak: 0,
-44	  retryCount: 0,
-45	  content,
-46	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-47	};
-48	
-49	const sessionMeta: SessionMeta = {
-50	  profileId: 'storybook-user',
-51	  gameId: 'theme-showcase',
-52	  gradeBand: 'year1-2',
-53	  seed: 'storybook-seed',
-54	  initialContent: content,
-55	  initialState,
-56	};
-57	
-58	// ── Custom game component fixture data ──────────────────────────────────────
-59	
-60	const configFields: ConfigField[] = [
-61	  {
-62	    type: 'select',
-63	    key: 'inputMethod',
-64	    label: 'Input method',
-65	    options: [
-66	      { value: 'drag', label: 'Drag' },
-67	      { value: 'type', label: 'Type' },
-68	    ],
-69	  },
-70	  {
-71	    type: 'number',
-72	    key: 'totalRounds',
-73	    label: 'Total rounds',
-74	    min: 1,
-75	    max: 20,
-76	  },
-77	  {
-78	    type: 'checkbox',
-79	    key: 'ttsEnabled',
-80	    label: 'Text-to-speech',
-81	  },
-82	];
-83	
-84	// ── Story body ────────────────────────────────────────────────────────────
-85	
-86	const ShowcaseBody = () => (
-87	  <div className="flex flex-col gap-4 p-4">
-88	    <GameNameChip
-89	      title="Sort Numbers"
-90	      customGameName="Easy Numbers"
-91	      customGameColor="teal"
-92	    />
-93	    <GameNameChip title="Word Spell" subject="reading" />
-94	    <ConfigFormFields
-95	      fields={configFields}
-96	      config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
-97	      onChange={() => {}}
-98	    />
-99	  </div>
-100	);
-101	
-102	// ── Meta ──────────────────────────────────────────────────────────────────
-103	
-104	const meta = {
-105	  component: GameShell,
-106	  title: 'Pages/ThemeShowcase',
-107	  tags: ['autodocs'],
-108	  decorators: [withDb, withRouter],
-109	  parameters: {
-110	    layout: 'fullscreen',
-111	  },
-112	  args: {
-113	    config: shellConfig,
-114	    moves: {},
-115	    initialState,
-116	    sessionId: 'showcase-session',
-117	    meta: sessionMeta,
-118	    children: <ShowcaseBody />,
-119	  },
-120	} satisfies Meta<typeof GameShell>;
-121	export default meta;
-122	
-123	type Story = StoryObj<typeof GameShell>;
-124	
-125	// ── 4 locked-theme VR stories ─────────────────────────────────────────────
-126	
-127	export const OceanLight: Story = {
-128	  parameters: { globals: { theme: 'light' } },
-129	};
-130	
-131	export const OceanDark: Story = {
-132	  parameters: { globals: { theme: 'dark' } },
-133	};
-134	
-135	export const ForestLight: Story = {
-136	  parameters: { globals: { theme: 'forest-light' } },
-137	};
-138	
-139	export const ForestDark: Story = {
-140	  parameters: { globals: { theme: 'forest-dark' } },
-141	};
+1 import { withDb } from '../../.storybook/decorators/withDb';
+2 import { withRouter } from '../../.storybook/decorators/withRouter';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 import type {
+5   GameEngineState,
+6   ResolvedContent,
+7   ResolvedGameConfig,
+8   SessionMeta,
+9 } from '@/lib/game-engine/types';
+10 import type { Meta, StoryObj } from '@storybook/react';
+11 import { ConfigFormFields } from '@/components/ConfigFormFields';
+12 import { GameShell } from '@/components/game/GameShell';
+13 import { GameNameChip } from '@/components/GameNameChip';
+14 
+15 // ── GameShell fixture data ────────────────────────────────────────────────
+16 
+17 const content: ResolvedContent = {
+18   rounds: [
+19     {
+20       id: 'r1',
+21       prompt: { en: 'Sort the numbers' },
+22       correctAnswer: '1',
+23     },
+24   ],
+25 };
+26 
+27 const shellConfig: ResolvedGameConfig = {
+28   gameId: 'theme-showcase',
+29   title: { en: 'Theme Showcase' },
+30   gradeBand: 'year1-2',
+31   maxRounds: 3,
+32   maxRetries: 1,
+33   maxUndoDepth: 3,
+34   timerVisible: true,
+35   timerDurationSeconds: 60,
+36   difficulty: 'medium',
+37 };
+38 
+39 const initialState: GameEngineState = {
+40   phase: 'playing',
+41   roundIndex: 0,
+42   score: 0,
+43   streak: 0,
+44   retryCount: 0,
+45   content,
+46   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+47 };
+48 
+49 const sessionMeta: SessionMeta = {
+50   profileId: 'storybook-user',
+51   gameId: 'theme-showcase',
+52   gradeBand: 'year1-2',
+53   seed: 'storybook-seed',
+54   initialContent: content,
+55   initialState,
+56 };
+57 
+58 // ── Custom game component fixture data ──────────────────────────────────────
+59 
+60 const configFields: ConfigField[] = [
+61   {
+62     type: 'select',
+63     key: 'inputMethod',
+64     label: 'Input method',
+65     options: [
+66       { value: 'drag', label: 'Drag' },
+67       { value: 'type', label: 'Type' },
+68     ],
+69   },
+70   {
+71     type: 'number',
+72     key: 'totalRounds',
+73     label: 'Total rounds',
+74     min: 1,
+75     max: 20,
+76   },
+77   {
+78     type: 'checkbox',
+79     key: 'ttsEnabled',
+80     label: 'Text-to-speech',
+81   },
+82 ];
+83 
+84 // ── Story body ────────────────────────────────────────────────────────────
+85 
+86 const ShowcaseBody = () => (
+87   <div className="flex flex-col gap-4 p-4">
+88     <GameNameChip
+89       title="Sort Numbers"
+90       customGameName="Easy Numbers"
+91       customGameColor="teal"
+92     />
+93     <GameNameChip title="Word Spell" subject="reading" />
+94     <ConfigFormFields
+95       fields={configFields}
+96       config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
+97       onChange={() => {}}
+98     />
+99   </div>
+100 );
+101 
+102 // ── Meta ──────────────────────────────────────────────────────────────────
+103 
+104 const meta = {
+105   component: GameShell,
+106   title: 'Pages/ThemeShowcase',
+107   tags: ['autodocs'],
+108   decorators: [withDb, withRouter],
+109   parameters: {
+110     layout: 'fullscreen',
+111   },
+112   args: {
+113     config: shellConfig,
+114     moves: {},
+115     initialState,
+116     sessionId: 'showcase-session',
+117     meta: sessionMeta,
+118     children: <ShowcaseBody />,
+119   },
+120 } satisfies Meta<typeof GameShell>;
+121 export default meta;
+122 
+123 type Story = StoryObj<typeof GameShell>;
+124 
+125 // ── 4 locked-theme VR stories ─────────────────────────────────────────────
+126 
+127 export const OceanLight: Story = {
+128   parameters: { globals: { theme: 'light' } },
+129 };
+130 
+131 export const OceanDark: Story = {
+132   parameters: { globals: { theme: 'dark' } },
+133 };
+134 
+135 export const ForestLight: Story = {
+136   parameters: { globals: { theme: 'forest-light' } },
+137 };
+138 
+139 export const ForestDark: Story = {
+140   parameters: { globals: { theme: 'forest-dark' } },
+141 };
 142
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:47Z)**_
@@ -6683,6 +6793,7 @@ Auto-fix import order with ESLint
 ```text
 [This command modified 1 file you've previously read: worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:43Z)**_
@@ -6726,6 +6837,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/203
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:47Z)**_
@@ -6750,6 +6862,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )"
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:50Z)**_
@@ -6773,6 +6886,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-theme-showcase/src/stories/ThemeShowcase.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:55Z)**_
@@ -6792,7 +6906,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:40:56Z)**_
 
 Everything completed cleanly. Here is the summary:
 
-**PR URL:** https://github.com/leocaseiro/base-skill/pull/203
+**PR URL:** <https://github.com/leocaseiro/base-skill/pull/203>
 
 **Typecheck/lint status:** Both passed, but not on the first try. There was one lint error on the first attempt:
 
@@ -6822,7 +6936,7 @@ _**User (2026-04-28 05:40:56Z)**_
 <summary>Agent "Tier 3 Task 1: Retrofit GameGrid.stories.tsx" completed</summary>
 <result>Everything completed cleanly. Here is the summary:
 
-**PR URL:** https://github.com/leocaseiro/base-skill/pull/203
+**PR URL:** <https://github.com/leocaseiro/base-skill/pull/203>
 
 **Typecheck/lint status:** Both passed, but not on the first try. There was one lint error on the first attempt:
 
@@ -6857,6 +6971,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.89s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 05:41:06Z)**_
@@ -6878,6 +6993,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 20.55s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:12Z)**_
@@ -6949,6 +7065,7 @@ stderr | src/games/sort-numbers/build-sort-round.test.ts > generateSortRounds > 
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:18Z)**_
@@ -6968,6 +7085,7 @@ Verify the commit was created
 be6d9186 docs: add word authoring spec and plan (#198)
 6ba916d5 docs: add word authoring spec and plan
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:32Z)**_
@@ -6983,6 +7101,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 9.42s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:22Z)**_
@@ -7065,6 +7184,7 @@ generateSortRounds: numeric start=3 produces sequence outside range [1,10]; fall
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:40Z)**_
@@ -7090,6 +7210,7 @@ Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 EOF
 )" 2>&1
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:50Z)**_
@@ -7105,6 +7226,7 @@ f1d62864 stories(components/GameNameChip): retrofit per single-Default Playgroun
 be6d9186 docs: add word authoring spec and plan (#198)
 6ba916d5 docs: add word authoring spec and plan
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:41:52Z)**_
@@ -7129,6 +7251,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        stories/game-name-chip-audit -> stories/game-name-chip-audit
 branch 'stories/game-name-chip-audit' set up to track 'origin/stories/game-name-chip-audit'.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:08Z)**_
@@ -7163,6 +7286,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/204
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:09Z)**_
@@ -7178,6 +7302,7 @@ d3f6f033 stories(stories/ThemeShowcase): retrofit per single-Default Playground
 be6d9186 docs: add word authoring spec and plan (#198)
 6ba916d5 docs: add word authoring spec and plan
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:11Z)**_
@@ -7197,9 +7322,10 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:15Z)**_
 
 Done. Here is the summary:
 
-**PR:** https://github.com/leocaseiro/base-skill/pull/204
+**PR:** <https://github.com/leocaseiro/base-skill/pull/204>
 
 **Typecheck/lint:** Typecheck passed first try. Lint failed once on the first attempt due to import order — the `import type { Meta, StoryObj } from '@storybook/react'` was placed last per the task instructions, but the project's `import/order` ESLint rule (with `sortTypesGroup: false`) does not separate type imports into a trailing group. ESLint auto-fix resolved it, producing the correct order:
+
 1. `import { GameNameChip } from './GameNameChip'` (sibling)
 2. `import type { Meta, StoryObj } from '@storybook/react'` (external type, within the type group which follows internal)
 3. `import { GAME_COLOR_KEYS } from '@/lib/game-colors'` (internal)
@@ -7220,9 +7346,10 @@ _**User (2026-04-28 05:42:15Z)**_
 <summary>Agent "Tier 3 Task 3: Retrofit GameNameChip.stories.tsx" completed</summary>
 <result>Done. Here is the summary:
 
-**PR:** https://github.com/leocaseiro/base-skill/pull/204
+**PR:** <https://github.com/leocaseiro/base-skill/pull/204>
 
 **Typecheck/lint:** Typecheck passed first try. Lint failed once on the first attempt due to import order — the `import type { Meta, StoryObj } from '@storybook/react'` was placed last per the task instructions, but the project's `import/order` ESLint rule (with `sortTypesGroup: false`) does not separate type imports into a trailing group. ESLint auto-fix resolved it, producing the correct order:
+
 1. `import { GameNameChip } from './GameNameChip'` (sibling)
 2. `import type { Meta, StoryObj } from '@storybook/react'` (external type, within the type group which follows internal)
 3. `import { GAME_COLOR_KEYS } from '@/lib/game-colors'` (internal)
@@ -7254,6 +7381,7 @@ Verify commit was created
 be6d9186 docs: add word authoring spec and plan (#198)
 6ba916d5 docs: add word authoring spec and plan
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:23Z)**_
@@ -7282,6 +7410,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        stories/game-card-audit -> stories/game-card-audit
 branch 'stories/game-card-audit' set up to track 'origin/stories/game-card-audit'.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:32Z)**_
@@ -7317,6 +7446,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/205
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:39Z)**_
@@ -7354,6 +7484,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/206
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:42:40Z)**_
@@ -7364,7 +7495,7 @@ PR created successfully.
 
 **Summary**
 
-PR URL: https://github.com/leocaseiro/base-skill/pull/205
+PR URL: <https://github.com/leocaseiro/base-skill/pull/205>
 
 **Checks:** Both `yarn typecheck` and `yarn lint` exited 0. All pre-push checks (Prettier, ESLint, Knip, TypeScript, unit tests) also passed cleanly.
 
@@ -7395,7 +7526,7 @@ _**User (2026-04-28 05:42:40Z)**_
 
 **Summary**
 
-PR URL: https://github.com/leocaseiro/base-skill/pull/205
+PR URL: <https://github.com/leocaseiro/base-skill/pull/205>
 
 **Checks:** Both `yarn typecheck` and `yarn lint` exited 0. All pre-push checks (Prettier, ESLint, Knip, TypeScript, unit tests) also passed cleanly.
 
@@ -7432,7 +7563,7 @@ PR created successfully.
 
 **Summary**
 
-PR URL: https://github.com/leocaseiro/base-skill/pull/206
+PR URL: <https://github.com/leocaseiro/base-skill/pull/206>
 
 **Typecheck/lint result:** Typecheck passed first try. Lint failed on the first attempt due to import order — two errors from `import/order`:
 
@@ -7440,12 +7571,14 @@ PR URL: https://github.com/leocaseiro/base-skill/pull/206
 2. Within type imports, `@storybook/react` (external) must come before `@/lib/game-colors` (internal) alphabetically
 
 Fixed by running `eslint --fix`, which reordered to:
+
 - Value imports: `storybook/test` (external) → `./GameCard` (sibling) → `@/lib/game-colors` (internal, value)
 - Type imports: `@/lib/game-colors` (internal) → `@storybook/react` (external) → `react` (external) — ordered alphabetically within the `type` group by ESLint's actual rule
 
 After the fix, both `yarn typecheck` and `yarn lint` exited 0.
 
 **Prop-type adaptations vs. template:**
+
 - `cover?: never` kept — `GameCard.tsx` has `cover?: Cover` in the `Common` type, so the shadow is valid and meaningful.
 - `onOpenCog` kept — present on the component.
 - All discriminated union branches matched exactly as written in the template.
@@ -7466,7 +7599,7 @@ _**User (2026-04-28 05:42:48Z)**_
 
 **Summary**
 
-PR URL: https://github.com/leocaseiro/base-skill/pull/206
+PR URL: <https://github.com/leocaseiro/base-skill/pull/206>
 
 **Typecheck/lint result:** Typecheck passed first try. Lint failed on the first attempt due to import order — two errors from `import/order`:
 
@@ -7474,12 +7607,14 @@ PR URL: https://github.com/leocaseiro/base-skill/pull/206
 2. Within type imports, `@storybook/react` (external) must come before `@/lib/game-colors` (internal) alphabetically
 
 Fixed by running `eslint --fix`, which reordered to:
+
 - Value imports: `storybook/test` (external) → `./GameCard` (sibling) → `@/lib/game-colors` (internal, value)
 - Type imports: `@/lib/game-colors` (internal) → `@storybook/react` (external) → `react` (external) — ordered alphabetically within the `type` group by ESLint's actual rule
 
 After the fix, both `yarn typecheck` and `yarn lint` exited 0.
 
 **Prop-type adaptations vs. template:**
+
 - `cover?: never` kept — `GameCard.tsx` has `cover?: Cover` in the `Common` type, so the shadow is valid and meaningful.
 - `onOpenCog` kept — present on the component.
 - All discriminated union branches matched exactly as written in the template.</result>
@@ -7520,6 +7655,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/207
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-28 05:42:50Z)**_
@@ -7532,7 +7668,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-28 05:43:00Z)**_
 
 Everything is done. Here is the summary:
 
-**PR URL:** https://github.com/leocaseiro/base-skill/pull/207
+**PR URL:** <https://github.com/leocaseiro/base-skill/pull/207>
 
 **What was done:**
 
@@ -7547,6 +7683,7 @@ The file `/Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-theme-showc
 **Type adaptations needed:** None. The fixture shapes in the original file were already fully compatible with the current types in `src/lib/game-engine/types.ts` — no field renames or removals required.
 
 **Named story exports:**
+
 - Before: 4 (`OceanLight`, `OceanDark`, `ForestLight`, `ForestDark`)
 - After: 1 (`Default`)
 
@@ -7564,7 +7701,7 @@ _**User (2026-04-28 05:43:00Z)**_
 <summary>Agent "Tier 3 Task 5: Retrofit ThemeShowcase.stories.tsx" completed</summary>
 <result>Everything is done. Here is the summary:
 
-**PR URL:** https://github.com/leocaseiro/base-skill/pull/207
+**PR URL:** <https://github.com/leocaseiro/base-skill/pull/207>
 
 **What was done:**
 
@@ -7579,6 +7716,7 @@ The file `/Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-theme-showc
 **Type adaptations needed:** None. The fixture shapes in the original file were already fully compatible with the current types in `src/lib/game-engine/types.ts` — no field renames or removals required.
 
 **Named story exports:**
+
 - Before: 4 (`OceanLight`, `OceanDark`, `ForestLight`, `ForestDark`)
 - After: 1 (`Default`)
 
@@ -7640,7 +7778,7 @@ _**User (2026-04-28 05:51:43Z)**_
 
 _**User (2026-04-28 05:52:51Z)**_
 
-review their changes if is the new standard, or is missing something. Use https://leocaseiro.github.io/base-skill/docs/?path=/story/answer-game-instructionsoverlay--playground as a reference
+review their changes if is the new standard, or is missing something. Use <https://leocaseiro.github.io/base-skill/docs/?path=/story/answer-game-instructionsoverlay--playground> as a reference
 
 ---
 
@@ -7657,179 +7795,180 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:00Z)**_
  `./src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx`
 
 ```text
-1	import { fn } from 'storybook/test';
-2	
-3	import { withDb } from '../../../../.storybook/decorators/withDb';
-4	import { withRouter } from '../../../../.storybook/decorators/withRouter';
-5	import { InstructionsOverlay } from './InstructionsOverlay';
-6	import type { SaveCustomGameInput } from './InstructionsOverlay';
-7	import type { GameColorKey } from '@/lib/game-colors';
-8	import type { Meta, StoryObj } from '@storybook/react';
-9	import type { ComponentType } from 'react';
-10	
-11	type PlaygroundGameId = 'sort-numbers' | 'word-spell' | 'number-match';
-12	
-13	interface StoryArgs {
-14	  text: string;
-15	  gameTitle: string;
-16	  gameId: PlaygroundGameId;
-17	  customGameName: string;
-18	  customGameColor: GameColorKey;
-19	  ttsEnabled: boolean;
-20	  isBookmarked: boolean;
-21	  totalRounds: number;
-22	  onStart: () => void;
-23	  onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
-24	  onUpdateCustomGame: (
-25	    name: string,
-26	    config: Record<string, unknown>,
-27	    extras?: { cover?: unknown; color?: GameColorKey },
-28	  ) => Promise<void>;
-29	  onToggleBookmark: () => void;
-30	  onConfigChange: (config: Record<string, unknown>) => void;
-31	  // Raw InstructionsOverlay props intentionally hidden from the Controls
-32	  // panel — either shadowed above (config), derived from other controls
-33	  // (customGameId), or not meaningful in the playground (cover,
-34	  // onDeleteCustomGame, existingCustomGameNames).
-35	  config?: never;
-36	  cover?: never;
-37	  customGameId?: never;
-38	  onDeleteCustomGame?: never;
-39	  existingCustomGameNames?: never;
-40	}
-41	
-42	const GAME_COLOR_OPTIONS = [
-43	  'indigo',
-44	  'teal',
-45	  'rose',
-46	  'amber',
-47	  'sky',
-48	  'lime',
-49	  'purple',
-50	  'orange',
-51	  'pink',
-52	  'emerald',
-53	  'slate',
-54	  'cyan',
-55	] as const satisfies readonly GameColorKey[];
-56	
-57	const GAME_ID_OPTIONS = [
-58	  'sort-numbers',
-59	  'word-spell',
-60	  'number-match',
-61	] as const satisfies readonly PlaygroundGameId[];
-62	
-63	const meta: Meta<StoryArgs> = {
-64	  component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
-65	  title: 'answer-game/InstructionsOverlay',
-66	  tags: ['autodocs'],
-67	  decorators: [withDb, withRouter],
-68	  parameters: {
-69	    layout: 'fullscreen',
-70	    docs: {
-71	      description: {
-72	        component:
-73	          'Pre-game shell: cover, title, instructions, "Let\'s go!" button, inline simple-config form, bookmark + cog affordances. The three real gameIds (`sort-numbers`, `word-spell`, `number-match`) drive the cover art and the inline SimpleConfigForm — pick one to see the actual renderer a game loads at runtime.\n\n**Custom-game mode:** type a non-empty `customGameName` to flip the shell into custom-game mode — the custom name becomes the primary heading, the original gameTitle moves to a coloured subtitle, and the save-on-play dialog is skipped on "Let\'s go!". Leave `customGameName` blank to preview the default game flow (save-on-play dialog prompts for a name).\n\nPlay-flow assertions (save prompt, custom start, cog opens AdvancedConfigModal, bookmark toggle) live in `InstructionsOverlay.test.tsx`; this story is visual-only.',
-74	      },
-75	    },
-76	  },
-77	  args: {
-78	    text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
-79	    gameTitle: 'Sort Numbers',
-80	    gameId: 'sort-numbers',
-81	    customGameName: '',
-82	    customGameColor: 'indigo' as GameColorKey,
-83	    ttsEnabled: false,
-84	    isBookmarked: false,
-85	    totalRounds: 5,
-86	    onStart: fn(),
-87	    onSaveCustomGame: fn(async () => 'stub-id'),
-88	    onUpdateCustomGame: fn(async () => {}),
-89	    onToggleBookmark: fn(),
-90	    onConfigChange: fn(),
-91	  },
-92	  argTypes: {
-93	    text: { control: 'text' },
-94	    gameTitle: { control: 'text' },
-95	    gameId: {
-96	      control: { type: 'select' },
-97	      options: GAME_ID_OPTIONS,
-98	      description:
-99	        'Drives the GameCover art and the inline SimpleConfigForm renderer.',
-100	    },
-101	    customGameName: {
-102	      control: 'text',
-103	      description:
-104	        'Leave empty for default game flow. Non-empty value flips the shell into custom-game mode (custom name heading, gameTitle as coloured subtitle, save-on-play dialog skipped).',
-105	    },
-106	    customGameColor: {
-107	      control: { type: 'select' },
-108	      options: GAME_COLOR_OPTIONS,
-109	      description:
-110	        'Colour applied to the custom-game heading + subtitle. Only visible when customGameName is non-empty.',
-111	    },
-112	    ttsEnabled: { control: 'boolean' },
-113	    isBookmarked: { control: 'boolean' },
-114	    totalRounds: {
-115	      control: { type: 'range', min: 1, max: 20, step: 1 },
-116	    },
-117	    onStart: { table: { disable: true } },
-118	    onSaveCustomGame: { table: { disable: true } },
-119	    onUpdateCustomGame: { table: { disable: true } },
-120	    onToggleBookmark: { table: { disable: true } },
-121	    onConfigChange: { table: { disable: true } },
-122	    config: { table: { disable: true } },
-123	    cover: { table: { disable: true } },
-124	    customGameId: { table: { disable: true } },
-125	    onDeleteCustomGame: { table: { disable: true } },
-126	    existingCustomGameNames: { table: { disable: true } },
-127	  },
-128	  render: ({
-129	    text,
-130	    gameTitle,
-131	    gameId,
-132	    customGameName,
-133	    customGameColor,
-134	    ttsEnabled,
-135	    isBookmarked,
-136	    totalRounds,
-137	    onStart,
-138	    onSaveCustomGame,
-139	    onUpdateCustomGame,
-140	    onToggleBookmark,
-141	    onConfigChange,
-142	  }) => {
-143	    const trimmedCustomName = customGameName.trim();
-144	    const derivedCustomGameId = trimmedCustomName
-145	      ? 'story-custom-id'
-146	      : undefined;
-147	    return (
-148	      <InstructionsOverlay
-149	        text={text}
-150	        gameTitle={gameTitle}
-151	        gameId={gameId}
-152	        customGameColor={customGameColor}
-153	        ttsEnabled={ttsEnabled}
-154	        isBookmarked={isBookmarked}
-155	        config={{ totalRounds }}
-156	        customGameId={derivedCustomGameId}
-157	        customGameName={trimmedCustomName || undefined}
-158	        onStart={onStart}
-159	        onSaveCustomGame={onSaveCustomGame}
-160	        onUpdateCustomGame={onUpdateCustomGame}
-161	        onToggleBookmark={onToggleBookmark}
-162	        onConfigChange={onConfigChange}
-163	      />
-164	    );
-165	  },
-166	};
-167	export default meta;
-168	
-169	type Story = StoryObj<StoryArgs>;
-170	
-171	export const Playground: Story = {};
+1 import { fn } from 'storybook/test';
+2 
+3 import { withDb } from '../../../../.storybook/decorators/withDb';
+4 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+5 import { InstructionsOverlay } from './InstructionsOverlay';
+6 import type { SaveCustomGameInput } from './InstructionsOverlay';
+7 import type { GameColorKey } from '@/lib/game-colors';
+8 import type { Meta, StoryObj } from '@storybook/react';
+9 import type { ComponentType } from 'react';
+10 
+11 type PlaygroundGameId = 'sort-numbers' | 'word-spell' | 'number-match';
+12 
+13 interface StoryArgs {
+14   text: string;
+15   gameTitle: string;
+16   gameId: PlaygroundGameId;
+17   customGameName: string;
+18   customGameColor: GameColorKey;
+19   ttsEnabled: boolean;
+20   isBookmarked: boolean;
+21   totalRounds: number;
+22   onStart: () => void;
+23   onSaveCustomGame: (input: SaveCustomGameInput) => Promise<string>;
+24   onUpdateCustomGame: (
+25     name: string,
+26     config: Record<string, unknown>,
+27     extras?: { cover?: unknown; color?: GameColorKey },
+28   ) => Promise<void>;
+29   onToggleBookmark: () => void;
+30   onConfigChange: (config: Record<string, unknown>) => void;
+31   // Raw InstructionsOverlay props intentionally hidden from the Controls
+32   // panel — either shadowed above (config), derived from other controls
+33   // (customGameId), or not meaningful in the playground (cover,
+34   // onDeleteCustomGame, existingCustomGameNames).
+35   config?: never;
+36   cover?: never;
+37   customGameId?: never;
+38   onDeleteCustomGame?: never;
+39   existingCustomGameNames?: never;
+40 }
+41 
+42 const GAME_COLOR_OPTIONS = [
+43   'indigo',
+44   'teal',
+45   'rose',
+46   'amber',
+47   'sky',
+48   'lime',
+49   'purple',
+50   'orange',
+51   'pink',
+52   'emerald',
+53   'slate',
+54   'cyan',
+55 ] as const satisfies readonly GameColorKey[];
+56 
+57 const GAME_ID_OPTIONS = [
+58   'sort-numbers',
+59   'word-spell',
+60   'number-match',
+61 ] as const satisfies readonly PlaygroundGameId[];
+62 
+63 const meta: Meta<StoryArgs> = {
+64   component: InstructionsOverlay as unknown as ComponentType<StoryArgs>,
+65   title: 'answer-game/InstructionsOverlay',
+66   tags: ['autodocs'],
+67   decorators: [withDb, withRouter],
+68   parameters: {
+69     layout: 'fullscreen',
+70     docs: {
+71       description: {
+72         component:
+73           'Pre-game shell: cover, title, instructions, "Let\'s go!" button, inline simple-config form, bookmark + cog affordances. The three real gameIds (`sort-numbers`, `word-spell`, `number-match`) drive the cover art and the inline SimpleConfigForm — pick one to see the actual renderer a game loads at runtime.\n\n**Custom-game mode:** type a non-empty `customGameName` to flip the shell into custom-game mode — the custom name becomes the primary heading, the original gameTitle moves to a coloured subtitle, and the save-on-play dialog is skipped on "Let\'s go!". Leave `customGameName` blank to preview the default game flow (save-on-play dialog prompts for a name).\n\nPlay-flow assertions (save prompt, custom start, cog opens AdvancedConfigModal, bookmark toggle) live in `InstructionsOverlay.test.tsx`; this story is visual-only.',
+74       },
+75     },
+76   },
+77   args: {
+78     text: 'Listen to each number and drag it into the correct slot to sort from smallest to biggest.',
+79     gameTitle: 'Sort Numbers',
+80     gameId: 'sort-numbers',
+81     customGameName: '',
+82     customGameColor: 'indigo' as GameColorKey,
+83     ttsEnabled: false,
+84     isBookmarked: false,
+85     totalRounds: 5,
+86     onStart: fn(),
+87     onSaveCustomGame: fn(async () => 'stub-id'),
+88     onUpdateCustomGame: fn(async () => {}),
+89     onToggleBookmark: fn(),
+90     onConfigChange: fn(),
+91   },
+92   argTypes: {
+93     text: { control: 'text' },
+94     gameTitle: { control: 'text' },
+95     gameId: {
+96       control: { type: 'select' },
+97       options: GAME_ID_OPTIONS,
+98       description:
+99         'Drives the GameCover art and the inline SimpleConfigForm renderer.',
+100     },
+101     customGameName: {
+102       control: 'text',
+103       description:
+104         'Leave empty for default game flow. Non-empty value flips the shell into custom-game mode (custom name heading, gameTitle as coloured subtitle, save-on-play dialog skipped).',
+105     },
+106     customGameColor: {
+107       control: { type: 'select' },
+108       options: GAME_COLOR_OPTIONS,
+109       description:
+110         'Colour applied to the custom-game heading + subtitle. Only visible when customGameName is non-empty.',
+111     },
+112     ttsEnabled: { control: 'boolean' },
+113     isBookmarked: { control: 'boolean' },
+114     totalRounds: {
+115       control: { type: 'range', min: 1, max: 20, step: 1 },
+116     },
+117     onStart: { table: { disable: true } },
+118     onSaveCustomGame: { table: { disable: true } },
+119     onUpdateCustomGame: { table: { disable: true } },
+120     onToggleBookmark: { table: { disable: true } },
+121     onConfigChange: { table: { disable: true } },
+122     config: { table: { disable: true } },
+123     cover: { table: { disable: true } },
+124     customGameId: { table: { disable: true } },
+125     onDeleteCustomGame: { table: { disable: true } },
+126     existingCustomGameNames: { table: { disable: true } },
+127   },
+128   render: ({
+129     text,
+130     gameTitle,
+131     gameId,
+132     customGameName,
+133     customGameColor,
+134     ttsEnabled,
+135     isBookmarked,
+136     totalRounds,
+137     onStart,
+138     onSaveCustomGame,
+139     onUpdateCustomGame,
+140     onToggleBookmark,
+141     onConfigChange,
+142   }) => {
+143     const trimmedCustomName = customGameName.trim();
+144     const derivedCustomGameId = trimmedCustomName
+145       ? 'story-custom-id'
+146       : undefined;
+147     return (
+148       <InstructionsOverlay
+149         text={text}
+150         gameTitle={gameTitle}
+151         gameId={gameId}
+152         customGameColor={customGameColor}
+153         ttsEnabled={ttsEnabled}
+154         isBookmarked={isBookmarked}
+155         config={{ totalRounds }}
+156         customGameId={derivedCustomGameId}
+157         customGameName={trimmedCustomName || undefined}
+158         onStart={onStart}
+159         onSaveCustomGame={onSaveCustomGame}
+160         onUpdateCustomGame={onUpdateCustomGame}
+161         onToggleBookmark={onToggleBookmark}
+162         onConfigChange={onConfigChange}
+163       />
+164     );
+165   },
+166 };
+167 export default meta;
+168 
+169 type Story = StoryObj<StoryArgs>;
+170 
+171 export const Playground: Story = {};
 172
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:01Z)**_
@@ -7839,573 +7978,574 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:01Z)**_
  `./.claude/skills/write-storybook/SKILL.md`
 
 ```text
-1	---
-2	name: write-storybook
-3	description: Use when adding, writing, or refactoring Storybook stories for React components in this project — enforces the single-Default Playground pattern, controls policy, decorators, and a11y rules
-4	---
-5	
-6	# Write Storybook
-7	
-8	## Overview
-9	
-10	Stories live co-located with their component (`ComponentName.stories.tsx`). This project uses `@storybook/react` with TanStack Router and `next-themes`.
-11	
-12	**The standard pattern is the "Playground"**: every component gets a **single `Default` story** driven by proper interactive controls (selects, booleans, ranges, color pickers, text inputs). The control surface is the playground — designers, QA, and developers explore every UI behaviour by tweaking controls, not by clicking between a dozen named stories.
-13	
-14	This pattern applies when:
-15	
-16	1. Creating a new story file.
-17	2. Auditing or refactoring an existing story file.
-18	3. Making changes to a component whose UI/API surface affects its story.
-19	
-20	Additional named stories are only added when a scenario genuinely **cannot** be expressed through the Playground's controls (see "When to Add Auxiliary Stories" below). Reference implementations:
-21	
-22	- [AnswerGame.stories.tsx](../../../src/components/answer-game/AnswerGame/AnswerGame.stories.tsx)
-23	- [InstructionsOverlay.stories.tsx](../../../src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx)
-24	- [ProgressHUD.stories.tsx](../../../src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx)
-25	- [EncouragementAnnouncer.stories.tsx](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) (shows the trigger-button pattern for callbacks that can't be reached by controls alone)
-26	
-27	## Rules
-28	
-29	- **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
-30	- **All story variants use named exports**: `export const Default: Story = {}`
-31	- Every story file **must include a `Default` story** — this is the Playground; every prop that affects UI must be driveable from its controls
-32	- Use `tags: ['autodocs']` in meta unless there's a reason not to
-33	- Do NOT import `React` — JSX transform handles it
-34	- Auxiliary named stories are allowed only when a scenario can't be expressed by toggling controls on `Default` (see "When to Add Auxiliary Stories")
-35	
-36	## File Structure
-37	
-38	```
-39	src/components/MyComponent.stories.tsx
-40	```
-41	
-42	## Minimal Template
-43	
-44	The Playground pattern: a single `Default` story, with every UI-affecting prop wired as a control on `meta`. Props are set once in `meta.args` so they serve as the Playground's baseline.
-45	
-46	```tsx
-47	import { fn } from 'storybook/test';
-48	import { MyComponent } from './MyComponent';
-49	import type { Meta, StoryObj } from '@storybook/react';
-50	
-51	const meta: Meta<typeof MyComponent> = {
-52	  component: MyComponent,
-53	  tags: ['autodocs'],
-54	  args: {
-55	    // Baseline values for the Playground — one place, drives Default.
-56	    onClick: fn(), // Actions panel logs every invocation (see "Callbacks & Listeners")
-57	  },
-58	  argTypes: {
-59	    // A control for every non-callback, non-JSX prop. See "Controls Policy" below.
-60	  },
-61	};
-62	export default meta;
-63	
-64	type Story = StoryObj<typeof MyComponent>;
-65	
-66	// The Playground. Empty body — it inherits meta.args and renders the
-67	// interactive control surface.
-68	export const Default: Story = {};
-69	```
-70	
-71	Extra named stories are only added when a scenario can't be expressed by flipping controls on `Default` — see "When to Add Auxiliary Stories".
-72	
-73	## Decorators
-74	
-75	Use decorators when the component depends on context providers:
-76	
-77	| Needs                                                   | Decorator                                                  |
-78	| ------------------------------------------------------- | ---------------------------------------------------------- |
-79	| TanStack Router (`useNavigate`, `Link`, params)         | `withRouter` from `../../.storybook/decorators/withRouter` |
-80	| Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `../../.storybook/decorators/withDb`         |
-81	| Theme toggle                                            | `withTheme` — already applied globally via `preview.tsx`   |
-82	| ThemeProvider                                           | Already applied globally — do NOT add again                |
-83	| Classic skin tokens (`--skin-*`)                        | Applied globally via `preview.tsx` — do NOT add again      |
-84	
-85	When both are needed, put `withDb` first (outermost), then `withRouter`:
-86	
-87	```tsx
-88	import { withDb } from '../../.storybook/decorators/withDb';
-89	import { withRouter } from '../../.storybook/decorators/withRouter';
-90	
-91	const meta: Meta<typeof MyComponent> = {
-92	  component: MyComponent,
-93	  tags: ['autodocs'],
-94	  decorators: [withDb, withRouter],
-95	};
-96	```
-97	
-98	When a story wraps in `AnswerGameProvider`, `withDb` must come **before** the provider wrapper:
-99	
-100	```tsx
-101	decorators: [
-102	  withDb,
-103	  (Story) => (
-104	    <AnswerGameProvider config={storyConfig}>
-105	      <Story />
-106	    </AnswerGameProvider>
-107	  ),
-108	],
-109	```
-110	
-111	## Controls Policy
-112	
-113	Every prop that isn't a callback, JSX node, or complex object MUST have an explicit `argTypes` entry with a proper interactive control. **Raw JSON object inputs in the Controls panel are not acceptable** — they make stories useless as a playground for designers and QA.
-114	
-115	### Mapping
-116	
-117	| Prop type                    | Control                                                                                         |
-118	| ---------------------------- | ----------------------------------------------------------------------------------------------- |
-119	| String union / enum          | `control: { type: 'select' }` with `options: [...]` (or `'radio'` for ≤4 options)               |
-120	| Boolean                      | `control: 'boolean'`                                                                            |
-121	| Bounded number               | `control: { type: 'range', min, max, step }`                                                    |
-122	| Free-text                    | `control: 'text'`                                                                               |
-123	| Color                        | `control: 'color'`                                                                              |
-124	| Multi-select array of unions | `control: 'multi-select'` with `options`                                                        |
-125	| Callback (`onFoo`)           | `args: { onFoo: fn() }` from `storybook/test` (spy shows in Actions panel + usable in `play()`) |
-126	| JSX / ReactNode              | `control: false`                                                                                |
-127	
-128	### Example
-129	
-130	```tsx
-131	const meta: Meta<typeof MyButton> = {
-132	  component: MyButton,
-133	  tags: ['autodocs'],
-134	  argTypes: {
-135	    variant: {
-136	      control: { type: 'select' },
-137	      options: ['primary', 'secondary', 'ghost'],
-138	    },
-139	    size: {
-140	      control: { type: 'radio' },
-141	      options: ['sm', 'md', 'lg'],
-142	    },
-143	    disabled: { control: 'boolean' },
-144	    rounds: {
-145	      control: { type: 'range', min: 1, max: 20, step: 1 },
-146	    },
-147	    icon: { control: false }, // ReactNode
-148	  },
-149	  args: {
-150	    onClick: fn(), // from 'storybook/test' — spy shows in Actions panel + usable in play()
-151	  },
-152	};
-153	```
-154	
-155	> **Why `fn()` and not `argTypes: { onClick: { action: 'clicked' } }`?** Both log to the Actions panel, but `fn()` doubles as a spy you can assert on from `play()` (`await expect(args.onClick).toHaveBeenCalled()`). Prefer `fn()` for consistency.
-156	>
-157	> **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
-158	
-159	## Complex Object Props
-160	
-161	When a component takes a config-shaped object (e.g., a game `config` with mode + difficulty + counts), do NOT expose the whole object as a single JSON control. Break each meaningful field into a top-level arg and assemble the object in a custom `render` function.
-162	
-163	```tsx
-164	import { type ComponentType } from 'react';
-165	import type { Meta, StoryObj } from '@storybook/react';
-166	import { GameConfigForm } from './GameConfigForm';
-167	
-168	type GameMode = 'easy' | 'hard';
-169	
-170	interface GameConfig {
-171	  mode: GameMode;
-172	  rounds: number;
-173	}
-174	
-175	interface GameConfigFormProps {
-176	  config: GameConfig;
-177	  onSubmit: (config: GameConfig) => void;
-178	}
-179	
-180	interface StoryArgs {
-181	  mode: GameMode;
-182	  rounds: number;
-183	  onSubmit: (config: GameConfig) => void;
-184	}
-185	
-186	// Double cast required: StoryArgs is a flat subset of GameConfigFormProps,
-187	// so TypeScript requires `as unknown as ComponentType<StoryArgs>` to bridge
-188	// the incompatible shapes. This is safe because the render function fully
-189	// controls how StoryArgs maps to props — component is only used for autodocs.
-190	const meta: Meta<StoryArgs> = {
-191	  component: GameConfigForm as unknown as ComponentType<StoryArgs>,
-192	  args: {
-193	    mode: 'easy',
-194	    rounds: 5,
-195	  },
-196	  argTypes: {
-197	    mode: {
-198	      control: { type: 'select' },
-199	      options: ['easy', 'hard'] satisfies GameMode[],
-200	    },
-201	    rounds: {
-202	      control: { type: 'range', min: 1, max: 20, step: 1 },
-203	    },
-204	  },
-205	  render: ({ mode, rounds, onSubmit }) => (
-206	    <GameConfigForm config={{ mode, rounds }} onSubmit={onSubmit} />
-207	  ),
-208	};
-209	```
-210	
-211	The Controls panel now shows individual `mode` and `rounds` inputs, and the rendered story reflects them. Reuse this pattern for any nested object — never let a JSON blob appear in Controls.
-212	
-213	## Playground Pattern
-214	
-215	The goal: one `Default` story where **every** UI behaviour is reachable by flipping controls. Designers and QA get a single URL to explore the full component surface.
-216	
-217	### What belongs in `Default`
-218	
-219	- Every string-union / enum prop → `select` or `radio` control, so switching values swaps the visual in place.
-220	- Every boolean prop → `boolean` control.
-221	- Every bounded numeric prop → `range` control.
-222	- Every text / list / color prop → appropriate control.
-223	- Every callback → `fn()` spy in `args` (logs to [Actions panel](https://storybook.js.org/docs/essentials/actions)).
-224	- Nested config objects → flattened into top-level args and reassembled in a `render` function (see "Complex Object Props").
-225	
-226	If a UI behaviour isn't reachable through the Playground, the Playground is incomplete — add the control before adding a new story.
-227	
-228	### When to Add Auxiliary Stories
-229	
-230	Only add a named story beyond `Default` when the scenario **cannot** be expressed by the Playground's control surface. Typical reasons:
-231	
-232	- **Stateful wrappers that can't be modeled as a prop.** Example: `EncouragementAnnouncer` has a `ReplayTrigger` story because the component's `visible` prop is toggled by a local `useState` wrapper — the Playground shows the "start visible" state; `ReplayTrigger` shows the "user must click to show it" flow. Both are useful; neither is expressible purely through controls.
-233	- **Pinned theme or viewport** that's meaningfully different (e.g., a high-contrast-only edge case). See "Themes per Story" and "Viewport per Story".
-234	- **`play()` assertions** that drive a specific interaction sequence (see "Optional: Interaction Tests with `play()`").
-235	
-236	Do **not** add auxiliary stories for:
-237	
-238	- Per-enum-value snapshots (the `variant` select control already covers these).
-239	- State variants like `Loading` / `Error` / `Empty` when those states are reachable by toggling a prop.
-240	- Edge cases like `LongText` / `ManyItems` — change the value in the control; if it's a common demo input, add it as a preset via `argTypes: { foo: { options: [...], mapping: {...} } }` rather than a new story.
-241	- **Alt-skin previews.** The classic skin is already applied globally (see "Default Skin Is Applied Globally"). If you need to preview a different skin, put it in a sibling `*.skin.stories.tsx` file — not as a named story in the main file.
-242	
-243	Auxiliary story names use PascalCase and describe what they uniquely add: `ReplayTrigger`, `HighContrast`, `SubmitsValidForm`.
-244	
-245	## Callbacks & Listeners
-246	
-247	### Default: rely on the Actions panel
-248	
-249	Wire every callback prop to a [`fn()` spy](https://storybook.js.org/docs/essentials/actions) from `storybook/test`:
-250	
-251	```tsx
-252	import { fn } from 'storybook/test';
-253	
-254	const meta: Meta<typeof MyComponent> = {
-255	  args: {
-256	    onClick: fn(),
-257	    onSubmit: fn(),
-258	    onDismiss: fn(),
-259	  },
-260	};
-261	```
-262	
-263	The Actions panel logs every invocation with arguments — enough for most components to verify callbacks fire. The same spy is assertable from `play()` if you later add interaction tests.
-264	
-265	> **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
-266	
-267	### Add trigger buttons only when a callback can't be reached through controls
-268	
-269	If a component subscribes to something, runs an effect, or fires a callback that the Playground's controls alone can't invoke, add a UI trigger button in the `render` function. Example: [EncouragementAnnouncer](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) wraps the component in a `ShowTrigger` helper with "Show" + "Dismiss" buttons because the component's visibility is driven by a one-shot state transition that no single control can replay.
-270	
-271	Rule of thumb: if you can observe the callback by toggling a control, use controls. If you need to replay a one-shot sequence (show → dismiss → show again) to see the effect run, add a trigger button.
-272	
-273	## Optional: Interaction Tests with `play()`
-274	
-275	`play()` is **optional** in this project. Visual regression and end-to-end coverage live in Playwright (`e2e/visual.spec.ts`, `e2e/*.spec.ts`) against live app routes — see "Visual Regression Boundary". `play()` remains useful as supplementary in-Storybook interaction assertions when:
-276	
-277	- The component's primary flow is non-trivial and not already covered by an e2e test.
-278	- You want an assertion (keyboard-only flow, validation error appearing, focus management) that the Actions panel can't express.
-279	
-280	Add a `play()` to `Default` when the interaction is central, or create a dedicated named story per flow. Skip `play()` for pure-display components or when e2e coverage already asserts the same behaviour.
-281	
-282	Import helpers from `storybook/test`:
-283	
-284	```tsx
-285	import { userEvent, within, expect } from 'storybook/test';
-286	```
-287	
-288	### Patterns
-289	
-290	**Form submit happy path:**
-291	
-292	```tsx
-293	export const SubmitsValidName: Story = {
-294	  args: { mode: 'create' },
-295	  play: async ({ canvasElement }) => {
-296	    const canvas = within(canvasElement);
-297	    await userEvent.type(canvas.getByLabelText('Name'), 'My Game');
-298	    await userEvent.click(
-299	      canvas.getByRole('button', { name: /save/i }),
-300	    );
-301	    await expect(canvas.getByText(/saved/i)).toBeVisible();
-302	  },
-303	};
-304	```
-305	
-306	**Form validation:**
-307	
-308	```tsx
-309	export const ShowsErrorOnEmptyName: Story = {
-310	  args: { mode: 'create' },
-311	  play: async ({ canvasElement }) => {
-312	    const canvas = within(canvasElement);
-313	    await userEvent.click(
-314	      canvas.getByRole('button', { name: /save/i }),
-315	    );
-316	    await expect(canvas.getByText(/name is required/i)).toBeVisible();
-317	    await expect(canvas.getByLabelText('Name')).toHaveFocus();
-318	  },
-319	};
-320	```
-321	
-322	**Disabled-state assertion:**
-323	
-324	```tsx
-325	export const SubmitDisabledWhenInvalid: Story = {
-326	  args: { mode: 'create' },
-327	  play: async ({ canvasElement }) => {
-328	    const canvas = within(canvasElement);
-329	    await expect(
-330	      canvas.getByRole('button', { name: /save/i }),
-331	    ).toBeDisabled();
-332	  },
-333	};
-334	```
-335	
-336	**Keyboard-only flow:**
-337	
-338	```tsx
-339	export const ClosesOnEscape: Story = {
-340	  play: async ({ canvasElement }) => {
-341	    const canvas = within(canvasElement);
-342	    await userEvent.keyboard('{Escape}');
-343	    await expect(canvas.queryByRole('dialog')).toBeNull();
-344	  },
-345	};
-346	```
-347	
-348	### Naming Convention
-349	
-350	Name interaction stories after the flow, not the input: `SubmitsValidForm`, `ShowsErrorOnEmptyName`, `ClosesOnEscape`. Keep them small and single-purpose — one assertion path per story makes failures self-explanatory.
-351	
-352	## Default Skin Is Applied Globally
-353	
-354	`.storybook/preview.tsx` registers a `withDefaultSkin` decorator that wraps every
-355	story in:
-356	
-357	```tsx
-358	<div className="game-container skin-classic" style={classicSkin.tokens}>
-359	  <Story />
-360	</div>
-361	```
-362	
-363	Components that consume `--skin-*` tokens (tiles, slots, HUD, question bar,
-364	celebration overlays) render with sensible defaults **without any per-file
-365	wrapper**. Do not add your own classic-skin wrapper — it's redundant.
-366	
-367	### Overriding the default skin
-368	
-369	Alt-skin test files (`*.skin.stories.tsx` — see
-370	`src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx`) register a
-371	different skin with `registerSkin('<gameId>', demoSkin)` and let the game
-372	component mount its own inner `skin-${skin.id}` wrapper. CSS custom-property
-373	cascade on the inner wrapper overrides the outer classic defaults — no opt-out
-374	parameter or `decorators: []` override is needed.
-375	
-376	If a future story needs to visually preview alt-skin tokens **without mounting
-377	a game component** (e.g. a bare token-swatch preview), add an opt-out parameter
-378	to `withDefaultSkin` at that time. Until then, YAGNI.
-379	
-380	## A11y Is Enforced
-381	
-382	`.storybook/preview.tsx` sets `parameters.a11y.test: 'error'` globally. Every story is axe-checked, and any violation (including color-contrast) **fails `yarn test:storybook` and CI**. You cannot opt out for a new story.
-383	
-384	To tune a story that legitimately needs a violation (e.g., demonstrating fallback rendering of broken markup), override at the story level — sparingly, with a comment explaining why:
-385	
-386	```tsx
-387	export const LegacyMarkup: Story = {
-388	  args: {
-389	    /* ... */
-390	  },
-391	  // Demonstrates the deprecated <table> layout we still support for
-392	  // in-flight content; axe correctly flags the missing <th>.
-393	  parameters: { a11y: { test: 'todo' } },
-394	};
-395	```
-396	
-397	The default behavior is the right one — fix the violation in the component or in the story args before reaching for `test: 'todo'`.
-398	
-399	## Themes per Story
-400	
-401	Five themes are registered as global toolbar items in `.storybook/preview.tsx`: `light` (default), `dark`, `forest-light`, `forest-dark`, `high-contrast`. The toolbar lets users switch interactively.
-402	
-403	Pin a story to a specific theme when a variant is meaningfully different in that theme (e.g., a high-contrast-only edge case):
-404	
-405	```tsx
-406	export const HighContrast: Story = {
-407	  globals: { theme: 'high-contrast' },
-408	};
-409	```
-410	
-411	Don't add a `Dark` story for every component — the toolbar already covers that. Add per-story theme pins only when the variant exercises something theme-specific.
-412	
-413	## Viewport per Story
-414	
-415	Five viewports are registered globally in `.storybook/preview.tsx`:
-416	
-417	| Name              | Size                 |
-418	| ----------------- | -------------------- |
-419	| `mobileSm`        | 360×640              |
-420	| `mobileLg`        | 390×844              |
-421	| `tabletPortrait`  | 768×1024             |
-422	| `tabletLandscape` | 1024×768 _(default)_ |
-423	| `desktop`         | 1280×800             |
-424	
-425	Pin a story when a layout meaningfully differs at a breakpoint:
-426	
-427	```tsx
-428	export const Mobile: Story = {
-429	  parameters: { viewport: { defaultViewport: 'mobileSm' } },
-430	};
-431	```
-432	
-433	The toolbar lets users switch interactively, so add per-story viewport pins only when the variant is breakpoint-specific.
-434	
-435	## Mocking & Fixtures
-436	
-437	### Fixtures
-438	
-439	Don't inline large data blobs (word lists, configs, sample sentences) in stories. Move them to a co-located file and import:
-440	
-441	```tsx
-442	// MyComponent.fixtures.ts
-443	export const longWordList = ['antidisestablishmentarianism' /* ... */];
-444	
-445	// MyComponent.stories.tsx
-446	import { longWordList } from './MyComponent.fixtures';
-447	
-448	export const ManyItems: Story = {
-449	  args: { items: longWordList },
-450	};
-451	```
-452	
-453	There is no top-level `src/test/fixtures/` directory in the project; co-locate by default. If a fixture is reused across components, lift it to a sibling shared file when the second consumer appears, not before.
-454	
-455	### Randomness in `play()`
-456	
-457	For reproducible interaction tests, stub `Math.random` inside `play()`:
-458	
-459	```tsx
-460	export const PicksTheFirstOption: Story = {
-461	  play: async ({ canvasElement }) => {
-462	    globalThis.Math.random = () => 0.42;
-463	    // ... drive the interaction
-464	  },
-465	};
-466	```
-467	
-468	This mirrors the pattern in `e2e/visual.spec.ts` and `e2e/seed-math-random.ts`.
-469	
-470	### Timers
-471	
-472	Use `vi.useFakeTimers()` from Vitest if a story needs to advance time (the Storybook test-runner shares the Vitest runtime).
-473	
-474	### Network
-475	
-476	There is no MSW addon installed. If a story needs network mocking, install `msw-storybook-addon` first and document the addition; until then, prefer prop-injecting the data the component would have fetched.
-477	
-478	## Visual Regression Boundary
-479	
-480	**Stories are NOT a VR mechanism in this project.** Visual regression is hand-curated Playwright tests in `e2e/visual.spec.ts` that drive the live app routes through Docker (`yarn test:vr`). Adding a new story does not add a VR snapshot.
-481	
-482	What this means for authors:
-483	
-484	- Do **not** add `parameters: { chromatic: ... }` to stories — chromatic is not configured.
-485	- If a new component or visual state needs regression coverage, add a `test('@visual …', …)` block in `e2e/visual.spec.ts` that loads the relevant route (`/en/game/...`, etc.) and calls `expect(page).toHaveScreenshot(...)`.
-486	- Storybook covers development, manual review, a11y, and `play()` interaction tests. VR covers pixel guards on user-facing routes. The two layers don't overlap.
-487	
-488	Mounting components directly in Playwright (component testing) is not currently set up; if a future story needs an isolated VR shot, add Playwright Component Testing to the project first.
-489	
-490	## Running Storybook Tests
-491	
-492	Multiple agents may be running Storybook simultaneously (e.g. parallel worktrees). **Never assume an existing Storybook instance is yours.** Always start a fresh one.
-493	
-494	### Workflow
-495	
-496	```bash
-497	# 1. Find a free port (start at 6006, scan upward)
-498	PORT=6006
-499	while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
-500	
-501	# 2. Start Storybook on that port
-502	yarn storybook --port $PORT --ci &
-503	STORYBOOK_PID=$!
-504	
-505	# 3. Wait until it responds
-506	until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 2; done
-507	
-508	# 4. Run tests against that port
-509	yarn test:storybook --url http://127.0.0.1:$PORT
-510	TEST_EXIT=$?
-511	
-512	# 5. Kill only on success — leave running on failure so you can debug
-513	if [ $TEST_EXIT -eq 0 ]; then
-514	  kill $STORYBOOK_PID
-515	fi
-516	
-517	exit $TEST_EXIT
-518	```
-519	
-520	### Rules
-521	
-522	- **Always start your own instance** — never use a Storybook you didn't start
-523	- **Always pass `--url`** when running `yarn test:storybook` so it targets your port
-524	- **Kill on green, leave on red** — a running Storybook lets you inspect failures in the browser
-525	- **Never use `SKIP_STORYBOOK=1` to work around a port conflict** — that skips the tests entirely; find a free port instead
-526	
-527	## Audit / Upgrade Checklist
-528	
-529	When you edit an existing story file for any reason, run this checklist before opening the PR. Each item is a yes/no gate — if any answer is "no," either fix or justify in the PR description.
-530	
-531	- [ ] A single `Default` story exists and every UI-affecting prop is reachable from its controls (the Playground)
-532	- [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
-533	- [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in [Actions panel](https://storybook.js.org/docs/essentials/actions); usable in `play()` if needed) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
-534	- [ ] Auxiliary named stories (if any) exist only for scenarios the Playground's controls can't express — see "When to Add Auxiliary Stories". Remove named stories that duplicate what a control toggle would show.
-535	- [ ] Callbacks that can't be triggered via controls have a UI trigger button in `render` (see "Callbacks & Listeners"); otherwise Actions panel is enough
-536	- [ ] `play()` is used only where it adds assertion value not covered by Playwright e2e — it's optional, not required
-537	- [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
-538	- [ ] No per-file classic-skin wrapper (`<div className="game-container skin-classic" style={classicSkin.tokens}>`) — the global `withDefaultSkin` decorator already applies this. Remove inline wrappers; keep `classicSkin` imports only if passed as a component prop.
-539	- [ ] No `parameters.chromatic` (we don't use it)
-540	- [ ] Story file passes `yarn test:storybook --url <port>` locally
-541	
-542	If you're touching the file, leave it better than you found it.
-543	
-544	## Common Mistakes
-545	
-546	| Mistake                                                  | Fix                                                                                                                                                                              |
-547	| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-548	| `import React from 'react'` at top                       | Remove — not needed                                                                                                                                                              |
-549	| Named export for meta (`export const meta`)              | Use `export default meta`                                                                                                                                                        |
-550	| Default export for stories (`export default Default`)    | Use `export const Default: Story = {}`                                                                                                                                           |
-551	| Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
-552	| Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
-553	| Named story for every enum value                         | Use a `select`/`radio` control; enum-per-value stories are only justified for pinned-theme/viewport or `play()` assertions                                                       |
-554	| Callback only reachable by a one-shot interaction        | Add a trigger button in `render` (see EncouragementAnnouncer) — don't rely on a static prop                                                                                      |
-555	| Forgetting `withRouter` for routing components           | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
-556	| Forgetting `withDb` for DB/settings hooks                | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
-557	| Adding `ThemeProvider` decorator                         | Already global — skip                                                                                                                                                            |
-558	| `SKIP_STORYBOOK=1` because port 6006 is in use           | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
-559	| Running `yarn test:storybook` without `--url`            | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
-560	| Raw JSON control for an enum/union prop                  | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
-561	| Whole-config JSON blob as a single control               | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
-562	| Relying on global `argTypesRegex` for Actions panel      | Doesn't work for DOM-extended props under react-docgen — wire `args: { onFoo: fn() }` from `storybook/test` explicitly                                                           |
-563	| Adding `parameters.chromatic`                            | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
-564	| Trying to opt out of a11y on a new story                 | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
-565	| Inlining `Math.random()` results in story args           | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
+1 ---
+2 name: write-storybook
+3 description: Use when adding, writing, or refactoring Storybook stories for React components in this project — enforces the single-Default Playground pattern, controls policy, decorators, and a11y rules
+4 ---
+5 
+6 # Write Storybook
+7 
+8 ## Overview
+9 
+10 Stories live co-located with their component (`ComponentName.stories.tsx`). This project uses `@storybook/react` with TanStack Router and `next-themes`.
+11 
+12 **The standard pattern is the "Playground"**: every component gets a **single `Default` story** driven by proper interactive controls (selects, booleans, ranges, color pickers, text inputs). The control surface is the playground — designers, QA, and developers explore every UI behaviour by tweaking controls, not by clicking between a dozen named stories.
+13 
+14 This pattern applies when:
+15 
+16 1. Creating a new story file.
+17 2. Auditing or refactoring an existing story file.
+18 3. Making changes to a component whose UI/API surface affects its story.
+19 
+20 Additional named stories are only added when a scenario genuinely **cannot** be expressed through the Playground's controls (see "When to Add Auxiliary Stories" below). Reference implementations:
+21 
+22 - [AnswerGame.stories.tsx](../../../src/components/answer-game/AnswerGame/AnswerGame.stories.tsx)
+23 - [InstructionsOverlay.stories.tsx](../../../src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx)
+24 - [ProgressHUD.stories.tsx](../../../src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx)
+25 - [EncouragementAnnouncer.stories.tsx](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) (shows the trigger-button pattern for callbacks that can't be reached by controls alone)
+26 
+27 ## Rules
+28 
+29 - **Always use `export default meta`** for the meta object (framework config file — the one exception to the named-export rule)
+30 - **All story variants use named exports**: `export const Default: Story = {}`
+31 - Every story file **must include a `Default` story** — this is the Playground; every prop that affects UI must be driveable from its controls
+32 - Use `tags: ['autodocs']` in meta unless there's a reason not to
+33 - Do NOT import `React` — JSX transform handles it
+34 - Auxiliary named stories are allowed only when a scenario can't be expressed by toggling controls on `Default` (see "When to Add Auxiliary Stories")
+35 
+36 ## File Structure
+37 
+38 ```
+39 src/components/MyComponent.stories.tsx
+40 ```
+41 
+42 ## Minimal Template
+43 
+44 The Playground pattern: a single `Default` story, with every UI-affecting prop wired as a control on `meta`. Props are set once in `meta.args` so they serve as the Playground's baseline.
+45 
+46 ```tsx
+47 import { fn } from 'storybook/test';
+48 import { MyComponent } from './MyComponent';
+49 import type { Meta, StoryObj } from '@storybook/react';
+50 
+51 const meta: Meta<typeof MyComponent> = {
+52   component: MyComponent,
+53   tags: ['autodocs'],
+54   args: {
+55     // Baseline values for the Playground — one place, drives Default.
+56     onClick: fn(), // Actions panel logs every invocation (see "Callbacks & Listeners")
+57   },
+58   argTypes: {
+59     // A control for every non-callback, non-JSX prop. See "Controls Policy" below.
+60   },
+61 };
+62 export default meta;
+63 
+64 type Story = StoryObj<typeof MyComponent>;
+65 
+66 // The Playground. Empty body — it inherits meta.args and renders the
+67 // interactive control surface.
+68 export const Default: Story = {};
+69 ```
+70 
+71 Extra named stories are only added when a scenario can't be expressed by flipping controls on `Default` — see "When to Add Auxiliary Stories".
+72 
+73 ## Decorators
+74 
+75 Use decorators when the component depends on context providers:
+76 
+77 | Needs                                                   | Decorator                                                  |
+78 | ------------------------------------------------------- | ---------------------------------------------------------- |
+79 | TanStack Router (`useNavigate`, `Link`, params)         | `withRouter` from `../../.storybook/decorators/withRouter` |
+80 | Database / RxDB (`useSettings`, `useRxDB`, any DB hook) | `withDb` from `../../.storybook/decorators/withDb`         |
+81 | Theme toggle                                            | `withTheme` — already applied globally via `preview.tsx`   |
+82 | ThemeProvider                                           | Already applied globally — do NOT add again                |
+83 | Classic skin tokens (`--skin-*`)                        | Applied globally via `preview.tsx` — do NOT add again      |
+84 
+85 When both are needed, put `withDb` first (outermost), then `withRouter`:
+86 
+87 ```tsx
+88 import { withDb } from '../../.storybook/decorators/withDb';
+89 import { withRouter } from '../../.storybook/decorators/withRouter';
+90 
+91 const meta: Meta<typeof MyComponent> = {
+92   component: MyComponent,
+93   tags: ['autodocs'],
+94   decorators: [withDb, withRouter],
+95 };
+96 ```
+97 
+98 When a story wraps in `AnswerGameProvider`, `withDb` must come **before** the provider wrapper:
+99 
+100 ```tsx
+101 decorators: [
+102   withDb,
+103   (Story) => (
+104     <AnswerGameProvider config={storyConfig}>
+105       <Story />
+106     </AnswerGameProvider>
+107   ),
+108 ],
+109 ```
+110 
+111 ## Controls Policy
+112 
+113 Every prop that isn't a callback, JSX node, or complex object MUST have an explicit `argTypes` entry with a proper interactive control. **Raw JSON object inputs in the Controls panel are not acceptable** — they make stories useless as a playground for designers and QA.
+114 
+115 ### Mapping
+116 
+117 | Prop type                    | Control                                                                                         |
+118 | ---------------------------- | ----------------------------------------------------------------------------------------------- |
+119 | String union / enum          | `control: { type: 'select' }` with `options: [...]` (or `'radio'` for ≤4 options)               |
+120 | Boolean                      | `control: 'boolean'`                                                                            |
+121 | Bounded number               | `control: { type: 'range', min, max, step }`                                                    |
+122 | Free-text                    | `control: 'text'`                                                                               |
+123 | Color                        | `control: 'color'`                                                                              |
+124 | Multi-select array of unions | `control: 'multi-select'` with `options`                                                        |
+125 | Callback (`onFoo`)           | `args: { onFoo: fn() }` from `storybook/test` (spy shows in Actions panel + usable in `play()`) |
+126 | JSX / ReactNode              | `control: false`                                                                                |
+127 
+128 ### Example
+129 
+130 ```tsx
+131 const meta: Meta<typeof MyButton> = {
+132   component: MyButton,
+133   tags: ['autodocs'],
+134   argTypes: {
+135     variant: {
+136       control: { type: 'select' },
+137       options: ['primary', 'secondary', 'ghost'],
+138     },
+139     size: {
+140       control: { type: 'radio' },
+141       options: ['sm', 'md', 'lg'],
+142     },
+143     disabled: { control: 'boolean' },
+144     rounds: {
+145       control: { type: 'range', min: 1, max: 20, step: 1 },
+146     },
+147     icon: { control: false }, // ReactNode
+148   },
+149   args: {
+150     onClick: fn(), // from 'storybook/test' — spy shows in Actions panel + usable in play()
+151   },
+152 };
+153 ```
+154 
+155 > **Why `fn()` and not `argTypes: { onClick: { action: 'clicked' } }`?** Both log to the Actions panel, but `fn()` doubles as a spy you can assert on from `play()` (`await expect(args.onClick).toHaveBeenCalled()`). Prefer `fn()` for consistency.
+156 >
+157 > **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
+158 
+159 ## Complex Object Props
+160 
+161 When a component takes a config-shaped object (e.g., a game `config` with mode + difficulty + counts), do NOT expose the whole object as a single JSON control. Break each meaningful field into a top-level arg and assemble the object in a custom `render` function.
+162 
+163 ```tsx
+164 import { type ComponentType } from 'react';
+165 import type { Meta, StoryObj } from '@storybook/react';
+166 import { GameConfigForm } from './GameConfigForm';
+167 
+168 type GameMode = 'easy' | 'hard';
+169 
+170 interface GameConfig {
+171   mode: GameMode;
+172   rounds: number;
+173 }
+174 
+175 interface GameConfigFormProps {
+176   config: GameConfig;
+177   onSubmit: (config: GameConfig) => void;
+178 }
+179 
+180 interface StoryArgs {
+181   mode: GameMode;
+182   rounds: number;
+183   onSubmit: (config: GameConfig) => void;
+184 }
+185 
+186 // Double cast required: StoryArgs is a flat subset of GameConfigFormProps,
+187 // so TypeScript requires `as unknown as ComponentType<StoryArgs>` to bridge
+188 // the incompatible shapes. This is safe because the render function fully
+189 // controls how StoryArgs maps to props — component is only used for autodocs.
+190 const meta: Meta<StoryArgs> = {
+191   component: GameConfigForm as unknown as ComponentType<StoryArgs>,
+192   args: {
+193     mode: 'easy',
+194     rounds: 5,
+195   },
+196   argTypes: {
+197     mode: {
+198       control: { type: 'select' },
+199       options: ['easy', 'hard'] satisfies GameMode[],
+200     },
+201     rounds: {
+202       control: { type: 'range', min: 1, max: 20, step: 1 },
+203     },
+204   },
+205   render: ({ mode, rounds, onSubmit }) => (
+206     <GameConfigForm config={{ mode, rounds }} onSubmit={onSubmit} />
+207   ),
+208 };
+209 ```
+210 
+211 The Controls panel now shows individual `mode` and `rounds` inputs, and the rendered story reflects them. Reuse this pattern for any nested object — never let a JSON blob appear in Controls.
+212 
+213 ## Playground Pattern
+214 
+215 The goal: one `Default` story where **every** UI behaviour is reachable by flipping controls. Designers and QA get a single URL to explore the full component surface.
+216 
+217 ### What belongs in `Default`
+218 
+219 - Every string-union / enum prop → `select` or `radio` control, so switching values swaps the visual in place.
+220 - Every boolean prop → `boolean` control.
+221 - Every bounded numeric prop → `range` control.
+222 - Every text / list / color prop → appropriate control.
+223 - Every callback → `fn()` spy in `args` (logs to [Actions panel](https://storybook.js.org/docs/essentials/actions)).
+224 - Nested config objects → flattened into top-level args and reassembled in a `render` function (see "Complex Object Props").
+225 
+226 If a UI behaviour isn't reachable through the Playground, the Playground is incomplete — add the control before adding a new story.
+227 
+228 ### When to Add Auxiliary Stories
+229 
+230 Only add a named story beyond `Default` when the scenario **cannot** be expressed by the Playground's control surface. Typical reasons:
+231 
+232 - **Stateful wrappers that can't be modeled as a prop.** Example: `EncouragementAnnouncer` has a `ReplayTrigger` story because the component's `visible` prop is toggled by a local `useState` wrapper — the Playground shows the "start visible" state; `ReplayTrigger` shows the "user must click to show it" flow. Both are useful; neither is expressible purely through controls.
+233 - **Pinned theme or viewport** that's meaningfully different (e.g., a high-contrast-only edge case). See "Themes per Story" and "Viewport per Story".
+234 - **`play()` assertions** that drive a specific interaction sequence (see "Optional: Interaction Tests with `play()`").
+235 
+236 Do **not** add auxiliary stories for:
+237 
+238 - Per-enum-value snapshots (the `variant` select control already covers these).
+239 - State variants like `Loading` / `Error` / `Empty` when those states are reachable by toggling a prop.
+240 - Edge cases like `LongText` / `ManyItems` — change the value in the control; if it's a common demo input, add it as a preset via `argTypes: { foo: { options: [...], mapping: {...} } }` rather than a new story.
+241 - **Alt-skin previews.** The classic skin is already applied globally (see "Default Skin Is Applied Globally"). If you need to preview a different skin, put it in a sibling `*.skin.stories.tsx` file — not as a named story in the main file.
+242 
+243 Auxiliary story names use PascalCase and describe what they uniquely add: `ReplayTrigger`, `HighContrast`, `SubmitsValidForm`.
+244 
+245 ## Callbacks & Listeners
+246 
+247 ### Default: rely on the Actions panel
+248 
+249 Wire every callback prop to a [`fn()` spy](https://storybook.js.org/docs/essentials/actions) from `storybook/test`:
+250 
+251 ```tsx
+252 import { fn } from 'storybook/test';
+253 
+254 const meta: Meta<typeof MyComponent> = {
+255   args: {
+256     onClick: fn(),
+257     onSubmit: fn(),
+258     onDismiss: fn(),
+259   },
+260 };
+261 ```
+262 
+263 The Actions panel logs every invocation with arguments — enough for most components to verify callbacks fire. The same spy is assertable from `play()` if you later add interaction tests.
+264 
+265 > **Note:** `.storybook/preview.tsx` sets `actions.argTypesRegex: '^on[A-Z].*'` globally, but it only wires props already in `argTypes`. Since this repo uses the default react-docgen (which does not expand `React.ComponentProps<'button'>` and similar DOM-extended types), most handler props never appear in inferred `argTypes` — so the regex matches nothing for them. Always wire `fn()` explicitly.
+266 
+267 ### Add trigger buttons only when a callback can't be reached through controls
+268 
+269 If a component subscribes to something, runs an effect, or fires a callback that the Playground's controls alone can't invoke, add a UI trigger button in the `render` function. Example: [EncouragementAnnouncer](../../../src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx) wraps the component in a `ShowTrigger` helper with "Show" + "Dismiss" buttons because the component's visibility is driven by a one-shot state transition that no single control can replay.
+270 
+271 Rule of thumb: if you can observe the callback by toggling a control, use controls. If you need to replay a one-shot sequence (show → dismiss → show again) to see the effect run, add a trigger button.
+272 
+273 ## Optional: Interaction Tests with `play()`
+274 
+275 `play()` is **optional** in this project. Visual regression and end-to-end coverage live in Playwright (`e2e/visual.spec.ts`, `e2e/*.spec.ts`) against live app routes — see "Visual Regression Boundary". `play()` remains useful as supplementary in-Storybook interaction assertions when:
+276 
+277 - The component's primary flow is non-trivial and not already covered by an e2e test.
+278 - You want an assertion (keyboard-only flow, validation error appearing, focus management) that the Actions panel can't express.
+279 
+280 Add a `play()` to `Default` when the interaction is central, or create a dedicated named story per flow. Skip `play()` for pure-display components or when e2e coverage already asserts the same behaviour.
+281 
+282 Import helpers from `storybook/test`:
+283 
+284 ```tsx
+285 import { userEvent, within, expect } from 'storybook/test';
+286 ```
+287 
+288 ### Patterns
+289 
+290 **Form submit happy path:**
+291 
+292 ```tsx
+293 export const SubmitsValidName: Story = {
+294   args: { mode: 'create' },
+295   play: async ({ canvasElement }) => {
+296     const canvas = within(canvasElement);
+297     await userEvent.type(canvas.getByLabelText('Name'), 'My Game');
+298     await userEvent.click(
+299       canvas.getByRole('button', { name: /save/i }),
+300     );
+301     await expect(canvas.getByText(/saved/i)).toBeVisible();
+302   },
+303 };
+304 ```
+305 
+306 **Form validation:**
+307 
+308 ```tsx
+309 export const ShowsErrorOnEmptyName: Story = {
+310   args: { mode: 'create' },
+311   play: async ({ canvasElement }) => {
+312     const canvas = within(canvasElement);
+313     await userEvent.click(
+314       canvas.getByRole('button', { name: /save/i }),
+315     );
+316     await expect(canvas.getByText(/name is required/i)).toBeVisible();
+317     await expect(canvas.getByLabelText('Name')).toHaveFocus();
+318   },
+319 };
+320 ```
+321 
+322 **Disabled-state assertion:**
+323 
+324 ```tsx
+325 export const SubmitDisabledWhenInvalid: Story = {
+326   args: { mode: 'create' },
+327   play: async ({ canvasElement }) => {
+328     const canvas = within(canvasElement);
+329     await expect(
+330       canvas.getByRole('button', { name: /save/i }),
+331     ).toBeDisabled();
+332   },
+333 };
+334 ```
+335 
+336 **Keyboard-only flow:**
+337 
+338 ```tsx
+339 export const ClosesOnEscape: Story = {
+340   play: async ({ canvasElement }) => {
+341     const canvas = within(canvasElement);
+342     await userEvent.keyboard('{Escape}');
+343     await expect(canvas.queryByRole('dialog')).toBeNull();
+344   },
+345 };
+346 ```
+347 
+348 ### Naming Convention
+349 
+350 Name interaction stories after the flow, not the input: `SubmitsValidForm`, `ShowsErrorOnEmptyName`, `ClosesOnEscape`. Keep them small and single-purpose — one assertion path per story makes failures self-explanatory.
+351 
+352 ## Default Skin Is Applied Globally
+353 
+354 `.storybook/preview.tsx` registers a `withDefaultSkin` decorator that wraps every
+355 story in:
+356 
+357 ```tsx
+358 <div className="game-container skin-classic" style={classicSkin.tokens}>
+359   <Story />
+360 </div>
+361 ```
+362 
+363 Components that consume `--skin-*` tokens (tiles, slots, HUD, question bar,
+364 celebration overlays) render with sensible defaults **without any per-file
+365 wrapper**. Do not add your own classic-skin wrapper — it's redundant.
+366 
+367 ### Overriding the default skin
+368 
+369 Alt-skin test files (`*.skin.stories.tsx` — see
+370 `src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx`) register a
+371 different skin with `registerSkin('<gameId>', demoSkin)` and let the game
+372 component mount its own inner `skin-${skin.id}` wrapper. CSS custom-property
+373 cascade on the inner wrapper overrides the outer classic defaults — no opt-out
+374 parameter or `decorators: []` override is needed.
+375 
+376 If a future story needs to visually preview alt-skin tokens **without mounting
+377 a game component** (e.g. a bare token-swatch preview), add an opt-out parameter
+378 to `withDefaultSkin` at that time. Until then, YAGNI.
+379 
+380 ## A11y Is Enforced
+381 
+382 `.storybook/preview.tsx` sets `parameters.a11y.test: 'error'` globally. Every story is axe-checked, and any violation (including color-contrast) **fails `yarn test:storybook` and CI**. You cannot opt out for a new story.
+383 
+384 To tune a story that legitimately needs a violation (e.g., demonstrating fallback rendering of broken markup), override at the story level — sparingly, with a comment explaining why:
+385 
+386 ```tsx
+387 export const LegacyMarkup: Story = {
+388   args: {
+389     /* ... */
+390   },
+391   // Demonstrates the deprecated <table> layout we still support for
+392   // in-flight content; axe correctly flags the missing <th>.
+393   parameters: { a11y: { test: 'todo' } },
+394 };
+395 ```
+396 
+397 The default behavior is the right one — fix the violation in the component or in the story args before reaching for `test: 'todo'`.
+398 
+399 ## Themes per Story
+400 
+401 Five themes are registered as global toolbar items in `.storybook/preview.tsx`: `light` (default), `dark`, `forest-light`, `forest-dark`, `high-contrast`. The toolbar lets users switch interactively.
+402 
+403 Pin a story to a specific theme when a variant is meaningfully different in that theme (e.g., a high-contrast-only edge case):
+404 
+405 ```tsx
+406 export const HighContrast: Story = {
+407   globals: { theme: 'high-contrast' },
+408 };
+409 ```
+410 
+411 Don't add a `Dark` story for every component — the toolbar already covers that. Add per-story theme pins only when the variant exercises something theme-specific.
+412 
+413 ## Viewport per Story
+414 
+415 Five viewports are registered globally in `.storybook/preview.tsx`:
+416 
+417 | Name              | Size                 |
+418 | ----------------- | -------------------- |
+419 | `mobileSm`        | 360×640              |
+420 | `mobileLg`        | 390×844              |
+421 | `tabletPortrait`  | 768×1024             |
+422 | `tabletLandscape` | 1024×768 _(default)_ |
+423 | `desktop`         | 1280×800             |
+424 
+425 Pin a story when a layout meaningfully differs at a breakpoint:
+426 
+427 ```tsx
+428 export const Mobile: Story = {
+429   parameters: { viewport: { defaultViewport: 'mobileSm' } },
+430 };
+431 ```
+432 
+433 The toolbar lets users switch interactively, so add per-story viewport pins only when the variant is breakpoint-specific.
+434 
+435 ## Mocking & Fixtures
+436 
+437 ### Fixtures
+438 
+439 Don't inline large data blobs (word lists, configs, sample sentences) in stories. Move them to a co-located file and import:
+440 
+441 ```tsx
+442 // MyComponent.fixtures.ts
+443 export const longWordList = ['antidisestablishmentarianism' /* ... */];
+444 
+445 // MyComponent.stories.tsx
+446 import { longWordList } from './MyComponent.fixtures';
+447 
+448 export const ManyItems: Story = {
+449   args: { items: longWordList },
+450 };
+451 ```
+452 
+453 There is no top-level `src/test/fixtures/` directory in the project; co-locate by default. If a fixture is reused across components, lift it to a sibling shared file when the second consumer appears, not before.
+454 
+455 ### Randomness in `play()`
+456 
+457 For reproducible interaction tests, stub `Math.random` inside `play()`:
+458 
+459 ```tsx
+460 export const PicksTheFirstOption: Story = {
+461   play: async ({ canvasElement }) => {
+462     globalThis.Math.random = () => 0.42;
+463     // ... drive the interaction
+464   },
+465 };
+466 ```
+467 
+468 This mirrors the pattern in `e2e/visual.spec.ts` and `e2e/seed-math-random.ts`.
+469 
+470 ### Timers
+471 
+472 Use `vi.useFakeTimers()` from Vitest if a story needs to advance time (the Storybook test-runner shares the Vitest runtime).
+473 
+474 ### Network
+475 
+476 There is no MSW addon installed. If a story needs network mocking, install `msw-storybook-addon` first and document the addition; until then, prefer prop-injecting the data the component would have fetched.
+477 
+478 ## Visual Regression Boundary
+479 
+480 **Stories are NOT a VR mechanism in this project.** Visual regression is hand-curated Playwright tests in `e2e/visual.spec.ts` that drive the live app routes through Docker (`yarn test:vr`). Adding a new story does not add a VR snapshot.
+481 
+482 What this means for authors:
+483 
+484 - Do **not** add `parameters: { chromatic: ... }` to stories — chromatic is not configured.
+485 - If a new component or visual state needs regression coverage, add a `test('@visual …', …)` block in `e2e/visual.spec.ts` that loads the relevant route (`/en/game/...`, etc.) and calls `expect(page).toHaveScreenshot(...)`.
+486 - Storybook covers development, manual review, a11y, and `play()` interaction tests. VR covers pixel guards on user-facing routes. The two layers don't overlap.
+487 
+488 Mounting components directly in Playwright (component testing) is not currently set up; if a future story needs an isolated VR shot, add Playwright Component Testing to the project first.
+489 
+490 ## Running Storybook Tests
+491 
+492 Multiple agents may be running Storybook simultaneously (e.g. parallel worktrees). **Never assume an existing Storybook instance is yours.** Always start a fresh one.
+493 
+494 ### Workflow
+495 
+496 ```bash
+497 # 1. Find a free port (start at 6006, scan upward)
+498 PORT=6006
+499 while lsof -i :$PORT > /dev/null 2>&1; do PORT=$((PORT + 1)); done
+500 
+501 # 2. Start Storybook on that port
+502 yarn storybook --port $PORT --ci &
+503 STORYBOOK_PID=$!
+504 
+505 # 3. Wait until it responds
+506 until curl -s http://127.0.0.1:$PORT > /dev/null 2>&1; do sleep 2; done
+507 
+508 # 4. Run tests against that port
+509 yarn test:storybook --url http://127.0.0.1:$PORT
+510 TEST_EXIT=$?
+511 
+512 # 5. Kill only on success — leave running on failure so you can debug
+513 if [ $TEST_EXIT -eq 0 ]; then
+514   kill $STORYBOOK_PID
+515 fi
+516 
+517 exit $TEST_EXIT
+518 ```
+519 
+520 ### Rules
+521 
+522 - **Always start your own instance** — never use a Storybook you didn't start
+523 - **Always pass `--url`** when running `yarn test:storybook` so it targets your port
+524 - **Kill on green, leave on red** — a running Storybook lets you inspect failures in the browser
+525 - **Never use `SKIP_STORYBOOK=1` to work around a port conflict** — that skips the tests entirely; find a free port instead
+526 
+527 ## Audit / Upgrade Checklist
+528 
+529 When you edit an existing story file for any reason, run this checklist before opening the PR. Each item is a yes/no gate — if any answer is "no," either fix or justify in the PR description.
+530 
+531 - [ ] A single `Default` story exists and every UI-affecting prop is reachable from its controls (the Playground)
+532 - [ ] All non-callback, non-JSX props have proper `argTypes` controls (no raw JSON for enums/booleans/numbers/colors)
+533 - [ ] Every `onFoo` handler wired to a `fn()` spy in `args` (shows in [Actions panel](https://storybook.js.org/docs/essentials/actions); usable in `play()` if needed) — do NOT rely on the global `argTypesRegex` alone; it only covers props already in `argTypes`, which react-docgen doesn't produce for DOM-extended props
+534 - [ ] Auxiliary named stories (if any) exist only for scenarios the Playground's controls can't express — see "When to Add Auxiliary Stories". Remove named stories that duplicate what a control toggle would show.
+535 - [ ] Callbacks that can't be triggered via controls have a UI trigger button in `render` (see "Callbacks & Listeners"); otherwise Actions panel is enough
+536 - [ ] `play()` is used only where it adds assertion value not covered by Playwright e2e — it's optional, not required
+537 - [ ] Decorators match current component dependencies (e.g., if the component started using `useSettings`, `withDb` is now required)
+538 - [ ] No per-file classic-skin wrapper (`<div className="game-container skin-classic" style={classicSkin.tokens}>`) — the global `withDefaultSkin` decorator already applies this. Remove inline wrappers; keep `classicSkin` imports only if passed as a component prop.
+539 - [ ] No `parameters.chromatic` (we don't use it)
+540 - [ ] Story file passes `yarn test:storybook --url <port>` locally
+541 
+542 If you're touching the file, leave it better than you found it.
+543 
+544 ## Common Mistakes
+545 
+546 | Mistake                                                  | Fix                                                                                                                                                                              |
+547 | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+548 | `import React from 'react'` at top                       | Remove — not needed                                                                                                                                                              |
+549 | Named export for meta (`export const meta`)              | Use `export default meta`                                                                                                                                                        |
+550 | Default export for stories (`export default Default`)    | Use `export const Default: Story = {}`                                                                                                                                           |
+551 | Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
+552 | Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
+553 | Named story for every enum value                         | Use a `select`/`radio` control; enum-per-value stories are only justified for pinned-theme/viewport or `play()` assertions                                                       |
+554 | Callback only reachable by a one-shot interaction        | Add a trigger button in `render` (see EncouragementAnnouncer) — don't rely on a static prop                                                                                      |
+555 | Forgetting `withRouter` for routing components           | Check if component calls `useNavigate`, `Link`, or reads route params                                                                                                            |
+556 | Forgetting `withDb` for DB/settings hooks                | Check if component (or any provider it uses) calls `useRxDB`, `useSettings`, or any DB hook — includes `AnswerGameProvider` which calls `useGameTTS` → `useSettings` → `useRxDB` |
+557 | Adding `ThemeProvider` decorator                         | Already global — skip                                                                                                                                                            |
+558 | `SKIP_STORYBOOK=1` because port 6006 is in use           | Find a free port and start your own instance — never skip to avoid a conflict                                                                                                    |
+559 | Running `yarn test:storybook` without `--url`            | Without `--url` it defaults to 6006 and may hit the wrong agent's Storybook                                                                                                      |
+560 | Raw JSON control for an enum/union prop                  | Add `argTypes` with `select`/`radio` and explicit `options`                                                                                                                      |
+561 | Whole-config JSON blob as a single control               | Break into individual args + custom `render` (see "Complex Object Props")                                                                                                        |
+562 | Relying on global `argTypesRegex` for Actions panel      | Doesn't work for DOM-extended props under react-docgen — wire `args: { onFoo: fn() }` from `storybook/test` explicitly                                                           |
+563 | Adding `parameters.chromatic`                            | Remove — VR is in `e2e/visual.spec.ts`, not Storybook                                                                                                                            |
+564 | Trying to opt out of a11y on a new story                 | Don't — it's enforced. Fix the violation, or use `test: 'todo'` only with documented justification                                                                               |
+565 | Inlining `Math.random()` results in story args           | Pin via `globalThis.Math.random = () => N` inside `play()` for reproducibility                                                                                                   |
 566
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:23Z)**_
@@ -8421,54 +8561,55 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:24Z)**_
  `./worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx`
 
 ```text
-1	import { fn } from 'storybook/test';
-2	
-3	import { GameCard } from './GameCard';
-4	import { GameGrid } from './GameGrid';
-5	import type { Meta, StoryObj } from '@storybook/react';
-6	import type { ComponentType } from 'react';
-7	
-8	interface StoryArgs {
-9	  cardCount: number;
-10	  // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
-11	  cards?: never;
-12	}
-13	
-14	const meta: Meta<StoryArgs> = {
-15	  component: GameGrid as unknown as ComponentType<StoryArgs>,
-16	  tags: ['autodocs'],
-17	  args: {
-18	    cardCount: 3,
-19	  },
-20	  argTypes: {
-21	    cardCount: {
-22	      control: { type: 'range', min: 0, max: 12, step: 1 },
-23	    },
-24	    cards: { table: { disable: true } },
-25	  },
-26	  render: ({ cardCount }) => (
-27	    <GameGrid
-28	      cards={Array.from({ length: cardCount }, (_, i) => (
-29	        <GameCard
-30	          key={`card-${String(i)}`}
-31	          variant="default"
-32	          gameId="sort-numbers"
-33	          title={`Card ${String(i + 1)}`}
-34	          chips={['K', '1', '2']}
-35	          onPlay={fn()}
-36	          onOpenCog={fn()}
-37	        />
-38	      ))}
-39	    />
-40	  ),
-41	};
-42	export default meta;
-43	
-44	type Story = StoryObj<StoryArgs>;
-45	
-46	export const Default: Story = {};
+1 import { fn } from 'storybook/test';
+2 
+3 import { GameCard } from './GameCard';
+4 import { GameGrid } from './GameGrid';
+5 import type { Meta, StoryObj } from '@storybook/react';
+6 import type { ComponentType } from 'react';
+7 
+8 interface StoryArgs {
+9   cardCount: number;
+10   // Raw GameGrid prop shadowed by the cardCount bridge — hidden from Controls.
+11   cards?: never;
+12 }
+13 
+14 const meta: Meta<StoryArgs> = {
+15   component: GameGrid as unknown as ComponentType<StoryArgs>,
+16   tags: ['autodocs'],
+17   args: {
+18     cardCount: 3,
+19   },
+20   argTypes: {
+21     cardCount: {
+22       control: { type: 'range', min: 0, max: 12, step: 1 },
+23     },
+24     cards: { table: { disable: true } },
+25   },
+26   render: ({ cardCount }) => (
+27     <GameGrid
+28       cards={Array.from({ length: cardCount }, (_, i) => (
+29         <GameCard
+30           key={`card-${String(i)}`}
+31           variant="default"
+32           gameId="sort-numbers"
+33           title={`Card ${String(i + 1)}`}
+34           chips={['K', '1', '2']}
+35           onPlay={fn()}
+36           onOpenCog={fn()}
+37         />
+38       ))}
+39     />
+40   ),
+41 };
+42 export default meta;
+43 
+44 type Story = StoryObj<StoryArgs>;
+45 
+46 export const Default: Story = {};
 47
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:25Z)**_
@@ -8478,123 +8619,124 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:25Z)**_
  `./worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx`
 
 ```text
-1	import { fn } from 'storybook/test';
-2	
-3	import { GameCard } from './GameCard';
-4	import type { GameColorKey } from '@/lib/game-colors';
-5	import type { Meta, StoryObj } from '@storybook/react';
-6	import type { ComponentType } from 'react';
-7	import { GAME_COLOR_KEYS } from '@/lib/game-colors';
-8	
-9	type Variant = 'default' | 'customGame';
-10	
-11	interface StoryArgs {
-12	  variant: Variant;
-13	  gameId: string;
-14	  title: string;
-15	  chipsText: string;
-16	  customGameName: string;
-17	  customGameColor: GameColorKey;
-18	  bookmarkable: boolean;
-19	  isBookmarked: boolean;
-20	  // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
-21	  chips?: never;
-22	  cover?: never;
-23	  onPlay?: never;
-24	  onOpenCog?: never;
-25	  onToggleBookmark?: never;
-26	}
-27	
-28	const meta: Meta<StoryArgs> = {
-29	  component: GameCard as unknown as ComponentType<StoryArgs>,
-30	  tags: ['autodocs'],
-31	  parameters: { layout: 'centered' },
-32	  args: {
-33	    variant: 'default',
-34	    gameId: 'sort-numbers',
-35	    title: 'Count in Order',
-36	    chipsText: '🚀 Up, 5 numbers, 2s',
-37	    customGameName: 'Skip by 2',
-38	    customGameColor: 'indigo',
-39	    bookmarkable: false,
-40	    isBookmarked: false,
-41	  },
-42	  argTypes: {
-43	    variant: {
-44	      control: { type: 'radio' },
-45	      options: ['default', 'customGame'] satisfies Variant[],
-46	    },
-47	    gameId: { control: 'text' },
-48	    title: { control: 'text' },
-49	    chipsText: { control: 'text' },
-50	    customGameName: { control: 'text' },
-51	    customGameColor: {
-52	      control: { type: 'select' },
-53	      options: GAME_COLOR_KEYS,
-54	    },
-55	    bookmarkable: { control: 'boolean' },
-56	    isBookmarked: { control: 'boolean' },
-57	    chips: { table: { disable: true } },
-58	    cover: { table: { disable: true } },
-59	    onPlay: { table: { disable: true } },
-60	    onOpenCog: { table: { disable: true } },
-61	    onToggleBookmark: { table: { disable: true } },
-62	  },
-63	  render: ({
-64	    variant,
-65	    gameId,
-66	    title,
-67	    chipsText,
-68	    customGameName,
-69	    customGameColor,
-70	    bookmarkable,
-71	    isBookmarked,
-72	  }) => {
-73	    const chips = chipsText
-74	      .split(',')
-75	      .map((s) => s.trim())
-76	      .filter(Boolean);
-77	
-78	    const bookmarkProps = bookmarkable
-79	      ? { isBookmarked, onToggleBookmark: fn() }
-80	      : {};
-81	
-82	    return (
-83	      <div className="w-64">
-84	        {variant === 'customGame' ? (
-85	          <GameCard
-86	            variant="customGame"
-87	            gameId={gameId}
-88	            title={title}
-89	            chips={chips}
-90	            customGameName={customGameName || 'Custom'}
-91	            customGameColor={customGameColor}
-92	            onPlay={fn()}
-93	            onOpenCog={fn()}
-94	            {...bookmarkProps}
-95	          />
-96	        ) : (
-97	          <GameCard
-98	            variant="default"
-99	            gameId={gameId}
-100	            title={title}
-101	            chips={chips}
-102	            onPlay={fn()}
-103	            onOpenCog={fn()}
-104	            {...bookmarkProps}
-105	          />
-106	        )}
-107	      </div>
-108	    );
-109	  },
-110	};
-111	export default meta;
-112	
-113	type Story = StoryObj<StoryArgs>;
-114	
-115	export const Default: Story = {};
+1 import { fn } from 'storybook/test';
+2 
+3 import { GameCard } from './GameCard';
+4 import type { GameColorKey } from '@/lib/game-colors';
+5 import type { Meta, StoryObj } from '@storybook/react';
+6 import type { ComponentType } from 'react';
+7 import { GAME_COLOR_KEYS } from '@/lib/game-colors';
+8 
+9 type Variant = 'default' | 'customGame';
+10 
+11 interface StoryArgs {
+12   variant: Variant;
+13   gameId: string;
+14   title: string;
+15   chipsText: string;
+16   customGameName: string;
+17   customGameColor: GameColorKey;
+18   bookmarkable: boolean;
+19   isBookmarked: boolean;
+20   // Shadowed raw props — driven by StoryArgs above; hidden from Controls.
+21   chips?: never;
+22   cover?: never;
+23   onPlay?: never;
+24   onOpenCog?: never;
+25   onToggleBookmark?: never;
+26 }
+27 
+28 const meta: Meta<StoryArgs> = {
+29   component: GameCard as unknown as ComponentType<StoryArgs>,
+30   tags: ['autodocs'],
+31   parameters: { layout: 'centered' },
+32   args: {
+33     variant: 'default',
+34     gameId: 'sort-numbers',
+35     title: 'Count in Order',
+36     chipsText: '🚀 Up, 5 numbers, 2s',
+37     customGameName: 'Skip by 2',
+38     customGameColor: 'indigo',
+39     bookmarkable: false,
+40     isBookmarked: false,
+41   },
+42   argTypes: {
+43     variant: {
+44       control: { type: 'radio' },
+45       options: ['default', 'customGame'] satisfies Variant[],
+46     },
+47     gameId: { control: 'text' },
+48     title: { control: 'text' },
+49     chipsText: { control: 'text' },
+50     customGameName: { control: 'text' },
+51     customGameColor: {
+52       control: { type: 'select' },
+53       options: GAME_COLOR_KEYS,
+54     },
+55     bookmarkable: { control: 'boolean' },
+56     isBookmarked: { control: 'boolean' },
+57     chips: { table: { disable: true } },
+58     cover: { table: { disable: true } },
+59     onPlay: { table: { disable: true } },
+60     onOpenCog: { table: { disable: true } },
+61     onToggleBookmark: { table: { disable: true } },
+62   },
+63   render: ({
+64     variant,
+65     gameId,
+66     title,
+67     chipsText,
+68     customGameName,
+69     customGameColor,
+70     bookmarkable,
+71     isBookmarked,
+72   }) => {
+73     const chips = chipsText
+74       .split(',')
+75       .map((s) => s.trim())
+76       .filter(Boolean);
+77 
+78     const bookmarkProps = bookmarkable
+79       ? { isBookmarked, onToggleBookmark: fn() }
+80       : {};
+81 
+82     return (
+83       <div className="w-64">
+84         {variant === 'customGame' ? (
+85           <GameCard
+86             variant="customGame"
+87             gameId={gameId}
+88             title={title}
+89             chips={chips}
+90             customGameName={customGameName || 'Custom'}
+91             customGameColor={customGameColor}
+92             onPlay={fn()}
+93             onOpenCog={fn()}
+94             {...bookmarkProps}
+95           />
+96         ) : (
+97           <GameCard
+98             variant="default"
+99             gameId={gameId}
+100             title={title}
+101             chips={chips}
+102             onPlay={fn()}
+103             onOpenCog={fn()}
+104             {...bookmarkProps}
+105           />
+106         )}
+107       </div>
+108     );
+109   },
+110 };
+111 export default meta;
+112 
+113 type Story = StoryObj<StoryArgs>;
+114 
+115 export const Default: Story = {};
 116
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:25Z)**_
@@ -8604,48 +8746,49 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:25Z)**_
  `./worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx`
 
 ```text
-1	import { GameNameChip } from './GameNameChip';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { GAME_COLOR_KEYS } from '@/lib/game-colors';
-4	
-5	const meta: Meta<typeof GameNameChip> = {
-6	  component: GameNameChip,
-7	  tags: ['autodocs'],
-8	  args: {
-9	    title: 'Word Spell',
-10	  },
-11	  argTypes: {
-12	    title: { control: 'text' },
-13	    customGameName: { control: 'text' },
-14	    customGameColor: {
-15	      control: { type: 'select' },
-16	      options: GAME_COLOR_KEYS,
-17	    },
-18	    subject: { control: 'text' },
-19	  },
-20	};
-21	export default meta;
-22	
-23	type Story = StoryObj<typeof GameNameChip>;
-24	
-25	export const Default: Story = {};
-26	
-27	export const AllColors: Story = {
-28	  render: () => (
-29	    <div className="flex flex-col gap-2">
-30	      {GAME_COLOR_KEYS.map((color) => (
-31	        <GameNameChip
-32	          key={color}
-33	          title="Word Spell"
-34	          customGameName={color}
-35	          customGameColor={color}
-36	        />
-37	      ))}
-38	    </div>
-39	  ),
-40	};
+1 import { GameNameChip } from './GameNameChip';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { GAME_COLOR_KEYS } from '@/lib/game-colors';
+4 
+5 const meta: Meta<typeof GameNameChip> = {
+6   component: GameNameChip,
+7   tags: ['autodocs'],
+8   args: {
+9     title: 'Word Spell',
+10   },
+11   argTypes: {
+12     title: { control: 'text' },
+13     customGameName: { control: 'text' },
+14     customGameColor: {
+15       control: { type: 'select' },
+16       options: GAME_COLOR_KEYS,
+17     },
+18     subject: { control: 'text' },
+19   },
+20 };
+21 export default meta;
+22 
+23 type Story = StoryObj<typeof GameNameChip>;
+24 
+25 export const Default: Story = {};
+26 
+27 export const AllColors: Story = {
+28   render: () => (
+29     <div className="flex flex-col gap-2">
+30       {GAME_COLOR_KEYS.map((color) => (
+31         <GameNameChip
+32           key={color}
+33           title="Word Spell"
+34           customGameName={color}
+35           customGameColor={color}
+36         />
+37       ))}
+38     </div>
+39   ),
+40 };
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:26Z)**_
@@ -8655,173 +8798,174 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:26Z)**_
  `./worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.stories.tsx`
 
 ```text
-1	import { fn } from 'storybook/test';
-2	
-3	import { ConfigFormFields } from './ConfigFormFields';
-4	import type { ConfigField } from '@/lib/config-fields';
-5	import type { Meta, StoryObj } from '@storybook/react';
-6	import type { ComponentType } from 'react';
-7	
-8	type Scenario =
-9	  | 'primitive-types'
-10	  | 'nested-types'
-11	  | 'nested-select-or-number'
-12	  | 'visible-when-hidden'
-13	  | 'visible-when-shown';
-14	
-15	interface StoryArgs {
-16	  scenario: Scenario;
-17	  onChange: (config: Record<string, unknown>) => void;
-18	  // Shadowed raw props — driven by scenario; hidden from Controls.
-19	  fields?: never;
-20	  config?: never;
-21	}
-22	
-23	// Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
-24	const primitiveFields: ConfigField[] = [
-25	  {
-26	    type: 'select',
-27	    key: 'size',
-28	    label: 'Size',
-29	    options: [
-30	      { value: 'small', label: 'Small' },
-31	      { value: 'medium', label: 'Medium' },
-32	      { value: 'large', label: 'Large' },
-33	    ],
-34	  },
-35	  {
-36	    type: 'number',
-37	    key: 'count',
-38	    label: 'Count',
-39	    min: 1,
-40	    max: 20,
-41	  },
-42	  {
-43	    type: 'checkbox',
-44	    key: 'enabled',
-45	    label: 'Enabled',
-46	  },
-47	];
-48	
-49	const nestedFields: ConfigField[] = [
-50	  {
-51	    type: 'nested-select',
-52	    key: 'group',
-53	    subKey: 'mode',
-54	    label: 'Group mode',
-55	    options: [
-56	      { value: 'auto', label: 'Auto' },
-57	      { value: 'manual', label: 'Manual' },
-58	    ],
-59	  },
-60	  {
-61	    type: 'nested-number',
-62	    key: 'group',
-63	    subKey: 'size',
-64	    label: 'Group size',
-65	    min: 1,
-66	    max: 10,
-67	  },
-68	];
-69	
-70	const selectOrNumberFields: ConfigField[] = [
-71	  {
-72	    type: 'nested-select-or-number',
-73	    key: 'range',
-74	    subKey: 'max',
-75	    label: 'Max range',
-76	    min: 1,
-77	    max: 100,
-78	  },
-79	];
-80	
-81	const visibleWhenFields: ConfigField[] = [
-82	  {
-83	    type: 'select',
-84	    key: 'mode',
-85	    label: 'Mode',
-86	    options: [
-87	      { value: 'simple', label: 'Simple' },
-88	      { value: 'advanced', label: 'Advanced' },
-89	    ],
-90	  },
-91	  {
-92	    type: 'nested-number',
-93	    key: 'advanced',
-94	    subKey: 'threshold',
-95	    label: 'Threshold',
-96	    min: 1,
-97	    max: 100,
-98	    visibleWhen: { key: 'mode', value: 'advanced' },
-99	  },
-100	];
-101	
-102	const scenarioData: Record<
-103	  Scenario,
-104	  { fields: ConfigField[]; config: Record<string, unknown> }
-105	> = {
-106	  'primitive-types': {
-107	    fields: primitiveFields,
-108	    config: { size: 'medium', count: 5, enabled: true },
-109	  },
-110	  'nested-types': {
-111	    fields: nestedFields,
-112	    config: { group: { mode: 'auto', size: 4 } },
-113	  },
-114	  'nested-select-or-number': {
-115	    fields: selectOrNumberFields,
-116	    config: { range: { max: 10 } },
-117	  },
-118	  'visible-when-hidden': {
-119	    fields: visibleWhenFields,
-120	    config: { mode: 'simple', advanced: { threshold: 50 } },
-121	  },
-122	  'visible-when-shown': {
-123	    fields: visibleWhenFields,
-124	    config: { mode: 'advanced', advanced: { threshold: 50 } },
-125	  },
-126	};
-127	
-128	const meta: Meta<StoryArgs> = {
-129	  component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
-130	  tags: ['autodocs'],
-131	  args: {
-132	    scenario: 'primitive-types',
-133	    onChange: fn(),
-134	  },
-135	  argTypes: {
-136	    scenario: {
-137	      control: { type: 'select' },
-138	      options: [
-139	        'primitive-types',
-140	        'nested-types',
-141	        'nested-select-or-number',
-142	        'visible-when-hidden',
-143	        'visible-when-shown',
-144	      ] satisfies Scenario[],
-145	    },
-146	    onChange: { table: { disable: true } },
-147	    fields: { table: { disable: true } },
-148	    config: { table: { disable: true } },
-149	  },
-150	  render: ({ scenario, onChange }) => {
-151	    const { fields, config } = scenarioData[scenario];
-152	    return (
-153	      <ConfigFormFields
-154	        fields={fields}
-155	        config={config}
-156	        onChange={onChange}
-157	      />
-158	    );
-159	  },
-160	};
-161	export default meta;
-162	
-163	type Story = StoryObj<StoryArgs>;
-164	
-165	export const Default: Story = {};
+1 import { fn } from 'storybook/test';
+2 
+3 import { ConfigFormFields } from './ConfigFormFields';
+4 import type { ConfigField } from '@/lib/config-fields';
+5 import type { Meta, StoryObj } from '@storybook/react';
+6 import type { ComponentType } from 'react';
+7 
+8 type Scenario =
+9   | 'primitive-types'
+10   | 'nested-types'
+11   | 'nested-select-or-number'
+12   | 'visible-when-hidden'
+13   | 'visible-when-shown';
+14 
+15 interface StoryArgs {
+16   scenario: Scenario;
+17   onChange: (config: Record<string, unknown>) => void;
+18   // Shadowed raw props — driven by scenario; hidden from Controls.
+19   fields?: never;
+20   config?: never;
+21 }
+22 
+23 // Generic fixtures — one per rendering branch of ConfigFormFields.tsx.
+24 const primitiveFields: ConfigField[] = [
+25   {
+26     type: 'select',
+27     key: 'size',
+28     label: 'Size',
+29     options: [
+30       { value: 'small', label: 'Small' },
+31       { value: 'medium', label: 'Medium' },
+32       { value: 'large', label: 'Large' },
+33     ],
+34   },
+35   {
+36     type: 'number',
+37     key: 'count',
+38     label: 'Count',
+39     min: 1,
+40     max: 20,
+41   },
+42   {
+43     type: 'checkbox',
+44     key: 'enabled',
+45     label: 'Enabled',
+46   },
+47 ];
+48 
+49 const nestedFields: ConfigField[] = [
+50   {
+51     type: 'nested-select',
+52     key: 'group',
+53     subKey: 'mode',
+54     label: 'Group mode',
+55     options: [
+56       { value: 'auto', label: 'Auto' },
+57       { value: 'manual', label: 'Manual' },
+58     ],
+59   },
+60   {
+61     type: 'nested-number',
+62     key: 'group',
+63     subKey: 'size',
+64     label: 'Group size',
+65     min: 1,
+66     max: 10,
+67   },
+68 ];
+69 
+70 const selectOrNumberFields: ConfigField[] = [
+71   {
+72     type: 'nested-select-or-number',
+73     key: 'range',
+74     subKey: 'max',
+75     label: 'Max range',
+76     min: 1,
+77     max: 100,
+78   },
+79 ];
+80 
+81 const visibleWhenFields: ConfigField[] = [
+82   {
+83     type: 'select',
+84     key: 'mode',
+85     label: 'Mode',
+86     options: [
+87       { value: 'simple', label: 'Simple' },
+88       { value: 'advanced', label: 'Advanced' },
+89     ],
+90   },
+91   {
+92     type: 'nested-number',
+93     key: 'advanced',
+94     subKey: 'threshold',
+95     label: 'Threshold',
+96     min: 1,
+97     max: 100,
+98     visibleWhen: { key: 'mode', value: 'advanced' },
+99   },
+100 ];
+101 
+102 const scenarioData: Record<
+103   Scenario,
+104   { fields: ConfigField[]; config: Record<string, unknown> }
+105 > = {
+106   'primitive-types': {
+107     fields: primitiveFields,
+108     config: { size: 'medium', count: 5, enabled: true },
+109   },
+110   'nested-types': {
+111     fields: nestedFields,
+112     config: { group: { mode: 'auto', size: 4 } },
+113   },
+114   'nested-select-or-number': {
+115     fields: selectOrNumberFields,
+116     config: { range: { max: 10 } },
+117   },
+118   'visible-when-hidden': {
+119     fields: visibleWhenFields,
+120     config: { mode: 'simple', advanced: { threshold: 50 } },
+121   },
+122   'visible-when-shown': {
+123     fields: visibleWhenFields,
+124     config: { mode: 'advanced', advanced: { threshold: 50 } },
+125   },
+126 };
+127 
+128 const meta: Meta<StoryArgs> = {
+129   component: ConfigFormFields as unknown as ComponentType<StoryArgs>,
+130   tags: ['autodocs'],
+131   args: {
+132     scenario: 'primitive-types',
+133     onChange: fn(),
+134   },
+135   argTypes: {
+136     scenario: {
+137       control: { type: 'select' },
+138       options: [
+139         'primitive-types',
+140         'nested-types',
+141         'nested-select-or-number',
+142         'visible-when-hidden',
+143         'visible-when-shown',
+144       ] satisfies Scenario[],
+145     },
+146     onChange: { table: { disable: true } },
+147     fields: { table: { disable: true } },
+148     config: { table: { disable: true } },
+149   },
+150   render: ({ scenario, onChange }) => {
+151     const { fields, config } = scenarioData[scenario];
+152     return (
+153       <ConfigFormFields
+154         fields={fields}
+155         config={config}
+156         onChange={onChange}
+157       />
+158     );
+159   },
+160 };
+161 export default meta;
+162 
+163 type Story = StoryObj<StoryArgs>;
+164 
+165 export const Default: Story = {};
 166
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:27Z)**_
@@ -8831,148 +8975,149 @@ _**Agent (claude-opus-4-7 2026-04-28 05:53:27Z)**_
  `./worktrees/stories-tier3-theme-showcase/src/stories/ThemeShowcase.stories.tsx`
 
 ```text
-1	import { withDb } from '../../.storybook/decorators/withDb';
-2	import { withRouter } from '../../.storybook/decorators/withRouter';
-3	import type { ConfigField } from '@/lib/config-fields';
-4	import type {
-5	  GameEngineState,
-6	  ResolvedContent,
-7	  ResolvedGameConfig,
-8	  SessionMeta,
-9	} from '@/lib/game-engine/types';
-10	import type { Meta, StoryObj } from '@storybook/react';
-11	import { ConfigFormFields } from '@/components/ConfigFormFields';
-12	import { GameShell } from '@/components/game/GameShell';
-13	import { GameNameChip } from '@/components/GameNameChip';
-14	
-15	// ── GameShell fixture data ────────────────────────────────────────────────
-16	
-17	const content: ResolvedContent = {
-18	  rounds: [
-19	    {
-20	      id: 'r1',
-21	      prompt: { en: 'Sort the numbers' },
-22	      correctAnswer: '1',
-23	    },
-24	  ],
-25	};
-26	
-27	const shellConfig: ResolvedGameConfig = {
-28	  gameId: 'theme-showcase',
-29	  title: { en: 'Theme Showcase' },
-30	  gradeBand: 'year1-2',
-31	  maxRounds: 3,
-32	  maxRetries: 1,
-33	  maxUndoDepth: 3,
-34	  timerVisible: true,
-35	  timerDurationSeconds: 60,
-36	  difficulty: 'medium',
-37	};
-38	
-39	const initialState: GameEngineState = {
-40	  phase: 'playing',
-41	  roundIndex: 0,
-42	  score: 0,
-43	  streak: 0,
-44	  retryCount: 0,
-45	  content,
-46	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-47	};
-48	
-49	const sessionMeta: SessionMeta = {
-50	  profileId: 'storybook-user',
-51	  gameId: 'theme-showcase',
-52	  gradeBand: 'year1-2',
-53	  seed: 'storybook-seed',
-54	  initialContent: content,
-55	  initialState,
-56	};
-57	
-58	// ── Custom game component fixture data ──────────────────────────────────────
-59	
-60	const configFields: ConfigField[] = [
-61	  {
-62	    type: 'select',
-63	    key: 'inputMethod',
-64	    label: 'Input method',
-65	    options: [
-66	      { value: 'drag', label: 'Drag' },
-67	      { value: 'type', label: 'Type' },
-68	    ],
-69	  },
-70	  {
-71	    type: 'number',
-72	    key: 'totalRounds',
-73	    label: 'Total rounds',
-74	    min: 1,
-75	    max: 20,
-76	  },
-77	  {
-78	    type: 'checkbox',
-79	    key: 'ttsEnabled',
-80	    label: 'Text-to-speech',
-81	  },
-82	];
-83	
-84	// ── Story body ────────────────────────────────────────────────────────────
-85	
-86	const ShowcaseBody = () => (
-87	  <div className="flex flex-col gap-4 p-4">
-88	    <GameNameChip
-89	      title="Sort Numbers"
-90	      customGameName="Easy Numbers"
-91	      customGameColor="teal"
-92	    />
-93	    <GameNameChip title="Word Spell" subject="reading" />
-94	    <ConfigFormFields
-95	      fields={configFields}
-96	      config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
-97	      onChange={() => {}}
-98	    />
-99	  </div>
-100	);
-101	
-102	// ── Meta ──────────────────────────────────────────────────────────────────
-103	
-104	const meta = {
-105	  component: GameShell,
-106	  title: 'Pages/ThemeShowcase',
-107	  tags: ['autodocs'],
-108	  decorators: [withDb, withRouter],
-109	  parameters: {
-110	    layout: 'fullscreen',
-111	    docs: {
-112	      description: {
-113	        component:
-114	          'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the registered themes via the toolbar.',
-115	      },
-116	    },
-117	  },
-118	  args: {
-119	    config: shellConfig,
-120	    moves: {},
-121	    initialState,
-122	    sessionId: 'showcase-session',
-123	    meta: sessionMeta,
-124	    children: <ShowcaseBody />,
-125	  },
-126	  argTypes: {
-127	    config: { table: { disable: true } },
-128	    moves: { table: { disable: true } },
-129	    initialState: { table: { disable: true } },
-130	    sessionId: { table: { disable: true } },
-131	    meta: { table: { disable: true } },
-132	    initialLog: { table: { disable: true } },
-133	    children: { table: { disable: true } },
-134	  },
-135	} satisfies Meta<typeof GameShell>;
-136	export default meta;
-137	
-138	type Story = StoryObj<typeof GameShell>;
-139	
-140	export const Default: Story = {};
+1 import { withDb } from '../../.storybook/decorators/withDb';
+2 import { withRouter } from '../../.storybook/decorators/withRouter';
+3 import type { ConfigField } from '@/lib/config-fields';
+4 import type {
+5   GameEngineState,
+6   ResolvedContent,
+7   ResolvedGameConfig,
+8   SessionMeta,
+9 } from '@/lib/game-engine/types';
+10 import type { Meta, StoryObj } from '@storybook/react';
+11 import { ConfigFormFields } from '@/components/ConfigFormFields';
+12 import { GameShell } from '@/components/game/GameShell';
+13 import { GameNameChip } from '@/components/GameNameChip';
+14 
+15 // ── GameShell fixture data ────────────────────────────────────────────────
+16 
+17 const content: ResolvedContent = {
+18   rounds: [
+19     {
+20       id: 'r1',
+21       prompt: { en: 'Sort the numbers' },
+22       correctAnswer: '1',
+23     },
+24   ],
+25 };
+26 
+27 const shellConfig: ResolvedGameConfig = {
+28   gameId: 'theme-showcase',
+29   title: { en: 'Theme Showcase' },
+30   gradeBand: 'year1-2',
+31   maxRounds: 3,
+32   maxRetries: 1,
+33   maxUndoDepth: 3,
+34   timerVisible: true,
+35   timerDurationSeconds: 60,
+36   difficulty: 'medium',
+37 };
+38 
+39 const initialState: GameEngineState = {
+40   phase: 'playing',
+41   roundIndex: 0,
+42   score: 0,
+43   streak: 0,
+44   retryCount: 0,
+45   content,
+46   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+47 };
+48 
+49 const sessionMeta: SessionMeta = {
+50   profileId: 'storybook-user',
+51   gameId: 'theme-showcase',
+52   gradeBand: 'year1-2',
+53   seed: 'storybook-seed',
+54   initialContent: content,
+55   initialState,
+56 };
+57 
+58 // ── Custom game component fixture data ──────────────────────────────────────
+59 
+60 const configFields: ConfigField[] = [
+61   {
+62     type: 'select',
+63     key: 'inputMethod',
+64     label: 'Input method',
+65     options: [
+66       { value: 'drag', label: 'Drag' },
+67       { value: 'type', label: 'Type' },
+68     ],
+69   },
+70   {
+71     type: 'number',
+72     key: 'totalRounds',
+73     label: 'Total rounds',
+74     min: 1,
+75     max: 20,
+76   },
+77   {
+78     type: 'checkbox',
+79     key: 'ttsEnabled',
+80     label: 'Text-to-speech',
+81   },
+82 ];
+83 
+84 // ── Story body ────────────────────────────────────────────────────────────
+85 
+86 const ShowcaseBody = () => (
+87   <div className="flex flex-col gap-4 p-4">
+88     <GameNameChip
+89       title="Sort Numbers"
+90       customGameName="Easy Numbers"
+91       customGameColor="teal"
+92     />
+93     <GameNameChip title="Word Spell" subject="reading" />
+94     <ConfigFormFields
+95       fields={configFields}
+96       config={{ inputMethod: 'drag', totalRounds: 8, ttsEnabled: true }}
+97       onChange={() => {}}
+98     />
+99   </div>
+100 );
+101 
+102 // ── Meta ──────────────────────────────────────────────────────────────────
+103 
+104 const meta = {
+105   component: GameShell,
+106   title: 'Pages/ThemeShowcase',
+107   tags: ['autodocs'],
+108   decorators: [withDb, withRouter],
+109   parameters: {
+110     layout: 'fullscreen',
+111     docs: {
+112       description: {
+113         component:
+114           'Token-only page composed from GameShell + GameNameChip + ConfigFormFields. Cycle through the registered themes via the toolbar.',
+115       },
+116     },
+117   },
+118   args: {
+119     config: shellConfig,
+120     moves: {},
+121     initialState,
+122     sessionId: 'showcase-session',
+123     meta: sessionMeta,
+124     children: <ShowcaseBody />,
+125   },
+126   argTypes: {
+127     config: { table: { disable: true } },
+128     moves: { table: { disable: true } },
+129     initialState: { table: { disable: true } },
+130     sessionId: { table: { disable: true } },
+131     meta: { table: { disable: true } },
+132     initialLog: { table: { disable: true } },
+133     children: { table: { disable: true } },
+134   },
+135 } satisfies Meta<typeof GameShell>;
+136 export default meta;
+137 
+138 type Story = StoryObj<typeof GameShell>;
+139 
+140 export const Default: Story = {};
 141
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:42Z)**_
@@ -8993,6 +9138,7 @@ Count Default vs Playground exports across reference stories
    2 export const Playground: Story = {
   10 export const Playground: Story = {};
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:53:46Z)**_
@@ -9020,6 +9166,7 @@ export const Playground: Story = {
 export const Playground: Story = {};
 export const ReplayTrigger: Story = {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:54:09Z)**_
@@ -9044,6 +9191,7 @@ Check Storybook autotitle config
 /Users/leocaseiro/Sites/base-skill/.storybook/preview.tsx:          { value: 'high-contrast', title: 'High Contrast' },
 /Users/leocaseiro/Sites/base-skill/.storybook/main.ts:  stories: ['../src/**/*.stories.tsx', '../src/**/*.mdx'],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:54:11Z)**_
@@ -9053,95 +9201,96 @@ _**Agent (claude-opus-4-7 2026-04-28 05:54:11Z)**_
  `./src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx`
 
 ```text
-1	import { useState } from 'react';
-2	import { fn } from 'storybook/test';
-3	
-4	import { EncouragementAnnouncer } from './EncouragementAnnouncer';
-5	import type { Meta, StoryObj } from '@storybook/react';
-6	import type { ComponentType } from 'react';
-7	
-8	interface StoryArgs {
-9	  message: string;
-10	  onDismiss: () => void;
-11	  // Raw EncouragementAnnouncer prop controlled by the story wrapper;
-12	  // declared here only to hide the react-docgen-inferred row from the
-13	  // Controls panel.
-14	  visible?: never;
-15	}
-16	
-17	const ShowTrigger = ({
-18	  message,
-19	  onDismiss,
-20	  startVisible = false,
-21	}: {
-22	  message: string;
-23	  onDismiss: () => void;
-24	  startVisible?: boolean;
-25	}) => {
-26	  const [visible, setVisible] = useState(startVisible);
-27	  const dismiss = () => {
-28	    setVisible(false);
-29	    onDismiss();
-30	  };
-31	  return (
-32	    <div className="flex gap-2">
-33	      <button
-34	        type="button"
-35	        onClick={() => setVisible(true)}
-36	        disabled={visible}
-37	        className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
-38	      >
-39	        Show encouragement
-40	      </button>
-41	      <button
-42	        type="button"
-43	        onClick={dismiss}
-44	        disabled={!visible}
-45	        className="rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50"
-46	      >
-47	        Dismiss
-48	      </button>
-49	      <EncouragementAnnouncer
-50	        visible={visible}
-51	        message={message}
-52	        onDismiss={dismiss}
-53	      />
-54	    </div>
-55	  );
-56	};
-57	
-58	const meta: Meta<StoryArgs> = {
-59	  component:
-60	    EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
-61	  title: 'answer-game/EncouragementAnnouncer',
-62	  tags: ['autodocs'],
-63	  args: {
-64	    message: 'Keep trying!',
-65	    onDismiss: fn(),
-66	  },
-67	  argTypes: {
-68	    message: { control: 'text' },
-69	    onDismiss: { table: { disable: true } },
-70	    visible: { table: { disable: true } },
-71	  },
-72	  render: ({ message, onDismiss }) => (
-73	    <ShowTrigger message={message} onDismiss={onDismiss} startVisible />
-74	  ),
-75	};
-76	export default meta;
-77	
-78	type Story = StoryObj<StoryArgs>;
-79	
-80	export const Playground: Story = {};
-81	
-82	export const ReplayTrigger: Story = {
-83	  args: { message: 'Great job!' },
-84	  render: ({ message, onDismiss }) => (
-85	    <ShowTrigger message={message} onDismiss={onDismiss} />
-86	  ),
-87	};
+1 import { useState } from 'react';
+2 import { fn } from 'storybook/test';
+3 
+4 import { EncouragementAnnouncer } from './EncouragementAnnouncer';
+5 import type { Meta, StoryObj } from '@storybook/react';
+6 import type { ComponentType } from 'react';
+7 
+8 interface StoryArgs {
+9   message: string;
+10   onDismiss: () => void;
+11   // Raw EncouragementAnnouncer prop controlled by the story wrapper;
+12   // declared here only to hide the react-docgen-inferred row from the
+13   // Controls panel.
+14   visible?: never;
+15 }
+16 
+17 const ShowTrigger = ({
+18   message,
+19   onDismiss,
+20   startVisible = false,
+21 }: {
+22   message: string;
+23   onDismiss: () => void;
+24   startVisible?: boolean;
+25 }) => {
+26   const [visible, setVisible] = useState(startVisible);
+27   const dismiss = () => {
+28     setVisible(false);
+29     onDismiss();
+30   };
+31   return (
+32     <div className="flex gap-2">
+33       <button
+34         type="button"
+35         onClick={() => setVisible(true)}
+36         disabled={visible}
+37         className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50"
+38       >
+39         Show encouragement
+40       </button>
+41       <button
+42         type="button"
+43         onClick={dismiss}
+44         disabled={!visible}
+45         className="rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50"
+46       >
+47         Dismiss
+48       </button>
+49       <EncouragementAnnouncer
+50         visible={visible}
+51         message={message}
+52         onDismiss={dismiss}
+53       />
+54     </div>
+55   );
+56 };
+57 
+58 const meta: Meta<StoryArgs> = {
+59   component:
+60     EncouragementAnnouncer as unknown as ComponentType<StoryArgs>,
+61   title: 'answer-game/EncouragementAnnouncer',
+62   tags: ['autodocs'],
+63   args: {
+64     message: 'Keep trying!',
+65     onDismiss: fn(),
+66   },
+67   argTypes: {
+68     message: { control: 'text' },
+69     onDismiss: { table: { disable: true } },
+70     visible: { table: { disable: true } },
+71   },
+72   render: ({ message, onDismiss }) => (
+73     <ShowTrigger message={message} onDismiss={onDismiss} startVisible />
+74   ),
+75 };
+76 export default meta;
+77 
+78 type Story = StoryObj<StoryArgs>;
+79 
+80 export const Playground: Story = {};
+81 
+82 export const ReplayTrigger: Story = {
+83   args: { message: 'Great job!' },
+84   render: ({ message, onDismiss }) => (
+85     <ShowTrigger message={message} onDismiss={onDismiss} />
+86   ),
+87 };
 88
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:54:28Z)**_
@@ -9163,6 +9312,7 @@ Check title pattern on merged root component stories
 /Users/leocaseiro/Sites/base-skill/src/components/Header.stories.tsx:export const Playground: Story = {};
 /Users/leocaseiro/Sites/base-skill/src/components/Footer.stories.tsx:export const Playground: Story = {};
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:54:36Z)**_
@@ -9186,6 +9336,7 @@ Check if merged root component stories have docs.description
 /Users/leocaseiro/Sites/base-skill/src/components/UpdateBanner.stories.tsx:        component:
 /Users/leocaseiro/Sites/base-skill/src/components/UpdateBanner.stories.tsx:      description:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:27Z)**_
@@ -9211,6 +9362,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:36Z)**_
 | ThemeShowcase | already has both ✓ | — |
 
 **Not gaps:**
+
 - `title:` is auto-derived for root `src/components/*` files (Footer/Header/UpdateBanner skip it). Only ThemeShowcase needs an explicit title because it's a `Pages/` page — and it already has one.
 - All 5 correctly use `tags: ['autodocs']`, `fn()` for handlers, the `StoryArgs` double-cast pattern, and `?: never` + `table.disable` for shadowed props.
 
@@ -9224,6 +9376,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:39Z)**_
@@ -9234,6 +9387,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-grid/src/components/GameGrid.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:41Z)**_
@@ -9244,6 +9398,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:42Z)**_
@@ -9254,6 +9409,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-card/src/components/GameCard.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:44Z)**_
@@ -9264,6 +9420,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:45Z)**_
@@ -9274,6 +9431,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-game-name-chip/src/components/GameNameChip.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:48Z)**_
@@ -9284,6 +9442,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:48Z)**_
@@ -9294,6 +9453,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-config-form-fields/src/components/ConfigFormFields.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:55:50Z)**_
@@ -9304,6 +9464,7 @@ _**Agent (claude-opus-4-7 2026-04-28 05:55:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-theme-showcase/src/stories/ThemeShowcase.stories.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:00Z)**_
@@ -9335,6 +9496,7 @@ EOF
 ```text
 Command running in background with ID: b08k0xacs. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/b08k0xacs.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:08Z)**_
@@ -9360,6 +9522,7 @@ EOF
 ```text
 Command running in background with ID: bf5u1n7nx. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/bf5u1n7nx.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:11Z)**_
@@ -9385,6 +9548,7 @@ EOF
 ```text
 Command running in background with ID: b3tc5dvcn. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/b3tc5dvcn.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:13Z)**_
@@ -9410,6 +9574,7 @@ EOF
 ```text
 Command running in background with ID: bw56pdwb3. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/bw56pdwb3.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:16Z)**_
@@ -9434,6 +9599,7 @@ EOF
 ```text
 Command running in background with ID: bt95h4crn. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/5239c3e0-a39e-4fd3-abd3-34bf6b96aa27/tasks/bt95h4crn.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:56:21Z)**_
@@ -9484,6 +9650,7 @@ Done in 30.56s.
 To github.com:leocaseiro/base-skill.git
    26eadee6..86479669  stories/game-grid-audit -> stories/game-grid-audit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:58:26Z)**_
@@ -9520,6 +9687,7 @@ Done in 36.59s.
 To github.com:leocaseiro/base-skill.git
    f1d62864..506ece40  stories/game-name-chip-audit -> stories/game-name-chip-audit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:58:32Z)**_
@@ -9547,6 +9715,7 @@ Done in 34.45s.
 To github.com:leocaseiro/base-skill.git
    0a7cc430..572d505d  stories/config-form-fields-audit -> stories/config-form-fields-audit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:58:37Z)**_
@@ -9569,6 +9738,7 @@ Done in 32.51s.
 To github.com:leocaseiro/base-skill.git
    d3f6f033..2144a0e8  stories/theme-showcase-audit -> stories/theme-showcase-audit
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 05:58:43Z)**_
@@ -9607,6 +9777,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:01:59Z)**_
 ```text
 Launching skill: superpowers:writing-skills
 ```
+
 </details></tool-use>
 
 ---
@@ -9621,7 +9792,7 @@ Base directory for this skill: /Users/leocaseiro/.claude/plugins/cache/claude-pl
 
 **Writing skills IS Test-Driven Development applied to process documentation.**
 
-**Personal skills live in agent-specific directories (`~/.claude/skills` for Claude Code, `~/.agents/skills/` for Codex)** 
+**Personal skills live in agent-specific directories (`~/.claude/skills` for Claude Code, `~/.agents/skills/` for Codex)**
 
 You write test cases (pressure scenarios with subagents), watch them fail (baseline behavior), write the skill (documentation), watch tests pass (agents comply), and refactor (close loopholes).
 
@@ -9659,12 +9830,14 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 ## When to Create a Skill
 
 **Create when:**
+
 - Technique wasn't intuitively obvious to you
 - You'd reference this again across projects
 - Pattern applies broadly (not project-specific)
 - Others would benefit
 
 **Don't create for:**
+
 - One-off solutions
 - Standard practices well-documented elsewhere
 - Project-specific conventions (put in CLAUDE.md)
@@ -9673,16 +9846,18 @@ The entire skill creation process follows RED-GREEN-REFACTOR.
 ## Skill Types
 
 ### Technique
+
 Concrete method with steps to follow (condition-based-waiting, root-cause-tracing)
 
 ### Pattern
+
 Way of thinking about problems (flatten-with-flags, test-invariants)
 
 ### Reference
+
 API docs, syntax guides, tool documentation (office docs)
 
 ## Directory Structure
-
 
 ```
 skills/
@@ -9694,10 +9869,12 @@ skills/
 **Flat namespace** - all skills in one searchable namespace
 
 **Separate files for:**
+
 1. **Heavy reference** (100+ lines) - API docs, comprehensive syntax
 2. **Reusable tools** - Scripts, utilities, templates
 
 **Keep inline:**
+
 - Principles and concepts
 - Code patterns (< 50 lines)
 - Everything else
@@ -9705,6 +9882,7 @@ skills/
 ## SKILL.md Structure
 
 **Frontmatter (YAML):**
+
 - Two required fields: `name` and `description` (see [agentskills.io/specification](https://agentskills.io/specification) for all supported fields)
 - Max 1024 characters total
 - `name`: Use letters, numbers, and hyphens only (no parentheses, special chars)
@@ -9748,7 +9926,6 @@ What goes wrong + fixes
 Concrete results
 ```
 
-
 ## Claude Search Optimization (CSO)
 
 **Critical for discovery:** Future Claude needs to FIND your skill
@@ -9784,8 +9961,9 @@ description: Use when implementing any feature or bugfix, before writing impleme
 ```
 
 **Content:**
+
 - Use concrete triggers, symptoms, and situations that signal this skill applies
-- Describe the *problem* (race conditions, inconsistent behavior) not *language-specific symptoms* (setTimeout, sleep)
+- Describe the _problem_ (race conditions, inconsistent behavior) not _language-specific symptoms_ (setTimeout, sleep)
 - Keep triggers technology-agnostic unless the skill itself is technology-specific
 - If skill is technology-specific, make that explicit in the trigger
 - Write in third person (injected into system prompt)
@@ -9811,6 +9989,7 @@ description: Use when using React Router and handling authentication redirects
 ### 2. Keyword Coverage
 
 Use words Claude would search for:
+
 - Error messages: "Hook timed out", "ENOTEMPTY", "race condition"
 - Symptoms: "flaky", "hanging", "zombie", "pollution"
 - Synonyms: "timeout/hang/freeze", "cleanup/teardown/afterEach"
@@ -9819,6 +9998,7 @@ Use words Claude would search for:
 ### 3. Descriptive Naming
 
 **Use active voice, verb-first:**
+
 - ✅ `creating-skills` not `skill-creation`
 - ✅ `condition-based-waiting` not `async-test-helpers`
 
@@ -9827,6 +10007,7 @@ Use words Claude would search for:
 **Problem:** getting-started and frequently-referenced skills load into EVERY conversation. Every token counts.
 
 **Target word counts:**
+
 - getting-started workflows: <150 words each
 - Frequently-loaded skills: <200 words total
 - Other skills: <500 words (still be concise)
@@ -9834,6 +10015,7 @@ Use words Claude would search for:
 **Techniques:**
 
 **Move details to tool help:**
+
 ```bash
 # ❌ BAD: Document all flags in SKILL.md
 search-conversations supports --text, --both, --after DATE, --before DATE, --limit N
@@ -9843,6 +10025,7 @@ search-conversations supports multiple modes and filters. Run --help for details
 ```
 
 **Use cross-references:**
+
 ```markdown
 # ❌ BAD: Repeat workflow details
 When searching, dispatch subagent with template...
@@ -9853,6 +10036,7 @@ Always use subagents (50-100x context savings). REQUIRED: Use [other-skill-name]
 ```
 
 **Compress examples:**
+
 ```markdown
 # ❌ BAD: Verbose example (42 words)
 your human partner: "How did we handle authentication errors in React Router before?"
@@ -9866,11 +10050,13 @@ You: Searching...
 ```
 
 **Eliminate redundancy:**
+
 - Don't repeat what's in cross-referenced skills
 - Don't explain what's obvious from command
 - Don't include multiple examples of same pattern
 
 **Verification:**
+
 ```bash
 wc -w skills/path/SKILL.md
 # getting-started workflows: aim for <150 each
@@ -9878,12 +10064,14 @@ wc -w skills/path/SKILL.md
 ```
 
 **Name by what you DO or core insight:**
+
 - ✅ `condition-based-waiting` > `async-test-helpers`
 - ✅ `using-skills` not `skill-usage`
 - ✅ `flatten-with-flags` > `data-structure-refactoring`
 - ✅ `root-cause-tracing` > `debugging-techniques`
 
 **Gerunds (-ing) work well for processes:**
+
 - `creating-skills`, `testing-skills`, `debugging-with-logs`
 - Active, describes the action you're taking
 
@@ -9892,6 +10080,7 @@ wc -w skills/path/SKILL.md
 **When writing documentation that references other skills:**
 
 Use skill name only, with explicit requirement markers:
+
 - ✅ Good: `**REQUIRED SUB-SKILL:** Use superpowers:test-driven-development`
 - ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand superpowers:systematic-debugging`
 - ❌ Bad: `See skills/testing/test-driven-development` (unclear if required)
@@ -9915,11 +10104,13 @@ digraph when_flowchart {
 ```
 
 **Use flowcharts ONLY for:**
+
 - Non-obvious decision points
 - Process loops where you might stop too early
 - "When to use A vs B" decisions
 
 **Never use flowcharts for:**
+
 - Reference material → Tables, lists
 - Code examples → Markdown blocks
 - Linear instructions → Numbered lists
@@ -9928,6 +10119,7 @@ digraph when_flowchart {
 See @graphviz-conventions.dot for graphviz style rules.
 
 **Visualizing for your human partner:** Use `render-graphs.js` in this directory to render a skill's flowcharts to SVG:
+
 ```bash
 ./render-graphs.js ../some-skill           # Each diagram separately
 ./render-graphs.js ../some-skill --combine # All diagrams in one SVG
@@ -9938,11 +10130,13 @@ See @graphviz-conventions.dot for graphviz style rules.
 **One excellent example beats many mediocre ones**
 
 Choose most relevant language:
+
 - Testing techniques → TypeScript/JavaScript
 - System debugging → Shell/Python
 - Data processing → Python
 
 **Good example:**
+
 - Complete and runnable
 - Well-commented explaining WHY
 - From real scenario
@@ -9950,6 +10144,7 @@ Choose most relevant language:
 - Ready to adapt (not generic template)
 
 **Don't:**
+
 - Implement in 5+ languages
 - Create fill-in-the-blank templates
 - Write contrived examples
@@ -9959,21 +10154,26 @@ You're good at porting - one great example is enough.
 ## File Organization
 
 ### Self-Contained Skill
+
 ```
 defense-in-depth/
   SKILL.md    # Everything inline
 ```
+
 When: All content fits, no heavy reference needed
 
 ### Skill with Reusable Tool
+
 ```
 condition-based-waiting/
   SKILL.md    # Overview + patterns
   example.ts  # Working helpers to adapt
 ```
+
 When: Tool is reusable code, not just narrative
 
 ### Skill with Heavy Reference
+
 ```
 pptx/
   SKILL.md       # Overview + workflows
@@ -9981,6 +10181,7 @@ pptx/
   ooxml.md       # 500 lines XML structure
   scripts/       # Executable tools
 ```
+
 When: Reference material too large for inline
 
 ## The Iron Law (Same as TDD)
@@ -9995,6 +10196,7 @@ Write skill before testing? Delete it. Start over.
 Edit skill without testing? Same violation.
 
 **No exceptions:**
+
 - Not for "simple additions"
 - Not for "just adding a section"
 - Not for "documentation updates"
@@ -10013,6 +10215,7 @@ Different skill types need different test approaches:
 **Examples:** TDD, verification-before-completion, designing-before-coding
 
 **Test with:**
+
 - Academic questions: Do they understand the rules?
 - Pressure scenarios: Do they comply under stress?
 - Multiple pressures combined: time + sunk cost + exhaustion
@@ -10025,6 +10228,7 @@ Different skill types need different test approaches:
 **Examples:** condition-based-waiting, root-cause-tracing, defensive-programming
 
 **Test with:**
+
 - Application scenarios: Can they apply the technique correctly?
 - Variation scenarios: Do they handle edge cases?
 - Missing information tests: Do instructions have gaps?
@@ -10036,6 +10240,7 @@ Different skill types need different test approaches:
 **Examples:** reducing-complexity, information-hiding concepts
 
 **Test with:**
+
 - Recognition scenarios: Do they recognize when pattern applies?
 - Application scenarios: Can they use the mental model?
 - Counter-examples: Do they know when NOT to apply?
@@ -10047,6 +10252,7 @@ Different skill types need different test approaches:
 **Examples:** API documentation, command references, library guides
 
 **Test with:**
+
 - Retrieval scenarios: Can they find the right information?
 - Application scenarios: Can they use what they found correctly?
 - Gap testing: Are common use cases covered?
@@ -10089,10 +10295,12 @@ Write code before test? Delete it.
 Write code before test? Delete it. Start over.
 
 **No exceptions:**
+
 - Don't keep it as "reference"
 - Don't "adapt" it while writing tests
 - Don't look at it
 - Delete means delete
+
 ```
 </Good>
 
@@ -10149,6 +10357,7 @@ Follow the TDD cycle:
 ### RED: Write Failing Test (Baseline)
 
 Run pressure scenario with subagent WITHOUT the skill. Document exact behavior:
+
 - What choices did they make?
 - What rationalizations did they use (verbatim)?
 - Which pressures triggered violations?
@@ -10166,6 +10375,7 @@ Run same scenarios WITH skill. Agent should now comply.
 Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
 
 **Testing methodology:** See @testing-skills-with-subagents.md for the complete testing methodology:
+
 - How to write pressure scenarios
 - Pressure types (time, sunk cost, authority, exhaustion)
 - Plugging holes systematically
@@ -10174,21 +10384,26 @@ Agent found new rationalization? Add explicit counter. Re-test until bulletproof
 ## Anti-Patterns
 
 ### ❌ Narrative Example
+
 "In session 2025-10-03, we found empty projectDir caused..."
 **Why bad:** Too specific, not reusable
 
 ### ❌ Multi-Language Dilution
+
 example-js.js, example-py.py, example-go.go
 **Why bad:** Mediocre quality, maintenance burden
 
 ### ❌ Code in Flowcharts
+
 ```dot
 step1 [label="import fs"];
 step2 [label="read file"];
 ```
+
 **Why bad:** Can't copy-paste, hard to read
 
 ### ❌ Generic Labels
+
 helper1, helper2, step3, pattern4
 **Why bad:** Labels should have semantic meaning
 
@@ -10197,6 +10412,7 @@ helper1, helper2, step3, pattern4
 **After writing ANY skill, you MUST STOP and complete the deployment process.**
 
 **Do NOT:**
+
 - Create multiple skills in batch without testing each
 - Move to next skill before current one is verified
 - Skip testing because "batching is more efficient"
@@ -10210,11 +10426,13 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 **IMPORTANT: Use TodoWrite to create todos for EACH checklist item below.**
 
 **RED Phase - Write Failing Test:**
+
 - [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
 - [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
 - [ ] Identify patterns in rationalizations/failures
 
 **GREEN Phase - Write Minimal Skill:**
+
 - [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
 - [ ] YAML frontmatter with required `name` and `description` fields (max 1024 chars; see [spec](https://agentskills.io/specification))
 - [ ] Description starts with "Use when..." and includes specific triggers/symptoms
@@ -10227,6 +10445,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Run scenarios WITH skill - verify agents now comply
 
 **REFACTOR Phase - Close Loopholes:**
+
 - [ ] Identify NEW rationalizations from testing
 - [ ] Add explicit counters (if discipline skill)
 - [ ] Build rationalization table from all test iterations
@@ -10234,6 +10453,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Re-test until bulletproof
 
 **Quality Checks:**
+
 - [ ] Small flowchart only if decision non-obvious
 - [ ] Quick reference table
 - [ ] Common mistakes section
@@ -10241,6 +10461,7 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 - [ ] Supporting files only for tools or heavy reference
 
 **Deployment:**
+
 - [ ] Commit skill to git and push to your fork (if configured)
 - [ ] Consider contributing back via PR (if broadly useful)
 
@@ -10249,10 +10470,10 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 How future Claude finds your skill:
 
 1. **Encounters problem** ("tests are flaky")
-3. **Finds SKILL** (description matches)
-4. **Scans overview** (is this relevant?)
-5. **Reads patterns** (quick reference table)
-6. **Loads example** (only when implementing)
+2. **Finds SKILL** (description matches)
+3. **Scans overview** (is this relevant?)
+4. **Reads patterns** (quick reference table)
+5. **Loads example** (only when implementing)
 
 **Optimize for this flow** - put searchable terms early and often.
 
@@ -10265,7 +10486,6 @@ Same cycle: RED (baseline) → GREEN (write skill) → REFACTOR (close loopholes
 Same benefits: Better quality, fewer surprises, bulletproof results.
 
 If you follow TDD for code, follow it for skills. It's the same discipline applied to documentation.
-
 
 ---
 
@@ -10289,6 +10509,7 @@ Create worktree for SKILL.md update
 Preparing worktree (new branch 'chore/storybook-skill-playground-rename')
 HEAD is now at be6d9186 docs: add word authoring spec and plan (#198)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:02:39Z)**_
@@ -10308,6 +10529,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 11.00s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:02:58Z)**_
@@ -10345,6 +10567,7 @@ Find all Default references in SKILL.md
 551:| Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
 552:| Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:03:35Z)**_
@@ -10373,6 +10596,7 @@ Count Default occurrences with backticks
 551:| Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
 552:| Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:00Z)**_
@@ -10404,6 +10628,7 @@ Find non-story-name Default occurrences
 551:| Missing `Default` story                                  | Always add one — it is the Playground                                                                                                                                            |
 552:| Multiple stories duplicating what a control would toggle | Delete them; wire the prop as a control on `Default` instead (see "Playground Pattern")                                                                                          |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:22Z)**_
@@ -10420,6 +10645,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:23Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:24Z)**_
@@ -10430,6 +10656,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:24Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:26Z)**_
@@ -10440,6 +10667,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:26Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:28Z)**_
@@ -10450,6 +10678,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:28Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:30Z)**_
@@ -10460,6 +10689,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:30Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:33Z)**_
@@ -10470,6 +10700,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:33Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:37Z)**_
@@ -10481,8 +10712,9 @@ _**Agent (claude-opus-4-7 2026-04-28 06:04:38Z)**_
  `./worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md`
 
 ```text
-1	---
+1 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:04:41Z)**_
@@ -10495,6 +10727,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:11:37Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:11:39Z)**_
@@ -10505,6 +10738,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:11:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:11:40Z)**_
@@ -10515,6 +10749,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:11:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:11:41Z)**_
@@ -10525,6 +10760,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:11:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:11:54Z)**_
@@ -10537,6 +10773,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:12:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:13Z)**_
@@ -10547,6 +10784,7 @@ _**Agent (claude-opus-4-7 2026-04-28 06:12:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/chore-skill-playground-rename/.claude/skills/write-storybook/SKILL.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:16Z)**_
@@ -10570,6 +10808,7 @@ Verify only intentional Default occurrences remain
 551:| Default export for stories (`export default Playground`) | Use `export const Playground: Story = {}`                                                                                                                                        |
 552:| Story export named `Default`                             | Use `Playground` — the canonical name across all reference stories (InstructionsOverlay, AnswerGame, ProgressHUD, Footer, Header, etc.). The pattern is _called_ "Playground"; the export name matches.                          |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:23Z)**_
@@ -10598,6 +10837,7 @@ Summary: 2 error(s)
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:36Z)**_
@@ -10614,6 +10854,7 @@ Run prettier directly on SKILL.md
 .claude/skills/write-storybook/SKILL.md 104ms
 [This command modified 1 file you've previously read: .claude/skills/write-storybook/SKILL.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:44Z)**_
@@ -10633,6 +10874,7 @@ Linting: 124 file(s)
 Summary: 0 error(s)
 Done in 1.26s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:12:56Z)**_
@@ -10690,6 +10932,7 @@ Done in 24.96s.
 [chore/storybook-skill-playground-rename 8c3b9f69] docs(skill/write-storybook): rename Default to Playground throughout
  1 file changed, 36 insertions(+), 34 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:13:37Z)**_
@@ -10714,6 +10957,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        chore/storybook-skill-playground-rename -> chore/storybook-skill-playground-rename
 branch 'chore/storybook-skill-playground-rename' set up to track 'origin/chore/storybook-skill-playground-rename'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:14:07Z)**_
@@ -10767,6 +11011,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/208
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 06:14:12Z)**_
@@ -10778,7 +11023,7 @@ PR opened: [#208](https://github.com/leocaseiro/base-skill/pull/208) — `docs(s
 **Summary of what the skill update does:**
 
 - Replaces every story-name `Default` with `Playground` (16 substitutions across template, rules, audit checklist, Common Mistakes)
-- Adds an **explicit anti-rule** in the Rules section: *"The Playground export **must be named exactly `Playground`** (not `Default`)"* with a link to InstructionsOverlay
+- Adds an **explicit anti-rule** in the Rules section: _"The Playground export **must be named exactly `Playground`** (not `Default`)"_ with a link to InstructionsOverlay
 - Adds a **new Common Mistakes row** specifically for the `Default` → `Playground` rationalization, so future agents under the same pressure see the warning
 - Leaves untouched: `### Default: rely on the Actions panel` (section header), `## Default Skin Is Applied Globally` (decorator section), `withDefaultSkin` (decorator name)
 - Passed `yarn lint:md`, `prettier --check`, and the full pre-push gate

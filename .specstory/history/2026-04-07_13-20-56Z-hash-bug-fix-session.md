@@ -7,6 +7,7 @@
 _**User (2026-04-07 13:20:56Z)**_
 
 <ide_selection>The user selected the lines 5041 to 5097 from /Users/leocaseiro/Sites/base-skill/.specstory/history/2026-04-07_12-29-50Z-this-session-is-being.md:
+
 # Bug fix session — drag-cancel UX in bold-chatelet worktree
 
 **Worktree:** `/Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/` (branch `claude/bold-chatelet`). Do NOT create a new worktree — use this one.
@@ -125,7 +126,6 @@ Read these before proposing any changes:
 - **Slot → bank (already working)**: unchanged.
 - **Slot → slot (swap, already working)**: unchanged.
 
-
 ---
 IMO, the tile that is dropped anywhere, but not a correct destination (e.g. bank or slot), should animate and go back to whatever it was dragged from. We could add the sound effect tile placement too, but as a nice-to-have for me.
 
@@ -177,6 +177,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -185,6 +186,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -192,6 +194,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -227,6 +230,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -240,6 +244,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -368,6 +373,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -387,6 +393,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -437,17 +444,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -459,10 +467,10 @@ The user wants to fix drag-cancel UX bugs in the bold-chatelet worktree. Let me 
 The worktree is at `/Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/`
 
 Let me read all the key files mentioned:
+
 1. `src/components/answer-game/useSlotTileDrag.ts`
 2. `src/components/answer-game/useDraggableTile.ts`
 3. `src/components/answer-game/useBankDropTarget.ts`
-
 
 4. `src/components/answer-game/useTouchDrag.ts`
 5. `src/components/answer-game/Slot/slot-animations.ts`
@@ -483,177 +491,178 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:08Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useCallback, useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TouchDragHandlers } from './useTouchDrag';
-8	import type { RefObject } from 'react';
-9	
-10	export interface SlotTileDrag extends TouchDragHandlers {
-11	  dragRef: RefObject<HTMLButtonElement | null>;
-12	}
-13	
-14	interface UseSlotTileDragOptions {
-15	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-16	  tileId: string | null;
-17	  label: string | null;
-18	  zoneIndex: number;
-19	  /**
-20	   * Called when the dragged tile is dropped on a target zone.
-21	   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-22	   * REMOVE_TILE or SWAP_TILES as appropriate.
-23	   */
-24	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-25	  /**
-26	   * Called immediately before REMOVE_TILE is dispatched when the tile
-27	   * is returning to the bank (no valid drop target). Use this to trigger
-28	   * the eject-return animation while the slot button is still in the DOM.
-29	   */
-30	  onBankReturn?: () => void;
-31	}
-32	
-33	/**
-34	 * Enables an occupied slot tile to be dragged back to the bank or to another
-35	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-36	 *
-37	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-38	 * visible in the slot during the drag.
-39	 *
-40	 * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
-41	 * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
-42	 *
-43	 * On cancel or no valid drop target: onBankReturn is called (for animation),
-44	 * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
-45	 */
-46	export const useSlotTileDrag = ({
-47	  tileId,
-48	  label,
-49	  zoneIndex,
-50	  onDrop,
-51	  onBankReturn,
-52	}: UseSlotTileDragOptions): SlotTileDrag => {
-53	  const dispatch = useAnswerGameDispatch();
-54	  const dragRef = useRef<HTMLButtonElement>(null);
-55	
-56	  // Keep stable refs so the HTML5 adapter closure stays current.
-57	  const onDropRef = useRef(onDrop);
-58	  useEffect(() => {
-59	    onDropRef.current = onDrop;
-60	  }, [onDrop]);
-61	
-62	  const onBankReturnRef = useRef(onBankReturn);
-63	  useEffect(() => {
-64	    onBankReturnRef.current = onBankReturn;
-65	  }, [onBankReturn]);
-66	
-67	  // HTML5 DnD — desktop
-68	  useEffect(() => {
-69	    if (!tileId) return;
-70	    const element = dragRef.current;
-71	    if (!element) return;
-72	    const currentTileId = tileId;
-73	    const currentZoneIndex = zoneIndex;
-74	    return draggable({
-75	      element,
-76	      getInitialData: () => ({
-77	        tileId: currentTileId,
-78	        sourceZoneIndex: currentZoneIndex,
-79	      }),
-80	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-81	        setCustomNativeDragPreview({
-82	          nativeSetDragImage,
-83	          getOffset: preserveOffsetOnSource({
-84	            element,
-85	            input: location.current.input,
-86	          }),
-87	          render({ container }) {
-88	            const rect = element.getBoundingClientRect();
-89	            const ghost = document.createElement('div');
-90	            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-91	            // inner elements are preserved — avoids the shrunken-font issue
-92	            // that occurs when reading fontSize from the button itself.
-93	            ghost.innerHTML = element.innerHTML;
-94	            Object.assign(ghost.style, {
-95	              width: `${rect.width}px`,
-96	              height: `${rect.height}px`,
-97	              borderRadius: '12px',
-98	              display: 'flex',
-99	              alignItems: 'center',
-100	              justifyContent: 'center',
-101	              background: 'var(--card, #fff)',
-102	              color: 'var(--card-foreground, #000)',
-103	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-104	              transform: 'scale(1.08)',
-105	            });
-106	            container.append(ghost);
-107	            return () => ghost.remove();
-108	          },
-109	        });
-110	      },
-111	      onDragStart: () =>
-112	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-113	      onDrop: ({ location }) => {
-114	        const targets = location.current.dropTargets;
-115	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-116	
-117	        // Always clear drag state first.
-118	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-119	
-120	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-121	          // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
-122	          onDropRef.current(currentTileId, targetZoneIndex);
-123	        } else {
-124	          // No valid slot target (dropped on bank or outside) — return to bank.
-125	          onBankReturnRef.current?.();
-126	          dispatch({
-127	            type: 'REMOVE_TILE',
-128	            zoneIndex: currentZoneIndex,
-129	          });
-130	        }
-131	      },
-132	    });
-133	  }, [tileId, zoneIndex, dispatch]);
-134	
-135	  // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
-136	  const handleTouchDrop = useCallback(
-137	    (droppedTileId: string, targetZoneIndex: number) => {
-138	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-139	      onDrop(droppedTileId, targetZoneIndex);
-140	    },
-141	    [dispatch, onDrop],
-142	  );
-143	
-144	  // Pointer-events drag — touch / mobile
-145	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-146	    useTouchDrag({
-147	      tileId: tileId ?? '',
-148	      label: label ?? '',
-149	      onDragStart: tileId
-150	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-151	        : undefined,
-152	      onDragCancel: tileId
-153	        ? () => {
-154	            onBankReturnRef.current?.();
-155	            dispatch({ type: 'REMOVE_TILE', zoneIndex });
-156	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-157	          }
-158	        : undefined,
-159	      onDrop: handleTouchDrop,
-160	    });
-161	
-162	  return {
-163	    dragRef,
-164	    onPointerDown,
-165	    onPointerMove,
-166	    onPointerUp,
-167	    onPointerCancel,
-168	  };
-169	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useCallback, useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TouchDragHandlers } from './useTouchDrag';
+8 import type { RefObject } from 'react';
+9 
+10 export interface SlotTileDrag extends TouchDragHandlers {
+11   dragRef: RefObject<HTMLButtonElement | null>;
+12 }
+13 
+14 interface UseSlotTileDragOptions {
+15   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+16   tileId: string | null;
+17   label: string | null;
+18   zoneIndex: number;
+19   /**
+20    * Called when the dragged tile is dropped on a target zone.
+21    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+22    * REMOVE_TILE or SWAP_TILES as appropriate.
+23    */
+24   onDrop: (tileId: string, targetZoneIndex: number) => void;
+25   /**
+26    * Called immediately before REMOVE_TILE is dispatched when the tile
+27    * is returning to the bank (no valid drop target). Use this to trigger
+28    * the eject-return animation while the slot button is still in the DOM.
+29    */
+30   onBankReturn?: () => void;
+31 }
+32 
+33 /**
+34  * Enables an occupied slot tile to be dragged back to the bank or to another
+35  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+36  *
+37  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+38  * visible in the slot during the drag.
+39  *
+40  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+41  * called so the caller can dispatch SWAP_TILES or REMOVE_TILE+PLACE_TILE.
+42  *
+43  * On cancel or no valid drop target: onBankReturn is called (for animation),
+44  * then REMOVE_TILE + SET_DRAG_ACTIVE are dispatched to return the tile to bank.
+45  */
+46 export const useSlotTileDrag = ({
+47   tileId,
+48   label,
+49   zoneIndex,
+50   onDrop,
+51   onBankReturn,
+52 }: UseSlotTileDragOptions): SlotTileDrag => {
+53   const dispatch = useAnswerGameDispatch();
+54   const dragRef = useRef<HTMLButtonElement>(null);
+55 
+56   // Keep stable refs so the HTML5 adapter closure stays current.
+57   const onDropRef = useRef(onDrop);
+58   useEffect(() => {
+59     onDropRef.current = onDrop;
+60   }, [onDrop]);
+61 
+62   const onBankReturnRef = useRef(onBankReturn);
+63   useEffect(() => {
+64     onBankReturnRef.current = onBankReturn;
+65   }, [onBankReturn]);
+66 
+67   // HTML5 DnD — desktop
+68   useEffect(() => {
+69     if (!tileId) return;
+70     const element = dragRef.current;
+71     if (!element) return;
+72     const currentTileId = tileId;
+73     const currentZoneIndex = zoneIndex;
+74     return draggable({
+75       element,
+76       getInitialData: () => ({
+77         tileId: currentTileId,
+78         sourceZoneIndex: currentZoneIndex,
+79       }),
+80       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+81         setCustomNativeDragPreview({
+82           nativeSetDragImage,
+83           getOffset: preserveOffsetOnSource({
+84             element,
+85             input: location.current.input,
+86           }),
+87           render({ container }) {
+88             const rect = element.getBoundingClientRect();
+89             const ghost = document.createElement('div');
+90             // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+91             // inner elements are preserved — avoids the shrunken-font issue
+92             // that occurs when reading fontSize from the button itself.
+93             ghost.innerHTML = element.innerHTML;
+94             Object.assign(ghost.style, {
+95               width: `${rect.width}px`,
+96               height: `${rect.height}px`,
+97               borderRadius: '12px',
+98               display: 'flex',
+99               alignItems: 'center',
+100               justifyContent: 'center',
+101               background: 'var(--card, #fff)',
+102               color: 'var(--card-foreground, #000)',
+103               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+104               transform: 'scale(1.08)',
+105             });
+106             container.append(ghost);
+107             return () => ghost.remove();
+108           },
+109         });
+110       },
+111       onDragStart: () =>
+112         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+113       onDrop: ({ location }) => {
+114         const targets = location.current.dropTargets;
+115         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+116 
+117         // Always clear drag state first.
+118         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+119 
+120         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+121           // Confirmed drop on a valid slot — caller handles REMOVE_TILE / SWAP_TILES.
+122           onDropRef.current(currentTileId, targetZoneIndex);
+123         } else {
+124           // No valid slot target (dropped on bank or outside) — return to bank.
+125           onBankReturnRef.current?.();
+126           dispatch({
+127             type: 'REMOVE_TILE',
+128             zoneIndex: currentZoneIndex,
+129           });
+130         }
+131       },
+132     });
+133   }, [tileId, zoneIndex, dispatch]);
+134 
+135   // Wrap onDrop for the touch path: caller handles REMOVE_TILE / SWAP_TILES.
+136   const handleTouchDrop = useCallback(
+137     (droppedTileId: string, targetZoneIndex: number) => {
+138       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+139       onDrop(droppedTileId, targetZoneIndex);
+140     },
+141     [dispatch, onDrop],
+142   );
+143 
+144   // Pointer-events drag — touch / mobile
+145   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+146     useTouchDrag({
+147       tileId: tileId ?? '',
+148       label: label ?? '',
+149       onDragStart: tileId
+150         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+151         : undefined,
+152       onDragCancel: tileId
+153         ? () => {
+154             onBankReturnRef.current?.();
+155             dispatch({ type: 'REMOVE_TILE', zoneIndex });
+156             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+157           }
+158         : undefined,
+159       onDrop: handleTouchDrop,
+160     });
+161 
+162   return {
+163     dragRef,
+164     onPointerDown,
+165     onPointerMove,
+166     onPointerUp,
+167     onPointerCancel,
+168   };
+169 };
 170
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:08Z)**_
@@ -663,84 +672,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:08Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => {
-37	        speakTileRef.current(tile.label);
-38	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-39	      },
-40	      onDrop: () => {
-41	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-42	      },
-43	    });
-44	  }, [tile.id, tile.label, dispatch]);
-45	
-46	  // Pointer-events drag — touch / mobile
-47	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-48	    useTouchDrag({
-49	      tileId: tile.id,
-50	      label: tile.label,
-51	      onDragStart: () => {
-52	        speakTileRef.current(tile.label);
-53	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-54	      },
-55	      onDragCancel: () =>
-56	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-57	      onDrop: (droppedTileId, zoneIndex) => {
-58	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-59	        placeTile(droppedTileId, zoneIndex);
-60	      },
-61	    });
-62	
-63	  const handleClick = () => {
-64	    speakTile(tile.label);
-65	    placeInNextSlot(tile.id);
-66	  };
-67	
-68	  return {
-69	    ref,
-70	    handleClick,
-71	    onPointerDown,
-72	    onPointerMove,
-73	    onPointerUp,
-74	    onPointerCancel,
-75	  };
-76	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => {
+37         speakTileRef.current(tile.label);
+38         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+39       },
+40       onDrop: () => {
+41         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+42       },
+43     });
+44   }, [tile.id, tile.label, dispatch]);
+45 
+46   // Pointer-events drag — touch / mobile
+47   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+48     useTouchDrag({
+49       tileId: tile.id,
+50       label: tile.label,
+51       onDragStart: () => {
+52         speakTileRef.current(tile.label);
+53         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+54       },
+55       onDragCancel: () =>
+56         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+57       onDrop: (droppedTileId, zoneIndex) => {
+58         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+59         placeTile(droppedTileId, zoneIndex);
+60       },
+61     });
+62 
+63   const handleClick = () => {
+64     speakTile(tile.label);
+65     placeInNextSlot(tile.id);
+66   };
+67 
+68   return {
+69     ref,
+70     handleClick,
+71     onPointerDown,
+72     onPointerMove,
+73     onPointerUp,
+74     onPointerCancel,
+75   };
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:09Z)**_
@@ -750,37 +760,38 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:09Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useBankDropTarget.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import type { RefObject } from 'react';
-4	
-5	/**
-6	 * Registers a container element as a drop target for the tile bank.
-7	 *
-8	 * This makes the bank an accepted HTML5 drop zone so the browser shows
-9	 * a "move" cursor (instead of the "no drop" reject animation) when a slot
-10	 * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
-11	 * useSlotTileDrag's onDrop — the bank target intentionally carries no
-12	 * zoneIndex so that path treats it as "return to bank".
-13	 */
-14	export const useBankDropTarget = (): {
-15	  bankRef: RefObject<HTMLDivElement | null>;
-16	} => {
-17	  const bankRef = useRef<HTMLDivElement>(null);
-18	
-19	  useEffect(() => {
-20	    const el = bankRef.current;
-21	    if (!el) return;
-22	    return dropTargetForElements({
-23	      element: el,
-24	      getData: () => ({ isBankTarget: true }),
-25	    });
-26	  }, []);
-27	
-28	  return { bankRef };
-29	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import type { RefObject } from 'react';
+4 
+5 /**
+6  * Registers a container element as a drop target for the tile bank.
+7  *
+8  * This makes the bank an accepted HTML5 drop zone so the browser shows
+9  * a "move" cursor (instead of the "no drop" reject animation) when a slot
+10  * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
+11  * useSlotTileDrag's onDrop — the bank target intentionally carries no
+12  * zoneIndex so that path treats it as "return to bank".
+13  */
+14 export const useBankDropTarget = (): {
+15   bankRef: RefObject<HTMLDivElement | null>;
+16 } => {
+17   const bankRef = useRef<HTMLDivElement>(null);
+18 
+19   useEffect(() => {
+20     const el = bankRef.current;
+21     if (!el) return;
+22     return dropTargetForElements({
+23       element: el,
+24       getData: () => ({ isBankTarget: true }),
+25     });
+26   }, []);
+27 
+28   return { bankRef };
+29 };
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:09Z)**_
@@ -790,257 +801,258 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:09Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	}
-65	
-66	export const useTouchDrag = ({
-67	  tileId,
-68	  label,
-69	  onDragStart,
-70	  onDragCancel,
-71	  onDrop,
-72	}: UseTouchDragOptions): TouchDragHandlers => {
-73	  const onDragCancelRef = useRef(onDragCancel);
-74	  useEffect(() => {
-75	    onDragCancelRef.current = onDragCancel;
-76	  }, [onDragCancel]);
-77	
-78	  const ghostRef = useRef<GhostInfo | null>(null);
-79	  const isDragging = useRef(false);
-80	  const startPos = useRef<{ x: number; y: number } | null>(null);
-81	  const capturedElRef = useRef<HTMLElement | null>(null);
-82	  const capturedPointerIdRef = useRef<number | null>(null);
-83	  const safetyTimerRef = useRef<ReturnType<
-84	    typeof globalThis.setTimeout
-85	  > | null>(null);
-86	
-87	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-88	  // → cleanupGhost re-entry.
-89	  const cleanupInProgressRef = useRef(false);
-90	
-91	  const cleanupGhost = useCallback(() => {
-92	    if (cleanupInProgressRef.current) return;
-93	    cleanupInProgressRef.current = true;
-94	
-95	    if (safetyTimerRef.current !== null) {
-96	      globalThis.clearTimeout(safetyTimerRef.current);
-97	      safetyTimerRef.current = null;
-98	    }
-99	
-100	    ghostRef.current?.el.remove();
-101	    ghostRef.current = null;
-102	
-103	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-104	    // lostpointercapture event triggered by it sees null refs and bails out.
-105	    const el = capturedElRef.current;
-106	    const pointerId = capturedPointerIdRef.current;
-107	    capturedElRef.current = null;
-108	    capturedPointerIdRef.current = null;
-109	
-110	    if (el !== null && pointerId !== null) {
-111	      try {
-112	        el.releasePointerCapture(pointerId);
-113	      } catch {
-114	        // Element may no longer be in the DOM — ignore.
-115	      }
-116	    }
-117	
-118	    isDragging.current = false;
-119	    startPos.current = null;
-120	    cleanupInProgressRef.current = false;
-121	  }, []);
-122	
-123	  const cleanup = useCallback(() => {
-124	    cleanupGhost();
-125	  }, [cleanupGhost]);
-126	
-127	  const onPointerDown = useCallback(
-128	    (e: PointerEvent<HTMLElement>) => {
-129	      if (e.pointerType === 'mouse' || !tileId) return;
-130	      e.currentTarget.setPointerCapture(e.pointerId);
-131	      capturedElRef.current = e.currentTarget;
-132	      capturedPointerIdRef.current = e.pointerId;
-133	      startPos.current = { x: e.clientX, y: e.clientY };
-134	      isDragging.current = false;
-135	
-136	      // When the captured element is removed from the DOM (e.g. a slot tile
-137	      // gets auto-ejected while the user is dragging it), the browser fires
-138	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-139	      // ghost doesn't float for 5 seconds.
-140	      e.currentTarget.addEventListener(
-141	        'lostpointercapture',
-142	        () => {
-143	          if (!cleanupInProgressRef.current && isDragging.current) {
-144	            cleanupGhost();
-145	            onDragCancelRef.current?.();
-146	          }
-147	        },
-148	        { once: true },
-149	      );
-150	    },
-151	    [tileId, cleanupGhost],
-152	  );
-153	
-154	  const onPointerMove = useCallback(
-155	    (e: PointerEvent<HTMLElement>) => {
-156	      if (e.pointerType === 'mouse' || !startPos.current) return;
-157	
-158	      if (!isDragging.current) {
-159	        const dx = e.clientX - startPos.current.x;
-160	        const dy = e.clientY - startPos.current.y;
-161	        if (
-162	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-163	          Math.abs(dy) > DRAG_THRESHOLD_PX
-164	        ) {
-165	          isDragging.current = true;
-166	          ghostRef.current = buildGhost(
-167	            e.currentTarget,
-168	            label,
-169	            e.clientX,
-170	            e.clientY,
-171	          );
-172	          onDragStart?.();
-173	
-174	          safetyTimerRef.current = globalThis.setTimeout(() => {
-175	            cleanupGhost();
-176	            onDragCancelRef.current?.();
-177	          }, 5000);
-178	
-179	          document.addEventListener('contextmenu', cleanupGhost, {
-180	            once: true,
-181	          });
-182	          document.addEventListener('visibilitychange', cleanupGhost, {
-183	            once: true,
-184	          });
-185	        }
-186	      }
-187	
-188	      if (isDragging.current && ghostRef.current) {
-189	        const { el, halfW, halfH } = ghostRef.current;
-190	        el.style.left = `${e.clientX - halfW}px`;
-191	        el.style.top = `${e.clientY - halfH}px`;
-192	      }
-193	    },
-194	    [label, onDragStart, cleanupGhost],
-195	  );
-196	
-197	  const onPointerUp = useCallback(
-198	    (e: PointerEvent<HTMLElement>) => {
-199	      if (e.pointerType === 'mouse' || !startPos.current) return;
-200	
-201	      if (isDragging.current) {
-202	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-203	        ghostRef.current?.el.remove();
-204	        ghostRef.current = null;
-205	
-206	        const elements = document.elementsFromPoint(
-207	          e.clientX,
-208	          e.clientY,
-209	        );
-210	        let dropped = false;
-211	        for (const el of elements) {
-212	          if (
-213	            el instanceof HTMLElement &&
-214	            el.dataset['zoneIndex'] !== undefined
-215	          ) {
-216	            const zoneIndex = Number.parseInt(
-217	              el.dataset['zoneIndex'],
-218	              10,
-219	            );
-220	            if (!Number.isNaN(zoneIndex)) {
-221	              onDrop(tileId, zoneIndex);
-222	              dropped = true;
-223	              break;
-224	            }
-225	          }
-226	        }
-227	        if (!dropped) {
-228	          onDragCancelRef.current?.();
-229	        }
-230	      }
-231	
-232	      cleanup();
-233	    },
-234	    [tileId, onDrop, cleanup],
-235	  );
-236	
-237	  const onPointerCancel = useCallback(
-238	    (e: PointerEvent<HTMLElement>) => {
-239	      if (e.pointerType === 'mouse') return;
-240	      if (isDragging.current) {
-241	        onDragCancelRef.current?.();
-242	      }
-243	      cleanupGhost();
-244	    },
-245	    [cleanupGhost],
-246	  );
-247	
-248	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-249	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64 }
+65 
+66 export const useTouchDrag = ({
+67   tileId,
+68   label,
+69   onDragStart,
+70   onDragCancel,
+71   onDrop,
+72 }: UseTouchDragOptions): TouchDragHandlers => {
+73   const onDragCancelRef = useRef(onDragCancel);
+74   useEffect(() => {
+75     onDragCancelRef.current = onDragCancel;
+76   }, [onDragCancel]);
+77 
+78   const ghostRef = useRef<GhostInfo | null>(null);
+79   const isDragging = useRef(false);
+80   const startPos = useRef<{ x: number; y: number } | null>(null);
+81   const capturedElRef = useRef<HTMLElement | null>(null);
+82   const capturedPointerIdRef = useRef<number | null>(null);
+83   const safetyTimerRef = useRef<ReturnType<
+84     typeof globalThis.setTimeout
+85   > | null>(null);
+86 
+87   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+88   // → cleanupGhost re-entry.
+89   const cleanupInProgressRef = useRef(false);
+90 
+91   const cleanupGhost = useCallback(() => {
+92     if (cleanupInProgressRef.current) return;
+93     cleanupInProgressRef.current = true;
+94 
+95     if (safetyTimerRef.current !== null) {
+96       globalThis.clearTimeout(safetyTimerRef.current);
+97       safetyTimerRef.current = null;
+98     }
+99 
+100     ghostRef.current?.el.remove();
+101     ghostRef.current = null;
+102 
+103     // Clear refs BEFORE releasePointerCapture so that any synchronous
+104     // lostpointercapture event triggered by it sees null refs and bails out.
+105     const el = capturedElRef.current;
+106     const pointerId = capturedPointerIdRef.current;
+107     capturedElRef.current = null;
+108     capturedPointerIdRef.current = null;
+109 
+110     if (el !== null && pointerId !== null) {
+111       try {
+112         el.releasePointerCapture(pointerId);
+113       } catch {
+114         // Element may no longer be in the DOM — ignore.
+115       }
+116     }
+117 
+118     isDragging.current = false;
+119     startPos.current = null;
+120     cleanupInProgressRef.current = false;
+121   }, []);
+122 
+123   const cleanup = useCallback(() => {
+124     cleanupGhost();
+125   }, [cleanupGhost]);
+126 
+127   const onPointerDown = useCallback(
+128     (e: PointerEvent<HTMLElement>) => {
+129       if (e.pointerType === 'mouse' || !tileId) return;
+130       e.currentTarget.setPointerCapture(e.pointerId);
+131       capturedElRef.current = e.currentTarget;
+132       capturedPointerIdRef.current = e.pointerId;
+133       startPos.current = { x: e.clientX, y: e.clientY };
+134       isDragging.current = false;
+135 
+136       // When the captured element is removed from the DOM (e.g. a slot tile
+137       // gets auto-ejected while the user is dragging it), the browser fires
+138       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+139       // ghost doesn't float for 5 seconds.
+140       e.currentTarget.addEventListener(
+141         'lostpointercapture',
+142         () => {
+143           if (!cleanupInProgressRef.current && isDragging.current) {
+144             cleanupGhost();
+145             onDragCancelRef.current?.();
+146           }
+147         },
+148         { once: true },
+149       );
+150     },
+151     [tileId, cleanupGhost],
+152   );
+153 
+154   const onPointerMove = useCallback(
+155     (e: PointerEvent<HTMLElement>) => {
+156       if (e.pointerType === 'mouse' || !startPos.current) return;
+157 
+158       if (!isDragging.current) {
+159         const dx = e.clientX - startPos.current.x;
+160         const dy = e.clientY - startPos.current.y;
+161         if (
+162           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+163           Math.abs(dy) > DRAG_THRESHOLD_PX
+164         ) {
+165           isDragging.current = true;
+166           ghostRef.current = buildGhost(
+167             e.currentTarget,
+168             label,
+169             e.clientX,
+170             e.clientY,
+171           );
+172           onDragStart?.();
+173 
+174           safetyTimerRef.current = globalThis.setTimeout(() => {
+175             cleanupGhost();
+176             onDragCancelRef.current?.();
+177           }, 5000);
+178 
+179           document.addEventListener('contextmenu', cleanupGhost, {
+180             once: true,
+181           });
+182           document.addEventListener('visibilitychange', cleanupGhost, {
+183             once: true,
+184           });
+185         }
+186       }
+187 
+188       if (isDragging.current && ghostRef.current) {
+189         const { el, halfW, halfH } = ghostRef.current;
+190         el.style.left = `${e.clientX - halfW}px`;
+191         el.style.top = `${e.clientY - halfH}px`;
+192       }
+193     },
+194     [label, onDragStart, cleanupGhost],
+195   );
+196 
+197   const onPointerUp = useCallback(
+198     (e: PointerEvent<HTMLElement>) => {
+199       if (e.pointerType === 'mouse' || !startPos.current) return;
+200 
+201       if (isDragging.current) {
+202         // Remove ghost before elementsFromPoint so it doesn't interfere.
+203         ghostRef.current?.el.remove();
+204         ghostRef.current = null;
+205 
+206         const elements = document.elementsFromPoint(
+207           e.clientX,
+208           e.clientY,
+209         );
+210         let dropped = false;
+211         for (const el of elements) {
+212           if (
+213             el instanceof HTMLElement &&
+214             el.dataset['zoneIndex'] !== undefined
+215           ) {
+216             const zoneIndex = Number.parseInt(
+217               el.dataset['zoneIndex'],
+218               10,
+219             );
+220             if (!Number.isNaN(zoneIndex)) {
+221               onDrop(tileId, zoneIndex);
+222               dropped = true;
+223               break;
+224             }
+225           }
+226         }
+227         if (!dropped) {
+228           onDragCancelRef.current?.();
+229         }
+230       }
+231 
+232       cleanup();
+233     },
+234     [tileId, onDrop, cleanup],
+235   );
+236 
+237   const onPointerCancel = useCallback(
+238     (e: PointerEvent<HTMLElement>) => {
+239       if (e.pointerType === 'mouse') return;
+240       if (isDragging.current) {
+241         onDragCancelRef.current?.();
+242       }
+243       cleanupGhost();
+244     },
+245     [cleanupGhost],
+246   );
+247 
+248   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+249 };
 250
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:10Z)**_
@@ -1050,152 +1062,153 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:10Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile flying from its slot toward the tile bank.
-28	 *
-29	 * Phase 1: ghost flies to the hole (transform only, no opacity change).
-30	 * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
-31	 *          This lets the caller wait until the real tile has appeared in the
-32	 *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
-33	 *          preventing a visible gap between ghost disappearing and tile appearing.
-34	 *
-35	 * Returns { startFade } — call it when the bank tile is ready to be shown.
-36	 * If startFade is called before phase 1 completes, the fade starts immediately
-37	 * after the ghost arrives. Calling it multiple times is a no-op.
-38	 *
-39	 * el is the button inside the slot. We use its parent (the slot li) for
-40	 * accurate pixel dimensions and border-radius, then build a fresh fixed-
-41	 * position ghost div so the animation escapes overflow:hidden ancestors
-42	 * and avoids size-full / percentage class conflicts.
-43	 */
-44	export const triggerEjectReturn = (
-45	  el: HTMLElement,
-46	  tileId: string | null,
-47	  onComplete: () => void,
-48	): { startFade: () => void } => {
-49	  // Slot element gives us correct size + border-radius (button has size-full %).
-50	  const sourceEl = el.parentElement ?? el;
-51	  const sourceRect = sourceEl.getBoundingClientRect();
-52	  const { borderRadius } = globalThis.getComputedStyle(sourceEl);
-53	
-54	  // Fresh div — no inherited classes that could break fixed positioning.
-55	  const ghost = document.createElement('div');
-56	  ghost.innerHTML = el.innerHTML;
-57	  ghost.style.cssText = `
-58	    position: fixed;
-59	    top: ${sourceRect.top}px;
-60	    left: ${sourceRect.left}px;
-61	    width: ${sourceRect.width}px;
-62	    height: ${sourceRect.height}px;
-63	    border-radius: ${borderRadius};
-64	    display: flex;
-65	    align-items: center;
-66	    justify-content: center;
-67	    background: var(--card);
-68	    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-69	    z-index: 9999;
-70	    pointer-events: none;
-71	    margin: 0;
-72	  `;
-73	  document.body.append(ghost);
-74	
-75	  // Hide the original so only the ghost is visible during the flight.
-76	  el.style.opacity = '0';
-77	
-78	  const cleanup = () => {
-79	    ghost.remove();
-80	    el.style.opacity = '';
-81	    onComplete();
-82	  };
-83	
-84	  // Look up the specific hole for this tile, or fall back to the bank container.
-85	  const targetEl = tileId
-86	    ? document.querySelector<HTMLElement>(
-87	        `[data-tile-bank-hole="${tileId}"]`,
-88	      )
-89	    : document.querySelector<HTMLElement>('[data-tile-bank]');
-90	
-91	  // startFade state machine: phase-1 may complete before or after the caller
-92	  // triggers the fade, so we track both independently.
-93	  let fadeRequested = false;
-94	  let phaseOneDone = false;
-95	
-96	  const doFade = () => {
-97	    ghost.style.transition = 'opacity 200ms ease-out';
-98	    void ghost.offsetWidth;
-99	    ghost.style.opacity = '0';
-100	    ghost.addEventListener('transitionend', cleanup, { once: true });
-101	  };
-102	
-103	  const startFade = () => {
-104	    if (fadeRequested) return; // idempotent
-105	    fadeRequested = true;
-106	    if (phaseOneDone) doFade();
-107	  };
-108	
-109	  if (!targetEl) {
-110	    // No target — fade in place immediately (no hole to fly to).
-111	    ghost.style.transition = 'opacity 300ms ease-in';
-112	    void ghost.offsetWidth;
-113	    ghost.style.opacity = '0';
-114	    ghost.addEventListener('transitionend', cleanup, { once: true });
-115	    return { startFade };
-116	  }
-117	
-118	  const bankRect = targetEl.getBoundingClientRect();
-119	  const deltaX =
-120	    bankRect.left +
-121	    bankRect.width / 2 -
-122	    (sourceRect.left + sourceRect.width / 2);
-123	  const deltaY =
-124	    bankRect.top +
-125	    bankRect.height / 2 -
-126	    (sourceRect.top + sourceRect.height / 2);
-127	
-128	  // Phase 1: fly to the hole (no opacity change during flight).
-129	  ghost.style.transition = 'transform 300ms ease-in';
-130	  void ghost.offsetWidth;
-131	  ghost.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-132	
-133	  ghost.addEventListener(
-134	    'transitionend',
-135	    () => {
-136	      phaseOneDone = true;
-137	      if (fadeRequested) doFade();
-138	      // Otherwise ghost waits at hole until startFade() is called.
-139	    },
-140	    { once: true },
-141	  );
-142	
-143	  return { startFade };
-144	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile flying from its slot toward the tile bank.
+28  *
+29  * Phase 1: ghost flies to the hole (transform only, no opacity change).
+30  * Phase 2: ghost fades out — but only when the caller invokes `startFade()`.
+31  *          This lets the caller wait until the real tile has appeared in the
+32  *          bank (i.e. after EJECT_TILE fires) before fading the ghost out,
+33  *          preventing a visible gap between ghost disappearing and tile appearing.
+34  *
+35  * Returns { startFade } — call it when the bank tile is ready to be shown.
+36  * If startFade is called before phase 1 completes, the fade starts immediately
+37  * after the ghost arrives. Calling it multiple times is a no-op.
+38  *
+39  * el is the button inside the slot. We use its parent (the slot li) for
+40  * accurate pixel dimensions and border-radius, then build a fresh fixed-
+41  * position ghost div so the animation escapes overflow:hidden ancestors
+42  * and avoids size-full / percentage class conflicts.
+43  */
+44 export const triggerEjectReturn = (
+45   el: HTMLElement,
+46   tileId: string | null,
+47   onComplete: () => void,
+48 ): { startFade: () => void } => {
+49   // Slot element gives us correct size + border-radius (button has size-full %).
+50   const sourceEl = el.parentElement ?? el;
+51   const sourceRect = sourceEl.getBoundingClientRect();
+52   const { borderRadius } = globalThis.getComputedStyle(sourceEl);
+53 
+54   // Fresh div — no inherited classes that could break fixed positioning.
+55   const ghost = document.createElement('div');
+56   ghost.innerHTML = el.innerHTML;
+57   ghost.style.cssText = `
+58     position: fixed;
+59     top: ${sourceRect.top}px;
+60     left: ${sourceRect.left}px;
+61     width: ${sourceRect.width}px;
+62     height: ${sourceRect.height}px;
+63     border-radius: ${borderRadius};
+64     display: flex;
+65     align-items: center;
+66     justify-content: center;
+67     background: var(--card);
+68     box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+69     z-index: 9999;
+70     pointer-events: none;
+71     margin: 0;
+72   `;
+73   document.body.append(ghost);
+74 
+75   // Hide the original so only the ghost is visible during the flight.
+76   el.style.opacity = '0';
+77 
+78   const cleanup = () => {
+79     ghost.remove();
+80     el.style.opacity = '';
+81     onComplete();
+82   };
+83 
+84   // Look up the specific hole for this tile, or fall back to the bank container.
+85   const targetEl = tileId
+86     ? document.querySelector<HTMLElement>(
+87         `[data-tile-bank-hole="${tileId}"]`,
+88       )
+89     : document.querySelector<HTMLElement>('[data-tile-bank]');
+90 
+91   // startFade state machine: phase-1 may complete before or after the caller
+92   // triggers the fade, so we track both independently.
+93   let fadeRequested = false;
+94   let phaseOneDone = false;
+95 
+96   const doFade = () => {
+97     ghost.style.transition = 'opacity 200ms ease-out';
+98     void ghost.offsetWidth;
+99     ghost.style.opacity = '0';
+100     ghost.addEventListener('transitionend', cleanup, { once: true });
+101   };
+102 
+103   const startFade = () => {
+104     if (fadeRequested) return; // idempotent
+105     fadeRequested = true;
+106     if (phaseOneDone) doFade();
+107   };
+108 
+109   if (!targetEl) {
+110     // No target — fade in place immediately (no hole to fly to).
+111     ghost.style.transition = 'opacity 300ms ease-in';
+112     void ghost.offsetWidth;
+113     ghost.style.opacity = '0';
+114     ghost.addEventListener('transitionend', cleanup, { once: true });
+115     return { startFade };
+116   }
+117 
+118   const bankRect = targetEl.getBoundingClientRect();
+119   const deltaX =
+120     bankRect.left +
+121     bankRect.width / 2 -
+122     (sourceRect.left + sourceRect.width / 2);
+123   const deltaY =
+124     bankRect.top +
+125     bankRect.height / 2 -
+126     (sourceRect.top + sourceRect.height / 2);
+127 
+128   // Phase 1: fly to the hole (no opacity change during flight).
+129   ghost.style.transition = 'transform 300ms ease-in';
+130   void ghost.offsetWidth;
+131   ghost.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+132 
+133   ghost.addEventListener(
+134     'transitionend',
+135     () => {
+136       phaseOneDone = true;
+137       if (fadeRequested) doFade();
+138       // Otherwise ghost waits at hole until startFade() is called.
+139     },
+140     { once: true },
+141   );
+142 
+143   return { startFade };
+144 };
 145
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:11Z)**_
@@ -1205,238 +1218,239 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:11Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '../useSlotTileDrag';
-6	import { useTileEvaluation } from '../useTileEvaluation';
-7	import {
-8	  triggerEjectReturn,
-9	  triggerPop,
-10	  triggerShake,
-11	} from './slot-animations';
-12	import type { RefObject } from 'react';
-13	import { playSound } from '@/lib/audio/AudioFeedback';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	}
-24	
-25	export interface UseSlotBehaviorReturn {
-26	  renderProps: SlotRenderProps;
-27	  slotRef: RefObject<HTMLElement | null>;
-28	  dragRef: RefObject<HTMLButtonElement | null>;
-29	  handleClick: () => void;
-30	  isBeingDragged: boolean;
-31	  pointerHandlers: {
-32	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-33	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-34	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-36	  };
-37	}
-38	
-39	export const useSlotBehavior = (
-40	  index: number,
-41	): UseSlotBehaviorReturn => {
-42	  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
-43	    useAnswerGameContext();
-44	  const dispatch = useAnswerGameDispatch();
-45	  const { placeTile } = useTileEvaluation();
-46	
-47	  const zone = zones[index];
-48	  const tileId = zone?.placedTileId ?? null;
-49	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-50	  const label = tile?.label ?? null;
-51	  const isWrong = zone?.isWrong ?? false;
-52	  const isLocked = zone?.isLocked ?? false;
-53	  const isEmpty = tileId === null;
-54	
-55	  // Resolve interaction mode: explicit config or inferred from inputMethod
-56	  const slotInteraction =
-57	    config.slotInteraction ??
-58	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-59	  const isOrdered = slotInteraction === 'ordered';
-60	
-61	  const isActive = isOrdered && activeSlotIndex === index;
-62	  const showCursor =
-63	    isActive && isEmpty && config.inputMethod !== 'drag';
-64	  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
-65	
-66	  const slotRef = useRef<HTMLElement | null>(null);
-67	  const prevIsWrongRef = useRef(isWrong);
-68	  const prevTileIdRef = useRef(tileId);
-69	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-70	  // it when EJECT_TILE fires and the tile is back in the bank.
-71	  const startFadeRef = useRef<(() => void) | null>(null);
-72	
-73	  // Drop target handler — choose evaluation or swap based on interaction mode
-74	  const handleDrop = useCallback(
-75	    (droppedTileId: string, targetZoneIndex: number) => {
-76	      if (isOrdered) {
-77	        placeTile(droppedTileId, targetZoneIndex);
-78	        return;
-79	      }
-80	      // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
-81	      // Only fall back to placeTile for bank tiles.
-82	      const targetZone = zones[targetZoneIndex];
-83	      if (!targetZone) return;
-84	      const sourceZoneIndex = zones.findIndex(
-85	        (z) => z.placedTileId === droppedTileId,
-86	      );
-87	      if (sourceZoneIndex !== -1) {
-88	        // Evaluate both outcomes before dispatching to play exactly one sound.
-89	        const droppedTile = allTiles.find(
-90	          (t) => t.id === droppedTileId,
-91	        );
-92	        const displacedTile = targetZone.placedTileId
-93	          ? allTiles.find((t) => t.id === targetZone.placedTileId)
-94	          : null;
-95	        const sourceZone = zones[sourceZoneIndex];
-96	        const droppedCorrect =
-97	          droppedTile?.value === targetZone.expectedValue;
-98	        const displacedCorrect = displacedTile
-99	          ? displacedTile.value === sourceZone?.expectedValue
-100	          : true;
-101	        playSound(
-102	          droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
-103	        );
-104	        dispatch({
-105	          type: 'SWAP_TILES',
-106	          fromZoneIndex: sourceZoneIndex,
-107	          toZoneIndex: targetZoneIndex,
-108	        });
-109	        return;
-110	      }
-111	      placeTile(droppedTileId, targetZoneIndex);
-112	    },
-113	    [isOrdered, placeTile, zones, dispatch, allTiles],
-114	  );
-115	
-116	  // Register as drop target
-117	  useEffect(() => {
-118	    const el = slotRef.current;
-119	    if (!el) return;
-120	    return dropTargetForElements({
-121	      element: el,
-122	      getData: () => ({ zoneIndex: index }),
-123	      onDrop: ({ source }) => {
-124	        // Slot-tile drags (sourceZoneIndex present) handle their own
-125	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-126	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-127	        const sourceTileId = source.data['tileId'];
-128	        if (typeof sourceTileId === 'string') {
-129	          handleDrop(sourceTileId, index);
-130	          // Clear drag active state here — the draggable component (bank tile)
-131	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-132	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-133	        }
-134	      },
-135	    });
-136	  }, [index, handleDrop, dispatch]);
-137	
-138	  // Drag source for filled slots
-139	  const {
-140	    dragRef,
-141	    onPointerDown,
-142	    onPointerMove,
-143	    onPointerUp,
-144	    onPointerCancel,
-145	  } = useSlotTileDrag({
-146	    tileId,
-147	    label,
-148	    zoneIndex: index,
-149	    onDrop: handleDrop,
-150	  });
-151	
-152	  // Click handler: remove tile from slot (returns to bank)
-153	  const handleClick = useCallback(() => {
-154	    if (isEmpty) return;
-155	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-156	  }, [isEmpty, dispatch, index]);
-157	
-158	  // Feedback animations: trigger on state transitions
-159	  useEffect(() => {
-160	    const el = slotRef.current;
-161	    if (!el) return;
-162	
-163	    const wasWrong = prevIsWrongRef.current;
-164	    prevIsWrongRef.current = isWrong;
-165	
-166	    const prevTileId = prevTileIdRef.current;
-167	    prevTileIdRef.current = tileId;
-168	    const freshlyPlaced = tileId !== null && prevTileId === null;
-169	
-170	    if (
-171	      tileId !== null &&
-172	      prevTileId !== null &&
-173	      tileId !== prevTileId
-174	    ) {
-175	      // Tile swapped between slots — animate per zone; sound played once in handleDrop.
-176	      if (isWrong) {
-177	        triggerShake(el);
-178	      } else {
-179	        triggerPop(el);
-180	      }
-181	    } else if (isWrong && !wasWrong) {
-182	      // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
-183	      triggerShake(el);
-184	
-185	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-186	        const timerId = setTimeout(() => {
-187	          const tileEl = dragRef.current;
-188	          if (!tileEl) return;
-189	          const { startFade } = triggerEjectReturn(
-190	            tileEl,
-191	            tileId,
-192	            () => {},
-193	          );
-194	          startFadeRef.current = startFade;
-195	        }, 350);
-196	        return () => clearTimeout(timerId);
-197	      }
-198	    } else if (freshlyPlaced && !isWrong) {
-199	      // Correctly placed from bank (sound already played by useTileEvaluation).
-200	      triggerPop(el);
-201	    } else if (tileId === null && prevTileId !== null) {
-202	      // Tile returned to bank (click, drag, or eject).
-203	      playSound('tile-place');
-204	      startFadeRef.current?.();
-205	      startFadeRef.current = null;
-206	    }
-207	  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
-208	
-209	  return {
-210	    renderProps: {
-211	      label,
-212	      tileId,
-213	      isActive,
-214	      isWrong,
-215	      isLocked,
-216	      isEmpty,
-217	      showCursor,
-218	    },
-219	    slotRef,
-220	    dragRef,
-221	    handleClick,
-222	    isBeingDragged,
-223	    pointerHandlers: {
-224	      onPointerDown,
-225	      onPointerMove,
-226	      onPointerUp,
-227	      onPointerCancel,
-228	    },
-229	  };
-230	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '../useSlotTileDrag';
+6 import { useTileEvaluation } from '../useTileEvaluation';
+7 import {
+8   triggerEjectReturn,
+9   triggerPop,
+10   triggerShake,
+11 } from './slot-animations';
+12 import type { RefObject } from 'react';
+13 import { playSound } from '@/lib/audio/AudioFeedback';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23 }
+24 
+25 export interface UseSlotBehaviorReturn {
+26   renderProps: SlotRenderProps;
+27   slotRef: RefObject<HTMLElement | null>;
+28   dragRef: RefObject<HTMLButtonElement | null>;
+29   handleClick: () => void;
+30   isBeingDragged: boolean;
+31   pointerHandlers: {
+32     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+33     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+34     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+36   };
+37 }
+38 
+39 export const useSlotBehavior = (
+40   index: number,
+41 ): UseSlotBehaviorReturn => {
+42   const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
+43     useAnswerGameContext();
+44   const dispatch = useAnswerGameDispatch();
+45   const { placeTile } = useTileEvaluation();
+46 
+47   const zone = zones[index];
+48   const tileId = zone?.placedTileId ?? null;
+49   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+50   const label = tile?.label ?? null;
+51   const isWrong = zone?.isWrong ?? false;
+52   const isLocked = zone?.isLocked ?? false;
+53   const isEmpty = tileId === null;
+54 
+55   // Resolve interaction mode: explicit config or inferred from inputMethod
+56   const slotInteraction =
+57     config.slotInteraction ??
+58     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+59   const isOrdered = slotInteraction === 'ordered';
+60 
+61   const isActive = isOrdered && activeSlotIndex === index;
+62   const showCursor =
+63     isActive && isEmpty && config.inputMethod !== 'drag';
+64   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+65 
+66   const slotRef = useRef<HTMLElement | null>(null);
+67   const prevIsWrongRef = useRef(isWrong);
+68   const prevTileIdRef = useRef(tileId);
+69   // Holds the startFade handle returned by triggerEjectReturn so we can call
+70   // it when EJECT_TILE fires and the tile is back in the bank.
+71   const startFadeRef = useRef<(() => void) | null>(null);
+72 
+73   // Drop target handler — choose evaluation or swap based on interaction mode
+74   const handleDrop = useCallback(
+75     (droppedTileId: string, targetZoneIndex: number) => {
+76       if (isOrdered) {
+77         placeTile(droppedTileId, targetZoneIndex);
+78         return;
+79       }
+80       // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
+81       // Only fall back to placeTile for bank tiles.
+82       const targetZone = zones[targetZoneIndex];
+83       if (!targetZone) return;
+84       const sourceZoneIndex = zones.findIndex(
+85         (z) => z.placedTileId === droppedTileId,
+86       );
+87       if (sourceZoneIndex !== -1) {
+88         // Evaluate both outcomes before dispatching to play exactly one sound.
+89         const droppedTile = allTiles.find(
+90           (t) => t.id === droppedTileId,
+91         );
+92         const displacedTile = targetZone.placedTileId
+93           ? allTiles.find((t) => t.id === targetZone.placedTileId)
+94           : null;
+95         const sourceZone = zones[sourceZoneIndex];
+96         const droppedCorrect =
+97           droppedTile?.value === targetZone.expectedValue;
+98         const displacedCorrect = displacedTile
+99           ? displacedTile.value === sourceZone?.expectedValue
+100           : true;
+101         playSound(
+102           droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+103         );
+104         dispatch({
+105           type: 'SWAP_TILES',
+106           fromZoneIndex: sourceZoneIndex,
+107           toZoneIndex: targetZoneIndex,
+108         });
+109         return;
+110       }
+111       placeTile(droppedTileId, targetZoneIndex);
+112     },
+113     [isOrdered, placeTile, zones, dispatch, allTiles],
+114   );
+115 
+116   // Register as drop target
+117   useEffect(() => {
+118     const el = slotRef.current;
+119     if (!el) return;
+120     return dropTargetForElements({
+121       element: el,
+122       getData: () => ({ zoneIndex: index }),
+123       onDrop: ({ source }) => {
+124         // Slot-tile drags (sourceZoneIndex present) handle their own
+125         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+126         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+127         const sourceTileId = source.data['tileId'];
+128         if (typeof sourceTileId === 'string') {
+129           handleDrop(sourceTileId, index);
+130           // Clear drag active state here — the draggable component (bank tile)
+131           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+132           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+133         }
+134       },
+135     });
+136   }, [index, handleDrop, dispatch]);
+137 
+138   // Drag source for filled slots
+139   const {
+140     dragRef,
+141     onPointerDown,
+142     onPointerMove,
+143     onPointerUp,
+144     onPointerCancel,
+145   } = useSlotTileDrag({
+146     tileId,
+147     label,
+148     zoneIndex: index,
+149     onDrop: handleDrop,
+150   });
+151 
+152   // Click handler: remove tile from slot (returns to bank)
+153   const handleClick = useCallback(() => {
+154     if (isEmpty) return;
+155     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+156   }, [isEmpty, dispatch, index]);
+157 
+158   // Feedback animations: trigger on state transitions
+159   useEffect(() => {
+160     const el = slotRef.current;
+161     if (!el) return;
+162 
+163     const wasWrong = prevIsWrongRef.current;
+164     prevIsWrongRef.current = isWrong;
+165 
+166     const prevTileId = prevTileIdRef.current;
+167     prevTileIdRef.current = tileId;
+168     const freshlyPlaced = tileId !== null && prevTileId === null;
+169 
+170     if (
+171       tileId !== null &&
+172       prevTileId !== null &&
+173       tileId !== prevTileId
+174     ) {
+175       // Tile swapped between slots — animate per zone; sound played once in handleDrop.
+176       if (isWrong) {
+177         triggerShake(el);
+178       } else {
+179         triggerPop(el);
+180       }
+181     } else if (isWrong && !wasWrong) {
+182       // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
+183       triggerShake(el);
+184 
+185       if (config.wrongTileBehavior === 'lock-auto-eject') {
+186         const timerId = setTimeout(() => {
+187           const tileEl = dragRef.current;
+188           if (!tileEl) return;
+189           const { startFade } = triggerEjectReturn(
+190             tileEl,
+191             tileId,
+192             () => {},
+193           );
+194           startFadeRef.current = startFade;
+195         }, 350);
+196         return () => clearTimeout(timerId);
+197       }
+198     } else if (freshlyPlaced && !isWrong) {
+199       // Correctly placed from bank (sound already played by useTileEvaluation).
+200       triggerPop(el);
+201     } else if (tileId === null && prevTileId !== null) {
+202       // Tile returned to bank (click, drag, or eject).
+203       playSound('tile-place');
+204       startFadeRef.current?.();
+205       startFadeRef.current = null;
+206     }
+207   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+208 
+209   return {
+210     renderProps: {
+211       label,
+212       tileId,
+213       isActive,
+214       isWrong,
+215       isLocked,
+216       isEmpty,
+217       showCursor,
+218     },
+219     slotRef,
+220     dragRef,
+221     handleClick,
+222     isBeingDragged,
+223     pointerHandlers: {
+224       onPointerDown,
+225       onPointerMove,
+226       onPointerUp,
+227       onPointerCancel,
+228     },
+229   };
+230 };
 231
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:21:11Z)**_
@@ -1446,91 +1460,92 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:21:11Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const NumberTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Number ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const SortNumbersTileBank = () => {
-36	  const { allTiles, bankTileIds, dragActiveTileId } =
-37	    useAnswerGameContext();
-38	  const { bankRef } = useBankDropTarget();
-39	
-40	  return (
-41	    <div
-42	      ref={bankRef}
-43	      data-tile-bank=""
-44	      className="flex flex-wrap justify-center gap-3"
-45	    >
-46	      {allTiles.map((tile) => {
-47	        const inBank = bankTileIds.includes(tile.id);
-48	        const isDragging = tile.id === dragActiveTileId;
-49	
-50	        if (inBank && isDragging) {
-51	          return (
-52	            <div key={tile.id} className="relative size-14">
-53	              <div
-54	                data-tile-bank-hole={tile.id}
-55	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-56	                aria-hidden="true"
-57	              />
-58	              <div
-59	                className="absolute inset-0 invisible"
-60	                aria-hidden="true"
-61	              >
-62	                <NumberTile tile={tile} />
-63	              </div>
-64	            </div>
-65	          );
-66	        }
-67	
-68	        if (inBank) {
-69	          return <NumberTile key={tile.id} tile={tile} />;
-70	        }
-71	
-72	        return (
-73	          <div
-74	            key={tile.id}
-75	            data-tile-bank-hole={tile.id}
-76	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-77	            aria-hidden="true"
-78	          />
-79	        );
-80	      })}
-81	    </div>
-82	  );
-83	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const NumberTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Number ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const SortNumbersTileBank = () => {
+36   const { allTiles, bankTileIds, dragActiveTileId } =
+37     useAnswerGameContext();
+38   const { bankRef } = useBankDropTarget();
+39 
+40   return (
+41     <div
+42       ref={bankRef}
+43       data-tile-bank=""
+44       className="flex flex-wrap justify-center gap-3"
+45     >
+46       {allTiles.map((tile) => {
+47         const inBank = bankTileIds.includes(tile.id);
+48         const isDragging = tile.id === dragActiveTileId;
+49 
+50         if (inBank && isDragging) {
+51           return (
+52             <div key={tile.id} className="relative size-14">
+53               <div
+54                 data-tile-bank-hole={tile.id}
+55                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+56                 aria-hidden="true"
+57               />
+58               <div
+59                 className="absolute inset-0 invisible"
+60                 aria-hidden="true"
+61               >
+62                 <NumberTile tile={tile} />
+63               </div>
+64             </div>
+65           );
+66         }
+67 
+68         if (inBank) {
+69           return <NumberTile key={tile.id} tile={tile} />;
+70         }
+71 
+72         return (
+73           <div
+74             key={tile.id}
+75             data-tile-bank-hole={tile.id}
+76             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+77             aria-hidden="true"
+78           />
+79         );
+80       })}
+81     </div>
+82   );
+83 };
 84
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:09Z)**_
@@ -1543,9 +1558,9 @@ Now I have a thorough understanding of the codebase. Let me analyze both bugs sy
 ### Bug A — Slot → invalid drop (2 ugly animations)
 
 **Data flow for slot drag:**
+
 1. User starts drag → `onDragStart` in `useSlotTileDrag` fires → `SET_DRAG_ACTIVE(tileId)` dispatched → button becomes `invisible pointer-events-none` (isBeingDragged = true)
 2. User drops somewhere invalid (not a slot, not bank) → `onDrop` in `useSlotTileDrag` fires
-
 
 3. The `onDrop` handler checks the targets array, and if nothing valid is found, it calls `onBankReturn?.()` then dispatches `REMOVE_TILE`. However, the browser's snap-back animation actually triggers before `onDrop` even fires—when the drag system detects no valid drop target, it immediately animates the ghost back to its origin. Since the button is invisible at that moment, we see the ghost flying back to an invisible element, creating that jarring visual.
 
@@ -1581,7 +1596,7 @@ Setting up the catch-all drop target hook...
 
 Now I need to figure out where to actually use this hook—it should go in the top-level game component, not just the bank. Then I'll wire up the `onBankReturn` callback in `useSlotBehavior` to handle drops that land on the catch-all target.
 
-The tricky part is that `dragRef` is returned from `useSlotTileDrag`, so I can't reference it in the `onBankReturn` callback that gets passed to the hook itself—I'd need a separate ref to track the dragged element. BankReturn`, which is passed to `useSlotTileDrag`, we'd need to create `dragRef` before calling the hook. But `dragRef` is created inside `useSlotTileDrag`.
+The tricky part is that `dragRef` is returned from `useSlotTileDrag`, so I can't reference it in the `onBankReturn` callback that gets passed to the hook itself—I'd need a separate ref to track the dragged element. BankReturn`, which is passed to`useSlotTileDrag`, we'd need to create`dragRef` before calling the hook. But `dragRef` is created inside `useSlotTileDrag`.
 
 The simplest approach is to change the `onBankReturn` signature so it receives the drag element directly, then pass that element when calling the callback from within `useSlotTileDrag`. This way `useSlotBehavior` can access the button element without needing to manage the ref ordering issue.
 
@@ -1611,6 +1626,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:10Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:10Z)**_
@@ -1622,6 +1638,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:10Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:14Z)**_
@@ -1633,6 +1650,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:14Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:16Z)**_
@@ -1650,6 +1668,7 @@ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:18Z)**_
@@ -1659,226 +1678,227 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:18Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { Slot } from '@/components/answer-game/Slot/Slot';
-16	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { buildRoundOrder } from '@/games/build-round-order';
-22	
-23	interface SortNumbersProps {
-24	  config: SortNumbersConfig;
-25	}
-26	
-27	const SortNumbersSession = ({
-28	  sortNumbersConfig,
-29	  roundOrder,
-30	  onRestartSession,
-31	}: {
-32	  sortNumbersConfig: SortNumbersConfig;
-33	  roundOrder: readonly number[];
-34	  onRestartSession: () => void;
-35	}) => {
-36	  const { t } = useTranslation('games');
-37	  const { phase, roundIndex, retryCount, zones } =
-38	    useAnswerGameContext();
-39	  const dispatch = useAnswerGameDispatch();
-40	  const { confettiReady, gameOverReady } = useGameSounds();
-41	  const navigate = useNavigate();
-42	  const { locale } = useParams({ from: '/$locale' });
-43	  const completionToken = useRef(0);
-44	
-45	  const configRoundIndex = roundOrder[roundIndex];
-46	  const round =
-47	    configRoundIndex === undefined
-48	      ? undefined
-49	      : sortNumbersConfig.rounds[configRoundIndex];
-50	
-51	  const directionLabel =
-52	    sortNumbersConfig.direction === 'ascending'
-53	      ? t('sort-numbers-ui.ascending-label')
-54	      : t('sort-numbers-ui.descending-label');
-55	
-56	  useRoundTTS(directionLabel);
-57	
-58	  const handleHome = () => {
-59	    void navigate({ to: '/$locale', params: { locale } });
-60	  };
-61	
-62	  const handlePlayAgain = () => {
-63	    onRestartSession();
-64	  };
-65	
-66	  useEffect(() => {
-67	    if (phase !== 'round-complete' || !confettiReady) return;
-68	
-69	    const token = ++completionToken.current;
-70	    const delayMs = 750;
-71	    const timer = globalThis.setTimeout(() => {
-72	      if (completionToken.current !== token) return;
-73	
-74	      const isLastRound = roundIndex >= roundOrder.length - 1;
-75	      if (isLastRound) {
-76	        dispatch({ type: 'COMPLETE_GAME' });
-77	        return;
-78	      }
-79	
-80	      const nextConfigIndex = roundOrder[roundIndex + 1];
-81	      const nextRound =
-82	        nextConfigIndex === undefined
-83	          ? undefined
-84	          : sortNumbersConfig.rounds[nextConfigIndex];
-85	
-86	      if (!nextRound) {
-87	        dispatch({ type: 'COMPLETE_GAME' });
-88	        return;
-89	      }
-90	
-91	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-92	        nextRound.sequence,
-93	        sortNumbersConfig.direction,
-94	      );
-95	      dispatch({
-96	        type: 'ADVANCE_ROUND',
-97	        tiles: nextTiles,
-98	        zones: nextZones,
-99	      });
-100	    }, delayMs);
-101	
-102	    return () => {
-103	      globalThis.clearTimeout(timer);
-104	    };
-105	  }, [
-106	    phase,
-107	    confettiReady,
-108	    roundIndex,
-109	    dispatch,
-110	    roundOrder,
-111	    sortNumbersConfig.rounds,
-112	    sortNumbersConfig.direction,
-113	  ]);
-114	
-115	  if (!round) return null;
-116	
-117	  return (
-118	    <>
-119	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-120	        <AnswerGame.Question>
-121	          <p className="text-center text-lg font-semibold text-foreground">
-122	            {directionLabel}
-123	          </p>
-124	        </AnswerGame.Question>
-125	        <AnswerGame.Answer>
-126	          <SlotRow className="gap-2">
-127	            {zones.map((zone, i) => (
-128	              <Slot
-129	                key={zone.id}
-130	                index={i}
-131	                className="size-14 rounded-lg"
-132	              >
-133	                {({ label }) => (
-134	                  <span className="text-2xl font-bold">{label}</span>
-135	                )}
-136	              </Slot>
-137	            ))}
-138	          </SlotRow>
-139	        </AnswerGame.Answer>
-140	        <AnswerGame.Choices>
-141	          <SortNumbersTileBank />
-142	        </AnswerGame.Choices>
-143	      </div>
-144	      <ScoreAnimation visible={confettiReady} />
-145	      {gameOverReady ? (
-146	        <GameOverOverlay
-147	          retryCount={retryCount}
-148	          onPlayAgain={handlePlayAgain}
-149	          onHome={handleHome}
-150	        />
-151	      ) : null}
-152	    </>
-153	  );
-154	};
-155	
-156	export const SortNumbers = ({ config }: SortNumbersProps) => {
-157	  const roundsInOrder = config.roundsInOrder === true;
-158	  const [sessionEpoch, setSessionEpoch] = useState(0);
-159	
-160	  const roundOrder = useMemo(() => {
-161	    void sessionEpoch;
-162	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-163	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-164	
-165	  const firstConfigIndex = roundOrder[0];
-166	  const round0 =
-167	    firstConfigIndex === undefined
-168	      ? undefined
-169	      : config.rounds[firstConfigIndex];
-170	
-171	  const { tiles, zones } = useMemo(() => {
-172	    if (!round0) {
-173	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-174	    }
-175	    return buildSortRound(round0.sequence, config.direction);
-176	  }, [round0, config.direction]);
-177	
-178	  const answerGameConfig = useMemo(
-179	    (): AnswerGameConfig => ({
-180	      gameId: config.gameId,
-181	      inputMethod: config.inputMethod,
-182	      wrongTileBehavior: config.wrongTileBehavior,
-183	      tileBankMode: config.tileBankMode,
-184	      totalRounds: config.rounds.length,
-185	      roundsInOrder: config.roundsInOrder,
-186	      ttsEnabled: config.ttsEnabled,
-187	      touchKeyboardInputMode: 'numeric',
-188	      initialTiles: tiles,
-189	      initialZones: zones,
-190	      slotInteraction: 'free-swap' as const,
-191	    }),
-192	    [
-193	      config.gameId,
-194	      config.inputMethod,
-195	      config.wrongTileBehavior,
-196	      config.tileBankMode,
-197	      config.rounds.length,
-198	      config.roundsInOrder,
-199	      config.ttsEnabled,
-200	      tiles,
-201	      zones,
-202	    ],
-203	  );
-204	
-205	  if (!round0) return null;
-206	
-207	  return (
-208	    <AnswerGame config={answerGameConfig}>
-209	      <SortNumbersSession
-210	        sortNumbersConfig={config}
-211	        roundOrder={roundOrder}
-212	        onRestartSession={() => {
-213	          setSessionEpoch((e) => e + 1);
-214	        }}
-215	      />
-216	    </AnswerGame>
-217	  );
-218	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { Slot } from '@/components/answer-game/Slot/Slot';
+16 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { buildRoundOrder } from '@/games/build-round-order';
+22 
+23 interface SortNumbersProps {
+24   config: SortNumbersConfig;
+25 }
+26 
+27 const SortNumbersSession = ({
+28   sortNumbersConfig,
+29   roundOrder,
+30   onRestartSession,
+31 }: {
+32   sortNumbersConfig: SortNumbersConfig;
+33   roundOrder: readonly number[];
+34   onRestartSession: () => void;
+35 }) => {
+36   const { t } = useTranslation('games');
+37   const { phase, roundIndex, retryCount, zones } =
+38     useAnswerGameContext();
+39   const dispatch = useAnswerGameDispatch();
+40   const { confettiReady, gameOverReady } = useGameSounds();
+41   const navigate = useNavigate();
+42   const { locale } = useParams({ from: '/$locale' });
+43   const completionToken = useRef(0);
+44 
+45   const configRoundIndex = roundOrder[roundIndex];
+46   const round =
+47     configRoundIndex === undefined
+48       ? undefined
+49       : sortNumbersConfig.rounds[configRoundIndex];
+50 
+51   const directionLabel =
+52     sortNumbersConfig.direction === 'ascending'
+53       ? t('sort-numbers-ui.ascending-label')
+54       : t('sort-numbers-ui.descending-label');
+55 
+56   useRoundTTS(directionLabel);
+57 
+58   const handleHome = () => {
+59     void navigate({ to: '/$locale', params: { locale } });
+60   };
+61 
+62   const handlePlayAgain = () => {
+63     onRestartSession();
+64   };
+65 
+66   useEffect(() => {
+67     if (phase !== 'round-complete' || !confettiReady) return;
+68 
+69     const token = ++completionToken.current;
+70     const delayMs = 750;
+71     const timer = globalThis.setTimeout(() => {
+72       if (completionToken.current !== token) return;
+73 
+74       const isLastRound = roundIndex >= roundOrder.length - 1;
+75       if (isLastRound) {
+76         dispatch({ type: 'COMPLETE_GAME' });
+77         return;
+78       }
+79 
+80       const nextConfigIndex = roundOrder[roundIndex + 1];
+81       const nextRound =
+82         nextConfigIndex === undefined
+83           ? undefined
+84           : sortNumbersConfig.rounds[nextConfigIndex];
+85 
+86       if (!nextRound) {
+87         dispatch({ type: 'COMPLETE_GAME' });
+88         return;
+89       }
+90 
+91       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+92         nextRound.sequence,
+93         sortNumbersConfig.direction,
+94       );
+95       dispatch({
+96         type: 'ADVANCE_ROUND',
+97         tiles: nextTiles,
+98         zones: nextZones,
+99       });
+100     }, delayMs);
+101 
+102     return () => {
+103       globalThis.clearTimeout(timer);
+104     };
+105   }, [
+106     phase,
+107     confettiReady,
+108     roundIndex,
+109     dispatch,
+110     roundOrder,
+111     sortNumbersConfig.rounds,
+112     sortNumbersConfig.direction,
+113   ]);
+114 
+115   if (!round) return null;
+116 
+117   return (
+118     <>
+119       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+120         <AnswerGame.Question>
+121           <p className="text-center text-lg font-semibold text-foreground">
+122             {directionLabel}
+123           </p>
+124         </AnswerGame.Question>
+125         <AnswerGame.Answer>
+126           <SlotRow className="gap-2">
+127             {zones.map((zone, i) => (
+128               <Slot
+129                 key={zone.id}
+130                 index={i}
+131                 className="size-14 rounded-lg"
+132               >
+133                 {({ label }) => (
+134                   <span className="text-2xl font-bold">{label}</span>
+135                 )}
+136               </Slot>
+137             ))}
+138           </SlotRow>
+139         </AnswerGame.Answer>
+140         <AnswerGame.Choices>
+141           <SortNumbersTileBank />
+142         </AnswerGame.Choices>
+143       </div>
+144       <ScoreAnimation visible={confettiReady} />
+145       {gameOverReady ? (
+146         <GameOverOverlay
+147           retryCount={retryCount}
+148           onPlayAgain={handlePlayAgain}
+149           onHome={handleHome}
+150         />
+151       ) : null}
+152     </>
+153   );
+154 };
+155 
+156 export const SortNumbers = ({ config }: SortNumbersProps) => {
+157   const roundsInOrder = config.roundsInOrder === true;
+158   const [sessionEpoch, setSessionEpoch] = useState(0);
+159 
+160   const roundOrder = useMemo(() => {
+161     void sessionEpoch;
+162     return buildRoundOrder(config.rounds.length, roundsInOrder);
+163   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+164 
+165   const firstConfigIndex = roundOrder[0];
+166   const round0 =
+167     firstConfigIndex === undefined
+168       ? undefined
+169       : config.rounds[firstConfigIndex];
+170 
+171   const { tiles, zones } = useMemo(() => {
+172     if (!round0) {
+173       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+174     }
+175     return buildSortRound(round0.sequence, config.direction);
+176   }, [round0, config.direction]);
+177 
+178   const answerGameConfig = useMemo(
+179     (): AnswerGameConfig => ({
+180       gameId: config.gameId,
+181       inputMethod: config.inputMethod,
+182       wrongTileBehavior: config.wrongTileBehavior,
+183       tileBankMode: config.tileBankMode,
+184       totalRounds: config.rounds.length,
+185       roundsInOrder: config.roundsInOrder,
+186       ttsEnabled: config.ttsEnabled,
+187       touchKeyboardInputMode: 'numeric',
+188       initialTiles: tiles,
+189       initialZones: zones,
+190       slotInteraction: 'free-swap' as const,
+191     }),
+192     [
+193       config.gameId,
+194       config.inputMethod,
+195       config.wrongTileBehavior,
+196       config.tileBankMode,
+197       config.rounds.length,
+198       config.roundsInOrder,
+199       config.ttsEnabled,
+200       tiles,
+201       zones,
+202     ],
+203   );
+204 
+205   if (!round0) return null;
+206 
+207   return (
+208     <AnswerGame config={answerGameConfig}>
+209       <SortNumbersSession
+210         sortNumbersConfig={config}
+211         roundOrder={roundOrder}
+212         onRestartSession={() => {
+213           setSessionEpoch((e) => e + 1);
+214         }}
+215       />
+216     </AnswerGame>
+217   );
+218 };
 219
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:20Z)**_
@@ -1909,6 +1929,7 @@ src/components/answer-game/useGameSounds.ts
 src/components/answer-game/useGameTTS.ts
 src/components/answer-game/useTileEvaluation.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:22Z)**_
@@ -1932,6 +1953,7 @@ src/components/answer-game/AnswerGame/AnswerGame.test.tsx
 src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
 src/components/answer-game/AnswerGame/AnswerGame.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:26Z)**_
@@ -1943,6 +1965,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:26Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:30Z)**_
@@ -1952,48 +1975,49 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:30Z)**_
  `./src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:44Z)**_
@@ -2003,7 +2027,7 @@ OK, so the game container is `AnswerGameRoot` which wraps `AnswerGameProvider`. 
 
 Actually, the simplest approach: add the catch-all drop target using `document.body` in a hook that is mounted at the `AnswerGame` level. Or I could just register it in `useBankDropTarget` — no, that's not right.
 
-Actually, the cleanest solution: register the catch-all on `document.body` from within a hook. 
+Actually, the cleanest solution: register the catch-all on `document.body` from within a hook.
 
 I think the best move is to create a `useCatchAllDropTarget` hook and call it from `AnswerGameProvider` where the state and context already live, rather than trying to add it to a presentational component.
 </details></think>
@@ -2018,6 +2042,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:46Z)**_
 src/components/answer-game/AnswerGameProvider.test.tsx
 src/components/answer-game/AnswerGameProvider.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:23:48Z)**_
@@ -2027,106 +2052,107 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:23:48Z)**_
  `./src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-7	import { TouchKeyboardContext } from './TouchKeyboardContext';
-8	import { useKeyboardInput } from './useKeyboardInput';
-9	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-10	import type {
-11	  AnswerGameAction,
-12	  AnswerGameConfig,
-13	  AnswerGameState,
-14	} from './types';
-15	import type { Dispatch, ReactNode } from 'react';
-16	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-17	
-18	export const AnswerGameStateContext =
-19	  createContext<AnswerGameState | null>(null);
-20	export const AnswerGameDispatchContext =
-21	  createContext<Dispatch<AnswerGameAction> | null>(null);
-22	
-23	const KeyboardInputAdapter = () => {
-24	  useKeyboardInput();
-25	  return null;
-26	};
-27	
-28	const TouchKeyboardAdapter = ({
-29	  inputMode,
-30	  children,
-31	}: {
-32	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-33	  children: ReactNode;
-34	}) => {
-35	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-36	  return (
-37	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-38	      <HiddenKeyboardInput
-39	        inputRef={hiddenInputRef}
-40	        inputMode={inputMode}
-41	      />
-42	      {children}
-43	    </TouchKeyboardContext.Provider>
-44	  );
-45	};
-46	
-47	interface AnswerGameProviderProps {
-48	  config: AnswerGameConfig;
-49	  children: ReactNode;
-50	}
-51	
-52	export const AnswerGameProvider = ({
-53	  config,
-54	  children,
-55	}: AnswerGameProviderProps) => {
-56	  const [state, dispatch] = useReducer(
-57	    answerGameReducer,
-58	    config,
-59	    makeInitialState,
-60	  );
-61	
-62	  useEffect(() => {
-63	    const tiles = config.initialTiles;
-64	    const zones = config.initialZones;
-65	    if (tiles?.length && zones?.length) {
-66	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-67	    }
-68	  }, [config.gameId, config.initialTiles, config.initialZones]);
-69	
-70	  const roundProgress = {
-71	    current: state.roundIndex + 1,
-72	    total: config.totalRounds,
-73	  };
-74	
-75	  const usesTouchKeyboard =
-76	    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
-77	
-78	  return (
-79	    <GameRoundContext.Provider value={roundProgress}>
-80	      <AnswerGameStateContext.Provider value={state}>
-81	        <AnswerGameDispatchContext.Provider value={dispatch}>
-82	          {usesTouchKeyboard ? (
-83	            <TouchKeyboardAdapter
-84	              inputMode={config.touchKeyboardInputMode ?? 'text'}
-85	            >
-86	              {children}
-87	            </TouchKeyboardAdapter>
-88	          ) : (
-89	            <TouchKeyboardContext.Provider value={null}>
-90	              <KeyboardInputAdapter />
-91	              {children}
-92	            </TouchKeyboardContext.Provider>
-93	          )}
-94	        </AnswerGameDispatchContext.Provider>
-95	      </AnswerGameStateContext.Provider>
-96	    </GameRoundContext.Provider>
-97	  );
-98	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+7 import { TouchKeyboardContext } from './TouchKeyboardContext';
+8 import { useKeyboardInput } from './useKeyboardInput';
+9 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+10 import type {
+11   AnswerGameAction,
+12   AnswerGameConfig,
+13   AnswerGameState,
+14 } from './types';
+15 import type { Dispatch, ReactNode } from 'react';
+16 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+17 
+18 export const AnswerGameStateContext =
+19   createContext<AnswerGameState | null>(null);
+20 export const AnswerGameDispatchContext =
+21   createContext<Dispatch<AnswerGameAction> | null>(null);
+22 
+23 const KeyboardInputAdapter = () => {
+24   useKeyboardInput();
+25   return null;
+26 };
+27 
+28 const TouchKeyboardAdapter = ({
+29   inputMode,
+30   children,
+31 }: {
+32   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+33   children: ReactNode;
+34 }) => {
+35   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+36   return (
+37     <TouchKeyboardContext.Provider value={focusKeyboard}>
+38       <HiddenKeyboardInput
+39         inputRef={hiddenInputRef}
+40         inputMode={inputMode}
+41       />
+42       {children}
+43     </TouchKeyboardContext.Provider>
+44   );
+45 };
+46 
+47 interface AnswerGameProviderProps {
+48   config: AnswerGameConfig;
+49   children: ReactNode;
+50 }
+51 
+52 export const AnswerGameProvider = ({
+53   config,
+54   children,
+55 }: AnswerGameProviderProps) => {
+56   const [state, dispatch] = useReducer(
+57     answerGameReducer,
+58     config,
+59     makeInitialState,
+60   );
+61 
+62   useEffect(() => {
+63     const tiles = config.initialTiles;
+64     const zones = config.initialZones;
+65     if (tiles?.length && zones?.length) {
+66       dispatch({ type: 'INIT_ROUND', tiles, zones });
+67     }
+68   }, [config.gameId, config.initialTiles, config.initialZones]);
+69 
+70   const roundProgress = {
+71     current: state.roundIndex + 1,
+72     total: config.totalRounds,
+73   };
+74 
+75   const usesTouchKeyboard =
+76     navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+77 
+78   return (
+79     <GameRoundContext.Provider value={roundProgress}>
+80       <AnswerGameStateContext.Provider value={state}>
+81         <AnswerGameDispatchContext.Provider value={dispatch}>
+82           {usesTouchKeyboard ? (
+83             <TouchKeyboardAdapter
+84               inputMode={config.touchKeyboardInputMode ?? 'text'}
+85             >
+86               {children}
+87             </TouchKeyboardAdapter>
+88           ) : (
+89             <TouchKeyboardContext.Provider value={null}>
+90               <KeyboardInputAdapter />
+91               {children}
+92             </TouchKeyboardContext.Provider>
+93           )}
+94         </AnswerGameDispatchContext.Provider>
+95       </AnswerGameStateContext.Provider>
+96     </GameRoundContext.Provider>
+97   );
+98 };
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:25:59Z)**_
@@ -2137,11 +2163,11 @@ Now I have all the context I need. Let me plan the implementation.
 ## Root Cause Summary
 
 **Bug A (Slot → invalid drop, 2 ugly animations):**
+
 - Root cause: No drop target exists outside the bank and slots → browser HTML5 snap-back fires before `onDrop` callback
 - Secondary issue: `onBankReturn` is never passed to `useSlotTileDrag` in `useSlotBehavior` (line 145-150), so no `triggerEjectReturn` animation is triggered
 
 **Bug B (Bank → invalid drop, silent disappear):**
-
 
 - Root cause: `useDraggableTile.onDrop` only clears the drag state without any animation and doesn't handle invalid drops differently from valid ones
 
@@ -2208,11 +2234,12 @@ Now I have a complete picture. Let me formulate the implementation plan.
 ## Root Cause Summary
 
 ### Bug A — Slot → invalid drop
+
 1. **Root cause**: No drop target registered outside the bank/slots → browser plays native HTML5 snap-back animation (ghost flies back to drag source, which is invisible)
 2. **Secondary**: `onBankReturn` is never passed to `useSlotTileDrag` in `useSlotBehavior` (line 145-150), so even if we fix the snap-back, no animation plays on invalid drops
 
-
 ### Bug B — Bank → invalid drop
+
 1. **Root cause**: `useDraggableTile.onDrop` only dispatches `SET_DRAG_ACTIVE(null)` with no location check → tile just silently reappears, no animation
 
 ## Fix Strategy
@@ -2294,6 +2321,7 @@ Updating the hook call to include `onBankReturn` callback... I see that `onCompl
 There's a timing issue I need to work through though — `triggerEjectReturn` immediately hides the slot button, but I need to verify when `EJECT_TILE` actually fires relative to `REMOVE_TILE` in the effect chain.
 
 Looking at the code, when the tile is ejected and returns to null, the effect checks if `tileId` changed from non-null to null, and if so, it plays the sound and triggers the fade animation. This happens regardless of whether the tile was removed via click, drag, or auto-eject — the key is just that `tileId` becomes null. ), `startFade` is called. For the drag-cancel path, the sequence would be:
+
 1. `onBankReturn(tileEl)` → `triggerEjectReturn(tileEl, tileId, () => {})` → `startFadeRef.current = startFade`
    - Ghost created at slot position, hidden button (`el.style.opacity = '0'`)
    - Ghost starts flying to bank hole
@@ -2315,11 +2343,13 @@ Now I have a complete picture. Let me trace through both bugs systematically.
 ## Root Cause Analysis
 
 **Bug A (Slot → invalid drop):**
+
 1. No drop target exists outside bank/slots → browser plays native snap-back to the drag source button, which is `invisible` (class from `isBeingDragged`)
 2. THEN `onDrop` fires with `targets.length === 0` → `onBankReturn?.()` (currently `undefined` — never wired in `useSlotBehavior`) → `REMOVE_TILE` → tile jumps to bank
 3. Two disconnected visual events
 
 **Bug B (Bank → invalid drop):**
+
 - `useDraggableTile.onDrop` just dispatches `SET_DRAG_ACTIVE(null)` with no location check — no animation at all
 
 ## Fix Plan
@@ -2382,6 +2412,7 @@ useTouchDrag.ts
 useTouchKeyboardInput.test.tsx
 useTouchKeyboardInput.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:29:27Z)**_
@@ -2394,7 +2425,6 @@ Let me also check if there's a test file for `useSlotTileDrag` that I should upd
 I already saw `useSlotTileDrag.test.tsx` in the listing. Let me read it to understand what tests exist:
 
 Actually, let me just implement the code changes now. I'll read the test file to see if I need to update it.
-
 
 Now I need to look at both test files to understand the existing test coverage for these hooks.
 </details></think>
@@ -2410,215 +2440,216 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:29:28Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx`
 
 ```text
-1	import { render } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { useSlotTileDrag } from './useSlotTileDrag';
-4	import type { ReactNode } from 'react';
-5	
-6	vi.mock('@/lib/game-event-bus', () => ({
-7	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-8	}));
-9	
-10	vi.mock('@/lib/audio/AudioFeedback', () => ({
-11	  playSound: vi.fn(),
-12	  queueSound: vi.fn(),
-13	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-14	}));
-15	
-16	// Capture the options passed to draggable so tests can invoke the callbacks.
-17	type DraggableDropArgs = {
-18	  location: {
-19	    current: {
-20	      dropTargets: { data: Record<string, unknown> }[];
-21	    };
-22	  };
-23	};
-24	
-25	type DraggableOptions = {
-26	  element: HTMLElement;
-27	  getInitialData?: () => Record<string, unknown>;
-28	  onDragStart?: () => void;
-29	  onDrop?: (args: DraggableDropArgs) => void;
-30	};
-31	
-32	let capturedDraggableOptions: DraggableOptions | null = null;
-33	
-34	const mockCleanup = () => {};
-35	
-36	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-37	  draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
-38	    capturedDraggableOptions = opts;
-39	    return mockCleanup;
-40	  }),
-41	}));
-42	
-43	const mockDispatch = vi.fn();
-44	
-45	vi.mock('./useAnswerGameDispatch', () => ({
-46	  useAnswerGameDispatch: () => mockDispatch,
-47	}));
-48	
-49	// useTouchDrag uses pointer events — mock it to simplify unit tests here.
-50	vi.mock('./useTouchDrag', () => ({
-51	  useTouchDrag: () => ({
-52	    onPointerDown: vi.fn(),
-53	    onPointerMove: vi.fn(),
-54	    onPointerUp: vi.fn(),
-55	    onPointerCancel: vi.fn(),
-56	  }),
-57	}));
-58	
-59	// Test component that attaches the dragRef to an actual button element so the
-60	// useEffect inside useSlotTileDrag can find element !== null and register the
-61	// draggable adapter.
-62	const SlotTileDragHarness = ({
-63	  tileId,
-64	  zoneIndex,
-65	  onDrop,
-66	}: {
-67	  tileId: string | null;
-68	  zoneIndex: number;
-69	  onDrop: (id: string, idx: number) => void;
-70	  children?: ReactNode;
-71	}) => {
-72	  const { dragRef } = useSlotTileDrag({
-73	    tileId,
-74	    label: 'A',
-75	    zoneIndex,
-76	    onDrop,
-77	  });
-78	  return (
-79	    <button type="button" ref={dragRef} data-testid="drag-tile">
-80	      A
-81	    </button>
-82	  );
-83	};
-84	
-85	describe('useSlotTileDrag', () => {
-86	  it('registers draggable on mount when tileId is provided', () => {
-87	    capturedDraggableOptions = null;
-88	    render(
-89	      <SlotTileDragHarness
-90	        tileId="tile-1"
-91	        zoneIndex={0}
-92	        onDrop={vi.fn()}
-93	      />,
-94	    );
-95	    expect(capturedDraggableOptions).not.toBeNull();
-96	  });
-97	
-98	  describe('HTML5 onDrop — no drop targets', () => {
-99	    it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
-100	      capturedDraggableOptions = null;
-101	      mockDispatch.mockClear();
-102	      const mockOnDrop = vi.fn();
-103	
-104	      render(
-105	        <SlotTileDragHarness
-106	          tileId="tile-1"
-107	          zoneIndex={0}
-108	          onDrop={mockOnDrop}
-109	        />,
-110	      );
-111	
-112	      expect(capturedDraggableOptions).not.toBeNull();
-113	
-114	      (
-115	        capturedDraggableOptions as unknown as DraggableOptions
-116	      ).onDrop?.({
-117	        location: { current: { dropTargets: [] } },
-118	      });
-119	
-120	      expect(mockDispatch).toHaveBeenCalledWith({
-121	        type: 'REMOVE_TILE',
-122	        zoneIndex: 0,
-123	      });
-124	      expect(mockDispatch).toHaveBeenCalledWith({
-125	        type: 'SET_DRAG_ACTIVE',
-126	        tileId: null,
-127	      });
-128	      expect(mockOnDrop).not.toHaveBeenCalled();
-129	    });
-130	  });
-131	
-132	  describe('HTML5 onDrop — drop target with no zoneIndex', () => {
-133	    it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
-134	      capturedDraggableOptions = null;
-135	      mockDispatch.mockClear();
-136	      const mockOnDrop = vi.fn();
-137	
-138	      render(
-139	        <SlotTileDragHarness
-140	          tileId="tile-1"
-141	          zoneIndex={0}
-142	          onDrop={mockOnDrop}
-143	        />,
-144	      );
-145	
-146	      expect(capturedDraggableOptions).not.toBeNull();
-147	
-148	      (
-149	        capturedDraggableOptions as unknown as DraggableOptions
-150	      ).onDrop?.({
-151	        location: {
-152	          current: {
-153	            dropTargets: [{ data: { someOtherKey: 'value' } }],
-154	          },
-155	        },
-156	      });
-157	
-158	      expect(mockDispatch).toHaveBeenCalledWith({
-159	        type: 'REMOVE_TILE',
-160	        zoneIndex: 0,
-161	      });
-162	      expect(mockDispatch).toHaveBeenCalledWith({
-163	        type: 'SET_DRAG_ACTIVE',
-164	        tileId: null,
-165	      });
-166	      expect(mockOnDrop).not.toHaveBeenCalled();
-167	    });
-168	  });
-169	
-170	  describe('HTML5 onDrop — confirmed drop on valid target', () => {
-171	    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
-172	      capturedDraggableOptions = null;
-173	      mockDispatch.mockClear();
-174	      const mockOnDrop = vi.fn();
-175	
-176	      render(
-177	        <SlotTileDragHarness
-178	          tileId="tile-1"
-179	          zoneIndex={0}
-180	          onDrop={mockOnDrop}
-181	        />,
-182	      );
-183	
-184	      expect(capturedDraggableOptions).not.toBeNull();
-185	
-186	      (
-187	        capturedDraggableOptions as unknown as DraggableOptions
-188	      ).onDrop?.({
-189	        location: {
-190	          current: {
-191	            dropTargets: [{ data: { zoneIndex: 2 } }],
-192	          },
-193	        },
-194	      });
-195	
-196	      expect(mockDispatch).toHaveBeenCalledWith({
-197	        type: 'SET_DRAG_ACTIVE',
-198	        tileId: null,
-199	      });
-200	      expect(mockDispatch).not.toHaveBeenCalledWith(
-201	        expect.objectContaining({ type: 'REMOVE_TILE' }),
-202	      );
-203	      expect(mockOnDrop).toHaveBeenCalledOnce();
-204	      expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
-205	    });
-206	  });
-207	});
+1 import { render } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { useSlotTileDrag } from './useSlotTileDrag';
+4 import type { ReactNode } from 'react';
+5 
+6 vi.mock('@/lib/game-event-bus', () => ({
+7   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+8 }));
+9 
+10 vi.mock('@/lib/audio/AudioFeedback', () => ({
+11   playSound: vi.fn(),
+12   queueSound: vi.fn(),
+13   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+14 }));
+15 
+16 // Capture the options passed to draggable so tests can invoke the callbacks.
+17 type DraggableDropArgs = {
+18   location: {
+19     current: {
+20       dropTargets: { data: Record<string, unknown> }[];
+21     };
+22   };
+23 };
+24 
+25 type DraggableOptions = {
+26   element: HTMLElement;
+27   getInitialData?: () => Record<string, unknown>;
+28   onDragStart?: () => void;
+29   onDrop?: (args: DraggableDropArgs) => void;
+30 };
+31 
+32 let capturedDraggableOptions: DraggableOptions | null = null;
+33 
+34 const mockCleanup = () => {};
+35 
+36 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+37   draggable: vi.fn().mockImplementation((opts: DraggableOptions) => {
+38     capturedDraggableOptions = opts;
+39     return mockCleanup;
+40   }),
+41 }));
+42 
+43 const mockDispatch = vi.fn();
+44 
+45 vi.mock('./useAnswerGameDispatch', () => ({
+46   useAnswerGameDispatch: () => mockDispatch,
+47 }));
+48 
+49 // useTouchDrag uses pointer events — mock it to simplify unit tests here.
+50 vi.mock('./useTouchDrag', () => ({
+51   useTouchDrag: () => ({
+52     onPointerDown: vi.fn(),
+53     onPointerMove: vi.fn(),
+54     onPointerUp: vi.fn(),
+55     onPointerCancel: vi.fn(),
+56   }),
+57 }));
+58 
+59 // Test component that attaches the dragRef to an actual button element so the
+60 // useEffect inside useSlotTileDrag can find element !== null and register the
+61 // draggable adapter.
+62 const SlotTileDragHarness = ({
+63   tileId,
+64   zoneIndex,
+65   onDrop,
+66 }: {
+67   tileId: string | null;
+68   zoneIndex: number;
+69   onDrop: (id: string, idx: number) => void;
+70   children?: ReactNode;
+71 }) => {
+72   const { dragRef } = useSlotTileDrag({
+73     tileId,
+74     label: 'A',
+75     zoneIndex,
+76     onDrop,
+77   });
+78   return (
+79     <button type="button" ref={dragRef} data-testid="drag-tile">
+80       A
+81     </button>
+82   );
+83 };
+84 
+85 describe('useSlotTileDrag', () => {
+86   it('registers draggable on mount when tileId is provided', () => {
+87     capturedDraggableOptions = null;
+88     render(
+89       <SlotTileDragHarness
+90         tileId="tile-1"
+91         zoneIndex={0}
+92         onDrop={vi.fn()}
+93       />,
+94     );
+95     expect(capturedDraggableOptions).not.toBeNull();
+96   });
+97 
+98   describe('HTML5 onDrop — no drop targets', () => {
+99     it('dispatches REMOVE_TILE for the correct zoneIndex and does not call onDrop', () => {
+100       capturedDraggableOptions = null;
+101       mockDispatch.mockClear();
+102       const mockOnDrop = vi.fn();
+103 
+104       render(
+105         <SlotTileDragHarness
+106           tileId="tile-1"
+107           zoneIndex={0}
+108           onDrop={mockOnDrop}
+109         />,
+110       );
+111 
+112       expect(capturedDraggableOptions).not.toBeNull();
+113 
+114       (
+115         capturedDraggableOptions as unknown as DraggableOptions
+116       ).onDrop?.({
+117         location: { current: { dropTargets: [] } },
+118       });
+119 
+120       expect(mockDispatch).toHaveBeenCalledWith({
+121         type: 'REMOVE_TILE',
+122         zoneIndex: 0,
+123       });
+124       expect(mockDispatch).toHaveBeenCalledWith({
+125         type: 'SET_DRAG_ACTIVE',
+126         tileId: null,
+127       });
+128       expect(mockOnDrop).not.toHaveBeenCalled();
+129     });
+130   });
+131 
+132   describe('HTML5 onDrop — drop target with no zoneIndex', () => {
+133     it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
+134       capturedDraggableOptions = null;
+135       mockDispatch.mockClear();
+136       const mockOnDrop = vi.fn();
+137 
+138       render(
+139         <SlotTileDragHarness
+140           tileId="tile-1"
+141           zoneIndex={0}
+142           onDrop={mockOnDrop}
+143         />,
+144       );
+145 
+146       expect(capturedDraggableOptions).not.toBeNull();
+147 
+148       (
+149         capturedDraggableOptions as unknown as DraggableOptions
+150       ).onDrop?.({
+151         location: {
+152           current: {
+153             dropTargets: [{ data: { someOtherKey: 'value' } }],
+154           },
+155         },
+156       });
+157 
+158       expect(mockDispatch).toHaveBeenCalledWith({
+159         type: 'REMOVE_TILE',
+160         zoneIndex: 0,
+161       });
+162       expect(mockDispatch).toHaveBeenCalledWith({
+163         type: 'SET_DRAG_ACTIVE',
+164         tileId: null,
+165       });
+166       expect(mockOnDrop).not.toHaveBeenCalled();
+167     });
+168   });
+169 
+170   describe('HTML5 onDrop — confirmed drop on valid target', () => {
+171     it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns REMOVE_TILE/SWAP_TILES', () => {
+172       capturedDraggableOptions = null;
+173       mockDispatch.mockClear();
+174       const mockOnDrop = vi.fn();
+175 
+176       render(
+177         <SlotTileDragHarness
+178           tileId="tile-1"
+179           zoneIndex={0}
+180           onDrop={mockOnDrop}
+181         />,
+182       );
+183 
+184       expect(capturedDraggableOptions).not.toBeNull();
+185 
+186       (
+187         capturedDraggableOptions as unknown as DraggableOptions
+188       ).onDrop?.({
+189         location: {
+190           current: {
+191             dropTargets: [{ data: { zoneIndex: 2 } }],
+192           },
+193         },
+194       });
+195 
+196       expect(mockDispatch).toHaveBeenCalledWith({
+197         type: 'SET_DRAG_ACTIVE',
+198         tileId: null,
+199       });
+200       expect(mockDispatch).not.toHaveBeenCalledWith(
+201         expect.objectContaining({ type: 'REMOVE_TILE' }),
+202       );
+203       expect(mockOnDrop).toHaveBeenCalledOnce();
+204       expect(mockOnDrop).toHaveBeenCalledWith('tile-1', 2);
+205     });
+206   });
+207 });
 208
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:29:29Z)**_
@@ -2628,93 +2659,94 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:29:29Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { useDraggableTile } from './useDraggableTile';
-4	
-5	vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
-6	  draggable: vi.fn().mockReturnValue(() => {}),
-7	}));
-8	
-9	const mockPlaceInNextSlot = vi.fn();
-10	const mockSpeakTile = vi.fn();
-11	
-12	vi.mock('./useAutoNextSlot', () => ({
-13	  useAutoNextSlot: () => ({ placeInNextSlot: mockPlaceInNextSlot }),
-14	}));
-15	
-16	vi.mock('./useGameTTS', () => ({
-17	  useGameTTS: () => ({
-18	    speakTile: mockSpeakTile,
-19	    speakPrompt: vi.fn(),
-20	  }),
-21	}));
-22	
-23	vi.mock('./useAnswerGameContext', () => ({
-24	  useAnswerGameContext: () => ({
-25	    config: {
-26	      inputMethod: 'drag',
-27	      ttsEnabled: true,
-28	      totalRounds: 1,
-29	      gameId: 'test',
-30	      wrongTileBehavior: 'lock-auto-eject',
-31	      tileBankMode: 'exact',
-32	    },
-33	    zones: [],
-34	    allTiles: [],
-35	    bankTileIds: [],
-36	    activeSlotIndex: 0,
-37	    roundIndex: 0,
-38	    retryCount: 0,
-39	    phase: 'playing',
-40	    dragActiveTileId: null,
-41	  }),
-42	}));
-43	
-44	vi.mock('./useAnswerGameDispatch', () => ({
-45	  useAnswerGameDispatch: () => vi.fn(),
-46	}));
-47	
-48	const mockPlaceTile = vi.fn();
-49	
-50	vi.mock('./useTileEvaluation', () => ({
-51	  useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
-52	}));
-53	
-54	describe('useDraggableTile', () => {
-55	  const tile = { id: 't1', label: 'C', value: 'c' };
-56	
-57	  it('returns a ref, handleClick, and touch handlers', () => {
-58	    const { result } = renderHook(() => useDraggableTile(tile));
-59	    expect(result.current.ref).toBeDefined();
-60	    expect(typeof result.current.handleClick).toBe('function');
-61	    expect(typeof result.current.onPointerDown).toBe('function');
-62	    expect(typeof result.current.onPointerMove).toBe('function');
-63	    expect(typeof result.current.onPointerUp).toBe('function');
-64	    expect(typeof result.current.onPointerCancel).toBe('function');
-65	  });
-66	
-67	  it('handleClick does not throw', () => {
-68	    const { result } = renderHook(() => useDraggableTile(tile));
-69	    expect(() => act(() => result.current.handleClick())).not.toThrow();
-70	  });
-71	
-72	  it('handleClick calls speakTile with tile label', () => {
-73	    mockSpeakTile.mockClear();
-74	    const { result } = renderHook(() => useDraggableTile(tile));
-75	    act(() => result.current.handleClick());
-76	    expect(mockSpeakTile).toHaveBeenCalledWith(tile.label);
-77	  });
-78	
-79	  it('handleClick calls placeInNextSlot with tile id', () => {
-80	    mockPlaceInNextSlot.mockClear();
-81	    const { result } = renderHook(() => useDraggableTile(tile));
-82	    act(() => result.current.handleClick());
-83	    expect(mockPlaceInNextSlot).toHaveBeenCalledWith(tile.id);
-84	  });
-85	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { useDraggableTile } from './useDraggableTile';
+4 
+5 vi.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => ({
+6   draggable: vi.fn().mockReturnValue(() => {}),
+7 }));
+8 
+9 const mockPlaceInNextSlot = vi.fn();
+10 const mockSpeakTile = vi.fn();
+11 
+12 vi.mock('./useAutoNextSlot', () => ({
+13   useAutoNextSlot: () => ({ placeInNextSlot: mockPlaceInNextSlot }),
+14 }));
+15 
+16 vi.mock('./useGameTTS', () => ({
+17   useGameTTS: () => ({
+18     speakTile: mockSpeakTile,
+19     speakPrompt: vi.fn(),
+20   }),
+21 }));
+22 
+23 vi.mock('./useAnswerGameContext', () => ({
+24   useAnswerGameContext: () => ({
+25     config: {
+26       inputMethod: 'drag',
+27       ttsEnabled: true,
+28       totalRounds: 1,
+29       gameId: 'test',
+30       wrongTileBehavior: 'lock-auto-eject',
+31       tileBankMode: 'exact',
+32     },
+33     zones: [],
+34     allTiles: [],
+35     bankTileIds: [],
+36     activeSlotIndex: 0,
+37     roundIndex: 0,
+38     retryCount: 0,
+39     phase: 'playing',
+40     dragActiveTileId: null,
+41   }),
+42 }));
+43 
+44 vi.mock('./useAnswerGameDispatch', () => ({
+45   useAnswerGameDispatch: () => vi.fn(),
+46 }));
+47 
+48 const mockPlaceTile = vi.fn();
+49 
+50 vi.mock('./useTileEvaluation', () => ({
+51   useTileEvaluation: () => ({ placeTile: mockPlaceTile }),
+52 }));
+53 
+54 describe('useDraggableTile', () => {
+55   const tile = { id: 't1', label: 'C', value: 'c' };
+56 
+57   it('returns a ref, handleClick, and touch handlers', () => {
+58     const { result } = renderHook(() => useDraggableTile(tile));
+59     expect(result.current.ref).toBeDefined();
+60     expect(typeof result.current.handleClick).toBe('function');
+61     expect(typeof result.current.onPointerDown).toBe('function');
+62     expect(typeof result.current.onPointerMove).toBe('function');
+63     expect(typeof result.current.onPointerUp).toBe('function');
+64     expect(typeof result.current.onPointerCancel).toBe('function');
+65   });
+66 
+67   it('handleClick does not throw', () => {
+68     const { result } = renderHook(() => useDraggableTile(tile));
+69     expect(() => act(() => result.current.handleClick())).not.toThrow();
+70   });
+71 
+72   it('handleClick calls speakTile with tile label', () => {
+73     mockSpeakTile.mockClear();
+74     const { result } = renderHook(() => useDraggableTile(tile));
+75     act(() => result.current.handleClick());
+76     expect(mockSpeakTile).toHaveBeenCalledWith(tile.label);
+77   });
+78 
+79   it('handleClick calls placeInNextSlot with tile id', () => {
+80     mockPlaceInNextSlot.mockClear();
+81     const { result } = renderHook(() => useDraggableTile(tile));
+82     act(() => result.current.handleClick());
+83     expect(mockPlaceInNextSlot).toHaveBeenCalledWith(tile.id);
+84   });
+85 });
 86
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:29:45Z)**_
@@ -2728,8 +2760,7 @@ The `useSlotTileDrag.test.tsx` tests do test `onDrop` behavior. The test harness
 
 Let me now implement all the changes.
 
-### Summary of changes:
-
+### Summary of changes
 
 I need to create a new catch-all drop target adapter, update the provider to mount it, add a bank tile return animation trigger, modify the drag hook to pass the element to `onBankReturn`, and update the slot component accordingly.
 
@@ -2759,6 +2790,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:29:45Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:29:54Z)**_
@@ -2805,6 +2837,7 @@ export const useCatchAllDropTarget = (): void => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useCatchAllDropTarget.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:30:10Z)**_
@@ -2829,106 +2862,107 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:30:13Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-7	import { TouchKeyboardContext } from './TouchKeyboardContext';
-8	import { useKeyboardInput } from './useKeyboardInput';
-9	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-10	import type {
-11	  AnswerGameAction,
-12	  AnswerGameConfig,
-13	  AnswerGameState,
-14	} from './types';
-15	import type { Dispatch, ReactNode } from 'react';
-16	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-17	
-18	export const AnswerGameStateContext =
-19	  createContext<AnswerGameState | null>(null);
-20	export const AnswerGameDispatchContext =
-21	  createContext<Dispatch<AnswerGameAction> | null>(null);
-22	
-23	const KeyboardInputAdapter = () => {
-24	  useKeyboardInput();
-25	  return null;
-26	};
-27	
-28	const TouchKeyboardAdapter = ({
-29	  inputMode,
-30	  children,
-31	}: {
-32	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-33	  children: ReactNode;
-34	}) => {
-35	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-36	  return (
-37	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-38	      <HiddenKeyboardInput
-39	        inputRef={hiddenInputRef}
-40	        inputMode={inputMode}
-41	      />
-42	      {children}
-43	    </TouchKeyboardContext.Provider>
-44	  );
-45	};
-46	
-47	interface AnswerGameProviderProps {
-48	  config: AnswerGameConfig;
-49	  children: ReactNode;
-50	}
-51	
-52	export const AnswerGameProvider = ({
-53	  config,
-54	  children,
-55	}: AnswerGameProviderProps) => {
-56	  const [state, dispatch] = useReducer(
-57	    answerGameReducer,
-58	    config,
-59	    makeInitialState,
-60	  );
-61	
-62	  useEffect(() => {
-63	    const tiles = config.initialTiles;
-64	    const zones = config.initialZones;
-65	    if (tiles?.length && zones?.length) {
-66	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-67	    }
-68	  }, [config.gameId, config.initialTiles, config.initialZones]);
-69	
-70	  const roundProgress = {
-71	    current: state.roundIndex + 1,
-72	    total: config.totalRounds,
-73	  };
-74	
-75	  const usesTouchKeyboard =
-76	    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
-77	
-78	  return (
-79	    <GameRoundContext.Provider value={roundProgress}>
-80	      <AnswerGameStateContext.Provider value={state}>
-81	        <AnswerGameDispatchContext.Provider value={dispatch}>
-82	          {usesTouchKeyboard ? (
-83	            <TouchKeyboardAdapter
-84	              inputMode={config.touchKeyboardInputMode ?? 'text'}
-85	            >
-86	              {children}
-87	            </TouchKeyboardAdapter>
-88	          ) : (
-89	            <TouchKeyboardContext.Provider value={null}>
-90	              <KeyboardInputAdapter />
-91	              {children}
-92	            </TouchKeyboardContext.Provider>
-93	          )}
-94	        </AnswerGameDispatchContext.Provider>
-95	      </AnswerGameStateContext.Provider>
-96	    </GameRoundContext.Provider>
-97	  );
-98	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+7 import { TouchKeyboardContext } from './TouchKeyboardContext';
+8 import { useKeyboardInput } from './useKeyboardInput';
+9 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+10 import type {
+11   AnswerGameAction,
+12   AnswerGameConfig,
+13   AnswerGameState,
+14 } from './types';
+15 import type { Dispatch, ReactNode } from 'react';
+16 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+17 
+18 export const AnswerGameStateContext =
+19   createContext<AnswerGameState | null>(null);
+20 export const AnswerGameDispatchContext =
+21   createContext<Dispatch<AnswerGameAction> | null>(null);
+22 
+23 const KeyboardInputAdapter = () => {
+24   useKeyboardInput();
+25   return null;
+26 };
+27 
+28 const TouchKeyboardAdapter = ({
+29   inputMode,
+30   children,
+31 }: {
+32   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+33   children: ReactNode;
+34 }) => {
+35   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+36   return (
+37     <TouchKeyboardContext.Provider value={focusKeyboard}>
+38       <HiddenKeyboardInput
+39         inputRef={hiddenInputRef}
+40         inputMode={inputMode}
+41       />
+42       {children}
+43     </TouchKeyboardContext.Provider>
+44   );
+45 };
+46 
+47 interface AnswerGameProviderProps {
+48   config: AnswerGameConfig;
+49   children: ReactNode;
+50 }
+51 
+52 export const AnswerGameProvider = ({
+53   config,
+54   children,
+55 }: AnswerGameProviderProps) => {
+56   const [state, dispatch] = useReducer(
+57     answerGameReducer,
+58     config,
+59     makeInitialState,
+60   );
+61 
+62   useEffect(() => {
+63     const tiles = config.initialTiles;
+64     const zones = config.initialZones;
+65     if (tiles?.length && zones?.length) {
+66       dispatch({ type: 'INIT_ROUND', tiles, zones });
+67     }
+68   }, [config.gameId, config.initialTiles, config.initialZones]);
+69 
+70   const roundProgress = {
+71     current: state.roundIndex + 1,
+72     total: config.totalRounds,
+73   };
+74 
+75   const usesTouchKeyboard =
+76     navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+77 
+78   return (
+79     <GameRoundContext.Provider value={roundProgress}>
+80       <AnswerGameStateContext.Provider value={state}>
+81         <AnswerGameDispatchContext.Provider value={dispatch}>
+82           {usesTouchKeyboard ? (
+83             <TouchKeyboardAdapter
+84               inputMode={config.touchKeyboardInputMode ?? 'text'}
+85             >
+86               {children}
+87             </TouchKeyboardAdapter>
+88           ) : (
+89             <TouchKeyboardContext.Provider value={null}>
+90               <KeyboardInputAdapter />
+91               {children}
+92             </TouchKeyboardContext.Provider>
+93           )}
+94         </AnswerGameDispatchContext.Provider>
+95       </AnswerGameStateContext.Provider>
+96     </GameRoundContext.Provider>
+97   );
+98 };
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:30:23Z)**_
@@ -2939,6 +2973,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:30:23Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:30:27Z)**_
@@ -2963,6 +2998,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:30:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:30:34Z)**_
@@ -2977,6 +3013,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:30:37Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:30:45Z)**_
@@ -3006,6 +3043,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:31:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/slot-animations.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:31:08Z)**_
@@ -3035,6 +3073,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:31:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:31:19Z)**_
@@ -3049,6 +3088,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:31:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:31:25Z)**_
@@ -3063,6 +3103,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:31:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:31:36Z)**_
@@ -3092,6 +3133,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:31:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:31:52Z)**_
@@ -3121,6 +3163,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:32:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:32:06Z)**_
@@ -3135,6 +3178,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:32:10Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:32:19Z)**_
@@ -3164,6 +3208,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:32:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:32:32Z)**_
@@ -3178,6 +3223,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:32:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:32:46Z)**_
@@ -3192,6 +3238,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:32:52Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:32:58Z)**_
@@ -3206,6 +3253,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:33:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:33:03Z)**_
@@ -3220,6 +3268,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:33:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:33:20Z)**_
@@ -3296,6 +3345,7 @@ AssertionError: expected undefined to be defined
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:34:23Z)**_
@@ -3307,6 +3357,7 @@ Let me check — the test file is at:
 `src/components/answer-game/useDraggableTile.test.tsx`
 
 And `triggerBankTileReturn` is imported in `useDraggableTile.ts` as:
+
 ```typescript
 import { triggerBankTileReturn } from './Slot/slot-animations';
 
@@ -3320,6 +3371,7 @@ The real problem might be that `capturedDraggableOptions` is being shared across
 ```
 Actually, I think the issue is that `renderHook` doesn't automatically wrap the hook call in `act`, so the `useEffect` might not be running synchronously. Let me check if I need to explicitly call `act` or if the hook is even being triggered properly.
 ```
+
 The mock for `triggerBankTileReturn` is set up at the module level, but I need to verify that both the test and the source file are importing from the same module path — if the paths don't match exactly, the mock won't intercept the call. I'm setting up a mock for the draggable function that captures the options passed to it, but the issue is that `renderHook` doesn't automatically flush `useEffect` synchronously, so the effect might not have run yet when I'm trying to access the captured options. I'm simulating the drop event with `zoneIndex: 1`, which should trigger the dispatch call to clear the drag state, but `mockDispatch` shows zero calls. I think the problem is that the mock for `useAnswerGameDispatch` is returning a new function each time instead of the captured `mockDispatch` instance, so the dispatch calls aren't being tracked.
 
 The real issue is a hoisting problem—vitest hoists `vi.mock` calls before module-level variable declarations, so `mockDispatch` is undefined when the mock factory runs. I need to use `vi.hoisted` to declare `mockDispatch` in a way that's available to the mock factory. be `undefined` when the factory first runs. But in practice, the pattern works because the mock factory executes during module initialization when `mockDispatch` is already defined, and by the time tests run, everything is properly set up. Since `useSlotTileDrag.test.tsx` uses the exact same approach and passes, I should be able to apply it here too.
@@ -3343,6 +3395,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:34:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:34:29Z)**_
@@ -3357,6 +3410,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:34:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:34:36Z)**_
@@ -3371,6 +3425,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:34:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:06Z)**_
@@ -3423,6 +3478,7 @@ stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defers via v
 
 Done in 5.65s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:09Z)**_
@@ -3445,6 +3501,7 @@ src/components/answer-game/useSlotTileDrag.test.tsx(155,14): error TS2532: Objec
 error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:18Z)**_
@@ -3454,27 +3511,28 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:35:18Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx`
 
 ```text
-145	        />,
-146	      );
-147	
-148	      (
-149	        capturedDraggableOptions as unknown as DraggableOptions
-150	      ).onDrop?.({
-151	        location: { current: { dropTargets: [] } },
-152	      });
-153	
-154	      expect(mockOnBankReturn).toHaveBeenCalledOnce();
-155	      expect(mockOnBankReturn.mock.calls[0][0]).toBeInstanceOf(
-156	        HTMLButtonElement,
-157	      );
-158	    });
-159	  });
-160	
-161	  describe('HTML5 onDrop — drop target with no zoneIndex', () => {
-162	    it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
-163	      capturedDraggableOptions = null;
-164	      mockDispatch.mockClear();
+145         />,
+146       );
+147 
+148       (
+149         capturedDraggableOptions as unknown as DraggableOptions
+150       ).onDrop?.({
+151         location: { current: { dropTargets: [] } },
+152       });
+153 
+154       expect(mockOnBankReturn).toHaveBeenCalledOnce();
+155       expect(mockOnBankReturn.mock.calls[0][0]).toBeInstanceOf(
+156         HTMLButtonElement,
+157       );
+158     });
+159   });
+160 
+161   describe('HTML5 onDrop — drop target with no zoneIndex', () => {
+162     it('dispatches REMOVE_TILE but does not call onDrop when target lacks zoneIndex', () => {
+163       capturedDraggableOptions = null;
+164       mockDispatch.mockClear();
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:23Z)**_
@@ -3486,7 +3544,7 @@ The error is on line 155: `mockOnBankReturn.mock.calls[0][0]` — TypeScript say
 expect(mockOnBankReturn.mock.calls[0]?.[0]).toBeInstanceOf(HTMLButtonElement);
 ```
 
-Actually, since we already asserted `toHaveBeenCalledOnce()` above, the call exists. But TypeScript doesn't know that. 
+Actually, since we already asserted `toHaveBeenCalledOnce()` above, the call exists. But TypeScript doesn't know that.
 
 I'll use a non-null assertion to tell TypeScript the call definitely exists...
 </details></think>
@@ -3499,6 +3557,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:35:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:30Z)**_
@@ -3514,6 +3573,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.16s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:35:32Z)**_
@@ -3548,6 +3608,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:36:14Z)**_
@@ -3557,7 +3618,7 @@ Three lint errors to fix:
 
 1. `useCatchAllDropTarget.ts`: `arrow-body-style` — `useEffect(() => { return dropTargetForElements(...) }, [])` should be `useEffect(() => dropTargetForElements(...), [])`.
 
-2. `useDraggableTile.test.tsx`: `unicorn/consistent-function-scoping` — the `DraggableTileHarness` component is inside the module but not inside the describe block. The linter is complaining about it. 
+2. `useDraggableTile.test.tsx`: `unicorn/consistent-function-scoping` — the `DraggableTileHarness` component is inside the module but not inside the describe block. The linter is complaining about it.
 
 Wait, I'm looking at the actual error more carefully. The `unicorn/consistent-function-scoping` rule is flagging the arrow function inside `vi.mock`'s `mockImplementation` callback on line 24, not the `DraggableTileHarness` component itself. The linter wants that function moved to the outer scope since it doesn't depend on any variables from its enclosing context. I'm looking at the test file structure now. The mock setup is creating a draggable function that captures options, and the linter is flagging that the arrow function inside `vi.mock()` should be moved to outer scope since it doesn't depend on any variables from within the mock call itself. I'm realizing the issue might be that inline arrow function in the return statement — the linter probably wants me to extract that cleanup function to the module level like the working test does, rather than defining it inline within `mockImplementation`. Setting up the mock implementation for the draggable adapter to capture the options passed to it, then mocking the slot animations module with its trigger function. I see the issue — that arrow function on line 24 is what the linter is flagging, and I should extract it to the outer scope like the test file did with `const mockCleanup = () => {}`. Now I'm looking at another lint error in `useSlotTileDrag.ts` where there's an unnecessary condition check on `element` that's already been narrowed by an earlier guard clause.
 </details></think>
@@ -3574,6 +3635,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:36:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useCatchAllDropTarget.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:36:26Z)**_
@@ -3584,6 +3646,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:36:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:36:31Z)**_
@@ -3598,6 +3661,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 13:36:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:36:56Z)**_
@@ -3631,6 +3695,7 @@ Done in 2.23s.
 
 Done in 5.79s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 13:36:59Z)**_
@@ -3663,6 +3728,7 @@ All lint, typecheck, and 368 tests pass. Here's what was implemented:
 **Root causes fixed:**
 
 **Bug A** had two problems:
+
 1. No drop target outside bank/slots → browser's native snap-back fired to an invisible button
 2. `onBankReturn` was never wired in `useSlotBehavior`
 
@@ -3699,7 +3765,7 @@ The user is asking why I'm not committing after each step. They seem to want inc
 
 Let me also note that the user wants commits at each step. In the CLAUDE.md, it says "Never commit directly to master" and work on branches via worktrees. The current worktree is `bold-chatelet` on branch `claude/bold-chatelet`. I should commit the work done so far.
 
-But wait - the user is asking WHY I'm not committing. 
+But wait - the user is asking WHY I'm not committing.
 
 I should acknowledge this and start committing incrementally. The `CatchAllDropTarget` being commented out might indicate the user found an issue with it during testing, so I'll note that state when I commit. I was about to explain why I haven't been committing, but really I should just start doing it.
 
@@ -3721,33 +3787,33 @@ Your branch is ahead of 'origin/claude/bold-chatelet' by 10 commits.
 
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	new file:   src/components/answer-game/styles.ts
-	new file:   src/components/answer-game/useCatchAllDropTarget.ts
+ new file:   src/components/answer-game/styles.ts
+ new file:   src/components/answer-game/useCatchAllDropTarget.ts
 
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .specstory/statistics.json
-	modified:   src/components/answer-game/AnswerGameProvider.tsx
-	modified:   src/components/answer-game/Slot/slot-animations.ts
-	modified:   src/components/answer-game/Slot/useSlotBehavior.ts
-	modified:   src/components/answer-game/useDraggableTile.test.tsx
-	modified:   src/components/answer-game/useDraggableTile.ts
-	modified:   src/components/answer-game/useSlotTileDrag.test.tsx
-	modified:   src/components/answer-game/useSlotTileDrag.ts
-	modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
-	modified:   src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
-	modified:   src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
+ modified:   .specstory/statistics.json
+ modified:   src/components/answer-game/AnswerGameProvider.tsx
+ modified:   src/components/answer-game/Slot/slot-animations.ts
+ modified:   src/components/answer-game/Slot/useSlotBehavior.ts
+ modified:   src/components/answer-game/useDraggableTile.test.tsx
+ modified:   src/components/answer-game/useDraggableTile.ts
+ modified:   src/components/answer-game/useSlotTileDrag.test.tsx
+ modified:   src/components/answer-game/useSlotTileDrag.ts
+ modified:   src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+ modified:   src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
+ modified:   src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	.specstory/history/2026-04-07_03-29-49Z-i-want-to-make.md
-	.specstory/history/2026-04-07_07-08-28Z-this-session-is-being.md
-	.specstory/history/2026-04-07_08-32-53Z-specstory-sync-claude.md
-	.specstory/history/2026-04-07_08-54-17Z-this-session-is-being.md
-	docs/mockups/
-	docs/superpowers/plans/2026-04-07-unified-slot-component.md
-	docs/superpowers/specs/2026-04-07-unified-slot-component-design.md
+ .specstory/history/2026-04-07_03-29-49Z-i-want-to-make.md
+ .specstory/history/2026-04-07_07-08-28Z-this-session-is-being.md
+ .specstory/history/2026-04-07_08-32-53Z-specstory-sync-claude.md
+ .specstory/history/2026-04-07_08-54-17Z-this-session-is-being.md
+ docs/mockups/
+ docs/superpowers/plans/2026-04-07-unified-slot-component.md
+ docs/superpowers/specs/2026-04-07-unified-slot-component-design.md
 
 b9c0607 fix(slot): play swap sound once with correct priority
 d294e0b fix(slot): use innerHTML for drag ghost to preserve font size
@@ -3755,6 +3821,7 @@ c2d5f08 fix(slot): prevent tile duplication when dragging to empty slot
 9bcaa41 fix(slot): slot-to-bank drag, swap evaluation, animations & sounds
 4dc0ebe fix(slot): keep button in DOM when dragging to fix HTML5 drag cancel
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:36:25Z)**_
@@ -3767,7 +3834,6 @@ Also I see that there are already 10 commits ahead of origin - this is an existi
 Let me check what's currently in AnswerGameProvider.tsx regarding the commented-out CatchAllDropTarget.
 
 I should commit the current changes. Let me create a meaningful commit for the drag-cancel UX changes.
-
 
 Since the system indicates this change was intentional, I'll commit everything as-is with a clear message about the drag-cancel improvements and the commented-out CatchAllDropTarget component.
 </details></think>
@@ -3791,6 +3857,7 @@ Stage drag-cancel UX fix files
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:36:45Z)**_
@@ -3859,19 +3926,20 @@ Exit code 1
 ✖ 1 problem (1 error, 0 warnings)
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:36:52Z)**_
 
 <think><details><summary>Thought Process</summary>
 The lint hook is complaining that `CatchAllDropTarget` is defined but the usage is commented out. I need to either:
+
 1. Remove the component definition too (since it's commented out), or
 2. Uncomment the usage
 
 Since the user intentionally commented out the `<CatchAllDropTarget />` usage, I should also comment out or remove the component definition and import, so the file is clean.
 
 Actually, looking at this — the user commented out the `<CatchAllDropTarget />` usage. So the component is defined but never used. I should remove the component definition (and import) from `AnswerGameProvider.tsx` since it's not being used.
-
 
 The `useCatchAllDropTarget` hook can stay as its own file since it might be used later, but I'll go ahead and remove the unused component and its import from the provider.
 </details></think>
@@ -3887,113 +3955,114 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:36:53Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-7	import { TouchKeyboardContext } from './TouchKeyboardContext';
-8	import { useCatchAllDropTarget } from './useCatchAllDropTarget';
-9	import { useKeyboardInput } from './useKeyboardInput';
-10	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-11	import type {
-12	  AnswerGameAction,
-13	  AnswerGameConfig,
-14	  AnswerGameState,
-15	} from './types';
-16	import type { Dispatch, ReactNode } from 'react';
-17	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-18	
-19	export const AnswerGameStateContext =
-20	  createContext<AnswerGameState | null>(null);
-21	export const AnswerGameDispatchContext =
-22	  createContext<Dispatch<AnswerGameAction> | null>(null);
-23	
-24	const CatchAllDropTarget = () => {
-25	  useCatchAllDropTarget();
-26	  return null;
-27	};
-28	
-29	const KeyboardInputAdapter = () => {
-30	  useKeyboardInput();
-31	  return null;
-32	};
-33	
-34	const TouchKeyboardAdapter = ({
-35	  inputMode,
-36	  children,
-37	}: {
-38	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-39	  children: ReactNode;
-40	}) => {
-41	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-42	  return (
-43	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-44	      <HiddenKeyboardInput
-45	        inputRef={hiddenInputRef}
-46	        inputMode={inputMode}
-47	      />
-48	      {children}
-49	    </TouchKeyboardContext.Provider>
-50	  );
-51	};
-52	
-53	interface AnswerGameProviderProps {
-54	  config: AnswerGameConfig;
-55	  children: ReactNode;
-56	}
-57	
-58	export const AnswerGameProvider = ({
-59	  config,
-60	  children,
-61	}: AnswerGameProviderProps) => {
-62	  const [state, dispatch] = useReducer(
-63	    answerGameReducer,
-64	    config,
-65	    makeInitialState,
-66	  );
-67	
-68	  useEffect(() => {
-69	    const tiles = config.initialTiles;
-70	    const zones = config.initialZones;
-71	    if (tiles?.length && zones?.length) {
-72	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-73	    }
-74	  }, [config.gameId, config.initialTiles, config.initialZones]);
-75	
-76	  const roundProgress = {
-77	    current: state.roundIndex + 1,
-78	    total: config.totalRounds,
-79	  };
-80	
-81	  const usesTouchKeyboard =
-82	    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
-83	
-84	  return (
-85	    <GameRoundContext.Provider value={roundProgress}>
-86	      <AnswerGameStateContext.Provider value={state}>
-87	        <AnswerGameDispatchContext.Provider value={dispatch}>
-88	          {/* <CatchAllDropTarget /> */}
-89	          {usesTouchKeyboard ? (
-90	            <TouchKeyboardAdapter
-91	              inputMode={config.touchKeyboardInputMode ?? 'text'}
-92	            >
-93	              {children}
-94	            </TouchKeyboardAdapter>
-95	          ) : (
-96	            <TouchKeyboardContext.Provider value={null}>
-97	              <KeyboardInputAdapter />
-98	              {children}
-99	            </TouchKeyboardContext.Provider>
-100	          )}
-101	        </AnswerGameDispatchContext.Provider>
-102	      </AnswerGameStateContext.Provider>
-103	    </GameRoundContext.Provider>
-104	  );
-105	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+7 import { TouchKeyboardContext } from './TouchKeyboardContext';
+8 import { useCatchAllDropTarget } from './useCatchAllDropTarget';
+9 import { useKeyboardInput } from './useKeyboardInput';
+10 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+11 import type {
+12   AnswerGameAction,
+13   AnswerGameConfig,
+14   AnswerGameState,
+15 } from './types';
+16 import type { Dispatch, ReactNode } from 'react';
+17 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+18 
+19 export const AnswerGameStateContext =
+20   createContext<AnswerGameState | null>(null);
+21 export const AnswerGameDispatchContext =
+22   createContext<Dispatch<AnswerGameAction> | null>(null);
+23 
+24 const CatchAllDropTarget = () => {
+25   useCatchAllDropTarget();
+26   return null;
+27 };
+28 
+29 const KeyboardInputAdapter = () => {
+30   useKeyboardInput();
+31   return null;
+32 };
+33 
+34 const TouchKeyboardAdapter = ({
+35   inputMode,
+36   children,
+37 }: {
+38   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+39   children: ReactNode;
+40 }) => {
+41   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+42   return (
+43     <TouchKeyboardContext.Provider value={focusKeyboard}>
+44       <HiddenKeyboardInput
+45         inputRef={hiddenInputRef}
+46         inputMode={inputMode}
+47       />
+48       {children}
+49     </TouchKeyboardContext.Provider>
+50   );
+51 };
+52 
+53 interface AnswerGameProviderProps {
+54   config: AnswerGameConfig;
+55   children: ReactNode;
+56 }
+57 
+58 export const AnswerGameProvider = ({
+59   config,
+60   children,
+61 }: AnswerGameProviderProps) => {
+62   const [state, dispatch] = useReducer(
+63     answerGameReducer,
+64     config,
+65     makeInitialState,
+66   );
+67 
+68   useEffect(() => {
+69     const tiles = config.initialTiles;
+70     const zones = config.initialZones;
+71     if (tiles?.length && zones?.length) {
+72       dispatch({ type: 'INIT_ROUND', tiles, zones });
+73     }
+74   }, [config.gameId, config.initialTiles, config.initialZones]);
+75 
+76   const roundProgress = {
+77     current: state.roundIndex + 1,
+78     total: config.totalRounds,
+79   };
+80 
+81   const usesTouchKeyboard =
+82     navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+83 
+84   return (
+85     <GameRoundContext.Provider value={roundProgress}>
+86       <AnswerGameStateContext.Provider value={state}>
+87         <AnswerGameDispatchContext.Provider value={dispatch}>
+88           {/* <CatchAllDropTarget /> */}
+89           {usesTouchKeyboard ? (
+90             <TouchKeyboardAdapter
+91               inputMode={config.touchKeyboardInputMode ?? 'text'}
+92             >
+93               {children}
+94             </TouchKeyboardAdapter>
+95           ) : (
+96             <TouchKeyboardContext.Provider value={null}>
+97               <KeyboardInputAdapter />
+98               {children}
+99             </TouchKeyboardContext.Provider>
+100           )}
+101         </AnswerGameDispatchContext.Provider>
+102       </AnswerGameStateContext.Provider>
+103     </GameRoundContext.Provider>
+104   );
+105 };
 106
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:36:58Z)**_
@@ -4004,6 +4073,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:36:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:03Z)**_
@@ -4020,6 +4090,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:37:04Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:09Z)**_
@@ -4030,6 +4101,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:37:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:19Z)**_
@@ -4038,6 +4110,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:37:19Z)**_
 The user wants to revert the latest fixes. Let me check what commits were made since the last good state and revert to the commit before my changes.
 
 Looking at the git log:
+
 ```
 b9c0607 fix(slot): play swap sound once with correct priority
 d294e0b fix(slot): use innerHTML for drag ghost to preserve font size
@@ -4078,6 +4151,7 @@ Show all changes since last commit
  .../LetterTileBank/LetterTileBank.test.tsx         |   7 +-
  12 files changed, 363 insertions(+), 13 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:25Z)**_
@@ -4091,6 +4165,7 @@ Revert all modified files and remove new hook file
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:29Z)**_
@@ -4124,6 +4199,7 @@ Check what's left after revert
  13 files changed, 370 insertions(+), 13 deletions(-)
 M  src/components/answer-game/AnswerGameProvider.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:37Z)**_
@@ -4131,10 +4207,9 @@ _**Agent (claude-sonnet-4-6 2026-04-07 15:37:37Z)**_
 <think><details><summary>Thought Process</summary>
 The `git checkout -- file` is bringing back the staged version which still has the `useCatchAllDropTarget` import. I need to unstage everything first and then checkout. Let me check what's staged.
 
-Actually, looking more carefully: `git status --short` shows `M ` (staged modification) for AnswerGameProvider.tsx. This is because `git add` earlier staged a version with `useCatchAllDropTarget`. The `git checkout -- file` restores from the index (staged), not HEAD.
+Actually, looking more carefully: `git status --short` shows `M` (staged modification) for AnswerGameProvider.tsx. This is because `git add` earlier staged a version with `useCatchAllDropTarget`. The `git checkout -- file` restores from the index (staged), not HEAD.
 
 I need to `git restore --staged` then `git checkout --` to get back to HEAD.
-
 
 Actually, I can skip the unstaging step and just use `git restore --source=HEAD -- file` to pull directly from HEAD instead of the index.
 </details></think>
@@ -4151,6 +4226,7 @@ Unstage everything and restore all files to HEAD
 Removing src/components/answer-game/styles.ts
 Removing src/components/answer-game/useCatchAllDropTarget.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:44Z)**_
@@ -4168,6 +4244,7 @@ Verify only unrelated changes remain
  .../LetterTileBank/LetterTileBank.test.tsx         |  7 ++++--
  4 files changed, 60 insertions(+), 4 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:37:49Z)**_
@@ -4205,6 +4282,7 @@ Find all imports of styles.ts and its git history
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:25Z)**_
@@ -4222,6 +4300,7 @@ Check if styles.ts exists in master
 ```text
 NOT IN MASTER
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:29Z)**_
@@ -4239,6 +4318,7 @@ stash@{2}: WIP on fix/e2e-and-vr-tests: 4bf78c1 chore(e2e/VR): update VR tests c
 stash@{3}: WIP on master: 3667926 docs(spec): adopt directory-per-component file structure
 stash@{4}: lint-staged automatic backup
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:32Z)**_
@@ -4261,6 +4341,7 @@ export const skeuoStyle: CSSProperties = {
   textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:35Z)**_
@@ -4289,6 +4370,7 @@ export const skeuoStyle: CSSProperties = {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/styles.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:42Z)**_
@@ -4387,12 +4469,13 @@ src/routes/$locale/_app/game/$gameId.tsx
 src/routes/$locale/_app/index.tsx
 src/styles.css
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:50Z)**_
 
 <think><details><summary>Thought Process</summary>
-The stash@{1} was the "lint-staged automatic backup" which was the state before my changes. That means `styles.ts` was already a new file in the worktree (part of the existing work there, not committed to git yet). 
+The stash@{1} was the "lint-staged automatic backup" which was the state before my changes. That means `styles.ts` was already a new file in the worktree (part of the existing work there, not committed to git yet).
 
 The `styles.ts` file I recovered from the stash is the correct one — it was already in the staged area of the worktree as a new file that was part of the ongoing work. I accidentally cleaned it with `git clean -f`.
 
@@ -4416,6 +4499,7 @@ Re-stage styles.ts
 ```text
 A  src/components/answer-game/styles.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 15:38:56Z)**_

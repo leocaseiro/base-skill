@@ -1054,13 +1054,14 @@ The user wants co-located tests - tests live next to their component files, not 
 Here's how this changes things:
 
 **Unit/Component tests (Vitest):**
+
 - Co-located: `app/routes/__root.test.tsx` instead of `tests/unit/smoke.test.tsx`
 - Pattern: `app/**/*.test.{ts,tsx}` in vitest config
 - No separate `tests/unit/` directory
 
 **E2E tests (Playwright):**
-- E2E tests span the whole app and aren't tied to one component - they're typically kept in a dedicated folder since they test user flows, not units
 
+- E2E tests span the whole app and aren't tied to one component - they're typically kept in a dedicated folder since they test user flows, not units
 
 - For e2e, I'm weighing whether to keep a top-level `e2e/` folder separate from app code, or co-locate them with routes using an `.e2e.ts` suffix like `app/routes/_app/index.e2e.ts`
 - The "domain structure" preference suggests tests should live near their code, but e2e tests that span multiple flows across the app don't fit neatly into a single route file
@@ -1137,12 +1138,14 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 Here is a summary of what changed:
 
 **Unit tests (Vitest)** — fully co-located:
+
 - `app/routes/__root.test.tsx` sits next to `__root.tsx`
 - `app/routes/_app/index.test.tsx` sits next to `index.tsx`
 - Every future component/route gets a `.test.tsx` file right beside it
 - `vitest.config.ts` uses `include: ['app/**/*.test.{ts,tsx}']` to find them all
 
 **E2E tests (Playwright)** — single `e2e/` folder at root:
+
 - `e2e/smoke.spec.ts`
 - `e2e/a11y.spec.ts`
 - E2E tests aren't co-locatable because they test full user flows that cross multiple routes and components — keeping them in one place makes them easy to find and run as a group

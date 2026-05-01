@@ -10,39 +10,39 @@ _**User**_
 
 I need to make some adjustments to the PRD. After fixing the PRD, ask me to approve, and we'll adjust the other documents. Be free to ask me or check the @docs/project-scope.md for any extra clarifications.
 
-#1 Added "cloud syncing" as a future premium feature.
+# 1 Added "cloud syncing" as a future premium feature.
 
 > Future premium features (server-side authentication, multiplayer coordination, paid content gating, cloud syncing)
 
-#2 - Persona 3 - we have the scenario "2-4 children", but we don't want to limit that number
+# 2 - Persona 3 - we have the scenario "2-4 children", but we don't want to limit that number
 
-#3 - Persona 3 - Goals settings can be shared by entire family, optionally
+# 3 - Persona 3 - Goals settings can be shared by entire family, optionally
 
-#4 For C-07. We might need to ask the parent to download each game, depending on the file size. (PS: In the technology, we might want to mention that every code can have its own bundle, so we can lazy load, and it would be faster this way. Maybe a preload could be necessary per each game). Let's also adjust "5.4 Offline-First Gameplay" accordingly.
+# 4 For C-07. We might need to ask the parent to download each game, depending on the file size. (PS: In the technology, we might want to mention that every code can have its own bundle, so we can lazy load, and it would be faster this way. Maybe a preload could be necessary per each game). Let's also adjust "5.4 Offline-First Gameplay" accordingly.
 
-#5 For C-10, even older children could listen to the audio, but parents can remove that if they want to force practising reading.
+# 5 For C-10, even older children could listen to the audio, but parents can remove that if they want to force practising reading.
 
-#6 line 156, shouldn't be "search (text + TTS for younger children)"?
+# 6 line 156, shouldn't be "search (text + TTS for younger children)"?
 
-#7 - "5.2 - Game catalog format." - Not sure how easy would be to add a new game just defined as JSON. Can you breakdown what did you mean by that?
+# 7 - "5.2 - Game catalog format." - Not sure how easy would be to add a new game just defined as JSON. Can you breakdown what did you mean by that?
 
-#8 Whenever we mention "synced to cloud", it should be cloud storage (such as GDrive or OneDrive), let's be ambiguous.
+# 8 Whenever we mention "synced to cloud", it should be cloud storage (such as GDrive or OneDrive), let's be ambiguous.
 
-#9 - 5.4 - Offline-First Gameplay. We can have a way to trigger to download all games, but this might be an expensive task, and we should avoid at first load.
+# 9 - 5.4 - Offline-First Gameplay. We can have a way to trigger to download all games, but this might be an expensive task, and we should avoid at first load.
 
-#10 We don't need "Visual waveform feedback during listening." We can have a simple GIF to simulate that.
+# 10 We don't need "Visual waveform feedback during listening." We can have a simple GIF to simulate that.
 
-#11 - 5.9 - For typography, we might allow parents to change the font-style. By default we want to use https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation . Young children might confund different font-style, so we want to keep the games consistant with those.
+# 11 - 5.9 - For typography, we might allow parents to change the font-style. By default we want to use <https://fonts.google.com/specimen/Edu+NSW+ACT+Foundation> . Young children might confund different font-style, so we want to keep the games consistant with those.
 
-#12 - 5.13 and 6.4 - We need to make sure that users can change zoom in/out in case the game UI is not good on their devices.
+# 12 - 5.13 and 6.4 - We need to make sure that users can change zoom in/out in case the game UI is not good on their devices.
 
 # 13 - 6.1 Performance - why not canvas for UI? Isn't canvas faster than CSS?
 
-# 14 - 8 - ABCya has an app that you can play offline. I also think their ads goes away on subscription users.
+# 14 - 8 - ABCya has an app that you can play offline. I also think their ads goes away on subscription users
 
 # 15 - Set a new task to do a proper research (later on) to write properly the table of Competitors. We don't want to "lie"
 
-#16 Cursor rules should be in the initial release
+# 16 Cursor rules should be in the initial release
 
 ---
 
@@ -232,7 +232,7 @@ _**Agent (claude-4.6-opus-high-thinking)**_
 <think><details><summary>Thought Process</summary>
 Let me start making the changes. I'll batch independent changes together.
 
-#1 is already done - "cloud syncing" is already listed in line 29. Let me verify and mark complete.
+# 1 is already done - "cloud syncing" is already listed in line 29. Let me verify and mark complete.
 
 Let me now make changes #2, #3, #5, #6, #10, #14, #16 first as they are simple text replacements.Then I'll tackle the more complex ones.</details></think>
 
@@ -1448,7 +1448,7 @@ Now I need to read the remaining docs that might need updates.
 
 Let me now plan what changes are needed in each document based on the 16 PRD changes:
 
-### architecture.md changes needed:
+### architecture.md changes needed
 
 1. **#4** - Per-game code splitting / lazy loading for game bundles
 2. **#8** - Cloud storage generic references (line 20: "Google Drive + OneDrive")
@@ -1459,21 +1459,21 @@ Let me now plan what changes are needed in each document based on the 16 PRD cha
 6. **#13** - CSS/DOM rationale for UI (verify constraint mentions)
 7. **#16** - Cursor rules now in scope (no mention needed here?)
 
-### data-model.md changes needed:
+### data-model.md changes needed
 
 1. **#3** - Family-shared settings already seems covered
 2. **#8** - Cloud storage generic references
 3. **#11** - Typography: update theme schema default font from "Nunito" to "Edu NSW ACT Foundation"
 4. **#5** - Settings might need a `ttsEnabled` field for parent override
 
-### game-engine.md changes needed:
+### game-engine.md changes needed
 
 1. Looking at what updates are required here...
 2. **#5** - TTS configurable per profile (parent can disable)
 3. **#10** - SpeechInput: replace waveform with animated GIF
 4. **#7** - JSON game config breakdown already detailed here
 
-### ui-ux.md changes needed:
+### ui-ux.md changes needed
 
 1. **#5** - TTS toggle clarification (available for all, parent can disable)
 2. **#10** - SpeechInput: replace waveform reference with animated visual indicator
@@ -1556,7 +1556,7 @@ Actually, since these are all independent edits across different files, let me p
 
 Let me now create a comprehensive todo list for all document changes:
 
-### architecture.md changes:
+### architecture.md changes
 
 1. Line 20: "Google Drive + OneDrive" → "cloud storage (initially Google Drive + OneDrive)"
 2. Line 219: `SpeechInput` - "STT with waveform feedback" → "STT with animated visual indicator"
@@ -1564,17 +1564,17 @@ Let me now create a comprehensive todo list for all document changes:
 3. Line 408: Need to add a note about per-game lazy loading in the cache strategy section
 4. Font update - need to change the default font reference to Edu NSW ACT Foundation (this appears in ui-ux.md, not here)
 
-### data-model.md changes:
+### data-model.md changes
 
 1. Theme examples: update "Nunito" to "Edu NSW ACT Foundation" as default font (lines 580, 599)
 2. Settings schema: add `ttsEnabled` field to allow parent TTS override
 
-### game-engine.md changes:
+### game-engine.md changes
 
 1. Line 929: Replace the SpeechInput description about animated waveform SVG with a note that it's now a GIF-based visual indicator
 2. Add per-game code-splitting and lazy loading documentation
 
-### ui-ux.md changes:
+### ui-ux.md changes
 
 1. Section 2.2 Typography: update default font from Nunito/Fredoka to Edu NSW ACT Foundation
 2. Lines 98, 106-108: Update font family references throughout the font stack

@@ -664,6 +664,7 @@ The user did not describe a specific issue. Read the debug log and summarize any
 ## Settings
 
 Remember that settings are in:
+
 - user - /Users/leocaseiro/.claude/settings.json
 - project - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.json
 - local - /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/.claude/settings.local.json
