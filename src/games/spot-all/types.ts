@@ -1,4 +1,4 @@
-import type { SpotAllVisualVariation } from './visual-variation/pick-variation';
+import type { SpotAllTileStyle } from './visual-variation/pick-variation';
 import type { RelationshipType } from '@/data/confusables/types';
 import type { ConfigField } from '@/lib/config-fields';
 import type { CssTransform } from '@/lib/distractors/types';
@@ -13,7 +13,7 @@ export interface SpotAllTile {
   label: string;
   isCorrect: boolean;
   transform?: CssTransform;
-  visualVariation?: SpotAllVisualVariation;
+  tileStyle?: SpotAllTileStyle;
 }
 
 export interface SpotAllRound {
@@ -31,7 +31,6 @@ export interface SpotAllConfig {
   correctTileCount: number;
   distractorCount: number;
   totalRounds: number;
-  visualVariationEnabled: boolean;
   enabledFontIds: string[];
   roundsInOrder: boolean;
   ttsEnabled: boolean;
@@ -64,11 +63,6 @@ export const spotAllConfigFields: ConfigField[] = [
     label: 'Distractor tiles',
     min: 1,
     max: 16,
-  },
-  {
-    type: 'checkbox',
-    key: 'visualVariationEnabled',
-    label: 'Visual variation',
   },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },

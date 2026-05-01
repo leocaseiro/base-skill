@@ -17,7 +17,6 @@ const baseConfig = (
   correctTileCount: 3,
   distractorCount: 2,
   totalRounds: 1,
-  visualVariationEnabled: false,
   enabledFontIds: [],
   roundsInOrder: false,
   ttsEnabled: true,
@@ -60,17 +59,14 @@ describe('buildSpotAllRound', () => {
     expect(distractor?.transform).toBe('scaleX(-1)');
   });
 
-  it('applies visualVariation to BOTH correct and distractor tiles when enabled', () => {
+  it('applies tileStyle to BOTH correct and distractor tiles when fonts are enabled', () => {
     const r = buildSpotAllRound(
       baseConfig({
-        visualVariationEnabled: true,
         enabledFontIds: ['andika', 'nunito'],
       }),
       { rng: seededRandom('s1') },
     );
-    expect(r.tiles.every((t) => t.visualVariation !== undefined)).toBe(
-      true,
-    );
+    expect(r.tiles.every((t) => t.tileStyle !== undefined)).toBe(true);
   });
 
   it('guarantees at least 1 correct tile even when correctTileCount is 0', () => {

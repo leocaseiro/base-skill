@@ -17,7 +17,7 @@ const baseConfig: SpotAllConfig = {
   correctTileCount: 3,
   distractorCount: 5,
   totalRounds: 5,
-  visualVariationEnabled: true,
+
   enabledFontIds: ['sans', 'mono'],
   roundsInOrder: false,
   ttsEnabled: false,

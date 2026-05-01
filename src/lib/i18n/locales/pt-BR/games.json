@@ -54,8 +54,7 @@
         "transposition": "Transposição",
         "reversible": "Reversível (auto-espelho)"
       },
-      "font-pool": { "label": "Conjunto de fontes" },
-      "visual-variation": { "label": "Variação visual nas peças" },
+      "tile-styles": { "label": "Estilos de peças" },
       "invalid-selection": "Escolha ao menos um grupo para jogar"
     }
   },
