@@ -164,6 +164,8 @@ const draftToHit = (d: DraftEntry): WordHit => ({
   variants: d.variants,
   ipa: d.ipa || undefined,
   graphemes: d.graphemes,
+  emoji: d.emoji,
+  image: d.image,
   provenance: 'draft' satisfies Provenance,
   draftId: d.id,
 });
@@ -186,6 +188,8 @@ const joinHits = (
         variants: c.variants,
         ipa: entry.ipa || undefined,
         graphemes: entry.graphemes,
+        emoji: entry.emoji,
+        image: entry.image,
         provenance: 'shipped',
       } as WordHit,
     ];
