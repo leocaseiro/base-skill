@@ -39,4 +39,28 @@ describe('flashBankTileRejectFeedback', () => {
     expect(mockTriggerShake).toHaveBeenCalledWith(standalone);
     expect(standalone.style.borderWidth).toBe('2px');
   });
+
+  it('restores React tile inline styles after animationend', () => {
+    document.body.innerHTML = `
+      <div class="relative">
+        <div data-tile-bank-hole="t1"></div>
+        <div class="absolute"><button type="button">A</button></div>
+      </div>
+    `;
+    const btn = document.querySelector('button')!;
+    const gradient =
+      'linear-gradient(180deg, transparent 70%, red 100%), blue';
+    const shadow =
+      'rgba(0,0,0,0.08) 0 0 0 1px, inset 0 -2px 1px rgba(0,0,0,0.08)';
+    btn.style.background = gradient;
+    btn.style.boxShadow = shadow;
+
+    flashBankTileRejectFeedback('t1');
+
+    btn.dispatchEvent(new Event('animationend'));
+
+    expect(btn.style.background).toBe(gradient);
+    expect(btn.style.boxShadow).toBe(shadow);
+    expect(btn.style.borderWidth).toBe('');
+  });
 });
