@@ -33,6 +33,8 @@ export const entryMatches = (
 ): boolean => {
   if (hit.region !== filter.region) return false;
 
+  if (filter.hasVisual && !hit.emoji && !hit.image) return false;
+
   if (filter.level !== undefined && hit.level !== filter.level)
     return false;
   if (filter.levels && !filter.levels.includes(hit.level)) return false;

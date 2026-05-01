@@ -158,7 +158,7 @@ describe('useLibraryRounds', () => {
 
     // The signature here matches the filter from the config.
     const seen = await store.get(
-      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=|hasVisual=',
     );
     expect(seen.size).toBe(3);
   });
@@ -180,7 +180,7 @@ describe('useLibraryRounds', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const seen = await store.get(
-      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+      'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=|hasVisual=',
     );
     expect(seen.size).toBe(0);
   });
