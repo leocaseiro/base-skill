@@ -137,6 +137,28 @@ describe('entryMatches', () => {
     ).toBe(false);
   });
 
+  it('empty graphemesRequired/graphemesAllowed arrays do not reject words', () => {
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: [],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesAllowed: [],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: [],
+        graphemesAllowed: [],
+      }),
+    ).toBe(true);
+  });
+
   it('phonemesAllowed + Required: "c making /k/" case', () => {
     // cat: c/k, a/æ, t/t
     expect(
