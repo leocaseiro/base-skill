@@ -5,7 +5,7 @@
 **Worktree:** worktrees/issue-277-consolidate-word-emoji
 **Worktree path:** /Users/leocaseiro/Sites/base-skill/worktrees/issue-277-consolidate-word-emoji
 **Git status:** clean
-**Last commit:** d2a654dc docs(plan): consolidate word and emoji data implementation plan (#277)
+**Last commit:** 49c8277e docs: require full worktree paths in agent output (#277)
 **PR:** #281 — open
 
 ## Resume command
@@ -13,7 +13,8 @@
 ```
 /resync
 cd worktrees/issue-277-consolidate-word-emoji
-# Execute implementation plan based on the requirements doc
+# Execute the implementation plan — choose subagent-driven or inline
+# Plan: worktrees/issue-277-consolidate-word-emoji/docs/superpowers/plans/2026-05-01-consolidate-word-emoji.md
 ```
 
 ## Current state
@@ -24,7 +25,7 @@ cd worktrees/issue-277-consolidate-word-emoji
 
 ## What we did
 
-Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) for consolidating word and emoji data. Ran `ce-doc-review` on both the requirements doc and the implementation plan. Supersedes issue #266 with a comment linking it to #277. Implementation plan written with 9 TDD tasks, reviewed with 5 reviewer personas (5 findings resolved: 2 fixed, 2 skipped, 1 noted as known limitation).
+Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) for consolidating word and emoji data. Ran `ce-doc-review` on both the requirements doc and the implementation plan. Supersedes issue #266 with a comment linking it to #277. Implementation plan written with 9 TDD tasks, reviewed with 5 reviewer personas (5 findings resolved: 2 fixed, 2 skipped, 1 noted as known limitation). Also added "full worktree paths in output" rule to CLAUDE.md, AGENTS.md, and `.cursor/rules/git-workflow.mdc`.
 
 ## Decisions made
 
@@ -38,8 +39,8 @@ Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) f
 
 ## Spec / Plan
 
-- docs/brainstorms/2026-05-01-consolidate-word-emoji-requirements.md
-- docs/superpowers/plans/2026-05-01-consolidate-word-emoji.md
+- worktrees/issue-277-consolidate-word-emoji/docs/brainstorms/2026-05-01-consolidate-word-emoji-requirements.md
+- worktrees/issue-277-consolidate-word-emoji/docs/superpowers/plans/2026-05-01-consolidate-word-emoji.md
 
 ## Key files
 
@@ -70,3 +71,4 @@ Brainstormed and wrote a requirements document covering 9 requirements (R1-R9) f
 - The mode invariant in `resolveWordSpellConfig` currently _deletes_ `source` for picture mode — it must be _inverted_ so picture mode becomes source-defined with `hasVisual: true`.
 - `WordSpell.tsx` already renders emoji/image from rounds correctly — no changes needed there.
 - Issue #266 was superseded by #277 — a comment was added to #266 linking to this work.
+- Doc review findings from the plan: sentence-gap hasVisual injection (skipped), totalRounds cap removal (skipped — deferred to SRS), fallback test fix (applied — use level 8), filterSignature mismatch on fallback (applied — `activeFilter` tracking), region hardcoded to aus (noted as known limitation).
