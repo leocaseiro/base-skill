@@ -21,6 +21,7 @@
     "word-spell": "Arraste as letras para as caixas e forme a palavra. Toque na imagem ou no alto-falante para ouvir a palavra.",
     "number-match": "Arraste as peças para combinar cada número. Toque no número para ouvir.",
     "sort-numbers": "Coloque os números em ordem! Arraste cada número para o lugar certo.",
+    "spot-all": "Toque em cada peça que mostra o caractere destacado. Algumas peças parecem similares mas estão invertidas ou são diferentes — toque apenas nas corretas.",
     "lets-go": "Vamos lá!",
     "advanced": "Avançado",
     "settings": "⚙️ Configurações",
@@ -38,6 +39,24 @@
     "saveAndPlay": "Salvar e jogar",
     "playWithoutSaving": "Jogar sem salvar",
     "configure": "Configurar"
+  },
+  "spot-all": "Encontre Todos!",
+  "spot-all-description": "Toque em todas as peças que combinam com o pedido — cuidado com letras invertidas e parecidas.",
+  "spot-all-ui": {
+    "prompt": "Selecione todos os {{target}}",
+    "speak-prompt": "Ouvir a pergunta",
+    "config": {
+      "groups": {
+        "mirror-horizontal": "Espelho Horizontal",
+        "mirror-vertical": "Espelho Vertical",
+        "rotation-180": "Rotação 180°",
+        "visual-similarity": "Semelhança Visual",
+        "transposition": "Transposição",
+        "reversible": "Reversível (auto-espelho)"
+      },
+      "tile-styles": { "label": "Estilos de peças" },
+      "invalid-selection": "Escolha ao menos um grupo para jogar"
+    }
   },
   "sort-numbers-ui": {
     "ascending-label": "Pra Cima!",
