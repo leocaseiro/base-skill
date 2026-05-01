@@ -240,7 +240,7 @@ describe('filterWords (integration against seeded chunks)', () => {
     expect(result.hits[0]!.syllableCount).toBeGreaterThanOrEqual(1);
   });
 
-  it.skip('propagates emoji from curriculum entry into WordHit', async () => {
+  it('propagates emoji from curriculum entry into WordHit', async () => {
     const result = await filterWords({
       region: 'aus',
       hasVisual: true,
