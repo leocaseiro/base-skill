@@ -35,7 +35,10 @@ mode because the visual data isn't part of the word data.
 - R1. `CurriculumEntry` gains optional `emoji?: string` and `image?: string`
   fields. Both are optional — most words will have neither.
 - R2. `WordHit` gains matching optional `emoji?` and `image?` fields, populated
-  from the curriculum entry during filtering.
+  from the curriculum entry during filtering. Specifically, `joinHits` in
+  `filter.ts` must propagate `emoji` and `image` from `CurriculumEntry` into
+  the constructed `WordHit`, and `draftToHit` must propagate them from
+  `DraftEntry`.
 - R3. `DraftEntry` gains optional `emoji?` and `image?` fields for authoring
   parity.
 - R4. The `toWordSpellRound` adapter maps `emoji` and `image` from `WordHit`
@@ -43,11 +46,14 @@ mode because the visual data isn't part of the word data.
 
 **Curriculum data**
 
-- R5. The 7 existing hardcoded emoji words (ant, can, cat, dog, pin, sad, sun)
-  gain an `emoji` field in their respective `aus/level1.json` or
-  `aus/level2.json` curriculum entries.
+- R5. The 7 existing hardcoded emoji words that already have curriculum entries
+  (ant, can, cat, dog, pin, sad, sun) gain an `emoji` field in their respective
+  `aus/level1.json` or `aus/level2.json` curriculum entries.
 - R6. "mum" is added as a new `CurriculumEntry` in `aus/level2.json` (level 2
-  covers graphemes `m` and `u`) with its emoji `🤱`.
+  covers graphemes `m` and `u`) with its emoji `🤱`. A corresponding `WordCore`
+  entry must also be added to `core/level2.json` (with `word` and
+  `syllableCount`) — without it, `joinHits` will silently discard the
+  curriculum entry.
 
 **Filtering**
 
@@ -58,7 +64,14 @@ mode because the visual data isn't part of the word data.
 
 - R8. When WordSpell is in picture mode, the config resolver uses
   library-sourced rounds with `hasVisual: true` in the filter, instead of
-  falling back to the hardcoded pool.
+  falling back to the hardcoded pool. This requires inverting the existing mode
+  invariant in `resolveWordSpellConfig` (which currently deletes `source` for
+  picture mode) so that picture mode becomes `source` defined with
+  `hasVisual: true`. The existing test asserting source is dropped for picture
+  mode must be updated to assert the new behavior. If a saved config has
+  explicit `rounds` with emoji/image data, those are honored as-is (no library
+  fetch). If `hasVisual` filtering returns zero results, the game falls back to
+  recall mode (audio-only) rather than displaying a blank screen.
 - R9. The hardcoded `WORD_SPELL_ROUND_POOL` and `sliceWordSpellRounds` are
   removed.
 
