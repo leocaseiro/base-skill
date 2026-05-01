@@ -353,7 +353,6 @@ export const WordSpell = ({
         .exec();
 
       if (cancellation.isCancelled || !doc) return;
-      if (hasWordSpellPersistedContent(doc.initialContent)) return;
 
       const patch = buildWordSpellInitialContent({
         rounds: resolvedRounds,
@@ -493,7 +492,27 @@ export const WordSpell = ({
     );
   }
 
-  if (!round0) return null;
+  if (!round0) {
+    if (import.meta.env.DEV) {
+      console.warn(
+        '[WordSpell] 0 rounds resolved. Filter returned no matching words.',
+        { source: config.source, mode: config.mode },
+      );
+    }
+    return (
+      <div
+        role="alert"
+        className="flex min-h-[200px] w-full flex-col items-center justify-center gap-2 text-muted-foreground"
+      >
+        <p>No words matched the current filter.</p>
+        {import.meta.env.DEV && (
+          <pre className="max-w-md overflow-auto text-xs">
+            {JSON.stringify(config.source?.filter, null, 2)}
+          </pre>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
