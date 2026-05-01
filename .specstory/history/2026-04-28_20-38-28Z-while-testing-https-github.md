@@ -6,7 +6,7 @@
 
 _**User (2026-04-28 20:40:57Z)**_
 
-While testing https://github.com/leocaseiro/base-skill/pull/219 I noticed that we accidentally didn't plan properly. We should be able to list all those words based on level. 
+While testing <https://github.com/leocaseiro/base-skill/pull/219> I noticed that we accidentally didn't plan properly. We should be able to list all those words based on level.
 
 See /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
 
@@ -193,7 +193,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:04Z)**_
@@ -205,51 +204,52 @@ _**Agent (claude-opus-4-7 2026-04-28 20:41:05Z)**_
  `./docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md`
 
 ```text
-1	# Australia vocabulary
-2	
-3	## level 1
-4	
-5	- grapheme: [s,a,t,p,i,n]
-6	- words: [in,it,at,an,as,tin,sit,sat,nit,Nat,ant,tip,tap,sip,sap,pit,pat,pin,nip,nap,pan,tan,sin,sits,pips,nits,ants,tips,taps,spin,spit,spat,pats,pits,snip,snap,pins,pant,pans,nips,naps,sits,pants,spits]
-7	
-8	## level 2
-9	
-10	- grapheme: [m,d,g,o,c,k,ck,e,u,r]
-11	- words: [dad,cap,sad,gap,tag,map,can,man,cat,mad,Sam,Pam,net,red,met,pen,set,pet,ten,men,peg,Meg,send,test,sit,did,dip,pin,pig,dig,rip,Kim,kid,kiss,sick,pick,on,dog,mop,not,pop,rock,top,sock,pot,cot,cop,dot,up,us,cup,mug,pup,sun,gum,dug,duck,tug,rug,run]
-12	
-13	## level 3
-14	
-15	- grapheme: [b,h,f,l,j,v,w,x,y,z]
-16	- words: [mad,sat,sad,rag,hat,tan,sag,bat,rap,wax,cat,cap,mat,red,met,beg,pen,jet,hen,web,set,bed,pet,ten,leg,led,sit,hid,bit,big,win,zip,hit,lip,did,pin,pig,rip,bin,not,dob,fox,log,hot,pop,sock,lot,jog,pot,rob,job,box,cup,hum,mug,pup,hut,jug,sun,bug,tub,bun,hug,run]
-17	
-18	## level 4
-19	
-20	- grapheme: [sh,ch,th,th,qu,ng,wh,ph,g,c]
-21	- words: [ship,shop,shed,fish,dish,wish,shin,lush,dash,rash,cash,shelf,crush,thick,thin,cloth,moth,fifth,this,that,them,chip,chop,chin,chess,chap,chat,chill,such,much,rich,inch,check,chest,ring,sing,song,dong,thing,thong,bang,rang,sung,hang,bling,sling,quiz,quest,squid,quick,quack,quilt,quit,quoll,squint,liquid,squish,cent,Vincent,citrus,dance,mince,gem,gel,magic,Phil,dolphin,phonics,graphic,alphabet,whip,whiff,when]
-22	
-23	## level 5
-24	
-25	- grapheme: [ai,ay,ea,ee,ie,igh,oa,ow,ew,ue]
-26	- words: [aim,mail,pain,nail,wait,sail,rain,bait,jail,tail,brain,chain,paint,say,pay,day,way,lay,bay,pray,play,tray,sway,clay,stay,spray,pea,eat,sea,tea,beat,meat,team,each,beach,cheap,treat,leak,scream,bee,see,tree,feet,keep,seed,sheep,week,beep,free,meet,reef,sheet,new,few,stew,nephew,cue,due,rescue,die,lie,pie,tie,died,pies,fries,spied,tries,dried,untie,magpie,high,light,night,tight,sight,right,might,fight,bright,fright,flight,slight,boat,coat,goat,loaf,moan,road,soap,soak,toad,float,groan,roast,toast,bow,low,blow,glow,show,slow,snow,grow,flow,throw,grown,flown,blown]
-27	
-28	## level 6
-29	
-30	- grapheme: [oi,oy,oo,oo,ou,ow,er,ir,ur,ar,or]
-31	- words: [oil,coil,coin,boil,join,soil,spoil,point,moist,joint,foil,noise,toilet,boy,toy,joy,soy,toys,boys,Troy,annoy,enjoy,employ,look,took,hood,good,hook,foot,cook,book,wood,shook,cooking,footprint,wooden,zoo,zoom,soon,roof,moon,food,hoop,boot,boom,tooth,spoon,scoop,smooth,out,ouch,loud,couch,shout,cloud,pouch,count,proud,round,found,ground,sound,cow,owl,now,wow,how,howl,down,town,brown,crowd,drown,clown,frown,her,fern,perch,term,verb,stern,clerk,herd,nerve,serve,swerve,merge,bird,stir,dirt,third,swirl,twirl,whirl,skirt,shirt,first,chip,birth,shirt,fur,surf,burn,curl,hurt,turn,church,burst,churn,nurse,purse,suburb,turtle,arm,art,car,jar,bark,cart,dark,farm,hard,barn,card,chart,dart,torch,corn,torn,fork,born,sort,horn,pork,short,sport,thorn,storm,boring]
-32	
-33	<!-- TODO below here -->
-34	
-35	## level 7
-36	
-37	- grapheme: [a_e,e_e,i_e,o_e,u_e,a,e,y,i,y,o]
-38	- words: [cake,bake,make,lake,gate,date,name,take,shake,plate,skate,brave,eve,Pete,theme,these,delete,athlete,compete,complete,concrete,extreme,size,wife,like,life,dive,bite,bike,five,pipe,hide,slide,spike,bride,rope,bone,poke,rose,hose,home,cone,choke,broke,froze,globe,smoke,spoke,use,tune,cube,puke,cute,fume,Duke,fuse,mute,dispute,tribute,baby,angel,basic,raven,lady,bacon,naked,razor,Mason,later,label,apron,potato,me,be,we,he,she,evil,even,vegan,recess,happy,angry,windy,sunny,silly,rusty,jelly,lady,lucky,puppy,bunny,daddy,fluffy,find,kind,child,mind,wild,blind,pilot,item,quiet,final,Friday,silent,spider,by,my,sky,spy,fly,cry,dry,fry,sly,try,why,sty,go,so,no,hotel,focus,local,poem,robot,total,banjo,locate,donut,moment]
-39	
-40	## level 8
-41	
-42	- grapheme: [aw,ew,ou,air,are,ear,eer,ore,dge,tch]
-43	- words: [law,jaw,saw,raw,paw,jaw,fawn,claw,lawn,draw,hawk,yawn,pawpaw,chew,blew,drew,crew,grew,flew,threw,screw,cashew,touch,young,couple,cousin,double,trouble,country,nourish,air,hair,chair,fair,pair,flair,stair,unfair,repair,impair,airport,airway,scare,dare,rare,share,flare,stare,glare,square,beware,prepare,compare,bear,pear,wear,swear,steer,deer,cheer,career,more,tore,core,sore,wore,shore,store,swore,adore,score,snore,before,explore,edge,badge,fudge,hedge,ledge,wedge,lodge,bridge,fridge,smudge,sludge,itch,catch,witch,patch,ditch,fetch,batch,hatch,latch,watch,match,snatch,stitch]
+1 # Australia vocabulary
+2 
+3 ## level 1
+4 
+5 - grapheme: [s,a,t,p,i,n]
+6 - words: [in,it,at,an,as,tin,sit,sat,nit,Nat,ant,tip,tap,sip,sap,pit,pat,pin,nip,nap,pan,tan,sin,sits,pips,nits,ants,tips,taps,spin,spit,spat,pats,pits,snip,snap,pins,pant,pans,nips,naps,sits,pants,spits]
+7 
+8 ## level 2
+9 
+10 - grapheme: [m,d,g,o,c,k,ck,e,u,r]
+11 - words: [dad,cap,sad,gap,tag,map,can,man,cat,mad,Sam,Pam,net,red,met,pen,set,pet,ten,men,peg,Meg,send,test,sit,did,dip,pin,pig,dig,rip,Kim,kid,kiss,sick,pick,on,dog,mop,not,pop,rock,top,sock,pot,cot,cop,dot,up,us,cup,mug,pup,sun,gum,dug,duck,tug,rug,run]
+12 
+13 ## level 3
+14 
+15 - grapheme: [b,h,f,l,j,v,w,x,y,z]
+16 - words: [mad,sat,sad,rag,hat,tan,sag,bat,rap,wax,cat,cap,mat,red,met,beg,pen,jet,hen,web,set,bed,pet,ten,leg,led,sit,hid,bit,big,win,zip,hit,lip,did,pin,pig,rip,bin,not,dob,fox,log,hot,pop,sock,lot,jog,pot,rob,job,box,cup,hum,mug,pup,hut,jug,sun,bug,tub,bun,hug,run]
+17 
+18 ## level 4
+19 
+20 - grapheme: [sh,ch,th,th,qu,ng,wh,ph,g,c]
+21 - words: [ship,shop,shed,fish,dish,wish,shin,lush,dash,rash,cash,shelf,crush,thick,thin,cloth,moth,fifth,this,that,them,chip,chop,chin,chess,chap,chat,chill,such,much,rich,inch,check,chest,ring,sing,song,dong,thing,thong,bang,rang,sung,hang,bling,sling,quiz,quest,squid,quick,quack,quilt,quit,quoll,squint,liquid,squish,cent,Vincent,citrus,dance,mince,gem,gel,magic,Phil,dolphin,phonics,graphic,alphabet,whip,whiff,when]
+22 
+23 ## level 5
+24 
+25 - grapheme: [ai,ay,ea,ee,ie,igh,oa,ow,ew,ue]
+26 - words: [aim,mail,pain,nail,wait,sail,rain,bait,jail,tail,brain,chain,paint,say,pay,day,way,lay,bay,pray,play,tray,sway,clay,stay,spray,pea,eat,sea,tea,beat,meat,team,each,beach,cheap,treat,leak,scream,bee,see,tree,feet,keep,seed,sheep,week,beep,free,meet,reef,sheet,new,few,stew,nephew,cue,due,rescue,die,lie,pie,tie,died,pies,fries,spied,tries,dried,untie,magpie,high,light,night,tight,sight,right,might,fight,bright,fright,flight,slight,boat,coat,goat,loaf,moan,road,soap,soak,toad,float,groan,roast,toast,bow,low,blow,glow,show,slow,snow,grow,flow,throw,grown,flown,blown]
+27 
+28 ## level 6
+29 
+30 - grapheme: [oi,oy,oo,oo,ou,ow,er,ir,ur,ar,or]
+31 - words: [oil,coil,coin,boil,join,soil,spoil,point,moist,joint,foil,noise,toilet,boy,toy,joy,soy,toys,boys,Troy,annoy,enjoy,employ,look,took,hood,good,hook,foot,cook,book,wood,shook,cooking,footprint,wooden,zoo,zoom,soon,roof,moon,food,hoop,boot,boom,tooth,spoon,scoop,smooth,out,ouch,loud,couch,shout,cloud,pouch,count,proud,round,found,ground,sound,cow,owl,now,wow,how,howl,down,town,brown,crowd,drown,clown,frown,her,fern,perch,term,verb,stern,clerk,herd,nerve,serve,swerve,merge,bird,stir,dirt,third,swirl,twirl,whirl,skirt,shirt,first,chip,birth,shirt,fur,surf,burn,curl,hurt,turn,church,burst,churn,nurse,purse,suburb,turtle,arm,art,car,jar,bark,cart,dark,farm,hard,barn,card,chart,dart,torch,corn,torn,fork,born,sort,horn,pork,short,sport,thorn,storm,boring]
+32 
+33 <!-- TODO below here -->
+34 
+35 ## level 7
+36 
+37 - grapheme: [a_e,e_e,i_e,o_e,u_e,a,e,y,i,y,o]
+38 - words: [cake,bake,make,lake,gate,date,name,take,shake,plate,skate,brave,eve,Pete,theme,these,delete,athlete,compete,complete,concrete,extreme,size,wife,like,life,dive,bite,bike,five,pipe,hide,slide,spike,bride,rope,bone,poke,rose,hose,home,cone,choke,broke,froze,globe,smoke,spoke,use,tune,cube,puke,cute,fume,Duke,fuse,mute,dispute,tribute,baby,angel,basic,raven,lady,bacon,naked,razor,Mason,later,label,apron,potato,me,be,we,he,she,evil,even,vegan,recess,happy,angry,windy,sunny,silly,rusty,jelly,lady,lucky,puppy,bunny,daddy,fluffy,find,kind,child,mind,wild,blind,pilot,item,quiet,final,Friday,silent,spider,by,my,sky,spy,fly,cry,dry,fry,sly,try,why,sty,go,so,no,hotel,focus,local,poem,robot,total,banjo,locate,donut,moment]
+39 
+40 ## level 8
+41 
+42 - grapheme: [aw,ew,ou,air,are,ear,eer,ore,dge,tch]
+43 - words: [law,jaw,saw,raw,paw,jaw,fawn,claw,lawn,draw,hawk,yawn,pawpaw,chew,blew,drew,crew,grew,flew,threw,screw,cashew,touch,young,couple,cousin,double,trouble,country,nourish,air,hair,chair,fair,pair,flair,stair,unfair,repair,impair,airport,airway,scare,dare,rare,share,flare,stare,glare,square,beware,prepare,compare,bear,pear,wear,swear,steer,deer,cheer,career,more,tore,core,sore,wore,shore,store,swore,adore,score,snore,before,explore,edge,badge,fudge,hedge,ledge,wedge,lodge,bridge,fridge,smudge,sludge,itch,catch,witch,patch,ditch,fetch,batch,hatch,latch,watch,match,snatch,stitch]
 44
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:09Z)**_
@@ -265,6 +265,7 @@ Get PR 219 details
 ```text
 {"body":"## Summary\n\nImplements the WordSpell levels-and-defaults plan from the design spec and implementation plan committed via PR #212. Closes #216.\n\n- **Fix Level 3+ regression** — the Simple form was populating `phonemesAllowed` from `GRAPHEMES_BY_LEVEL[level]` (only that level's phonemes). `filterWords` requires every grapheme of a candidate word to map into the allowed set, so words using prerequisite-level phonemes were silently filtered out → 0 playable rounds at Level 3+. Fix: switch to `cumulativeGraphemes(level)` so phonemes from levels 1..N are addressable.\n- **Advanced ⊇ Simple** — extracted `WordSpellLibrarySource` sub-component (Level + Phonemes) and exposed it in the Advanced modal via a new optional `getAdvancedHeaderRenderer` registry hook. Other games unaffected. Also added `distractorCount` (visible only when `tileBankMode = distractors`).\n- **Defaults flip** — `mode: recall` (picture mode silently degrades for library-sourced rounds with no images) and `roundsInOrder: false` (random rounds are the natural default; stories needing stability already opt-in explicitly).\n- **Removed unused `scramble` mode** — never used in any user-facing flow. Slot-interaction simplifies to `sentence-gap → free-swap`, everything else → `ordered`.\n\n## Three-layer regression strategy\n\n1. **Cumulative-helper unit test** (`src/data/words/levels.test.ts`) — locks the cumulative-graphemes contract.\n2. **Curriculum invariant test** (`src/data/words/curriculum-invariant.test.ts`) — parameterized over every `(region, level)`. With cumulative phonemes, every level must yield ≥ 4 playable hits. **32/32 passing** (4 regions × 8 levels).\n3. **Form-emits-playable test** (`src/games/word-spell/WordSpellSimpleConfigForm/source-emits-playable.test.tsx`) — TDD red/green: failed for Levels 3-7 before the fix, passes for all 8 levels after.\n\n## Commits\n\n- `test: lock in cumulativeGraphemes helper contract`\n- `test: parameterized curriculum invariant — every (region, level) is playable`\n- `fix(word-spell): use cumulative phonemes so Level 3+ produces playable words` (TDD red+green)\n- `refactor(word-spell): extract WordSpellLibrarySource sub-component`\n- `feat(word-spell): expose Level + Phonemes in the Advanced modal`\n- `feat(word-spell): expose distractorCount in Advanced modal`\n- `feat(word-spell): default to recall mode`\n- `feat(word-spell): random rounds by default`\n- `refactor(word-spell): remove unused scramble mode`\n- `fix(word-spell): type Region in source-emits-playable test`\n\n## Test plan\n\n- [x] yarn lint — green\n- [x] yarn typecheck — green\n- [x] yarn test — 1095/1095 passing across 156 files\n- [x] yarn vitest run on form-emits-playable — 8/8 levels pass after fix\n- [x] yarn vitest run curriculum-invariant — 32/32 (region, level) pairs pass\n- [x] All pre-push hooks green\n- [ ] **Manual smoke test in dev server (please verify locally — Step 4 of plan):**\n  - [ ] Launch WordSpell with no custom config → lands on `recall`, plays in random order, draws Level 1 cumulatively\n  - [ ] Open Advanced modal for WordSpell → Level select + Phoneme chips appear above the standard fields\n  - [ ] Toggle Advanced `tileBankMode` to `distractors` → `distractorCount` field becomes visible\n  - [ ] Switch Simple form to Level 3 → chips for /s/, /æ/, /m/, /b/, etc. all appear; non-empty rounds are produced\n  - [ ] Confirm there is no `scramble` option in the mode dropdown\n\n## Notes\n\n- The design spec ships in PR #212 (already merged); this PR is the implementation half.\n- `MIN_PLAYABLE_HITS = 4` in the curriculum-invariant test is load-bearing — do not lower.\n- VR baselines: not affected. `roundsInOrder: false` only changes the no-config route default; stories that need ordering pin it explicitly.\n- The dev-server smoke test could not be run from this CI-like session — the codepaths are exercised by tests, but the human-eye check is left for the reviewer.\n\nCloses #216","files":[{"path":".claude/handoffs/2026-04-29-wordspell-multi-level-plan-ready.md","additions":157,"deletions":0,"changeType":"ADDED"},{"path":"docs/superpowers/plans/2026-04-28-wordspell-multi-level-units.md","additions":1965,"deletions":0,"changeType":"ADDED"},{"path":"docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md","additions":526,"deletions":0,"changeType":"ADDED"},{"path":"src/components/AdvancedConfigModal.test.tsx","additions":66,"deletions":0,"changeType":"MODIFIED"},{"path":"src/components/AdvancedConfigModal.tsx","additions":8,"deletions":1,"changeType":"MODIFIED"},{"path":"src/components/config/ChipStrip.tsx","additions":1,"deletions":1,"changeType":"MODIFIED"},{"path":"src/data/words/curriculum-invariant.test.ts","additions":85,"deletions":0,"changeType":"ADDED"},{"path":"src/data/words/levels.test.ts","additions":33,"deletions":0,"changeType":"ADDED"},{"path":"src/db/create-database.ts","additions":8,"deletions":1,"changeType":"MODIFIED"},{"path":"src/db/migrations/word-spell-multi-level.collection.test.ts","additions":94,"deletions":0,"changeType":"ADDED"},{"path":"src/db/migrations/word-spell-multi-level.test.ts","additions":94,"deletions":0,"changeType":"ADDED"},{"path":"src/db/migrations/word-spell-multi-level.ts","additions":64,"deletions":0,"changeType":"ADDED"},{"path":"src/db/schemas/custom_games.ts","additions":1,"deletions":1,"changeType":"MODIFIED"},{"path":"src/db/schemas/saved_game_configs.ts","additions":1,"deletions":1,"changeType":"MODIFIED"},{"path":"src/games/config-fields-registry.tsx","additions":21,"deletions":0,"changeType":"RENAMED"},{"path":"src/games/word-spell/WordSpell/WordSpell.stories.tsx","additions":0,"deletions":4,"changeType":"MODIFIED"},{"path":"src/games/word-spell/WordSpell/WordSpell.tsx","additions":0,"deletions":1,"changeType":"MODIFIED"},{"path":"src/games/word-spell/WordSpellLibrarySource/WordSpellLibrarySource.test.tsx","additions":89,"deletions":0,"changeType":"ADDED"},{"path":"src/games/word-spell/WordSpellLibrarySource/WordSpellLibrarySource.tsx","additions":236,"deletions":0,"changeType":"ADDED"},{"path":"src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx","additions":23,"deletions":22,"changeType":"MODIFIED"},{"path":"src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx","additions":3,"deletions":108,"changeType":"MODIFIED"},{"path":"src/games/word-spell/WordSpellSimpleConfigForm/source-emits-playable.test.tsx","additions":69,"deletions":0,"changeType":"ADDED"},{"path":"src/games/word-spell/level-unit-selection.test.ts","additions":73,"deletions":0,"changeType":"ADDED"},{"path":"src/games/word-spell/level-unit-selection.ts","additions":52,"deletions":0,"changeType":"ADDED"},{"path":"src/games/word-spell/resolve-simple-config.test.ts","additions":70,"deletions":26,"changeType":"MODIFIED"},{"path":"src/games/word-spell/resolve-simple-config.ts","additions":81,"deletions":22,"changeType":"MODIFIED"},{"path":"src/games/word-spell/types.ts","additions":16,"deletions":5,"changeType":"MODIFIED"},{"path":"src/routes/$locale/_app/game/$gameId.tsx","additions":3,"deletions":11,"changeType":"MODIFIED"},{"path":"src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts","additions":6,"deletions":4,"changeType":"MODIFIED"},{"path":"vite.config.ts","additions":16,"deletions":3,"changeType":"MODIFIED"}],"headRefName":"feat/issue-216","state":"OPEN","title":"feat(word-spell): levels-and-defaults — fix Level 3+, Advanced parity, recall+random defaults"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:23Z)**_
@@ -315,6 +316,7 @@ words.test.ts
 writer.test.ts
 writer.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:27Z)**_
@@ -342,6 +344,7 @@ br
 uk
 us
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:29Z)**_
@@ -351,163 +354,164 @@ _**Agent (claude-opus-4-7 2026-04-28 20:41:29Z)**_
  `./src/data/words/levels.ts`
 
 ```text
-1	// src/data/words/levels.ts
-2	import type { Region } from './types';
-3	
-4	export const ALL_REGIONS: readonly Region[] = ['aus', 'uk', 'us', 'br'];
-5	
-6	export const LEVEL_LABELS: Record<Region, (level: number) => string> = {
-7	  aus: (n) => `Level ${n}`,
-8	  uk: (n) => `Phase ${n}`,
-9	  us: (n) => `K Unit ${n}`,
-10	  br: (n) => `Unidade ${n}`,
-11	};
-12	
-13	/**
-14	 * A single grapheme-phoneme pairing taught at a given level. A grapheme like
-15	 * `c` appears twice across the AUS progression — once at level 2 teaching /k/,
-16	 * once at level 4 teaching /s/. Modelling each as its own unit keeps both
-17	 * variants addressable in the cumulative pool and in filter queries.
-18	 */
-19	export interface LevelGraphemeUnit {
-20	  /** Orthographic form: `c`, `sh`, `igh`, `a_e`. */
-21	  g: string;
-22	  /** IPA of the sound this unit teaches at this level: `k`, `s`, `ʃ`, `aɪ`. */
-23	  p: string;
-24	  /** Optional teacher label: `soft c`, `th voiced`. */
-25	  name?: string;
-26	}
-27	
-28	/**
-29	 * Grapheme-phoneme units newly introduced at each level of the AUS
-30	 * progression. Source:
-31	 * docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
-32	 * Cumulative sets use `cumulativeGraphemes(level)` below.
-33	 */
-34	export const GRAPHEMES_BY_LEVEL: Record<
-35	  number,
-36	  readonly LevelGraphemeUnit[]
-37	> = {
-38	  1: [
-39	    { g: 's', p: 's' },
-40	    { g: 'a', p: 'æ' },
-41	    { g: 't', p: 't' },
-42	    { g: 'p', p: 'p' },
-43	    { g: 'i', p: 'ɪ' },
-44	    { g: 'n', p: 'n' },
-45	  ],
-46	  2: [
-47	    { g: 'm', p: 'm' },
-48	    { g: 'd', p: 'd' },
-49	    { g: 'g', p: 'g' },
-50	    { g: 'o', p: 'ɒ' },
-51	    { g: 'c', p: 'k' },
-52	    { g: 'k', p: 'k' },
-53	    { g: 'ck', p: 'k' },
-54	    { g: 'e', p: 'e' },
-55	    { g: 'u', p: 'ʌ' },
-56	    { g: 'r', p: 'r' },
-57	  ],
-58	  3: [
-59	    { g: 'b', p: 'b' },
-60	    { g: 'h', p: 'h' },
-61	    { g: 'f', p: 'f' },
-62	    { g: 'l', p: 'l' },
-63	    { g: 'j', p: 'dʒ' },
-64	    { g: 'v', p: 'v' },
-65	    { g: 'w', p: 'w' },
-66	    { g: 'x', p: 'ks' },
-67	    { g: 'y', p: 'j' },
-68	    { g: 'z', p: 'z' },
-69	  ],
-70	  4: [
-71	    { g: 'sh', p: 'ʃ' },
-72	    { g: 'ch', p: 'tʃ' },
-73	    { g: 'th', p: 'θ', name: 'th voiceless' },
-74	    { g: 'th', p: 'ð', name: 'th voiced' },
-75	    { g: 'qu', p: 'kw' },
-76	    { g: 'ng', p: 'ŋ' },
-77	    { g: 'wh', p: 'w' },
-78	    { g: 'ph', p: 'f' },
-79	    { g: 'g', p: 'dʒ', name: 'soft g' },
-80	    { g: 'c', p: 's', name: 'soft c' },
-81	  ],
-82	  5: [
-83	    { g: 'ai', p: 'eɪ' },
-84	    { g: 'ay', p: 'eɪ' },
-85	    { g: 'ea', p: 'iː' },
-86	    { g: 'ee', p: 'iː' },
-87	    { g: 'ie', p: 'aɪ' },
-88	    { g: 'igh', p: 'aɪ' },
-89	    { g: 'oa', p: 'oʊ' },
-90	    { g: 'ow', p: 'oʊ' },
-91	    { g: 'ew', p: 'juː' },
-92	    { g: 'ue', p: 'juː' },
-93	  ],
-94	  6: [
-95	    { g: 'oi', p: 'ɔɪ' },
-96	    { g: 'oy', p: 'ɔɪ' },
-97	    { g: 'oo', p: 'uː', name: 'oo long' },
-98	    { g: 'oo', p: 'ʊ', name: 'oo short' },
-99	    { g: 'ou', p: 'aʊ' },
-100	    { g: 'er', p: 'ɜː' },
-101	    { g: 'ir', p: 'ɜː' },
-102	    { g: 'ur', p: 'ɜː' },
-103	    { g: 'ar', p: 'ɑː' },
-104	    { g: 'or', p: 'ɔː' },
-105	  ],
-106	  7: [
-107	    { g: 'a_e', p: 'eɪ' },
-108	    { g: 'e_e', p: 'iː' },
-109	    { g: 'i_e', p: 'aɪ' },
-110	    { g: 'o_e', p: 'oʊ' },
-111	    { g: 'u_e', p: 'juː' },
-112	  ],
-113	  8: [
-114	    { g: 'aw', p: 'ɔː' },
-115	    { g: 'air', p: 'eə' },
-116	    { g: 'are', p: 'eə' },
-117	    { g: 'ear', p: 'ɪə' },
-118	    { g: 'eer', p: 'ɪə' },
-119	    { g: 'ore', p: 'ɔː' },
-120	    { g: 'dge', p: 'dʒ' },
-121	    { g: 'tch', p: 'tʃ' },
-122	  ],
-123	};
-124	
-125	/**
-126	 * Returns all LevelGraphemeUnits introduced at or before `level`, preserving
-127	 * introduction order and keeping multiple variants of the same orthography
-128	 * (e.g. both `c=/k/` and `c=/s/` at level 4+).
-129	 */
-130	export const cumulativeGraphemes = (
-131	  level: number,
-132	): LevelGraphemeUnit[] => {
-133	  const out: LevelGraphemeUnit[] = [];
-134	  const seen = new Set<string>();
-135	  for (let l = 1; l <= level; l++) {
-136	    for (const unit of GRAPHEMES_BY_LEVEL[l] ?? []) {
-137	      const key = `${unit.g}|${unit.p}`;
-138	      if (seen.has(key)) continue;
-139	      seen.add(key);
-140	      out.push(unit);
-141	    }
-142	  }
-143	  return out;
-144	};
-145	
-146	/**
-147	 * Deduped orthographic pool for structural word splitting. Used by
-148	 * `makeGraphemes` — the splitter only needs to know which grapheme forms
-149	 * exist, not which phoneme each one teaches.
-150	 */
-151	export const graphemePool = (level: number): string[] => {
-152	  const seen = new Set<string>();
-153	  for (const unit of cumulativeGraphemes(level)) seen.add(unit.g);
-154	  return [...seen];
-155	};
+1 // src/data/words/levels.ts
+2 import type { Region } from './types';
+3 
+4 export const ALL_REGIONS: readonly Region[] = ['aus', 'uk', 'us', 'br'];
+5 
+6 export const LEVEL_LABELS: Record<Region, (level: number) => string> = {
+7   aus: (n) => `Level ${n}`,
+8   uk: (n) => `Phase ${n}`,
+9   us: (n) => `K Unit ${n}`,
+10   br: (n) => `Unidade ${n}`,
+11 };
+12 
+13 /**
+14  * A single grapheme-phoneme pairing taught at a given level. A grapheme like
+15  * `c` appears twice across the AUS progression — once at level 2 teaching /k/,
+16  * once at level 4 teaching /s/. Modelling each as its own unit keeps both
+17  * variants addressable in the cumulative pool and in filter queries.
+18  */
+19 export interface LevelGraphemeUnit {
+20   /** Orthographic form: `c`, `sh`, `igh`, `a_e`. */
+21   g: string;
+22   /** IPA of the sound this unit teaches at this level: `k`, `s`, `ʃ`, `aɪ`. */
+23   p: string;
+24   /** Optional teacher label: `soft c`, `th voiced`. */
+25   name?: string;
+26 }
+27 
+28 /**
+29  * Grapheme-phoneme units newly introduced at each level of the AUS
+30  * progression. Source:
+31  * docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
+32  * Cumulative sets use `cumulativeGraphemes(level)` below.
+33  */
+34 export const GRAPHEMES_BY_LEVEL: Record<
+35   number,
+36   readonly LevelGraphemeUnit[]
+37 > = {
+38   1: [
+39     { g: 's', p: 's' },
+40     { g: 'a', p: 'æ' },
+41     { g: 't', p: 't' },
+42     { g: 'p', p: 'p' },
+43     { g: 'i', p: 'ɪ' },
+44     { g: 'n', p: 'n' },
+45   ],
+46   2: [
+47     { g: 'm', p: 'm' },
+48     { g: 'd', p: 'd' },
+49     { g: 'g', p: 'g' },
+50     { g: 'o', p: 'ɒ' },
+51     { g: 'c', p: 'k' },
+52     { g: 'k', p: 'k' },
+53     { g: 'ck', p: 'k' },
+54     { g: 'e', p: 'e' },
+55     { g: 'u', p: 'ʌ' },
+56     { g: 'r', p: 'r' },
+57   ],
+58   3: [
+59     { g: 'b', p: 'b' },
+60     { g: 'h', p: 'h' },
+61     { g: 'f', p: 'f' },
+62     { g: 'l', p: 'l' },
+63     { g: 'j', p: 'dʒ' },
+64     { g: 'v', p: 'v' },
+65     { g: 'w', p: 'w' },
+66     { g: 'x', p: 'ks' },
+67     { g: 'y', p: 'j' },
+68     { g: 'z', p: 'z' },
+69   ],
+70   4: [
+71     { g: 'sh', p: 'ʃ' },
+72     { g: 'ch', p: 'tʃ' },
+73     { g: 'th', p: 'θ', name: 'th voiceless' },
+74     { g: 'th', p: 'ð', name: 'th voiced' },
+75     { g: 'qu', p: 'kw' },
+76     { g: 'ng', p: 'ŋ' },
+77     { g: 'wh', p: 'w' },
+78     { g: 'ph', p: 'f' },
+79     { g: 'g', p: 'dʒ', name: 'soft g' },
+80     { g: 'c', p: 's', name: 'soft c' },
+81   ],
+82   5: [
+83     { g: 'ai', p: 'eɪ' },
+84     { g: 'ay', p: 'eɪ' },
+85     { g: 'ea', p: 'iː' },
+86     { g: 'ee', p: 'iː' },
+87     { g: 'ie', p: 'aɪ' },
+88     { g: 'igh', p: 'aɪ' },
+89     { g: 'oa', p: 'oʊ' },
+90     { g: 'ow', p: 'oʊ' },
+91     { g: 'ew', p: 'juː' },
+92     { g: 'ue', p: 'juː' },
+93   ],
+94   6: [
+95     { g: 'oi', p: 'ɔɪ' },
+96     { g: 'oy', p: 'ɔɪ' },
+97     { g: 'oo', p: 'uː', name: 'oo long' },
+98     { g: 'oo', p: 'ʊ', name: 'oo short' },
+99     { g: 'ou', p: 'aʊ' },
+100     { g: 'er', p: 'ɜː' },
+101     { g: 'ir', p: 'ɜː' },
+102     { g: 'ur', p: 'ɜː' },
+103     { g: 'ar', p: 'ɑː' },
+104     { g: 'or', p: 'ɔː' },
+105   ],
+106   7: [
+107     { g: 'a_e', p: 'eɪ' },
+108     { g: 'e_e', p: 'iː' },
+109     { g: 'i_e', p: 'aɪ' },
+110     { g: 'o_e', p: 'oʊ' },
+111     { g: 'u_e', p: 'juː' },
+112   ],
+113   8: [
+114     { g: 'aw', p: 'ɔː' },
+115     { g: 'air', p: 'eə' },
+116     { g: 'are', p: 'eə' },
+117     { g: 'ear', p: 'ɪə' },
+118     { g: 'eer', p: 'ɪə' },
+119     { g: 'ore', p: 'ɔː' },
+120     { g: 'dge', p: 'dʒ' },
+121     { g: 'tch', p: 'tʃ' },
+122   ],
+123 };
+124 
+125 /**
+126  * Returns all LevelGraphemeUnits introduced at or before `level`, preserving
+127  * introduction order and keeping multiple variants of the same orthography
+128  * (e.g. both `c=/k/` and `c=/s/` at level 4+).
+129  */
+130 export const cumulativeGraphemes = (
+131   level: number,
+132 ): LevelGraphemeUnit[] => {
+133   const out: LevelGraphemeUnit[] = [];
+134   const seen = new Set<string>();
+135   for (let l = 1; l <= level; l++) {
+136     for (const unit of GRAPHEMES_BY_LEVEL[l] ?? []) {
+137       const key = `${unit.g}|${unit.p}`;
+138       if (seen.has(key)) continue;
+139       seen.add(key);
+140       out.push(unit);
+141     }
+142   }
+143   return out;
+144 };
+145 
+146 /**
+147  * Deduped orthographic pool for structural word splitting. Used by
+148  * `makeGraphemes` — the splitter only needs to know which grapheme forms
+149  * exist, not which phoneme each one teaches.
+150  */
+151 export const graphemePool = (level: number): string[] => {
+152   const seen = new Set<string>();
+153   for (const unit of cumulativeGraphemes(level)) seen.add(unit.g);
+154   return [...seen];
+155 };
 156
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:32Z)**_
@@ -517,162 +521,163 @@ _**Agent (claude-opus-4-7 2026-04-28 20:41:32Z)**_
  `./src/data/words/core/level3.json`
 
 ```text
-1	[
-2	  {
-3	    "word": "bat",
-4	    "syllableCount": 1
-5	  },
-6	  {
-7	    "word": "bed",
-8	    "syllableCount": 1
-9	  },
-10	  {
-11	    "word": "beg",
-12	    "syllableCount": 1
-13	  },
-14	  {
-15	    "word": "big",
-16	    "syllableCount": 1
-17	  },
-18	  {
-19	    "word": "bin",
-20	    "syllableCount": 1
-21	  },
-22	  {
-23	    "word": "bit",
-24	    "syllableCount": 1
-25	  },
-26	  {
-27	    "word": "box",
-28	    "syllableCount": 1
-29	  },
-30	  {
-31	    "word": "bug",
-32	    "syllableCount": 1
-33	  },
-34	  {
-35	    "word": "bun",
-36	    "syllableCount": 1
-37	  },
-38	  {
-39	    "word": "dob",
-40	    "syllableCount": 1
-41	  },
-42	  {
-43	    "word": "fox",
-44	    "syllableCount": 1
-45	  },
-46	  {
-47	    "word": "hat",
-48	    "syllableCount": 1
-49	  },
-50	  {
-51	    "word": "hen",
-52	    "syllableCount": 1
-53	  },
-54	  {
-55	    "word": "hid",
-56	    "syllableCount": 1
-57	  },
-58	  {
-59	    "word": "hit",
-60	    "syllableCount": 1
-61	  },
-62	  {
-63	    "word": "hot",
-64	    "syllableCount": 1
-65	  },
-66	  {
-67	    "word": "hug",
-68	    "syllableCount": 1
-69	  },
-70	  {
-71	    "word": "hum",
-72	    "syllableCount": 1
-73	  },
-74	  {
-75	    "word": "hut",
-76	    "syllableCount": 1
-77	  },
-78	  {
-79	    "word": "jet",
-80	    "syllableCount": 1
-81	  },
-82	  {
-83	    "word": "job",
-84	    "syllableCount": 1
-85	  },
-86	  {
-87	    "word": "jog",
-88	    "syllableCount": 1
-89	  },
-90	  {
-91	    "word": "jug",
-92	    "syllableCount": 1
-93	  },
-94	  {
-95	    "word": "led",
-96	    "syllableCount": 1
-97	  },
-98	  {
-99	    "word": "leg",
-100	    "syllableCount": 1
-101	  },
-102	  {
-103	    "word": "lip",
-104	    "syllableCount": 1
-105	  },
-106	  {
-107	    "word": "log",
-108	    "syllableCount": 1
-109	  },
-110	  {
-111	    "word": "lot",
-112	    "syllableCount": 1
-113	  },
-114	  {
-115	    "word": "mat",
-116	    "syllableCount": 1
-117	  },
-118	  {
-119	    "word": "rag",
-120	    "syllableCount": 1
-121	  },
-122	  {
-123	    "word": "rap",
-124	    "syllableCount": 1
-125	  },
-126	  {
-127	    "word": "rob",
-128	    "syllableCount": 1
-129	  },
-130	  {
-131	    "word": "sag",
-132	    "syllableCount": 1
-133	  },
-134	  {
-135	    "word": "tub",
-136	    "syllableCount": 1
-137	  },
-138	  {
-139	    "word": "wax",
-140	    "syllableCount": 1
-141	  },
-142	  {
-143	    "word": "web",
-144	    "syllableCount": 1
-145	  },
-146	  {
-147	    "word": "win",
-148	    "syllableCount": 1
-149	  },
-150	  {
-151	    "word": "zip",
-152	    "syllableCount": 1
-153	  }
-154	]
+1 [
+2   {
+3     "word": "bat",
+4     "syllableCount": 1
+5   },
+6   {
+7     "word": "bed",
+8     "syllableCount": 1
+9   },
+10   {
+11     "word": "beg",
+12     "syllableCount": 1
+13   },
+14   {
+15     "word": "big",
+16     "syllableCount": 1
+17   },
+18   {
+19     "word": "bin",
+20     "syllableCount": 1
+21   },
+22   {
+23     "word": "bit",
+24     "syllableCount": 1
+25   },
+26   {
+27     "word": "box",
+28     "syllableCount": 1
+29   },
+30   {
+31     "word": "bug",
+32     "syllableCount": 1
+33   },
+34   {
+35     "word": "bun",
+36     "syllableCount": 1
+37   },
+38   {
+39     "word": "dob",
+40     "syllableCount": 1
+41   },
+42   {
+43     "word": "fox",
+44     "syllableCount": 1
+45   },
+46   {
+47     "word": "hat",
+48     "syllableCount": 1
+49   },
+50   {
+51     "word": "hen",
+52     "syllableCount": 1
+53   },
+54   {
+55     "word": "hid",
+56     "syllableCount": 1
+57   },
+58   {
+59     "word": "hit",
+60     "syllableCount": 1
+61   },
+62   {
+63     "word": "hot",
+64     "syllableCount": 1
+65   },
+66   {
+67     "word": "hug",
+68     "syllableCount": 1
+69   },
+70   {
+71     "word": "hum",
+72     "syllableCount": 1
+73   },
+74   {
+75     "word": "hut",
+76     "syllableCount": 1
+77   },
+78   {
+79     "word": "jet",
+80     "syllableCount": 1
+81   },
+82   {
+83     "word": "job",
+84     "syllableCount": 1
+85   },
+86   {
+87     "word": "jog",
+88     "syllableCount": 1
+89   },
+90   {
+91     "word": "jug",
+92     "syllableCount": 1
+93   },
+94   {
+95     "word": "led",
+96     "syllableCount": 1
+97   },
+98   {
+99     "word": "leg",
+100     "syllableCount": 1
+101   },
+102   {
+103     "word": "lip",
+104     "syllableCount": 1
+105   },
+106   {
+107     "word": "log",
+108     "syllableCount": 1
+109   },
+110   {
+111     "word": "lot",
+112     "syllableCount": 1
+113   },
+114   {
+115     "word": "mat",
+116     "syllableCount": 1
+117   },
+118   {
+119     "word": "rag",
+120     "syllableCount": 1
+121   },
+122   {
+123     "word": "rap",
+124     "syllableCount": 1
+125   },
+126   {
+127     "word": "rob",
+128     "syllableCount": 1
+129   },
+130   {
+131     "word": "sag",
+132     "syllableCount": 1
+133   },
+134   {
+135     "word": "tub",
+136     "syllableCount": 1
+137   },
+138   {
+139     "word": "wax",
+140     "syllableCount": 1
+141   },
+142   {
+143     "word": "web",
+144     "syllableCount": 1
+145   },
+146   {
+147     "word": "win",
+148     "syllableCount": 1
+149   },
+150   {
+151     "word": "zip",
+152     "syllableCount": 1
+153   }
+154 ]
 155
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:38Z)**_
@@ -689,6 +694,7 @@ Find usages of core level json files
 /Users/leocaseiro/Sites/base-skill/src/data/words/filter.ts
 /Users/leocaseiro/Sites/base-skill/src/data/words/words.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:41Z)**_
@@ -698,268 +704,269 @@ _**Agent (claude-opus-4-7 2026-04-28 20:41:41Z)**_
  `./src/data/words/filter.ts`
 
 ```text
-1	import { ALL_REGIONS } from './levels';
-2	import type {
-3	  CurriculumEntry,
-4	  DraftEntry,
-5	  FilterResult,
-6	  Provenance,
-7	  Region,
-8	  WordCore,
-9	  WordFilter,
-10	  WordHit,
-11	} from './types';
-12	
-13	const inRange = (
-14	  n: number,
-15	  [min, max]: readonly [number, number],
-16	): boolean => n >= min && n <= max;
-17	
-18	export const isLevelInFilter = (
-19	  filter: WordFilter,
-20	  level: number,
-21	): boolean => {
-22	  if (filter.level !== undefined && filter.level !== level)
-23	    return false;
-24	  if (filter.levels && !filter.levels.includes(level)) return false;
-25	  if (filter.levelRange && !inRange(level, filter.levelRange))
-26	    return false;
-27	  return true;
-28	};
-29	
-30	export const entryMatches = (
-31	  hit: WordHit,
-32	  filter: WordFilter,
-33	): boolean => {
-34	  if (hit.region !== filter.region) return false;
-35	
-36	  if (filter.level !== undefined && hit.level !== filter.level)
-37	    return false;
-38	  if (filter.levels && !filter.levels.includes(hit.level)) return false;
-39	  if (filter.levelRange && !inRange(hit.level, filter.levelRange))
-40	    return false;
-41	
-42	  if (
-43	    filter.syllableCountEq !== undefined &&
-44	    hit.syllableCount !== filter.syllableCountEq
-45	  )
-46	    return false;
-47	  if (
-48	    filter.syllableCountRange &&
-49	    !inRange(hit.syllableCount, filter.syllableCountRange)
-50	  )
-51	    return false;
-52	
-53	  const hasGraphemeFilter =
-54	    filter.graphemesAllowed !== undefined ||
-55	    filter.graphemesRequired !== undefined ||
-56	    filter.phonemesAllowed !== undefined ||
-57	    filter.phonemesRequired !== undefined;
-58	
-59	  if (!hasGraphemeFilter) return true;
-60	  if (!hit.graphemes) return false;
-61	
-62	  if (filter.graphemesAllowed) {
-63	    const allowed = new Set(filter.graphemesAllowed);
-64	    if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
-65	  }
-66	  if (filter.graphemesRequired) {
-67	    const required = new Set(filter.graphemesRequired);
-68	    if (!hit.graphemes.some((g) => required.has(g.g))) return false;
-69	  }
-70	  if (filter.phonemesAllowed) {
-71	    const allowed = new Set(filter.phonemesAllowed);
-72	    if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
-73	  }
-74	  if (filter.phonemesRequired) {
-75	    const required = new Set(filter.phonemesRequired);
-76	    if (!hit.graphemes.some((g) => required.has(g.p))) return false;
-77	  }
-78	
-79	  return true;
-80	};
-81	
-82	const coreLoaders = import.meta.glob<{ default: WordCore[] }>(
-83	  './core/level*.json',
-84	);
-85	const ausLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
-86	  './curriculum/aus/level*.json',
-87	);
-88	const ukLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
-89	  './curriculum/uk/level*.json',
-90	);
-91	const usLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
-92	  './curriculum/us/level*.json',
-93	);
-94	const brLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
-95	  './curriculum/br/level*.json',
-96	);
-97	
-98	const loadersForRegion = (
-99	  region: Region,
-100	): Record<string, () => Promise<{ default: CurriculumEntry[] }>> => {
-101	  switch (region) {
-102	    case 'aus': {
-103	      return ausLoaders;
-104	    }
-105	    case 'uk': {
-106	      return ukLoaders;
-107	    }
-108	    case 'us': {
-109	      return usLoaders;
-110	    }
-111	    case 'br': {
-112	      return brLoaders;
-113	    }
-114	  }
-115	};
-116	
-117	let coreCache: Map<string, WordCore> | null = null;
-118	const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
-119	
-120	export const __resetChunkCacheForTests = (): void => {
-121	  coreCache = null;
-122	  for (const r of ALL_REGIONS) delete curriculumCache[r];
-123	};
-124	
-125	const loadCore = async (): Promise<Map<string, WordCore>> => {
-126	  if (coreCache) return coreCache;
-127	  const map = new Map<string, WordCore>();
-128	  const chunks = await Promise.all(
-129	    Object.values(coreLoaders).map((load) => load()),
-130	  );
-131	  for (const chunk of chunks) {
-132	    for (const entry of chunk.default) map.set(entry.word, entry);
-133	  }
-134	  coreCache = map;
-135	  return map;
-136	};
-137	
-138	const loadCurriculum = async (
-139	  region: Region,
-140	): Promise<CurriculumEntry[]> => {
-141	  if (curriculumCache[region]) return curriculumCache[region];
-142	  const chunks = await Promise.all(
-143	    Object.values(loadersForRegion(region)).map((load) => load()),
-144	  );
-145	  const flat = chunks.flatMap((c) => c.default);
-146	  curriculumCache[region] = flat;
-147	  return flat;
-148	};
-149	
-150	const draftToHit = (d: DraftEntry): WordHit => ({
-151	  word: d.word,
-152	  region: d.region,
-153	  level: d.level,
-154	  syllableCount: d.syllableCount,
-155	  syllables: d.syllables,
-156	  variants: d.variants,
-157	  ipa: d.ipa || undefined,
-158	  graphemes: d.graphemes,
-159	  provenance: 'draft' satisfies Provenance,
-160	  draftId: d.id,
-161	});
-162	
-163	const joinHits = (
-164	  curriculum: CurriculumEntry[],
-165	  core: Map<string, WordCore>,
-166	  region: Region,
-167	): WordHit[] =>
-168	  curriculum.flatMap((entry) => {
-169	    const c = core.get(entry.word);
-170	    if (!c) return [];
-171	    return [
-172	      {
-173	        word: entry.word,
-174	        region,
-175	        level: entry.level,
-176	        syllableCount: c.syllableCount,
-177	        syllables: c.syllables,
-178	        variants: c.variants,
-179	        ipa: entry.ipa || undefined,
-180	        graphemes: entry.graphemes,
-181	        provenance: 'shipped',
-182	      } as WordHit,
-183	    ];
-184	  });
-185	
-186	const sortByWord = (hits: WordHit[]): WordHit[] =>
-187	  hits.toSorted((a, b) => a.word.localeCompare(b.word));
-188	
-189	export const loadShippedIndex = async (
-190	  region: Region,
-191	): Promise<Set<string>> => {
-192	  const curriculum = await loadCurriculum(region);
-193	  return new Set(curriculum.map((entry) => entry.word));
-194	};
-195	
-196	export const loadShippedWordLevels = async (
-197	  region: Region,
-198	): Promise<Map<string, number>> => {
-199	  const curriculum = await loadCurriculum(region);
-200	  const map = new Map<string, number>();
-201	  for (const entry of curriculum) {
-202	    const existing = map.get(entry.word);
-203	    if (existing === undefined || entry.level < existing) {
-204	      map.set(entry.word, entry.level);
-205	    }
-206	  }
-207	  return map;
-208	};
-209	
-210	export const filterWords = async (
-211	  filter: WordFilter,
-212	): Promise<FilterResult> => {
-213	  const core = await loadCore();
-214	  const curriculum = await loadCurriculum(filter.region);
-215	  const shipped = joinHits(curriculum, core, filter.region).filter(
-216	    (h) => entryMatches(h, filter),
-217	  );
-218	
-219	  // Lazy import to avoid Dexie singleton conflicts in environments
-220	  // that also load RxDB (which bundles a different Dexie version).
-221	  const { draftStore } = await import('./authoring/draftStore');
-222	  const allDrafts = await draftStore.listDrafts({
-223	    region: filter.region,
-224	  });
-225	  const drafts = allDrafts
-226	    .map((d) => draftToHit(d))
-227	    .filter((h) => entryMatches(h, filter));
-228	
-229	  if (
-230	    shipped.length > 0 ||
-231	    drafts.length > 0 ||
-232	    filter.region === 'aus' ||
-233	    filter.fallbackToAus === false
-234	  ) {
-235	    // Drafts shadow shipped entries for the same word — the draft is
-236	    // treated as the authoritative working copy (this is how the
-237	    // "edit shipped" flow persists corrections without mutating the
-238	    // curriculum JSON at runtime).
-239	    const draftWords = new Set(drafts.map((d) => d.word));
-240	    const shippedOnly = shipped.filter((s) => !draftWords.has(s.word));
-241	    return { hits: sortByWord([...shippedOnly, ...drafts]) };
-242	  }
-243	
-244	  const ausCurriculum = await loadCurriculum('aus');
-245	  const ausShipped = joinHits(ausCurriculum, core, 'aus').filter((h) =>
-246	    entryMatches(h, { ...filter, region: 'aus' }),
-247	  );
-248	  const ausDrafts = await draftStore.listDrafts({ region: 'aus' });
-249	  const ausFilteredDrafts = ausDrafts
-250	    .map((d) => draftToHit(d))
-251	    .filter((h) => entryMatches(h, { ...filter, region: 'aus' }));
-252	  const ausDraftWords = new Set(ausFilteredDrafts.map((d) => d.word));
-253	  const ausShippedOnly = ausShipped.filter(
-254	    (s) => !ausDraftWords.has(s.word),
-255	  );
-256	  return {
-257	    hits: sortByWord([...ausShippedOnly, ...ausFilteredDrafts]),
-258	    usedFallback: { from: filter.region, to: 'aus' },
-259	  };
-260	};
+1 import { ALL_REGIONS } from './levels';
+2 import type {
+3   CurriculumEntry,
+4   DraftEntry,
+5   FilterResult,
+6   Provenance,
+7   Region,
+8   WordCore,
+9   WordFilter,
+10   WordHit,
+11 } from './types';
+12 
+13 const inRange = (
+14   n: number,
+15   [min, max]: readonly [number, number],
+16 ): boolean => n >= min && n <= max;
+17 
+18 export const isLevelInFilter = (
+19   filter: WordFilter,
+20   level: number,
+21 ): boolean => {
+22   if (filter.level !== undefined && filter.level !== level)
+23     return false;
+24   if (filter.levels && !filter.levels.includes(level)) return false;
+25   if (filter.levelRange && !inRange(level, filter.levelRange))
+26     return false;
+27   return true;
+28 };
+29 
+30 export const entryMatches = (
+31   hit: WordHit,
+32   filter: WordFilter,
+33 ): boolean => {
+34   if (hit.region !== filter.region) return false;
+35 
+36   if (filter.level !== undefined && hit.level !== filter.level)
+37     return false;
+38   if (filter.levels && !filter.levels.includes(hit.level)) return false;
+39   if (filter.levelRange && !inRange(hit.level, filter.levelRange))
+40     return false;
+41 
+42   if (
+43     filter.syllableCountEq !== undefined &&
+44     hit.syllableCount !== filter.syllableCountEq
+45   )
+46     return false;
+47   if (
+48     filter.syllableCountRange &&
+49     !inRange(hit.syllableCount, filter.syllableCountRange)
+50   )
+51     return false;
+52 
+53   const hasGraphemeFilter =
+54     filter.graphemesAllowed !== undefined ||
+55     filter.graphemesRequired !== undefined ||
+56     filter.phonemesAllowed !== undefined ||
+57     filter.phonemesRequired !== undefined;
+58 
+59   if (!hasGraphemeFilter) return true;
+60   if (!hit.graphemes) return false;
+61 
+62   if (filter.graphemesAllowed) {
+63     const allowed = new Set(filter.graphemesAllowed);
+64     if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
+65   }
+66   if (filter.graphemesRequired) {
+67     const required = new Set(filter.graphemesRequired);
+68     if (!hit.graphemes.some((g) => required.has(g.g))) return false;
+69   }
+70   if (filter.phonemesAllowed) {
+71     const allowed = new Set(filter.phonemesAllowed);
+72     if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
+73   }
+74   if (filter.phonemesRequired) {
+75     const required = new Set(filter.phonemesRequired);
+76     if (!hit.graphemes.some((g) => required.has(g.p))) return false;
+77   }
+78 
+79   return true;
+80 };
+81 
+82 const coreLoaders = import.meta.glob<{ default: WordCore[] }>(
+83   './core/level*.json',
+84 );
+85 const ausLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+86   './curriculum/aus/level*.json',
+87 );
+88 const ukLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+89   './curriculum/uk/level*.json',
+90 );
+91 const usLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+92   './curriculum/us/level*.json',
+93 );
+94 const brLoaders = import.meta.glob<{ default: CurriculumEntry[] }>(
+95   './curriculum/br/level*.json',
+96 );
+97 
+98 const loadersForRegion = (
+99   region: Region,
+100 ): Record<string, () => Promise<{ default: CurriculumEntry[] }>> => {
+101   switch (region) {
+102     case 'aus': {
+103       return ausLoaders;
+104     }
+105     case 'uk': {
+106       return ukLoaders;
+107     }
+108     case 'us': {
+109       return usLoaders;
+110     }
+111     case 'br': {
+112       return brLoaders;
+113     }
+114   }
+115 };
+116 
+117 let coreCache: Map<string, WordCore> | null = null;
+118 const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
+119 
+120 export const __resetChunkCacheForTests = (): void => {
+121   coreCache = null;
+122   for (const r of ALL_REGIONS) delete curriculumCache[r];
+123 };
+124 
+125 const loadCore = async (): Promise<Map<string, WordCore>> => {
+126   if (coreCache) return coreCache;
+127   const map = new Map<string, WordCore>();
+128   const chunks = await Promise.all(
+129     Object.values(coreLoaders).map((load) => load()),
+130   );
+131   for (const chunk of chunks) {
+132     for (const entry of chunk.default) map.set(entry.word, entry);
+133   }
+134   coreCache = map;
+135   return map;
+136 };
+137 
+138 const loadCurriculum = async (
+139   region: Region,
+140 ): Promise<CurriculumEntry[]> => {
+141   if (curriculumCache[region]) return curriculumCache[region];
+142   const chunks = await Promise.all(
+143     Object.values(loadersForRegion(region)).map((load) => load()),
+144   );
+145   const flat = chunks.flatMap((c) => c.default);
+146   curriculumCache[region] = flat;
+147   return flat;
+148 };
+149 
+150 const draftToHit = (d: DraftEntry): WordHit => ({
+151   word: d.word,
+152   region: d.region,
+153   level: d.level,
+154   syllableCount: d.syllableCount,
+155   syllables: d.syllables,
+156   variants: d.variants,
+157   ipa: d.ipa || undefined,
+158   graphemes: d.graphemes,
+159   provenance: 'draft' satisfies Provenance,
+160   draftId: d.id,
+161 });
+162 
+163 const joinHits = (
+164   curriculum: CurriculumEntry[],
+165   core: Map<string, WordCore>,
+166   region: Region,
+167 ): WordHit[] =>
+168   curriculum.flatMap((entry) => {
+169     const c = core.get(entry.word);
+170     if (!c) return [];
+171     return [
+172       {
+173         word: entry.word,
+174         region,
+175         level: entry.level,
+176         syllableCount: c.syllableCount,
+177         syllables: c.syllables,
+178         variants: c.variants,
+179         ipa: entry.ipa || undefined,
+180         graphemes: entry.graphemes,
+181         provenance: 'shipped',
+182       } as WordHit,
+183     ];
+184   });
+185 
+186 const sortByWord = (hits: WordHit[]): WordHit[] =>
+187   hits.toSorted((a, b) => a.word.localeCompare(b.word));
+188 
+189 export const loadShippedIndex = async (
+190   region: Region,
+191 ): Promise<Set<string>> => {
+192   const curriculum = await loadCurriculum(region);
+193   return new Set(curriculum.map((entry) => entry.word));
+194 };
+195 
+196 export const loadShippedWordLevels = async (
+197   region: Region,
+198 ): Promise<Map<string, number>> => {
+199   const curriculum = await loadCurriculum(region);
+200   const map = new Map<string, number>();
+201   for (const entry of curriculum) {
+202     const existing = map.get(entry.word);
+203     if (existing === undefined || entry.level < existing) {
+204       map.set(entry.word, entry.level);
+205     }
+206   }
+207   return map;
+208 };
+209 
+210 export const filterWords = async (
+211   filter: WordFilter,
+212 ): Promise<FilterResult> => {
+213   const core = await loadCore();
+214   const curriculum = await loadCurriculum(filter.region);
+215   const shipped = joinHits(curriculum, core, filter.region).filter(
+216     (h) => entryMatches(h, filter),
+217   );
+218 
+219   // Lazy import to avoid Dexie singleton conflicts in environments
+220   // that also load RxDB (which bundles a different Dexie version).
+221   const { draftStore } = await import('./authoring/draftStore');
+222   const allDrafts = await draftStore.listDrafts({
+223     region: filter.region,
+224   });
+225   const drafts = allDrafts
+226     .map((d) => draftToHit(d))
+227     .filter((h) => entryMatches(h, filter));
+228 
+229   if (
+230     shipped.length > 0 ||
+231     drafts.length > 0 ||
+232     filter.region === 'aus' ||
+233     filter.fallbackToAus === false
+234   ) {
+235     // Drafts shadow shipped entries for the same word — the draft is
+236     // treated as the authoritative working copy (this is how the
+237     // "edit shipped" flow persists corrections without mutating the
+238     // curriculum JSON at runtime).
+239     const draftWords = new Set(drafts.map((d) => d.word));
+240     const shippedOnly = shipped.filter((s) => !draftWords.has(s.word));
+241     return { hits: sortByWord([...shippedOnly, ...drafts]) };
+242   }
+243 
+244   const ausCurriculum = await loadCurriculum('aus');
+245   const ausShipped = joinHits(ausCurriculum, core, 'aus').filter((h) =>
+246     entryMatches(h, { ...filter, region: 'aus' }),
+247   );
+248   const ausDrafts = await draftStore.listDrafts({ region: 'aus' });
+249   const ausFilteredDrafts = ausDrafts
+250     .map((d) => draftToHit(d))
+251     .filter((h) => entryMatches(h, { ...filter, region: 'aus' }));
+252   const ausDraftWords = new Set(ausFilteredDrafts.map((d) => d.word));
+253   const ausShippedOnly = ausShipped.filter(
+254     (s) => !ausDraftWords.has(s.word),
+255   );
+256   return {
+257     hits: sortByWord([...ausShippedOnly, ...ausFilteredDrafts]),
+258     usedFallback: { from: filter.region, to: 'aus' },
+259   };
+260 };
 261
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:45Z)**_
@@ -1030,6 +1037,7 @@ level8.json
       {
         "g": "e",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:41:57Z)**_
@@ -1039,18 +1047,18 @@ _**Agent (claude-opus-4-7 2026-04-28 20:42:06Z)**_
 I read the plan and PR #219. Here's what I see:
 
 - The plan's level 3 word list is **cumulative** (words playable using any grapheme from levels 1+2+3).
-- PR #219 fixed the *grapheme allowlist* to be cumulative (so level-3 graphemes don't reject words built from level-1 graphemes).
-- But `curriculum/aus/level3.json` only contains words newly *introduced* at level 3 (`bat, bed, beg, big, bin, bit, box…`).
+- PR #219 fixed the _grapheme allowlist_ to be cumulative (so level-3 graphemes don't reject words built from level-1 graphemes).
+- But `curriculum/aus/level3.json` only contains words newly _introduced_ at level 3 (`bat, bed, beg, big, bin, bit, box…`).
 - `filterWords` filters by `hit.level === filter.level`, so selecting level 3 still returns only the ~38 level-3-tagged words — not the 63 cumulative words from your example (which include `sat, sad, mad, red, met, sit, did, pin, pig, not, pop, sun, run…` from levels 1+2).
 
-So the gap is: **the word *pool* is per-level, but the user-facing "Level 3" should mean "everything playable up to level 3".**
+So the gap is: **the word _pool_ is per-level, but the user-facing "Level 3" should mean "everything playable up to level 3".**
 
 Before I propose options — one clarifying question:
 
 **When a user selects "Level 3" in the WordSpell picker, which interpretation do you want?**
 
-- **A.** Cumulative — show all words from levels 1+2+3 (matches your pasted list of 63 words). "Level 3" means *mastery through level 3*.
-- **B.** Level-only — show only the ~38 words newly introduced at level 3 (current behavior). "Level 3" means *the words for this lesson*.
+- **A.** Cumulative — show all words from levels 1+2+3 (matches your pasted list of 63 words). "Level 3" means _mastery through level 3_.
+- **B.** Level-only — show only the ~38 words newly introduced at level 3 (current behavior). "Level 3" means _the words for this lesson_.
 - **C.** User-selectable — both behaviors available via a toggle/range (e.g., "Levels 1–3" vs. "Level 3 only").
 
 My read of the plan doc and the bug you described is **A** (cumulative), but I want to confirm before designing the fix.
@@ -1102,45 +1110,46 @@ _**Agent (claude-opus-4-7 2026-04-28 20:47:54Z)**_
  `./src/games/word-spell/resolve-simple-config.ts`
 
 ```text
-1	import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-2	
-3	export const resolveSimpleConfig = (
-4	  simple: WordSpellSimpleConfig,
-5	): WordSpellConfig => ({
-6	  gameId: 'word-spell',
-7	  component: 'WordSpell',
-8	  configMode: 'simple',
-9	  mode: 'scramble',
-10	  tileUnit: 'letter',
-11	  inputMethod: simple.inputMethod,
-12	  wrongTileBehavior: 'lock-manual',
-13	  ttsEnabled: true,
-14	  roundsInOrder: false,
-15	  totalRounds: 4,
-16	  tileBankMode: 'exact',
-17	  source: {
-18	    type: 'word-library',
-19	    filter: {
-20	      region: 'aus',
-21	      level: simple.level,
-22	      phonemesAllowed: simple.phonemesAllowed,
-23	    },
-24	  },
-25	});
-26	
-27	export const advancedToSimple = (
-28	  config: WordSpellConfig,
-29	): WordSpellSimpleConfig => {
-30	  const filter = config.source?.filter;
-31	  return {
-32	    configMode: 'simple',
-33	    level: filter?.level ?? 1,
-34	    phonemesAllowed: filter?.phonemesAllowed ?? [],
-35	    inputMethod: config.inputMethod,
-36	  };
-37	};
+1 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
+2 
+3 export const resolveSimpleConfig = (
+4   simple: WordSpellSimpleConfig,
+5 ): WordSpellConfig => ({
+6   gameId: 'word-spell',
+7   component: 'WordSpell',
+8   configMode: 'simple',
+9   mode: 'scramble',
+10   tileUnit: 'letter',
+11   inputMethod: simple.inputMethod,
+12   wrongTileBehavior: 'lock-manual',
+13   ttsEnabled: true,
+14   roundsInOrder: false,
+15   totalRounds: 4,
+16   tileBankMode: 'exact',
+17   source: {
+18     type: 'word-library',
+19     filter: {
+20       region: 'aus',
+21       level: simple.level,
+22       phonemesAllowed: simple.phonemesAllowed,
+23     },
+24   },
+25 });
+26 
+27 export const advancedToSimple = (
+28   config: WordSpellConfig,
+29 ): WordSpellSimpleConfig => {
+30   const filter = config.source?.filter;
+31   return {
+32     configMode: 'simple',
+33     level: filter?.level ?? 1,
+34     phonemesAllowed: filter?.phonemesAllowed ?? [],
+35     inputMethod: config.inputMethod,
+36   };
+37 };
 38
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:47:57Z)**_
@@ -1237,6 +1246,7 @@ export const advancedToSimple = (
         }
       }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:13Z)**_
@@ -1351,6 +1361,7 @@ interface WordSpellProps {
   persistedContent?: Record<string, unknown> | null;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:17Z)**_
@@ -1443,6 +1454,7 @@ export const useLibraryRounds = (
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
       if (cancellation.isCancelled) return;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:22Z)**_
@@ -1517,6 +1529,7 @@ const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
   timerVisible: false,
   timerDurationSeconds: null,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:26Z)**_
@@ -1564,6 +1577,7 @@ Find WordSpell config resolution
 739:  if (gameId === 'word-spell') {
 741:      <WordSpellGameBody
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:29Z)**_
@@ -1747,6 +1761,7 @@ export const resolveWordSpellConfig = (
 
 const resolveNumberMatchConfig = (
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:39Z)**_
@@ -1795,6 +1810,7 @@ export const WordSpellSimpleConfigForm = ({
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:48:47Z)**_
@@ -1929,6 +1945,7 @@ const LevelRowCheckboxTree = ({
 }: {
   level: number;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:49:02Z)**_
@@ -1939,7 +1956,7 @@ Sure — let me ground this in what's actually on the branch first, then propose
 
 ## What's on `feat/issue-216` today
 
-Looking at `WordSpellLibrarySource.tsx`, the picker is fully **free-form**: every level row shows its own checkbox + per-phoneme chips, and the user can tick any combination across any levels. Nothing forces cumulativity. `resolveSimpleConfig` then turns `selectedUnits` into `phonemesAllowed` + `graphemesAllowed` with no `level` constraint — so the *filter* is correct, but only if the user has actually ticked the prior-level chips.
+Looking at `WordSpellLibrarySource.tsx`, the picker is fully **free-form**: every level row shows its own checkbox + per-phoneme chips, and the user can tick any combination across any levels. Nothing forces cumulativity. `resolveSimpleConfig` then turns `selectedUnits` into `phonemesAllowed` + `graphemesAllowed` with no `level` constraint — so the _filter_ is correct, but only if the user has actually ticked the prior-level chips.
 
 So today, "Level 4 → tick only `sh`" filters to **only words built from `sh` + `a/i/o/...`** if those vowels happen to also be ticked, otherwise zero. Not what you want.
 
@@ -2003,12 +2020,14 @@ So the bug isn't really "the form doesn't persist `configMode: simple`" — it's
 ## Revised plan (same PR #219)
 
 **Fix A — Cumulative-by-default selection** (UI)
+
 - Touching Level N cascades-on units from levels 1..N
 - Prior-level rows render visible but **locked** (always-checked, disabled chips)
 - Level-N row stays interactive — narrow `sh`-only is supported
 - `defaultSelection()` becomes "all of Level 1" rather than whatever it is today
 
 **Fix B — Round source by mode** (config plumbing)
+
 - Split `DEFAULT_WORD_SPELL_CONFIG` into two:
   - **Recall default** — `mode: 'recall'`, `source: { type: 'word-library', filter: defaultFilter }`, no `rounds` array
   - **Picture default** — `mode: 'picture'`, `rounds: sliceWordSpellRounds(8)`, no `source`
@@ -2017,6 +2036,7 @@ So the bug isn't really "the form doesn't persist `configMode: simple`" — it's
 - Mode toggle in Advanced should swap the two cleanly
 
 **Test plan**
+
 1. **Red** — `resolveWordSpellConfig(null)` → resolves to recall + library source + no emoji rounds (currently fails)
 2. **Red** — switching mode `recall ↔ picture` produces clean configs with the right source/no leak
 3. **Red** — `WordSpellLibrarySource` with no selection: clicking "Level 3" checkbox results in selectedUnits covering all Level 1+2+3 units; deselecting individual Level 3 chips still leaves Level 1+2 selected; Level 1+2 row checkboxes are disabled
@@ -2064,6 +2084,7 @@ SortNumbersSimpleConfigForm
 SortNumbersTileBank
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:56:18Z)**_
@@ -2078,6 +2099,7 @@ List sort-numbers simple form files
 SortNumbersSimpleConfigForm.test.tsx
 SortNumbersSimpleConfigForm.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:56:21Z)**_
@@ -2092,6 +2114,7 @@ Find preview logic in sort-numbers
 /Users/leocaseiro/Sites/base-skill/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.tsx:38:  const preview =
 /Users/leocaseiro/Sites/base-skill/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.tsx:109:        {preview}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:56:24Z)**_
@@ -2101,107 +2124,108 @@ _**Agent (claude-opus-4-7 2026-04-28 20:56:24Z)**_
  `./src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.tsx`
 
 ```text
-25	  const start = typeof rawSkip.start === 'number' ? rawSkip.start : 2;
-26	  const skip = { mode: 'by' as const, step, start };
-27	  const inputMethod =
-28	    config.inputMethod === 'type'
-29	      ? 'type'
-30	      : config.inputMethod === 'both'
-31	        ? 'both'
-32	        : 'drag';
-33	
-34	  const sequence = Array.from(
-35	    { length: quantity },
-36	    (_, i) => start + i * step,
-37	  );
-38	  const preview =
-39	    direction === 'ascending'
-40	      ? sequence.join(', ')
-41	      : sequence.toReversed().join(', ');
-42	
-43	  const ascSub = directionLabel('ascending');
-44	  const descSub = directionLabel('descending');
-45	
-46	  return (
-47	    <div className="flex flex-col gap-4">
-48	      <ChunkGroup
-49	        label="Which way?"
-50	        options={[
-51	          {
-52	            value: 'ascending',
-53	            emoji: ascSub.emoji,
-54	            label: ascSub.label,
-55	            subtitle: ascSub.subtitle,
-56	          },
-57	          {
-58	            value: 'descending',
-59	            emoji: descSub.emoji,
-60	            label: descSub.label,
-61	            subtitle: descSub.subtitle,
-62	          },
-63	        ]}
-64	        value={direction}
-65	        onChange={(d) => onChange({ ...config, direction: d })}
-66	      />
-67	
-68	      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2">
-69	        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
-70	          How many?
-71	          <Stepper
-72	            label="How many"
-73	            value={quantity}
-74	            min={2}
-75	            max={10}
-76	            onChange={(v) => onChange({ ...config, quantity: v })}
-77	          />
-78	        </div>
-79	        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
-80	          Start at
-81	          <Stepper
-82	            label="Start"
-83	            value={start}
-84	            min={1}
-85	            max={10_000}
-86	            onChange={(v) =>
-87	              onChange({
-88	                ...config,
-89	                skip: { ...skip, start: v },
-90	              })
-91	            }
-92	          />
-93	        </div>
-94	        <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
-95	          Skip by
-96	          <Stepper
-97	            label="Skip"
-98	            value={step}
-99	            min={1}
-100	            max={10_000}
-101	            onChange={(v) =>
-102	              onChange({ ...config, skip: { ...skip, step: v } })
-103	            }
-104	          />
-105	        </div>
-106	      </div>
-107	
-108	      <div className="rounded-lg bg-muted px-3 py-2 text-center font-mono text-sm">
-109	        {preview}
-110	      </div>
-111	
-112	      <ChunkGroup
-113	        label="How do you answer?"
-114	        options={[
-115	          { value: 'drag', emoji: '✋', label: 'Drag' },
-116	          { value: 'type', emoji: '⌨️', label: 'Type' },
-117	          { value: 'both', emoji: '✨', label: 'Both' },
-118	        ]}
-119	        value={inputMethod}
-120	        onChange={(m) => onChange({ ...config, inputMethod: m })}
-121	      />
-122	    </div>
-123	  );
-124	};
+25   const start = typeof rawSkip.start === 'number' ? rawSkip.start : 2;
+26   const skip = { mode: 'by' as const, step, start };
+27   const inputMethod =
+28     config.inputMethod === 'type'
+29       ? 'type'
+30       : config.inputMethod === 'both'
+31         ? 'both'
+32         : 'drag';
+33 
+34   const sequence = Array.from(
+35     { length: quantity },
+36     (_, i) => start + i * step,
+37   );
+38   const preview =
+39     direction === 'ascending'
+40       ? sequence.join(', ')
+41       : sequence.toReversed().join(', ');
+42 
+43   const ascSub = directionLabel('ascending');
+44   const descSub = directionLabel('descending');
+45 
+46   return (
+47     <div className="flex flex-col gap-4">
+48       <ChunkGroup
+49         label="Which way?"
+50         options={[
+51           {
+52             value: 'ascending',
+53             emoji: ascSub.emoji,
+54             label: ascSub.label,
+55             subtitle: ascSub.subtitle,
+56           },
+57           {
+58             value: 'descending',
+59             emoji: descSub.emoji,
+60             label: descSub.label,
+61             subtitle: descSub.subtitle,
+62           },
+63         ]}
+64         value={direction}
+65         onChange={(d) => onChange({ ...config, direction: d })}
+66       />
+67 
+68       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-2">
+69         <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
+70           How many?
+71           <Stepper
+72             label="How many"
+73             value={quantity}
+74             min={2}
+75             max={10}
+76             onChange={(v) => onChange({ ...config, quantity: v })}
+77           />
+78         </div>
+79         <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
+80           Start at
+81           <Stepper
+82             label="Start"
+83             value={start}
+84             min={1}
+85             max={10_000}
+86             onChange={(v) =>
+87               onChange({
+88                 ...config,
+89                 skip: { ...skip, start: v },
+90               })
+91             }
+92           />
+93         </div>
+94         <div className="flex flex-col items-center gap-1 text-xs font-semibold uppercase text-foreground/80">
+95           Skip by
+96           <Stepper
+97             label="Skip"
+98             value={step}
+99             min={1}
+100             max={10_000}
+101             onChange={(v) =>
+102               onChange({ ...config, skip: { ...skip, step: v } })
+103             }
+104           />
+105         </div>
+106       </div>
+107 
+108       <div className="rounded-lg bg-muted px-3 py-2 text-center font-mono text-sm">
+109         {preview}
+110       </div>
+111 
+112       <ChunkGroup
+113         label="How do you answer?"
+114         options={[
+115           { value: 'drag', emoji: '✋', label: 'Drag' },
+116           { value: 'type', emoji: '⌨️', label: 'Type' },
+117           { value: 'both', emoji: '✨', label: 'Both' },
+118         ]}
+119         value={inputMethod}
+120         onChange={(m) => onChange({ ...config, inputMethod: m })}
+121       />
+122     </div>
+123   );
+124 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 20:56:36Z)**_
@@ -2306,7 +2330,7 @@ _**Agent (claude-opus-4-7 2026-04-28 20:58:22Z)**_
 Hold on — I want to flag a contradiction so we can resolve it before writing the spec, because three things have been said that don't fully agree:
 
 1. **Your first message** pasted the plan's level-3 word list verbatim — and that list contains `sat, sad, mad, red, met, sit, did, pin, pop, sun, run` etc. (pure level-1/2 words, no level-3 grapheme).
-2. **Your second message** confirmed cumulative: "Level 4 + only sh" = Levels 1-3 in full + sh only from Level 4. That implies easy words *should* show up.
+2. **Your second message** confirmed cumulative: "Level 4 + only sh" = Levels 1-3 in full + sh only from Level 4. That implies easy words _should_ show up.
 3. **Just now**: "selecting level 3, avoid showing easy words from levels 1 and 2." That excludes pure L1/L2 words.
 
 (2) and (3) are incompatible. (1) matches (2), not (3).
@@ -2337,7 +2361,7 @@ Given this, three honest interpretations of "Level 3 selected":
 
 **Which do you want? My read is now Y** — it matches "avoid easy L1/L2 words", it's computable from existing data, and "Level 4 + only sh" still works (filters to words with `sh`). The plan doc's literal lists would not strictly match Y, but they're close, and Y is what teachers actually want pedagogically.
 
-If **Y**: the design becomes "Level N selected ⇒ filter cumulative pool to words containing at least one phoneme from the user's selection in level N". Picking *all* level-N chips ⇒ the standard "introduces level N" set. Picking only `sh` ⇒ words that use `sh`.
+If **Y**: the design becomes "Level N selected ⇒ filter cumulative pool to words containing at least one phoneme from the user's selection in level N". Picking _all_ level-N chips ⇒ the standard "introduces level N" set. Picking only `sh` ⇒ words that use `sh`.
 
 Confirm Y (or pick X/Z) and I'll write the spec. The preview bar (Fix C) will also let you see at a glance whether the chosen rule produces what you want, so we can iterate quickly.
 
@@ -2374,7 +2398,7 @@ job, jog, jug, led, leg, lip, log, lot, rap, rob,
 sag, tub, wax, web, win, zip, …
 ```
 
-What's *excluded* (would be in cumulative): `at, it, sit, sat, tap, pin, pan, mad, dad, sad, red, met, set, pen, ten, did, dip, pig, dog, mop, not, pop, top, sun, run, mug, cup` — all "easy" L1/L2-only words. Exactly the goal.
+What's _excluded_ (would be in cumulative): `at, it, sit, sat, tap, pin, pan, mad, dad, sad, red, met, set, pen, ten, did, dip, pig, dog, mop, not, pop, top, sun, run, mug, cup` — all "easy" L1/L2-only words. Exactly the goal.
 
 ## Example B — Level 4, only `sh` chip selected
 
@@ -2441,6 +2465,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:08:35Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:08:42Z)**_
@@ -2482,6 +2507,7 @@ Check existing worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/stories-tier3-theme-showcase              2144a0e8 [stories/theme-showcase-audit]
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner                       a69cf440 [tools/phoneme-tuner]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:04Z)**_
@@ -2504,6 +2530,7 @@ a7a2cc6f fix(sw): precache index.html for PR previews
 c13fd0d9 test(word-spell): strengthen curriculum invariant to prove L3+ unlocks words
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:22Z)**_
@@ -2517,6 +2544,7 @@ Write docs/superpowers/specs/2026-04-29-wordspell-cumulative-mode-preview-design
 ```text
 Task #1 created successfully: Write design spec for cumulative + mode + preview fixes
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:29Z)**_
@@ -2528,6 +2556,7 @@ After spec is written, re-read with fresh eyes per brainstorming skill: scan for
 ```text
 Task #2 created successfully: Self-review spec for placeholders, ambiguity, scope
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:30Z)**_
@@ -2539,6 +2568,7 @@ yarn fix:md, commit to feat/issue-216 branch (existing PR #219), push. Confirm w
 ```text
 Task #3 created successfully: Commit and push spec on feat/issue-216
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:31Z)**_
@@ -2550,6 +2580,7 @@ Per brainstorming skill: ask user to review the committed spec before transition
 ```text
 Task #4 created successfully: Get user approval on written spec
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:32Z)**_
@@ -2561,6 +2592,7 @@ After spec approval, invoke superpowers:writing-plans to author the implementati
 ```text
 Task #5 created successfully: Invoke writing-plans skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:38Z)**_
@@ -2571,6 +2603,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:09:38Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:47Z)**_
@@ -2595,6 +2628,7 @@ Check spec naming convention
 2026-04-28-wordspell-levels-defaults-design.md
 2026-04-28-wordspell-multi-level-units-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:09:54Z)**_
@@ -2604,67 +2638,68 @@ _**Agent (claude-opus-4-7 2026-04-28 21:09:54Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
 
 ```text
-1	# WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles
-2	
-3	> Status: **Approved (design)** — implementation plan to follow.
-4	> Date: 2026-04-28
-5	> Owner: leocaseiro
-6	
-7	## Background
-8	
-9	PR #219 (issue #216) shipped a cumulative-phonemes Level picker for WordSpell.
-10	Mid-review, two issues surfaced:
-11	
-12	1. **Cumulative chips overwhelm the level focus.** Selecting Level 4 surfaces
-13	   every phoneme from L1–L4 as a chip, so the "level" loses pedagogical
-14	   meaning — a player on Level 4 should be drilling Level-4 sounds, not
-15	   re-cycling through everything they already know.
-16	2. **The Level field is a single dropdown.** Players can't say "I want Levels
-17	   1, 2, and 4 (skipping 3)." A child mid-progression who hasn't covered L3 yet
-18	   has no way to express that.
-19	
-20	The phoneme data already supports a richer model — most levels have ~6–11
-21	distinct `(grapheme, phoneme)` units, and 11 phonemes recur across levels via
-22	different graphemes (e.g. `/s/` via `s` at L1 and `c` at L4). Treating each
-23	unit as its own toggle, with levels as bulk-select presets, fits both the
-24	data shape and the player's mental model.
-25	
-26	## Goals
-27	
-28	1. **Disjoint multi-level selection** — players can pick any subset of levels
-29	   like `{L1, L2, L4}`. Skipping intermediate levels is allowed.
-30	2. **Per-`(grapheme, phoneme)` unit toggles** — each chip / sub-checkbox is an
-31	   independent unit. Toggling `s /s/` at L1 does not affect `c /s/` at L4.
-32	3. **Level checkboxes as bulk-toggle presets** — checking a level row turns on
-33	   all its units; unchecking turns them all off. The checkbox state itself is
-34	   tri-state and **derived** from the unit selection.
-35	4. **Phoneme-driven filter** — the curriculum's `level` tag is informational
-36	   only. A word plays iff every one of its graphemes maps to a `(g, p)` pair
-37	   in the player's `selectedUnits`.
-38	5. **Last-used selection persists**; first-time launch defaults to `{L1}`.
-39	6. **Visual symmetry, two renderings** — Simple form uses chip pills inside
-40	   each level row; Advanced modal uses a nested `<ul>` of plain checkboxes.
-41	   Same data model, same tri-state behaviour, different styling.
-42	
-43	## Non-Goals
-44	
-45	- Curriculum data changes. `GRAPHEMES_BY_LEVEL` and the per-level word lists
-46	  are unchanged.
-47	- Play-Again repeating sequence (issue #220). Tracked separately.
-48	- Storybook visual baselines. Stories whose snapshots include the affected
-49	  forms will be re-recorded as part of implementation.
-50	
-51	## What changes vs. PR #219
-52	
-53	PR #219 introduced the shared `WordSpellLibrarySource` shell and the
-54	`getAdvancedHeaderRenderer` registry hook, plus several unrelated polish
-55	changes. The architectural pieces survive; the form internals get rewritten:
-56	
-57	| PR #219 piece                                   | Status                                                           |
-58	| ----------------------------------------------- | ---------------------------------------------------------------- |
-59	| `WordSpellLibrarySource` component shell + slot | Keep (rewrite internals)                                         |
-60	| `getAdvancedHeaderRenderer` registry hook       | Keep                                                             |
+1 # WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles
+2 
+3 > Status: **Approved (design)** — implementation plan to follow.
+4 > Date: 2026-04-28
+5 > Owner: leocaseiro
+6 
+7 ## Background
+8 
+9 PR #219 (issue #216) shipped a cumulative-phonemes Level picker for WordSpell.
+10 Mid-review, two issues surfaced:
+11 
+12 1. **Cumulative chips overwhelm the level focus.** Selecting Level 4 surfaces
+13    every phoneme from L1–L4 as a chip, so the "level" loses pedagogical
+14    meaning — a player on Level 4 should be drilling Level-4 sounds, not
+15    re-cycling through everything they already know.
+16 2. **The Level field is a single dropdown.** Players can't say "I want Levels
+17    1, 2, and 4 (skipping 3)." A child mid-progression who hasn't covered L3 yet
+18    has no way to express that.
+19 
+20 The phoneme data already supports a richer model — most levels have ~6–11
+21 distinct `(grapheme, phoneme)` units, and 11 phonemes recur across levels via
+22 different graphemes (e.g. `/s/` via `s` at L1 and `c` at L4). Treating each
+23 unit as its own toggle, with levels as bulk-select presets, fits both the
+24 data shape and the player's mental model.
+25 
+26 ## Goals
+27 
+28 1. **Disjoint multi-level selection** — players can pick any subset of levels
+29    like `{L1, L2, L4}`. Skipping intermediate levels is allowed.
+30 2. **Per-`(grapheme, phoneme)` unit toggles** — each chip / sub-checkbox is an
+31    independent unit. Toggling `s /s/` at L1 does not affect `c /s/` at L4.
+32 3. **Level checkboxes as bulk-toggle presets** — checking a level row turns on
+33    all its units; unchecking turns them all off. The checkbox state itself is
+34    tri-state and **derived** from the unit selection.
+35 4. **Phoneme-driven filter** — the curriculum's `level` tag is informational
+36    only. A word plays iff every one of its graphemes maps to a `(g, p)` pair
+37    in the player's `selectedUnits`.
+38 5. **Last-used selection persists**; first-time launch defaults to `{L1}`.
+39 6. **Visual symmetry, two renderings** — Simple form uses chip pills inside
+40    each level row; Advanced modal uses a nested `<ul>` of plain checkboxes.
+41    Same data model, same tri-state behaviour, different styling.
+42 
+43 ## Non-Goals
+44 
+45 - Curriculum data changes. `GRAPHEMES_BY_LEVEL` and the per-level word lists
+46   are unchanged.
+47 - Play-Again repeating sequence (issue #220). Tracked separately.
+48 - Storybook visual baselines. Stories whose snapshots include the affected
+49   forms will be re-recorded as part of implementation.
+50 
+51 ## What changes vs. PR #219
+52 
+53 PR #219 introduced the shared `WordSpellLibrarySource` shell and the
+54 `getAdvancedHeaderRenderer` registry hook, plus several unrelated polish
+55 changes. The architectural pieces survive; the form internals get rewritten:
+56 
+57 | PR #219 piece                                   | Status                                                           |
+58 | ----------------------------------------------- | ---------------------------------------------------------------- |
+59 | `WordSpellLibrarySource` component shell + slot | Keep (rewrite internals)                                         |
+60 | `getAdvancedHeaderRenderer` registry hook       | Keep                                                             |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:10:03Z)**_
@@ -2676,207 +2711,208 @@ _**Agent (claude-opus-4-7 2026-04-28 21:10:04Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
 
 ```text
-60	| `getAdvancedHeaderRenderer` registry hook       | Keep                                                             |
-61	| `cumulativeGraphemes` helper in `levels.ts`     | Keep (used by `graphemePool`)                                    |
-62	| `levels.test.ts` (cumulativeGraphemes contract) | Keep                                                             |
-63	| `curriculum-invariant.test.ts`                  | **Rewrite** — assert per-level playability instead of cumulative |
-64	| `source-emits-playable.test.tsx`                | **Rewrite** — drive the new multi-select widget                  |
-65	| `recall` default mode                           | Keep                                                             |
-66	| `roundsInOrder: false` default                  | Keep                                                             |
-67	| `scramble` mode removed                         | Keep                                                             |
-68	| `distractorCount` field in Advanced             | Keep                                                             |
-69	| Form's use of `cumulativeGraphemes`             | **Remove** — superseded by per-level unit lookups                |
-70	
-71	## Selection model
-72	
-73	The authoritative state is a list of `(grapheme, phoneme)` units the player
-74	has opted into:
-75	
-76	```ts
-77	type LevelGraphemeUnit = { g: string; p: string };
-78	
-79	type WordSpellSimpleConfig = {
-80	  configMode: 'simple';
-81	  selectedUnits: LevelGraphemeUnit[]; // ← replaces { level, phonemesAllowed }
-82	  region: Region;
-83	  inputMethod: 'drag' | 'type' | 'both';
-84	};
-85	```
-86	
-87	Each unit comes from `GRAPHEMES_BY_LEVEL` and is uniquely identified by its
-88	`(g, p)` pair. The order of units in the array is not significant.
-89	
-90	### Why `(g, p)` and not just `p`
-91	
-92	Eleven phonemes appear at multiple levels in the AUS curriculum via different
-93	graphemes:
-94	
-95	| phoneme | graphemes (and levels)            |
-96	| ------- | --------------------------------- |
-97	| `/s/`   | `s` (L1), `c` (L4)                |
-98	| `/f/`   | `f` (L3), `ph` (L4)               |
-99	| `/dʒ/`  | `j` (L3), `g` (L4), `dge` (L8)    |
-100	| `/w/`   | `w` (L3), `wh` (L4)               |
-101	| `/tʃ/`  | `ch` (L4), `tch` (L8)             |
-102	| `/eɪ/`  | `ai` (L5), `ay` (L5), `a_e` (L7)  |
-103	| `/iː/`  | `ea` (L5), `ee` (L5), `e_e` (L7)  |
-104	| `/aɪ/`  | `ie` (L5), `igh` (L5), `i_e` (L7) |
-105	| `/oʊ/`  | `oa` (L5), `ow` (L5), `o_e` (L7)  |
-106	| `/juː/` | `ew` (L5), `ue` (L5), `u_e` (L7)  |
-107	| `/ɔː/`  | `or` (L6), `aw` (L8), `ore` (L8)  |
-108	
-109	A player who has learned `s` at L1 may not yet recognise `c` as also spelling
-110	`/s/`. Toggling them as one unit would conflate two distinct teaching events.
-111	The `(g, p)` pair is the smallest unit a player can identify with.
-112	
-113	## Filter contract — phoneme-only, no level gate
-114	
-115	`filterWords` derives both fields from `selectedUnits`:
-116	
-117	```ts
-118	const phonemesAllowed = [...new Set(selectedUnits.map((u) => u.p))];
-119	const graphemesAllowed = [...new Set(selectedUnits.map((u) => u.g))];
-120	```
-121	
-122	A candidate word plays iff **every** one of its graphemes matches a
-123	`(g, p)` pair in `selectedUnits` — equivalent to: the grapheme is in
-124	`graphemesAllowed` AND the phoneme it teaches in this word is in
-125	`phonemesAllowed`.
-126	
-127	The curriculum's `level` tag is **not** part of the filter. A word tagged at
-128	L4 can play for a player with only L1–L2 selected, provided the word happens
-129	to use only L1–L2 phonemes (rare in practice — most "advanced" words feature
-130	their level's headline phoneme, which won't be in the player's selection).
-131	
-132	The existing `WordFilter` shape already supports both `graphemesAllowed` and
-133	`phonemesAllowed`. The plan verifies they AND together correctly inside
-134	`entryMatches` (`src/data/words/filter.ts:30`).
-135	
-136	## UI — Simple form
-137	
-138	Stacked rows, one per level (L1 through L8). Each row contains a tri-state
-139	checkbox, a level label, and the level's `(g, p)` units rendered as toggleable
-140	chip pills.
-141	
-142	```text
-143	☑ Level 1
-144	  [s /s/] [a /æ/] [t /t/] [p /p/] [i /ɪ/] [n /n/]    ← all chips filled
-145	
-146	▣ Level 2          ← indeterminate (some on, some off)
-147	  [m /m/] [d /d/] [g /g/] [o /ɒ/]
-148	  [c, k, ck /k/] [e /ɛ/] [u /ʌ/] [r /r/]
-149	
-150	☐ Level 3          ← unchecked, row dimmed
-151	  [b /b/] [h /h/] [f /f/] [l /l/] [j /dʒ/]
-152	  [v /v/] [w /w/] [x /ks/] [y /j/] [z /z/] [qu /kw/]
-153	```
-154	
-155	### Interaction
-156	
-157	- **Click row checkbox** → bulk-toggle every chip in that row.
-158	- **Click a chip** → toggle just that `(g, p)` unit.
-159	- **Tri-state derivation**: row is `checked` iff every unit in that level is
-160	  in `selectedUnits`; `unchecked` iff none are; `indeterminate` otherwise.
-161	- **Validation**: `selectedUnits` must be non-empty. The existing "Pick at
-162	  least one sound to play." error surfaces when the form would otherwise
-163	  emit an empty selection.
-164	
-165	### Chip composition rules (within one level row)
-166	
-167	- Multiple graphemes that teach the **same phoneme at the same level** still
-168	  collapse into one chip — for example, L2 has `c`, `k`, and `ck` all teaching
-169	  `/k/`, so the chip is labelled `c, k, ck /k/`. This preserves the existing
-170	  per-level dedup behaviour and keeps the chip strip readable.
-171	- Toggling a multi-grapheme chip toggles **all** of its `(g, p)` units as a
-172	  single atomic operation (e.g. tapping `c, k, ck /k/` flips all three units
-173	  on or off together).
-174	- Across levels, multi-grapheme phonemes are separate chips: L1 `s /s/` and
-175	  L4 `c /s/` are two independent chips, never collapsed.
-176	
-177	## UI — Advanced modal
-178	
-179	Same data model, plain rendering: nested checkbox list. Lives in the existing
-180	`WordSpellLibrarySource` registry slot above the standard Advanced fields.
-181	
-182	```html
-183	<ul>
-184	  <li>
-185	    <input type="checkbox" id="lvl-1" /><label for="lvl-1">
-186	      Level 1</label
-187	    >
-188	    <ul>
-189	      <li>
-190	        <label><input type="checkbox" /> s /s/</label>
-191	      </li>
-192	      <li>
-193	        <label><input type="checkbox" /> a /æ/</label>
-194	      </li>
-195	      …
-196	    </ul>
-197	  </li>
-198	  <li>
-199	    <input type="checkbox" id="lvl-2" /><label for="lvl-2">
-200	      Level 2</label
-201	    >
-202	    <ul>
-203	      <li>
-204	        <label><input type="checkbox" /> m /m/</label>
-205	      </li>
-206	      …
-207	    </ul>
-208	  </li>
-209	  …
-210	</ul>
-211	```
-212	
-213	- Top-level checkbox (`#lvl-N`) is the same tri-state as the Simple form's
-214	  row checkbox: derived, bulk-toggle.
-215	- Each leaf checkbox represents one `(g, p)` unit (or one collapsed
-216	  multi-grapheme unit, same rule as Simple).
-217	- No chip styling. Plain HTML lists with native checkboxes.
-218	
-219	The component decides which rendering to use based on a `variant` prop
-220	(`'chips' | 'checkbox-tree'`). `WordSpellSimpleConfigForm` passes
-221	`variant="chips"`; the registry's `getAdvancedHeaderRenderer` returns a
-222	wrapper that passes `variant="checkbox-tree"`.
-223	
-224	## Defaults & persistence
-225	
-226	- **First launch (no saved config):** `selectedUnits = all units in L1`.
-227	  Equivalent to "L1 fully checked, all others unchecked".
-228	- **Subsequent launches:** restore the last persisted selection from
-229	  `last-session-game-config` (RxDB-backed; existing infrastructure).
-230	- **Deep-link route loads** still default to L1 for first-time visitors —
-231	  the per-route loader does not consult last-session state for the no-config
-232	  fallback.
-233	- `resolveSimpleConfig` builds `source.filter` from `selectedUnits` by
-234	  computing `phonemesAllowed` and `graphemesAllowed` as derived fields.
-235	
-236	## Component shape
-237	
-238	`WordSpellLibrarySource` (existing file, internals rewritten):
-239	
-240	```ts
-241	type Variant = 'chips' | 'checkbox-tree';
-242	
-243	type Props = {
-244	  config: Record<string, unknown>;
-245	  onChange: (config: Record<string, unknown>) => void;
-246	  variant?: Variant; // default 'chips'
-247	};
-248	```
-249	
-250	The component:
-251	
-252	- Reads `config.selectedUnits` (or applies the default `{L1}` selection if
-253	  absent).
-254	- Renders one row per level 1–8.
-255	- Within each row, computes the chip / sub-checkbox set from
-256	  `GRAPHEMES_BY_LEVEL[level]`, applying the same-phoneme-same-level dedup.
-257	- Derives the row checkbox state from the intersection between
-258	  `selectedUnits` and the level's units.
-259	- Dispatches `onChange` with an updated `selectedUnits` array on every
+60 | `getAdvancedHeaderRenderer` registry hook       | Keep                                                             |
+61 | `cumulativeGraphemes` helper in `levels.ts`     | Keep (used by `graphemePool`)                                    |
+62 | `levels.test.ts` (cumulativeGraphemes contract) | Keep                                                             |
+63 | `curriculum-invariant.test.ts`                  | **Rewrite** — assert per-level playability instead of cumulative |
+64 | `source-emits-playable.test.tsx`                | **Rewrite** — drive the new multi-select widget                  |
+65 | `recall` default mode                           | Keep                                                             |
+66 | `roundsInOrder: false` default                  | Keep                                                             |
+67 | `scramble` mode removed                         | Keep                                                             |
+68 | `distractorCount` field in Advanced             | Keep                                                             |
+69 | Form's use of `cumulativeGraphemes`             | **Remove** — superseded by per-level unit lookups                |
+70 
+71 ## Selection model
+72 
+73 The authoritative state is a list of `(grapheme, phoneme)` units the player
+74 has opted into:
+75 
+76 ```ts
+77 type LevelGraphemeUnit = { g: string; p: string };
+78 
+79 type WordSpellSimpleConfig = {
+80   configMode: 'simple';
+81   selectedUnits: LevelGraphemeUnit[]; // ← replaces { level, phonemesAllowed }
+82   region: Region;
+83   inputMethod: 'drag' | 'type' | 'both';
+84 };
+85 ```
+86 
+87 Each unit comes from `GRAPHEMES_BY_LEVEL` and is uniquely identified by its
+88 `(g, p)` pair. The order of units in the array is not significant.
+89 
+90 ### Why `(g, p)` and not just `p`
+91 
+92 Eleven phonemes appear at multiple levels in the AUS curriculum via different
+93 graphemes:
+94 
+95 | phoneme | graphemes (and levels)            |
+96 | ------- | --------------------------------- |
+97 | `/s/`   | `s` (L1), `c` (L4)                |
+98 | `/f/`   | `f` (L3), `ph` (L4)               |
+99 | `/dʒ/`  | `j` (L3), `g` (L4), `dge` (L8)    |
+100 | `/w/`   | `w` (L3), `wh` (L4)               |
+101 | `/tʃ/`  | `ch` (L4), `tch` (L8)             |
+102 | `/eɪ/`  | `ai` (L5), `ay` (L5), `a_e` (L7)  |
+103 | `/iː/`  | `ea` (L5), `ee` (L5), `e_e` (L7)  |
+104 | `/aɪ/`  | `ie` (L5), `igh` (L5), `i_e` (L7) |
+105 | `/oʊ/`  | `oa` (L5), `ow` (L5), `o_e` (L7)  |
+106 | `/juː/` | `ew` (L5), `ue` (L5), `u_e` (L7)  |
+107 | `/ɔː/`  | `or` (L6), `aw` (L8), `ore` (L8)  |
+108 
+109 A player who has learned `s` at L1 may not yet recognise `c` as also spelling
+110 `/s/`. Toggling them as one unit would conflate two distinct teaching events.
+111 The `(g, p)` pair is the smallest unit a player can identify with.
+112 
+113 ## Filter contract — phoneme-only, no level gate
+114 
+115 `filterWords` derives both fields from `selectedUnits`:
+116 
+117 ```ts
+118 const phonemesAllowed = [...new Set(selectedUnits.map((u) => u.p))];
+119 const graphemesAllowed = [...new Set(selectedUnits.map((u) => u.g))];
+120 ```
+121 
+122 A candidate word plays iff **every** one of its graphemes matches a
+123 `(g, p)` pair in `selectedUnits` — equivalent to: the grapheme is in
+124 `graphemesAllowed` AND the phoneme it teaches in this word is in
+125 `phonemesAllowed`.
+126 
+127 The curriculum's `level` tag is **not** part of the filter. A word tagged at
+128 L4 can play for a player with only L1–L2 selected, provided the word happens
+129 to use only L1–L2 phonemes (rare in practice — most "advanced" words feature
+130 their level's headline phoneme, which won't be in the player's selection).
+131 
+132 The existing `WordFilter` shape already supports both `graphemesAllowed` and
+133 `phonemesAllowed`. The plan verifies they AND together correctly inside
+134 `entryMatches` (`src/data/words/filter.ts:30`).
+135 
+136 ## UI — Simple form
+137 
+138 Stacked rows, one per level (L1 through L8). Each row contains a tri-state
+139 checkbox, a level label, and the level's `(g, p)` units rendered as toggleable
+140 chip pills.
+141 
+142 ```text
+143 ☑ Level 1
+144   [s /s/] [a /æ/] [t /t/] [p /p/] [i /ɪ/] [n /n/]    ← all chips filled
+145 
+146 ▣ Level 2          ← indeterminate (some on, some off)
+147   [m /m/] [d /d/] [g /g/] [o /ɒ/]
+148   [c, k, ck /k/] [e /ɛ/] [u /ʌ/] [r /r/]
+149 
+150 ☐ Level 3          ← unchecked, row dimmed
+151   [b /b/] [h /h/] [f /f/] [l /l/] [j /dʒ/]
+152   [v /v/] [w /w/] [x /ks/] [y /j/] [z /z/] [qu /kw/]
+153 ```
+154 
+155 ### Interaction
+156 
+157 - **Click row checkbox** → bulk-toggle every chip in that row.
+158 - **Click a chip** → toggle just that `(g, p)` unit.
+159 - **Tri-state derivation**: row is `checked` iff every unit in that level is
+160   in `selectedUnits`; `unchecked` iff none are; `indeterminate` otherwise.
+161 - **Validation**: `selectedUnits` must be non-empty. The existing "Pick at
+162   least one sound to play." error surfaces when the form would otherwise
+163   emit an empty selection.
+164 
+165 ### Chip composition rules (within one level row)
+166 
+167 - Multiple graphemes that teach the **same phoneme at the same level** still
+168   collapse into one chip — for example, L2 has `c`, `k`, and `ck` all teaching
+169   `/k/`, so the chip is labelled `c, k, ck /k/`. This preserves the existing
+170   per-level dedup behaviour and keeps the chip strip readable.
+171 - Toggling a multi-grapheme chip toggles **all** of its `(g, p)` units as a
+172   single atomic operation (e.g. tapping `c, k, ck /k/` flips all three units
+173   on or off together).
+174 - Across levels, multi-grapheme phonemes are separate chips: L1 `s /s/` and
+175   L4 `c /s/` are two independent chips, never collapsed.
+176 
+177 ## UI — Advanced modal
+178 
+179 Same data model, plain rendering: nested checkbox list. Lives in the existing
+180 `WordSpellLibrarySource` registry slot above the standard Advanced fields.
+181 
+182 ```html
+183 <ul>
+184   <li>
+185     <input type="checkbox" id="lvl-1" /><label for="lvl-1">
+186       Level 1</label
+187     >
+188     <ul>
+189       <li>
+190         <label><input type="checkbox" /> s /s/</label>
+191       </li>
+192       <li>
+193         <label><input type="checkbox" /> a /æ/</label>
+194       </li>
+195       …
+196     </ul>
+197   </li>
+198   <li>
+199     <input type="checkbox" id="lvl-2" /><label for="lvl-2">
+200       Level 2</label
+201     >
+202     <ul>
+203       <li>
+204         <label><input type="checkbox" /> m /m/</label>
+205       </li>
+206       …
+207     </ul>
+208   </li>
+209   …
+210 </ul>
+211 ```
+212 
+213 - Top-level checkbox (`#lvl-N`) is the same tri-state as the Simple form's
+214   row checkbox: derived, bulk-toggle.
+215 - Each leaf checkbox represents one `(g, p)` unit (or one collapsed
+216   multi-grapheme unit, same rule as Simple).
+217 - No chip styling. Plain HTML lists with native checkboxes.
+218 
+219 The component decides which rendering to use based on a `variant` prop
+220 (`'chips' | 'checkbox-tree'`). `WordSpellSimpleConfigForm` passes
+221 `variant="chips"`; the registry's `getAdvancedHeaderRenderer` returns a
+222 wrapper that passes `variant="checkbox-tree"`.
+223 
+224 ## Defaults & persistence
+225 
+226 - **First launch (no saved config):** `selectedUnits = all units in L1`.
+227   Equivalent to "L1 fully checked, all others unchecked".
+228 - **Subsequent launches:** restore the last persisted selection from
+229   `last-session-game-config` (RxDB-backed; existing infrastructure).
+230 - **Deep-link route loads** still default to L1 for first-time visitors —
+231   the per-route loader does not consult last-session state for the no-config
+232   fallback.
+233 - `resolveSimpleConfig` builds `source.filter` from `selectedUnits` by
+234   computing `phonemesAllowed` and `graphemesAllowed` as derived fields.
+235 
+236 ## Component shape
+237 
+238 `WordSpellLibrarySource` (existing file, internals rewritten):
+239 
+240 ```ts
+241 type Variant = 'chips' | 'checkbox-tree';
+242 
+243 type Props = {
+244   config: Record<string, unknown>;
+245   onChange: (config: Record<string, unknown>) => void;
+246   variant?: Variant; // default 'chips'
+247 };
+248 ```
+249 
+250 The component:
+251 
+252 - Reads `config.selectedUnits` (or applies the default `{L1}` selection if
+253   absent).
+254 - Renders one row per level 1–8.
+255 - Within each row, computes the chip / sub-checkbox set from
+256   `GRAPHEMES_BY_LEVEL[level]`, applying the same-phoneme-same-level dedup.
+257 - Derives the row checkbox state from the intersection between
+258   `selectedUnits` and the level's units.
+259 - Dispatches `onChange` with an updated `selectedUnits` array on every
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:10:11Z)**_
@@ -2886,275 +2922,276 @@ _**Agent (claude-opus-4-7 2026-04-28 21:10:11Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
 
 ```text
-260	  toggle.
-261	
-262	A small helper file `level-unit-selection.ts` (or co-located inside the
-263	component file) holds the pure functions:
-264	
-265	```ts
-266	type Tri = 'checked' | 'unchecked' | 'indeterminate';
-267	
-268	export const triStateForLevel = (
-269	  level: number,
-270	  selected: LevelGraphemeUnit[],
-271	): Tri;
-272	
-273	export const toggleLevel = (
-274	  level: number,
-275	  selected: LevelGraphemeUnit[],
-276	  next: 'checked' | 'unchecked',
-277	): LevelGraphemeUnit[];
-278	
-279	export const toggleUnit = (
-280	  unit: LevelGraphemeUnit,
-281	  selected: LevelGraphemeUnit[],
-282	): LevelGraphemeUnit[];
-283	
-284	export const defaultSelection = (): LevelGraphemeUnit[]; // → L1 units
-285	```
-286	
-287	Pure functions; trivially unit-testable.
-288	
-289	## IndexedDB migration
-290	
-291	Existing players have WordSpell configs persisted in IndexedDB under the old
-292	shape (`source.filter.{level, phonemesAllowed}` for full configs;
-293	`{configMode: 'simple', level, phonemesAllowed}` for simple configs). The
-294	new code reads `selectedUnits`. Without a migration, those rows would either
-295	crash the form on read or fall back to defaults — both unacceptable per
-296	"don't break current games."
-297	
-298	### Affected collections
-299	
-300	- `saved_game_configs` — schema **bumps to v3**. Holds the resume-last-session
-301	  row (id `last:anonymous:<gameId>`) plus any legacy named saves not yet
-302	  migrated to `custom_games`.
-303	- `custom_games` — schema **bumps from v0 to v1** (first migration on this
-304	  collection). Holds the user's named custom games. Same `config: object`
-305	  shape as `saved_game_configs`.
-306	
-307	`session_history_index` is NOT affected — it stores resolved rounds and round
-308	order, not the simple config.
-309	
-310	### Migration strategy (shared by both collections)
-311	
-312	A pure helper, `migrateWordSpellConfig`, transforms a single doc's `config`
-313	field. The RxDB `migrationStrategies[N]` per collection wraps it.
-314	
-315	```ts
-316	// src/db/migrations/word-spell-multi-level.ts
-317	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-318	import type { LevelGraphemeUnit } from '@/data/words';
-319	
-320	const buildSelectedUnits = (
-321	  level: number,
-322	  phonemesAllowed: readonly string[],
-323	): LevelGraphemeUnit[] => {
-324	  const units: LevelGraphemeUnit[] = [];
-325	  // Scan levels 1..N (covers both pre-fix and cumulative-fix shapes from PR #219)
-326	  for (let lvl = 1; lvl <= level; lvl++) {
-327	    for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
-328	      if (phonemesAllowed.includes(u.p)) units.push(u);
-329	    }
-330	  }
-331	  return units;
-332	};
-333	
-334	export const migrateWordSpellConfig = (
-335	  doc: Record<string, unknown>,
-336	): Record<string, unknown> => {
-337	  if (doc.gameId !== 'word-spell') return doc;
-338	
-339	  const config = (doc.config as Record<string, unknown>) ?? {};
-340	  if (Array.isArray(config.selectedUnits)) return doc; // already new shape
-341	
-342	  // Simple-shape: { configMode: 'simple', level, phonemesAllowed }
-343	  if (
-344	    config.configMode === 'simple' &&
-345	    typeof config.level === 'number' &&
-346	    Array.isArray(config.phonemesAllowed)
-347	  ) {
-348	    return {
-349	      ...doc,
-350	      config: {
-351	        ...config,
-352	        selectedUnits: buildSelectedUnits(
-353	          config.level,
-354	          config.phonemesAllowed as string[],
-355	        ),
-356	      },
-357	    };
-358	  }
-359	
-360	  // Full-shape: { source: { filter: { level, phonemesAllowed } } }
-361	  const source = config.source as
-362	    | { filter?: { level?: number; phonemesAllowed?: string[] } }
-363	    | undefined;
-364	  if (
-365	    source?.filter &&
-366	    typeof source.filter.level === 'number' &&
-367	    Array.isArray(source.filter.phonemesAllowed)
-368	  ) {
-369	    return {
-370	      ...doc,
-371	      config: {
-372	        ...config,
-373	        selectedUnits: buildSelectedUnits(
-374	          source.filter.level,
-375	          source.filter.phonemesAllowed,
-376	        ),
-377	      },
-378	    };
-379	  }
-380	
-381	  // Unrecognised shape (e.g. hand-authored rounds with no source) — leave alone.
-382	  return doc;
-383	};
-384	```
-385	
-386	### Schema bumps
-387	
-388	In `src/db/create-database.ts`:
-389	
-390	```ts
-391	saved_game_configs: {
-392	  schema: savedGameConfigsSchema, // version: 3
-393	  migrationStrategies: {
-394	    1: ...existing,
-395	    2: ...existing,
-396	    3: migrateWordSpellConfig,
-397	  },
-398	},
-399	custom_games: {
-400	  schema: customGamesSchema, // version: 1
-401	  migrationStrategies: {
-402	    1: migrateWordSpellConfig,
-403	  },
-404	},
-405	```
-406	
-407	The schema files (`savedGameConfigsSchema`, `customGamesSchema`) are updated
-408	to set `version: 3` / `version: 1` respectively. The `config` field stays
-409	typed as `Record<string, unknown>` — no schema-level field changes needed.
-410	
-411	### Belt-and-suspenders: tolerant reader
-412	
-413	`resolveSimpleConfig` and the new component's selection-derivation also
-414	accept the legacy shape at read-time, falling back to `buildSelectedUnits`
-415	if `selectedUnits` is missing. This protects against:
-416	
-417	- A doc that escaped the migration (e.g. test fixtures, mocked DBs).
-418	- Future schemas where the migration runs lazily.
-419	
-420	In production code: prefer `selectedUnits`; fall back to deriving from
-421	`level + phonemesAllowed`; default to L1 only if neither is present.
-422	
-423	### Migration tests
-424	
-425	`src/db/migrations/word-spell-multi-level.test.ts`:
-426	
-427	- Migrates a simple-shape doc (`level=4`, `phonemesAllowed=['s','m']`) →
-428	  `selectedUnits` contains every `(g, /s/)` unit and every `(g, /m/)` unit
-429	  in L1–L4.
-430	- Migrates a full-shape doc (`source.filter.{level, phonemesAllowed}`) →
-431	  same result.
-432	- Idempotent: a doc that already has `selectedUnits` is returned unchanged.
-433	- Non-WordSpell doc returned unchanged.
-434	- Hand-authored full config (no `source`) returned unchanged.
-435	- Edge case: `phonemesAllowed=[]` → empty `selectedUnits` (the form will
-436	  flag this as invalid on read, prompting the user to pick at least one).
-437	- Cross-level phoneme: `phonemesAllowed=['/s/']` at `level=4` produces both
-438	  `{g:'s',p:'s'}` (from L1) **and** `{g:'c',p:'s'}` (from L4) — preserves
-439	  the player's previous reach.
-440	
-441	`src/db/migrate-collections.test.ts` (or extension of the existing
-442	collection-migration tests):
-443	
-444	- Insert a v2 `saved_game_configs` doc with the legacy shape; bump to v3;
-445	  re-read; assert `selectedUnits` is present and correct.
-446	- Same for `custom_games` v0 → v1.
-447	
-448	## Testing strategy
-449	
-450	Three layers, mirroring the previous spec's discipline:
-451	
-452	1. **Pure-logic unit tests** (`level-unit-selection.test.ts`)
-453	   - `triStateForLevel` returns `checked` / `unchecked` / `indeterminate`
-454	     correctly for empty, full, and partial selections.
-455	   - `toggleLevel` adds / removes exactly the level's units.
-456	   - `toggleUnit` toggles one unit, preserves others.
-457	   - `defaultSelection` returns the L1 unit set.
-458	2. **Component tests** (`WordSpellLibrarySource.test.tsx`)
-459	   - Renders 8 level rows in `chips` mode.
-460	   - Renders 8 level rows in `checkbox-tree` mode.
-461	   - Tri-state checkbox reflects current selection.
-462	   - Clicking a row checkbox bulk-toggles its chips.
-463	   - Clicking a chip toggles one unit and updates the row checkbox.
-464	   - L1 `s /s/` and L4 `c /s/` are independent chips.
-465	   - Multi-grapheme dedup: L2 chip labelled `c, k, ck /k/` toggles all three
-466	     graphemes atomically.
-467	   - Empty `selectedUnits` surfaces the "Pick at least one sound to play."
-468	     error.
-469	3. **Curriculum invariant test**
-470	   `src/data/words/curriculum-invariant.test.ts` rewritten to:
-471	   - Parameterise over every `(region, level)`.
-472	   - Build `selectedUnits` from that level's units alone.
-473	   - Assert `filterWords` returns ≥ `MIN_PLAYABLE_HITS` (currently 4) hits.
-474	   - Confirms each level is independently playable; previous version asserted
-475	     cumulative selection only.
-476	4. **Form-emits-playable** `source-emits-playable.test.tsx` rewritten to:
-477	   - Render the new multi-select widget.
-478	   - Toggle levels via the row checkbox; assert `source.filter` is well-formed.
-479	   - Toggle individual chips; assert phonemes / graphemes match.
-480	   - Verify the L1-only default produces non-empty `filterWords` results.
-481	
-482	E2E coverage isn't expanded — the form-driven tests above exercise the
-483	contract end-to-end up through `filterWords`. If a regression slips through,
-484	the curriculum-invariant test catches the data side and the component test
-485	catches the UI side.
-486	
-487	## Risk & mitigation
-488	
-489	**Saved Custom Games under the old shape break on read.** Addressed by the
-490	RxDB migration above: `saved_game_configs` v3 and `custom_games` v1 both run
-491	`migrateWordSpellConfig` on every legacy doc, populating `selectedUnits` from
-492	the saved `level + phonemesAllowed`. `resolveSimpleConfig` also has a
-493	read-time coercion fallback as belt-and-suspenders.
-494	
-495	**Visual regression in Storybook.** Plan re-records affected baselines and
-496	includes a manual diff review step.
-497	
-498	**Performance — `filterWords` runs without a level prefilter.** The phoneme
-499	test is fast; the existing chunked indexes already load lazily. Plan
-500	benchmarks if any test exceeds 2s.
-501	
-502	**Tri-state derivation drift when `GRAPHEMES_BY_LEVEL` changes.** Derived
-503	from data on every render; no cached state.
-504	
-505	## Implementation order (preview — full plan separate)
-506	
-507	1. Add `level-unit-selection.ts` pure helpers + tests
-508	2. Add `migrateWordSpellConfig` helper + unit tests; bump
-509	   `saved_game_configs` schema to v3 and `custom_games` schema to v1; wire
-510	   the migration strategies in `create-database.ts`; collection-level
-511	   migration tests
-512	3. Rewrite `WordSpellLibrarySource` with the `chips` variant; tests
-513	4. Add the `checkbox-tree` variant; tests
-514	5. Wire `getAdvancedHeaderRenderer` to pass `variant="checkbox-tree"`
-515	6. Update `WordSpellSimpleConfig` and `resolveSimpleConfig` for
-516	   `selectedUnits` (with read-time fallback to `level + phonemesAllowed`)
-517	7. Rewrite `curriculum-invariant.test.ts` and `source-emits-playable.test.tsx`
-518	8. Hook last-session-game-config restore for the simple form (verifies the
-519	   migrated row drives the new UI on first read)
-520	9. Re-record affected Storybook baselines; run VR
-521	10. Manual smoke test in dev server, including a pre-seeded legacy doc that
-522	    must round-trip through the migration without crashing or losing the
-523	    user's selection
-524	
-525	The plan elaborates each step into red-green TDD pairs with the exact files
-526	to touch.
+260   toggle.
+261 
+262 A small helper file `level-unit-selection.ts` (or co-located inside the
+263 component file) holds the pure functions:
+264 
+265 ```ts
+266 type Tri = 'checked' | 'unchecked' | 'indeterminate';
+267 
+268 export const triStateForLevel = (
+269   level: number,
+270   selected: LevelGraphemeUnit[],
+271 ): Tri;
+272 
+273 export const toggleLevel = (
+274   level: number,
+275   selected: LevelGraphemeUnit[],
+276   next: 'checked' | 'unchecked',
+277 ): LevelGraphemeUnit[];
+278 
+279 export const toggleUnit = (
+280   unit: LevelGraphemeUnit,
+281   selected: LevelGraphemeUnit[],
+282 ): LevelGraphemeUnit[];
+283 
+284 export const defaultSelection = (): LevelGraphemeUnit[]; // → L1 units
+285 ```
+286 
+287 Pure functions; trivially unit-testable.
+288 
+289 ## IndexedDB migration
+290 
+291 Existing players have WordSpell configs persisted in IndexedDB under the old
+292 shape (`source.filter.{level, phonemesAllowed}` for full configs;
+293 `{configMode: 'simple', level, phonemesAllowed}` for simple configs). The
+294 new code reads `selectedUnits`. Without a migration, those rows would either
+295 crash the form on read or fall back to defaults — both unacceptable per
+296 "don't break current games."
+297 
+298 ### Affected collections
+299 
+300 - `saved_game_configs` — schema **bumps to v3**. Holds the resume-last-session
+301   row (id `last:anonymous:<gameId>`) plus any legacy named saves not yet
+302   migrated to `custom_games`.
+303 - `custom_games` — schema **bumps from v0 to v1** (first migration on this
+304   collection). Holds the user's named custom games. Same `config: object`
+305   shape as `saved_game_configs`.
+306 
+307 `session_history_index` is NOT affected — it stores resolved rounds and round
+308 order, not the simple config.
+309 
+310 ### Migration strategy (shared by both collections)
+311 
+312 A pure helper, `migrateWordSpellConfig`, transforms a single doc's `config`
+313 field. The RxDB `migrationStrategies[N]` per collection wraps it.
+314 
+315 ```ts
+316 // src/db/migrations/word-spell-multi-level.ts
+317 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+318 import type { LevelGraphemeUnit } from '@/data/words';
+319 
+320 const buildSelectedUnits = (
+321   level: number,
+322   phonemesAllowed: readonly string[],
+323 ): LevelGraphemeUnit[] => {
+324   const units: LevelGraphemeUnit[] = [];
+325   // Scan levels 1..N (covers both pre-fix and cumulative-fix shapes from PR #219)
+326   for (let lvl = 1; lvl <= level; lvl++) {
+327     for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
+328       if (phonemesAllowed.includes(u.p)) units.push(u);
+329     }
+330   }
+331   return units;
+332 };
+333 
+334 export const migrateWordSpellConfig = (
+335   doc: Record<string, unknown>,
+336 ): Record<string, unknown> => {
+337   if (doc.gameId !== 'word-spell') return doc;
+338 
+339   const config = (doc.config as Record<string, unknown>) ?? {};
+340   if (Array.isArray(config.selectedUnits)) return doc; // already new shape
+341 
+342   // Simple-shape: { configMode: 'simple', level, phonemesAllowed }
+343   if (
+344     config.configMode === 'simple' &&
+345     typeof config.level === 'number' &&
+346     Array.isArray(config.phonemesAllowed)
+347   ) {
+348     return {
+349       ...doc,
+350       config: {
+351         ...config,
+352         selectedUnits: buildSelectedUnits(
+353           config.level,
+354           config.phonemesAllowed as string[],
+355         ),
+356       },
+357     };
+358   }
+359 
+360   // Full-shape: { source: { filter: { level, phonemesAllowed } } }
+361   const source = config.source as
+362     | { filter?: { level?: number; phonemesAllowed?: string[] } }
+363     | undefined;
+364   if (
+365     source?.filter &&
+366     typeof source.filter.level === 'number' &&
+367     Array.isArray(source.filter.phonemesAllowed)
+368   ) {
+369     return {
+370       ...doc,
+371       config: {
+372         ...config,
+373         selectedUnits: buildSelectedUnits(
+374           source.filter.level,
+375           source.filter.phonemesAllowed,
+376         ),
+377       },
+378     };
+379   }
+380 
+381   // Unrecognised shape (e.g. hand-authored rounds with no source) — leave alone.
+382   return doc;
+383 };
+384 ```
+385 
+386 ### Schema bumps
+387 
+388 In `src/db/create-database.ts`:
+389 
+390 ```ts
+391 saved_game_configs: {
+392   schema: savedGameConfigsSchema, // version: 3
+393   migrationStrategies: {
+394     1: ...existing,
+395     2: ...existing,
+396     3: migrateWordSpellConfig,
+397   },
+398 },
+399 custom_games: {
+400   schema: customGamesSchema, // version: 1
+401   migrationStrategies: {
+402     1: migrateWordSpellConfig,
+403   },
+404 },
+405 ```
+406 
+407 The schema files (`savedGameConfigsSchema`, `customGamesSchema`) are updated
+408 to set `version: 3` / `version: 1` respectively. The `config` field stays
+409 typed as `Record<string, unknown>` — no schema-level field changes needed.
+410 
+411 ### Belt-and-suspenders: tolerant reader
+412 
+413 `resolveSimpleConfig` and the new component's selection-derivation also
+414 accept the legacy shape at read-time, falling back to `buildSelectedUnits`
+415 if `selectedUnits` is missing. This protects against:
+416 
+417 - A doc that escaped the migration (e.g. test fixtures, mocked DBs).
+418 - Future schemas where the migration runs lazily.
+419 
+420 In production code: prefer `selectedUnits`; fall back to deriving from
+421 `level + phonemesAllowed`; default to L1 only if neither is present.
+422 
+423 ### Migration tests
+424 
+425 `src/db/migrations/word-spell-multi-level.test.ts`:
+426 
+427 - Migrates a simple-shape doc (`level=4`, `phonemesAllowed=['s','m']`) →
+428   `selectedUnits` contains every `(g, /s/)` unit and every `(g, /m/)` unit
+429   in L1–L4.
+430 - Migrates a full-shape doc (`source.filter.{level, phonemesAllowed}`) →
+431   same result.
+432 - Idempotent: a doc that already has `selectedUnits` is returned unchanged.
+433 - Non-WordSpell doc returned unchanged.
+434 - Hand-authored full config (no `source`) returned unchanged.
+435 - Edge case: `phonemesAllowed=[]` → empty `selectedUnits` (the form will
+436   flag this as invalid on read, prompting the user to pick at least one).
+437 - Cross-level phoneme: `phonemesAllowed=['/s/']` at `level=4` produces both
+438   `{g:'s',p:'s'}` (from L1) **and** `{g:'c',p:'s'}` (from L4) — preserves
+439   the player's previous reach.
+440 
+441 `src/db/migrate-collections.test.ts` (or extension of the existing
+442 collection-migration tests):
+443 
+444 - Insert a v2 `saved_game_configs` doc with the legacy shape; bump to v3;
+445   re-read; assert `selectedUnits` is present and correct.
+446 - Same for `custom_games` v0 → v1.
+447 
+448 ## Testing strategy
+449 
+450 Three layers, mirroring the previous spec's discipline:
+451 
+452 1. **Pure-logic unit tests** (`level-unit-selection.test.ts`)
+453    - `triStateForLevel` returns `checked` / `unchecked` / `indeterminate`
+454      correctly for empty, full, and partial selections.
+455    - `toggleLevel` adds / removes exactly the level's units.
+456    - `toggleUnit` toggles one unit, preserves others.
+457    - `defaultSelection` returns the L1 unit set.
+458 2. **Component tests** (`WordSpellLibrarySource.test.tsx`)
+459    - Renders 8 level rows in `chips` mode.
+460    - Renders 8 level rows in `checkbox-tree` mode.
+461    - Tri-state checkbox reflects current selection.
+462    - Clicking a row checkbox bulk-toggles its chips.
+463    - Clicking a chip toggles one unit and updates the row checkbox.
+464    - L1 `s /s/` and L4 `c /s/` are independent chips.
+465    - Multi-grapheme dedup: L2 chip labelled `c, k, ck /k/` toggles all three
+466      graphemes atomically.
+467    - Empty `selectedUnits` surfaces the "Pick at least one sound to play."
+468      error.
+469 3. **Curriculum invariant test**
+470    `src/data/words/curriculum-invariant.test.ts` rewritten to:
+471    - Parameterise over every `(region, level)`.
+472    - Build `selectedUnits` from that level's units alone.
+473    - Assert `filterWords` returns ≥ `MIN_PLAYABLE_HITS` (currently 4) hits.
+474    - Confirms each level is independently playable; previous version asserted
+475      cumulative selection only.
+476 4. **Form-emits-playable** `source-emits-playable.test.tsx` rewritten to:
+477    - Render the new multi-select widget.
+478    - Toggle levels via the row checkbox; assert `source.filter` is well-formed.
+479    - Toggle individual chips; assert phonemes / graphemes match.
+480    - Verify the L1-only default produces non-empty `filterWords` results.
+481 
+482 E2E coverage isn't expanded — the form-driven tests above exercise the
+483 contract end-to-end up through `filterWords`. If a regression slips through,
+484 the curriculum-invariant test catches the data side and the component test
+485 catches the UI side.
+486 
+487 ## Risk & mitigation
+488 
+489 **Saved Custom Games under the old shape break on read.** Addressed by the
+490 RxDB migration above: `saved_game_configs` v3 and `custom_games` v1 both run
+491 `migrateWordSpellConfig` on every legacy doc, populating `selectedUnits` from
+492 the saved `level + phonemesAllowed`. `resolveSimpleConfig` also has a
+493 read-time coercion fallback as belt-and-suspenders.
+494 
+495 **Visual regression in Storybook.** Plan re-records affected baselines and
+496 includes a manual diff review step.
+497 
+498 **Performance — `filterWords` runs without a level prefilter.** The phoneme
+499 test is fast; the existing chunked indexes already load lazily. Plan
+500 benchmarks if any test exceeds 2s.
+501 
+502 **Tri-state derivation drift when `GRAPHEMES_BY_LEVEL` changes.** Derived
+503 from data on every render; no cached state.
+504 
+505 ## Implementation order (preview — full plan separate)
+506 
+507 1. Add `level-unit-selection.ts` pure helpers + tests
+508 2. Add `migrateWordSpellConfig` helper + unit tests; bump
+509    `saved_game_configs` schema to v3 and `custom_games` schema to v1; wire
+510    the migration strategies in `create-database.ts`; collection-level
+511    migration tests
+512 3. Rewrite `WordSpellLibrarySource` with the `chips` variant; tests
+513 4. Add the `checkbox-tree` variant; tests
+514 5. Wire `getAdvancedHeaderRenderer` to pass `variant="checkbox-tree"`
+515 6. Update `WordSpellSimpleConfig` and `resolveSimpleConfig` for
+516    `selectedUnits` (with read-time fallback to `level + phonemesAllowed`)
+517 7. Rewrite `curriculum-invariant.test.ts` and `source-emits-playable.test.tsx`
+518 8. Hook last-session-game-config restore for the simple form (verifies the
+519    migrated row drives the new UI on first read)
+520 9. Re-record affected Storybook baselines; run VR
+521 10. Manual smoke test in dev server, including a pre-seeded legacy doc that
+522     must round-trip through the migration without crashing or losing the
+523     user's selection
+524 
+525 The plan elaborates each step into red-green TDD pairs with the exact files
+526 to touch.
 527
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:10:37Z)**_
@@ -3167,6 +3204,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:10:38Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:10:57Z)**_
@@ -3219,295 +3257,296 @@ _**Agent (claude-opus-4-7 2026-04-28 21:12:58Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/visual-companion.md`
 
 ```text
-1	# Visual Companion Guide
-2	
-3	Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
-4	
-5	## When to Use
-6	
-7	Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
-8	
-9	**Use the browser** when the content itself is visual:
-10	
-11	- **UI mockups** — wireframes, layouts, navigation structures, component designs
-12	- **Architecture diagrams** — system components, data flow, relationship maps
-13	- **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
-14	- **Design polish** — when the question is about look and feel, spacing, visual hierarchy
-15	- **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
-16	
-17	**Use the terminal** when the content is text or tabular:
-18	
-19	- **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
-20	- **Conceptual A/B/C choices** — picking between approaches described in words
-21	- **Tradeoff lists** — pros/cons, comparison tables
-22	- **Technical decisions** — API design, data modeling, architectural approach selection
-23	- **Clarifying questions** — anything where the answer is words, not a visual preference
-24	
-25	A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
-26	
-27	## How It Works
-28	
-29	The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
-30	
-31	**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
-32	
-33	## Starting a Session
-34	
-35	```bash
-36	# Start server with persistence (mockups saved to project)
-37	scripts/start-server.sh --project-dir /path/to/project
-38	
-39	# Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
-40	#           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
-41	#           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
-42	```
-43	
-44	Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
-45	
-46	**Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
-47	
-48	**Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
-49	
-50	**Launching the server by platform:**
-51	
-52	**Claude Code (macOS / Linux):**
-53	```bash
-54	# Default mode works — the script backgrounds the server itself
-55	scripts/start-server.sh --project-dir /path/to/project
-56	```
-57	
-58	**Claude Code (Windows):**
-59	```bash
-60	# Windows auto-detects and uses foreground mode, which blocks the tool call.
-61	# Use run_in_background: true on the Bash tool call so the server survives
-62	# across conversation turns.
-63	scripts/start-server.sh --project-dir /path/to/project
-64	```
-65	When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
-66	
-67	**Codex:**
-68	```bash
-69	# Codex reaps background processes. The script auto-detects CODEX_CI and
-70	# switches to foreground mode. Run it normally — no extra flags needed.
-71	scripts/start-server.sh --project-dir /path/to/project
-72	```
-73	
-74	**Gemini CLI:**
-75	```bash
-76	# Use --foreground and set is_background: true on your shell tool call
-77	# so the process survives across turns
-78	scripts/start-server.sh --project-dir /path/to/project --foreground
-79	```
-80	
-81	**Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
-82	
-83	If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
-84	
-85	```bash
-86	scripts/start-server.sh \
-87	  --project-dir /path/to/project \
-88	  --host 0.0.0.0 \
-89	  --url-host localhost
-90	```
-91	
-92	Use `--url-host` to control what hostname is printed in the returned URL JSON.
-93	
-94	## The Loop
-95	
-96	1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
-97	   - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
-98	   - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
-99	   - **Never reuse filenames** — each screen gets a fresh file
-100	   - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
-101	   - Server automatically serves the newest file
-102	
-103	2. **Tell user what to expect and end your turn:**
-104	   - Remind them of the URL (every step, not just first)
-105	   - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
-106	   - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
-107	
-108	3. **On your next turn** — after the user responds in the terminal:
-109	   - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
-110	   - Merge with the user's terminal text to get the full picture
-111	   - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
-112	
-113	4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
-114	
-115	5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
-116	
-117	   ```html
-118	   <!-- filename: waiting.html (or waiting-2.html, etc.) -->
-119	   <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
-120	     <p class="subtitle">Continuing in terminal...</p>
-121	   </div>
-122	   ```
-123	
-124	   This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
-125	
-126	6. Repeat until done.
-127	
-128	## Writing Content Fragments
-129	
-130	Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
-131	
-132	**Minimal example:**
-133	
-134	```html
-135	<h2>Which layout works better?</h2>
-136	<p class="subtitle">Consider readability and visual hierarchy</p>
-137	
-138	<div class="options">
-139	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-140	    <div class="letter">A</div>
-141	    <div class="content">
-142	      <h3>Single Column</h3>
-143	      <p>Clean, focused reading experience</p>
-144	    </div>
-145	  </div>
-146	  <div class="option" data-choice="b" onclick="toggleSelect(this)">
-147	    <div class="letter">B</div>
-148	    <div class="content">
-149	      <h3>Two Column</h3>
-150	      <p>Sidebar navigation with main content</p>
-151	    </div>
-152	  </div>
-153	</div>
-154	```
-155	
-156	That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
-157	
-158	## CSS Classes Available
-159	
-160	The frame template provides these CSS classes for your content:
-161	
-162	### Options (A/B/C choices)
-163	
-164	```html
-165	<div class="options">
-166	  <div class="option" data-choice="a" onclick="toggleSelect(this)">
-167	    <div class="letter">A</div>
-168	    <div class="content">
-169	      <h3>Title</h3>
-170	      <p>Description</p>
-171	    </div>
-172	  </div>
-173	</div>
-174	```
-175	
-176	**Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
-177	
-178	```html
-179	<div class="options" data-multiselect>
-180	  <!-- same option markup — users can select/deselect multiple -->
-181	</div>
-182	```
-183	
-184	### Cards (visual designs)
-185	
-186	```html
-187	<div class="cards">
-188	  <div class="card" data-choice="design1" onclick="toggleSelect(this)">
-189	    <div class="card-image"><!-- mockup content --></div>
-190	    <div class="card-body">
-191	      <h3>Name</h3>
-192	      <p>Description</p>
-193	    </div>
-194	  </div>
-195	</div>
-196	```
-197	
-198	### Mockup container
-199	
-200	```html
-201	<div class="mockup">
-202	  <div class="mockup-header">Preview: Dashboard Layout</div>
-203	  <div class="mockup-body"><!-- your mockup HTML --></div>
-204	</div>
-205	```
-206	
-207	### Split view (side-by-side)
-208	
-209	```html
-210	<div class="split">
-211	  <div class="mockup"><!-- left --></div>
-212	  <div class="mockup"><!-- right --></div>
-213	</div>
-214	```
-215	
-216	### Pros/Cons
-217	
-218	```html
-219	<div class="pros-cons">
-220	  <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
-221	  <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
-222	</div>
-223	```
-224	
-225	### Mock elements (wireframe building blocks)
-226	
-227	```html
-228	<div class="mock-nav">Logo | Home | About | Contact</div>
-229	<div style="display: flex;">
-230	  <div class="mock-sidebar">Navigation</div>
-231	  <div class="mock-content">Main content area</div>
-232	</div>
-233	<button class="mock-button">Action Button</button>
-234	<input class="mock-input" placeholder="Input field">
-235	<div class="placeholder">Placeholder area</div>
-236	```
-237	
-238	### Typography and sections
-239	
-240	- `h2` — page title
-241	- `h3` — section heading
-242	- `.subtitle` — secondary text below title
-243	- `.section` — content block with bottom margin
-244	- `.label` — small uppercase label text
-245	
-246	## Browser Events Format
-247	
-248	When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
-249	
-250	```jsonl
-251	{"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
-252	{"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
-253	{"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
-254	```
-255	
-256	The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
-257	
-258	If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
-259	
-260	## Design Tips
-261	
-262	- **Scale fidelity to the question** — wireframes for layout, polish for polish questions
-263	- **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
-264	- **Iterate before advancing** — if feedback changes current screen, write a new version
-265	- **2-4 options max** per screen
-266	- **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
-267	- **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
-268	
-269	## File Naming
-270	
-271	- Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
-272	- Never reuse filenames — each screen must be a new file
-273	- For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
-274	- Server serves newest file by modification time
-275	
-276	## Cleaning Up
-277	
-278	```bash
-279	scripts/stop-server.sh $SESSION_DIR
-280	```
-281	
-282	If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
-283	
-284	## Reference
-285	
-286	- Frame template (CSS reference): `scripts/frame-template.html`
-287	- Helper script (client-side): `scripts/helper.js`
+1 # Visual Companion Guide
+2 
+3 Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+4 
+5 ## When to Use
+6 
+7 Decide per-question, not per-session. The test: **would the user understand this better by seeing it than reading it?**
+8 
+9 **Use the browser** when the content itself is visual:
+10 
+11 - **UI mockups** — wireframes, layouts, navigation structures, component designs
+12 - **Architecture diagrams** — system components, data flow, relationship maps
+13 - **Side-by-side visual comparisons** — comparing two layouts, two color schemes, two design directions
+14 - **Design polish** — when the question is about look and feel, spacing, visual hierarchy
+15 - **Spatial relationships** — state machines, flowcharts, entity relationships rendered as diagrams
+16 
+17 **Use the terminal** when the content is text or tabular:
+18 
+19 - **Requirements and scope questions** — "what does X mean?", "which features are in scope?"
+20 - **Conceptual A/B/C choices** — picking between approaches described in words
+21 - **Tradeoff lists** — pros/cons, comparison tables
+22 - **Technical decisions** — API design, data modeling, architectural approach selection
+23 - **Clarifying questions** — anything where the answer is words, not a visual preference
+24 
+25 A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the terminal. "Which of these wizard layouts feels right?" is visual — use the browser.
+26 
+27 ## How It Works
+28 
+29 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
+30 
+31 **Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, selection indicator, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
+32 
+33 ## Starting a Session
+34 
+35 ```bash
+36 # Start server with persistence (mockups saved to project)
+37 scripts/start-server.sh --project-dir /path/to/project
+38 
+39 # Returns: {"type":"server-started","port":52341,"url":"http://localhost:52341",
+40 #           "screen_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/content",
+41 #           "state_dir":"/path/to/project/.superpowers/brainstorm/12345-1706000000/state"}
+42 ```
+43 
+44 Save `screen_dir` and `state_dir` from the response. Tell user to open the URL.
+45 
+46 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.superpowers/brainstorm/` for the session directory.
+47 
+48 **Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
+49 
+50 **Launching the server by platform:**
+51 
+52 **Claude Code (macOS / Linux):**
+53 ```bash
+54 # Default mode works — the script backgrounds the server itself
+55 scripts/start-server.sh --project-dir /path/to/project
+56 ```
+57 
+58 **Claude Code (Windows):**
+59 ```bash
+60 # Windows auto-detects and uses foreground mode, which blocks the tool call.
+61 # Use run_in_background: true on the Bash tool call so the server survives
+62 # across conversation turns.
+63 scripts/start-server.sh --project-dir /path/to/project
+64 ```
+65 When calling this via the Bash tool, set `run_in_background: true`. Then read `$STATE_DIR/server-info` on the next turn to get the URL and port.
+66 
+67 **Codex:**
+68 ```bash
+69 # Codex reaps background processes. The script auto-detects CODEX_CI and
+70 # switches to foreground mode. Run it normally — no extra flags needed.
+71 scripts/start-server.sh --project-dir /path/to/project
+72 ```
+73 
+74 **Gemini CLI:**
+75 ```bash
+76 # Use --foreground and set is_background: true on your shell tool call
+77 # so the process survives across turns
+78 scripts/start-server.sh --project-dir /path/to/project --foreground
+79 ```
+80 
+81 **Other environments:** The server must keep running in the background across conversation turns. If your environment reaps detached processes, use `--foreground` and launch the command with your platform's background execution mechanism.
+82 
+83 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
+84 
+85 ```bash
+86 scripts/start-server.sh \
+87   --project-dir /path/to/project \
+88   --host 0.0.0.0 \
+89   --url-host localhost
+90 ```
+91 
+92 Use `--url-host` to control what hostname is printed in the returned URL JSON.
+93 
+94 ## The Loop
+95 
+96 1. **Check server is alive**, then **write HTML** to a new file in `screen_dir`:
+97    - Before each write, check that `$STATE_DIR/server-info` exists. If it doesn't (or `$STATE_DIR/server-stopped` exists), the server has shut down — restart it with `start-server.sh` before continuing. The server auto-exits after 30 minutes of inactivity.
+98    - Use semantic filenames: `platform.html`, `visual-style.html`, `layout.html`
+99    - **Never reuse filenames** — each screen gets a fresh file
+100    - Use Write tool — **never use cat/heredoc** (dumps noise into terminal)
+101    - Server automatically serves the newest file
+102 
+103 2. **Tell user what to expect and end your turn:**
+104    - Remind them of the URL (every step, not just first)
+105    - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
+106    - Ask them to respond in the terminal: "Take a look and let me know what you think. Click to select an option if you'd like."
+107 
+108 3. **On your next turn** — after the user responds in the terminal:
+109    - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
+110    - Merge with the user's terminal text to get the full picture
+111    - The terminal message is the primary feedback; `state_dir/events` provides structured interaction data
+112 
+113 4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
+114 
+115 5. **Unload when returning to terminal** — when the next step doesn't need the browser (e.g., a clarifying question, a tradeoff discussion), push a waiting screen to clear the stale content:
+116 
+117    ```html
+118    <!-- filename: waiting.html (or waiting-2.html, etc.) -->
+119    <div style="display:flex;align-items:center;justify-content:center;min-height:60vh">
+120      <p class="subtitle">Continuing in terminal...</p>
+121    </div>
+122    ```
+123 
+124    This prevents the user from staring at a resolved choice while the conversation has moved on. When the next visual question comes up, push a new content file as usual.
+125 
+126 6. Repeat until done.
+127 
+128 ## Writing Content Fragments
+129 
+130 Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, selection indicator, and all interactive infrastructure).
+131 
+132 **Minimal example:**
+133 
+134 ```html
+135 <h2>Which layout works better?</h2>
+136 <p class="subtitle">Consider readability and visual hierarchy</p>
+137 
+138 <div class="options">
+139   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+140     <div class="letter">A</div>
+141     <div class="content">
+142       <h3>Single Column</h3>
+143       <p>Clean, focused reading experience</p>
+144     </div>
+145   </div>
+146   <div class="option" data-choice="b" onclick="toggleSelect(this)">
+147     <div class="letter">B</div>
+148     <div class="content">
+149       <h3>Two Column</h3>
+150       <p>Sidebar navigation with main content</p>
+151     </div>
+152   </div>
+153 </div>
+154 ```
+155 
+156 That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
+157 
+158 ## CSS Classes Available
+159 
+160 The frame template provides these CSS classes for your content:
+161 
+162 ### Options (A/B/C choices)
+163 
+164 ```html
+165 <div class="options">
+166   <div class="option" data-choice="a" onclick="toggleSelect(this)">
+167     <div class="letter">A</div>
+168     <div class="content">
+169       <h3>Title</h3>
+170       <p>Description</p>
+171     </div>
+172   </div>
+173 </div>
+174 ```
+175 
+176 **Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item. The indicator bar shows the count.
+177 
+178 ```html
+179 <div class="options" data-multiselect>
+180   <!-- same option markup — users can select/deselect multiple -->
+181 </div>
+182 ```
+183 
+184 ### Cards (visual designs)
+185 
+186 ```html
+187 <div class="cards">
+188   <div class="card" data-choice="design1" onclick="toggleSelect(this)">
+189     <div class="card-image"><!-- mockup content --></div>
+190     <div class="card-body">
+191       <h3>Name</h3>
+192       <p>Description</p>
+193     </div>
+194   </div>
+195 </div>
+196 ```
+197 
+198 ### Mockup container
+199 
+200 ```html
+201 <div class="mockup">
+202   <div class="mockup-header">Preview: Dashboard Layout</div>
+203   <div class="mockup-body"><!-- your mockup HTML --></div>
+204 </div>
+205 ```
+206 
+207 ### Split view (side-by-side)
+208 
+209 ```html
+210 <div class="split">
+211   <div class="mockup"><!-- left --></div>
+212   <div class="mockup"><!-- right --></div>
+213 </div>
+214 ```
+215 
+216 ### Pros/Cons
+217 
+218 ```html
+219 <div class="pros-cons">
+220   <div class="pros"><h4>Pros</h4><ul><li>Benefit</li></ul></div>
+221   <div class="cons"><h4>Cons</h4><ul><li>Drawback</li></ul></div>
+222 </div>
+223 ```
+224 
+225 ### Mock elements (wireframe building blocks)
+226 
+227 ```html
+228 <div class="mock-nav">Logo | Home | About | Contact</div>
+229 <div style="display: flex;">
+230   <div class="mock-sidebar">Navigation</div>
+231   <div class="mock-content">Main content area</div>
+232 </div>
+233 <button class="mock-button">Action Button</button>
+234 <input class="mock-input" placeholder="Input field">
+235 <div class="placeholder">Placeholder area</div>
+236 ```
+237 
+238 ### Typography and sections
+239 
+240 - `h2` — page title
+241 - `h3` — section heading
+242 - `.subtitle` — secondary text below title
+243 - `.section` — content block with bottom margin
+244 - `.label` — small uppercase label text
+245 
+246 ## Browser Events Format
+247 
+248 When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
+249 
+250 ```jsonl
+251 {"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
+252 {"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
+253 {"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
+254 ```
+255 
+256 The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
+257 
+258 If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their terminal text.
+259 
+260 ## Design Tips
+261 
+262 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
+263 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
+264 - **Iterate before advancing** — if feedback changes current screen, write a new version
+265 - **2-4 options max** per screen
+266 - **Use real content when it matters** — for a photography portfolio, use actual images (Unsplash). Placeholder content obscures design issues.
+267 - **Keep mockups simple** — focus on layout and structure, not pixel-perfect design
+268 
+269 ## File Naming
+270 
+271 - Use semantic names: `platform.html`, `visual-style.html`, `layout.html`
+272 - Never reuse filenames — each screen must be a new file
+273 - For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
+274 - Server serves newest file by modification time
+275 
+276 ## Cleaning Up
+277 
+278 ```bash
+279 scripts/stop-server.sh $SESSION_DIR
+280 ```
+281 
+282 If the session used `--project-dir`, mockup files persist in `.superpowers/brainstorm/` for later reference. Only `/tmp` sessions get deleted on stop.
+283 
+284 ## Reference
+285 
+286 - Frame template (CSS reference): `scripts/frame-template.html`
+287 - Helper script (client-side): `scripts/helper.js`
 288
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:13:05Z)**_
@@ -3525,6 +3564,7 @@ server.cjs
 start-server.sh
 stop-server.sh
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:13:15Z)**_
@@ -3538,6 +3578,7 @@ Start visual companion server
 ```text
 {"type":"server-started","port":51004,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51004","screen_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/content","state_dir":"/Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/state"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:13:27Z)**_
@@ -4060,11 +4101,12 @@ _**Agent (claude-opus-4-7 2026-04-28 21:14:24Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/content/paths-comparison.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:14:33Z)**_
 
-Open **http://localhost:51004** — three side-by-side mockups of the same scenario ("Level 4 + only `sh`") under each path:
+Open **<http://localhost:51004>** — three side-by-side mockups of the same scenario ("Level 4 + only `sh`") under each path:
 
 - **Path 1 (Cumulative-locked)** — L1-3 are auto-included and locked; L4 chips narrow to `sh` only. Preview shows ~47 real words.
 - **Path 2 (Keep disjoint)** — current PR design. Picking only L4+sh → 0 results, because `i` and `p` aren't in the allowed set.
@@ -4340,6 +4382,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:17:15Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/content/two-layer-filter.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:18:14Z)**_
@@ -4355,6 +4398,7 @@ Check browser interaction events
 ```text
 no events
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:19:10Z)**_
@@ -4781,6 +4825,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:20:11Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/content/path1-refined-l3-l4.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:20:27Z)**_
@@ -4827,10 +4872,12 @@ _**Agent (claude-opus-4-7 2026-04-28 21:23:07Z)**_
 Locked in. To be sure I'm capturing exactly what you want before I write the spec:
 
 **Selection model**
+
 - Free chip selection across all 8 level rows (PR #219's data model survives — `selectedUnits: LevelGraphemeUnit[]`).
 - Default = all Level 1 chips ticked (unchanged).
 
 **Group click** (replaces tri-state checkbox in both Simple and Advanced)
+
 - Click the **level header label** ("Level 4") → bulk-toggle every chip in that row.
   - All on → unticks all
   - All off → ticks all
@@ -4840,16 +4887,19 @@ Locked in. To be sure I'm capturing exactly what you want before I write the spe
 - No native `<input type=checkbox>` anywhere — clean chip + clickable header in both contexts.
 
 **Same component in Simple and Advanced**
+
 - Drop the `variant: 'chips' | 'checkbox-tree'` distinction from PR #219 spec.
 - One `WordSpellLibrarySource` rendering — chips + clickable headers — used by both Simple form and Advanced modal slot.
 
 **Filter derivation in `resolveSimpleConfig`**
+
 - `maxLevel = max(level for unit in selectedUnits)` (or 1 if empty)
 - `graphemesAllowed = cumulativeGraphemes(maxLevel)` → spellability (every grapheme of word must be in pool)
 - `phonemesRequired = unique phonemes from selectedUnits` → Y filter (word must contain ≥1)
 - (Drop `phonemesAllowed` from the filter — replaced by `phonemesRequired`)
 
 **Plus the other approved fixes**
+
 - **Fix B**: `recall` default uses library source; `picture` default uses `WORD_SPELL_ROUND_POOL`. The two never mix in `DEFAULT_WORD_SPELL_CONFIG`.
 - **Fix C**: live word preview (SortNumbers-style `bg-muted` bar) below the picker, in both Simple and Advanced.
 
@@ -4873,6 +4923,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:23:09Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.superpowers/brainstorm/17029-1777410792/content/waiting.html (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:23:15Z)**_
@@ -4883,6 +4934,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:23:15Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:23:23Z)**_
@@ -4899,6 +4951,7 @@ From github.com:leocaseiro/base-skill
 Already up to date.
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:25:54Z)**_
@@ -5462,6 +5515,7 @@ preview, and migration are all settled.
 ```text
 File created successfully at: /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:26:10Z)**_
@@ -5473,12 +5527,14 @@ Good news — that's already supported by the design. Picking individual chips a
 **Your scenario: student struggling with `d, g, b, v`.**
 
 Tick those four chips:
+
 - `d /d/` at Level 2
 - `g /g/` at Level 2
 - `b /b/` at Level 3
 - `v /v/` at Level 3
 
 Then the system computes:
+
 - `maxLevel = 3` → tile pool = cumulative L1-3 graphemes (`s, a, t, p, i, n, m, d, g, o, c, k, ck, e, u, r, b, h, f, l, j, v, w, x, y, z`)
 - `phonemesRequired = {/d/, /g/, /b/, /v/}` (Y filter)
 
@@ -5505,6 +5561,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:26:24Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:26:30Z)**_
@@ -5515,6 +5572,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:26:30Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:26:31Z)**_
@@ -5525,6 +5583,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:26:31Z)**_
 ```text
 Updated task #2 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:26:38Z)**_
@@ -5540,6 +5599,7 @@ Scan spec for placeholders
 ```text
 no placeholders
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:26:45Z)**_
@@ -5549,97 +5609,98 @@ _**Agent (claude-opus-4-7 2026-04-28 21:26:45Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md`
 
 ```text
-200	Live preview: ship, shop, fish, dish, wish, lash, …       (47 words)
-201	```
-202	
-203	### Chip and header states
-204	
-205	| Selection | Header glyph | Header text          | Header bg     | Chip variant |
-206	| --------- | ------------ | -------------------- | ------------- | ------------ |
-207	| All chips on | ● | "Level N · N / N sounds" | filled accent | green        |
-208	| Some chips on | ◐ | "Level N · partial M / N sounds" | half-filled accent | mix of green and grey |
-209	| No chips on, level ≤ max | ◯ | "Level N · tiles only" | neutral grey | grey-outlined |
-210	| No chips on, level > max | ○ | "Level N · not in scope" | dimmed | faded |
-211	
-212	The "tiles only" state visualises the cumulative-grapheme cascade: the
-213	row contributes its graphemes to the tile pool but no phonemes to the
-214	Y filter. The "not in scope" state is identical visually but
-215	semantically different — those graphemes are excluded from the tile pool
-216	because no chip at or above that level is ticked.
-217	
-218	### Interaction
-219	
-220	- **Click level header** → bulk-toggle every chip in that row. Computed
-221	  by `toggleLevel(level, selected, target)` where `target = 'unchecked'`
-222	  if the row is currently `all-on`, else `'checked'`. Indeterminate rows
-223	  go to all-on.
-224	- **Click an individual chip** → toggle just that `(g, p)` unit.
-225	  `toggleUnit(unit, selected)` (already exists).
-226	- **Multi-grapheme chip** (e.g., L2 `c, k, ck /k/` — three graphemes,
-227	  one phoneme) → toggling the chip toggles all three units atomically.
-228	  The chip is "on" iff all three units are in `selectedUnits`.
-229	- **Empty selection** (`selectedUnits.length === 0`) → form surfaces
-230	  the existing "Pick at least one sound to play." validation message.
-231	
-232	### Accessibility
-233	
-234	The clickable header is rendered as a `<button>` with `aria-pressed`
-235	reflecting the all-on / partial / off state. The header text includes
-236	the count ("Level 4 · 1 / 10 sounds") so screen readers announce both
-237	the level and selection state in one phrase.
-238	
-239	Chips remain `<button>` elements with `aria-pressed` reflecting their
-240	own toggled state. Keyboard navigation: tab through header, then
-241	through chips in the row, with `Space` / `Enter` to toggle.
-242	
-243	## Default state
-244	
-245	- **First launch (no saved config):** `selectedUnits = all units in L1`
-246	  (six units). Equivalent to "L1 row all-on, every other row off".
-247	  Tile pool = L1 graphemes; Y filter = L1 phonemes; word pool = the
-248	  ~45 words in `curriculum/aus/level1.json`.
-249	- **Subsequent launches:** restore last-persisted selection from
-250	  `last-session-game-config` (RxDB-backed; existing infrastructure).
-251	- **Deep-link route loads** without a saved config still default to L1
-252	  via `resolveWordSpellConfig`.
-253	
-254	## Mode-driven round source (Fix B)
-255	
-256	`DEFAULT_WORD_SPELL_CONFIG` is split into two non-overlapping defaults:
-257	
-258	```ts
-259	const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
-260	  // ...shared fields
-261	  mode: 'recall',
-262	  source: {
-263	    type: 'word-library',
-264	    filter: {
-265	      region: 'aus',
-266	      graphemesAllowed: cumulativeGraphemes(1).map((u) => u.g),
-267	      phonemesRequired: defaultSelection().map((u) => u.p),
-268	    },
-269	  },
-270	  // No `rounds` field — `useLibraryRounds` queries `source.filter`
-271	};
-272	
-273	const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
-274	  // ...shared fields
-275	  mode: 'picture',
-276	  rounds: sliceWordSpellRounds(8),
-277	  // No `source` — picture rounds are explicit emoji+word pairs
-278	};
-279	```
-280	
-281	`resolveWordSpellConfig` picks the appropriate default by looking at the
-282	saved config's mode (defaulting to `recall`):
-283	
-284	```ts
-285	export const resolveWordSpellConfig = (
-286	  saved: Record<string, unknown> | null,
-287	): WordSpellConfig => {
-288	  const mode = saved?.mode === 'picture' ? 'picture' : 'recall';
-289	  const base = mode === 'picture' ? DEFAULT_PICTURE_CONFIG : DEFAULT_RECALL_CONFIG;
+200 Live preview: ship, shop, fish, dish, wish, lash, …       (47 words)
+201 ```
+202 
+203 ### Chip and header states
+204 
+205 | Selection | Header glyph | Header text          | Header bg     | Chip variant |
+206 | --------- | ------------ | -------------------- | ------------- | ------------ |
+207 | All chips on | ● | "Level N · N / N sounds" | filled accent | green        |
+208 | Some chips on | ◐ | "Level N · partial M / N sounds" | half-filled accent | mix of green and grey |
+209 | No chips on, level ≤ max | ◯ | "Level N · tiles only" | neutral grey | grey-outlined |
+210 | No chips on, level > max | ○ | "Level N · not in scope" | dimmed | faded |
+211 
+212 The "tiles only" state visualises the cumulative-grapheme cascade: the
+213 row contributes its graphemes to the tile pool but no phonemes to the
+214 Y filter. The "not in scope" state is identical visually but
+215 semantically different — those graphemes are excluded from the tile pool
+216 because no chip at or above that level is ticked.
+217 
+218 ### Interaction
+219 
+220 - **Click level header** → bulk-toggle every chip in that row. Computed
+221   by `toggleLevel(level, selected, target)` where `target = 'unchecked'`
+222   if the row is currently `all-on`, else `'checked'`. Indeterminate rows
+223   go to all-on.
+224 - **Click an individual chip** → toggle just that `(g, p)` unit.
+225   `toggleUnit(unit, selected)` (already exists).
+226 - **Multi-grapheme chip** (e.g., L2 `c, k, ck /k/` — three graphemes,
+227   one phoneme) → toggling the chip toggles all three units atomically.
+228   The chip is "on" iff all three units are in `selectedUnits`.
+229 - **Empty selection** (`selectedUnits.length === 0`) → form surfaces
+230   the existing "Pick at least one sound to play." validation message.
+231 
+232 ### Accessibility
+233 
+234 The clickable header is rendered as a `<button>` with `aria-pressed`
+235 reflecting the all-on / partial / off state. The header text includes
+236 the count ("Level 4 · 1 / 10 sounds") so screen readers announce both
+237 the level and selection state in one phrase.
+238 
+239 Chips remain `<button>` elements with `aria-pressed` reflecting their
+240 own toggled state. Keyboard navigation: tab through header, then
+241 through chips in the row, with `Space` / `Enter` to toggle.
+242 
+243 ## Default state
+244 
+245 - **First launch (no saved config):** `selectedUnits = all units in L1`
+246   (six units). Equivalent to "L1 row all-on, every other row off".
+247   Tile pool = L1 graphemes; Y filter = L1 phonemes; word pool = the
+248   ~45 words in `curriculum/aus/level1.json`.
+249 - **Subsequent launches:** restore last-persisted selection from
+250   `last-session-game-config` (RxDB-backed; existing infrastructure).
+251 - **Deep-link route loads** without a saved config still default to L1
+252   via `resolveWordSpellConfig`.
+253 
+254 ## Mode-driven round source (Fix B)
+255 
+256 `DEFAULT_WORD_SPELL_CONFIG` is split into two non-overlapping defaults:
+257 
+258 ```ts
+259 const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
+260   // ...shared fields
+261   mode: 'recall',
+262   source: {
+263     type: 'word-library',
+264     filter: {
+265       region: 'aus',
+266       graphemesAllowed: cumulativeGraphemes(1).map((u) => u.g),
+267       phonemesRequired: defaultSelection().map((u) => u.p),
+268     },
+269   },
+270   // No `rounds` field — `useLibraryRounds` queries `source.filter`
+271 };
+272 
+273 const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
+274   // ...shared fields
+275   mode: 'picture',
+276   rounds: sliceWordSpellRounds(8),
+277   // No `source` — picture rounds are explicit emoji+word pairs
+278 };
+279 ```
+280 
+281 `resolveWordSpellConfig` picks the appropriate default by looking at the
+282 saved config's mode (defaulting to `recall`):
+283 
+284 ```ts
+285 export const resolveWordSpellConfig = (
+286   saved: Record<string, unknown> | null,
+287 ): WordSpellConfig => {
+288   const mode = saved?.mode === 'picture' ? 'picture' : 'recall';
+289   const base = mode === 'picture' ? DEFAULT_PICTURE_CONFIG : DEFAULT_RECALL_CONFIG;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:27:26Z)**_
@@ -5652,6 +5713,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:27:30Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:27:40Z)**_
@@ -5662,6 +5724,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:27:40Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:27:48Z)**_
@@ -5700,6 +5763,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:27:56Z)**_
@@ -5711,24 +5775,25 @@ _**Agent (claude-opus-4-7 2026-04-28 21:27:56Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md`
 
 ```text
-78	| -------------------------------------------------------------- | ------------------------------------------------------------- |
-79	| `WordSpellLibrarySource` shell + registry slot                 | Keep                                                          |
-80	| `getAdvancedHeaderRenderer` registry hook                      | Keep                                                          |
-81	| `selectedUnits: LevelGraphemeUnit[]` config shape              | Keep                                                          |
-82	| `level-unit-selection.ts` pure helpers                         | Keep `toggleLevel`, `toggleUnit`, `defaultSelection`; **drop** `triStateForLevel` |
-83	| `migrateWordSpellConfig` + schema bumps (`saved_game_configs` v3, `custom_games` v1) | Keep unchanged                                                |
-84	| `chips` vs `checkbox-tree` variant prop                        | **Drop** — single rendering                                   |
-85	| Native `<input type="checkbox">` for level rows                | **Drop** — replaced by clickable header                       |
-86	| `cumulativeGraphemes` helper in `levels.ts`                    | Keep — now used by `resolveSimpleConfig` for `graphemesAllowed`|
-87	| `phonemesAllowed` field on `source.filter`                     | **Drop** in derived filter — replaced by `phonemesRequired`   |
-88	| `DEFAULT_WORD_SPELL_CONFIG` carrying both `mode: 'recall'` and emoji `rounds` | **Split** into `DEFAULT_RECALL_CONFIG` and `DEFAULT_PICTURE_CONFIG` |
-89	| `WORD_SPELL_ROUND_POOL`                                        | Keep — only consulted for picture mode now                    |
-90	| `curriculum-invariant.test.ts` (per-level playability)         | Keep, **extend** to assert the new cumulative + Y rule         |
-91	| `source-emits-playable.test.tsx`                               | **Rewrite** to drive the group-click UI and assert the new filter shape |
-92	
-93	## Selection model — unchanged data, new derivation
+78 | -------------------------------------------------------------- | ------------------------------------------------------------- |
+79 | `WordSpellLibrarySource` shell + registry slot                 | Keep                                                          |
+80 | `getAdvancedHeaderRenderer` registry hook                      | Keep                                                          |
+81 | `selectedUnits: LevelGraphemeUnit[]` config shape              | Keep                                                          |
+82 | `level-unit-selection.ts` pure helpers                         | Keep `toggleLevel`, `toggleUnit`, `defaultSelection`; **drop** `triStateForLevel` |
+83 | `migrateWordSpellConfig` + schema bumps (`saved_game_configs` v3, `custom_games` v1) | Keep unchanged                                                |
+84 | `chips` vs `checkbox-tree` variant prop                        | **Drop** — single rendering                                   |
+85 | Native `<input type="checkbox">` for level rows                | **Drop** — replaced by clickable header                       |
+86 | `cumulativeGraphemes` helper in `levels.ts`                    | Keep — now used by `resolveSimpleConfig` for `graphemesAllowed`|
+87 | `phonemesAllowed` field on `source.filter`                     | **Drop** in derived filter — replaced by `phonemesRequired`   |
+88 | `DEFAULT_WORD_SPELL_CONFIG` carrying both `mode: 'recall'` and emoji `rounds` | **Split** into `DEFAULT_RECALL_CONFIG` and `DEFAULT_PICTURE_CONFIG` |
+89 | `WORD_SPELL_ROUND_POOL`                                        | Keep — only consulted for picture mode now                    |
+90 | `curriculum-invariant.test.ts` (per-level playability)         | Keep, **extend** to assert the new cumulative + Y rule         |
+91 | `source-emits-playable.test.tsx`                               | **Rewrite** to drive the group-click UI and assert the new filter shape |
+92 
+93 ## Selection model — unchanged data, new derivation
 94
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:12Z)**_
@@ -5746,6 +5811,7 @@ docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md 69ms
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 [This command modified 1 file you've previously read: ../../.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:21Z)**_
@@ -5763,6 +5829,7 @@ Linting: 1 file(s)
 Summary: 0 error(s)
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:28Z)**_
@@ -5778,6 +5845,7 @@ Checking formatting...
 All matched files use Prettier code style!
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:35Z)**_
@@ -5788,6 +5856,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:28:35Z)**_
 ```text
 Updated task #2 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:36Z)**_
@@ -5798,6 +5867,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:28:36Z)**_
 ```text
 Updated task #3 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:28:45Z)**_
@@ -5816,6 +5886,7 @@ A  docs/superpowers/specs/2026-04-29-wordspell-cumulative-y-filter-design.md
 ?? .claude/scheduled_tasks.lock
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:29:32Z)**_
@@ -5915,6 +5986,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 </persisted-output>
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:29:40Z)**_
@@ -5929,6 +6001,7 @@ Confirm commit landed
 34bd8074 docs: design spec for cumulative tile pool + Y phoneme filter
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:29:48Z)**_
@@ -5954,6 +6027,7 @@ To github.com:leocaseiro/base-skill.git
    a0e76ae8..34bd8074  feat/issue-216 -> feat/issue-216
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:30:29Z)**_
@@ -5964,6 +6038,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:30:29Z)**_
 ```text
 Updated task #3 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:30:29Z)**_
@@ -5974,6 +6049,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:30:29Z)**_
 ```text
 Updated task #4 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:30:48Z)**_
@@ -6014,17 +6090,18 @@ _**Agent (claude-opus-4-7 2026-04-28 21:41:25Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
 
 ```text
-1	# WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles
-2	
-3	> Status: **Approved (design)** — implementation plan to follow.
-4	> Date: 2026-04-28
-5	> Owner: leocaseiro
-6	
-7	## Background
-8	
-9	PR #219 (issue #216) shipped a cumulative-phonemes Level picker for WordSpell.
-10	Mid-review, two issues surfaced:
+1 # WordSpell — Multi-Select Levels & Per-Unit Phoneme Toggles
+2 
+3 > Status: **Approved (design)** — implementation plan to follow.
+4 > Date: 2026-04-28
+5 > Owner: leocaseiro
+6 
+7 ## Background
+8 
+9 PR #219 (issue #216) shipped a cumulative-phonemes Level picker for WordSpell.
+10 Mid-review, two issues surfaced:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:41:41Z)**_
@@ -6035,6 +6112,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:41:41Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:41:47Z)**_
@@ -6044,22 +6122,23 @@ _**Agent (claude-opus-4-7 2026-04-28 21:41:47Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-28-wordspell-multi-level-units.md`
 
 ```text
-1	# WordSpell Multi-Select Levels & Per-Unit Phoneme Toggles — Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Spec:** `docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
-6	
-7	**Goal:** Replace WordSpell's single-Level Simple form with a disjoint
-8	multi-level checkbox UI where each `(grapheme, phoneme)` unit is an
-9	independent toggle, the level row checkbox is a derived tri-state preset,
-10	and existing saved configs migrate cleanly via RxDB schema bumps.
-11	
-12	**Architecture:** Pure helpers (`level-unit-selection.ts`) own the
-13	selection-state derivations. The shared `WordSpellLibrarySource` component
-14	renders two variants (`chips` for Simple, `checkbox-tree` for Advanced)
-15	driven by the same data model. Persistence is `selectedUnits: { g, p }[]`.
+1 # WordSpell Multi-Select Levels & Per-Unit Phoneme Toggles — Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Spec:** `docs/superpowers/specs/2026-04-28-wordspell-multi-level-units-design.md`
+6 
+7 **Goal:** Replace WordSpell's single-Level Simple form with a disjoint
+8 multi-level checkbox UI where each `(grapheme, phoneme)` unit is an
+9 independent toggle, the level row checkbox is a derived tri-state preset,
+10 and existing saved configs migrate cleanly via RxDB schema bumps.
+11 
+12 **Architecture:** Pure helpers (`level-unit-selection.ts`) own the
+13 selection-state derivations. The shared `WordSpellLibrarySource` component
+14 renders two variants (`chips` for Simple, `checkbox-tree` for Advanced)
+15 driven by the same data model. Persistence is `selectedUnits: { g, p }[]`.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:42:01Z)**_
@@ -6070,6 +6149,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:42:01Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-28-wordspell-multi-level-units.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:42:10Z)**_
@@ -6089,6 +6169,7 @@ Linting: 2 file(s)
 Summary: 0 error(s)
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:42:47Z)**_
@@ -6153,6 +6234,7 @@ stderr | src/data/words/authoring/AuthoringPanel.test.tsx > AuthoringPanel shell
 </persisted-output>
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:43:28Z)**_
@@ -6173,6 +6255,7 @@ To github.com:leocaseiro/base-skill.git
    34bd8074..67fd2769  feat/issue-216 -> feat/issue-216
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:43:43Z)**_
@@ -6192,6 +6275,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:43:44Z)**_
 ```text
 Updated task #4 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:43:45Z)**_
@@ -6202,6 +6286,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:43:45Z)**_
 ```text
 Updated task #5 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:43:52Z)**_
@@ -6217,6 +6302,7 @@ Stop visual companion server
 ```text
 {"status": "stopped"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:01Z)**_
@@ -6253,6 +6339,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -6273,6 +6360,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -6343,6 +6431,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -6351,6 +6440,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -6381,13 +6471,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -6433,6 +6524,7 @@ WordSpellSimpleConfigForm.test.tsx
 WordSpellSimpleConfigForm.tsx
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:20Z)**_
@@ -6442,60 +6534,61 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:20Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/level-unit-selection.ts`
 
 ```text
-1	import type { LevelGraphemeUnit } from '@/data/words';
-2	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-3	
-4	export type Tri = 'checked' | 'unchecked' | 'indeterminate';
-5	
-6	const sameUnit = (
-7	  a: LevelGraphemeUnit,
-8	  b: LevelGraphemeUnit,
-9	): boolean => a.g === b.g && a.p === b.p;
-10	
-11	const unitsAt = (level: number): LevelGraphemeUnit[] =>
-12	  (GRAPHEMES_BY_LEVEL[level] ?? []) as LevelGraphemeUnit[];
-13	
-14	export const triStateForLevel = (
-15	  level: number,
-16	  selected: readonly LevelGraphemeUnit[],
-17	): Tri => {
-18	  const units = unitsAt(level);
-19	  if (units.length === 0) return 'unchecked';
-20	  const onCount = units.filter((u) =>
-21	    selected.some((s) => sameUnit(s, u)),
-22	  ).length;
-23	  if (onCount === 0) return 'unchecked';
-24	  if (onCount === units.length) return 'checked';
-25	  return 'indeterminate';
-26	};
-27	
-28	export const toggleLevel = (
-29	  level: number,
-30	  selected: readonly LevelGraphemeUnit[],
-31	  next: 'checked' | 'unchecked',
-32	): LevelGraphemeUnit[] => {
-33	  const units = unitsAt(level);
-34	  const withoutLevel = selected.filter(
-35	    (s) => !units.some((u) => sameUnit(u, s)),
-36	  );
-37	  return next === 'checked'
-38	    ? [...withoutLevel, ...units]
-39	    : withoutLevel;
-40	};
-41	
-42	export const toggleUnit = (
-43	  unit: LevelGraphemeUnit,
-44	  selected: readonly LevelGraphemeUnit[],
-45	): LevelGraphemeUnit[] => {
-46	  const present = selected.some((s) => sameUnit(s, unit));
-47	  return present
-48	    ? selected.filter((s) => !sameUnit(s, unit))
-49	    : [...selected, unit];
-50	};
-51	
-52	export const defaultSelection = (): LevelGraphemeUnit[] => unitsAt(1);
+1 import type { LevelGraphemeUnit } from '@/data/words';
+2 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+3 
+4 export type Tri = 'checked' | 'unchecked' | 'indeterminate';
+5 
+6 const sameUnit = (
+7   a: LevelGraphemeUnit,
+8   b: LevelGraphemeUnit,
+9 ): boolean => a.g === b.g && a.p === b.p;
+10 
+11 const unitsAt = (level: number): LevelGraphemeUnit[] =>
+12   (GRAPHEMES_BY_LEVEL[level] ?? []) as LevelGraphemeUnit[];
+13 
+14 export const triStateForLevel = (
+15   level: number,
+16   selected: readonly LevelGraphemeUnit[],
+17 ): Tri => {
+18   const units = unitsAt(level);
+19   if (units.length === 0) return 'unchecked';
+20   const onCount = units.filter((u) =>
+21     selected.some((s) => sameUnit(s, u)),
+22   ).length;
+23   if (onCount === 0) return 'unchecked';
+24   if (onCount === units.length) return 'checked';
+25   return 'indeterminate';
+26 };
+27 
+28 export const toggleLevel = (
+29   level: number,
+30   selected: readonly LevelGraphemeUnit[],
+31   next: 'checked' | 'unchecked',
+32 ): LevelGraphemeUnit[] => {
+33   const units = unitsAt(level);
+34   const withoutLevel = selected.filter(
+35     (s) => !units.some((u) => sameUnit(u, s)),
+36   );
+37   return next === 'checked'
+38     ? [...withoutLevel, ...units]
+39     : withoutLevel;
+40 };
+41 
+42 export const toggleUnit = (
+43   unit: LevelGraphemeUnit,
+44   selected: readonly LevelGraphemeUnit[],
+45 ): LevelGraphemeUnit[] => {
+46   const present = selected.some((s) => sameUnit(s, unit));
+47   return present
+48     ? selected.filter((s) => !sameUnit(s, unit))
+49     : [...selected, unit];
+50 };
+51 
+52 export const defaultSelection = (): LevelGraphemeUnit[] => unitsAt(1);
 53
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:21Z)**_
@@ -6505,244 +6598,245 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:21Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/WordSpellLibrarySource/WordSpellLibrarySource.tsx`
 
 ```text
-1	import { useEffect, useRef } from 'react';
-2	import {
-3	  defaultSelection,
-4	  toggleLevel,
-5	  toggleUnit,
-6	  triStateForLevel,
-7	} from '../level-unit-selection';
-8	import type { LevelGraphemeUnit } from '@/data/words';
-9	import type { JSX } from 'react';
-10	import { ChipStrip } from '@/components/config/ChipStrip';
-11	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-12	
-13	export type LibrarySourceVariant = 'chips' | 'checkbox-tree';
-14	
-15	type Props = {
-16	  config: Record<string, unknown>;
-17	  onChange: (config: Record<string, unknown>) => void;
-18	  variant?: LibrarySourceVariant;
-19	};
-20	
-21	const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-22	
-23	const readSelected = (
-24	  config: Record<string, unknown>,
-25	): LevelGraphemeUnit[] => {
-26	  const raw = config.selectedUnits;
-27	  return Array.isArray(raw)
-28	    ? (raw as LevelGraphemeUnit[])
-29	    : defaultSelection();
-30	};
-31	
-32	const chipsForLevel = (
-33	  level: number,
-34	): { value: string; label: string; units: LevelGraphemeUnit[] }[] => {
-35	  const byPhoneme = new Map<string, LevelGraphemeUnit[]>();
-36	  for (const u of GRAPHEMES_BY_LEVEL[level] ?? []) {
-37	    const existing = byPhoneme.get(u.p);
-38	    if (existing) existing.push(u);
-39	    else byPhoneme.set(u.p, [u]);
-40	  }
-41	  return [...byPhoneme.entries()].map(([p, units]) => ({
-42	    value: `${level}|${p}`,
-43	    label: `${units.map((u) => u.g).join(', ')} /${p}/`,
-44	    units,
-45	  }));
-46	};
-47	
-48	const LevelRowChips = ({
-49	  level,
-50	  selected,
-51	  onChange,
-52	}: {
-53	  level: number;
-54	  selected: LevelGraphemeUnit[];
-55	  onChange: (next: LevelGraphemeUnit[]) => void;
-56	}): JSX.Element => {
-57	  const tri = triStateForLevel(level, selected);
-58	  const cbRef = useRef<HTMLInputElement>(null);
-59	  useEffect(() => {
-60	    if (cbRef.current)
-61	      cbRef.current.indeterminate = tri === 'indeterminate';
-62	  }, [tri]);
-63	
-64	  const chips = chipsForLevel(level);
-65	  const isUnitOn = (u: LevelGraphemeUnit): boolean =>
-66	    selected.some((s) => s.g === u.g && s.p === u.p);
-67	  const selectedChipValues = chips
-68	    .filter((c) => c.units.every((u) => isUnitOn(u)))
-69	    .map((c) => c.value);
-70	
-71	  const handleRow = () => {
-72	    onChange(
-73	      toggleLevel(
-74	        level,
-75	        selected,
-76	        tri === 'checked' ? 'unchecked' : 'checked',
-77	      ),
-78	    );
-79	  };
-80	
-81	  const handleChip = (next: string[]) => {
-82	    let acc = selected;
-83	    for (const c of chips) {
-84	      const wantOn = next.includes(c.value);
-85	      const isOn = c.units.every((u) => isUnitOn(u));
-86	      if (wantOn !== isOn) {
-87	        for (const u of c.units) acc = toggleUnit(u, acc);
-88	      }
-89	    }
-90	    onChange(acc);
-91	  };
-92	
-93	  return (
-94	    <div className="flex flex-col gap-2">
-95	      <label className="flex items-center gap-2 text-sm font-semibold">
-96	        <input
-97	          ref={cbRef}
-98	          type="checkbox"
-99	          checked={tri === 'checked'}
-100	          onChange={handleRow}
-101	          aria-label={`Level ${level}`}
-102	        />
-103	        Level {level}
-104	      </label>
-105	      <ChipStrip
-106	        chips={chips.map(({ value, label }) => ({ value, label }))}
-107	        selected={selectedChipValues}
-108	        mode="toggleable"
-109	        onChange={handleChip}
-110	      />
-111	    </div>
-112	  );
-113	};
-114	
-115	const LevelRowCheckboxTree = ({
-116	  level,
-117	  selected,
-118	  onChange,
-119	}: {
-120	  level: number;
-121	  selected: LevelGraphemeUnit[];
-122	  onChange: (next: LevelGraphemeUnit[]) => void;
-123	}): JSX.Element => {
-124	  const tri = triStateForLevel(level, selected);
-125	  const cbRef = useRef<HTMLInputElement>(null);
-126	  useEffect(() => {
-127	    if (cbRef.current)
-128	      cbRef.current.indeterminate = tri === 'indeterminate';
-129	  }, [tri]);
-130	
-131	  const chips = chipsForLevel(level);
-132	  const isUnitOn = (u: LevelGraphemeUnit): boolean =>
-133	    selected.some((s) => s.g === u.g && s.p === u.p);
-134	
-135	  const handleRow = () => {
-136	    onChange(
-137	      toggleLevel(
-138	        level,
-139	        selected,
-140	        tri === 'checked' ? 'unchecked' : 'checked',
-141	      ),
-142	    );
-143	  };
-144	
-145	  const handleChip = (units: LevelGraphemeUnit[]) => {
-146	    let acc = selected;
-147	    for (const u of units) acc = toggleUnit(u, acc);
-148	    onChange(acc);
-149	  };
-150	
-151	  return (
-152	    <li>
-153	      <label className="flex items-center gap-2 text-sm font-semibold">
-154	        <input
-155	          ref={cbRef}
-156	          type="checkbox"
-157	          checked={tri === 'checked'}
-158	          onChange={handleRow}
-159	          aria-label={`Level ${level}`}
-160	        />
-161	        Level {level}
-162	      </label>
-163	      <ul className="ml-6 mt-1 flex flex-col gap-1">
-164	        {chips.map((c) => (
-165	          <li key={c.value}>
-166	            <label className="flex items-center gap-2 text-sm">
-167	              <input
-168	                type="checkbox"
-169	                checked={c.units.every((u) => isUnitOn(u))}
-170	                onChange={() => handleChip(c.units)}
-171	                aria-label={c.label}
-172	              />
-173	              {c.label}
-174	            </label>
-175	          </li>
-176	        ))}
-177	      </ul>
-178	    </li>
-179	  );
-180	};
-181	
-182	export const WordSpellLibrarySource = ({
-183	  config,
-184	  onChange,
-185	  variant = 'chips',
-186	}: Props): JSX.Element => {
-187	  const selected = readSelected(config);
-188	  const invalid = selected.length === 0;
-189	
-190	  const setSelected = (next: LevelGraphemeUnit[]) => {
-191	    onChange({ ...config, selectedUnits: next });
-192	  };
-193	
-194	  if (variant === 'checkbox-tree') {
-195	    return (
-196	      <div data-invalid={invalid ? 'true' : 'false'}>
-197	        <ul className="flex flex-col gap-2">
-198	          {LEVELS.map((n) => (
-199	            <LevelRowCheckboxTree
-200	              key={n}
-201	              level={n}
-202	              selected={selected}
-203	              onChange={setSelected}
-204	            />
-205	          ))}
-206	        </ul>
-207	        {invalid && (
-208	          <p className="mt-2 text-xs text-destructive">
-209	            Pick at least one sound to play.
-210	          </p>
-211	        )}
-212	      </div>
-213	    );
-214	  }
-215	
-216	  return (
-217	    <div
-218	      className="flex flex-col gap-4"
-219	      data-invalid={invalid ? 'true' : 'false'}
-220	    >
-221	      {LEVELS.map((n) => (
-222	        <LevelRowChips
-223	          key={n}
-224	          level={n}
-225	          selected={selected}
-226	          onChange={setSelected}
-227	        />
-228	      ))}
-229	      {invalid && (
-230	        <p className="mt-2 text-xs text-destructive">
-231	          Pick at least one sound to play.
-232	        </p>
-233	      )}
-234	    </div>
-235	  );
-236	};
+1 import { useEffect, useRef } from 'react';
+2 import {
+3   defaultSelection,
+4   toggleLevel,
+5   toggleUnit,
+6   triStateForLevel,
+7 } from '../level-unit-selection';
+8 import type { LevelGraphemeUnit } from '@/data/words';
+9 import type { JSX } from 'react';
+10 import { ChipStrip } from '@/components/config/ChipStrip';
+11 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+12 
+13 export type LibrarySourceVariant = 'chips' | 'checkbox-tree';
+14 
+15 type Props = {
+16   config: Record<string, unknown>;
+17   onChange: (config: Record<string, unknown>) => void;
+18   variant?: LibrarySourceVariant;
+19 };
+20 
+21 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+22 
+23 const readSelected = (
+24   config: Record<string, unknown>,
+25 ): LevelGraphemeUnit[] => {
+26   const raw = config.selectedUnits;
+27   return Array.isArray(raw)
+28     ? (raw as LevelGraphemeUnit[])
+29     : defaultSelection();
+30 };
+31 
+32 const chipsForLevel = (
+33   level: number,
+34 ): { value: string; label: string; units: LevelGraphemeUnit[] }[] => {
+35   const byPhoneme = new Map<string, LevelGraphemeUnit[]>();
+36   for (const u of GRAPHEMES_BY_LEVEL[level] ?? []) {
+37     const existing = byPhoneme.get(u.p);
+38     if (existing) existing.push(u);
+39     else byPhoneme.set(u.p, [u]);
+40   }
+41   return [...byPhoneme.entries()].map(([p, units]) => ({
+42     value: `${level}|${p}`,
+43     label: `${units.map((u) => u.g).join(', ')} /${p}/`,
+44     units,
+45   }));
+46 };
+47 
+48 const LevelRowChips = ({
+49   level,
+50   selected,
+51   onChange,
+52 }: {
+53   level: number;
+54   selected: LevelGraphemeUnit[];
+55   onChange: (next: LevelGraphemeUnit[]) => void;
+56 }): JSX.Element => {
+57   const tri = triStateForLevel(level, selected);
+58   const cbRef = useRef<HTMLInputElement>(null);
+59   useEffect(() => {
+60     if (cbRef.current)
+61       cbRef.current.indeterminate = tri === 'indeterminate';
+62   }, [tri]);
+63 
+64   const chips = chipsForLevel(level);
+65   const isUnitOn = (u: LevelGraphemeUnit): boolean =>
+66     selected.some((s) => s.g === u.g && s.p === u.p);
+67   const selectedChipValues = chips
+68     .filter((c) => c.units.every((u) => isUnitOn(u)))
+69     .map((c) => c.value);
+70 
+71   const handleRow = () => {
+72     onChange(
+73       toggleLevel(
+74         level,
+75         selected,
+76         tri === 'checked' ? 'unchecked' : 'checked',
+77       ),
+78     );
+79   };
+80 
+81   const handleChip = (next: string[]) => {
+82     let acc = selected;
+83     for (const c of chips) {
+84       const wantOn = next.includes(c.value);
+85       const isOn = c.units.every((u) => isUnitOn(u));
+86       if (wantOn !== isOn) {
+87         for (const u of c.units) acc = toggleUnit(u, acc);
+88       }
+89     }
+90     onChange(acc);
+91   };
+92 
+93   return (
+94     <div className="flex flex-col gap-2">
+95       <label className="flex items-center gap-2 text-sm font-semibold">
+96         <input
+97           ref={cbRef}
+98           type="checkbox"
+99           checked={tri === 'checked'}
+100           onChange={handleRow}
+101           aria-label={`Level ${level}`}
+102         />
+103         Level {level}
+104       </label>
+105       <ChipStrip
+106         chips={chips.map(({ value, label }) => ({ value, label }))}
+107         selected={selectedChipValues}
+108         mode="toggleable"
+109         onChange={handleChip}
+110       />
+111     </div>
+112   );
+113 };
+114 
+115 const LevelRowCheckboxTree = ({
+116   level,
+117   selected,
+118   onChange,
+119 }: {
+120   level: number;
+121   selected: LevelGraphemeUnit[];
+122   onChange: (next: LevelGraphemeUnit[]) => void;
+123 }): JSX.Element => {
+124   const tri = triStateForLevel(level, selected);
+125   const cbRef = useRef<HTMLInputElement>(null);
+126   useEffect(() => {
+127     if (cbRef.current)
+128       cbRef.current.indeterminate = tri === 'indeterminate';
+129   }, [tri]);
+130 
+131   const chips = chipsForLevel(level);
+132   const isUnitOn = (u: LevelGraphemeUnit): boolean =>
+133     selected.some((s) => s.g === u.g && s.p === u.p);
+134 
+135   const handleRow = () => {
+136     onChange(
+137       toggleLevel(
+138         level,
+139         selected,
+140         tri === 'checked' ? 'unchecked' : 'checked',
+141       ),
+142     );
+143   };
+144 
+145   const handleChip = (units: LevelGraphemeUnit[]) => {
+146     let acc = selected;
+147     for (const u of units) acc = toggleUnit(u, acc);
+148     onChange(acc);
+149   };
+150 
+151   return (
+152     <li>
+153       <label className="flex items-center gap-2 text-sm font-semibold">
+154         <input
+155           ref={cbRef}
+156           type="checkbox"
+157           checked={tri === 'checked'}
+158           onChange={handleRow}
+159           aria-label={`Level ${level}`}
+160         />
+161         Level {level}
+162       </label>
+163       <ul className="ml-6 mt-1 flex flex-col gap-1">
+164         {chips.map((c) => (
+165           <li key={c.value}>
+166             <label className="flex items-center gap-2 text-sm">
+167               <input
+168                 type="checkbox"
+169                 checked={c.units.every((u) => isUnitOn(u))}
+170                 onChange={() => handleChip(c.units)}
+171                 aria-label={c.label}
+172               />
+173               {c.label}
+174             </label>
+175           </li>
+176         ))}
+177       </ul>
+178     </li>
+179   );
+180 };
+181 
+182 export const WordSpellLibrarySource = ({
+183   config,
+184   onChange,
+185   variant = 'chips',
+186 }: Props): JSX.Element => {
+187   const selected = readSelected(config);
+188   const invalid = selected.length === 0;
+189 
+190   const setSelected = (next: LevelGraphemeUnit[]) => {
+191     onChange({ ...config, selectedUnits: next });
+192   };
+193 
+194   if (variant === 'checkbox-tree') {
+195     return (
+196       <div data-invalid={invalid ? 'true' : 'false'}>
+197         <ul className="flex flex-col gap-2">
+198           {LEVELS.map((n) => (
+199             <LevelRowCheckboxTree
+200               key={n}
+201               level={n}
+202               selected={selected}
+203               onChange={setSelected}
+204             />
+205           ))}
+206         </ul>
+207         {invalid && (
+208           <p className="mt-2 text-xs text-destructive">
+209             Pick at least one sound to play.
+210           </p>
+211         )}
+212       </div>
+213     );
+214   }
+215 
+216   return (
+217     <div
+218       className="flex flex-col gap-4"
+219       data-invalid={invalid ? 'true' : 'false'}
+220     >
+221       {LEVELS.map((n) => (
+222         <LevelRowChips
+223           key={n}
+224           level={n}
+225           selected={selected}
+226           onChange={setSelected}
+227         />
+228       ))}
+229       {invalid && (
+230         <p className="mt-2 text-xs text-destructive">
+231           Pick at least one sound to play.
+232         </p>
+233       )}
+234     </div>
+235   );
+236 };
 237
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:21Z)**_
@@ -6752,126 +6846,127 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:21Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/types.ts`
 
 ```text
-1	import type { AnswerGameConfig } from '@/components/answer-game/types';
-2	import type {
-3	  LevelGraphemeUnit,
-4	  Region,
-5	  WordSpellSource,
-6	} from '@/data/words';
-7	import type { ConfigField } from '@/lib/config-fields';
-8	
-9	export type WordSpellSimpleConfig = {
-10	  configMode: 'simple';
-11	  selectedUnits: LevelGraphemeUnit[];
-12	  region: Region;
-13	  inputMethod: 'drag' | 'type' | 'both';
-14	};
-15	
-16	export interface GapDefinition {
-17	  word: string;
-18	  distractors?: string[];
-19	}
-20	
-21	export interface WordSpellRound {
-22	  word: string;
-23	  /**
-24	   * Native emoji (or ZWJ sequence) for picture mode. When set, this is shown instead of `image` / `sceneImage`.
-25	   */
-26	  emoji?: string;
-27	  /** Fluent Emoji SVG path, URL, or `/public` asset path (picture/sentence-gap modes) */
-28	  image?: string;
-29	  /** Sentence with a blank for sentence-gap mode: "The ___ sat on the mat." */
-30	  sentence?: string;
-31	  /** Scene illustration for sentence-gap mode */
-32	  sceneImage?: string;
-33	  /** Optional custom audio override instead of TTS */
-34	  audioOverride?: string;
-35	  /** Gap definitions for sentence-gap mode. Each entry maps to a {N} placeholder. */
-36	  gaps?: GapDefinition[];
-37	}
-38	
-39	export interface WordSpellConfig extends AnswerGameConfig {
-40	  component: 'WordSpell';
-41	  configMode?: 'simple' | 'advanced';
-42	  mode: 'picture' | 'recall' | 'sentence-gap';
-43	  /** @default 'letter' */
-44	  tileUnit: 'letter' | 'syllable' | 'word';
-45	  /** Explicit hand-authored rounds. Wins over `source` when both are present. */
-46	  rounds?: WordSpellRound[];
-47	  /** Library-driven rounds. Resolved at WordSpell mount time. */
-48	  source?: WordSpellSource;
-49	}
-50	
-51	export const wordSpellConfigFields: ConfigField[] = [
-52	  {
-53	    type: 'select',
-54	    key: 'inputMethod',
-55	    label: 'Input method',
-56	    options: [
-57	      { value: 'drag', label: 'drag' },
-58	      { value: 'type', label: 'type' },
-59	      { value: 'both', label: 'both' },
-60	    ],
-61	  },
-62	  {
-63	    type: 'select',
-64	    key: 'wrongTileBehavior',
-65	    label: 'Wrong tile behaviour',
-66	    options: [
-67	      { value: 'reject', label: 'reject' },
-68	      { value: 'lock-manual', label: 'lock-manual' },
-69	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-70	    ],
-71	  },
-72	  {
-73	    type: 'select',
-74	    key: 'tileBankMode',
-75	    label: 'Tile bank mode',
-76	    options: [
-77	      { value: 'exact', label: 'exact' },
-78	      { value: 'distractors', label: 'distractors' },
-79	    ],
-80	  },
-81	  {
-82	    type: 'number',
-83	    key: 'distractorCount',
-84	    label: 'Distractor count',
-85	    min: 1,
-86	    max: 10,
-87	    visibleWhen: { key: 'tileBankMode', value: 'distractors' },
-88	  },
-89	  {
-90	    type: 'number',
-91	    key: 'totalRounds',
-92	    label: 'Total rounds',
-93	    min: 1,
-94	    max: 8,
-95	  },
-96	  {
-97	    type: 'select',
-98	    key: 'mode',
-99	    label: 'Mode',
-100	    options: [
-101	      { value: 'picture', label: 'picture' },
-102	      { value: 'recall', label: 'recall' },
-103	      { value: 'sentence-gap', label: 'sentence-gap' },
-104	    ],
-105	  },
-106	  {
-107	    type: 'select',
-108	    key: 'tileUnit',
-109	    label: 'Tile unit',
-110	    options: [
-111	      { value: 'letter', label: 'letter' },
-112	      { value: 'syllable', label: 'syllable' },
-113	      { value: 'word', label: 'word' },
-114	    ],
-115	  },
-116	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-117	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-118	];
+1 import type { AnswerGameConfig } from '@/components/answer-game/types';
+2 import type {
+3   LevelGraphemeUnit,
+4   Region,
+5   WordSpellSource,
+6 } from '@/data/words';
+7 import type { ConfigField } from '@/lib/config-fields';
+8 
+9 export type WordSpellSimpleConfig = {
+10   configMode: 'simple';
+11   selectedUnits: LevelGraphemeUnit[];
+12   region: Region;
+13   inputMethod: 'drag' | 'type' | 'both';
+14 };
+15 
+16 export interface GapDefinition {
+17   word: string;
+18   distractors?: string[];
+19 }
+20 
+21 export interface WordSpellRound {
+22   word: string;
+23   /**
+24    * Native emoji (or ZWJ sequence) for picture mode. When set, this is shown instead of `image` / `sceneImage`.
+25    */
+26   emoji?: string;
+27   /** Fluent Emoji SVG path, URL, or `/public` asset path (picture/sentence-gap modes) */
+28   image?: string;
+29   /** Sentence with a blank for sentence-gap mode: "The ___ sat on the mat." */
+30   sentence?: string;
+31   /** Scene illustration for sentence-gap mode */
+32   sceneImage?: string;
+33   /** Optional custom audio override instead of TTS */
+34   audioOverride?: string;
+35   /** Gap definitions for sentence-gap mode. Each entry maps to a {N} placeholder. */
+36   gaps?: GapDefinition[];
+37 }
+38 
+39 export interface WordSpellConfig extends AnswerGameConfig {
+40   component: 'WordSpell';
+41   configMode?: 'simple' | 'advanced';
+42   mode: 'picture' | 'recall' | 'sentence-gap';
+43   /** @default 'letter' */
+44   tileUnit: 'letter' | 'syllable' | 'word';
+45   /** Explicit hand-authored rounds. Wins over `source` when both are present. */
+46   rounds?: WordSpellRound[];
+47   /** Library-driven rounds. Resolved at WordSpell mount time. */
+48   source?: WordSpellSource;
+49 }
+50 
+51 export const wordSpellConfigFields: ConfigField[] = [
+52   {
+53     type: 'select',
+54     key: 'inputMethod',
+55     label: 'Input method',
+56     options: [
+57       { value: 'drag', label: 'drag' },
+58       { value: 'type', label: 'type' },
+59       { value: 'both', label: 'both' },
+60     ],
+61   },
+62   {
+63     type: 'select',
+64     key: 'wrongTileBehavior',
+65     label: 'Wrong tile behaviour',
+66     options: [
+67       { value: 'reject', label: 'reject' },
+68       { value: 'lock-manual', label: 'lock-manual' },
+69       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+70     ],
+71   },
+72   {
+73     type: 'select',
+74     key: 'tileBankMode',
+75     label: 'Tile bank mode',
+76     options: [
+77       { value: 'exact', label: 'exact' },
+78       { value: 'distractors', label: 'distractors' },
+79     ],
+80   },
+81   {
+82     type: 'number',
+83     key: 'distractorCount',
+84     label: 'Distractor count',
+85     min: 1,
+86     max: 10,
+87     visibleWhen: { key: 'tileBankMode', value: 'distractors' },
+88   },
+89   {
+90     type: 'number',
+91     key: 'totalRounds',
+92     label: 'Total rounds',
+93     min: 1,
+94     max: 8,
+95   },
+96   {
+97     type: 'select',
+98     key: 'mode',
+99     label: 'Mode',
+100     options: [
+101       { value: 'picture', label: 'picture' },
+102       { value: 'recall', label: 'recall' },
+103       { value: 'sentence-gap', label: 'sentence-gap' },
+104     ],
+105   },
+106   {
+107     type: 'select',
+108     key: 'tileUnit',
+109     label: 'Tile unit',
+110     options: [
+111       { value: 'letter', label: 'letter' },
+112       { value: 'syllable', label: 'syllable' },
+113       { value: 'word', label: 'word' },
+114     ],
+115   },
+116   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+117   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+118 ];
 119
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:28Z)**_
@@ -6881,104 +6976,105 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:28Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/resolve-simple-config.ts`
 
 ```text
-1	import { defaultSelection } from './level-unit-selection';
-2	import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-3	import type { LevelGraphemeUnit } from '@/data/words';
-4	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-5	
-6	const phonemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
-7	  ...new Set(units.map((u) => u.p)),
-8	];
-9	
-10	const graphemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
-11	  ...new Set(units.map((u) => u.g)),
-12	];
-13	
-14	const unitsFromLegacy = (
-15	  raw: Record<string, unknown>,
-16	): LevelGraphemeUnit[] => {
-17	  if (
-18	    typeof raw.level !== 'number' ||
-19	    !Array.isArray(raw.phonemesAllowed)
-20	  )
-21	    return defaultSelection();
-22	  const out: LevelGraphemeUnit[] = [];
-23	  for (let lvl = 1; lvl <= raw.level; lvl++) {
-24	    for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
-25	      if ((raw.phonemesAllowed as string[]).includes(u.p)) out.push(u);
-26	    }
-27	  }
-28	  return out.length > 0 ? out : defaultSelection();
-29	};
-30	
-31	export const resolveSimpleConfig = (
-32	  simple: WordSpellSimpleConfig,
-33	): WordSpellConfig => {
-34	  const raw = simple as unknown as Record<string, unknown>;
-35	  const units = Array.isArray(raw.selectedUnits)
-36	    ? (raw.selectedUnits as LevelGraphemeUnit[])
-37	    : unitsFromLegacy(raw);
-38	  const region =
-39	    typeof raw.region === 'string' ? (raw.region as 'aus') : 'aus';
-40	
-41	  return {
-42	    gameId: 'word-spell',
-43	    component: 'WordSpell',
-44	    configMode: 'simple',
-45	    mode: 'recall',
-46	    tileUnit: 'letter',
-47	    inputMethod: simple.inputMethod,
-48	    wrongTileBehavior: 'lock-manual',
-49	    ttsEnabled: true,
-50	    roundsInOrder: false,
-51	    totalRounds: 4,
-52	    tileBankMode: 'exact',
-53	    source: {
-54	      type: 'word-library',
-55	      filter: {
-56	        region,
-57	        phonemesAllowed: phonemesOf(units),
-58	        graphemesAllowed: graphemesOf(units),
-59	      },
-60	    },
-61	  };
-62	};
-63	
-64	export const advancedToSimple = (
-65	  config: WordSpellConfig,
-66	): WordSpellSimpleConfig => {
-67	  const filter = config.source?.filter;
-68	  const region = filter?.region ?? 'aus';
-69	
-70	  if (
-71	    typeof filter?.level === 'number' &&
-72	    Array.isArray(filter.phonemesAllowed)
-73	  ) {
-74	    const out: LevelGraphemeUnit[] = [];
-75	    for (let lvl = 1; lvl <= filter.level; lvl++) {
-76	      for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
-77	        if (filter.phonemesAllowed.includes(u.p)) {
-78	          out.push(u);
-79	        }
-80	      }
-81	    }
-82	    return {
-83	      configMode: 'simple',
-84	      selectedUnits: out,
-85	      region,
-86	      inputMethod: config.inputMethod,
-87	    };
-88	  }
-89	
-90	  return {
-91	    configMode: 'simple',
-92	    selectedUnits: defaultSelection(),
-93	    region,
-94	    inputMethod: config.inputMethod,
-95	  };
-96	};
+1 import { defaultSelection } from './level-unit-selection';
+2 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
+3 import type { LevelGraphemeUnit } from '@/data/words';
+4 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+5 
+6 const phonemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
+7   ...new Set(units.map((u) => u.p)),
+8 ];
+9 
+10 const graphemesOf = (units: readonly LevelGraphemeUnit[]): string[] => [
+11   ...new Set(units.map((u) => u.g)),
+12 ];
+13 
+14 const unitsFromLegacy = (
+15   raw: Record<string, unknown>,
+16 ): LevelGraphemeUnit[] => {
+17   if (
+18     typeof raw.level !== 'number' ||
+19     !Array.isArray(raw.phonemesAllowed)
+20   )
+21     return defaultSelection();
+22   const out: LevelGraphemeUnit[] = [];
+23   for (let lvl = 1; lvl <= raw.level; lvl++) {
+24     for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
+25       if ((raw.phonemesAllowed as string[]).includes(u.p)) out.push(u);
+26     }
+27   }
+28   return out.length > 0 ? out : defaultSelection();
+29 };
+30 
+31 export const resolveSimpleConfig = (
+32   simple: WordSpellSimpleConfig,
+33 ): WordSpellConfig => {
+34   const raw = simple as unknown as Record<string, unknown>;
+35   const units = Array.isArray(raw.selectedUnits)
+36     ? (raw.selectedUnits as LevelGraphemeUnit[])
+37     : unitsFromLegacy(raw);
+38   const region =
+39     typeof raw.region === 'string' ? (raw.region as 'aus') : 'aus';
+40 
+41   return {
+42     gameId: 'word-spell',
+43     component: 'WordSpell',
+44     configMode: 'simple',
+45     mode: 'recall',
+46     tileUnit: 'letter',
+47     inputMethod: simple.inputMethod,
+48     wrongTileBehavior: 'lock-manual',
+49     ttsEnabled: true,
+50     roundsInOrder: false,
+51     totalRounds: 4,
+52     tileBankMode: 'exact',
+53     source: {
+54       type: 'word-library',
+55       filter: {
+56         region,
+57         phonemesAllowed: phonemesOf(units),
+58         graphemesAllowed: graphemesOf(units),
+59       },
+60     },
+61   };
+62 };
+63 
+64 export const advancedToSimple = (
+65   config: WordSpellConfig,
+66 ): WordSpellSimpleConfig => {
+67   const filter = config.source?.filter;
+68   const region = filter?.region ?? 'aus';
+69 
+70   if (
+71     typeof filter?.level === 'number' &&
+72     Array.isArray(filter.phonemesAllowed)
+73   ) {
+74     const out: LevelGraphemeUnit[] = [];
+75     for (let lvl = 1; lvl <= filter.level; lvl++) {
+76       for (const u of GRAPHEMES_BY_LEVEL[lvl] ?? []) {
+77         if (filter.phonemesAllowed.includes(u.p)) {
+78           out.push(u);
+79         }
+80       }
+81     }
+82     return {
+83       configMode: 'simple',
+84       selectedUnits: out,
+85       region,
+86       inputMethod: config.inputMethod,
+87     };
+88   }
+89 
+90   return {
+91     configMode: 'simple',
+92     selectedUnits: defaultSelection(),
+93     region,
+94     inputMethod: config.inputMethod,
+95   };
+96 };
 97
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:29Z)**_
@@ -6988,81 +7084,82 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:29Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/level-unit-selection.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import {
-3	  defaultSelection,
-4	  toggleLevel,
-5	  toggleUnit,
-6	  triStateForLevel,
-7	} from './level-unit-selection';
-8	import type { LevelGraphemeUnit } from '@/data/words';
-9	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-10	
-11	const L1 = (GRAPHEMES_BY_LEVEL[1] ?? []) as LevelGraphemeUnit[];
-12	const L2 = (GRAPHEMES_BY_LEVEL[2] ?? []) as LevelGraphemeUnit[];
-13	
-14	describe('triStateForLevel', () => {
-15	  it('returns "unchecked" when no L1 units are selected', () => {
-16	    expect(triStateForLevel(1, [])).toBe('unchecked');
-17	  });
-18	
-19	  it('returns "checked" when every L1 unit is selected', () => {
-20	    expect(triStateForLevel(1, [...L1])).toBe('checked');
-21	  });
-22	
-23	  it('returns "indeterminate" when some L1 units are selected', () => {
-24	    expect(triStateForLevel(1, [L1[0]!])).toBe('indeterminate');
-25	  });
-26	
-27	  it('treats other levels independently', () => {
-28	    expect(triStateForLevel(2, [...L1])).toBe('unchecked');
-29	  });
-30	});
-31	
-32	describe('toggleLevel', () => {
-33	  it('adds every unit at the level when next="checked"', () => {
-34	    const result = toggleLevel(1, [], 'checked');
-35	    expect(result).toHaveLength(L1.length);
-36	  });
-37	
-38	  it('removes every unit at the level when next="unchecked"', () => {
-39	    const result = toggleLevel(1, [...L1, ...L2], 'unchecked');
-40	    expect(result).toEqual(L2);
-41	  });
-42	
-43	  it('does not duplicate units already in the selection', () => {
-44	    const result = toggleLevel(1, [L1[0]!], 'checked');
-45	    expect(result).toHaveLength(L1.length);
-46	  });
-47	});
-48	
-49	describe('toggleUnit', () => {
-50	  it('adds the unit when absent', () => {
-51	    const u = L1[0]!;
-52	    expect(toggleUnit(u, [])).toEqual([u]);
-53	  });
-54	
-55	  it('removes the unit when present', () => {
-56	    const u = L1[0]!;
-57	    expect(toggleUnit(u, [u])).toEqual([]);
-58	  });
-59	
-60	  it('treats (g, p) as the identity — different grapheme, same phoneme stay independent', () => {
-61	    const sL1 = { g: 's', p: 's' } as LevelGraphemeUnit;
-62	    const cL4 = { g: 'c', p: 's' } as LevelGraphemeUnit;
-63	    const after = toggleUnit(cL4, [sL1]);
-64	    expect(after).toContainEqual(sL1);
-65	    expect(after).toContainEqual(cL4);
-66	  });
-67	});
-68	
-69	describe('defaultSelection', () => {
-70	  it('returns every unit at level 1', () => {
-71	    expect(defaultSelection()).toEqual(L1);
-72	  });
-73	});
+1 import { describe, expect, it } from 'vitest';
+2 import {
+3   defaultSelection,
+4   toggleLevel,
+5   toggleUnit,
+6   triStateForLevel,
+7 } from './level-unit-selection';
+8 import type { LevelGraphemeUnit } from '@/data/words';
+9 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+10 
+11 const L1 = (GRAPHEMES_BY_LEVEL[1] ?? []) as LevelGraphemeUnit[];
+12 const L2 = (GRAPHEMES_BY_LEVEL[2] ?? []) as LevelGraphemeUnit[];
+13 
+14 describe('triStateForLevel', () => {
+15   it('returns "unchecked" when no L1 units are selected', () => {
+16     expect(triStateForLevel(1, [])).toBe('unchecked');
+17   });
+18 
+19   it('returns "checked" when every L1 unit is selected', () => {
+20     expect(triStateForLevel(1, [...L1])).toBe('checked');
+21   });
+22 
+23   it('returns "indeterminate" when some L1 units are selected', () => {
+24     expect(triStateForLevel(1, [L1[0]!])).toBe('indeterminate');
+25   });
+26 
+27   it('treats other levels independently', () => {
+28     expect(triStateForLevel(2, [...L1])).toBe('unchecked');
+29   });
+30 });
+31 
+32 describe('toggleLevel', () => {
+33   it('adds every unit at the level when next="checked"', () => {
+34     const result = toggleLevel(1, [], 'checked');
+35     expect(result).toHaveLength(L1.length);
+36   });
+37 
+38   it('removes every unit at the level when next="unchecked"', () => {
+39     const result = toggleLevel(1, [...L1, ...L2], 'unchecked');
+40     expect(result).toEqual(L2);
+41   });
+42 
+43   it('does not duplicate units already in the selection', () => {
+44     const result = toggleLevel(1, [L1[0]!], 'checked');
+45     expect(result).toHaveLength(L1.length);
+46   });
+47 });
+48 
+49 describe('toggleUnit', () => {
+50   it('adds the unit when absent', () => {
+51     const u = L1[0]!;
+52     expect(toggleUnit(u, [])).toEqual([u]);
+53   });
+54 
+55   it('removes the unit when present', () => {
+56     const u = L1[0]!;
+57     expect(toggleUnit(u, [u])).toEqual([]);
+58   });
+59 
+60   it('treats (g, p) as the identity — different grapheme, same phoneme stay independent', () => {
+61     const sL1 = { g: 's', p: 's' } as LevelGraphemeUnit;
+62     const cL4 = { g: 'c', p: 's' } as LevelGraphemeUnit;
+63     const after = toggleUnit(cL4, [sL1]);
+64     expect(after).toContainEqual(sL1);
+65     expect(after).toContainEqual(cL4);
+66   });
+67 });
+68 
+69 describe('defaultSelection', () => {
+70   it('returns every unit at level 1', () => {
+71     expect(defaultSelection()).toEqual(L1);
+72   });
+73 });
 74
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:29Z)**_
@@ -7072,97 +7169,98 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:29Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/WordSpellLibrarySource/WordSpellLibrarySource.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { useState } from 'react';
-4	import { describe, expect, it } from 'vitest';
-5	import { WordSpellLibrarySource } from './WordSpellLibrarySource';
-6	import type { LevelGraphemeUnit } from '@/data/words';
-7	import type { JSX } from 'react';
-8	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-9	
-10	const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
-11	
-12	const Harness = ({
-13	  initial,
-14	}: {
-15	  initial: LevelGraphemeUnit[];
-16	}): JSX.Element => {
-17	  const [config, setConfig] = useState<Record<string, unknown>>({
-18	    selectedUnits: initial,
-19	    region: 'aus',
-20	  });
-21	  return (
-22	    <WordSpellLibrarySource config={config} onChange={setConfig} />
-23	  );
-24	};
-25	
-26	describe('WordSpellLibrarySource — chips variant (default)', () => {
-27	  it('renders 8 level rows', () => {
-28	    render(<Harness initial={L1} />);
-29	    for (let n = 1; n <= 8; n++) {
-30	      expect(screen.getByLabelText(`Level ${n}`)).toBeInTheDocument();
-31	    }
-32	  });
-33	
-34	  it('shows the L1 row checkbox as checked when all L1 units are selected', () => {
-35	    render(<Harness initial={L1} />);
-36	    const cb = screen.getByLabelText('Level 1');
-37	    expect(cb).toBeChecked();
-38	    expect(cb).not.toBePartiallyChecked();
-39	  });
-40	
-41	  it('shows the L1 row checkbox as indeterminate when one L1 unit is missing', () => {
-42	    render(<Harness initial={L1.slice(1)} />);
-43	    const cb = screen.getByLabelText('Level 1');
-44	    expect(cb).toBePartiallyChecked();
-45	  });
-46	
-47	  it('shows the L2 row checkbox as unchecked when no L2 units are selected', () => {
-48	    render(<Harness initial={L1} />);
-49	    const cb = screen.getByLabelText('Level 2');
-50	    expect(cb).not.toBeChecked();
-51	    expect(cb).not.toBePartiallyChecked();
-52	  });
-53	
-54	  it('clicking a row checkbox toggles every unit in that row', async () => {
-55	    const user = userEvent.setup();
-56	    render(<Harness initial={L1} />);
-57	    const l2 = screen.getByLabelText('Level 2');
-58	    await user.click(l2);
-59	    expect(l2).toBeChecked();
-60	    expect(l2).not.toBePartiallyChecked();
-61	  });
-62	
-63	  it('clicking an individual chip toggles just that unit and updates the row', async () => {
-64	    const user = userEvent.setup();
-65	    render(<Harness initial={L1} />);
-66	    const firstL1Chip = screen.getByRole('button', {
-67	      name: new RegExp(String.raw`${L1[0]!.g} \/${L1[0]!.p}\/`, 'i'),
-68	    });
-69	    await user.click(firstL1Chip);
-70	    expect(firstL1Chip).toHaveAttribute('aria-pressed', 'false');
-71	    const l1 = screen.getByLabelText('Level 1');
-72	    expect(l1).toBePartiallyChecked();
-73	  });
-74	
-75	  it('renders L1 `s /s/` and L4 `c /s/` as independent chips', () => {
-76	    render(<Harness initial={L1} />);
-77	    const sL1 = screen.getByRole('button', { name: /^s \/s\//i });
-78	    const cL4 = screen.getByRole('button', { name: /^c \/s\//i });
-79	    expect(sL1).not.toBe(cL4);
-80	  });
-81	
-82	  it('flags data-invalid when selectedUnits is empty', () => {
-83	    const { container } = render(<Harness initial={[]} />);
-84	    expect(container.firstElementChild).toHaveAttribute(
-85	      'data-invalid',
-86	      'true',
-87	    );
-88	  });
-89	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { useState } from 'react';
+4 import { describe, expect, it } from 'vitest';
+5 import { WordSpellLibrarySource } from './WordSpellLibrarySource';
+6 import type { LevelGraphemeUnit } from '@/data/words';
+7 import type { JSX } from 'react';
+8 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+9 
+10 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+11 
+12 const Harness = ({
+13   initial,
+14 }: {
+15   initial: LevelGraphemeUnit[];
+16 }): JSX.Element => {
+17   const [config, setConfig] = useState<Record<string, unknown>>({
+18     selectedUnits: initial,
+19     region: 'aus',
+20   });
+21   return (
+22     <WordSpellLibrarySource config={config} onChange={setConfig} />
+23   );
+24 };
+25 
+26 describe('WordSpellLibrarySource — chips variant (default)', () => {
+27   it('renders 8 level rows', () => {
+28     render(<Harness initial={L1} />);
+29     for (let n = 1; n <= 8; n++) {
+30       expect(screen.getByLabelText(`Level ${n}`)).toBeInTheDocument();
+31     }
+32   });
+33 
+34   it('shows the L1 row checkbox as checked when all L1 units are selected', () => {
+35     render(<Harness initial={L1} />);
+36     const cb = screen.getByLabelText('Level 1');
+37     expect(cb).toBeChecked();
+38     expect(cb).not.toBePartiallyChecked();
+39   });
+40 
+41   it('shows the L1 row checkbox as indeterminate when one L1 unit is missing', () => {
+42     render(<Harness initial={L1.slice(1)} />);
+43     const cb = screen.getByLabelText('Level 1');
+44     expect(cb).toBePartiallyChecked();
+45   });
+46 
+47   it('shows the L2 row checkbox as unchecked when no L2 units are selected', () => {
+48     render(<Harness initial={L1} />);
+49     const cb = screen.getByLabelText('Level 2');
+50     expect(cb).not.toBeChecked();
+51     expect(cb).not.toBePartiallyChecked();
+52   });
+53 
+54   it('clicking a row checkbox toggles every unit in that row', async () => {
+55     const user = userEvent.setup();
+56     render(<Harness initial={L1} />);
+57     const l2 = screen.getByLabelText('Level 2');
+58     await user.click(l2);
+59     expect(l2).toBeChecked();
+60     expect(l2).not.toBePartiallyChecked();
+61   });
+62 
+63   it('clicking an individual chip toggles just that unit and updates the row', async () => {
+64     const user = userEvent.setup();
+65     render(<Harness initial={L1} />);
+66     const firstL1Chip = screen.getByRole('button', {
+67       name: new RegExp(String.raw`${L1[0]!.g} \/${L1[0]!.p}\/`, 'i'),
+68     });
+69     await user.click(firstL1Chip);
+70     expect(firstL1Chip).toHaveAttribute('aria-pressed', 'false');
+71     const l1 = screen.getByLabelText('Level 1');
+72     expect(l1).toBePartiallyChecked();
+73   });
+74 
+75   it('renders L1 `s /s/` and L4 `c /s/` as independent chips', () => {
+76     render(<Harness initial={L1} />);
+77     const sL1 = screen.getByRole('button', { name: /^s \/s\//i });
+78     const cL4 = screen.getByRole('button', { name: /^c \/s\//i });
+79     expect(sL1).not.toBe(cL4);
+80   });
+81 
+82   it('flags data-invalid when selectedUnits is empty', () => {
+83     const { container } = render(<Harness initial={[]} />);
+84     expect(container.firstElementChild).toHaveAttribute(
+85       'data-invalid',
+86       'true',
+87     );
+88   });
+89 });
 90
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:36Z)**_
@@ -7174,72 +7272,73 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:37Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/components/config/ChipStrip.tsx`
 
 ```text
-1	import type { JSX } from 'react';
-2	
-3	export type Chip = {
-4	  value: string;
-5	  label: string;
-6	  subtitle?: string;
-7	};
-8	
-9	type ChipStripProps =
-10	  | {
-11	      chips: Chip[];
-12	      selected: string[];
-13	      mode: 'read-only';
-14	    }
-15	  | {
-16	      chips: Chip[];
-17	      selected: string[];
-18	      mode: 'toggleable';
-19	      onChange: (next: string[]) => void;
-20	    };
-21	
-22	export const ChipStrip = (props: ChipStripProps): JSX.Element => {
-23	  const { chips, selected, mode } = props;
-24	
-25	  return (
-26	    <div className="flex flex-wrap gap-1">
-27	      {chips.map((c) => {
-28	        const on = selected.includes(c.value);
-29	        const base = 'rounded-full px-2.5 py-1 text-xs font-bold';
-30	        const cls = on
-31	          ? `${base} bg-primary text-primary-foreground`
-32	          : `${base} border border-border bg-muted text-foreground`;
-33	
-34	        if (mode === 'read-only') {
-35	          return (
-36	            <span key={c.value} className={cls}>
-37	              {c.label}
-38	            </span>
-39	          );
-40	        }
-41	
-42	        const toggle = () => {
-43	          const next = on
-44	            ? selected.filter((v) => v !== c.value)
-45	            : [...selected, c.value];
-46	          props.onChange(next);
-47	        };
-48	
-49	        return (
-50	          <button
-51	            key={c.value}
-52	            type="button"
-53	            aria-pressed={on}
-54	            aria-label={c.label}
-55	            onClick={toggle}
-56	            className={cls}
-57	          >
-58	            {c.label}
-59	          </button>
-60	        );
-61	      })}
-62	    </div>
-63	  );
-64	};
+1 import type { JSX } from 'react';
+2 
+3 export type Chip = {
+4   value: string;
+5   label: string;
+6   subtitle?: string;
+7 };
+8 
+9 type ChipStripProps =
+10   | {
+11       chips: Chip[];
+12       selected: string[];
+13       mode: 'read-only';
+14     }
+15   | {
+16       chips: Chip[];
+17       selected: string[];
+18       mode: 'toggleable';
+19       onChange: (next: string[]) => void;
+20     };
+21 
+22 export const ChipStrip = (props: ChipStripProps): JSX.Element => {
+23   const { chips, selected, mode } = props;
+24 
+25   return (
+26     <div className="flex flex-wrap gap-1">
+27       {chips.map((c) => {
+28         const on = selected.includes(c.value);
+29         const base = 'rounded-full px-2.5 py-1 text-xs font-bold';
+30         const cls = on
+31           ? `${base} bg-primary text-primary-foreground`
+32           : `${base} border border-border bg-muted text-foreground`;
+33 
+34         if (mode === 'read-only') {
+35           return (
+36             <span key={c.value} className={cls}>
+37               {c.label}
+38             </span>
+39           );
+40         }
+41 
+42         const toggle = () => {
+43           const next = on
+44             ? selected.filter((v) => v !== c.value)
+45             : [...selected, c.value];
+46           props.onChange(next);
+47         };
+48 
+49         return (
+50           <button
+51             key={c.value}
+52             type="button"
+53             aria-pressed={on}
+54             aria-label={c.label}
+55             onClick={toggle}
+56             className={cls}
+57           >
+58             {c.label}
+59           </button>
+60         );
+61       })}
+62     </div>
+63   );
+64 };
 65
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:38Z)**_
@@ -7249,110 +7348,111 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:38Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/useLibraryRounds.ts`
 
 ```text
-1	import { useEffect, useState } from 'react';
-2	import type { WordSpellConfig, WordSpellRound } from './types';
-3	import type { Region, SeenWordsStore } from '@/data/words';
-4	import {
-5	  filterSignature,
-6	  filterWords,
-7	  pickWithRecycling,
-8	  toWordSpellRound,
-9	} from '@/data/words';
-10	
-11	interface LibraryRoundsState {
-12	  rounds: WordSpellRound[];
-13	  isLoading: boolean;
-14	  usedFallback?: { from: Region; to: 'aus' };
-15	}
-16	
-17	const initialStateFor = (
-18	  config: WordSpellConfig,
-19	): LibraryRoundsState => {
-20	  if (config.source) return { rounds: [], isLoading: true };
-21	  return { rounds: config.rounds ?? [], isLoading: false };
-22	};
-23	
-24	export const useLibraryRounds = (
-25	  config: WordSpellConfig,
-26	  seed: string | undefined,
-27	  store: SeenWordsStore,
-28	): LibraryRoundsState => {
-29	  const [state, setState] = useState<LibraryRoundsState>(() =>
-30	    initialStateFor(config),
-31	  );
-32	
-33	  useEffect(() => {
-34	    if (config.rounds && config.rounds.length > 0) {
-35	      const explicit = config.rounds;
-36	      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
-37	      setState((prev) =>
-38	        prev.rounds === explicit &&
-39	        !prev.isLoading &&
-40	        prev.usedFallback === undefined
-41	          ? prev
-42	          : { rounds: explicit, isLoading: false },
-43	      );
-44	      return;
-45	    }
-46	
-47	    const source = config.source;
-48	    if (!source) {
-49	      setState((prev) =>
-50	        prev.rounds.length === 0 &&
-51	        !prev.isLoading &&
-52	        prev.usedFallback === undefined
-53	          ? prev
-54	          : { rounds: [], isLoading: false },
-55	      );
-56	      return;
-57	    }
-58	
-59	    const cancellation = { isCancelled: false as boolean };
-60	
-61	    setState((prev) =>
-62	      prev.isLoading ? prev : { ...prev, isLoading: true },
-63	    );
-64	
-65	    void (async () => {
-66	      const result = await filterWords(source.filter);
-67	      if (cancellation.isCancelled) return;
-68	
-69	      const limit = source.limit ?? config.totalRounds;
-70	      const picked = config.roundsInOrder
-71	        ? result.hits.slice(0, limit)
-72	        : await pickWithRecycling(
-73	            result.hits,
-74	            limit,
-75	            filterSignature(source.filter),
-76	            store,
-77	            seed,
-78	          );
-79	      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
-80	      if (cancellation.isCancelled) return;
-81	
-82	      setState({
-83	        rounds: picked.map((hit) => toWordSpellRound(hit)),
-84	        isLoading: false,
-85	        usedFallback: result.usedFallback,
-86	      });
-87	    })();
-88	
-89	    return () => {
-90	      cancellation.isCancelled = true;
-91	    };
-92	  }, [
-93	    config.rounds,
-94	    config.source,
-95	    config.totalRounds,
-96	    config.roundsInOrder,
-97	    seed,
-98	    store,
-99	  ]);
-100	
-101	  return state;
-102	};
+1 import { useEffect, useState } from 'react';
+2 import type { WordSpellConfig, WordSpellRound } from './types';
+3 import type { Region, SeenWordsStore } from '@/data/words';
+4 import {
+5   filterSignature,
+6   filterWords,
+7   pickWithRecycling,
+8   toWordSpellRound,
+9 } from '@/data/words';
+10 
+11 interface LibraryRoundsState {
+12   rounds: WordSpellRound[];
+13   isLoading: boolean;
+14   usedFallback?: { from: Region; to: 'aus' };
+15 }
+16 
+17 const initialStateFor = (
+18   config: WordSpellConfig,
+19 ): LibraryRoundsState => {
+20   if (config.source) return { rounds: [], isLoading: true };
+21   return { rounds: config.rounds ?? [], isLoading: false };
+22 };
+23 
+24 export const useLibraryRounds = (
+25   config: WordSpellConfig,
+26   seed: string | undefined,
+27   store: SeenWordsStore,
+28 ): LibraryRoundsState => {
+29   const [state, setState] = useState<LibraryRoundsState>(() =>
+30     initialStateFor(config),
+31   );
+32 
+33   useEffect(() => {
+34     if (config.rounds && config.rounds.length > 0) {
+35       const explicit = config.rounds;
+36       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
+37       setState((prev) =>
+38         prev.rounds === explicit &&
+39         !prev.isLoading &&
+40         prev.usedFallback === undefined
+41           ? prev
+42           : { rounds: explicit, isLoading: false },
+43       );
+44       return;
+45     }
+46 
+47     const source = config.source;
+48     if (!source) {
+49       setState((prev) =>
+50         prev.rounds.length === 0 &&
+51         !prev.isLoading &&
+52         prev.usedFallback === undefined
+53           ? prev
+54           : { rounds: [], isLoading: false },
+55       );
+56       return;
+57     }
+58 
+59     const cancellation = { isCancelled: false as boolean };
+60 
+61     setState((prev) =>
+62       prev.isLoading ? prev : { ...prev, isLoading: true },
+63     );
+64 
+65     void (async () => {
+66       const result = await filterWords(source.filter);
+67       if (cancellation.isCancelled) return;
+68 
+69       const limit = source.limit ?? config.totalRounds;
+70       const picked = config.roundsInOrder
+71         ? result.hits.slice(0, limit)
+72         : await pickWithRecycling(
+73             result.hits,
+74             limit,
+75             filterSignature(source.filter),
+76             store,
+77             seed,
+78           );
+79       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
+80       if (cancellation.isCancelled) return;
+81 
+82       setState({
+83         rounds: picked.map((hit) => toWordSpellRound(hit)),
+84         isLoading: false,
+85         usedFallback: result.usedFallback,
+86       });
+87     })();
+88 
+89     return () => {
+90       cancellation.isCancelled = true;
+91     };
+92   }, [
+93     config.rounds,
+94     config.source,
+95     config.totalRounds,
+96     config.roundsInOrder,
+97     seed,
+98     store,
+99   ]);
+100 
+101   return state;
+102 };
 103
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:44:38Z)**_
@@ -7362,56 +7462,57 @@ _**Agent (claude-opus-4-7 2026-04-28 21:44:38Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/data/words/index.ts`
 
 ```text
-1	export type {
-2	  CurriculumEntry,
-3	  FilterResult,
-4	  Grapheme,
-5	  Region,
-6	  ValidationError,
-7	  WordCore,
-8	  WordFilter,
-9	  WordHit,
-10	  WordSpellSource,
-11	} from './types';
-12	export type { LevelGraphemeUnit } from './levels';
-13	export {
-14	  ALL_REGIONS,
-15	  cumulativeGraphemes,
-16	  GRAPHEMES_BY_LEVEL,
-17	  graphemePool,
-18	  LEVEL_LABELS,
-19	} from './levels';
-20	export {
-21	  IPA_TO_PHONEME_CODE,
-22	  PHONEME_CODE_TO_IPA,
-23	} from './phoneme-codes';
-24	export {
-25	  makeCurriculumEntry,
-26	  makeGraphemes,
-27	  makeWordCore,
-28	  validateEntry,
-29	} from './builders';
-30	export {
-31	  removeCurriculumEntry,
-32	  removeWordCore,
-33	  upsertCurriculumEntry,
-34	  upsertWordCore,
-35	} from './writer';
-36	export {
-37	  __resetChunkCacheForTests,
-38	  entryMatches,
-39	  filterWords,
-40	} from './filter';
-41	export { toWordSpellRound } from './adapters';
-42	export { sampleHits } from './sample';
-43	export {
-44	  createInMemorySeenWordsStore,
-45	  filterSignature,
-46	  pickWithRecycling,
-47	} from './seen-words';
-48	export type { SeenWordsStore } from './seen-words';
+1 export type {
+2   CurriculumEntry,
+3   FilterResult,
+4   Grapheme,
+5   Region,
+6   ValidationError,
+7   WordCore,
+8   WordFilter,
+9   WordHit,
+10   WordSpellSource,
+11 } from './types';
+12 export type { LevelGraphemeUnit } from './levels';
+13 export {
+14   ALL_REGIONS,
+15   cumulativeGraphemes,
+16   GRAPHEMES_BY_LEVEL,
+17   graphemePool,
+18   LEVEL_LABELS,
+19 } from './levels';
+20 export {
+21   IPA_TO_PHONEME_CODE,
+22   PHONEME_CODE_TO_IPA,
+23 } from './phoneme-codes';
+24 export {
+25   makeCurriculumEntry,
+26   makeGraphemes,
+27   makeWordCore,
+28   validateEntry,
+29 } from './builders';
+30 export {
+31   removeCurriculumEntry,
+32   removeWordCore,
+33   upsertCurriculumEntry,
+34   upsertWordCore,
+35 } from './writer';
+36 export {
+37   __resetChunkCacheForTests,
+38   entryMatches,
+39   filterWords,
+40 } from './filter';
+41 export { toWordSpellRound } from './adapters';
+42 export { sampleHits } from './sample';
+43 export {
+44   createInMemorySeenWordsStore,
+45   filterSignature,
+46   pickWithRecycling,
+47 } from './seen-words';
+48 export type { SeenWordsStore } from './seen-words';
 49
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:45:12Z)**_
@@ -7423,84 +7524,85 @@ _**Agent (claude-opus-4-7 2026-04-28 21:45:13Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/config-fields-registry.tsx`
 
 ```text
-1	import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
-2	import { numberMatchConfigFields } from './number-match/types';
-3	import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
-4	import { sortNumbersConfigFields } from './sort-numbers/types';
-5	import { wordSpellConfigFields } from './word-spell/types';
-6	import { WordSpellLibrarySource } from './word-spell/WordSpellLibrarySource/WordSpellLibrarySource';
-7	import { WordSpellSimpleConfigForm } from './word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
-8	import type { ConfigField } from '@/lib/config-fields';
-9	import type { JSX } from 'react';
-10	
-11	export const getConfigFields = (gameId: string): ConfigField[] => {
-12	  switch (gameId) {
-13	    case 'word-spell': {
-14	      return wordSpellConfigFields;
-15	    }
-16	    case 'number-match': {
-17	      return numberMatchConfigFields;
-18	    }
-19	    case 'sort-numbers': {
-20	      return sortNumbersConfigFields;
-21	    }
-22	    default: {
-23	      return [];
-24	    }
-25	  }
-26	};
-27	
-28	export const getAdvancedConfigFields = getConfigFields;
-29	
-30	type ConfigFormRendererProps = {
-31	  config: Record<string, unknown>;
-32	  onChange: (config: Record<string, unknown>) => void;
-33	};
-34	
-35	type ConfigFormRenderer = (
-36	  props: ConfigFormRendererProps,
-37	) => JSX.Element;
-38	
-39	export const getSimpleConfigFormRenderer = (
-40	  gameId: string,
-41	): ConfigFormRenderer | undefined => {
-42	  switch (gameId) {
-43	    case 'word-spell': {
-44	      return WordSpellSimpleConfigForm;
-45	    }
-46	    case 'number-match': {
-47	      return NumberMatchSimpleConfigForm;
-48	    }
-49	    case 'sort-numbers': {
-50	      return SortNumbersSimpleConfigForm;
-51	    }
-52	    default: {
-53	      return undefined;
-54	    }
-55	  }
-56	};
-57	
-58	const WordSpellAdvancedHeader = (props: {
-59	  config: Record<string, unknown>;
-60	  onChange: (config: Record<string, unknown>) => void;
-61	}): JSX.Element => (
-62	  <WordSpellLibrarySource {...props} variant="checkbox-tree" />
-63	);
-64	
-65	export const getAdvancedHeaderRenderer = (
-66	  gameId: string,
-67	): ConfigFormRenderer | undefined => {
-68	  switch (gameId) {
-69	    case 'word-spell': {
-70	      return WordSpellAdvancedHeader;
-71	    }
-72	    default: {
-73	      return undefined;
-74	    }
-75	  }
-76	};
+1 import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
+2 import { numberMatchConfigFields } from './number-match/types';
+3 import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
+4 import { sortNumbersConfigFields } from './sort-numbers/types';
+5 import { wordSpellConfigFields } from './word-spell/types';
+6 import { WordSpellLibrarySource } from './word-spell/WordSpellLibrarySource/WordSpellLibrarySource';
+7 import { WordSpellSimpleConfigForm } from './word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
+8 import type { ConfigField } from '@/lib/config-fields';
+9 import type { JSX } from 'react';
+10 
+11 export const getConfigFields = (gameId: string): ConfigField[] => {
+12   switch (gameId) {
+13     case 'word-spell': {
+14       return wordSpellConfigFields;
+15     }
+16     case 'number-match': {
+17       return numberMatchConfigFields;
+18     }
+19     case 'sort-numbers': {
+20       return sortNumbersConfigFields;
+21     }
+22     default: {
+23       return [];
+24     }
+25   }
+26 };
+27 
+28 export const getAdvancedConfigFields = getConfigFields;
+29 
+30 type ConfigFormRendererProps = {
+31   config: Record<string, unknown>;
+32   onChange: (config: Record<string, unknown>) => void;
+33 };
+34 
+35 type ConfigFormRenderer = (
+36   props: ConfigFormRendererProps,
+37 ) => JSX.Element;
+38 
+39 export const getSimpleConfigFormRenderer = (
+40   gameId: string,
+41 ): ConfigFormRenderer | undefined => {
+42   switch (gameId) {
+43     case 'word-spell': {
+44       return WordSpellSimpleConfigForm;
+45     }
+46     case 'number-match': {
+47       return NumberMatchSimpleConfigForm;
+48     }
+49     case 'sort-numbers': {
+50       return SortNumbersSimpleConfigForm;
+51     }
+52     default: {
+53       return undefined;
+54     }
+55   }
+56 };
+57 
+58 const WordSpellAdvancedHeader = (props: {
+59   config: Record<string, unknown>;
+60   onChange: (config: Record<string, unknown>) => void;
+61 }): JSX.Element => (
+62   <WordSpellLibrarySource {...props} variant="checkbox-tree" />
+63 );
+64 
+65 export const getAdvancedHeaderRenderer = (
+66   gameId: string,
+67 ): ConfigFormRenderer | undefined => {
+68   switch (gameId) {
+69     case 'word-spell': {
+70       return WordSpellAdvancedHeader;
+71     }
+72     default: {
+73       return undefined;
+74     }
+75   }
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:45:14Z)**_
@@ -7510,91 +7612,92 @@ _**Agent (claude-opus-4-7 2026-04-28 21:45:14Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/resolve-simple-config.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import {
-3	  advancedToSimple,
-4	  resolveSimpleConfig,
-5	} from './resolve-simple-config';
-6	import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-7	import { GRAPHEMES_BY_LEVEL } from '@/data/words';
-8	
-9	const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
-10	
-11	describe('resolveSimpleConfig', () => {
-12	  it('resolves recall mode + region from selectedUnits', () => {
-13	    const simple: WordSpellSimpleConfig = {
-14	      configMode: 'simple',
-15	      selectedUnits: L1,
-16	      region: 'aus',
-17	      inputMethod: 'drag',
-18	    };
-19	    const full = resolveSimpleConfig(simple);
-20	    expect(full.mode).toBe('recall');
-21	    expect(full.source?.filter.region).toBe('aus');
-22	  });
-23	
-24	  it('derives phonemesAllowed and graphemesAllowed from selectedUnits', () => {
-25	    const simple: WordSpellSimpleConfig = {
-26	      configMode: 'simple',
-27	      selectedUnits: [
-28	        { g: 's', p: 's' },
-29	        { g: 'a', p: 'æ' },
-30	      ],
-31	      region: 'aus',
-32	      inputMethod: 'drag',
-33	    };
-34	    const full = resolveSimpleConfig(simple);
-35	    expect(full.source?.filter.phonemesAllowed).toEqual(['s', 'æ']);
-36	    expect(full.source?.filter.graphemesAllowed).toEqual(['s', 'a']);
-37	  });
-38	});
-39	
-40	describe('advancedToSimple', () => {
-41	  it('populates selectedUnits from source.filter.{level, phonemesAllowed}', () => {
-42	    const config = {
-43	      gameId: 'word-spell',
-44	      component: 'WordSpell',
-45	      mode: 'recall',
-46	      tileUnit: 'letter',
-47	      inputMethod: 'drag',
-48	      wrongTileBehavior: 'lock-manual',
-49	      ttsEnabled: true,
-50	      roundsInOrder: false,
-51	      totalRounds: 4,
-52	      tileBankMode: 'exact',
-53	      source: {
-54	        type: 'word-library',
-55	        filter: {
-56	          region: 'aus',
-57	          level: 1,
-58	          phonemesAllowed: ['s'],
-59	        },
-60	      },
-61	    } as WordSpellConfig;
-62	    const simple = advancedToSimple(config);
-63	    expect(simple.region).toBe('aus');
-64	    expect(simple.selectedUnits).toEqual([{ g: 's', p: 's' }]);
-65	  });
-66	
-67	  it('falls back to L1 default when no source is present', () => {
-68	    const config = {
-69	      gameId: 'word-spell',
-70	      component: 'WordSpell',
-71	      mode: 'recall',
-72	      tileUnit: 'letter',
-73	      inputMethod: 'drag',
-74	      wrongTileBehavior: 'lock-manual',
-75	      ttsEnabled: true,
-76	      roundsInOrder: false,
-77	      totalRounds: 4,
-78	      tileBankMode: 'exact',
-79	    } as WordSpellConfig;
-80	    const simple = advancedToSimple(config);
-81	    expect(simple.selectedUnits).toEqual(L1);
-82	  });
-83	});
+1 import { describe, expect, it } from 'vitest';
+2 import {
+3   advancedToSimple,
+4   resolveSimpleConfig,
+5 } from './resolve-simple-config';
+6 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
+7 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+8 
+9 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+10 
+11 describe('resolveSimpleConfig', () => {
+12   it('resolves recall mode + region from selectedUnits', () => {
+13     const simple: WordSpellSimpleConfig = {
+14       configMode: 'simple',
+15       selectedUnits: L1,
+16       region: 'aus',
+17       inputMethod: 'drag',
+18     };
+19     const full = resolveSimpleConfig(simple);
+20     expect(full.mode).toBe('recall');
+21     expect(full.source?.filter.region).toBe('aus');
+22   });
+23 
+24   it('derives phonemesAllowed and graphemesAllowed from selectedUnits', () => {
+25     const simple: WordSpellSimpleConfig = {
+26       configMode: 'simple',
+27       selectedUnits: [
+28         { g: 's', p: 's' },
+29         { g: 'a', p: 'æ' },
+30       ],
+31       region: 'aus',
+32       inputMethod: 'drag',
+33     };
+34     const full = resolveSimpleConfig(simple);
+35     expect(full.source?.filter.phonemesAllowed).toEqual(['s', 'æ']);
+36     expect(full.source?.filter.graphemesAllowed).toEqual(['s', 'a']);
+37   });
+38 });
+39 
+40 describe('advancedToSimple', () => {
+41   it('populates selectedUnits from source.filter.{level, phonemesAllowed}', () => {
+42     const config = {
+43       gameId: 'word-spell',
+44       component: 'WordSpell',
+45       mode: 'recall',
+46       tileUnit: 'letter',
+47       inputMethod: 'drag',
+48       wrongTileBehavior: 'lock-manual',
+49       ttsEnabled: true,
+50       roundsInOrder: false,
+51       totalRounds: 4,
+52       tileBankMode: 'exact',
+53       source: {
+54         type: 'word-library',
+55         filter: {
+56           region: 'aus',
+57           level: 1,
+58           phonemesAllowed: ['s'],
+59         },
+60       },
+61     } as WordSpellConfig;
+62     const simple = advancedToSimple(config);
+63     expect(simple.region).toBe('aus');
+64     expect(simple.selectedUnits).toEqual([{ g: 's', p: 's' }]);
+65   });
+66 
+67   it('falls back to L1 default when no source is present', () => {
+68     const config = {
+69       gameId: 'word-spell',
+70       component: 'WordSpell',
+71       mode: 'recall',
+72       tileUnit: 'letter',
+73       inputMethod: 'drag',
+74       wrongTileBehavior: 'lock-manual',
+75       ttsEnabled: true,
+76       roundsInOrder: false,
+77       totalRounds: 4,
+78       tileBankMode: 'exact',
+79     } as WordSpellConfig;
+80     const simple = advancedToSimple(config);
+81     expect(simple.selectedUnits).toEqual(L1);
+82   });
+83 });
 84
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:45:14Z)**_
@@ -7604,77 +7707,78 @@ _**Agent (claude-opus-4-7 2026-04-28 21:45:14Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/games/word-spell/WordSpellSimpleConfigForm/source-emits-playable.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { useState } from 'react';
-4	import { describe, expect, it } from 'vitest';
-5	import { resolveSimpleConfig } from '../resolve-simple-config';
-6	import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
-7	import type { LevelGraphemeUnit } from '@/data/words';
-8	import type { JSX } from 'react';
-9	import { GRAPHEMES_BY_LEVEL, filterWords } from '@/data/words';
-10	
-11	const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
-12	
-13	const Harness = ({
-14	  initial,
-15	  onConfigRef,
-16	}: {
-17	  initial: LevelGraphemeUnit[];
-18	  onConfigRef: (cfg: Record<string, unknown>) => void;
-19	}): JSX.Element => {
-20	  const [config, setConfig] = useState<Record<string, unknown>>({
-21	    configMode: 'simple',
-22	    selectedUnits: initial,
-23	    region: 'aus',
-24	    inputMethod: 'drag',
-25	  });
-26	  onConfigRef(config);
-27	  return (
-28	    <WordSpellSimpleConfigForm
-29	      config={config}
-30	      onChange={(next) => {
-31	        setConfig(next);
-32	        onConfigRef(next);
-33	      }}
-34	    />
-35	  );
-36	};
-37	
-38	const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-39	
-40	describe('Simple form emits playable source for every level', () => {
-41	  for (const level of LEVELS) {
-42	    it(`level ${level}: toggling its row produces ≥ 1 hit`, async () => {
-43	      const user = userEvent.setup();
-44	      let captured: Record<string, unknown> = {};
-45	      render(
-46	        <Harness
-47	          initial={L1}
-48	          onConfigRef={(c) => {
-49	            captured = c;
-50	          }}
-51	        />,
-52	      );
-53	
-54	      if (level !== 1) {
-55	        await user.click(screen.getByLabelText(`Level ${level}`));
-56	      }
-57	
-58	      const simple = captured as {
-59	        configMode: 'simple';
-60	        selectedUnits: LevelGraphemeUnit[];
-61	        region: 'aus';
-62	        inputMethod: 'drag';
-63	      };
-64	      const resolved = resolveSimpleConfig(simple);
-65	      const result = await filterWords(resolved.source!.filter);
-66	      expect(result.hits.length).toBeGreaterThan(0);
-67	    });
-68	  }
-69	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { useState } from 'react';
+4 import { describe, expect, it } from 'vitest';
+5 import { resolveSimpleConfig } from '../resolve-simple-config';
+6 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
+7 import type { LevelGraphemeUnit } from '@/data/words';
+8 import type { JSX } from 'react';
+9 import { GRAPHEMES_BY_LEVEL, filterWords } from '@/data/words';
+10 
+11 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
+12 
+13 const Harness = ({
+14   initial,
+15   onConfigRef,
+16 }: {
+17   initial: LevelGraphemeUnit[];
+18   onConfigRef: (cfg: Record<string, unknown>) => void;
+19 }): JSX.Element => {
+20   const [config, setConfig] = useState<Record<string, unknown>>({
+21     configMode: 'simple',
+22     selectedUnits: initial,
+23     region: 'aus',
+24     inputMethod: 'drag',
+25   });
+26   onConfigRef(config);
+27   return (
+28     <WordSpellSimpleConfigForm
+29       config={config}
+30       onChange={(next) => {
+31         setConfig(next);
+32         onConfigRef(next);
+33       }}
+34     />
+35   );
+36 };
+37 
+38 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+39 
+40 describe('Simple form emits playable source for every level', () => {
+41   for (const level of LEVELS) {
+42     it(`level ${level}: toggling its row produces ≥ 1 hit`, async () => {
+43       const user = userEvent.setup();
+44       let captured: Record<string, unknown> = {};
+45       render(
+46         <Harness
+47           initial={L1}
+48           onConfigRef={(c) => {
+49             captured = c;
+50           }}
+51         />,
+52       );
+53 
+54       if (level !== 1) {
+55         await user.click(screen.getByLabelText(`Level ${level}`));
+56       }
+57 
+58       const simple = captured as {
+59         configMode: 'simple';
+60         selectedUnits: LevelGraphemeUnit[];
+61         region: 'aus';
+62         inputMethod: 'drag';
+63       };
+64       const resolved = resolveSimpleConfig(simple);
+65       const result = await filterWords(resolved.source!.filter);
+66       expect(result.hits.length).toBeGreaterThan(0);
+67     });
+68   }
+69 });
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:45:21Z)**_
@@ -7686,76 +7790,77 @@ _**Agent (claude-opus-4-7 2026-04-28 21:45:22Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import { resolveWordSpellConfig } from './$gameId';
-3	
-4	describe('resolveWordSpellConfig', () => {
-5	  it('preserves source and drops explicit rounds for simple-mode saved configs', () => {
-6	    const saved = {
-7	      component: 'WordSpell',
-8	      configMode: 'simple',
-9	      source: {
-10	        type: 'word-library',
-11	        filter: {
-12	          region: 'aus',
-13	          level: 2,
-14	          phonemesAllowed: ['s', 't'],
-15	        },
-16	      },
-17	      inputMethod: 'drag',
-18	    };
-19	
-20	    const resolved = resolveWordSpellConfig(saved);
-21	
-22	    expect(resolved.configMode).toBe('simple');
-23	    expect(resolved.source?.type).toBe('word-library');
-24	    expect(resolved.source?.filter.region).toBe('aus');
-25	    expect(resolved.source?.filter.phonemesAllowed).toContain('s');
-26	    expect(resolved.source?.filter.phonemesAllowed).toContain('t');
-27	    expect(resolved.source?.filter.graphemesAllowed).toBeDefined();
-28	    expect(resolved.rounds ?? []).toEqual([]);
-29	    expect(resolved.roundsInOrder).toBe(false);
-30	  });
-31	
-32	  it('leaves advanced saved configs alone (emoji rounds preserved)', () => {
-33	    const saved = {
-34	      component: 'WordSpell',
-35	      configMode: 'advanced',
-36	      totalRounds: 4,
-37	    };
-38	
-39	    const resolved = resolveWordSpellConfig(saved);
-40	
-41	    expect(resolved.rounds).toBeDefined();
-42	    expect(resolved.rounds?.length).toBe(4);
-43	    expect(resolved.source).toBeUndefined();
-44	  });
-45	
-46	  it('drops explicit rounds when advanced saved config has a source', () => {
-47	    const saved = {
-48	      component: 'WordSpell',
-49	      configMode: 'advanced',
-50	      source: {
-51	        type: 'word-library',
-52	        filter: { region: 'aus', level: 2 },
-53	      },
-54	      totalRounds: 4,
-55	    };
-56	
-57	    const resolved = resolveWordSpellConfig(saved);
-58	
-59	    expect(resolved.source).toEqual(saved.source);
-60	    expect(resolved.rounds ?? []).toEqual([]);
-61	  });
-62	
-63	  it('returns emoji-based default when saved is null', () => {
-64	    const resolved = resolveWordSpellConfig(null);
-65	    expect(resolved.rounds?.length).toBe(8);
-66	    expect(resolved.source).toBeUndefined();
-67	  });
-68	});
+1 import { describe, expect, it } from 'vitest';
+2 import { resolveWordSpellConfig } from './$gameId';
+3 
+4 describe('resolveWordSpellConfig', () => {
+5   it('preserves source and drops explicit rounds for simple-mode saved configs', () => {
+6     const saved = {
+7       component: 'WordSpell',
+8       configMode: 'simple',
+9       source: {
+10         type: 'word-library',
+11         filter: {
+12           region: 'aus',
+13           level: 2,
+14           phonemesAllowed: ['s', 't'],
+15         },
+16       },
+17       inputMethod: 'drag',
+18     };
+19 
+20     const resolved = resolveWordSpellConfig(saved);
+21 
+22     expect(resolved.configMode).toBe('simple');
+23     expect(resolved.source?.type).toBe('word-library');
+24     expect(resolved.source?.filter.region).toBe('aus');
+25     expect(resolved.source?.filter.phonemesAllowed).toContain('s');
+26     expect(resolved.source?.filter.phonemesAllowed).toContain('t');
+27     expect(resolved.source?.filter.graphemesAllowed).toBeDefined();
+28     expect(resolved.rounds ?? []).toEqual([]);
+29     expect(resolved.roundsInOrder).toBe(false);
+30   });
+31 
+32   it('leaves advanced saved configs alone (emoji rounds preserved)', () => {
+33     const saved = {
+34       component: 'WordSpell',
+35       configMode: 'advanced',
+36       totalRounds: 4,
+37     };
+38 
+39     const resolved = resolveWordSpellConfig(saved);
+40 
+41     expect(resolved.rounds).toBeDefined();
+42     expect(resolved.rounds?.length).toBe(4);
+43     expect(resolved.source).toBeUndefined();
+44   });
+45 
+46   it('drops explicit rounds when advanced saved config has a source', () => {
+47     const saved = {
+48       component: 'WordSpell',
+49       configMode: 'advanced',
+50       source: {
+51         type: 'word-library',
+52         filter: { region: 'aus', level: 2 },
+53       },
+54       totalRounds: 4,
+55     };
+56 
+57     const resolved = resolveWordSpellConfig(saved);
+58 
+59     expect(resolved.source).toEqual(saved.source);
+60     expect(resolved.rounds ?? []).toEqual([]);
+61   });
+62 
+63   it('returns emoji-based default when saved is null', () => {
+64     const resolved = resolveWordSpellConfig(null);
+65     expect(resolved.rounds?.length).toBe(8);
+66     expect(resolved.source).toBeUndefined();
+67   });
+68 });
 69
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:45:53Z)**_
@@ -7767,93 +7872,94 @@ _**Agent (claude-opus-4-7 2026-04-28 21:45:54Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/src/data/words/curriculum-invariant.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import { filterWords } from './filter';
-3	import { ALL_REGIONS, GRAPHEMES_BY_LEVEL } from './levels';
-4	
-5	const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-6	
-7	const unitsThrough = (maxLevel: number) => {
-8	  const out = [];
-9	  for (let lvl = 1; lvl <= maxLevel; lvl++) {
-10	    out.push(...(GRAPHEMES_BY_LEVEL[lvl] ?? []));
-11	  }
-12	  return out;
-13	};
-14	
-15	const deriveFilter = (units: { g: string; p: string }[]) => ({
-16	  phonemesAllowed: [...new Set(units.map((u) => u.p))],
-17	  graphemesAllowed: [...new Set(units.map((u) => u.g))],
-18	});
-19	
-20	describe('curriculum invariant: cumulative selection at each level yields ≥ 4 words', () => {
-21	  for (const region of ALL_REGIONS) {
-22	    for (const level of LEVELS) {
-23	      it(`${region} L1..${level}: cumulative yields ≥ 4 word(s)`, async () => {
-24	        const units = unitsThrough(level);
-25	        const result = await filterWords({
-26	          region,
-27	          ...deriveFilter(units),
-28	        });
-29	        expect(result.hits.length).toBeGreaterThanOrEqual(4);
-30	      });
-31	    }
-32	  }
-33	});
-34	
-35	describe('curriculum invariant: every level unlocks NEW playable words', () => {
-36	  for (const region of ALL_REGIONS) {
-37	    for (const level of LEVELS) {
-38	      it(`${region} L${level}: adding this level produces words that use its graphemes`, async () => {
-39	        const allUnits = unitsThrough(level);
-40	        const thisLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
-41	        const thisLevelGraphemes = new Set(thisLevel.map((u) => u.g));
-42	
-43	        const result = await filterWords({
-44	          region,
-45	          ...deriveFilter(allUnits),
-46	        });
-47	
-48	        const wordsUsingThisLevel = result.hits.filter((hit) =>
-49	          hit.graphemes?.some((g) => thisLevelGraphemes.has(g.g)),
-50	        );
-51	
-52	        expect(
-53	          wordsUsingThisLevel.length,
-54	          `L${level} graphemes [${[...thisLevelGraphemes].join(', ')}] should appear in at least 1 word`,
-55	        ).toBeGreaterThanOrEqual(1);
-56	      });
-57	    }
-58	  }
-59	});
-60	
-61	describe('curriculum invariant: each level 3-8 adds words beyond the baseline', () => {
-62	  for (const region of ALL_REGIONS) {
-63	    const baseline = unitsThrough(2);
-64	
-65	    for (const level of [3, 4, 5, 6, 7, 8] as const) {
-66	      it(`${region} L${level}: L1+L2+L${level} yields strictly more words than L1+L2 alone`, async () => {
-67	        const [baseResult, combinedResult] = await Promise.all([
-68	          filterWords({ region, ...deriveFilter(baseline) }),
-69	          filterWords({
-70	            region,
-71	            ...deriveFilter([
-72	              ...baseline,
-73	              ...(GRAPHEMES_BY_LEVEL[level] ?? []),
-74	            ]),
-75	          }),
-76	        ]);
-77	
-78	        expect(
-79	          combinedResult.hits.length,
-80	          `adding L${level} should unlock new words`,
-81	        ).toBeGreaterThan(baseResult.hits.length);
-82	      });
-83	    }
-84	  }
-85	});
+1 import { describe, expect, it } from 'vitest';
+2 import { filterWords } from './filter';
+3 import { ALL_REGIONS, GRAPHEMES_BY_LEVEL } from './levels';
+4 
+5 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+6 
+7 const unitsThrough = (maxLevel: number) => {
+8   const out = [];
+9   for (let lvl = 1; lvl <= maxLevel; lvl++) {
+10     out.push(...(GRAPHEMES_BY_LEVEL[lvl] ?? []));
+11   }
+12   return out;
+13 };
+14 
+15 const deriveFilter = (units: { g: string; p: string }[]) => ({
+16   phonemesAllowed: [...new Set(units.map((u) => u.p))],
+17   graphemesAllowed: [...new Set(units.map((u) => u.g))],
+18 });
+19 
+20 describe('curriculum invariant: cumulative selection at each level yields ≥ 4 words', () => {
+21   for (const region of ALL_REGIONS) {
+22     for (const level of LEVELS) {
+23       it(`${region} L1..${level}: cumulative yields ≥ 4 word(s)`, async () => {
+24         const units = unitsThrough(level);
+25         const result = await filterWords({
+26           region,
+27           ...deriveFilter(units),
+28         });
+29         expect(result.hits.length).toBeGreaterThanOrEqual(4);
+30       });
+31     }
+32   }
+33 });
+34 
+35 describe('curriculum invariant: every level unlocks NEW playable words', () => {
+36   for (const region of ALL_REGIONS) {
+37     for (const level of LEVELS) {
+38       it(`${region} L${level}: adding this level produces words that use its graphemes`, async () => {
+39         const allUnits = unitsThrough(level);
+40         const thisLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
+41         const thisLevelGraphemes = new Set(thisLevel.map((u) => u.g));
+42 
+43         const result = await filterWords({
+44           region,
+45           ...deriveFilter(allUnits),
+46         });
+47 
+48         const wordsUsingThisLevel = result.hits.filter((hit) =>
+49           hit.graphemes?.some((g) => thisLevelGraphemes.has(g.g)),
+50         );
+51 
+52         expect(
+53           wordsUsingThisLevel.length,
+54           `L${level} graphemes [${[...thisLevelGraphemes].join(', ')}] should appear in at least 1 word`,
+55         ).toBeGreaterThanOrEqual(1);
+56       });
+57     }
+58   }
+59 });
+60 
+61 describe('curriculum invariant: each level 3-8 adds words beyond the baseline', () => {
+62   for (const region of ALL_REGIONS) {
+63     const baseline = unitsThrough(2);
+64 
+65     for (const level of [3, 4, 5, 6, 7, 8] as const) {
+66       it(`${region} L${level}: L1+L2+L${level} yields strictly more words than L1+L2 alone`, async () => {
+67         const [baseResult, combinedResult] = await Promise.all([
+68           filterWords({ region, ...deriveFilter(baseline) }),
+69           filterWords({
+70             region,
+71             ...deriveFilter([
+72               ...baseline,
+73               ...(GRAPHEMES_BY_LEVEL[level] ?? []),
+74             ]),
+75           }),
+76         ]);
+77 
+78         expect(
+79           combinedResult.hits.length,
+80           `adding L${level} should unlock new words`,
+81         ).toBeGreaterThan(baseResult.hits.length);
+82       });
+83     }
+84   }
+85 });
 86
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:46:18Z)**_
@@ -10039,6 +10145,7 @@ This puts every commit from Phases 1-8 onto the existing PR #219.
 ```text
 File created successfully at: /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:07Z)**_
@@ -10058,6 +10165,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:15Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:23Z)**_
@@ -10069,27 +10177,28 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:24Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md`
 
 ```text
-945	    expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
-946	  });
-947	
-948	  it('marks the L1 header as all-on when every L1 unit is selected', () => {
-949	    render(<Harness initial={L1} />);
-950	    const l1 = screen.getByRole('button', { name: /Level 1/i });
-951	    expect(l1).toHaveAttribute('aria-pressed', 'true');
-952	  });
-953	
-954	  it('marks the L1 header as partial (mixed) when one L1 unit is missing', () => {
-955	    render(<Harness initial={L1.slice(1)} />);
-956	    const l1 = screen.getByRole('button', { name: /Level 1/i });
-957	    expect(l1).toHaveAttribute('aria-pressed', 'mixed');
-958	  });
-959	
-960	  it('marks the L2 header as off when no L2 units are selected', () => {
-961	    render(<Harness initial={L1} />);
-962	    const l2 = screen.getByRole('button', { name: /Level 2/i });
-963	    expect(l2).toHaveAttribute('aria-pressed', 'false');
-964	  });
+945     expect(container.querySelectorAll('input[type="checkbox"]')).toHaveLength(0);
+946   });
+947 
+948   it('marks the L1 header as all-on when every L1 unit is selected', () => {
+949     render(<Harness initial={L1} />);
+950     const l1 = screen.getByRole('button', { name: /Level 1/i });
+951     expect(l1).toHaveAttribute('aria-pressed', 'true');
+952   });
+953 
+954   it('marks the L1 header as partial (mixed) when one L1 unit is missing', () => {
+955     render(<Harness initial={L1.slice(1)} />);
+956     const l1 = screen.getByRole('button', { name: /Level 1/i });
+957     expect(l1).toHaveAttribute('aria-pressed', 'mixed');
+958   });
+959 
+960   it('marks the L2 header as off when no L2 units are selected', () => {
+961     render(<Harness initial={L1} />);
+962     const l2 = screen.getByRole('button', { name: /Level 2/i });
+963     expect(l2).toHaveAttribute('aria-pressed', 'false');
+964   });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:29Z)**_
@@ -10115,6 +10224,7 @@ Locate Step numbering in Task 8
 2124:- [ ] **Step 4: Commit any baseline updates**
 2137:- [ ] **Step 5: Push the branch**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:34Z)**_
@@ -10148,6 +10258,7 @@ Find Task 8 step numbers
 1895:- [ ] **Step 3: Commit**
 1920:- [ ] **Step 1: Append new test blocks**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:39Z)**_
@@ -10159,17 +10270,18 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:40Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md`
 
 ```text
-1460	Remove the now-unused `DEFAULT_WORD_SPELL_CONFIG` constant from the same file.
-1461	
-1462	- [ ] **Step 3: Update existing test expectations**
-1463	
-1464	Open `src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts`. Replace its contents with:
-1465	
-1466	```ts
-1467	import { describe, expect, it } from 'vitest';
-1468	import { resolveWordSpellConfig } from './$gameId';
+1460 Remove the now-unused `DEFAULT_WORD_SPELL_CONFIG` constant from the same file.
+1461 
+1462 - [ ] **Step 3: Update existing test expectations**
+1463 
+1464 Open `src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts`. Replace its contents with:
+1465 
+1466 ```ts
+1467 import { describe, expect, it } from 'vitest';
+1468 import { resolveWordSpellConfig } from './$gameId';
 1469
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:46Z)**_
@@ -10180,6 +10292,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:46Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:52Z)**_
@@ -10189,32 +10302,33 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:52Z)**_
  `/Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md`
 
 ```text
-1575	```
-1576	
-1577	- [ ] **Step 4: Run tests**
-1578	
-1579	```bash
-1580	yarn vitest run src/routes/\$locale/_app/game/resolveWordSpellConfig.test.ts
-1581	```
-1582	
-1583	Expected: all 6 tests pass.
-1584	
-1585	- [ ] **Step 5: Run full word-spell suite + types**
-1586	
-1587	```bash
-1588	yarn vitest run src/games/word-spell/ src/routes/\$locale/_app/game/ && yarn typecheck
-1589	```
-1590	
-1591	Expected: green.
-1592	
-1593	- [ ] **Step 6: Commit**
-1594	
-1595	```bash
-1596	git add src/routes/\$locale/_app/game/\$gameId.tsx src/routes/\$locale/_app/game/resolveWordSpellConfig.test.ts
-1597	git commit -m "feat(word-spell): mode-driven default config
-1598	
-1599	Splits DEFAULT_WORD_SPELL_CONFIG into DEFAULT_RECALL_CONFIG (library
+1575 ```
+1576 
+1577 - [ ] **Step 4: Run tests**
+1578 
+1579 ```bash
+1580 yarn vitest run src/routes/\$locale/_app/game/resolveWordSpellConfig.test.ts
+1581 ```
+1582 
+1583 Expected: all 6 tests pass.
+1584 
+1585 - [ ] **Step 5: Run full word-spell suite + types**
+1586 
+1587 ```bash
+1588 yarn vitest run src/games/word-spell/ src/routes/\$locale/_app/game/ && yarn typecheck
+1589 ```
+1590 
+1591 Expected: green.
+1592 
+1593 - [ ] **Step 6: Commit**
+1594 
+1595 ```bash
+1596 git add src/routes/\$locale/_app/game/\$gameId.tsx src/routes/\$locale/_app/game/resolveWordSpellConfig.test.ts
+1597 git commit -m "feat(word-spell): mode-driven default config
+1598 
+1599 Splits DEFAULT_WORD_SPELL_CONFIG into DEFAULT_RECALL_CONFIG (library
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:52:59Z)**_
@@ -10225,6 +10339,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:52:59Z)**_
 ```text
 The file /Users/leocaseiro/.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:53:07Z)**_
@@ -10244,6 +10359,7 @@ Summary: 0 error(s)
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 [This command modified 1 file you've previously read: ../../.worktrees/base-skill/bs-4/docs/superpowers/plans/2026-04-29-wordspell-cumulative-y-filter.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:53:44Z)**_
@@ -10325,6 +10441,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 </persisted-output>
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:54:27Z)**_
@@ -10346,6 +10463,7 @@ To github.com:leocaseiro/base-skill.git
    67fd2769..a08cf87a  feat/issue-216 -> feat/issue-216
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:54:32Z)**_
@@ -10356,6 +10474,7 @@ _**Agent (claude-opus-4-7 2026-04-28 21:54:32Z)**_
 ```text
 Updated task #5 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:54:46Z)**_
@@ -10549,7 +10668,6 @@ If any answer is "no", tighten the relevant section before saving.
 - Intermediate reasoning that reached conclusions
 - Information obvious from the code
 
-
 ---
 
 _**Agent (claude-opus-4-7 2026-04-28 21:56:56Z)**_
@@ -10577,6 +10695,7 @@ a08cf87a docs: implementation plan for cumulative tile pool + Y filter
 {"number":219,"state":"OPEN","url":"https://github.com/leocaseiro/base-skill/pull/219"}
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:57:05Z)**_
@@ -10592,6 +10711,7 @@ Check what's uncommitted
 ?? .claude/scheduled_tasks.lock
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 21:57:18Z)**_
@@ -10716,6 +10836,7 @@ None. The spec, plan, and design decisions are settled.
 ```text
 File created successfully at: /Users/leocaseiro/.worktrees/base-skill/bs-4/.claude/handoffs/2026-04-29-wordspell-cumulative-y-filter-plan-ready.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 22:13:49Z)**_
@@ -10778,6 +10899,7 @@ act(() => {
 </persisted-output>
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 22:14:51Z)**_
@@ -10797,6 +10919,7 @@ To github.com:leocaseiro/base-skill.git
    a08cf87a..4c55605b  feat/issue-216 -> feat/issue-216
 Shell cwd was reset to /Users/leocaseiro/Sites/base-skill
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 22:14:59Z)**_

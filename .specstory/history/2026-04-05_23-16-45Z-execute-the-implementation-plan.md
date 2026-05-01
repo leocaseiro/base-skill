@@ -10984,6 +10984,7 @@ Steps:
 ```bash
 cd /Users/leocaseiro/Sites/base-skill/worktrees/feat/touch-keyboard && yarn test src/components/answer-game/OrderedSlots/OrderedSlots.test.tsx 2>&1 | tail -10
 ```
+
 1. Commit:
 
 ```bash

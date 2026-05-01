@@ -14,6 +14,7 @@ _**User (2026-04-22 06:55:11Z)**_
   via a shared concurrency group). Do NOT write spec or plan docs.
 
   Steps:
+
   1. Edit .github/workflows/pr-preview.yml ��� add a job-level concurrency block to
      the `deploy-preview` job:
        concurrency:
@@ -31,6 +32,7 @@ _**User (2026-04-22 06:55:11Z)**_
      concurrency group serializes all gh-pages writers across pr-preview.yml and
      deploy.yml. Refs the incident."
   5. Stop. Wait for user review.
+
   ```
 
   ## Current state
@@ -233,6 +235,7 @@ _**Agent (claude-opus-4-7 2026-04-22 06:55:18Z)**_
 ```text
 Launching skill: resync
 ```
+
 </details></tool-use>
 
 ---
@@ -305,7 +308,6 @@ Wait for the user's decision. Do not resume prior work until they respond.
 - If `gh` is unauthenticated, surface the error and stop at step 2 rather than guessing.
 - Keep the whole report under ~25 lines. The user invokes this to re-ground quickly, not to read a novel.
 
-
 ---
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:21Z)**_
@@ -321,6 +323,7 @@ Fetch origin with prune
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:26Z)**_
@@ -334,6 +337,7 @@ Show current branch
 ```text
 master
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:26Z)**_
@@ -358,6 +362,7 @@ Short status with branch
 ?? .specstory/history/2026-04-22_04-19-31Z-handoff-tier-3-storybook.md
 ?? .specstory/history/2026-04-22_06-55-08Z-resync-cd-worktrees-fix.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:26Z)**_
@@ -371,6 +376,7 @@ Commits behind origin/master
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:26Z)**_
@@ -384,6 +390,7 @@ Commits ahead of origin/master
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:27Z)**_
@@ -397,6 +404,7 @@ List open PRs
 ```text
 [{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"docs/handoff-tier3","isDraft":false,"number":166,"title":"docs(handoff): tier 3 storybook audit execution","updatedAt":"2026-04-22T04:28:42Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"stories/word-library-explorer-audit","isDraft":false,"number":163,"title":"stories(data/words/word-library-explorer): audit controls + Playground","updatedAt":"2026-04-22T04:21:15Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"stories/dot-group-question-audit","isDraft":false,"number":162,"title":"stories(questions/dot-group-question): audit controls + Playground","updatedAt":"2026-04-22T04:20:54Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"stories/audio-button-audit","isDraft":false,"number":161,"title":"stories(questions/audio-button): audit controls + Playground","updatedAt":"2026-04-22T04:22:30Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"stories/image-question-audit","isDraft":false,"number":160,"title":"stories(questions/image-question): audit controls + Playground","updatedAt":"2026-04-22T04:18:48Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"stories/text-question-audit","isDraft":false,"number":159,"title":"stories(questions/text-question): audit controls + Playground","updatedAt":"2026-04-22T04:21:09Z"},{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"baseRefName":"master","headRefName":"chore/specstory-sync-2026-04-22_2","isDraft":false,"number":148,"title":"ai(specstory): sync","updatedAt":"2026-04-21T20:43:16Z"}]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:32Z)**_
@@ -467,6 +475,7 @@ drwxr-xr-x@ 42 leocaseiro  staff   1344 12 Apr 08:18 tools-phoneme-tuner
 /Users/leocaseiro/Sites/base-skill/worktrees/stories-word-library-explorer    d5a981db [stories/word-library-explorer-audit]
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner              a69cf440 [tools/phoneme-tuner]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-22 06:55:38Z)**_

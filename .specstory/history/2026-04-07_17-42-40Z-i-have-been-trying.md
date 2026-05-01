@@ -1439,6 +1439,7 @@ I see there's a ref-based workaround in `useSlotTileDrag` that updates `onDropRe
 
 - `dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })`
 - `onDropRef.current(c, 1)` → `handleDrop(c, 1)`
+
 1. `handleDrop`:
    - `zones[1].placedTileId` = `a` (not null)
    - `sourceZoneIndex = zones.findIndex(z => z.placedTileId === c)` = 0

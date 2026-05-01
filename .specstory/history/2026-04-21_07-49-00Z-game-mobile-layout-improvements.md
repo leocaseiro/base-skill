@@ -3047,3 +3047,11268 @@ To list worktrees from the main clone:
 ```bash
 git worktree list
 ```
+
+---
+
+_**User**_
+
+We need to also hide the Header (/src/routes/$locale/_app.tsx:16:9). and Footer /src/components/Footer.tsx:38:5 
+
+---
+
+_**Agent (composer-2)**_
+
+Checking how the app layout and Footer are structured so we can hide them on game routes.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/components/Footer.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/components/Header.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "isGameRoute|_app/game"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "isGameRoute|_app/game",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "src/routes/$locale/_app/game/$gameId.test.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/routes/$locale/_app/game/$gameId.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "src/components/UpdateBanner.tsx"
+    },
+    {
+      "matchCount": 5,
+      "uri": "src/routeTree.gen.ts"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The Header lacks isGameRoute in the current workspace; game layout changes might only exist in the worktree.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "from '@/components/Header'|from \\\"@/components/Header\\\""
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "from '@/components/Header'|from \\\"@/components/Header\\\"",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-15_01-38-11Z-i-am-interested-to.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./docs/superpowers/plans/2026-04-01-milestone-3-app-shell.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-14_02-19-39Z-i-want-to-figure.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-12_22-42-57Z-plan-complete-and-saved.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": "./.specstory/history/2026-04-12_13-13-25Z-i-want-to-make.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./src/routes/$locale/_app.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-07_11-03-51Z-you-are-completing-task.md"
+    },
+    {
+      "matchCount": 3,
+      "uri": "./.specstory/history/2026-04-07_10-07-56Z-superpowers-subagent-driven-development.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-07_09-46-03Z-superpowers-writing-plans-we.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-05_13-58-14Z-critical-respond-with-text.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-04_11-23-07Z-fix-the-a11y-contrast.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-04_09-35-26Z-i-need-to-continue.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-02_00-17-06Z-i-want-to-fix.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-01_13-38-29Z.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-01_11-06-42Z-i-am-trying-to.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": "./.specstory/history/2026-04-01_08-16-48Z.md"
+    }
+  ],
+  "totalFiles": 16,
+  "totalMatches": 19
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The header is exclusively used in _app.tsx.</details></think>
+
+_**Agent (composer-2)**_
+
+Hiding Header and Footer in the app layout on game routes so we have a single source of truth (Header isn't used elsewhere).
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{tsx,ts}",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "_app\\.tsx|AppLayout"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "_app\\.tsx|AppLayout",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "./src/routes/$locale/_app.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && npx eslint --max-warnings 0 'src/routes/$locale/_app.tsx' 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && npx eslint --max-warnings 0 'src/routes/$locale/_app.tsx' 2>&1
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+---
+
+_**User**_
+
+you should also use baby step commits
+
+---
+
+_**Agent (composer-2)**_
+
+Checking git status and splitting changes into small, focused commits.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git status --short && git branch --show-current && git diff --stat</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git status --short && git branch --show-current && git diff --stat
+```
+
+```
+ M .specstory/history/2026-04-21_07-49-00Z-game-mobile-layout-improvements.md
+ M .specstory/statistics.json
+ M src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+ M src/routes/$locale/_app.tsx
+?? .specstory/history/2026-04-21_20-42-44Z-continue-the-storybook-controls.md
+?? .specstory/history/2026-04-21_20-50-04Z-continue-the-storybook-controls.md
+?? .specstory/history/2026-04-21_23-15-46Z-continue-the-storybook-controls.md
+?? .specstory/history/2026-04-21_23-49-27Z-apply-classicskin-as-the.md
+master
+ ...21_07-49-00Z-game-mobile-layout-improvements.md | 246 +++++++++++++++++++++
+ .specstory/statistics.json                         |  44 +++-
+ .../EncouragementAnnouncer.stories.tsx             |   9 +-
+ src/routes/$locale/_app.tsx                        |  49 ++--
+ 4 files changed, 318 insertions(+), 30 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The user is currently on the master branch and has uncommitted changes.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git diff src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git diff src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+```
+
+```
+diff --git a/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx b/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+index bb7dbb28..98960f99 100644
+--- a/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
++++ b/src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx
+@@ -38,14 +38,7 @@ const ShowTrigger = ({
+       &gt;
+         Show encouragement
+       &lt;/button&gt;
+-      &lt;button
+-        type="button"
+-        onClick={dismiss}
+-        disabled={!visible}
+-        className="rounded-lg bg-muted px-4 py-2 text-foreground disabled:opacity-50"
+-      &gt;
+-        Dismiss
+-      &lt;/button&gt;
++
+       &lt;EncouragementAnnouncer
+         visible={visible}
+         message={message}
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+Unrelated story change: Dismiss button removed.</details></think>
+
+_**Agent (composer-2)**_
+
+Creating a feature branch (we're on `master` — avoiding direct commits per project rules) and making two small commits: app shell first, then the Storybook change.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git checkout -b feat/hide-app-chrome-on-game-routes</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git checkout -b feat/hide-app-chrome-on-game-routes
+```
+
+```
+Switched to a new branch 'feat/hide-app-chrome-on-game-routes'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill && git add 'src/routes/$locale/_app.tsx' && git commit --trailer "Made-with: Cursor" -m "feat(app): hide header and footer on game routes
+
+Match paths ending in /_app/game/:gameId so the shell is immersive;
+OfflineIndicator and UpdateBanner stay mounted."</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill && git add 'src/routes/$locale/_app.tsx' && git commit --trailer "Made-with: Cursor" -m "feat(app): hide header and footer on game routes
+
+Match paths ending in /_app/game/:gameId so the shell is immersive;
+OfflineIndicator and UpdateBanner stay mounted."
+```
+
+```
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (8f55c292)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 1 file
+[STARTED] *.{ts,tsx} — 1 file
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx
+[COMPLETED] *.{ts,tsx} — 1 file
+[COMPLETED] .lintstagedrc.mjs — 1 file
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders the game title
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders the GameCover at the top
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders instructions text
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders game title in top bar
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 524ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 445ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders "Let's go!" button
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 505ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  362ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 324ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; prompts to save as custom game when "Let's go!" is clicked on a default game
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 341ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 372ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 348ms
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 773ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  327ms
+   ✓ CoverPicker &gt; pressing "Use game default" clears the cover  344ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders undo button when maxUndoDepth is non-zero
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; prompts to save as custom game when "Let's go!" is clicked on a default game
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides undo button when maxUndoDepth is 0
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 671ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with title from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; prompts to save as custom game when "Let's go!" is clicked on a default game
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders Exit button in footer
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; calls onStart immediately (and updates the custom game) when playing a custom game
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (9 tests) 495ms
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 803ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders the simple settings form expanded by default
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders customGameName when provided
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 552ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; shows a cog button that opens the AdvancedConfigModal
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; shows a cog button that opens the AdvancedConfigModal
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; does not render a Star button when onToggleBookmark is omitted
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders aria-pressed=false when isBookmarked is false
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; renders aria-pressed=true when isBookmarked is true
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1206ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; clicking the Star fires onToggleBookmark
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (13 tests) 1227ms
+   ✓ InstructionsOverlay &gt; prompts to save as custom game when "Let's go!" is clicked on a default game  463ms
+ ✓ src/components/game/GameShell.test.tsx (13 tests) 1197ms
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 454ms
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 294ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 343ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 279ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 372ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 268ms
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 421ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 348ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 351ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 290ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1429ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  1243ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 403ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 298ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 255ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 251ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 205ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 204ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 197ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 223ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 198ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 255ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 191ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (10 tests) 206ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 172ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/migrations.test.ts (1 test) 166ms
+ ✓ src/db/create-database.test.ts (3 tests) 214ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 180ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 182ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 185ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 223ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 112ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 175ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 213ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3786ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  446ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  425ms
+   ✓ AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate  331ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  570ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  347ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  477ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 169ms
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 215ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/components/ui/button.test.tsx (1 test) 89ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 21ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 12ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 123ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 140ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 83ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 240ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 42ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 122ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 52ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 53ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 74ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 26ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/data/words/words.test.ts (7 tests) 25ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 39ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 18ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 22ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 49ms
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 35ms
+ ✓ src/data/words/filter.test.ts (13 tests) 30ms
+ ✓ src/components/OfflineIndicator.test.tsx (4 tests) 56ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 39ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 61ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 66ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 35ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 45ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 9ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 17ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 8ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 4ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (33 tests) 7ms
+ ✓ src/data/words/writer.test.ts (7 tests) 11ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 9ms
+ ✓ src/routes/__root.test.tsx (1 test) 12ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 8ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 38ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 19ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 1ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 4ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 19ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 17ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 11ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 5ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 4ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 4ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 4ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 6ms
+ ✓ src/data/words/builders.test.ts (29 tests) 6ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/data/words/sample.test.ts (7 tests) 5ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 4ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 3ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 3ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 5ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 3ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+
+ Test Files  130 passed (130)
+      Tests  870 passed (870)
+   Start at  10:45:42
+   Duration  9.47s (transform 2.67s, setup 10.09s, collect 31.86s, tests 25.41s, environment 64.37s, prepare 5.90s)
+
+Done in 10.04s.
+[feat/hide-app-chrome-on-game-routes a45a3f25] feat(app): hide header and footer on game routes
+ 1 file changed, 31 insertions(+), 18 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Cancelled
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+---
+
+_**User**_
+
+wait, aren't we at Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu ?
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The user wants to know the workspace location.</details></think>
+
+_**Agent (composer-2)**_
+
+Checking both locations: the last commands used the main repo (`/Users/leocaseiro/Sites/base-skill`), not the worktree.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git -C /Users/leocaseiro/Sites/base-skill worktree list && echo '---' && git -C /Users/leocaseiro/Sites/base-skill branch --show-current && git -C /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu branch --show-current 2>/dev/null; git -C /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu status -sb 2>/dev/null</summary>
+
+```bash
+git -C /Users/leocaseiro/Sites/base-skill worktree list && echo '---' && git -C /Users/leocaseiro/Sites/base-skill branch --show-current && git -C /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu branch --show-current 2>/dev/null; git -C /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu status -sb 2>/dev/null
+```
+
+```
+/Users/leocaseiro/Sites/base-skill                                           a45a3f25 [feat/hide-app-chrome-on-game-routes]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/adoring-kalam-e4f948    a7a3bdbd [feat/storybook-playground-pattern]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/gifted-bouman           f7cb4c51 [feat/phonics-word-library-task-11-filterWords]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/musing-merkle           294f9e7a [claude/musing-merkle]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/stupefied-satoshi       67d8d1fd [claude/stupefied-satoshi]
+/Users/leocaseiro/Sites/base-skill/worktrees/audit-storybook-controls        9b5a9353 [audit/storybook-controls]
+/Users/leocaseiro/Sites/base-skill/worktrees/ci-auto-merge-release           4ef53c28 [ci/auto-merge-release]
+/Users/leocaseiro/Sites/base-skill/worktrees/docs/tdd-rule                   4b1c577f [docs/tdd-rule]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-answer-game-primitive      39f4922f [feat/answer-game-primitive]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-bookmarks-phase-2          f9140721 [feat/bookmarks-phase-2]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing 873241e2 [feat/game-tile-auto-font-sizing]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-syllables             6503b0af [feat/word-syllables]
+/Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users     fe28ddb8 [fix/bookmarks-dm4-old-users]
+/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu                    ef97b569 [feat/game-no-menu]
+/Users/leocaseiro/Sites/base-skill/worktrees/plan-tier3-storybook-audit      a965174e [plan/tier3-storybook-audit]
+/Users/leocaseiro/Sites/base-skill/worktrees/specstory-sync-2026-04-16       bfad83b2 [specstory-sync-2026-04-16]
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay    ccdeca82 [stories/instructions-overlay-audit]
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-tier1-2-audit-plan      7e70ab43 [stories/tier1-2-audit-plan]
+/Users/leocaseiro/Sites/base-skill/worktrees/storybook-default-skin          c1651a1b [chore/storybook-default-skin]
+/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner             a69cf440 [tools/phoneme-tuner]
+---
+feat/hide-app-chrome-on-game-routes
+feat/game-no-menu
+## feat/game-no-menu...origin/master [behind 53]
+ M .cursor/rules/git-workflow.mdc
+ M CLAUDE.md
+ M src/components/Header.tsx
+ M src/components/game/GameShell.stories.tsx
+ M src/components/game/GameShell.test.tsx
+ M src/components/game/GameShell.tsx
+ M src/routes/$locale/_app/game/$gameId.test.tsx
+?? AGENTS.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+So:
+
+- Main checkout (`/Users/leocaseiro/Sites/base-skill`) is on branch `feat/hide-app-chrome-on-game-routes` at commit a45a3f25, which contains the app.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git -C /Users/leocaseiro/Sites/base-skill log -2 --oneline && git -C /Users/leocaseiro/Sites/base-skill show --stat -1</summary>
+
+```bash
+git -C /Users/leocaseiro/Sites/base-skill log -2 --oneline && git -C /Users/leocaseiro/Sites/base-skill show --stat -1
+```
+
+```
+a45a3f25 feat(app): hide header and footer on game routes
+52f57ae6 docs(spec): tier 1 + tier 2 storybook audit batch design (#149)
+commit a45a3f25063366da702503a352d05d4b4c255ca9
+Author: leocaseiro &lt;leobok@gmail.com&gt;
+Date:   Wed Apr 22 10:45:38 2026 +1000
+
+    feat(app): hide header and footer on game routes
+    
+    Match paths ending in /_app/game/:gameId so the shell is immersive;
+    OfflineIndicator and UpdateBanner stay mounted.
+    
+    Made-with: Cursor
+
+ src/routes/$locale/_app.tsx | 49 ++++++++++++++++++++++++++++-----------------
+ 1 file changed, 31 insertions(+), 18 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+We’re **not** in `worktrees/game-no-menu` from the agent’s point of view.
+
+**What actually happened**
+
+- Terminal commands used **`/Users/leocaseiro/Sites/base-skill`** (the **main** checkout).
+- That checkout is on **`feat/hide-app-chrome-on-game-routes`** with commit **`a45a3f25`** — the **header/footer hide** change in `src/routes/$locale/_app.tsx` lives **there only**.
+- **`worktrees/game-no-menu`** is still on **`feat/game-no-menu`** at **`ef97b569`** with your **uncommitted** GameShell / Header / `AGENTS.md` / `.cursor` work. It does **not** include that `_app.tsx` commit unless you bring it over.
+
+**Why**
+
+- Cursor’s **opened folder** drives what the agent edits; your session was rooted at **`base-skill`**, not **`base-skill/worktrees/game-no-menu`**. Same git repo, **different working trees** → different branches and different files on disk.
+
+**What to do**
+
+1. **Use the worktree as the workspace:** *File → Open Folder* →  
+   `Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu`
+2. **Move the app-shell commit into that branch**, e.g. from the main checkout:
+
+   ```bash
+   cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+   git fetch origin
+   git cherry-pick a45a3f25
+   ```
+
+   Resolve conflicts if any, then continue your baby-step commits **from that directory**.
+
+I can run the cherry-pick for you in `worktrees/game-no-menu` if you want that applied next.
+
+---
+
+_**User**_
+
+do it please, we should be working inside Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu on this session
+
+---
+
+_**Agent (composer-2)**_
+
+Cherry-picking the app-shell commit into `worktrees/game-no-menu` and verifying the worktree state.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git stash push -m "WIP feat/game-no-menu before cherry-pick app chrome" --include-untracked</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git stash push -m "WIP feat/game-no-menu before cherry-pick app chrome" --include-untracked
+```
+
+```
+## feat/game-no-menu...origin/master [behind 53]
+ M .cursor/rules/git-workflow.mdc
+ M CLAUDE.md
+ M src/components/Header.tsx
+ M src/components/game/GameShell.stories.tsx
+ M src/components/game/GameShell.test.tsx
+ M src/components/game/GameShell.tsx
+ M src/routes/$locale/_app/game/$gameId.test.tsx
+?? AGENTS.md
+Saved working directory and index state On feat/game-no-menu: WIP feat/game-no-menu before cherry-pick app chrome
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git cherry-pick a45a3f25</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git cherry-pick a45a3f25
+```
+
+```
+[feat/game-no-menu 2d3ebef0] feat(app): hide header and footer on game routes
+ Date: Wed Apr 22 10:45:38 2026 +1000
+ 1 file changed, 31 insertions(+), 18 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git stash pop</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git stash pop
+```
+
+```
+On branch feat/game-no-menu
+Your branch and 'origin/master' have diverged,
+and have 1 and 53 different commits each, respectively.
+  (use "git pull" if you want to integrate the remote branch with yours)
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .cursor/rules/git-workflow.mdc
+	modified:   CLAUDE.md
+	modified:   src/components/Header.tsx
+	modified:   src/components/game/GameShell.stories.tsx
+	modified:   src/components/game/GameShell.test.tsx
+	modified:   src/components/game/GameShell.tsx
+	modified:   src/routes/$locale/_app/game/$gameId.test.tsx
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	AGENTS.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (bb0fde080aea910e5d816ff5a62dd7d02d704bba)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx",
+  "pattern": "showAppChrome|APP_GAME_PATH"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx",
+  "pattern": "showAppChrome|APP_GAME_PATH",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "worktrees/game-no-menu/src/routes/$locale/_app.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Here’s what was done in **`/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu`**:
+
+1. **Stashed** your existing WIP (GameShell, Header, `AGENTS.md`, `.cursor` rules, etc.).
+2. **Cherry-picked** `a45a3f25` → new commit **`2d3ebef0`** on **`feat/game-no-menu`**: `feat(app): hide header and footer on game routes`.
+3. **Re-applied** the stash so your uncommitted game-shell + agent-rule edits are back on top.
+
+`_app.tsx` in this worktree now has `showAppChrome` / `APP_GAME_PATH_RE` as expected.
+
+**For this session in Cursor:** use **File → Open Folder** and choose:
+
+`Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu`
+
+I can’t switch the IDE workspace from here; once that folder is open, tools and edits will target this worktree by default.
+
+**Note:** `feat/game-no-menu` has **diverged** from `origin/master` (1 local commit vs 53 on remote). Before you PR, you’ll likely want `git fetch origin` and either **rebase** onto `origin/master` or **merge** `master`, depending on how you manage this branch.
+
+---
+
+_**User**_
+
+my stash should be a new PR for the agents rules. Please do that using a subagent
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The user wants to create a new pull request for agents rules work that was previously stashed. The current uncommitted changes in game-no-menu include AGENTS.md, .cursor/rules/git-workflow.mdc, and CLAUDE.md, along with potential GameShell/Header changes. The stash contained both agents rules and game shell changes, but the user wants a new PR for agents rules only. The plan is to:
+
+- Separate agents-rules changes from game shell changes
+- Create a new branch from origin/master
+- Create a new PR for just the agents rules changes Commit only the agents rules files and open a PR.
+
+The user wants the stash content related to agents rules to form its own PR. The stash included:
+- .cursor/rules/git-workflow.mdc
+- CLAUDE.md
+- AGENTS.md
+- src/components/Header.tsx, GameShell*, $gameId.test.tsx - these are game UI changes, not agents rules
+
+I need to:
+1. Read the current git status in worktrees/game-no-menu
+2. Create a new branch from origin/master
+3. Extract and commit only the agents rules files from the stash
+4. Push the branch and open a PR for the agents rules changes The user wants to create a new pull request for agents rules changes by:
+- Creating a new branch from origin/master
+- Staging only AGENTS.md, .cursor/rules/git-workflow.mdc, and CLAUDE.md
+- Committing these files separately with baby steps
+- Pushing the branch and opening a PR
+- Keeping game shell changes uncommitted or stashed separately
+
+The user explicitly requested using a subagent for this task.</details></think>
+
+_**Agent (composer-2)**_
+
+Checking the worktree state, then using a subagent to branch, commit only agent-rules files (baby-step commits), and open a PR.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git log -3 --oneline</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git log -3 --oneline
+```
+
+```
+## feat/game-no-menu...origin/master [ahead 1, behind 53]
+ M .cursor/rules/git-workflow.mdc
+ M CLAUDE.md
+ M src/components/Header.tsx
+ M src/components/game/GameShell.stories.tsx
+ M src/components/game/GameShell.test.tsx
+ M src/components/game/GameShell.tsx
+ M src/routes/$locale/_app/game/$gameId.test.tsx
+?? AGENTS.md
+2d3ebef0 feat(app): hide header and footer on game routes
+ef97b569 chore(release): v0.10.7 (#133)
+4a537592 Chore/specstory sync 2026 04 21 (#132)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+I'll use Task subagent with detailed instructions to: I'll use Task subagent with detailed instructions to:
+
+- From game-no-menu, stash the game-related files only OR stash all and selectively apply
+- Create new branch from origin/master named feat/agents-workflow-rules
+- Apply only AGENTS.md, .cursor/rules/git-workflow.mdc, CLAUDE.md changes
+
+Easiest path without losing game WIP:
+- Save agents files to /tmp from working tree
+- Stash game files only
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+cp AGENTS.md /tmp/AGENTS.md.pr
+cp .cursor/rules/git-workflow.mdc /tmp/git-workflow.mdc.pr
+cp CLAUDE.md /tmp/CLAUDE.md.pr
+git stash push -m "game shell WIP" -- src/components/Header.
+``` Now that the game files are stashed, the agents-related files remain untracked in the working directory. I'll fetch the latest from origin/master and create a new branch feat/agents-workflow-rules based on it.
+
+- Copy the previously saved agents files back into their original locations:
+  - AGENTS.md
+  - .cursor/rules/git-workflow.mdc
+  - CLAUDE.md
+- Stage and commit these files for the new branch
+
+This approach preserves the WIP game changes while applying only the necessary workflow rules and agent configuration files to the new feature branch.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2">
+<details>
+<summary>Tool use: **task_v2**</summary>
+
+
+Parameters:
+
+```json
+{
+  "description": "Agents rules PR via worktree",
+  "model": "composer-2-fast",
+  "name": "shell",
+  "prompt": "You are working in git repo /Users/leocaseiro/Sites/base-skill.\n\nGoal: Open a **new GitHub PR** that contains **only** the agent/workflow documentation changes (no GameShell, Header, or game test changes).\n\n**Source of truth for file contents** (current working copies on disk):\n- /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/AGENTS.md (untracked)\n- /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/.cursor/rules/git-workflow.mdc\n- /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/CLAUDE.md (first lines point to AGENTS.md)\n\nSteps (must follow):\n\n1. &#96;git fetch origin master&#96; from repo root.\n\n2. Create a **new worktree** (do NOT repoint &#96;worktrees/game-no-menu&#96; away from &#96;feat/game-no-menu&#96;):\n   - Path: &#96;/Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules&#96;\n   - Branch: &#96;feat/agents-workflow-rules&#96; from &#96;origin/master&#96;\n   - If that path or branch already exists, remove old worktree safely or reuse after confirming with &#96;git worktree list&#96;.\n\n3. Copy the three files from &#96;worktrees/game-no-menu&#96; into the new worktree (same relative paths). Ensure &#96;.cursor/rules/&#96; exists.\n\n4. In &#96;worktrees/agents-workflow-rules&#96;, make **baby-step commits** (3 commits):\n   - Commit 1: &#96;AGENTS.md&#96; only — message: &#96;docs(agents): add AGENTS.md for cross-tool agent instructions&#96;\n   - Commit 2: &#96;.cursor/rules/git-workflow.mdc&#96; only — message: &#96;chore(cursor): harden git-workflow rule for worktree gate&#96;\n   - Commit 3: &#96;CLAUDE.md&#96; only — message: &#96;docs: point agents to AGENTS.md from CLAUDE.md&#96;\n\n5. Run &#96;npx prettier --write AGENTS.md CLAUDE.md&#96; and &#96;npx eslint --max-warnings 0&#96; on any touched non-md if needed; for &#96;.mdc&#96; skip if no eslint rule. If &#96;yarn fix:md&#96; applies to these files without huge churn, run it.\n\n6. Push: &#96;git push -u origin feat/agents-workflow-rules&#96;\n\n7. Create PR: &#96;gh pr create --base master --head feat/agents-workflow-rules&#96; with a clear title and body (value-first: what AGENTS.md does, why worktree gate, link to CLAUDE.md). If &#96;gh&#96; fails, report the error.\n\n8. **Clean up &#96;game-no-menu&#96; working tree** so agent-rule edits are not duplicated with uncommitted noise:\n   - &#96;cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu&#96;\n   - &#96;git restore CLAUDE.md .cursor/rules/git-workflow.mdc&#96;\n   - Remove untracked &#96;AGENTS.md&#96; if present (&#96;rm AGENTS.md&#96;)\n   - Leave **only** the game-related modified files unstaged (Header, GameShell*, $gameId.test.tsx) as before.\n   - Verify with &#96;git status -sb&#96;\n\nReturn: branch name, commit SHAs, PR URL, and final &#96;git status -sb&#96; for both worktrees.",
+  "subagentType": "shell"
+}
+```
+Additional data:
+
+```json
+{
+  "status": "success",
+  "subagentComposerId": "3b3967c3-8013-4ff2-bbc6-27d0fe910083",
+  "terminationReason": "completed"
+}
+```
+Result:
+
+```json
+{
+  "agentId": "3b3967c3-8013-4ff2-bbc6-27d0fe910083"
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="task_v2"><details>
+<summary>Tool use: **task_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Here’s what the shell subagent did:
+
+### PR (agents rules only)
+- **PR:** https://github.com/leocaseiro/base-skill/pull/156  
+- **Branch:** `feat/agents-workflow-rules` (from current `origin/master`)
+
+### Baby-step commits
+1. `c0af3c99` — `docs(agents): add AGENTS.md for cross-tool agent instructions`  
+2. `2338a6ca` — `chore(cursor): harden git-workflow rule for worktree gate`  
+3. `93f32a23` — `docs: point agents to AGENTS.md from CLAUDE.md`
+
+### Worktrees
+- **`worktrees/agents-workflow-rules`** — holds only those three commits; clean vs remote.  
+- **`worktrees/game-no-menu`** — still on **`feat/game-no-menu`** (with your cherry-picked app chrome commit). Agent-rule copies were removed from the working tree so you’re not duplicating the PR locally; **only** the game-shell WIP remains modified:
+
+  `Header.tsx`, `GameShell*.tsx`, `GameShell.test.tsx`, `$gameId.test.tsx`.
+
+Continue game work in **`Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu`**; use **`worktrees/agents-workflow-rules`** if you need to tweak the PR branch.
+
+---
+
+_**User**_
+
+Did you mention by baby steps too? Every time the agent thing is good, they should commit. It's okay to have multiple commits in a single PR, I would prefer to review or cherry pick. Also to undo later.
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The user requests documentation for the agent workflow, specifically referencing AGENTS.</details></think>
+
+_**Agent (composer-2)**_
+
+Adding explicit “baby-step commits” guidance to the agent docs and pushing an update to the agents-rules branch.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/AGENTS.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/.cursor/rules/git-workflow.mdc</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+I'll add a new section "## Commits (baby steps)" to AGENTS.md.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/AGENTS.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/.cursor/rules/git-workflow.mdc</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/CLAUDE.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules/CLAUDE.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules && npx prettier --write AGENTS.md CLAUDE.md && git add AGENTS.md && git commit --trailer "Made-with: Cursor" -m "docs(agents): prefer baby-step commits for review and cherry-pick"
+
+git add .cursor/rules/git-workflow.mdc && git commit --trailer "Made-with: Cursor" -m "chore(cursor): document baby-step commits in git-workflow rule"
+
+git add CLAUDE.md && git commit --trailer "Made-with: Cursor" -m "docs: align CLAUDE git rules with baby-step commit practice"
+
+git push origin feat/agents-workflow-rules</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/agents-workflow-rules && npx prettier --write AGENTS.md CLAUDE.md && git add AGENTS.md && git commit --trailer "Made-with: Cursor" -m "docs(agents): prefer baby-step commits for review and cherry-pick"
+
+git add .cursor/rules/git-workflow.mdc && git commit --trailer "Made-with: Cursor" -m "chore(cursor): document baby-step commits in git-workflow rule"
+
+git add CLAUDE.md && git commit --trailer "Made-with: Cursor" -m "docs: align CLAUDE git rules with baby-step commit practice"
+
+git push origin feat/agents-workflow-rules
+```
+
+```
+AGENTS.md 13ms (unchanged)
+CLAUDE.md 11ms (unchanged)
+[feat/agents-workflow-rules 4b1c77de] docs(agents): prefer baby-step commits for review and cherry-pick
+ 1 file changed, 6 insertions(+)
+[feat/agents-workflow-rules f7e890a5] chore(cursor): document baby-step commits in git-workflow rule
+ 1 file changed, 6 insertions(+)
+[feat/agents-workflow-rules e0d78ed1] docs: align CLAUDE git rules with baby-step commit practice
+ 1 file changed, 1 insertion(+)
+To github.com:leocaseiro/base-skill.git
+   93f32a23..e0d78ed1  feat/agents-workflow-rules -&gt; feat/agents-workflow-rules
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+That wasn’t spelled out in the first version of the agents docs; it is now, and the PR branch is updated with **three more baby-step commits**:
+
+1. **`4b1c77de`** — `docs(agents): prefer baby-step commits for review and cherry-pick` (`AGENTS.md` — new **Commits (baby steps)** section: commit after each coherent chunk, multiple commits per PR OK, cherry-pick/revert friendly, “baby steps” = default for the branch unless user opts out).
+
+2. **`f7e890a5`** — `chore(cursor): document baby-step commits in git-workflow rule` (`.cursor/rules/git-workflow.mdc` — same idea for Cursor always-on context).
+
+3. **`e0d78ed1`** — `docs: align CLAUDE git rules with baby-step commit practice` (`CLAUDE.md` — bullet under Git Workflow **Rules** + link to `AGENTS.md`).
+
+Pushed to **`feat/agents-workflow-rules`**, so **PR #156** (https://github.com/leocaseiro/base-skill/pull/156) now includes this guidance. After merge, any agent that reads `AGENTS.md` / `git-workflow.mdc` / `CLAUDE.md` gets the baby-step expectation explicitly.
+
+---
+
+_**User**_
+
+Did we implement the mobile improvements, or just planned?
+
+---
+
+_**Agent (composer-2)**_
+
+Checking the codebase for implemented mobile game-shell and app-layout changes.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/components/game/GameShell.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+**It depends which tree you’re looking at.**
+
+### Main repo (`/Users/leocaseiro/Sites/base-skill`)
+**Not implemented** — still the older behavior:
+- `GameShell.tsx` still has the top bar (back + title), footer with undo / pause / exit, and the old imports (`LogOut`, `Pause`, `RotateCcw`).
+- `_app.tsx` always renders `Header` and `Footer` (no game-route chrome toggle).
+
+### Worktree `worktrees/game-no-menu` (`feat/game-no-menu`)
+**Implemented in code** (and evolved past the first draft):
+- `GameShell` uses the **X** control, **fixed/portal** top chrome (so it stacks above overlays), **no** in-shell header bar or undo/pause footer.
+- `_app.tsx` uses **`shouldRenderAppHeaderFooter(pathname)`** from `@/lib/app-paths` to hide app **Header** and **Footer** on game routes.
+
+So: **not only planned** — the mobile-oriented shell is **built in `game-no-menu`**, but it is **not merged into `master`** yet, which is why the root checkout still looks unchanged.
+
+To ship it: finish/commit/push from `worktrees/game-no-menu` and open a PR (or merge `feat/game-no-menu` after rebasing on current `master`).
+
+---
+
+_**User**_
+
+Why did we still have headers and so on in here? https://leocaseiro.github.io/base-skill/en/game/sort-numbers 
+
+
+---
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The user is asking why the deployed site at https://leocaseiro.github is not working or inaccessible. The deployed site isn't working because the game's mobile improvements and changes were made in the `feat/game-no-menu` branch but weren't merged into the branch used for deployment (likely `master` or `gh-pages`). 
+
+To fix this:
+- Verify which branch GitHub Pages deploys from
+- Check if the `worktrees/game-no-menu` changes need to be merged into the deployment branch
+- Confirm the base path and deployment workflow settings
+
+The current deployment still shows the old code with headers instead of the updated game shell.</details></think>
+
+_**Agent (composer-2)**_
+
+Tracing how game URLs map to pathnames and what triggers the deploy — a route mismatch could explain headers still showing in production.
+
+
+
+_**Agent (composer-2)**_
+
+File not found
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.tsx",
+  "path": "/Users/leocaseiro/Sites/base-skill/src/routes",
+  "pattern": "game|_app"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src/routes",
+  "pattern": "game|_app",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/src/routes** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "shouldRenderAppHeaderFooter|app-paths"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "shouldRenderAppHeaderFooter|app-paths",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: ls /Users/leocaseiro/Sites/base-skill/src/routes 2>&1 | head -20</summary>
+
+```bash
+ls /Users/leocaseiro/Sites/base-skill/src/routes 2>&1 | head -20
+```
+
+```
+$locale
+__root.test.tsx
+__root.tsx
+index.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/__root.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.tsx",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "game|sort-numbers"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src",
+  "pattern": "game|sort-numbers",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "src/components/questions/ImageQuestion/ImageQuestion.stories.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "src/components/questions/DotGroupQuestion/DotGroupQuestion.stories.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "src/components/questions/AudioButton/AudioButton.stories.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "src/components/questions/TextQuestion/TextQuestion.stories.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/components/UpdateBanner.stories.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "src/components/answer-game/Slot/Slot.stories.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "src/components/answer-game/AnswerGame/AnswerGame.stories.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "src/components/answer-game/EncouragementAnnouncer/EncouragementAnnouncer.stories.tsx"
+    },
+    {
+      "matchCount": 7,
+      "uri": "src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx"
+    }
+  ],
+  "totalFiles": 10,
+  "totalMatches": 743
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/src/routeTree.gen.ts",
+  "pattern": "game"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/src/routeTree.gen.ts",
+  "pattern": "game",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/vite.config.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search">
+<details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **/Users/leocaseiro/Sites/base-skill/src** (0 files)
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+So on master (what the user has in base-skill):
+- 1.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: find /Users/leocaseiro/Sites/base-skill/src/routes -name '*.tsx' 2>/dev/null | head -40</summary>
+
+```bash
+find /Users/leocaseiro/Sites/base-skill/src/routes -name '*.tsx' 2>/dev/null | head -40
+```
+
+```
+/Users/leocaseiro/Sites/base-skill/src/routes/__root.test.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/index.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/__root.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/route.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/settings.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/index.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/game/$gameId.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/game/$gameId.test.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/index.test.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/index.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/overrides.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/data.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/sync.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/history.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent/voices.tsx
+/Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app/parent.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/route.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/router*.{ts,tsx}",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "_app|basepath|basePath|pathless"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill",
+  "pattern": "_app|basepath|basePath|pathless",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "./src/router.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The worktree fixed the pathname issue  games now use `/en/game/sort-numbers` instead of `/en/_app/game/sort-numbers`.</details></think>
+
+---
+
+_**User**_
+
+rebase from latest master, and raise a PR for me
+
+---
+
+_**Agent (composer-2)**_
+
+Rebasing `feat/game-no-menu` onto latest `origin/master` and opening a PR. Checking git state.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git log --oneline -5 && git worktree list | head -5</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -sb && git log --oneline -5 && git worktree list | head -5
+```
+
+```
+## feat/game-no-menu...origin/master [ahead 1, behind 146]
+ M src/components/Header.tsx
+ M src/components/OfflineIndicator.test.tsx
+ M src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+ M src/components/game/GameShell.stories.tsx
+ M src/components/game/GameShell.test.tsx
+ M src/components/game/GameShell.tsx
+ M src/routes/$locale/_app.tsx
+ M src/routes/$locale/_app/game/$gameId.test.tsx
+?? src/components/Footer.test.tsx
+?? src/components/Header.test.tsx
+?? src/components/UpdateBanner.test.tsx
+?? src/lib/app-paths.test.ts
+?? src/lib/app-paths.ts
+?? src/routes/$locale/_app-chrome-behavior.test.tsx
+2d3ebef0 feat(app): hide header and footer on game routes
+ef97b569 chore(release): v0.10.7 (#133)
+4a537592 Chore/specstory sync 2026 04 21 (#132)
+581cab10 ai(specstory): sync
+b5b56439 Merge branch 'chore/specstory-sync-2026-04-17' into chore/specstory-sync-2026-04-21
+/Users/leocaseiro/Sites/base-skill                                              4023f488 [master]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-meitner-9c8ee4        7acc50a6 [claude/bold-meitner-9c8ee4]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-sinoussi-60d7fa       38812e46 [claude/bold-sinoussi-60d7fa]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/dazzling-cartwright-ac3ed4 3ff2d215 [claude/dazzling-cartwright-ac3ed4]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/dazzling-colden-06a0a3     d44c40bc [claude/dazzling-colden-06a0a3]
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+There are many uncommitted changes.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git fetch origin master && git branch -r | grep game-no-menu; git log origin/feat/game-no-menu --oneline -2 2>/dev/null || echo 'no remote branch'</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git fetch origin master && git branch -r | grep game-no-menu; git log origin/feat/game-no-menu --oneline -2 2>/dev/null || echo 'no remote branch'
+```
+
+```
+From github.com:leocaseiro/base-skill
+ * branch              master     -&gt; FETCH_HEAD
+   4023f488..b86d09b9  master     -&gt; origin/master
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+grep failed with exit 1, likely due to a missing remote branch.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git diff --stat</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git diff --stat
+```
+
+```
+ src/components/Header.tsx                          |   5 +
+ src/components/OfflineIndicator.test.tsx           |  79 +++----
+ .../InstructionsOverlay.test.tsx                   | 240 +++++----------------
+ src/components/game/GameShell.stories.tsx          |   8 -
+ src/components/game/GameShell.test.tsx             |  55 ++---
+ src/components/game/GameShell.tsx                  | 102 +++------
+ src/routes/$locale/_app.tsx                        |   6 +-
+ src/routes/$locale/_app/game/$gameId.test.tsx      |   6 +-
+ 8 files changed, 145 insertions(+), 356 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx",
+  "pattern": "isGame|game"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx",
+  "pattern": "isGame|game",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -u</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status -u
+```
+
+```
+On branch feat/game-no-menu
+Your branch and 'origin/master' have diverged,
+and have 1 and 198 different commits each, respectively.
+  (use "git pull" if you want to integrate the remote branch with yours)
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   src/components/Header.tsx
+	modified:   src/components/OfflineIndicator.test.tsx
+	modified:   src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+	modified:   src/components/game/GameShell.stories.tsx
+	modified:   src/components/game/GameShell.test.tsx
+	modified:   src/components/game/GameShell.tsx
+	modified:   src/routes/$locale/_app.tsx
+	modified:   src/routes/$locale/_app/game/$gameId.test.tsx
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	src/components/Footer.test.tsx
+	src/components/Header.test.tsx
+	src/components/UpdateBanner.test.tsx
+	src/lib/app-paths.test.ts
+	src/lib/app-paths.ts
+	src/routes/$locale/_app-chrome-behavior.test.tsx
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx",
+  "pattern": "app-paths|isAppGameSessionPath"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx",
+  "pattern": "app-paths|isAppGameSessionPath",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/game-no-menu/src/components/Header.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The cherry-picked commit 2d3ebef0 may have used APP_GAME_PATH_RE with /_app/game/, but the current _app uses shouldRenderAppHeaderFooter from app-paths instead.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Footer.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/UpdateBanner.test.tsx</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+I'll commit the changes in this order:
+- app-paths + app-paths.test
+- [missing item]</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git show 2d3ebef0:src/routes/\$locale/_app.tsx | head -45</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git show 2d3ebef0:src/routes/\$locale/_app.tsx | head -45
+```
+
+```
+import {
+  Outlet,
+  createFileRoute,
+  useLocation,
+} from '@tanstack/react-router';
+import { I18nextProvider } from 'react-i18next';
+import type { JSX } from 'react';
+import { Footer } from '@/components/Footer';
+import { Header } from '@/components/Header';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { UpdateBanner } from '@/components/UpdateBanner';
+import { seedThemesOnce } from '@/db/seed-themes';
+import { i18n } from '@/lib/i18n/i18n';
+import { DbProvider } from '@/providers/DbProvider';
+import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+
+/** Matches &#96;/$locale/_app/game/$gameId&#96; (no trailing slash). */
+const APP_GAME_PATH_RE = /\/_app\/game\/[^/]+$/;
+
+const AppLayout = (): JSX.Element =&gt; {
+  const { pathname } = useLocation();
+  const showAppChrome = !APP_GAME_PATH_RE.test(pathname);
+
+  return (
+    &lt;DbProvider onDatabaseReady={seedThemesOnce}&gt;
+      &lt;I18nextProvider i18n={i18n}&gt;
+        &lt;ThemeRuntimeProvider&gt;
+          &lt;div className="flex min-h-screen flex-col"&gt;
+            {showAppChrome ? &lt;Header /&gt; : null}
+            &lt;OfflineIndicator /&gt;
+            &lt;UpdateBanner /&gt;
+            &lt;main className="flex-1"&gt;
+              &lt;Outlet /&gt;
+            &lt;/main&gt;
+            {showAppChrome ? &lt;Footer /&gt; : null}
+          &lt;/div&gt;
+        &lt;/ThemeRuntimeProvider&gt;
+      &lt;/I18nextProvider&gt;
+    &lt;/DbProvider&gt;
+  );
+};
+
+export const Route = createFileRoute('/$locale/_app')({
+  component: AppLayout,
+});
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+The working tree _app uses shouldRenderAppHeaderFooter to address the GitHub Pages URL discrepancy between `/en/game/` and `/_app/game/`. The commit 2d3ebef0 contains a broken regex, and several reset options are available. The cleanest approach is to reset to ef97b569 or use `git reset --mixed origin/master`.
+
+Options include:
+- Interactive rebase to edit 2d3ebef0 (complex)
+- Reset soft before 2d3ebef0 (loses one commit)
+- `git reset --soft ef97b569` (messy due to current branch state)
+- Rebase onto master after committing WIP (requires fixing history)
+- `git reset --mixed origin/master` or reset to ef97b569 (cleanest) The user wants to rebase onto the latest master. The steps are:
+
+- Commit all new files and stash nothing
+- Use `git reset --mixed HEAD~1` to remove the faulty commit while keeping the working tree changes
+- Rebase onto the latest master to incorporate recent updates
+
+This approach preserves the current working tree modifications to _app while resetting the problematic commit. If you run `git reset --mixed HEAD~1`, the branch moves to the parent commit (ef97b569), the index updates to match that commit's tree, and the working directory retains a combined state of the changes from 2d3ebef0 plus any current unstaged modifications. This means the working tree includes the tree from 2d3ebef0 merged with any uncommitted changes. After running `git reset --mixed HEAD~1`, the repository state becomes:
+
+- New HEAD = ef97b569
+- Index = ef97b569 tree
+- Working tree = unchanged files remain as they were on disk
+
+This preserves the current _app.tsx edits with shouldRenderAppHeaderFooter while maintaining other changes from 2d3ebef0 that were not part of the working tree. Then fetch master and rebase onto origin/master:
+`git fetch origin master && git rebase origin/master`
+
+Since we're at ef97b569 with a dirty working copy, we must either commit or stash first.
+
+A simpler approach:
+- Commit all current changes, including _app with app-paths, creating a new commit on top of 2d3ebef0
+- Run `git rebase -i origin/master` and either drop or fixup 2d3ebef0
+- Alternatively, use `git rebase --onto origin/master 2d3ebef0` to skip the bad commit
+
+Or perform a soft reset to remove the bad commit while preserving file state:
+```bash
+git reset --soft HEAD~1
+```</details></think>
+
+_**Agent (composer-2)**_
+
+Dropping the incorrect cherry-pick commit (it used `/_app/game/`, which doesn't match real URLs like `/en/game/sort-numbers`), then committing the current work in baby steps, rebasing onto `origin/master`, and opening the PR.
+
+
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git reset --mixed ef97b569 && git status -sb | head -25</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git reset --mixed ef97b569 && git status -sb | head -25
+```
+
+```
+Unstaged changes after reset:
+M	src/components/Header.tsx
+M	src/components/OfflineIndicator.test.tsx
+M	src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+M	src/components/game/GameShell.stories.tsx
+M	src/components/game/GameShell.test.tsx
+M	src/components/game/GameShell.tsx
+M	src/routes/$locale/_app.tsx
+M	src/routes/$locale/_app/game/$gameId.test.tsx
+## feat/game-no-menu...origin/master [behind 198]
+ M src/components/Header.tsx
+ M src/components/OfflineIndicator.test.tsx
+ M src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+ M src/components/game/GameShell.stories.tsx
+ M src/components/game/GameShell.test.tsx
+ M src/components/game/GameShell.tsx
+ M src/routes/$locale/_app.tsx
+ M src/routes/$locale/_app/game/$gameId.test.tsx
+?? src/components/Footer.test.tsx
+?? src/components/Header.test.tsx
+?? src/components/UpdateBanner.test.tsx
+?? src/lib/app-paths.test.ts
+?? src/lib/app-paths.ts
+?? src/routes/$locale/_app-chrome-behavior.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx",
+  "pattern": "shouldRenderAppHeaderFooter|APP_GAME_PATH"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx",
+  "pattern": "shouldRenderAppHeaderFooter|APP_GAME_PATH",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "worktrees/game-no-menu/src/routes/$locale/_app.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+Good. Now baby commits:
+
+- git add src/lib/app-paths.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && \
+git add src/lib/app-paths.ts src/lib/app-paths.test.ts && \
+git commit --trailer "Made-with: Cursor" -m "feat(lib): detect in-app game URLs for chrome hiding
+
+pathname is /:locale/game/:gameId (no _app segment in browser URLs)." && \
+git add 'src/routes/$locale/_app.tsx' 'src/routes/$locale/_app-chrome-behavior.test.tsx' && \
+git commit --trailer "Made-with: Cursor" -m "feat(app): hide global header and footer on game session routes" && \
+git add src/components/Header.tsx src/components/Header.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "fix(header): do not render on game session paths" && \
+git add src/components/Footer.test.tsx src/components/UpdateBanner.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "test: cover footer and update banner with game path behavior" && \
+git add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx src/components/game/GameShell.stories.tsx 'src/routes/$locale/_app/game/$gameId.test.tsx' && \
+git commit --trailer "Made-with: Cursor" -m "feat(game): immersive shell with portaled exit and no undo/pause bar" && \
+git add src/components/OfflineIndicator.test.tsx src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "test: align offline and instructions overlay with game paths"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && \
+git add src/lib/app-paths.ts src/lib/app-paths.test.ts && \
+git commit --trailer "Made-with: Cursor" -m "feat(lib): detect in-app game URLs for chrome hiding
+
+pathname is /:locale/game/:gameId (no _app segment in browser URLs)." && \
+git add 'src/routes/$locale/_app.tsx' 'src/routes/$locale/_app-chrome-behavior.test.tsx' && \
+git commit --trailer "Made-with: Cursor" -m "feat(app): hide global header and footer on game session routes" && \
+git add src/components/Header.tsx src/components/Header.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "fix(header): do not render on game session paths" && \
+git add src/components/Footer.test.tsx src/components/UpdateBanner.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "test: cover footer and update banner with game path behavior" && \
+git add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx src/components/game/GameShell.stories.tsx 'src/routes/$locale/_app/game/$gameId.test.tsx' && \
+git commit --trailer "Made-with: Cursor" -m "feat(game): immersive shell with portaled exit and no undo/pause bar" && \
+git add src/components/OfflineIndicator.test.tsx src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx && \
+git commit --trailer "Made-with: Cursor" -m "test: align offline and instructions overlay with game paths"
+```
+
+```
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (3ec8628d)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 450ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 497ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 659ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 693ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  451ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 353ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 905ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  448ms
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 400ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 429ms
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 441ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 696ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 450ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 498ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 841ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1166ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1257ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 376ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 418ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 378ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 357ms
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1237ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  968ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 397ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 391ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 379ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 227ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 423ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 400ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 261ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 207ms
+ ✓ src/components/Header.test.tsx (2 tests) 290ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 233ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 221ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 202ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 263ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 229ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 209ms
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 304ms
+ ✓ src/db/create-database.test.ts (3 tests) 249ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 165ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 200ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 238ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3378ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  441ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  362ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  450ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  324ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  480ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 127ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 167ms
+ ✓ src/components/Footer.test.tsx (1 test) 128ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 196ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 161ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 126ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 127ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 103ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 155ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 124ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 103ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 190ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 81ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 203ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/lib/seeded-random.test.ts (3 tests) 14ms
+ ✓ src/components/ui/button.test.tsx (1 test) 177ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 221ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 168ms
+ ✓ src/db/migrations.test.ts (1 test) 119ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 257ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 88ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 154ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 30ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 35ms
+ ✓ src/data/words/words.test.ts (7 tests) 36ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 39ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 26ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 21ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 18ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 32ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 26ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 18ms
+ ✓ src/data/words/filter.test.ts (13 tests) 16ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 12ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 12ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 49ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 37ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 58ms
+ ✓ src/routes/__root.test.tsx (1 test) 11ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 15ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 12ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 17ms
+ ✓ src/data/words/writer.test.ts (7 tests) 8ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 24ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 6ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 7ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 10ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 29ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 5ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 8ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 5ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 5ms
+ ✓ src/data/words/sample.test.ts (7 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 5ms
+ ✓ src/data/words/builders.test.ts (29 tests) 6ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 4ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 4ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 4ms
+ ✓ src/games/config-chips.test.ts (4 tests) 5ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 6ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 4ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 4ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 19ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 12ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 6ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 1ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:21:59
+   Duration  10.31s (transform 2.94s, setup 11.27s, collect 36.48s, tests 25.35s, environment 67.57s, prepare 6.45s)
+
+Done in 10.96s.
+[feat/game-no-menu fcf50c4d] feat(lib): detect in-app game URLs for chrome hiding
+ 2 files changed, 46 insertions(+)
+ create mode 100644 src/lib/app-paths.test.ts
+ create mode 100644 src/lib/app-paths.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (83cf7049)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 360ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 527ms
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 288ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 438ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 327ms
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 530ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  378ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 354ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 424ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 772ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  376ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 651ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 800ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 384ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 436ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1041ms
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1244ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 273ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 313ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 259ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 296ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1085ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  899ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 351ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 368ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 195ms
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 478ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 413ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 445ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 340ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 318ms
+ ✓ src/db/create-database.test.ts (3 tests) 183ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 242ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 224ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 167ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 200ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 208ms
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 146ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 242ms
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 279ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 395ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3298ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  389ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  394ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  440ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  306ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  636ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 332ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 196ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 379ms
+   ✓ InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)  378ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 249ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 179ms
+ ✓ src/components/ui/button.test.tsx (1 test) 180ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 287ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 176ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 187ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 175ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 192ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 231ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 56ms
+ ✓ src/components/Footer.test.tsx (1 test) 131ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 127ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 114ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 120ms
+ ✓ src/db/migrations.test.ts (1 test) 88ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 51ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 144ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 163ms
+ ✓ src/data/words/words.test.ts (7 tests) 30ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 49ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 149ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 24ms
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 37ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 45ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 36ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 24ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 28ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 126ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 33ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 81ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 15ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 30ms
+ ✓ src/data/words/filter.test.ts (13 tests) 20ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 26ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 15ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 19ms
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 17ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 13ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 33ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 33ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 25ms
+ ✓ src/routes/__root.test.tsx (1 test) 35ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 9ms
+ ✓ src/data/words/writer.test.ts (7 tests) 8ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 12ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 10ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 10ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 12ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+ ✓ src/data/words/builders.test.ts (29 tests) 14ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 19ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 13ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 8ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 4ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 5ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 3ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 6ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 3ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 3ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/data/words/sample.test.ts (7 tests) 4ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 17ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 3ms
+]633;P;Cwd=/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu]633;P;HasRichCommandDetection=True]633;A$ ]633;B]633;E;cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu &amp;&amp; \\\x0agit add src/lib/app-paths.ts src/lib/app-paths.test.ts &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "feat(lib): detect in-app game URLs for chrome hiding\x0a\x0apathname is /:locale/game/:gameId (no _app segment in browser URLs)." &amp;&amp; \\\x0agit add 'src/routes/$locale/_app.tsx' 'src/routes/$locale/_app-chrome-behavior.test.tsx' &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "feat(app): hide global header and footer on game session routes" &amp;&amp; \\\x0agit add src/components/Header.tsx src/components/Header.test.tsx &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "fix(header): do not render on game session paths" &amp;&amp; \\\x0agit add src/components/Footer.test.tsx src/components/UpdateBanner.test.tsx &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "test: cover footer and update banner with game path behavior" &amp;&amp; \\\x0agit add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx src/components/game/GameShell.stories.tsx 'src/routes/$locale/_app/game/$gameId.test.tsx' &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "feat(game): immersive shell with portaled exit and no undo/pause bar" &amp;&amp; \\\x0agit add src/components/OfflineIndicator.test.tsx src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &amp;&amp; \\\x0agit commit --trailer "Made-with: Cursor" -m "test: align offline and instructions overlay with game paths"cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu &amp;&amp; \
+git add src/lib/app-paths.ts src/lib/app-paths.test.ts &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "feat(lib): detect in-app game URLs for chrome hiding
+
+pathname is /:locale/game/:gameId (no _app segment in browser URLs)." &amp;&amp; \
+git add 'src/routes/$locale/_app.tsx' 'src/routes/$locale/_app-chrome-behavior.test.tsx' &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "feat(app): hide global header and footer on game session routes" &amp;&amp; \
+git add src/components/Header.tsx src/components/Header.test.tsx &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "fix(header): do not render on game session paths" &amp;&amp; \
+git add src/components/Footer.test.tsx src/components/UpdateBanner.test.tsx &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "test: cover footer and update banner with game path behavior" &amp;&amp; \
+git add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx src/components/game/GameShell.stories.tsx 'src/routes/$locale/_app/game/$gameId.test.tsx' &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "feat(game): immersive shell with portaled exit and no undo/pause bar" &amp;&amp; \
+git add src/components/OfflineIndicator.test.tsx src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &amp;&amp; \
+git commit --trailer "Made-with: Cursor" -m "test: align offline and instructions overlay with game paths"
+]633;C[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (3ec8628d)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.test.ts /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/lib/app-paths.ts
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 450ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 497ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 659ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 693ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  451ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 353ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 905ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  448ms
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 400ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 429ms
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 441ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 696ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 450ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 498ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 841ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1166ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1257ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 376ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 418ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 378ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 357ms
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1237ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  968ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 397ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 391ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 379ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 227ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 423ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 400ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 261ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 207ms
+ ✓ src/components/Header.test.tsx (2 tests) 290ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 233ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 221ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 202ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 263ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 229ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 209ms
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 304ms
+ ✓ src/db/create-database.test.ts (3 tests) 249ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 165ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 200ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 238ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3378ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  441ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  362ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  450ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  324ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  480ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 127ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 167ms
+ ✓ src/components/Footer.test.tsx (1 test) 128ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 196ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 161ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 126ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 127ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 103ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 155ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 124ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 103ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 190ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 81ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 203ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/lib/seeded-random.test.ts (3 tests) 14ms
+ ✓ src/components/ui/button.test.tsx (1 test) 177ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 221ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 168ms
+ ✓ src/db/migrations.test.ts (1 test) 119ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 257ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 88ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 154ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 30ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 35ms
+ ✓ src/data/words/words.test.ts (7 tests) 36ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 39ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 26ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 21ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 18ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 32ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 26ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 18ms
+ ✓ src/data/words/filter.test.ts (13 tests) 16ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 12ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 12ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 49ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 37ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 58ms
+ ✓ src/routes/__root.test.tsx (1 test) 11ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 15ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 12ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 17ms
+ ✓ src/data/words/writer.test.ts (7 tests) 8ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 24ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 6ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 7ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 10ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 29ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 5ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 8ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 5ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 5ms
+ ✓ src/data/words/sample.test.ts (7 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 5ms
+ ✓ src/data/words/builders.test.ts (29 tests) 6ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 4ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 4ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 4ms
+ ✓ src/games/config-chips.test.ts (4 tests) 5ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 4ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 6ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 4ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 4ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 19ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 12ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 6ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 1ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:21:59
+   Duration  10.31s (transform 2.94s, setup 11.27s, collect 36.48s, tests 25.35s, environment 67.57s, prepare 6.45s)
+
+Done in 10.96s.
+[feat/game-no-menu fcf50c4d] feat(lib): detect in-app game URLs for chrome hiding
+ 2 files changed, 46 insertions(+)
+ create mode 100644 src/lib/app-paths.test.ts
+ create mode 100644 src/lib/app-paths.ts
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (83cf7049)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app-chrome-behavior.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 360ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 527ms
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 288ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 438ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 327ms
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 530ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  378ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 354ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 424ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 772ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  376ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 651ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 800ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 384ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 436ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1041ms
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1244ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 273ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 313ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 259ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 296ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1085ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  899ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 351ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 368ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 195ms
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 478ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 413ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 445ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 340ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 318ms
+ ✓ src/db/create-database.test.ts (3 tests) 183ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 242ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 224ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 167ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 200ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 208ms
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 146ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 242ms
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 279ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 395ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3298ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  389ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  394ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  440ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  306ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  636ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 332ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 196ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 379ms
+   ✓ InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)  378ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 249ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 179ms
+ ✓ src/components/ui/button.test.tsx (1 test) 180ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 287ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 176ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 187ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 175ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 192ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 231ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 56ms
+ ✓ src/components/Footer.test.tsx (1 test) 131ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 127ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 114ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 120ms
+ ✓ src/db/migrations.test.ts (1 test) 88ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 51ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 144ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 163ms
+ ✓ src/data/words/words.test.ts (7 tests) 30ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 49ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 149ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 24ms
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 37ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 45ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 36ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 24ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 28ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 126ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 33ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 81ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 15ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 30ms
+ ✓ src/data/words/filter.test.ts (13 tests) 20ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 26ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 15ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 19ms
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 17ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 13ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 33ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 33ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 25ms
+ ✓ src/routes/__root.test.tsx (1 test) 35ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 9ms
+ ✓ src/data/words/writer.test.ts (7 tests) 8ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 12ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 10ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 10ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 12ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+ ✓ src/data/words/builders.test.ts (29 tests) 14ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 19ms
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 13ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 8ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 4ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 5ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 3ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 6ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 3ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 3ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/data/words/sample.test.ts (7 tests) 4ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 3ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 17ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 3ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 5ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 4ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 1ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:22:14
+   Duration  10.28s (transform 2.77s, setup 11.15s, collect 35.23s, tests 24.24s, environment 68.68s, prepare 6.70s)
+
+Done in 10.67s.
+[feat/game-no-menu 6f23b9b6] feat(app): hide global header and footer on game session routes
+ 2 files changed, 81 insertions(+), 18 deletions(-)
+ create mode 100644 src/routes/$locale/_app-chrome-behavior.test.tsx
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (acf805ad)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Header.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 224ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 472ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 467ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  353ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 438ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 349ms
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 362ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 357ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 751ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  338ms
+   ✓ CoverPicker &gt; pressing "Use game default" clears the cover  303ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 358ms
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 668ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 797ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 378ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 456ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1266ms
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1082ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 473ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 275ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1187ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  986ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 291ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 397ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 286ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 167ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 258ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 268ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 320ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 433ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 411ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 255ms
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 443ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 248ms
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 392ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 190ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 260ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 248ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 211ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 127ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 188ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 260ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 210ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 194ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 176ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 249ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 247ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/ui/button.test.tsx (1 test) 217ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3531ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  399ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  499ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  607ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  618ms
+ ✓ src/components/Header.test.tsx (2 tests) 429ms
+ ✓ src/db/create-database.test.ts (3 tests) 197ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 180ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 93ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 16ms
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 149ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 124ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 125ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 105ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 15ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 150ms
+ ✓ src/components/Footer.test.tsx (1 test) 161ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 82ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 175ms
+ ✓ src/db/migrations.test.ts (1 test) 134ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 180ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 42ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 159ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 84ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 120ms
+ ✓ src/routes/__root.test.tsx (1 test) 12ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 18ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 16ms
+ ✓ src/data/words/words.test.ts (7 tests) 35ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 41ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 36ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 34ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 34ms
+ ✓ src/data/words/filter.test.ts (13 tests) 37ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 24ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 43ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 35ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 19ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 18ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 8ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 20ms
+ ✓ src/games/cover.test.ts (3 tests) 4ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 14ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 17ms
+ ✓ src/data/words/builders.test.ts (29 tests) 6ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 11ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 33ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 8ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 14ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 38ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 11ms
+ ✓ src/data/words/writer.test.ts (7 tests) 10ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 6ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 12ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 16ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 17ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 44ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 6ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 4ms
+ ✓ src/data/words/sample.test.ts (7 tests) 5ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 3ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 5ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 4ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 4ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 3ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 7ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 3ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 8ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 3ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 4ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:22:28
+   Duration  10.44s (transform 2.50s, setup 11.54s, collect 33.89s, tests 24.36s, environment 70.64s, prepare 7.02s)
+
+Done in 10.82s.
+[feat/game-no-menu 2ca6167d] fix(header): do not render on game session paths
+ 2 files changed, 111 insertions(+)
+ create mode 100644 src/components/Header.test.tsx
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (aa31ba75)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Footer.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/UpdateBanner.test.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Footer.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/UpdateBanner.test.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Footer.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/UpdateBanner.test.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/Footer.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/UpdateBanner.test.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 394ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 536ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  403ms
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 553ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 457ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 316ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 314ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 331ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 399ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 280ms
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 809ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  369ms
+   ✓ CoverPicker &gt; pressing "Use game default" clears the cover  325ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 656ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 852ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 424ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 266ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1255ms
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 1159ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 355ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 411ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 400ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 350ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 385ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 343ms
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 393ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 250ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 284ms
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 255ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1198ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  967ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 403ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/GameCard.test.tsx (7 tests) 430ms
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 220ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 120ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 94ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 235ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 230ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 184ms
+ ✓ src/components/ui/button.test.tsx (1 test) 139ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 203ms
+ ✓ src/db/create-database.test.ts (3 tests) 158ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3183ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  411ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  348ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  529ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  464ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 180ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 290ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 118ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 227ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 180ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 202ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 243ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 113ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 110ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 114ms
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 143ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 128ms
+ ✓ src/components/Footer.test.tsx (1 test) 166ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 128ms
+ ✓ src/db/migrations.test.ts (1 test) 110ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 81ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 334ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 248ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 64ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 165ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 61ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 197ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 123ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 49ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 35ms
+ ✓ src/data/words/filter.test.ts (13 tests) 18ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 27ms
+ ✓ src/data/words/words.test.ts (7 tests) 27ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 32ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 22ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 21ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 39ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 37ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 12ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 26ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 35ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/lib/seeded-random.test.ts (3 tests) 13ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 16ms
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 27ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 22ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 16ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 53ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 13ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 37ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 81ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 14ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 12ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 7ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 11ms
+ ✓ src/routes/__root.test.tsx (1 test) 12ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 2ms
+ ✓ src/data/words/writer.test.ts (7 tests) 17ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 4ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 5ms
+ ✓ src/data/words/builders.test.ts (29 tests) 5ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 5ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 4ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 5ms
+ ✓ src/data/words/sample.test.ts (7 tests) 42ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 8ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 4ms
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 3ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 4ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 4ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 6ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 3ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 6ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 7ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 4ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 1ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 3ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 2ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 2ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:22:43
+   Duration  10.30s (transform 2.66s, setup 10.92s, collect 35.07s, tests 23.87s, environment 67.46s, prepare 7.03s)
+
+Done in 10.69s.
+[feat/game-no-menu 059318eb] test: cover footer and update banner with game path behavior
+ 2 files changed, 103 insertions(+)
+ create mode 100644 src/components/Footer.test.tsx
+ create mode 100644 src/components/UpdateBanner.test.tsx
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (785ea969)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 4 files
+[STARTED] *.{ts,tsx} — 4 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app/game/$gameId.test.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app/game/$gameId.test.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app/game/$gameId.test.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.stories.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/game/GameShell.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/routes/$locale/_app/game/$gameId.test.tsx
+[COMPLETED] *.{ts,tsx} — 4 files
+[COMPLETED] .lintstagedrc.mjs — 4 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 391ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 271ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 269ms
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 539ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 465ms
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 519ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  375ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 327ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 383ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 418ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 791ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  387ms
+   ✓ CoverPicker &gt; pressing "Use game default" clears the cover  302ms
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 658ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 776ms
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 415ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 969ms
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1205ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 312ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 131ms
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1055ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  877ms
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 418ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 429ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 479ms
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 473ms
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 497ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 527ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 366ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 489ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 323ms
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 357ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 239ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 303ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 216ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 118ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 290ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 127ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 216ms
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 204ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 206ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 131ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 187ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 86ms
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 221ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3368ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  451ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  348ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  511ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  363ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  429ms
+ ✓ src/components/Footer.test.tsx (1 test) 94ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 175ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 243ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 213ms
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 269ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 91ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 114ms
+ ✓ src/db/create-database.test.ts (3 tests) 232ms
+ ✓ src/components/ui/button.test.tsx (1 test) 105ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 117ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 16ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 156ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 57ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 182ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 107ms
+ ✓ src/db/migrations.test.ts (1 test) 84ms
+ ✓ src/data/words/sample.test.ts (7 tests) 3ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 200ms
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 97ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 212ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 108ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 171ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 18ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 17ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 15ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 61ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 33ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 40ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 70ms
+ ✓ src/data/words/words.test.ts (7 tests) 35ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 24ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 24ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 41ms
+ ✓ src/data/words/filter.test.ts (13 tests) 19ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 18ms
+ ✓ src/data/words/writer.test.ts (7 tests) 18ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 70ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 36ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 24ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 16ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 15ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 17ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 13ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 17ms
+ ✓ src/routes/__root.test.tsx (1 test) 12ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 5ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 7ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 28ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 21ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 29ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 17ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 17ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 3ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 4ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 18ms
+ ✓ src/data/words/builders.test.ts (29 tests) 10ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 4ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 3ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 3ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 3ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 15ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 1ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 2ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 5ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 5ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 2ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 3ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:22:57
+   Duration  10.16s (transform 2.80s, setup 11.01s, collect 34.06s, tests 24.12s, environment 66.64s, prepare 7.02s)
+
+Done in 10.53s.
+[feat/game-no-menu 1a31ddc6] feat(game): immersive shell with portaled exit and no undo/pause bar
+ 4 files changed, 53 insertions(+), 106 deletions(-)
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (e641d49a)
+[STARTED] Running tasks for staged files...
+[STARTED] .lintstagedrc.mjs — 2 files
+[STARTED] *.{ts,tsx} — 2 files
+[STARTED] *.css — 0 files
+[STARTED] *.md — 0 files
+[STARTED] *.mdx — 0 files
+[STARTED] *.json — 0 files
+[SKIPPED] *.css — no files
+[SKIPPED] *.md — no files
+[SKIPPED] *.mdx — no files
+[SKIPPED] *.json — no files
+[STARTED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+[COMPLETED] eslint --fix /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+[STARTED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+[COMPLETED] prettier --write /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/OfflineIndicator.test.tsx /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+[COMPLETED] *.{ts,tsx} — 2 files
+[COMPLETED] .lintstagedrc.mjs — 2 files
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[COMPLETED] Applying modifications from tasks...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 257ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 246ms
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 525ms
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 475ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  330ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 269ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 297ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 330ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 497ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 705ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  363ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 317ms
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 593ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 409ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 755ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 958ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1223ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 436ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 250ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 347ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1061ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  845ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 286ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 273ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 469ms
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 484ms
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 468ms
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/GameCard.test.tsx (7 tests) 326ms
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 494ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 271ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 190ms
+ ✓ src/components/Header.test.tsx (2 tests) 288ms
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 406ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 291ms
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 293ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 197ms
+ ✓ src/db/create-database.test.ts (3 tests) 202ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 198ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 171ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3042ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  333ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  344ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  487ms
+   ✓ AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload  345ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  347ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 131ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 256ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 116ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 209ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 96ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 148ms
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 166ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 108ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 185ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 145ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 158ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 173ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 147ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 134ms
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 119ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 126ms
+ ✓ src/components/ui/button.test.tsx (1 test) 93ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 62ms
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 43ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 43ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 141ms
+ ✓ src/components/Footer.test.tsx (1 test) 176ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 150ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/components/GameCover.test.tsx (3 tests) 78ms
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 158ms
+ ✓ src/db/migrations.test.ts (1 test) 135ms
+ ✓ src/data/words/words.test.ts (7 tests) 30ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 23ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 48ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 50ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 14ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 20ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 25ms
+ ✓ src/data/words/filter.test.ts (13 tests) 24ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 37ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 11ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 43ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 6ms
+ ✓ src/data/words/writer.test.ts (7 tests) 9ms
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/lib/seeded-random.test.ts (3 tests) 13ms
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 19ms
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 42ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 56ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 124ms
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 15ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 17ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 21ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 15ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 3ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 8ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 30ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 19ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 21ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 5ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 13ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 5ms
+ ✓ src/data/words/builders.test.ts (29 tests) 4ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 8ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 5ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/routes/__root.test.tsx (1 test) 18ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 3ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 5ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 4ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 3ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 3ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 3ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 2ms
+ ✓ src/data/words/sample.test.ts (7 tests) 3ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 5ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 6ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 3ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 4ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 1ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 3ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 3ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:23:11
+   Duration  10.06s (transform 2.97s, setup 10.83s, collect 35.20s, tests 22.69s, environment 64.48s, prepare 6.61s)
+
+Done in 10.51s.
+[feat/game-no-menu 9de62de8] test: align offline and instructions overlay with game paths
+ 2 files changed, 89 insertions(+), 228 deletions(-)
+]633;D;0
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="await">
+<details>
+<summary>Tool use: **await**</summary>
+
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="await"><details>
+<summary>Tool use: **await**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: sleep 90 && tail -40 /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+```bash
+sleep 90 && tail -40 /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt
+```
+
+```
+]633;C ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 2ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/games/cover.test.ts (3 tests) 6ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 3ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 4ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 2ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 1ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 3ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 3ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:23:11
+   Duration  10.06s (transform 2.97s, setup 10.83s, collect 35.20s, tests 22.69s, environment 64.48s, prepare 6.61s)
+
+Done in 10.51s.
+[feat/game-no-menu 9de62de8] test: align offline and instructions overlay with game paths
+ 2 files changed, 89 insertions(+), 228 deletions(-)
+
+---
+exit_code: 0
+elapsed_ms: 87913
+ended_at: 2026-04-24T11:23:21.455Z
+---
+]633;D;0
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt",
+  "pattern": "exit_code|husky - commit|Aborting|error Command|rebase|Successfully rebased"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt",
+  "pattern": "exit_code|husky - commit|Aborting|error Command|rebase|Successfully rebased",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt",
+  "pattern": "^\\[feat/game-no-menu|Successfully rebased|CONFLICT|exit_code|error Command|gh pr"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt",
+  "pattern": "^\\[feat/game-no-menu|Successfully rebased|CONFLICT|exit_code|error Command|gh pr",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "../../.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Offset 4980 is beyond file length (4000 lines)
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/581895.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git log --oneline -8 && git status -sb</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git log --oneline -8 && git status -sb
+```
+
+```
+1a31ddc6 feat(game): immersive shell with portaled exit and no undo/pause bar
+059318eb test: cover footer and update banner with game path behavior
+2ca6167d fix(header): do not render on game session paths
+6f23b9b6 feat(app): hide global header and footer on game session routes
+fcf50c4d feat(lib): detect in-app game URLs for chrome hiding
+ef97b569 chore(release): v0.10.7 (#133)
+4a537592 Chore/specstory sync 2026 04 21 (#132)
+581cab10 ai(specstory): sync
+## feat/game-no-menu...origin/master [ahead 5, behind 198]
+M  src/components/OfflineIndicator.test.tsx
+M  src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git diff --stat && git diff --cached --stat</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git diff --stat && git diff --cached --stat
+```
+
+```
+ src/components/OfflineIndicator.test.tsx           |  70 +++---
+ .../InstructionsOverlay.test.tsx                   | 247 +++++----------------
+ 2 files changed, 89 insertions(+), 228 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git status
+```
+
+```
+On branch feat/game-no-menu
+Your branch and 'origin/master' have diverged,
+and have 5 and 198 different commits each, respectively.
+  (use "git pull" if you want to integrate the remote branch with yours)
+
+Changes to be committed:
+  (use "git restore --staged &lt;file&gt;..." to unstage)
+	modified:   src/components/OfflineIndicator.test.tsx
+	modified:   src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<think><details><summary>Thought Process</summary>
+Staged changes are pending commit; Vitest is running in the background terminal.</details></think>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git commit --trailer "Made-with: Cursor" -m "test: align offline indicator and instructions overlay with game paths"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git commit --trailer "Made-with: Cursor" -m "test: align offline indicator and instructions overlay with game paths"
+```
+
+```
+→ lint-staged could not find any staged files.
+yarn run v1.22.22
+$ vitest run
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides initial state via useGameState
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/ConfigFormFields.test.tsx (18 tests) 388ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; provides stable dispatch via useGameDispatch
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; renders with suggested name pre-filled
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; SKIP_INSTRUCTIONS transitions to playing
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onSave with the name when form is submitted
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/migrate-custom-games.test.ts (5 tests) 276ms
+ ✓ src/components/config/Stepper.test.tsx (10 tests) 541ms
+ ✓ src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx (2 tests) 511ms
+   ✓ NumberMatchSimpleConfigForm &gt; clamps max below min  360ms
+ ✓ src/games/word-spell/useLibraryRounds.test.tsx (9 tests) 454ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is empty
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; UNDO rolls back to previous state
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/session-finder.test.ts (7 tests) 351ms
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/lib/game-engine/game-engine-provider.test.tsx &gt; GameEngineProvider &gt; resumes from initialLog when provided
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/useAnswerGameDraftSync.test.ts (7 tests) 368ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/lib/game-engine/game-engine-provider.test.tsx (6 tests) 412ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; shows error and does not call onSave when name is a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/CoverPicker.test.tsx (3 tests) 860ms
+   ✓ CoverPicker &gt; selecting an emoji updates the cover  399ms
+   ✓ CoverPicker &gt; pressing "Use game default" clears the cover  349ms
+stderr | src/components/SaveConfigDialog.test.tsx &gt; SaveConfigDialog &gt; calls onCancel when Cancel is clicked
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/games/number-match/NumberMatch/NumberMatch.test.tsx &gt; NumberMatch &gt; renders a TextQuestion for numeral-to-group mode
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ src/components/SaveConfigDialog.test.tsx (6 tests) 697ms
+stderr | src/games/word-spell/WordSpell/WordSpell.test.tsx &gt; WordSpell &gt; renders the game with letter tiles for the first round word
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; shows only "Save as new" when editing a default card
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useBookmarks.test.tsx (7 tests) 830ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with an empty name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/games/word-spell/WordSpell/WordSpell.test.tsx (6 tests) 524ms
+ ✓ src/games/number-match/NumberMatch/NumberMatch.test.tsx (5 tests) 570ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 940ms
+ ✓ src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx (3 tests) 261ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/db/hooks/useCustomGames.test.tsx (11 tests) 1274ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/GameCard.test.tsx &gt; GameCard &gt; renders a default card with chips, cog, Play, and the default type badge
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+ ✓ scripts/detect-buckets.test.mjs (30 tests) 318ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; allows "Update" to keep the same name without flagging a duplicate
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChipStrip.test.tsx (3 tests) 267ms
+ ✓ src/components/GameCard.test.tsx (7 tests) 306ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; does NOT render a Delete button for default mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 1108ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  842ms
+ ✓ src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx (3 tests) 284ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; renders a Delete button for customGame mode
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/db/hooks/useSettings.test.tsx (3 tests) 368ms
+ ✓ src/components/questions/DotGroupQuestion/DotGroupQuestion.test.tsx (5 tests) 331ms
+ ✓ src/lib/game-engine/config-loader.test.ts (7 tests) 501ms
+ ✓ src/db/schemas/bookmarks.test.ts (4 tests) 254ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 305ms
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; renders tiles for all bank tile IDs
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Save-as-new payload so saved advanced fields survive reload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx &gt; NumeralTileBank &gt; placed tile renders as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx (11 tests) 229ms
+ ✓ src/db/schemas/session_history_index.test.ts (6 tests) 327ms
+ ✓ src/db/schemas/word_spell_seen_words.test.ts (4 tests) 230ms
+ ✓ src/lib/game-engine/session-recorder.test.tsx (4 tests) 337ms
+ ✓ src/db/schemas/custom_games.test.ts (3 tests) 201ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUD.test.tsx (9 tests) 198ms
+ ✓ src/db/create-database.test.ts (3 tests) 183ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; stamps configMode: "advanced" on Update payload
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/config/CellSelect.test.tsx (2 tests) 170ms
+ ✓ src/db/hooks/useSeenWordsStore.test.tsx (5 tests) 319ms
+ ✓ src/db/schemas/saved_game_configs.test.ts (3 tests) 210ms
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 213ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/config/ChunkGroup.test.tsx (3 tests) 215ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 212ms
+stderr | src/components/AdvancedConfigModal.test.tsx &gt; AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/Footer.test.tsx (1 test) 117ms
+ ✓ src/components/answer-game/useRoundTTS.test.tsx (3 tests) 176ms
+ ✓ src/components/AdvancedConfigModal.test.tsx (11 tests) 3176ms
+   ✓ AdvancedConfigModal &gt; shows "Update" and "Save as new" buttons when editing a custom game  370ms
+   ✓ AdvancedConfigModal &gt; shows only "Save as new" when editing a default card  329ms
+   ✓ AdvancedConfigModal &gt; does not save with a duplicate name — focuses the input and surfaces the error  338ms
+   ✓ AdvancedConfigModal &gt; opens a confirmation dialog when Delete is clicked; Cancel keeps the modal open and does not call onDelete  421ms
+   ✓ AdvancedConfigModal &gt; calls onDelete with the configId and closes the modal on Confirm  507ms
+ ✓ src/components/answer-game/Slot/slot-animations.test.ts (8 tests) 140ms
+stderr | src/db/bookmarks-migration.test.ts &gt; bookmarks v0 (gameId shape) → v1 migration &gt; reopens a v0 DB at v1 and migrates real-world docs without DM4
+-------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+
+ ✓ src/db/bookmarks-migration.test.ts (1 test) 105ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; renders all bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 119ms
+stderr | src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx &gt; LetterTileBank &gt; placed tile is rendered as a hole, not a button
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx (4 tests) 181ms
+ ✓ src/components/answer-game/Slot/SlotRow.test.tsx (2 tests) 159ms
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; renders bank tiles as buttons
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;Initialiser&#96;). To locate the bad setState() call inside &#96;Initialiser&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx &gt; SortNumbersTileBank &gt; placed tile renders as hole
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestWithPlace&#96;). To locate the bad setState() call inside &#96;TestWithPlace&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx (3 tests) 139ms
+ ✓ src/db/migrations.test.ts (1 test) 82ms
+ ✓ src/components/answer-game/AnswerGame/AnswerGame.test.tsx (6 tests) 126ms
+ ✓ src/components/questions/AudioButton/AudioButton.test.tsx (3 tests) 162ms
+ ✓ src/components/questions/TextQuestion/TextQuestion.test.tsx (3 tests) 160ms
+ ✓ src/components/questions/EmojiQuestion/EmojiQuestion.test.tsx (1 test) 114ms
+ ✓ src/components/answer-game/useKeyboardDrag.test.tsx (2 tests) 22ms
+ ✓ src/components/answer-game/Slot/Slot.test.tsx (9 tests) 174ms
+stderr | src/db/hooks/useRxQuery.test.tsx &gt; useRxQuery &gt; updates when collection gains documents
+An update to ThemeCount inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/db/hooks/useRxQuery.test.tsx (1 test) 162ms
+ ✓ src/components/GameCover.test.tsx (3 tests) 53ms
+ ✓ src/lib/game-engine/move-log.test.ts (10 tests) 42ms
+ ✓ src/components/ui/button.test.tsx (1 test) 133ms
+ ✓ src/components/answer-game/AnswerGameProvider.test.tsx (8 tests) 178ms
+ ✓ src/components/questions/ImageQuestion/ImageQuestion.test.tsx (3 tests) 181ms
+ ✓ src/components/answer-game/ProgressHUD/ProgressHUDRoot.test.tsx (6 tests) 138ms
+ ✓ src/components/answer-game/useTouchKeyboardInput.test.tsx (8 tests) 65ms
+ ✓ src/components/GameNameChip.test.tsx (4 tests) 30ms
+ ✓ src/components/answer-game/useKeyboardInput.test.tsx (8 tests) 33ms
+ ✓ src/db/recover-bookmarks-migration.test.ts (7 tests) 18ms
+ ✓ src/data/words/words.test.ts (7 tests) 21ms
+ ✓ src/components/answer-game/useSlotTileDrag.test.tsx (4 tests) 23ms
+ ✓ src/data/words/filter.test.ts (13 tests) 17ms
+ ✓ src/components/answer-game/Slot/SentenceWithGaps.test.tsx (3 tests) 38ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 25ms
+ ✓ src/components/GameGrid.test.tsx (2 tests) 20ms
+ ✓ src/components/answer-game/Slot/useSlotBehavior.test.tsx (10 tests) 61ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "game-complete" when phase transitions to game-over via COMPLETE_GAME
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; confettiReady does not show when last round completes (goes straight to game-over)
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stdout | src/components/answer-game/useGameTTS.test.tsx &gt; useGameTTS &gt; speakTile is a no-op when speech is already active
+[TTS] speakTile("A") — busy, skipped
+
+ ✓ src/components/answer-game/useGameTTS.test.tsx (5 tests) 17ms
+stderr | src/components/answer-game/useGameSounds.test.tsx &gt; useGameSounds &gt; plays "level-complete" when phase transitions to level-complete
+An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/useGameSounds.test.tsx (12 tests) 42ms
+stderr | src/components/answer-game/useTileEvaluation.test.tsx &gt; useTileEvaluation &gt; plays "correct" sound on correct tile placement
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useTileEvaluation.test.tsx (7 tests) 25ms
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by falls back to consecutive when step is too large
+generateSortRounds: mode 'by' step=10 quantity=3 exceeds range [1,5]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start exceeding range falls back to consecutive
+generateSortRounds: numeric start=3 produces sequence outside range [1,10]; falling back to consecutive
+
+stderr | src/games/sort-numbers/build-sort-round.test.ts &gt; generateSortRounds &gt; mode by with numeric start outside range falls back to consecutive
+generateSortRounds: numeric start=1 produces sequence outside range [5,20]; falling back to consecutive
+
+ ✓ src/games/sort-numbers/build-sort-round.test.ts (22 tests) 6ms
+ ✓ src/lib/game-engine/lifecycle.test.ts (12 tests) 34ms
+ ✓ src/routes/__root.test.tsx (1 test) 13ms
+ ✓ src/components/answer-game/useDraggableTile.test.tsx (7 tests) 37ms
+ ✓ src/providers/DbProvider.test.tsx (1 test) 25ms
+ ✓ src/lib/audio/AudioFeedback.test.ts (5 tests) 22ms
+stderr | src/components/answer-game/useAutoNextSlot.test.tsx &gt; useAutoNextSlot &gt; places tile in activeSlotIndex zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/components/answer-game/useBankDropTarget.test.tsx (1 test) 26ms
+ ✓ src/components/answer-game/useAutoNextSlot.test.tsx (5 tests) 16ms
+ ✓ src/lib/seeded-random.test.ts (3 tests) 17ms
+ ✓ src/lib/skin/useGameSkin.test.tsx (6 tests) 20ms
+ ✓ src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx (1 test) 11ms
+ ✓ src/data/words/writer.test.ts (7 tests) 9ms
+ ✓ src/games/word-spell/WordSpell/word-spell-initial-content.test.ts (13 tests) 9ms
+stderr | src/components/answer-game/useFreeSwap.test.tsx &gt; useFreeSwap &gt; places tile in empty zone
+Cannot update a component (&#96;AnswerGameProvider&#96;) while rendering a different component (&#96;TestComponent&#96;). To locate the bad setState() call inside &#96;TestComponent&#96;, follow the stack trace as described in https://react.dev/link/setstate-in-render
+
+ ✓ src/games/cover.test.ts (3 tests) 2ms
+ ✓ src/components/answer-game/useFreeSwap.test.tsx (2 tests) 13ms
+ ✓ src/data/words/phoneme-audio.test.ts (11 tests) 7ms
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when the named voice is found via SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak sets utterance.voice when a legacy voiceName string is passed
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak leaves utterance.voice unset when the named voice is not found
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defaults to Daniel voice
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak applies rate and volume from SpeakOptions
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak does not call synth.cancel()
+[TTS] speak("hello") — speaking: false, pending: false → queued
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.speaking is true
+[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech calls synth.cancel() when synth.pending is true
+[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+[TTS] cancelSpeech() — idle, skipped
+
+stdout | src/lib/speech/SpeechOutput.test.ts &gt; SpeechOutput &gt; speak defers via voiceschanged when getVoices() returns empty
+[TTS] speak("hello") — voices not ready, waiting for voiceschanged
+
+ ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 6ms
+ ✓ src/lib/audio/playSoundUrl.test.ts (2 tests) 10ms
+ ✓ src/games/word-spell/resolve-simple-config.test.ts (2 tests) 2ms
+ ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 15ms
+ ✓ src/data/words/builders.test.ts (29 tests) 4ms
+ ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 7ms
+ ✓ src/data/words/seen-words.test.ts (15 tests) 6ms
+ ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 15ms
+ ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+ ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 3ms
+ ✓ src/games/sort-numbers/advanced-level-generator.test.ts (4 tests) 12ms
+ ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
+ ✓ src/lib/suggest-custom-game-name.test.ts (4 tests) 1ms
+ ✓ src/games/number-match/number-words.test.ts (60 tests) 8ms
+ ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 5ms
+ ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+ ✓ src/lib/theme/css-vars.test.ts (1 test) 2ms
+ ✓ src/games/build-round-order.test.ts (7 tests) 2ms
+ ✓ src/lib/skin/registry.test.ts (8 tests) 2ms
+ ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 12ms
+ ✓ src/games/registry.test.ts (3 tests) 2ms
+ ✓ src/data/words/sample.test.ts (7 tests) 3ms
+ ✓ src/lib/i18n/i18n.test.ts (1 test) 2ms
+ ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 16ms
+ ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+ ✓ src/db/bookmark-id.test.ts (4 tests) 1ms
+ ✓ src/lib/config-tags.test.ts (6 tests) 3ms
+ ✓ src/games/number-match/pair-to-mode.test.ts (7 tests) 22ms
+ ✓ src/lib/speech/voices.test.ts (3 tests) 2ms
+ ✓ src/games/simple-labels.test.ts (2 tests) 2ms
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 2ms
+ ✓ src/games/number-match/resolve-simple-config.test.ts (3 tests) 2ms
+ ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 1ms
+ ✓ src/games/config-chips.test.ts (4 tests) 2ms
+ ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+ ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+ ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+ ✓ src/lib/app-paths.test.ts (4 tests) 2ms
+ ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+ ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+ ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+ ✓ src/db/setup-validation.test.ts (1 test) 1ms
+
+ Test Files  135 passed (135)
+      Tests  858 passed (858)
+   Start at  21:23:22
+   Duration  9.62s (transform 2.95s, setup 10.80s, collect 34.19s, tests 23.28s, environment 64.04s, prepare 6.88s)
+
+Done in 10.01s.
+On branch feat/game-no-menu
+Your branch and 'origin/master' have diverged,
+and have 6 and 198 different commits each, respectively.
+
+nothing to commit, working tree clean
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt",
+  "pattern": "error|Error|FAIL|failed"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt",
+  "pattern": "error|Error|FAIL|failed",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "../../.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt",
+  "pattern": "\\[feat/game-no-menu|typecheck|husky"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt",
+  "pattern": "\\[feat/game-no-menu|typecheck|husky",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/agent-tools/938fcd78-bbf3-4b9b-9e94-0d8792e1813a.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git log --oneline -8 && git status -sb</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git log --oneline -8 && git status -sb
+```
+
+```
+9de62de8 test: align offline and instructions overlay with game paths
+1a31ddc6 feat(game): immersive shell with portaled exit and no undo/pause bar
+059318eb test: cover footer and update banner with game path behavior
+2ca6167d fix(header): do not render on game session paths
+6f23b9b6 feat(app): hide global header and footer on game session routes
+fcf50c4d feat(lib): detect in-app game URLs for chrome hiding
+ef97b569 chore(release): v0.10.7 (#133)
+4a537592 Chore/specstory sync 2026 04 21 (#132)
+## feat/game-no-menu...origin/master [ahead 6, behind 198]
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git fetch origin master && git rebase origin/master</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git fetch origin master && git rebase origin/master
+```
+
+```
+From github.com:leocaseiro/base-skill
+ * branch              master     -&gt; FETCH_HEAD
+Rebasing (1/6)Rebasing (2/6)Rebasing (3/6)Rebasing (4/6)Rebasing (5/6)Rebasing (6/6)Successfully rebased and updated refs/heads/feat/game-no-menu.
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git push -u origin feat/game-no-menu 2>&1</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && git push -u origin feat/game-no-menu 2>&1
+```
+
+```
+-e [1m──────────────────────────────────────────[0m
+-e [1m  Pre-push checks[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;36m  Triggered checks: build e2e eslint knip prettier storybook typecheck unit vr[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;36m[1m▶ Running: Prettier[0m
+Checking formatting...
+All matched files use Prettier code style!
+-e [0;32m  ✓ Prettier[0m
+-e [0;36m[1m▶ Running: ESLint[0m
+-e [0;32m  ✓ ESLint[0m
+-e [0;36m[1m▶ Running: Knip[0m
+Configuration hints (15)
+worktrees/**                         knip.config.ts  Remove from ignoreWorkspaces  
+@fontsource-variable/geist           knip.config.ts  Remove from ignoreDependencies
+shadcn                               knip.config.ts  Remove from ignoreDependencies
+tw-animate-css                       knip.config.ts  Remove from ignoreDependencies
+dexie                                knip.config.ts  Remove from ignoreDependencies
+@atlaskit/pragmatic-drag-and-drop    knip.config.ts  Remove from ignoreDependencies
+http-server                          knip.config.ts  Remove from ignoreDependencies
+wait-on                              knip.config.ts  Remove from ignoreDependencies
+src/routeTree.gen.ts                 knip.config.ts  Remove redundant entry pattern
+.storybook/main.ts                   knip.config.ts  Remove redundant entry pattern
+.storybook/preview.tsx               knip.config.ts  Remove redundant entry pattern
+vite.config.ts                       knip.config.ts  Remove redundant entry pattern
+vitest.config.ts                     knip.config.ts  Remove redundant entry pattern
+playwright.config.ts                 knip.config.ts  Remove redundant entry pattern
+eslint.config.js                     knip.config.ts  Remove redundant entry pattern
+-e [0;32m  ✓ Knip[0m
+-e [0;36m[1m▶ Running: TypeScript[0m
+yarn run v1.22.22
+$ tsc --noEmit
+Done in 3.21s.
+-e [0;32m  ✓ TypeScript[0m
+-e [0;36m[1m▶ Running: vitest related[0m
+
+ RUN  v3.2.4 /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu
+
+ ✓ src/lib/app-paths.test.ts (4 tests) 1ms
+ ✓ src/routes/$locale/_app-chrome-behavior.test.tsx (2 tests) 27ms
+ ✓ src/components/OfflineIndicator.test.tsx (2 tests) 90ms
+ ✓ src/components/UpdateBanner.test.tsx (3 tests) 121ms
+ ✓ src/components/Footer.test.tsx (1 test) 119ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders exit control and does not show the game title in chrome
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx &gt; InstructionsOverlay &gt; portals a full-viewport z-40 layer so GameShell can stack the exit control above (z-45)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; portals the top chrome to document.body with z-45 (above instructions z-40)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx (1 test) 166ms
+stderr | src/components/Header.test.tsx &gt; Header &gt; renders the app shell header when not in a game session
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to HeaderMenuPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/components/Header.test.tsx (2 tests) 201ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render a round counter (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render the progress bar (HUD now owns round display)
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders timer when timerVisible is true
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; hides timer when timerVisible is false
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (4 tests) 2ms
+ ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 3ms
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; does not render undo or pause controls
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/components/game/GameShell.test.tsx &gt; GameShell &gt; renders the game component children
+An update to DbProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() =&gt; {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; renders the game shell with exit control from loaderData
+react-i18next:: useTranslation: You will need to pass in an i18next instance by using initReactI18next { code: 'NO_I18NEXT_INSTANCE' }
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+ ✓ src/components/game/GameShell.test.tsx (11 tests) 711ms
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: Missing &#96;Description&#96; or &#96;aria-describedby={undefined}&#96; for {DialogContent}.
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+stderr | src/routes/$locale/_app/game/$gameId.test.tsx &gt; GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation
+Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!
+
+ ✓ src/routes/$locale/_app/game/$gameId.test.tsx (2 tests) 703ms
+   ✓ GameRoute &gt; deletes a custom game: removes doc from DB and triggers navigation  566ms
+
+ Test Files  11 passed (11)
+      Tests  40 passed (40)
+   Start at  21:24:16
+   Duration  3.32s (transform 637ms, setup 1.00s, collect 6.06s, tests 2.14s, environment 6.41s, prepare 1.10s)
+
+-e [0;32m  ✓ Unit tests (vitest related)[0m
+-e [1m──────────────────────────────────────────[0m
+-e [0;32m[1m  All pre-push checks passed.[0m
+-e [1m──────────────────────────────────────────[0m
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals/848071.txt</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && gh pr create --base master --head feat/game-no-menu --title "feat(game): immersive mobile shell and hide app chrome in session" --body "## Summary
+
+Games at \`/:locale/game/:gameId\` (GitHub Pages and local) now run **without** the global header, footer, or the old GameShell footer (undo/pause). A **portaled** exit control (X, 80% opacity) sits above instructions overlays and still opens the existing leave-game dialog.
+
+## Why
+
+- Browser paths omit the \`_app\` file-route segment, so chrome detection uses \`src/lib/app-paths.ts\` (\`/^\\/[^/]+\\/game\\/[^/]+$/\`), not \`/_app/game/\`.
+- \`GameShell\` top chrome uses \`createPortal(..., document.body)\` at \`z-[45]\` so it stacks above \`InstructionsOverlay\` (\`z-40\`).
+
+## Commits (review / cherry-pick friendly)
+
+1. \`feat(lib): detect in-app game URLs for chrome hiding\`
+2. \`feat(app): hide global header and footer on game session routes\`
+3. \`fix(header): do not render on game session paths\`
+4. \`test: cover footer and update banner with game path behavior\`
+5. \`feat(game): immersive shell with portaled exit and no undo/pause bar\`
+6. \`test: align offline indicator and instructions overlay with game paths\`
+
+## Verify
+
+- Unit: \`vitest related\` (pre-push) passed locally.
+- Manual: open a game on a phone-width viewport — no app header/footer; exit control visible on instructions and play.
+
+Made with [Cursor](https://cursor.com)"</summary>
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu && gh pr create --base master --head feat/game-no-menu --title "feat(game): immersive mobile shell and hide app chrome in session" --body "## Summary
+
+Games at \`/:locale/game/:gameId\` (GitHub Pages and local) now run **without** the global header, footer, or the old GameShell footer (undo/pause). A **portaled** exit control (X, 80% opacity) sits above instructions overlays and still opens the existing leave-game dialog.
+
+## Why
+
+- Browser paths omit the \`_app\` file-route segment, so chrome detection uses \`src/lib/app-paths.ts\` (\`/^\\/[^/]+\\/game\\/[^/]+$/\`), not \`/_app/game/\`.
+- \`GameShell\` top chrome uses \`createPortal(..., document.body)\` at \`z-[45]\` so it stacks above \`InstructionsOverlay\` (\`z-40\`).
+
+## Commits (review / cherry-pick friendly)
+
+1. \`feat(lib): detect in-app game URLs for chrome hiding\`
+2. \`feat(app): hide global header and footer on game session routes\`
+3. \`fix(header): do not render on game session paths\`
+4. \`test: cover footer and update banner with game path behavior\`
+5. \`feat(game): immersive shell with portaled exit and no undo/pause bar\`
+6. \`test: align offline indicator and instructions overlay with game paths\`
+
+## Verify
+
+- Unit: \`vitest related\` (pre-push) passed locally.
+- Manual: open a game on a phone-width viewport — no app header/footer; exit control visible on instructions and play.
+
+Made with [Cursor](https://cursor.com)"
+```
+
+```
+https://github.com/leocaseiro/base-skill/pull/189
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (composer-2)**_
+
+Here’s what was done in **`worktrees/game-no-menu`**:
+
+### Rebase
+- Fetched **`origin/master`** and **`git rebase origin/master`** — completed cleanly (6 commits replayed).
+
+### Branch / PR
+- Pushed **`feat/game-no-menu`** (new on `origin`; pre-push checks passed).
+- Opened **PR #189**: https://github.com/leocaseiro/base-skill/pull/189  
+
+### Commits on the PR (baby steps)
+1. `feat(lib): detect in-app game URLs for chrome hiding` — `app-paths` + tests  
+2. `feat(app): hide global header and footer on game session routes` — `_app` + chrome contract test  
+3. `fix(header): do not render on game session paths` — `Header` + test  
+4. `test: cover footer and update banner with game path behavior`  
+5. `feat(game): immersive shell with portaled exit and no undo/pause bar` — `GameShell` + route/story tests  
+6. `test: align offline indicator and instructions overlay with game paths`  
+
+### Note
+The earlier cherry-pick that matched `/_app/game/` was **dropped** (`git reset --mixed` to the old base) because real URLs are **`/en/game/...`**, not `/_app/game/...`. The PR uses **`src/lib/app-paths.ts`** so GitHub Pages matches production paths.
+
+After **#189** is merged and Pages deploys, `https://leocaseiro.github.io/base-skill/en/game/sort-numbers` should drop the global header/footer for that route.

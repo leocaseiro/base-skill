@@ -6,8 +6,7 @@
 
 _**User (2026-04-21 06:57:24Z)**_
 
-Is this already finished? If not, lets do it. 
-
+Is this already finished? If not, lets do it.
 
 Follow-up to PR #130 (fix/wordspell-resume-desync). The MVP from plan
 docs/superpowers/plans/2026-04-21-wordspell-resume-desync.md shipped
@@ -66,6 +65,7 @@ Check PR #130 status
 ```text
 {"headRefName":"fix/wordspell-resume-desync","mergedAt":"2026-04-21T05:25:54Z","state":"MERGED","title":"fix(word-spell): resume desync — persist roundOrder, align on reload"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:34Z)**_
@@ -98,6 +98,7 @@ List existing worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/storybook-audit-batch-2-answer-game 70634668 [audit/storybook-batch-2-answer-game]
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner                 a69cf440 [tools/phoneme-tuner]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:34Z)**_
@@ -125,6 +126,7 @@ d7861bea fix(db): recover from broken DM4 migrations on boot (#127)
 86258d88 docs(plan): WordSpell resume desync — fix tile/prompt mismatch on draft restore
 b281f310 chore(release): v0.10.4 (#126)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:43Z)**_
@@ -156,6 +158,7 @@ src/components/answer-game/useAutoNextSlot.test.tsx
 src/components/answer-game/useRoundTTS.test.tsx
 src/components/answer-game/useFreeSwap.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:46Z)**_
@@ -174,6 +177,7 @@ src/components/ui/sonner.tsx:12:const Toaster = ({ ...props }: ToasterProps) => 
 src/components/ui/sonner.tsx:17:      theme={theme as ToasterProps['theme']}
 src/components/ui/sonner.tsx:44:export { Toaster };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:46Z)**_
@@ -188,6 +192,7 @@ Check e2e test size
       61 e2e/wordspell-resume-desync.spec.ts
 wordspell-resume-desync.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:57:51Z)**_
@@ -268,13 +273,14 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/issues/135
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 06:59:43Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 06:59:44Z)**_
 
-Noted — task 2 (Toaster + toast on stale-draft discard) first. Issue #135 created: https://github.com/leocaseiro/base-skill/issues/135
+Noted — task 2 (Toaster + toast on stale-draft discard) first. Issue #135 created: <https://github.com/leocaseiro/base-skill/issues/135>
 
 Setting up the worktree from master.
 
@@ -291,6 +297,7 @@ Preparing worktree (new branch 'feat/wordspell-stale-draft-toast')
 branch 'feat/wordspell-stale-draft-toast' set up to track 'origin/master'.
 HEAD is now at ef97b569 chore(release): v0.10.7 (#133)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:01Z)**_
@@ -308,6 +315,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 9.27s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:01Z)**_
@@ -317,67 +325,68 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:01Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-420	  ]);
-421	
-422	  const firstConfigIndex = roundOrder[0];
-423	  const round0 =
-424	    firstConfigIndex === undefined
-425	      ? undefined
-426	      : resolvedRounds[firstConfigIndex];
-427	  const roundWord = round0?.word.trim() ? round0.word : '';
-428	
-429	  // Safety net: detect a draft whose tiles don't match the round the resumed
-430	  // index is pointing at. This covers legacy sessions (no persisted content,
-431	  // draft authored against a different word pool) and any future divergence.
-432	  // When stale, we ignore the draft and start from round 0 — a silent recovery
-433	  // is a strict improvement over the "stuck game" symptom. A follow-up PR can
-434	  // surface a toast once `Toaster` is mounted at the app root.
-435	  const staleDraft = useMemo(() => {
-436	    if (!initialState || sessionEpoch !== 0) return false;
-437	    if (resolvedRounds.length === 0 || isLoading) return false;
-438	    const draftRoundConfigIndex = roundOrder[initialState.roundIndex];
-439	    const draftRound =
-440	      draftRoundConfigIndex === undefined
-441	        ? undefined
-442	        : resolvedRounds[draftRoundConfigIndex];
-443	    if (!draftRound?.word) return true;
-444	    if (draftRound.gaps && draftRound.gaps.length > 0) return false;
-445	    return !isDraftAlignedWithRound({
-446	      draftTileValues: initialState.allTiles.map((t) => t.value),
-447	      roundWord: draftRound.word,
-448	    });
-449	  }, [
-450	    initialState,
-451	    resolvedRounds,
-452	    roundOrder,
-453	    sessionEpoch,
-454	    isLoading,
-455	  ]);
-456	
-457	  useEffect(() => {
-458	    if (!staleDraft || !db || !sessionId) return;
-459	    const cancellation = { isCancelled: false as boolean };
-460	    void (async () => {
-461	      const doc = await db.session_history_index
-462	        .findOne(sessionId)
-463	        .exec();
-464	
-465	      if (cancellation.isCancelled || !doc) return;
-466	      if (doc.draftState == null) return;
-467	      await doc.incrementalPatch({ draftState: null });
-468	    })();
-469	    return () => {
-470	      cancellation.isCancelled = true;
-471	    };
-472	  }, [staleDraft, db, sessionId]);
-473	
-474	  const { tiles, zones } = useMemo(() => {
-475	    if (!roundWord)
-476	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-477	
-478	    if (round0?.gaps && round0.gaps.length > 0) {
-479	      return buildSentenceGapRound(round0.gaps);
+420   ]);
+421 
+422   const firstConfigIndex = roundOrder[0];
+423   const round0 =
+424     firstConfigIndex === undefined
+425       ? undefined
+426       : resolvedRounds[firstConfigIndex];
+427   const roundWord = round0?.word.trim() ? round0.word : '';
+428 
+429   // Safety net: detect a draft whose tiles don't match the round the resumed
+430   // index is pointing at. This covers legacy sessions (no persisted content,
+431   // draft authored against a different word pool) and any future divergence.
+432   // When stale, we ignore the draft and start from round 0 — a silent recovery
+433   // is a strict improvement over the "stuck game" symptom. A follow-up PR can
+434   // surface a toast once `Toaster` is mounted at the app root.
+435   const staleDraft = useMemo(() => {
+436     if (!initialState || sessionEpoch !== 0) return false;
+437     if (resolvedRounds.length === 0 || isLoading) return false;
+438     const draftRoundConfigIndex = roundOrder[initialState.roundIndex];
+439     const draftRound =
+440       draftRoundConfigIndex === undefined
+441         ? undefined
+442         : resolvedRounds[draftRoundConfigIndex];
+443     if (!draftRound?.word) return true;
+444     if (draftRound.gaps && draftRound.gaps.length > 0) return false;
+445     return !isDraftAlignedWithRound({
+446       draftTileValues: initialState.allTiles.map((t) => t.value),
+447       roundWord: draftRound.word,
+448     });
+449   }, [
+450     initialState,
+451     resolvedRounds,
+452     roundOrder,
+453     sessionEpoch,
+454     isLoading,
+455   ]);
+456 
+457   useEffect(() => {
+458     if (!staleDraft || !db || !sessionId) return;
+459     const cancellation = { isCancelled: false as boolean };
+460     void (async () => {
+461       const doc = await db.session_history_index
+462         .findOne(sessionId)
+463         .exec();
+464 
+465       if (cancellation.isCancelled || !doc) return;
+466       if (doc.draftState == null) return;
+467       await doc.incrementalPatch({ draftState: null });
+468     })();
+469     return () => {
+470       cancellation.isCancelled = true;
+471     };
+472   }, [staleDraft, db, sessionId]);
+473 
+474   const { tiles, zones } = useMemo(() => {
+475     if (!roundWord)
+476       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+477 
+478     if (round0?.gaps && round0.gaps.length > 0) {
+479       return buildSentenceGapRound(round0.gaps);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:01Z)**_
@@ -387,52 +396,53 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:01Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/components/ui/sonner.tsx`
 
 ```text
-1	import {
-2	  CircleCheckIcon,
-3	  InfoIcon,
-4	  Loader2Icon,
-5	  OctagonXIcon,
-6	  TriangleAlertIcon,
-7	} from 'lucide-react';
-8	import { useTheme } from 'next-themes';
-9	import { Toaster as Sonner } from 'sonner';
-10	import type { ToasterProps } from 'sonner';
-11	
-12	const Toaster = ({ ...props }: ToasterProps) => {
-13	  const { theme = 'system' } = useTheme();
-14	
-15	  return (
-16	    <Sonner
-17	      theme={theme as ToasterProps['theme']}
-18	      className="toaster group"
-19	      icons={{
-20	        success: <CircleCheckIcon className="size-4" />,
-21	        info: <InfoIcon className="size-4" />,
-22	        warning: <TriangleAlertIcon className="size-4" />,
-23	        error: <OctagonXIcon className="size-4" />,
-24	        loading: <Loader2Icon className="size-4 animate-spin" />,
-25	      }}
-26	      style={
-27	        {
-28	          '--normal-bg': 'var(--popover)',
-29	          '--normal-text': 'var(--popover-foreground)',
-30	          '--normal-border': 'var(--border)',
-31	          '--border-radius': 'var(--radius)',
-32	        } as React.CSSProperties
-33	      }
-34	      toastOptions={{
-35	        classNames: {
-36	          toast: 'cn-toast',
-37	        },
-38	      }}
-39	      {...props}
-40	    />
-41	  );
-42	};
-43	
-44	export { Toaster };
+1 import {
+2   CircleCheckIcon,
+3   InfoIcon,
+4   Loader2Icon,
+5   OctagonXIcon,
+6   TriangleAlertIcon,
+7 } from 'lucide-react';
+8 import { useTheme } from 'next-themes';
+9 import { Toaster as Sonner } from 'sonner';
+10 import type { ToasterProps } from 'sonner';
+11 
+12 const Toaster = ({ ...props }: ToasterProps) => {
+13   const { theme = 'system' } = useTheme();
+14 
+15   return (
+16     <Sonner
+17       theme={theme as ToasterProps['theme']}
+18       className="toaster group"
+19       icons={{
+20         success: <CircleCheckIcon className="size-4" />,
+21         info: <InfoIcon className="size-4" />,
+22         warning: <TriangleAlertIcon className="size-4" />,
+23         error: <OctagonXIcon className="size-4" />,
+24         loading: <Loader2Icon className="size-4 animate-spin" />,
+25       }}
+26       style={
+27         {
+28           '--normal-bg': 'var(--popover)',
+29           '--normal-text': 'var(--popover-foreground)',
+30           '--normal-border': 'var(--border)',
+31           '--border-radius': 'var(--radius)',
+32         } as React.CSSProperties
+33       }
+34       toastOptions={{
+35         classNames: {
+36           toast: 'cn-toast',
+37         },
+38       }}
+39       {...props}
+40     />
+41   );
+42 };
+43 
+44 export { Toaster };
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:08Z)**_
@@ -455,6 +465,7 @@ __root.tsx
 $locale
 index.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:11Z)**_
@@ -466,6 +477,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:11Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:12Z)**_
@@ -477,6 +489,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:12Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:15Z)**_
@@ -486,62 +499,63 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:15Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/routes/__root.tsx`
 
 ```text
-1	import { TanStackDevtools } from '@tanstack/react-devtools';
-2	import {
-3	  HeadContent,
-4	  Scripts,
-5	  createRootRoute,
-6	} from '@tanstack/react-router';
-7	import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-8	
-9	import appCss from '../styles.css?url';
-10	import { ErrorBoundary } from '@/components/ErrorBoundary';
-11	import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvider';
-12	
-13	/** First paint only: class + color-scheme from system preference (no localStorage). */
-14	const THEME_INIT_SCRIPT =
-15	  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-16	
-17	const RootDocument = ({ children }: { children: React.ReactNode }) => (
-18	  <html lang="en" suppressHydrationWarning>
-19	    <head>
-20	      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-21	      <HeadContent />
-22	    </head>
-23	    <body className="font-sans antialiased">
-24	      <ErrorBoundary>
-25	        <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
-26	      </ErrorBoundary>
-27	      <TanStackDevtools
-28	        config={{ position: 'bottom-right' }}
-29	        plugins={[
-30	          {
-31	            name: 'Tanstack Router',
-32	            render: <TanStackRouterDevtoolsPanel />,
-33	          },
-34	        ]}
-35	      />
-36	      <Scripts />
-37	    </body>
-38	  </html>
-39	);
-40	
-41	export const Route = createRootRoute({
-42	  head: () => ({
-43	    meta: [
-44	      { charSet: 'utf8' },
-45	      {
-46	        name: 'viewport',
-47	        content: 'width=device-width, initial-scale=1',
-48	      },
-49	      { title: 'BaseSkill' },
-50	    ],
-51	    links: [{ rel: 'stylesheet', href: appCss }],
-52	  }),
-53	  shellComponent: RootDocument,
-54	});
+1 import { TanStackDevtools } from '@tanstack/react-devtools';
+2 import {
+3   HeadContent,
+4   Scripts,
+5   createRootRoute,
+6 } from '@tanstack/react-router';
+7 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+8 
+9 import appCss from '../styles.css?url';
+10 import { ErrorBoundary } from '@/components/ErrorBoundary';
+11 import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvider';
+12 
+13 /** First paint only: class + color-scheme from system preference (no localStorage). */
+14 const THEME_INIT_SCRIPT =
+15   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
+16 
+17 const RootDocument = ({ children }: { children: React.ReactNode }) => (
+18   <html lang="en" suppressHydrationWarning>
+19     <head>
+20       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+21       <HeadContent />
+22     </head>
+23     <body className="font-sans antialiased">
+24       <ErrorBoundary>
+25         <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+26       </ErrorBoundary>
+27       <TanStackDevtools
+28         config={{ position: 'bottom-right' }}
+29         plugins={[
+30           {
+31             name: 'Tanstack Router',
+32             render: <TanStackRouterDevtoolsPanel />,
+33           },
+34         ]}
+35       />
+36       <Scripts />
+37     </body>
+38   </html>
+39 );
+40 
+41 export const Route = createRootRoute({
+42   head: () => ({
+43     meta: [
+44       { charSet: 'utf8' },
+45       {
+46         name: 'viewport',
+47         content: 'width=device-width, initial-scale=1',
+48       },
+49       { title: 'BaseSkill' },
+50     ],
+51     links: [{ rel: 'stylesheet', href: appCss }],
+52   }),
+53   shellComponent: RootDocument,
+54 });
 55
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:16Z)**_
@@ -553,6 +567,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:16Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:17Z)**_
@@ -567,6 +582,7 @@ List i18n locale files
 Exit code 1
 ls: worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/locales/en/: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:21Z)**_
@@ -578,6 +594,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:21Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:22Z)**_
@@ -589,6 +606,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:22Z)**_
 ```text
 <tool_use_error>Path does not exist: worktrees/feat-wordspell-stale-draft-toast/src. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:22Z)**_
@@ -600,6 +618,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:22Z)**_
 ```text
 <tool_use_error>Path does not exist: worktrees/feat-wordspell-stale-draft-toast/src/routes. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:26Z)**_
@@ -638,6 +657,7 @@ theme
 utils.ts
 version.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:28Z)**_
@@ -657,6 +677,7 @@ src/components/ui/sonner.stories.tsx:5:import { Toaster } from './sonner';
 src/components/ui/sonner.stories.tsx:25:      <Toaster />
 src/components/ui/sonner.stories.tsx:52:      return toast(message);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:33Z)**_
@@ -673,6 +694,7 @@ i18n.test.ts
 i18n.ts
 locales
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:33Z)**_
@@ -682,20 +704,21 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:33Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/routes/__root.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import { describe, expect, it } from 'vitest';
-3	
-4	describe('Root document', () => {
-5	  it('renders without crashing', () => {
-6	    const RootShell = ({ children }: { children: React.ReactNode }) => (
-7	      <div data-testid="root-shell">{children}</div>
-8	    );
-9	    render(<RootShell>hello</RootShell>);
-10	    expect(screen.getByTestId('root-shell')).toBeInTheDocument();
-11	  });
-12	});
+1 import { render, screen } from '@testing-library/react';
+2 import { describe, expect, it } from 'vitest';
+3 
+4 describe('Root document', () => {
+5   it('renders without crashing', () => {
+6     const RootShell = ({ children }: { children: React.ReactNode }) => (
+7       <div data-testid="root-shell">{children}</div>
+8     );
+9     render(<RootShell>hello</RootShell>);
+10     expect(screen.getByTestId('root-shell')).toBeInTheDocument();
+11   });
+12 });
 13
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:36Z)**_
@@ -710,6 +733,7 @@ List locales
 en
 pt-BR
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:39Z)**_
@@ -726,6 +750,7 @@ encouragements.json
 games.json
 settings.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:39Z)**_
@@ -735,42 +760,43 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:39Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/i18n.ts`
 
 ```text
-1	import i18n from 'i18next';
-2	import { initReactI18next } from 'react-i18next';
-3	import enCommon from './locales/en/common.json';
-4	import enEncouragements from './locales/en/encouragements.json';
-5	import enGames from './locales/en/games.json';
-6	import enSettings from './locales/en/settings.json';
-7	import ptCommon from './locales/pt-BR/common.json';
-8	import ptEncouragements from './locales/pt-BR/encouragements.json';
-9	import ptGames from './locales/pt-BR/games.json';
-10	import ptSettings from './locales/pt-BR/settings.json';
-11	
-12	void i18n.use(initReactI18next).init({
-13	  lng: 'en',
-14	  fallbackLng: 'en',
-15	  defaultNS: 'common',
-16	  interpolation: { escapeValue: false },
-17	  resources: {
-18	    en: {
-19	      common: enCommon,
-20	      games: enGames,
-21	      settings: enSettings,
-22	      encouragements: enEncouragements,
-23	    },
-24	    'pt-BR': {
-25	      common: ptCommon,
-26	      games: ptGames,
-27	      settings: ptSettings,
-28	      encouragements: ptEncouragements,
-29	    },
-30	  },
-31	});
-32	
-33	// eslint-disable-next-line unicorn/prefer-export-from -- cannot use re-export syntax; i18n.use().init() must run on the local binding first
-34	export { i18n };
+1 import i18n from 'i18next';
+2 import { initReactI18next } from 'react-i18next';
+3 import enCommon from './locales/en/common.json';
+4 import enEncouragements from './locales/en/encouragements.json';
+5 import enGames from './locales/en/games.json';
+6 import enSettings from './locales/en/settings.json';
+7 import ptCommon from './locales/pt-BR/common.json';
+8 import ptEncouragements from './locales/pt-BR/encouragements.json';
+9 import ptGames from './locales/pt-BR/games.json';
+10 import ptSettings from './locales/pt-BR/settings.json';
+11 
+12 void i18n.use(initReactI18next).init({
+13   lng: 'en',
+14   fallbackLng: 'en',
+15   defaultNS: 'common',
+16   interpolation: { escapeValue: false },
+17   resources: {
+18     en: {
+19       common: enCommon,
+20       games: enGames,
+21       settings: enSettings,
+22       encouragements: enEncouragements,
+23     },
+24     'pt-BR': {
+25       common: ptCommon,
+26       games: ptGames,
+27       settings: ptSettings,
+28       encouragements: ptEncouragements,
+29     },
+30   },
+31 });
+32 
+33 // eslint-disable-next-line unicorn/prefer-export-from -- cannot use re-export syntax; i18n.use().init() must run on the local binding first
+34 export { i18n };
 35
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:43Z)**_
@@ -780,65 +806,66 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:43Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/locales/en/common.json`
 
 ```text
-1	{
-2	  "appName": "BaseSkill",
-3	  "home": {
-4	    "title": "Home"
-5	  },
-6	  "nav": {
-7	    "settings": "Settings",
-8	    "language": "Language"
-9	  },
-10	  "search": {
-11	    "placeholder": "Search games...",
-12	    "filters": "Filters"
-13	  },
-14	  "levels": {
-15	    "all": "All",
-16	    "PK": "Pre-K",
-17	    "K": "K",
-18	    "1": "Year 1",
-19	    "2": "Year 2",
-20	    "3": "Year 3",
-21	    "4": "Year 4"
-22	  },
-23	  "subjects": {
-24	    "all": "All subjects",
-25	    "math": "Math",
-26	    "reading": "Reading",
-27	    "letters": "Letters"
-28	  },
-29	  "offline": {
-30	    "banner": "You're offline. Playing from saved data."
-31	  },
-32	  "pagination": {
-33	    "previous": "Previous",
-34	    "next": "Next",
-35	    "pageOf": "Page {{page}} of {{total}}"
-36	  },
-37	  "play": "Play",
-38	  "bookmark": {
-39	    "add": "Add bookmark",
-40	    "remove": "Remove bookmark"
-41	  },
-42	  "customGame": {
-43	    "title": "Save configuration",
-44	    "nameLabel": "Configuration name",
-45	    "placeholder": "e.g. Easy Mode",
-46	    "save": "Save",
-47	    "cancel": "Cancel",
-48	    "remove": "Remove {{name}}",
-49	    "errorEmpty": "Please enter a name",
-50	    "errorDuplicate": "A configuration named \"{{name}}\" already exists",
-51	    "colorLabel": "Colour",
-52	    "update": "Update \"{{name}}\"",
-53	    "saveAsNew": "Save as new custom game…",
-54	    "saveCustomGameLabel": "Save as custom game",
-55	    "saveCustomGamePlaceholder": "e.g. Easy Mode"
-56	  }
-57	}
+1 {
+2   "appName": "BaseSkill",
+3   "home": {
+4     "title": "Home"
+5   },
+6   "nav": {
+7     "settings": "Settings",
+8     "language": "Language"
+9   },
+10   "search": {
+11     "placeholder": "Search games...",
+12     "filters": "Filters"
+13   },
+14   "levels": {
+15     "all": "All",
+16     "PK": "Pre-K",
+17     "K": "K",
+18     "1": "Year 1",
+19     "2": "Year 2",
+20     "3": "Year 3",
+21     "4": "Year 4"
+22   },
+23   "subjects": {
+24     "all": "All subjects",
+25     "math": "Math",
+26     "reading": "Reading",
+27     "letters": "Letters"
+28   },
+29   "offline": {
+30     "banner": "You're offline. Playing from saved data."
+31   },
+32   "pagination": {
+33     "previous": "Previous",
+34     "next": "Next",
+35     "pageOf": "Page {{page}} of {{total}}"
+36   },
+37   "play": "Play",
+38   "bookmark": {
+39     "add": "Add bookmark",
+40     "remove": "Remove bookmark"
+41   },
+42   "customGame": {
+43     "title": "Save configuration",
+44     "nameLabel": "Configuration name",
+45     "placeholder": "e.g. Easy Mode",
+46     "save": "Save",
+47     "cancel": "Cancel",
+48     "remove": "Remove {{name}}",
+49     "errorEmpty": "Please enter a name",
+50     "errorDuplicate": "A configuration named \"{{name}}\" already exists",
+51     "colorLabel": "Colour",
+52     "update": "Update \"{{name}}\"",
+53     "saveAsNew": "Save as new custom game…",
+54     "saveCustomGameLabel": "Save as custom game",
+55     "saveCustomGamePlaceholder": "e.g. Easy Mode"
+56   }
+57 }
 58
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:43Z)**_
@@ -848,65 +875,66 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:43Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/locales/pt-BR/common.json`
 
 ```text
-1	{
-2	  "appName": "BaseSkill",
-3	  "home": {
-4	    "title": "Início"
-5	  },
-6	  "nav": {
-7	    "settings": "Configurações",
-8	    "language": "Idioma"
-9	  },
-10	  "search": {
-11	    "placeholder": "Buscar jogos...",
-12	    "filters": "Filtros"
-13	  },
-14	  "levels": {
-15	    "all": "Todos",
-16	    "PK": "Pré-K",
-17	    "K": "K",
-18	    "1": "Ano 1",
-19	    "2": "Ano 2",
-20	    "3": "Ano 3",
-21	    "4": "Ano 4"
-22	  },
-23	  "subjects": {
-24	    "all": "Todos os assuntos",
-25	    "math": "Matemática",
-26	    "reading": "Leitura",
-27	    "letters": "Letras"
-28	  },
-29	  "offline": {
-30	    "banner": "Você está offline. Jogando a partir dos dados salvos."
-31	  },
-32	  "pagination": {
-33	    "previous": "Anterior",
-34	    "next": "Próximo",
-35	    "pageOf": "Página {{page}} de {{total}}"
-36	  },
-37	  "play": "Jogar",
-38	  "bookmark": {
-39	    "add": "Adicionar marcador",
-40	    "remove": "Remover marcador"
-41	  },
-42	  "customGame": {
-43	    "title": "Salvar configuração",
-44	    "nameLabel": "Nome da configuração",
-45	    "placeholder": "ex: Fácil",
-46	    "save": "Salvar",
-47	    "cancel": "Cancelar",
-48	    "remove": "Remover {{name}}",
-49	    "errorEmpty": "Por favor, insira um nome",
-50	    "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\"",
-51	    "colorLabel": "Cor",
-52	    "update": "Actualizar \"{{name}}\"",
-53	    "saveAsNew": "Salvar como novo jogo personalizado…",
-54	    "saveCustomGameLabel": "Salvar como jogo personalizado",
-55	    "saveCustomGamePlaceholder": "ex: Modo Fácil"
-56	  }
-57	}
+1 {
+2   "appName": "BaseSkill",
+3   "home": {
+4     "title": "Início"
+5   },
+6   "nav": {
+7     "settings": "Configurações",
+8     "language": "Idioma"
+9   },
+10   "search": {
+11     "placeholder": "Buscar jogos...",
+12     "filters": "Filtros"
+13   },
+14   "levels": {
+15     "all": "Todos",
+16     "PK": "Pré-K",
+17     "K": "K",
+18     "1": "Ano 1",
+19     "2": "Ano 2",
+20     "3": "Ano 3",
+21     "4": "Ano 4"
+22   },
+23   "subjects": {
+24     "all": "Todos os assuntos",
+25     "math": "Matemática",
+26     "reading": "Leitura",
+27     "letters": "Letras"
+28   },
+29   "offline": {
+30     "banner": "Você está offline. Jogando a partir dos dados salvos."
+31   },
+32   "pagination": {
+33     "previous": "Anterior",
+34     "next": "Próximo",
+35     "pageOf": "Página {{page}} de {{total}}"
+36   },
+37   "play": "Jogar",
+38   "bookmark": {
+39     "add": "Adicionar marcador",
+40     "remove": "Remover marcador"
+41   },
+42   "customGame": {
+43     "title": "Salvar configuração",
+44     "nameLabel": "Nome da configuração",
+45     "placeholder": "ex: Fácil",
+46     "save": "Salvar",
+47     "cancel": "Cancelar",
+48     "remove": "Remover {{name}}",
+49     "errorEmpty": "Por favor, insira um nome",
+50     "errorDuplicate": "Já existe uma configuração chamada \"{{name}}\"",
+51     "colorLabel": "Cor",
+52     "update": "Actualizar \"{{name}}\"",
+53     "saveAsNew": "Salvar como novo jogo personalizado…",
+54     "saveCustomGameLabel": "Salvar como jogo personalizado",
+55     "saveCustomGamePlaceholder": "ex: Modo Fácil"
+56   }
+57 }
 58
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:47Z)**_
@@ -920,6 +948,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:48Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:49Z)**_
@@ -929,67 +958,68 @@ _**Agent (claude-opus-4-7 2026-04-21 07:00:49Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import {
-4	  useContext,
-5	  useEffect,
-6	  useMemo,
-7	  useRef,
-8	  useState,
-9	} from 'react';
-10	import { buildSentenceGapRound } from '../build-sentence-gap-round';
-11	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-12	import { useLibraryRounds } from '../useLibraryRounds';
-13	import {
-14	  buildWordSpellInitialContent,
-15	  hasWordSpellPersistedContent,
-16	  isDraftAlignedWithRound,
-17	} from './word-spell-initial-content';
-18	import type { WordSpellConfig } from '../types';
-19	import type {
-20	  AnswerGameConfig,
-21	  AnswerGameDraftState,
-22	  AnswerZone,
-23	  TileItem,
-24	} from '@/components/answer-game/types';
-25	import type { GameSkin } from '@/lib/skin';
-26	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-27	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-28	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-29	import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
-30	import { Slot } from '@/components/answer-game/Slot/Slot';
-31	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-32	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-33	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-34	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-35	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-36	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-37	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-38	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-39	import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
-40	import { buildRoundOrder } from '@/games/build-round-order';
-41	import { getGameEventBus } from '@/lib/game-event-bus';
-42	import { useGameSkin } from '@/lib/skin';
-43	import { DbContext } from '@/providers/DbProvider';
-44	
-45	function segmentsForWord(
-46	  word: string,
-47	  tileUnit: WordSpellConfig['tileUnit'],
-48	): string[] {
-49	  const trimmed = word.trim();
-50	  if (tileUnit === 'word') return [trimmed];
-51	  if (tileUnit === 'syllable') {
-52	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-53	    return parts.length > 0 ? parts : [trimmed];
-54	  }
-55	  return [...trimmed.toLowerCase()];
-56	}
-57	
-58	function buildTilesAndZones(
-59	  word: string,
-60	  tileUnit: WordSpellConfig['tileUnit'],
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import {
+4   useContext,
+5   useEffect,
+6   useMemo,
+7   useRef,
+8   useState,
+9 } from 'react';
+10 import { buildSentenceGapRound } from '../build-sentence-gap-round';
+11 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+12 import { useLibraryRounds } from '../useLibraryRounds';
+13 import {
+14   buildWordSpellInitialContent,
+15   hasWordSpellPersistedContent,
+16   isDraftAlignedWithRound,
+17 } from './word-spell-initial-content';
+18 import type { WordSpellConfig } from '../types';
+19 import type {
+20   AnswerGameConfig,
+21   AnswerGameDraftState,
+22   AnswerZone,
+23   TileItem,
+24 } from '@/components/answer-game/types';
+25 import type { GameSkin } from '@/lib/skin';
+26 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+27 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+28 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+29 import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
+30 import { Slot } from '@/components/answer-game/Slot/Slot';
+31 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+32 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+33 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+34 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+35 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+36 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+37 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+38 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+39 import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
+40 import { buildRoundOrder } from '@/games/build-round-order';
+41 import { getGameEventBus } from '@/lib/game-event-bus';
+42 import { useGameSkin } from '@/lib/skin';
+43 import { DbContext } from '@/providers/DbProvider';
+44 
+45 function segmentsForWord(
+46   word: string,
+47   tileUnit: WordSpellConfig['tileUnit'],
+48 ): string[] {
+49   const trimmed = word.trim();
+50   if (tileUnit === 'word') return [trimmed];
+51   if (tileUnit === 'syllable') {
+52     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+53     return parts.length > 0 ? parts : [trimmed];
+54   }
+55   return [...trimmed.toLowerCase()];
+56 }
+57 
+58 function buildTilesAndZones(
+59   word: string,
+60   tileUnit: WordSpellConfig['tileUnit'],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:00:58Z)**_
@@ -1058,6 +1088,7 @@ Peek at games.json
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:00Z)**_
@@ -1085,6 +1116,7 @@ src/games/word-spell/build-sentence-gap-round.test.ts:49:  it('zones start with 
 
 [Showing results with pagination = limit: 15]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:00Z)**_
@@ -1107,6 +1139,7 @@ src/routes/$locale/_app/game/$gameId.tsx:511:  const { t } = useTranslation('gam
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:52Z)**_
@@ -1123,8 +1156,8 @@ _**Agent (claude-opus-4-7 2026-04-21 07:01:53Z)**_
 
 ```text
 .specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5048: pattern `from 'sonner'`
-.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5106:9	import { Toaster as Sonner } from 'sonner';
-.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5107:10	import type { ToasterProps } from 'sonner';
+.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5106:9 import { Toaster as Sonner } from 'sonner';
+.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5107:10 import type { ToasterProps } from 'sonner';
 .specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5166:src/components/ui/sonner.tsx:9:import { Toaster as Sonner } from 'sonner';
 .specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:5167:src/components/ui/sonner.tsx:10:import type { ToasterProps } from 'sonner';
 src/components/ui/sonner.tsx:9:import { Toaster as Sonner } from 'sonner';
@@ -1133,11 +1166,11 @@ src/components/ui/sonner.stories.tsx:2:import { toast } from 'sonner';
 docs/superpowers/plans/2026-04-02-storybook-setup.md:1063:import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:10453:import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:28547:import { toast } from 'sonner';
-.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:30117:2	import { toast } from 'sonner';
+.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:30117:2 import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45269:import { toast } from 'sonner';
-.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45388:9	import { Toaster as Sonner } from 'sonner';
-.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45389:10	import type { ToasterProps } from 'sonner';
-.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45436:2	import { toast } from 'sonner';
+.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45388:9 import { Toaster as Sonner } from 'sonner';
+.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45389:10 import type { ToasterProps } from 'sonner';
+.specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45436:2 import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45548:import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45692:import { toast } from 'sonner';
 .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md:45864:import { toast } from 'sonner';
@@ -1145,6 +1178,7 @@ docs/superpowers/plans/2026-04-02-storybook-setup.md:1063:import { toast } from 
 
 [Showing results with pagination = limit: 20]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:54Z)**_
@@ -1164,6 +1198,7 @@ WordSpell.stories.tsx
 WordSpell.test.tsx
 WordSpell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:55Z)**_
@@ -1177,6 +1212,7 @@ Check for test utils
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:01:59Z)**_
@@ -1188,189 +1224,190 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:00Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.test.tsx`
 
 ```text
-1	import { act, render, screen, within } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { describe, expect, it, vi } from 'vitest';
-4	import { WordSpell } from './WordSpell';
-5	import type { WordSpellConfig } from '../types';
-6	import { createInMemorySeenWordsStore } from '@/data/words';
-7	
-8	vi.mock('@/db/hooks/useSeenWordsStore', () => ({
-9	  useSeenWordsStore: () => createInMemorySeenWordsStore(),
-10	}));
-11	
-12	const navigateStub = vi.hoisted(() => vi.fn());
-13	
-14	vi.mock('@tanstack/react-router', () => ({
-15	  useNavigate: () => navigateStub,
-16	}));
-17	
-18	vi.mock('@/lib/speech/SpeechOutput', () => ({
-19	  speak: vi.fn(),
-20	  cancelSpeech: vi.fn(),
-21	  isSpeechActive: vi.fn().mockReturnValue(false),
-22	}));
-23	const noopUnsubscribe = () => {};
-24	vi.mock('@/lib/game-event-bus', () => ({
-25	  getGameEventBus: () => ({
-26	    emit: vi.fn(),
-27	    subscribe: vi.fn(() => noopUnsubscribe),
-28	  }),
-29	}));
-30	vi.mock('@/db/hooks/useSettings', () => ({
-31	  useSettings: () => ({
-32	    settings: {
-33	      speechRate: 1,
-34	      volume: 0.8,
-35	      preferredVoiceURI: undefined,
-36	    },
-37	    update: vi.fn(),
-38	  }),
-39	}));
-40	
-41	vi.mock('@/lib/audio/AudioFeedback', () => ({
-42	  playSound: vi.fn(),
-43	  queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
-44	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-45	}));
-46	
-47	vi.mock('canvas-confetti', () => ({
-48	  default: Object.assign(
-49	    vi.fn().mockImplementation(() => Promise.resolve()),
-50	    { reset: vi.fn() },
-51	  ),
-52	}));
-53	
-54	const config: WordSpellConfig = {
-55	  gameId: 'word-spell-test',
-56	  component: 'WordSpell',
-57	  inputMethod: 'drag',
-58	  wrongTileBehavior: 'lock-auto-eject',
-59	  tileBankMode: 'exact',
-60	  totalRounds: 2,
-61	  roundsInOrder: true,
-62	  ttsEnabled: true,
-63	  mode: 'picture',
-64	  tileUnit: 'letter',
-65	  rounds: [
-66	    { word: 'cat', image: 'https://placehold.co/160' },
-67	    { word: 'dog', image: 'https://placehold.co/160' },
-68	  ],
-69	};
-70	
-71	describe('WordSpell', () => {
-72	  it('renders the game with letter tiles for the first round word', () => {
-73	    render(<WordSpell config={config} />);
-74	    expect(
-75	      screen.getByRole('button', { name: 'Letter c' }),
-76	    ).toBeInTheDocument();
-77	    expect(
-78	      screen.getByRole('button', { name: 'Letter a' }),
-79	    ).toBeInTheDocument();
-80	    expect(
-81	      screen.getByRole('button', { name: 'Letter t' }),
-82	    ).toBeInTheDocument();
-83	  });
-84	
-85	  it('renders three answer slots for "cat"', () => {
-86	    const { container } = render(<WordSpell config={config} />);
-87	    const answerZone = container.querySelector<HTMLElement>(
-88	      '.game-answer-zone',
-89	    )!;
-90	    expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
-91	  });
-92	
-93	  it('does not render image in recall mode', () => {
-94	    const recallConfig: WordSpellConfig = {
-95	      ...config,
-96	      mode: 'recall',
-97	      rounds: [{ word: 'cat' }],
-98	    };
-99	    render(<WordSpell config={recallConfig} />);
-100	    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-101	  });
-102	
-103	  it('renders native emoji when round.emoji is set (no img)', () => {
-104	    const emojiConfig: WordSpellConfig = {
-105	      ...config,
-106	      rounds: [{ word: 'cat', emoji: '🐱' }],
-107	    };
-108	    render(<WordSpell config={emojiConfig} />);
-109	    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-110	    expect(
-111	      screen.getByRole('button', { name: /cat — tap to hear/i }),
-112	    ).toBeInTheDocument();
-113	  });
-114	});
-115	
-116	describe('WordSpell library levels recall', () => {
-117	  it('generates a new sampleSeed when the session restarts', async () => {
-118	    // Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
-119	    // This smoke test exists only to pin the component compiles with
-120	    // the new hook signature.
-121	    expect(true).toBe(true);
-122	  });
-123	});
-124	
-125	describe('WordSpell Play again', () => {
-126	  it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
-127	    const user = userEvent.setup();
-128	
-129	    const oneRoundConfig: WordSpellConfig = {
-130	      gameId: 'word-spell-test',
-131	      component: 'WordSpell',
-132	      inputMethod: 'type',
-133	      wrongTileBehavior: 'lock-auto-eject',
-134	      tileBankMode: 'exact',
-135	      totalRounds: 1,
-136	      roundsInOrder: true,
-137	      ttsEnabled: false,
-138	      mode: 'picture',
-139	      tileUnit: 'letter',
-140	      rounds: [{ word: 'a' }],
-141	    };
-142	
-143	    const { container } = render(<WordSpell config={oneRoundConfig} />);
-144	
-145	    // Game starts in playing phase — 1 answer slot visible, no game-over dialog
-146	    const answerZone = () =>
-147	      container.querySelector<HTMLElement>('.game-answer-zone')!;
-148	    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
-149	      1,
-150	    );
-151	    expect(
-152	      screen.queryByRole('dialog', { name: 'Game complete' }),
-153	    ).not.toBeInTheDocument();
-154	
-155	    // Type 'a' to correctly fill the only slot → phase transitions to game-over
-156	    act(() => {
-157	      globalThis.dispatchEvent(
-158	        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
-159	      );
-160	    });
-161	
-162	    // Game-over overlay appears
-163	    await screen.findByRole('button', { name: 'Play again' });
-164	    expect(
-165	      screen.getByRole('dialog', { name: 'Game complete' }),
-166	    ).toBeInTheDocument();
-167	
-168	    // Click "Play again"
-169	    await user.click(
-170	      screen.getByRole('button', { name: 'Play again' }),
-171	    );
-172	
-173	    // Overlay is gone and game has restarted at round 1
-174	    expect(
-175	      screen.queryByRole('dialog', { name: 'Game complete' }),
-176	    ).not.toBeInTheDocument();
-177	    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
-178	      1,
-179	    );
-180	  });
-181	});
+1 import { act, render, screen, within } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { describe, expect, it, vi } from 'vitest';
+4 import { WordSpell } from './WordSpell';
+5 import type { WordSpellConfig } from '../types';
+6 import { createInMemorySeenWordsStore } from '@/data/words';
+7 
+8 vi.mock('@/db/hooks/useSeenWordsStore', () => ({
+9   useSeenWordsStore: () => createInMemorySeenWordsStore(),
+10 }));
+11 
+12 const navigateStub = vi.hoisted(() => vi.fn());
+13 
+14 vi.mock('@tanstack/react-router', () => ({
+15   useNavigate: () => navigateStub,
+16 }));
+17 
+18 vi.mock('@/lib/speech/SpeechOutput', () => ({
+19   speak: vi.fn(),
+20   cancelSpeech: vi.fn(),
+21   isSpeechActive: vi.fn().mockReturnValue(false),
+22 }));
+23 const noopUnsubscribe = () => {};
+24 vi.mock('@/lib/game-event-bus', () => ({
+25   getGameEventBus: () => ({
+26     emit: vi.fn(),
+27     subscribe: vi.fn(() => noopUnsubscribe),
+28   }),
+29 }));
+30 vi.mock('@/db/hooks/useSettings', () => ({
+31   useSettings: () => ({
+32     settings: {
+33       speechRate: 1,
+34       volume: 0.8,
+35       preferredVoiceURI: undefined,
+36     },
+37     update: vi.fn(),
+38   }),
+39 }));
+40 
+41 vi.mock('@/lib/audio/AudioFeedback', () => ({
+42   playSound: vi.fn(),
+43   queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
+44   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+45 }));
+46 
+47 vi.mock('canvas-confetti', () => ({
+48   default: Object.assign(
+49     vi.fn().mockImplementation(() => Promise.resolve()),
+50     { reset: vi.fn() },
+51   ),
+52 }));
+53 
+54 const config: WordSpellConfig = {
+55   gameId: 'word-spell-test',
+56   component: 'WordSpell',
+57   inputMethod: 'drag',
+58   wrongTileBehavior: 'lock-auto-eject',
+59   tileBankMode: 'exact',
+60   totalRounds: 2,
+61   roundsInOrder: true,
+62   ttsEnabled: true,
+63   mode: 'picture',
+64   tileUnit: 'letter',
+65   rounds: [
+66     { word: 'cat', image: 'https://placehold.co/160' },
+67     { word: 'dog', image: 'https://placehold.co/160' },
+68   ],
+69 };
+70 
+71 describe('WordSpell', () => {
+72   it('renders the game with letter tiles for the first round word', () => {
+73     render(<WordSpell config={config} />);
+74     expect(
+75       screen.getByRole('button', { name: 'Letter c' }),
+76     ).toBeInTheDocument();
+77     expect(
+78       screen.getByRole('button', { name: 'Letter a' }),
+79     ).toBeInTheDocument();
+80     expect(
+81       screen.getByRole('button', { name: 'Letter t' }),
+82     ).toBeInTheDocument();
+83   });
+84 
+85   it('renders three answer slots for "cat"', () => {
+86     const { container } = render(<WordSpell config={config} />);
+87     const answerZone = container.querySelector<HTMLElement>(
+88       '.game-answer-zone',
+89     )!;
+90     expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
+91   });
+92 
+93   it('does not render image in recall mode', () => {
+94     const recallConfig: WordSpellConfig = {
+95       ...config,
+96       mode: 'recall',
+97       rounds: [{ word: 'cat' }],
+98     };
+99     render(<WordSpell config={recallConfig} />);
+100     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+101   });
+102 
+103   it('renders native emoji when round.emoji is set (no img)', () => {
+104     const emojiConfig: WordSpellConfig = {
+105       ...config,
+106       rounds: [{ word: 'cat', emoji: '🐱' }],
+107     };
+108     render(<WordSpell config={emojiConfig} />);
+109     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+110     expect(
+111       screen.getByRole('button', { name: /cat — tap to hear/i }),
+112     ).toBeInTheDocument();
+113   });
+114 });
+115 
+116 describe('WordSpell library levels recall', () => {
+117   it('generates a new sampleSeed when the session restarts', async () => {
+118     // Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
+119     // This smoke test exists only to pin the component compiles with
+120     // the new hook signature.
+121     expect(true).toBe(true);
+122   });
+123 });
+124 
+125 describe('WordSpell Play again', () => {
+126   it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
+127     const user = userEvent.setup();
+128 
+129     const oneRoundConfig: WordSpellConfig = {
+130       gameId: 'word-spell-test',
+131       component: 'WordSpell',
+132       inputMethod: 'type',
+133       wrongTileBehavior: 'lock-auto-eject',
+134       tileBankMode: 'exact',
+135       totalRounds: 1,
+136       roundsInOrder: true,
+137       ttsEnabled: false,
+138       mode: 'picture',
+139       tileUnit: 'letter',
+140       rounds: [{ word: 'a' }],
+141     };
+142 
+143     const { container } = render(<WordSpell config={oneRoundConfig} />);
+144 
+145     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
+146     const answerZone = () =>
+147       container.querySelector<HTMLElement>('.game-answer-zone')!;
+148     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+149       1,
+150     );
+151     expect(
+152       screen.queryByRole('dialog', { name: 'Game complete' }),
+153     ).not.toBeInTheDocument();
+154 
+155     // Type 'a' to correctly fill the only slot → phase transitions to game-over
+156     act(() => {
+157       globalThis.dispatchEvent(
+158         new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+159       );
+160     });
+161 
+162     // Game-over overlay appears
+163     await screen.findByRole('button', { name: 'Play again' });
+164     expect(
+165       screen.getByRole('dialog', { name: 'Game complete' }),
+166     ).toBeInTheDocument();
+167 
+168     // Click "Play again"
+169     await user.click(
+170       screen.getByRole('button', { name: 'Play again' }),
+171     );
+172 
+173     // Overlay is gone and game has restarted at round 1
+174     expect(
+175       screen.queryByRole('dialog', { name: 'Game complete' }),
+176     ).not.toBeInTheDocument();
+177     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+178       1,
+179     );
+180   });
+181 });
 182
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:09Z)**_
@@ -1386,6 +1423,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:10Z)**_
 302:export const WordSpell = ({
 308:}: WordSpellProps) => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:12Z)**_
@@ -1395,87 +1433,88 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:12Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-120	    () => wordSpellConfig.rounds ?? [],
-121	    [wordSpellConfig.rounds],
-122	  );
-123	
-124	  const configRoundIndex = roundOrder[roundIndex];
-125	  const round =
-126	    configRoundIndex === undefined
-127	      ? undefined
-128	      : rounds[configRoundIndex];
-129	
-130	  useRoundTTS(round?.word ?? '');
-131	
-132	  const handleHome = () => {
-133	    void navigate({
-134	      to: '/$locale',
-135	      params: { locale: 'en' },
-136	    });
-137	  };
-138	
-139	  const handlePlayAgain = () => {
-140	    onRestartSession();
-141	  };
-142	
-143	  useEffect(() => {
-144	    if (phase !== 'game-over') return;
-145	    getGameEventBus().emit({
-146	      type: 'game:end',
-147	      gameId: wordSpellConfig.gameId,
-148	      sessionId: '',
-149	      profileId: '',
-150	      timestamp: Date.now(),
-151	      roundIndex,
-152	      finalScore: 0,
-153	      totalRounds: roundOrder.length,
-154	      correctCount: 0,
-155	      durationMs: 0,
-156	      retryCount,
-157	    });
-158	  }, [
-159	    phase,
-160	    wordSpellConfig.gameId,
-161	    roundIndex,
-162	    roundOrder.length,
-163	    retryCount,
-164	  ]);
-165	
-166	  useEffect(() => {
-167	    if (phase !== 'round-complete' || !confettiReady) return;
-168	
-169	    const token = ++completionToken.current;
-170	    const delayMs = 750;
-171	    const timer = globalThis.setTimeout(() => {
-172	      if (completionToken.current !== token) return;
-173	
-174	      const isLastRound = roundIndex >= roundOrder.length - 1;
-175	      if (isLastRound) {
-176	        dispatch({ type: 'COMPLETE_GAME' });
-177	        return;
-178	      }
-179	
-180	      const nextConfigIndex = roundOrder[roundIndex + 1];
-181	      const nextRound =
-182	        nextConfigIndex === undefined
-183	          ? undefined
-184	          : rounds[nextConfigIndex];
-185	      const word = nextRound?.word.trim() ?? '';
-186	      if (!word) {
-187	        dispatch({ type: 'COMPLETE_GAME' });
-188	        return;
-189	      }
-190	      if (nextRound?.gaps && nextRound.gaps.length > 0) {
-191	        const { tiles: nextTiles, zones: nextZones } =
-192	          buildSentenceGapRound(nextRound.gaps);
-193	        dispatch({
-194	          type: 'ADVANCE_ROUND',
-195	          tiles: nextTiles,
-196	          zones: nextZones,
-197	        });
-198	      } else {
-199	        const { tiles: nextTiles, zones: nextZones } =
+120     () => wordSpellConfig.rounds ?? [],
+121     [wordSpellConfig.rounds],
+122   );
+123 
+124   const configRoundIndex = roundOrder[roundIndex];
+125   const round =
+126     configRoundIndex === undefined
+127       ? undefined
+128       : rounds[configRoundIndex];
+129 
+130   useRoundTTS(round?.word ?? '');
+131 
+132   const handleHome = () => {
+133     void navigate({
+134       to: '/$locale',
+135       params: { locale: 'en' },
+136     });
+137   };
+138 
+139   const handlePlayAgain = () => {
+140     onRestartSession();
+141   };
+142 
+143   useEffect(() => {
+144     if (phase !== 'game-over') return;
+145     getGameEventBus().emit({
+146       type: 'game:end',
+147       gameId: wordSpellConfig.gameId,
+148       sessionId: '',
+149       profileId: '',
+150       timestamp: Date.now(),
+151       roundIndex,
+152       finalScore: 0,
+153       totalRounds: roundOrder.length,
+154       correctCount: 0,
+155       durationMs: 0,
+156       retryCount,
+157     });
+158   }, [
+159     phase,
+160     wordSpellConfig.gameId,
+161     roundIndex,
+162     roundOrder.length,
+163     retryCount,
+164   ]);
+165 
+166   useEffect(() => {
+167     if (phase !== 'round-complete' || !confettiReady) return;
+168 
+169     const token = ++completionToken.current;
+170     const delayMs = 750;
+171     const timer = globalThis.setTimeout(() => {
+172       if (completionToken.current !== token) return;
+173 
+174       const isLastRound = roundIndex >= roundOrder.length - 1;
+175       if (isLastRound) {
+176         dispatch({ type: 'COMPLETE_GAME' });
+177         return;
+178       }
+179 
+180       const nextConfigIndex = roundOrder[roundIndex + 1];
+181       const nextRound =
+182         nextConfigIndex === undefined
+183           ? undefined
+184           : rounds[nextConfigIndex];
+185       const word = nextRound?.word.trim() ?? '';
+186       if (!word) {
+187         dispatch({ type: 'COMPLETE_GAME' });
+188         return;
+189       }
+190       if (nextRound?.gaps && nextRound.gaps.length > 0) {
+191         const { tiles: nextTiles, zones: nextZones } =
+192           buildSentenceGapRound(nextRound.gaps);
+193         dispatch({
+194           type: 'ADVANCE_ROUND',
+195           tiles: nextTiles,
+196           zones: nextZones,
+197         });
+198       } else {
+199         const { tiles: nextTiles, zones: nextZones } =
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:16Z)**_
@@ -1485,47 +1524,48 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:16Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-80	    label: value,
-81	    value,
-82	  }));
-83	  return { tiles, zones };
-84	}
-85	
-86	interface WordSpellProps {
-87	  config: WordSpellConfig;
-88	  initialState?: AnswerGameDraftState;
-89	  sessionId?: string;
-90	  seed?: string;
-91	  /**
-92	   * On resume, the persisted `session_history_index.initialContent` for this
-93	   * session. When it carries WordSpell data (see `hasWordSpellPersistedContent`)
-94	   * it overrides library re-sampling and round-order regeneration so the
-95	   * resumed tiles/prompt stay in lockstep with the draft.
-96	   */
-97	  persistedContent?: Record<string, unknown> | null;
-98	}
-99	
-100	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-101	const WordSpellSession = ({
-102	  wordSpellConfig,
-103	  roundOrder,
-104	  skin,
-105	  onRestartSession,
-106	}: {
-107	  wordSpellConfig: WordSpellConfig;
-108	  roundOrder: readonly number[];
-109	  skin: GameSkin;
-110	  onRestartSession: () => void;
-111	}) => {
-112	  const { phase, roundIndex, retryCount, zones } =
-113	    useAnswerGameContext();
-114	  const dispatch = useAnswerGameDispatch();
-115	  const { confettiReady, gameOverReady } = useGameSounds();
-116	  const navigate = useNavigate();
-117	  const completionToken = useRef(0);
-118	
-119	  const rounds = useMemo(
+80     label: value,
+81     value,
+82   }));
+83   return { tiles, zones };
+84 }
+85 
+86 interface WordSpellProps {
+87   config: WordSpellConfig;
+88   initialState?: AnswerGameDraftState;
+89   sessionId?: string;
+90   seed?: string;
+91   /**
+92    * On resume, the persisted `session_history_index.initialContent` for this
+93    * session. When it carries WordSpell data (see `hasWordSpellPersistedContent`)
+94    * it overrides library re-sampling and round-order regeneration so the
+95    * resumed tiles/prompt stay in lockstep with the draft.
+96    */
+97   persistedContent?: Record<string, unknown> | null;
+98 }
+99 
+100 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+101 const WordSpellSession = ({
+102   wordSpellConfig,
+103   roundOrder,
+104   skin,
+105   onRestartSession,
+106 }: {
+107   wordSpellConfig: WordSpellConfig;
+108   roundOrder: readonly number[];
+109   skin: GameSkin;
+110   onRestartSession: () => void;
+111 }) => {
+112   const { phase, roundIndex, retryCount, zones } =
+113     useAnswerGameContext();
+114   const dispatch = useAnswerGameDispatch();
+115   const { confettiReady, gameOverReady } = useGameSounds();
+116   const navigate = useNavigate();
+117   const completionToken = useRef(0);
+118 
+119   const rounds = useMemo(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:17Z)**_
@@ -1535,67 +1575,68 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:17Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-290	        ) : (
-291	          <GameOverOverlay
-292	            retryCount={retryCount}
-293	            onPlayAgain={handlePlayAgain}
-294	            onHome={handleHome}
-295	          />
-296	        )
-297	      ) : null}
-298	    </>
-299	  );
-300	};
-301	
-302	export const WordSpell = ({
-303	  config,
-304	  initialState,
-305	  sessionId,
-306	  seed,
-307	  persistedContent,
-308	}: WordSpellProps) => {
-309	  const skin = useGameSkin('word-spell', config.skin);
-310	  const [sessionEpoch, setSessionEpoch] = useState(0);
-311	  const seenWordsStore = useSeenWordsStore();
-312	  const sampleSeed = useMemo(() => {
-313	    void sessionEpoch;
-314	    return nanoid();
-315	  }, [sessionEpoch]);
-316	
-317	  // On resume, the persisted `initialContent` is authoritative over the live
-318	  // library sampler + seed-driven `buildRoundOrder`. If the source word pool
-319	  // or sampling logic changed since the session was saved, the regenerated
-320	  // rounds would desync from the in-progress draft (see plan 2026-04-21-wordspell-resume-desync).
-321	  // `sessionEpoch > 0` means the user hit "Play again"; we discard persisted
-322	  // content in that case so the new session samples fresh rounds.
-323	  const persisted = useMemo(() => {
-324	    if (sessionEpoch !== 0) return null;
-325	    return hasWordSpellPersistedContent(persistedContent)
-326	      ? persistedContent
-327	      : null;
-328	  }, [persistedContent, sessionEpoch]);
-329	
-330	  // When persisted content exists, short-circuit `useLibraryRounds` by
-331	  // substituting its `config.rounds` with the persisted rounds. The hook's
-332	  // own guard returns the explicit rounds synchronously when set.
-333	  const sourceConfig = useMemo<WordSpellConfig>(
-334	    () =>
-335	      persisted
-336	        ? {
-337	            ...config,
-338	            rounds: [...persisted.wordSpellRounds],
-339	            source: undefined,
-340	          }
-341	        : config,
-342	    [config, persisted],
-343	  );
-344	
-345	  const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-346	    sourceConfig,
-347	    sampleSeed,
-348	    seenWordsStore,
-349	  );
+290         ) : (
+291           <GameOverOverlay
+292             retryCount={retryCount}
+293             onPlayAgain={handlePlayAgain}
+294             onHome={handleHome}
+295           />
+296         )
+297       ) : null}
+298     </>
+299   );
+300 };
+301 
+302 export const WordSpell = ({
+303   config,
+304   initialState,
+305   sessionId,
+306   seed,
+307   persistedContent,
+308 }: WordSpellProps) => {
+309   const skin = useGameSkin('word-spell', config.skin);
+310   const [sessionEpoch, setSessionEpoch] = useState(0);
+311   const seenWordsStore = useSeenWordsStore();
+312   const sampleSeed = useMemo(() => {
+313     void sessionEpoch;
+314     return nanoid();
+315   }, [sessionEpoch]);
+316 
+317   // On resume, the persisted `initialContent` is authoritative over the live
+318   // library sampler + seed-driven `buildRoundOrder`. If the source word pool
+319   // or sampling logic changed since the session was saved, the regenerated
+320   // rounds would desync from the in-progress draft (see plan 2026-04-21-wordspell-resume-desync).
+321   // `sessionEpoch > 0` means the user hit "Play again"; we discard persisted
+322   // content in that case so the new session samples fresh rounds.
+323   const persisted = useMemo(() => {
+324     if (sessionEpoch !== 0) return null;
+325     return hasWordSpellPersistedContent(persistedContent)
+326       ? persistedContent
+327       : null;
+328   }, [persistedContent, sessionEpoch]);
+329 
+330   // When persisted content exists, short-circuit `useLibraryRounds` by
+331   // substituting its `config.rounds` with the persisted rounds. The hook's
+332   // own guard returns the explicit rounds synchronously when set.
+333   const sourceConfig = useMemo<WordSpellConfig>(
+334     () =>
+335       persisted
+336         ? {
+337             ...config,
+338             rounds: [...persisted.wordSpellRounds],
+339             source: undefined,
+340           }
+341         : config,
+342     [config, persisted],
+343   );
+344 
+345   const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+346     sourceConfig,
+347     sampleSeed,
+348     seenWordsStore,
+349   );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:20Z)**_
@@ -1605,107 +1646,108 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:20Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-349	  );
-350	
-351	  const resolvedConfig = useMemo<WordSpellConfig>(
-352	    () => ({ ...config, rounds: resolvedRounds }),
-353	    [config, resolvedRounds],
-354	  );
-355	
-356	  const roundsInOrder = resolvedConfig.roundsInOrder === true;
-357	
-358	  const roundOrder = useMemo(() => {
-359	    void sessionEpoch;
-360	    if (persisted) return persisted.roundOrder;
-361	    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
-362	  }, [
-363	    resolvedRounds.length,
-364	    roundsInOrder,
-365	    seed,
-366	    sessionEpoch,
-367	    persisted,
-368	  ]);
-369	
-370	  // For new sessions (no persisted content yet), write the real roundOrder +
-371	  // resolved rounds into `session_history_index.initialContent` so a future
-372	  // resume can reconstruct the exact game state.
-373	  const dbCtx = useContext(DbContext);
-374	  const db = dbCtx?.db ?? null;
-375	  const persistedRef = useRef(persisted);
-376	  useEffect(() => {
-377	    persistedRef.current = persisted;
-378	  }, [persisted]);
-379	
-380	  useEffect(() => {
-381	    if (!db || !sessionId) return;
-382	    if (persistedRef.current) return;
-383	    if (resolvedRounds.length === 0) return;
-384	    if (isLoading) return;
-385	
-386	    const cancellation = { isCancelled: false as boolean };
-387	    void (async () => {
-388	      const doc = await db.session_history_index
-389	        .findOne(sessionId)
-390	        .exec();
-391	
-392	      if (cancellation.isCancelled || !doc) return;
-393	      if (hasWordSpellPersistedContent(doc.initialContent)) return;
-394	
-395	      const patch = buildWordSpellInitialContent({
-396	        rounds: resolvedRounds,
-397	        roundOrder,
-398	        tileUnit: resolvedConfig.tileUnit,
-399	        mode: resolvedConfig.mode,
-400	      });
-401	      await doc.incrementalPatch({
-402	        initialContent: {
-403	          ...doc.initialContent,
-404	          ...patch,
-405	        },
-406	      });
-407	    })();
-408	
-409	    return () => {
-410	      cancellation.isCancelled = true;
-411	    };
-412	  }, [
-413	    db,
-414	    sessionId,
-415	    resolvedRounds,
-416	    roundOrder,
-417	    resolvedConfig.tileUnit,
-418	    resolvedConfig.mode,
-419	    isLoading,
-420	  ]);
-421	
-422	  const firstConfigIndex = roundOrder[0];
-423	  const round0 =
-424	    firstConfigIndex === undefined
-425	      ? undefined
-426	      : resolvedRounds[firstConfigIndex];
-427	  const roundWord = round0?.word.trim() ? round0.word : '';
-428	
-429	  // Safety net: detect a draft whose tiles don't match the round the resumed
-430	  // index is pointing at. This covers legacy sessions (no persisted content,
-431	  // draft authored against a different word pool) and any future divergence.
-432	  // When stale, we ignore the draft and start from round 0 — a silent recovery
-433	  // is a strict improvement over the "stuck game" symptom. A follow-up PR can
-434	  // surface a toast once `Toaster` is mounted at the app root.
-435	  const staleDraft = useMemo(() => {
-436	    if (!initialState || sessionEpoch !== 0) return false;
-437	    if (resolvedRounds.length === 0 || isLoading) return false;
-438	    const draftRoundConfigIndex = roundOrder[initialState.roundIndex];
-439	    const draftRound =
-440	      draftRoundConfigIndex === undefined
-441	        ? undefined
-442	        : resolvedRounds[draftRoundConfigIndex];
-443	    if (!draftRound?.word) return true;
-444	    if (draftRound.gaps && draftRound.gaps.length > 0) return false;
-445	    return !isDraftAlignedWithRound({
-446	      draftTileValues: initialState.allTiles.map((t) => t.value),
-447	      roundWord: draftRound.word,
-448	    });
+349   );
+350 
+351   const resolvedConfig = useMemo<WordSpellConfig>(
+352     () => ({ ...config, rounds: resolvedRounds }),
+353     [config, resolvedRounds],
+354   );
+355 
+356   const roundsInOrder = resolvedConfig.roundsInOrder === true;
+357 
+358   const roundOrder = useMemo(() => {
+359     void sessionEpoch;
+360     if (persisted) return persisted.roundOrder;
+361     return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+362   }, [
+363     resolvedRounds.length,
+364     roundsInOrder,
+365     seed,
+366     sessionEpoch,
+367     persisted,
+368   ]);
+369 
+370   // For new sessions (no persisted content yet), write the real roundOrder +
+371   // resolved rounds into `session_history_index.initialContent` so a future
+372   // resume can reconstruct the exact game state.
+373   const dbCtx = useContext(DbContext);
+374   const db = dbCtx?.db ?? null;
+375   const persistedRef = useRef(persisted);
+376   useEffect(() => {
+377     persistedRef.current = persisted;
+378   }, [persisted]);
+379 
+380   useEffect(() => {
+381     if (!db || !sessionId) return;
+382     if (persistedRef.current) return;
+383     if (resolvedRounds.length === 0) return;
+384     if (isLoading) return;
+385 
+386     const cancellation = { isCancelled: false as boolean };
+387     void (async () => {
+388       const doc = await db.session_history_index
+389         .findOne(sessionId)
+390         .exec();
+391 
+392       if (cancellation.isCancelled || !doc) return;
+393       if (hasWordSpellPersistedContent(doc.initialContent)) return;
+394 
+395       const patch = buildWordSpellInitialContent({
+396         rounds: resolvedRounds,
+397         roundOrder,
+398         tileUnit: resolvedConfig.tileUnit,
+399         mode: resolvedConfig.mode,
+400       });
+401       await doc.incrementalPatch({
+402         initialContent: {
+403           ...doc.initialContent,
+404           ...patch,
+405         },
+406       });
+407     })();
+408 
+409     return () => {
+410       cancellation.isCancelled = true;
+411     };
+412   }, [
+413     db,
+414     sessionId,
+415     resolvedRounds,
+416     roundOrder,
+417     resolvedConfig.tileUnit,
+418     resolvedConfig.mode,
+419     isLoading,
+420   ]);
+421 
+422   const firstConfigIndex = roundOrder[0];
+423   const round0 =
+424     firstConfigIndex === undefined
+425       ? undefined
+426       : resolvedRounds[firstConfigIndex];
+427   const roundWord = round0?.word.trim() ? round0.word : '';
+428 
+429   // Safety net: detect a draft whose tiles don't match the round the resumed
+430   // index is pointing at. This covers legacy sessions (no persisted content,
+431   // draft authored against a different word pool) and any future divergence.
+432   // When stale, we ignore the draft and start from round 0 — a silent recovery
+433   // is a strict improvement over the "stuck game" symptom. A follow-up PR can
+434   // surface a toast once `Toaster` is mounted at the app root.
+435   const staleDraft = useMemo(() => {
+436     if (!initialState || sessionEpoch !== 0) return false;
+437     if (resolvedRounds.length === 0 || isLoading) return false;
+438     const draftRoundConfigIndex = roundOrder[initialState.roundIndex];
+439     const draftRound =
+440       draftRoundConfigIndex === undefined
+441         ? undefined
+442         : resolvedRounds[draftRoundConfigIndex];
+443     if (!draftRound?.word) return true;
+444     if (draftRound.gaps && draftRound.gaps.length > 0) return false;
+445     return !isDraftAlignedWithRound({
+446       draftTileValues: initialState.allTiles.map((t) => t.value),
+447       roundWord: draftRound.word,
+448     });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:45Z)**_
@@ -1752,6 +1794,7 @@ export default defineConfig({
   },
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:47Z)**_
@@ -1765,6 +1808,7 @@ Find vitest setup
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:51Z)**_
@@ -1774,10 +1818,11 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:51Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/test-setup.ts`
 
 ```text
-1	import 'fake-indexeddb/auto';
-2	import '@testing-library/jest-dom';
+1 import 'fake-indexeddb/auto';
+2 import '@testing-library/jest-dom';
 3
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:55Z)**_
@@ -1797,11 +1842,12 @@ src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx:32:vi.mock('react-i1
 src/components/questions/TextQuestion/TextQuestion.test.tsx:25:vi.mock('react-i18next', () => ({
 src/components/questions/AudioButton/AudioButton.test.tsx:25:vi.mock('react-i18next', () => ({
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx:32:vi.mock('react-i18next', () => ({
-.specstory/history/2026-04-15_01-38-11Z-i-am-interested-to.md:70710:16	vi.mock('react-i18next', () => ({
+.specstory/history/2026-04-15_01-38-11Z-i-am-interested-to.md:70710:16 vi.mock('react-i18next', () => ({
 .specstory/history/2026-04-15_01-38-11Z-i-am-interested-to.md:72684:If the existing `vi.mock('react-i18next', ...)` in the test file doesn't include keys your new code uses, add them (e.g., `'instructions.settings'`, any new cog aria label key).
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:02:57Z)**_
@@ -1813,6 +1859,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:02:57Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:01Z)**_
@@ -1822,32 +1869,33 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:01Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx`
 
 ```text
-28	    },
-29	    update: vi.fn(),
-30	  }),
-31	}));
-32	vi.mock('react-i18next', () => ({
-33	  useTranslation: () => ({
-34	    t: (key: string) => key,
-35	    i18n: { language: 'en' },
-36	  }),
-37	}));
-38	
-39	const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
-40	
-41	vi.mock('@/components/answer-game/useBankDropTarget', () => ({
-42	  useBankDropTarget: () => ({
-43	    bankRef: { current: null },
-44	    get isDragOver() {
-45	      return bankDropState.isDragOver;
-46	    },
-47	  }),
-48	}));
-49	
-50	const config: AnswerGameConfig = {
-51	  gameId: 'test',
-52	  inputMethod: 'drag',
+28     },
+29     update: vi.fn(),
+30   }),
+31 }));
+32 vi.mock('react-i18next', () => ({
+33   useTranslation: () => ({
+34     t: (key: string) => key,
+35     i18n: { language: 'en' },
+36   }),
+37 }));
+38 
+39 const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
+40 
+41 vi.mock('@/components/answer-game/useBankDropTarget', () => ({
+42   useBankDropTarget: () => ({
+43     bankRef: { current: null },
+44     get isDragOver() {
+45       return bankDropState.isDragOver;
+46     },
+47   }),
+48 }));
+49 
+50 const config: AnswerGameConfig = {
+51   gameId: 'test',
+52   inputMethod: 'drag',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:09Z)**_
@@ -1881,6 +1929,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:11Z)**_
 146-
 147-export interface ProgressHUDProps {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:14Z)**_
@@ -1933,6 +1982,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:14Z)**_
 
 [Showing results with pagination = limit: 40]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:33Z)**_
@@ -1949,6 +1999,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:44Z)**_
@@ -1959,6 +2010,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:03:47Z)**_
@@ -1973,6 +2025,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:03:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:06Z)**_
@@ -2028,6 +2081,7 @@ AssertionError: expected "spy" to be called 1 times, but got 0 times
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:15Z)**_
@@ -2044,6 +2098,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/locales/en/common.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:21Z)**_
@@ -2054,6 +2109,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:21Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/locales/pt-BR/common.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:25Z)**_
@@ -2068,6 +2124,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:34Z)**_
@@ -2077,37 +2134,38 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:34Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-455	    sessionEpoch,
-456	    isLoading,
-457	  ]);
-458	
-459	  useEffect(() => {
-460	    if (!staleDraft || !db || !sessionId) return;
-461	    const cancellation = { isCancelled: false as boolean };
-462	    void (async () => {
-463	      const doc = await db.session_history_index
-464	        .findOne(sessionId)
-465	        .exec();
-466	
-467	      if (cancellation.isCancelled || !doc) return;
-468	      if (doc.draftState == null) return;
-469	      await doc.incrementalPatch({ draftState: null });
-470	    })();
-471	    return () => {
-472	      cancellation.isCancelled = true;
-473	    };
-474	  }, [staleDraft, db, sessionId]);
-475	
-476	  const { tiles, zones } = useMemo(() => {
-477	    if (!roundWord)
-478	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-479	
-480	    if (round0?.gaps && round0.gaps.length > 0) {
-481	      return buildSentenceGapRound(round0.gaps);
-482	    }
-483	
-484	    return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
+455     sessionEpoch,
+456     isLoading,
+457   ]);
+458 
+459   useEffect(() => {
+460     if (!staleDraft || !db || !sessionId) return;
+461     const cancellation = { isCancelled: false as boolean };
+462     void (async () => {
+463       const doc = await db.session_history_index
+464         .findOne(sessionId)
+465         .exec();
+466 
+467       if (cancellation.isCancelled || !doc) return;
+468       if (doc.draftState == null) return;
+469       await doc.incrementalPatch({ draftState: null });
+470     })();
+471     return () => {
+472       cancellation.isCancelled = true;
+473     };
+474   }, [staleDraft, db, sessionId]);
+475 
+476   const { tiles, zones } = useMemo(() => {
+477     if (!roundWord)
+478       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+479 
+480     if (round0?.gaps && round0.gaps.length > 0) {
+481       return buildSentenceGapRound(round0.gaps);
+482     }
+483 
+484     return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:43Z)**_
@@ -2120,6 +2178,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:04:57Z)**_
@@ -2130,6 +2189,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:04:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:03Z)**_
@@ -2140,6 +2200,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:07Z)**_
@@ -2154,6 +2215,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/routes/__root.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:14Z)**_
@@ -2164,6 +2226,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/routes/__root.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:17Z)**_
@@ -2193,6 +2256,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/
 
 Done in 1.74s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:23Z)**_
@@ -2212,6 +2276,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 4.28s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:38Z)**_
@@ -2249,6 +2314,7 @@ Run full unit suite
 
 Done in 10.89s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:42Z)**_
@@ -2262,19 +2328,20 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:43Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/lib/i18n/i18n.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import { i18n } from './i18n';
-3	
-4	describe('i18n', () => {
-5	  it('resolves common:appName for en and pt-BR', async () => {
-6	    await i18n.changeLanguage('en');
-7	    expect(i18n.t('common:appName')).toBe('BaseSkill');
-8	    await i18n.changeLanguage('pt-BR');
-9	    expect(i18n.t('common:appName')).toBe('BaseSkill');
-10	  });
-11	});
+1 import { describe, expect, it } from 'vitest';
+2 import { i18n } from './i18n';
+3 
+4 describe('i18n', () => {
+5   it('resolves common:appName for en and pt-BR', async () => {
+6     await i18n.changeLanguage('en');
+7     expect(i18n.t('common:appName')).toBe('BaseSkill');
+8     await i18n.changeLanguage('pt-BR');
+9     expect(i18n.t('common:appName')).toBe('BaseSkill');
+10   });
+11 });
 12
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:48Z)**_
@@ -2296,6 +2363,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/
 
 Done in 3.81s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:53Z)**_
@@ -2311,13 +2379,14 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:54Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-444	        : resolvedRounds[draftRoundConfigIndex];
-445	    if (!draftRound?.word) return true;
-446	    if (draftRound.gaps && draftRound.gaps.length > 0) return false;
-447	    return !isDraftAlignedWithRound({
-448	      draftTileValues: initialState.allTiles.map((t) => t.value),
-449	      roundWord: draftRound.word,
+444         : resolvedRounds[draftRoundConfigIndex];
+445     if (!draftRound?.word) return true;
+446     if (draftRound.gaps && draftRound.gaps.length > 0) return false;
+447     return !isDraftAlignedWithRound({
+448       draftTileValues: initialState.allTiles.map((t) => t.value),
+449       roundWord: draftRound.word,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:05:58Z)**_
@@ -2328,6 +2397,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:05:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:06:07Z)**_
@@ -2349,6 +2419,7 @@ Lint again + jsons
 
 Done in 2.92s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:06:08Z)**_
@@ -2363,6 +2434,7 @@ Prettier check
 Checking formatting...
 All matched files use Prettier code style!
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:06:21Z)**_
@@ -2386,6 +2458,7 @@ Status in worktree
  M src/lib/i18n/locales/pt-BR/common.json
  M src/routes/__root.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:06:46Z)**_
@@ -2434,6 +2507,7 @@ Done in 10.03s.
 [feat/wordspell-stale-draft-toast 9b790335] feat(word-spell): toast when a stale resumed draft is discarded
  5 files changed, 92 insertions(+), 5 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:06:54Z)**_
@@ -2443,7 +2517,7 @@ Committed `9b790335`. Pre-push hooks ran full unit suite (865 passed). Summary o
 - **`src/routes/__root.tsx`** — mount `<Toaster />` next to `ErrorBoundary`.
 - **`src/games/word-spell/WordSpell/WordSpell.tsx`** — import `useTranslation` + `toast`, add a `useEffect` that fires `toast(t('toasts.wordSpellStaleDraftRecovered'))` when `staleDraft` flips true. Also renamed a shadowed `t` → `tile` in a `.map`.
 - **`src/lib/i18n/locales/{en,pt-BR}/common.json`** — new `toasts.wordSpellStaleDraftRecovered` key (EN + pt-BR).
-- **`src/games/word-spell/WordSpell/WordSpell.test.tsx`** — three new tests under *"WordSpell stale-draft recovery toast"* (fires on stale, silent on aligned, silent on fresh). Mocks `sonner` + `react-i18next`.
+- **`src/games/word-spell/WordSpell/WordSpell.test.tsx`** — three new tests under _"WordSpell stale-draft recovery toast"_ (fires on stale, silent on aligned, silent on fresh). Mocks `sonner` + `react-i18next`.
 
 Ready to push `feat/wordspell-stale-draft-toast` → origin and open a PR against `master` linked to #135. Confirm?
 
@@ -2477,6 +2551,7 @@ src/db/hooks/useCustomGames.test.tsx:246:        name: 'Easy Mode',
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:32:29Z)**_
@@ -2491,6 +2566,7 @@ src/db/schemas/session_history_index.ts
 src/db/schemas/session_history_index.test.ts
 src/db/schemas/index.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:32:33Z)**_
@@ -2502,6 +2578,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:32:33Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:32:37Z)**_
@@ -2519,6 +2596,7 @@ src/db/bookmarks-migration.test.ts:2:import { addRxPlugin, createRxDatabase } fr
 
 [Showing results with pagination = limit: 5]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:32:42Z)**_
@@ -2528,42 +2606,43 @@ _**Agent (claude-opus-4-7 2026-04-21 07:32:42Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/db/create-database.ts`
 
 ```text
-95	async function addBaseSkillCollections(
-96	  db: RxDatabase<BaseSkillCollections>,
-97	): Promise<BaseSkillDatabase> {
-98	  await db.addCollections(COLLECTIONS);
-99	  return db as BaseSkillDatabase;
-100	}
-101	
-102	/** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
-103	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-104	  const db = await createRxDatabase<BaseSkillDatabase>({
-105	    name: `${DB_NAME}-${nanoid()}`,
-106	    storage: wrappedValidateAjvStorage({
-107	      storage: getRxStorageMemory(),
-108	    }),
-109	    multiInstance: false,
-110	  });
-111	  return addBaseSkillCollections(db);
-112	}
-113	
-114	const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
-115	
-116	/**
-117	 * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
-118	 * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
-119	 */
-120	export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
-121	  const db = await createRxDatabase<BaseSkillDatabase>({
-122	    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
-123	    storage: getRxStorageMemory(),
-124	    multiInstance: false,
-125	  });
-126	  const withCols = await addBaseSkillCollections(db);
-127	  await checkVersionAndMigrate(withCols);
-128	  return withCols;
-129	}
+95 async function addBaseSkillCollections(
+96   db: RxDatabase<BaseSkillCollections>,
+97 ): Promise<BaseSkillDatabase> {
+98   await db.addCollections(COLLECTIONS);
+99   return db as BaseSkillDatabase;
+100 }
+101 
+102 /** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
+103 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+104   const db = await createRxDatabase<BaseSkillDatabase>({
+105     name: `${DB_NAME}-${nanoid()}`,
+106     storage: wrappedValidateAjvStorage({
+107       storage: getRxStorageMemory(),
+108     }),
+109     multiInstance: false,
+110   });
+111   return addBaseSkillCollections(db);
+112 }
+113 
+114 const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+115 
+116 /**
+117  * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+118  * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+119  */
+120 export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+121   const db = await createRxDatabase<BaseSkillDatabase>({
+122     name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+123     storage: getRxStorageMemory(),
+124     multiInstance: false,
+125   });
+126   const withCols = await addBaseSkillCollections(db);
+127   await checkVersionAndMigrate(withCols);
+128   return withCols;
+129 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:32:46Z)**_
@@ -2578,6 +2657,7 @@ src/db/recover-bookmarks-migration.test.ts:7:const PROD_DB_NAME = 'baseskill-dat
 src/db/create-database.ts:32:const DB_NAME = 'baseskill-data-test';
 src/db/create-database.ts:33:const PRODUCTION_DB_NAME = 'baseskill-data';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:33:03Z)**_
@@ -2638,9 +2718,9 @@ _**Agent (claude-opus-4-7 2026-04-21 07:47:39Z)**_
 
 ```text
 docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md:108:`saveAndPlay`, `playWithoutSaving`, `cancel`.
-.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6390:9	  const playWithoutSaving = page.getByRole('button', {
-.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6394:13	    await playWithoutSaving.waitFor({
-.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6398:17	    await playWithoutSaving.click();
+.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6390:9   const playWithoutSaving = page.getByRole('button', {
+.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6394:13     await playWithoutSaving.waitFor({
+.specstory/history/2026-04-21_04-12-05Z-the-next-session-can.md:6398:17     await playWithoutSaving.click();
 .specstory/history/2026-04-21_01-39-29Z-since-i-started-the.md:6054:  const playWithoutSaving = page.getByRole('button', {
 .specstory/history/2026-04-21_01-39-29Z-since-i-started-the.md:6058:    await playWithoutSaving.waitFor({
 .specstory/history/2026-04-21_01-39-29Z-since-i-started-the.md:6062:    await playWithoutSaving.click();
@@ -2649,12 +2729,13 @@ docs/superpowers/plans/2026-04-16-custom-games-and-bookmarks.md:2992:  "playWith
 e2e/start-game.ts:9:  const playWithoutSaving = page.getByRole('button', {
 e2e/start-game.ts:13:    await playWithoutSaving.waitFor({
 e2e/start-game.ts:17:    await playWithoutSaving.click();
-.specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md:3993:355	                {t('instructions.playWithoutSaving', {
+.specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md:3993:355                 {t('instructions.playWithoutSaving', {
 .specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md:4556:`saveAndPlay`, `playWithoutSaving`, `cancel`.
-.specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md:5119:108	`saveAndPlay`, `playWithoutSaving`, `cancel`.
+.specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md:5119:108 `saveAndPlay`, `playWithoutSaving`, `cancel`.
 
 [Showing results with pagination = limit: 15]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:47:40Z)**_
@@ -2667,6 +2748,7 @@ _**Agent (claude-opus-4-7 2026-04-21 07:47:40Z)**_
 src/games/word-spell/resolve-simple-config.test.ts:30:      level: 3,
 src/games/word-spell/resolve-simple-config.test.ts:35:    expect(back.level).toBe(3);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:47:46Z)**_
@@ -2685,6 +2767,7 @@ src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:422:     
 src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx:28:        'instructions.saveAndPlay': 'Save & play',
 src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx:29:        'instructions.playWithoutSaving': 'Play without saving',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:47:48Z)**_
@@ -2694,47 +2777,48 @@ _**Agent (claude-opus-4-7 2026-04-21 07:47:48Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/resolve-simple-config.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import {
-3	  advancedToSimple,
-4	  resolveSimpleConfig,
-5	} from './resolve-simple-config';
-6	
-7	describe('WordSpell resolveSimpleConfig', () => {
-8	  it('builds a word-library source from simple fields', () => {
-9	    const full = resolveSimpleConfig({
-10	      configMode: 'simple',
-11	      level: 2,
-12	      phonemesAllowed: ['m', 'd', 'g'],
-13	      inputMethod: 'drag',
-14	    });
-15	    expect(full.source).toEqual({
-16	      type: 'word-library',
-17	      filter: {
-18	        region: 'aus',
-19	        level: 2,
-20	        phonemesAllowed: ['m', 'd', 'g'],
-21	      },
-22	    });
-23	    expect(full.mode).toBe('scramble');
-24	    expect(full.inputMethod).toBe('drag');
-25	  });
-26	
-27	  it('round-trips via advancedToSimple', () => {
-28	    const full = resolveSimpleConfig({
-29	      configMode: 'simple',
-30	      level: 3,
-31	      phonemesAllowed: ['k', 'ck'],
-32	      inputMethod: 'type',
-33	    });
-34	    const back = advancedToSimple(full);
-35	    expect(back.level).toBe(3);
-36	    expect(back.phonemesAllowed).toEqual(['k', 'ck']);
-37	    expect(back.inputMethod).toBe('type');
-38	  });
-39	});
+1 import { describe, expect, it } from 'vitest';
+2 import {
+3   advancedToSimple,
+4   resolveSimpleConfig,
+5 } from './resolve-simple-config';
+6 
+7 describe('WordSpell resolveSimpleConfig', () => {
+8   it('builds a word-library source from simple fields', () => {
+9     const full = resolveSimpleConfig({
+10       configMode: 'simple',
+11       level: 2,
+12       phonemesAllowed: ['m', 'd', 'g'],
+13       inputMethod: 'drag',
+14     });
+15     expect(full.source).toEqual({
+16       type: 'word-library',
+17       filter: {
+18         region: 'aus',
+19         level: 2,
+20         phonemesAllowed: ['m', 'd', 'g'],
+21       },
+22     });
+23     expect(full.mode).toBe('scramble');
+24     expect(full.inputMethod).toBe('drag');
+25   });
+26 
+27   it('round-trips via advancedToSimple', () => {
+28     const full = resolveSimpleConfig({
+29       configMode: 'simple',
+30       level: 3,
+31       phonemesAllowed: ['k', 'ck'],
+32       inputMethod: 'type',
+33     });
+34     const back = advancedToSimple(full);
+35     expect(back.level).toBe(3);
+36     expect(back.phonemesAllowed).toEqual(['k', 'ck']);
+37     expect(back.inputMethod).toBe('type');
+38   });
+39 });
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:48:00Z)**_
@@ -2746,62 +2830,63 @@ _**Agent (claude-opus-4-7 2026-04-21 07:48:01Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
 
 ```text
-380	              </span>
-381	              <input
-382	                ref={saveNameRef}
-383	                type="text"
-384	                value={savingName}
-385	                onChange={(e) => setSavingName(e.target.value)}
-386	                aria-invalid={showSaveOnPlayError}
-387	                aria-describedby={
-388	                  showSaveOnPlayError ? 'save-on-play-error' : undefined
-389	                }
-390	                className={`h-10 rounded-lg border bg-background px-3 text-sm ${
-391	                  showSaveOnPlayError
-392	                    ? 'border-destructive'
-393	                    : 'border-input'
-394	                }`}
-395	              />
-396	              {showSaveOnPlayError && (
-397	                <span
-398	                  id="save-on-play-error"
-399	                  role="alert"
-400	                  className="text-xs font-semibold text-destructive"
-401	                >
-402	                  {saveOnPlayError}
-403	                </span>
-404	              )}
-405	            </label>
-406	            <div className="flex gap-2">
-407	              <button
-408	                type="button"
-409	                onClick={handlePlayWithoutSaving}
-410	                className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
-411	              >
-412	                {t('instructions.playWithoutSaving', {
-413	                  defaultValue: 'Play without saving',
-414	                })}
-415	              </button>
-416	              <button
-417	                type="button"
-418	                onClick={handleSaveAndPlay}
-419	                aria-disabled={saveOnPlayError !== null}
-420	                className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
-421	              >
-422	                {t('instructions.saveAndPlay', {
-423	                  defaultValue: 'Save & play',
-424	                })}
-425	              </button>
-426	            </div>
-427	          </div>
-428	        </DialogContent>
-429	      </Dialog>
-430	    </div>,
-431	    document.body,
-432	  );
-433	};
+380               </span>
+381               <input
+382                 ref={saveNameRef}
+383                 type="text"
+384                 value={savingName}
+385                 onChange={(e) => setSavingName(e.target.value)}
+386                 aria-invalid={showSaveOnPlayError}
+387                 aria-describedby={
+388                   showSaveOnPlayError ? 'save-on-play-error' : undefined
+389                 }
+390                 className={`h-10 rounded-lg border bg-background px-3 text-sm ${
+391                   showSaveOnPlayError
+392                     ? 'border-destructive'
+393                     : 'border-input'
+394                 }`}
+395               />
+396               {showSaveOnPlayError && (
+397                 <span
+398                   id="save-on-play-error"
+399                   role="alert"
+400                   className="text-xs font-semibold text-destructive"
+401                 >
+402                   {saveOnPlayError}
+403                 </span>
+404               )}
+405             </label>
+406             <div className="flex gap-2">
+407               <button
+408                 type="button"
+409                 onClick={handlePlayWithoutSaving}
+410                 className="flex-1 rounded-lg border border-input bg-background py-2 text-sm"
+411               >
+412                 {t('instructions.playWithoutSaving', {
+413                   defaultValue: 'Play without saving',
+414                 })}
+415               </button>
+416               <button
+417                 type="button"
+418                 onClick={handleSaveAndPlay}
+419                 aria-disabled={saveOnPlayError !== null}
+420                 className="flex-1 rounded-lg bg-primary py-2 text-sm font-bold text-primary-foreground"
+421               >
+422                 {t('instructions.saveAndPlay', {
+423                   defaultValue: 'Save & play',
+424                 })}
+425               </button>
+426             </div>
+427           </div>
+428         </DialogContent>
+429       </Dialog>
+430     </div>,
+431     document.body,
+432   );
+433 };
 434
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:48:01Z)**_
@@ -2811,45 +2896,46 @@ _**Agent (claude-opus-4-7 2026-04-21 07:48:01Z)**_
  `./worktrees/feat-wordspell-stale-draft-toast/src/games/word-spell/resolve-simple-config.ts`
 
 ```text
-1	import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-2	
-3	export const resolveSimpleConfig = (
-4	  simple: WordSpellSimpleConfig,
-5	): WordSpellConfig => ({
-6	  gameId: 'word-spell',
-7	  component: 'WordSpell',
-8	  configMode: 'simple',
-9	  mode: 'scramble',
-10	  tileUnit: 'letter',
-11	  inputMethod: simple.inputMethod,
-12	  wrongTileBehavior: 'lock-manual',
-13	  ttsEnabled: true,
-14	  roundsInOrder: false,
-15	  totalRounds: 4,
-16	  tileBankMode: 'exact',
-17	  source: {
-18	    type: 'word-library',
-19	    filter: {
-20	      region: 'aus',
-21	      level: simple.level,
-22	      phonemesAllowed: simple.phonemesAllowed,
-23	    },
-24	  },
-25	});
-26	
-27	export const advancedToSimple = (
-28	  config: WordSpellConfig,
-29	): WordSpellSimpleConfig => {
-30	  const filter = config.source?.filter;
-31	  return {
-32	    configMode: 'simple',
-33	    level: filter?.level ?? 1,
-34	    phonemesAllowed: filter?.phonemesAllowed ?? [],
-35	    inputMethod: config.inputMethod,
-36	  };
-37	};
+1 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
+2 
+3 export const resolveSimpleConfig = (
+4   simple: WordSpellSimpleConfig,
+5 ): WordSpellConfig => ({
+6   gameId: 'word-spell',
+7   component: 'WordSpell',
+8   configMode: 'simple',
+9   mode: 'scramble',
+10   tileUnit: 'letter',
+11   inputMethod: simple.inputMethod,
+12   wrongTileBehavior: 'lock-manual',
+13   ttsEnabled: true,
+14   roundsInOrder: false,
+15   totalRounds: 4,
+16   tileBankMode: 'exact',
+17   source: {
+18     type: 'word-library',
+19     filter: {
+20       region: 'aus',
+21       level: simple.level,
+22       phonemesAllowed: simple.phonemesAllowed,
+23     },
+24   },
+25 });
+26 
+27 export const advancedToSimple = (
+28   config: WordSpellConfig,
+29 ): WordSpellSimpleConfig => {
+30   const filter = config.source?.filter;
+31   return {
+32     configMode: 'simple',
+33     level: filter?.level ?? 1,
+34     phonemesAllowed: filter?.phonemesAllowed ?? [],
+35     inputMethod: config.inputMethod,
+36   };
+37 };
 38
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:48:09Z)**_
@@ -2875,7 +2961,7 @@ Your answers to 4+5 will tell me whether the bug is (a) content-empty, (b) skip-
 
 _**User (2026-04-21 07:57:33Z)**_
 
-I will work on that bug later, lets continue our tasks for https://github.com/leocaseiro/base-skill/issues/135. Raise a PR with current fix, and lets keep going
+I will work on that bug later, lets continue our tasks for <https://github.com/leocaseiro/base-skill/issues/135>. Raise a PR with current fix, and lets keep going
 
 ---
 
@@ -2914,6 +3000,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        feat/wordspell-stale-draft-toast -> feat/wordspell-stale-draft-toast
 branch 'feat/wordspell-stale-draft-toast' set up to track 'origin/feat/wordspell-stale-draft-toast'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:58:51Z)**_
@@ -2960,13 +3047,14 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/136
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:59:02Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 07:59:02Z)**_
 
-PR #136 open: https://github.com/leocaseiro/base-skill/pull/136
+PR #136 open: <https://github.com/leocaseiro/base-skill/pull/136>
 
 Moving to task 3 (stronger e2e for drift). Setting up a fresh worktree from master.
 
@@ -2986,6 +3074,7 @@ HEAD is now at ef97b569 chore(release): v0.10.7 (#133)
 $ husky
 Done in 11.99s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:59:24Z)**_
@@ -2995,69 +3084,70 @@ _**Agent (claude-opus-4-7 2026-04-21 07:59:24Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	import { startGame } from './start-game';
-4	
-5	test.beforeEach(async ({ page }) => {
-6	  await seedMathRandom(page);
-7	});
-8	
-9	/**
-10	 * Regression for plan 2026-04-21-wordspell-resume-desync:
-11	 *
-12	 * A user resumes WordSpell and sees letter tiles for a different word than
-13	 * the one being spoken by the AudioButton (captured on-device: tiles spelled
-14	 * `pant` while TTS said `sit`). The tiles belonged to a frozen draft of round
-15	 * 2 of an earlier `roundOrder`; the audio came from a freshly-regenerated
-16	 * `roundOrder` (round 7 of a new pool).
-17	 *
-18	 * After the fix, WordSpell persists its resolved `roundOrder` into
-19	 * `session_history_index.initialContent` and prefers that over seed-based
-20	 * regeneration on resume. Reloading mid-session must therefore render the
-21	 * same tiles that were visible pre-reload.
-22	 */
-23	test('WordSpell resume keeps tiles aligned across app reloads', async ({
-24	  page,
-25	}) => {
-26	  await page.goto('/en/game/word-spell');
-27	  await page.getByRole('main').waitFor({ state: 'visible' });
-28	  await startGame(page);
-29	
-30	  const tiles = page.getByRole('button', { name: /^Letter /i });
-31	  await expect(tiles.first()).toBeVisible();
-32	
-33	  const sortedLabels = async () => {
-34	    const labels = await tiles.evaluateAll((nodes) =>
-35	      nodes.map((n) =>
-36	        (n.getAttribute('aria-label') ?? '').replace(/^Letter /i, ''),
-37	      ),
-38	    );
-39	    return labels.map((label) => label.toLowerCase()).toSorted();
-40	  };
-41	
-42	  const tileLabelsBefore = await sortedLabels();
-43	  expect(tileLabelsBefore.length).toBeGreaterThan(0);
-44	
-45	  // The draft sync in useAnswerGameDraftSync debounces 500 ms, and the
-46	  // initialContent patch fires once useLibraryRounds settles — wait past both.
-47	  await page.waitForTimeout(900);
-48	
-49	  await page.reload();
-50	  await page.getByRole('main').waitFor({ state: 'visible' });
-51	  await expect(tiles.first()).toBeVisible();
-52	
-53	  const tileLabelsAfter = await sortedLabels();
-54	  // Core invariant: the resumed round must show the same letters as before
-55	  // reload. A diverging set would mean the re-render used a regenerated
-56	  // `roundOrder` that the AudioButton prompt also follows — i.e. the desync.
-57	  expect(tileLabelsAfter).toEqual(tileLabelsBefore);
-58	  await expect(
-59	    page.getByRole('button', { name: 'Hear the question' }),
-60	  ).toBeVisible();
-61	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 import { startGame } from './start-game';
+4 
+5 test.beforeEach(async ({ page }) => {
+6   await seedMathRandom(page);
+7 });
+8 
+9 /**
+10  * Regression for plan 2026-04-21-wordspell-resume-desync:
+11  *
+12  * A user resumes WordSpell and sees letter tiles for a different word than
+13  * the one being spoken by the AudioButton (captured on-device: tiles spelled
+14  * `pant` while TTS said `sit`). The tiles belonged to a frozen draft of round
+15  * 2 of an earlier `roundOrder`; the audio came from a freshly-regenerated
+16  * `roundOrder` (round 7 of a new pool).
+17  *
+18  * After the fix, WordSpell persists its resolved `roundOrder` into
+19  * `session_history_index.initialContent` and prefers that over seed-based
+20  * regeneration on resume. Reloading mid-session must therefore render the
+21  * same tiles that were visible pre-reload.
+22  */
+23 test('WordSpell resume keeps tiles aligned across app reloads', async ({
+24   page,
+25 }) => {
+26   await page.goto('/en/game/word-spell');
+27   await page.getByRole('main').waitFor({ state: 'visible' });
+28   await startGame(page);
+29 
+30   const tiles = page.getByRole('button', { name: /^Letter /i });
+31   await expect(tiles.first()).toBeVisible();
+32 
+33   const sortedLabels = async () => {
+34     const labels = await tiles.evaluateAll((nodes) =>
+35       nodes.map((n) =>
+36         (n.getAttribute('aria-label') ?? '').replace(/^Letter /i, ''),
+37       ),
+38     );
+39     return labels.map((label) => label.toLowerCase()).toSorted();
+40   };
+41 
+42   const tileLabelsBefore = await sortedLabels();
+43   expect(tileLabelsBefore.length).toBeGreaterThan(0);
+44 
+45   // The draft sync in useAnswerGameDraftSync debounces 500 ms, and the
+46   // initialContent patch fires once useLibraryRounds settles — wait past both.
+47   await page.waitForTimeout(900);
+48 
+49   await page.reload();
+50   await page.getByRole('main').waitFor({ state: 'visible' });
+51   await expect(tiles.first()).toBeVisible();
+52 
+53   const tileLabelsAfter = await sortedLabels();
+54   // Core invariant: the resumed round must show the same letters as before
+55   // reload. A diverging set would mean the re-render used a regenerated
+56   // `roundOrder` that the AudioButton prompt also follows — i.e. the desync.
+57   expect(tileLabelsAfter).toEqual(tileLabelsBefore);
+58   await expect(
+59     page.getByRole('button', { name: 'Hear the question' }),
+60   ).toBeVisible();
+61 });
 62
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 07:59:25Z)**_
@@ -3067,323 +3157,324 @@ _**Agent (claude-opus-4-7 2026-04-21 07:59:25Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/bookmarks-dm4-recovery.spec.ts`
 
 ```text
-1	import fs from 'node:fs';
-2	import path from 'node:path';
-3	import { expect, test } from '@playwright/test';
-4	import { seedMathRandom } from './seed-math-random';
-5	import type { Page } from '@playwright/test';
-6	
-7	type ExportedDb = {
-8	  databaseName: string;
-9	  databaseVersion: number;
-10	  objectStoreNames: string[];
-11	  stores: { name: string; data: { key: unknown; value: unknown }[] }[];
-12	};
-13	
-14	const PROD_DB_NAME = 'baseskill-data';
-15	const V0_BOOKMARKS_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--bookmarks`;
-16	const V0_INTERNAL_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--_rxdb_internal`;
-17	const V0_MIGRATION_META_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--rx-migration-state-meta-bookmarks-0`;
-18	
-19	/**
-20	 * Seeds the exact pre-#117 broken IndexedDB shape that v0.10.0 left on
-21	 * real users' devices: gameId-keyed v0 bookmark docs + a `collection|bookmarks-0`
-22	 * meta entry that points at a v0 schema with the `gameId` field.
-23	 */
-24	const seedBrokenV0BookmarksState = async (page: Page) => {
-25	  await page.evaluate(
-26	    async ({ bookmarksDb, internalDb, metaDb }) => {
-27	      const wipe = (name: string) =>
-28	        new Promise<void>((resolve, reject) => {
-29	          const request = indexedDB.deleteDatabase(name);
-30	          request.addEventListener('success', () => resolve());
-31	          request.addEventListener('error', () =>
-32	            reject(request.error),
-33	          );
-34	          request.addEventListener('blocked', () => resolve());
-35	        });
-36	      const open = (name: string) =>
-37	        new Promise<IDBDatabase>((resolve, reject) => {
-38	          const request = indexedDB.open(name);
-39	          request.addEventListener('success', () =>
-40	            resolve(request.result),
-41	          );
-42	          request.addEventListener('error', () =>
-43	            reject(request.error),
-44	          );
-45	          request.addEventListener('upgradeneeded', () => {
-46	            request.result.createObjectStore('docs', { keyPath: 'id' });
-47	          });
-48	        });
-49	      const put = (db: IDBDatabase, doc: Record<string, unknown>) =>
-50	        new Promise<void>((resolve, reject) => {
-51	          const tx = db.transaction('docs', 'readwrite');
-52	          tx.objectStore('docs').put(doc);
-53	          tx.addEventListener('complete', () => resolve());
-54	          tx.addEventListener('error', () => reject(tx.error));
-55	        });
-56	
-57	      await Promise.all([
-58	        wipe(bookmarksDb),
-59	        wipe(internalDb),
-60	        wipe(metaDb),
-61	      ]);
-62	
-63	      const bookmarks = await open(bookmarksDb);
-64	      const fixtures = [
-65	        {
-66	          id: 'tJDLrcsRUtvroJvbMo6AE',
-67	          profileId: 'anonymous',
-68	          gameId: 'math-subtraction',
-69	          createdAt: '2026-04-02T12:06:57.559Z',
-70	          _deleted: '0',
-71	          _rev: '1-blcbcgzyjl',
-72	          _meta: { lwt: 1_775_131_617_559.01 },
-73	          _attachments: {},
-74	        },
-75	        {
-76	          id: 'zngVeBJa_tBjWvqdEWc3m',
-77	          profileId: 'anonymous',
-78	          gameId: 'placeholder-game',
-79	          createdAt: '2026-04-02T12:06:58.698Z',
-80	          _deleted: '0',
-81	          _rev: '1-blcbcgzyjl',
-82	          _meta: { lwt: 1_775_131_618_698.01 },
-83	          _attachments: {},
-84	        },
-85	      ];
-86	      for (const f of fixtures) await put(bookmarks, f);
-87	      bookmarks.close();
-88	
-89	      const internal = await open(internalDb);
-90	      await put(internal, {
-91	        id: 'collection|bookmarks-0',
-92	        key: 'bookmarks-0',
-93	        context: 'collection',
-94	        data: {
-95	          name: 'bookmarks',
-96	          schemaHash: 'seed-v0-hash',
-97	          schema: {
-98	            additionalProperties: false,
-99	            encrypted: [],
-100	            indexes: [
-101	              ['_deleted', 'id'],
-102	              ['_meta.lwt', 'id'],
-103	            ],
-104	            keyCompression: false,
-105	            primaryKey: 'id',
-106	            properties: {
-107	              _attachments: { type: 'object' },
-108	              _deleted: { type: 'boolean' },
-109	              _meta: {
-110	                additionalProperties: true,
-111	                properties: {
-112	                  lwt: {
-113	                    maximum: 1e15,
-114	                    minimum: 1,
-115	                    multipleOf: 0.01,
-116	                    type: 'number',
-117	                  },
-118	                },
-119	                required: ['lwt'],
-120	                type: 'object',
-121	              },
-122	              _rev: { minLength: 1, type: 'string' },
-123	              createdAt: { format: 'date-time', type: 'string' },
-124	              gameId: { maxLength: 64, type: 'string' },
-125	              id: { maxLength: 36, type: 'string' },
-126	              profileId: { maxLength: 36, type: 'string' },
-127	            },
-128	            required: [
-129	              'id',
-130	              'profileId',
-131	              'gameId',
-132	              'createdAt',
-133	              '_deleted',
-134	              '_rev',
-135	              '_meta',
-136	              '_attachments',
-137	            ],
-138	            type: 'object',
-139	            version: 0,
-140	          },
-141	          version: 0,
-142	          connectedStorages: [],
-143	        },
-144	        _deleted: '0',
-145	        _rev: '1-rsxfshggzi',
-146	        _meta: { lwt: 1_774_964_092_655.01 },
-147	        _attachments: {},
-148	      });
-149	      internal.close();
-150	    },
-151	    {
-152	      bookmarksDb: V0_BOOKMARKS_IDB,
-153	      internalDb: V0_INTERNAL_IDB,
-154	      metaDb: V0_MIGRATION_META_IDB,
-155	    },
-156	  );
-157	};
-158	
-159	/**
-160	 * Seeds the entire IndexedDB layout from a DevTools JSON export, so a
-161	 * developer can verify recovery against their own real-device data without
-162	 * leaving the local dev server.
-163	 *
-164	 * Run with:
-165	 *   SEED_FROM_EXPORT=./.local-debug/indexeddb-exports/<file>.json \
-166	 *     yarn test:e2e --project=chromium --headed e2e/bookmarks-dm4-recovery.spec.ts
-167	 */
-168	const seedFromDevtoolsExport = async (
-169	  page: Page,
-170	  exportPath: string,
-171	) => {
-172	  const absolutePath = path.isAbsolute(exportPath)
-173	    ? exportPath
-174	    : path.resolve(process.cwd(), exportPath);
-175	  const raw = fs.readFileSync(absolutePath, 'utf8');
-176	  const dbs = JSON.parse(raw) as ExportedDb[];
-177	  const baseskillDbs = dbs.filter((d) =>
-178	    d.databaseName.startsWith('rxdb-dexie-baseskill-data'),
-179	  );
-180	
-181	  // Helpers below are defined inline because they must serialize into the
-182	  // page.evaluate browser context — they cannot be hoisted to module scope.
-183	  /* eslint-disable unicorn/consistent-function-scoping -- arrow helpers must live inside page.evaluate so they serialize into the browser context */
-184	  await page.evaluate(async (payload) => {
-185	    const wipe = (name: string) =>
-186	      new Promise<void>((resolve, reject) => {
-187	        const request = indexedDB.deleteDatabase(name);
-188	        request.addEventListener('success', () => resolve());
-189	        request.addEventListener('error', () => reject(request.error));
-190	        request.addEventListener('blocked', () => resolve());
-191	      });
-192	    const open = (name: string, stores: string[]) =>
-193	      new Promise<IDBDatabase>((resolve, reject) => {
-194	        const request = indexedDB.open(name);
-195	        request.addEventListener('success', () =>
-196	          resolve(request.result),
-197	        );
-198	        request.addEventListener('error', () => reject(request.error));
-199	        request.addEventListener('upgradeneeded', () => {
-200	          for (const store of stores) {
-201	            if (!request.result.objectStoreNames.contains(store)) {
-202	              // Out-of-line keys: collections like session_history_index use
-203	              // `sessionId` (not `id`) as primary; we pass the explicit key
-204	              // from the export so all variants seed consistently.
-205	              request.result.createObjectStore(store);
-206	            }
-207	          }
-208	        });
-209	      });
-210	    const put = (
-211	      db: IDBDatabase,
-212	      store: string,
-213	      key: unknown,
-214	      value: unknown,
-215	    ) =>
-216	      new Promise<void>((resolve, reject) => {
-217	        const tx = db.transaction(store, 'readwrite');
-218	        tx.objectStore(store).put(value, key as IDBValidKey);
-219	        tx.addEventListener('complete', () => resolve());
-220	        tx.addEventListener('error', () => reject(tx.error));
-221	      });
-222	
-223	    for (const dbExport of payload) await wipe(dbExport.databaseName);
-224	
-225	    for (const dbExport of payload) {
-226	      const db = await open(
-227	        dbExport.databaseName,
-228	        dbExport.objectStoreNames,
-229	      );
-230	      // Only seed `docs` — RxDB rebuilds `changes`/`attachments` on demand
-231	      // and those rows in DevTools exports often lack the keyPath field.
-232	      const docsStore = dbExport.stores.find((s) => s.name === 'docs');
-233	      if (docsStore) {
-234	        for (const row of docsStore.data) {
-235	          await put(db, 'docs', row.key, row.value);
-236	        }
-237	      }
-238	      db.close();
-239	    }
-240	  }, baseskillDbs);
-241	  /* eslint-enable unicorn/consistent-function-scoping -- end of page.evaluate block */
-242	};
-243	
-244	test.beforeEach(async ({ page }) => {
-245	  await seedMathRandom(page);
-246	});
-247	
-248	test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', async ({
-249	  page,
-250	}) => {
-251	  // Land on the origin so subsequent IndexedDB calls run against it.
-252	  await page.goto('/en/');
-253	  await page.getByRole('main').waitFor({ state: 'visible' });
-254	
-255	  await seedBrokenV0BookmarksState(page);
-256	
-257	  await page.reload();
-258	  await page.getByRole('main').waitFor({ state: 'visible' });
-259	
-260	  await expect(
-261	    page.getByRole('button', { name: /^Play / }).first(),
-262	  ).toBeVisible();
-263	
-264	  await page.goto('/en/game/word-spell');
-265	  await page.getByRole('main').waitFor({ state: 'visible' });
-266	  await expect(
-267	    page.getByRole('button', { name: /let's go/i }),
-268	  ).toBeVisible();
-269	});
-270	
-271	const SEED_FROM_EXPORT = process.env['SEED_FROM_EXPORT'];
-272	
-273	test.describe('verify against a real DevTools IndexedDB export', () => {
-274	  test.skip(
-275	    !SEED_FROM_EXPORT,
-276	    'set SEED_FROM_EXPORT=path/to/export.json to enable',
-277	  );
-278	
-279	  test('app boots after seeding the entire DB layout from an export', async ({
-280	    page,
-281	  }) => {
-282	    const consoleErrors: string[] = [];
-283	    page.on('console', (msg) => {
-284	      if (msg.type() === 'error') consoleErrors.push(msg.text());
-285	    });
-286	    page.on('pageerror', (error) =>
-287	      consoleErrors.push(`pageerror: ${error.message}`),
-288	    );
-289	
-290	    await page.goto('/en/');
-291	    await page.getByRole('main').waitFor({ state: 'visible' });
-292	
-293	    await seedFromDevtoolsExport(page, SEED_FROM_EXPORT as string);
-294	
-295	    await page.reload();
-296	    await page
-297	      .getByRole('main')
-298	      .waitFor({ state: 'visible', timeout: 60_000 });
-299	
-300	    await expect(
-301	      page.getByRole('button', { name: /^Play / }).first(),
-302	    ).toBeVisible({ timeout: 60_000 });
-303	
-304	    const fatal = consoleErrors.filter(
-305	      (m) =>
-306	        m.includes('DM4') ||
-307	        m.includes('RxError') ||
-308	        m.includes('is closed'),
-309	    );
-310	    expect(
-311	      fatal,
-312	      `unexpected RxDB errors:\n${fatal.join('\n')}`,
-313	    ).toEqual([]);
-314	  });
-315	});
+1 import fs from 'node:fs';
+2 import path from 'node:path';
+3 import { expect, test } from '@playwright/test';
+4 import { seedMathRandom } from './seed-math-random';
+5 import type { Page } from '@playwright/test';
+6 
+7 type ExportedDb = {
+8   databaseName: string;
+9   databaseVersion: number;
+10   objectStoreNames: string[];
+11   stores: { name: string; data: { key: unknown; value: unknown }[] }[];
+12 };
+13 
+14 const PROD_DB_NAME = 'baseskill-data';
+15 const V0_BOOKMARKS_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--bookmarks`;
+16 const V0_INTERNAL_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--_rxdb_internal`;
+17 const V0_MIGRATION_META_IDB = `rxdb-dexie-${PROD_DB_NAME}--0--rx-migration-state-meta-bookmarks-0`;
+18 
+19 /**
+20  * Seeds the exact pre-#117 broken IndexedDB shape that v0.10.0 left on
+21  * real users' devices: gameId-keyed v0 bookmark docs + a `collection|bookmarks-0`
+22  * meta entry that points at a v0 schema with the `gameId` field.
+23  */
+24 const seedBrokenV0BookmarksState = async (page: Page) => {
+25   await page.evaluate(
+26     async ({ bookmarksDb, internalDb, metaDb }) => {
+27       const wipe = (name: string) =>
+28         new Promise<void>((resolve, reject) => {
+29           const request = indexedDB.deleteDatabase(name);
+30           request.addEventListener('success', () => resolve());
+31           request.addEventListener('error', () =>
+32             reject(request.error),
+33           );
+34           request.addEventListener('blocked', () => resolve());
+35         });
+36       const open = (name: string) =>
+37         new Promise<IDBDatabase>((resolve, reject) => {
+38           const request = indexedDB.open(name);
+39           request.addEventListener('success', () =>
+40             resolve(request.result),
+41           );
+42           request.addEventListener('error', () =>
+43             reject(request.error),
+44           );
+45           request.addEventListener('upgradeneeded', () => {
+46             request.result.createObjectStore('docs', { keyPath: 'id' });
+47           });
+48         });
+49       const put = (db: IDBDatabase, doc: Record<string, unknown>) =>
+50         new Promise<void>((resolve, reject) => {
+51           const tx = db.transaction('docs', 'readwrite');
+52           tx.objectStore('docs').put(doc);
+53           tx.addEventListener('complete', () => resolve());
+54           tx.addEventListener('error', () => reject(tx.error));
+55         });
+56 
+57       await Promise.all([
+58         wipe(bookmarksDb),
+59         wipe(internalDb),
+60         wipe(metaDb),
+61       ]);
+62 
+63       const bookmarks = await open(bookmarksDb);
+64       const fixtures = [
+65         {
+66           id: 'tJDLrcsRUtvroJvbMo6AE',
+67           profileId: 'anonymous',
+68           gameId: 'math-subtraction',
+69           createdAt: '2026-04-02T12:06:57.559Z',
+70           _deleted: '0',
+71           _rev: '1-blcbcgzyjl',
+72           _meta: { lwt: 1_775_131_617_559.01 },
+73           _attachments: {},
+74         },
+75         {
+76           id: 'zngVeBJa_tBjWvqdEWc3m',
+77           profileId: 'anonymous',
+78           gameId: 'placeholder-game',
+79           createdAt: '2026-04-02T12:06:58.698Z',
+80           _deleted: '0',
+81           _rev: '1-blcbcgzyjl',
+82           _meta: { lwt: 1_775_131_618_698.01 },
+83           _attachments: {},
+84         },
+85       ];
+86       for (const f of fixtures) await put(bookmarks, f);
+87       bookmarks.close();
+88 
+89       const internal = await open(internalDb);
+90       await put(internal, {
+91         id: 'collection|bookmarks-0',
+92         key: 'bookmarks-0',
+93         context: 'collection',
+94         data: {
+95           name: 'bookmarks',
+96           schemaHash: 'seed-v0-hash',
+97           schema: {
+98             additionalProperties: false,
+99             encrypted: [],
+100             indexes: [
+101               ['_deleted', 'id'],
+102               ['_meta.lwt', 'id'],
+103             ],
+104             keyCompression: false,
+105             primaryKey: 'id',
+106             properties: {
+107               _attachments: { type: 'object' },
+108               _deleted: { type: 'boolean' },
+109               _meta: {
+110                 additionalProperties: true,
+111                 properties: {
+112                   lwt: {
+113                     maximum: 1e15,
+114                     minimum: 1,
+115                     multipleOf: 0.01,
+116                     type: 'number',
+117                   },
+118                 },
+119                 required: ['lwt'],
+120                 type: 'object',
+121               },
+122               _rev: { minLength: 1, type: 'string' },
+123               createdAt: { format: 'date-time', type: 'string' },
+124               gameId: { maxLength: 64, type: 'string' },
+125               id: { maxLength: 36, type: 'string' },
+126               profileId: { maxLength: 36, type: 'string' },
+127             },
+128             required: [
+129               'id',
+130               'profileId',
+131               'gameId',
+132               'createdAt',
+133               '_deleted',
+134               '_rev',
+135               '_meta',
+136               '_attachments',
+137             ],
+138             type: 'object',
+139             version: 0,
+140           },
+141           version: 0,
+142           connectedStorages: [],
+143         },
+144         _deleted: '0',
+145         _rev: '1-rsxfshggzi',
+146         _meta: { lwt: 1_774_964_092_655.01 },
+147         _attachments: {},
+148       });
+149       internal.close();
+150     },
+151     {
+152       bookmarksDb: V0_BOOKMARKS_IDB,
+153       internalDb: V0_INTERNAL_IDB,
+154       metaDb: V0_MIGRATION_META_IDB,
+155     },
+156   );
+157 };
+158 
+159 /**
+160  * Seeds the entire IndexedDB layout from a DevTools JSON export, so a
+161  * developer can verify recovery against their own real-device data without
+162  * leaving the local dev server.
+163  *
+164  * Run with:
+165  *   SEED_FROM_EXPORT=./.local-debug/indexeddb-exports/<file>.json \
+166  *     yarn test:e2e --project=chromium --headed e2e/bookmarks-dm4-recovery.spec.ts
+167  */
+168 const seedFromDevtoolsExport = async (
+169   page: Page,
+170   exportPath: string,
+171 ) => {
+172   const absolutePath = path.isAbsolute(exportPath)
+173     ? exportPath
+174     : path.resolve(process.cwd(), exportPath);
+175   const raw = fs.readFileSync(absolutePath, 'utf8');
+176   const dbs = JSON.parse(raw) as ExportedDb[];
+177   const baseskillDbs = dbs.filter((d) =>
+178     d.databaseName.startsWith('rxdb-dexie-baseskill-data'),
+179   );
+180 
+181   // Helpers below are defined inline because they must serialize into the
+182   // page.evaluate browser context — they cannot be hoisted to module scope.
+183   /* eslint-disable unicorn/consistent-function-scoping -- arrow helpers must live inside page.evaluate so they serialize into the browser context */
+184   await page.evaluate(async (payload) => {
+185     const wipe = (name: string) =>
+186       new Promise<void>((resolve, reject) => {
+187         const request = indexedDB.deleteDatabase(name);
+188         request.addEventListener('success', () => resolve());
+189         request.addEventListener('error', () => reject(request.error));
+190         request.addEventListener('blocked', () => resolve());
+191       });
+192     const open = (name: string, stores: string[]) =>
+193       new Promise<IDBDatabase>((resolve, reject) => {
+194         const request = indexedDB.open(name);
+195         request.addEventListener('success', () =>
+196           resolve(request.result),
+197         );
+198         request.addEventListener('error', () => reject(request.error));
+199         request.addEventListener('upgradeneeded', () => {
+200           for (const store of stores) {
+201             if (!request.result.objectStoreNames.contains(store)) {
+202               // Out-of-line keys: collections like session_history_index use
+203               // `sessionId` (not `id`) as primary; we pass the explicit key
+204               // from the export so all variants seed consistently.
+205               request.result.createObjectStore(store);
+206             }
+207           }
+208         });
+209       });
+210     const put = (
+211       db: IDBDatabase,
+212       store: string,
+213       key: unknown,
+214       value: unknown,
+215     ) =>
+216       new Promise<void>((resolve, reject) => {
+217         const tx = db.transaction(store, 'readwrite');
+218         tx.objectStore(store).put(value, key as IDBValidKey);
+219         tx.addEventListener('complete', () => resolve());
+220         tx.addEventListener('error', () => reject(tx.error));
+221       });
+222 
+223     for (const dbExport of payload) await wipe(dbExport.databaseName);
+224 
+225     for (const dbExport of payload) {
+226       const db = await open(
+227         dbExport.databaseName,
+228         dbExport.objectStoreNames,
+229       );
+230       // Only seed `docs` — RxDB rebuilds `changes`/`attachments` on demand
+231       // and those rows in DevTools exports often lack the keyPath field.
+232       const docsStore = dbExport.stores.find((s) => s.name === 'docs');
+233       if (docsStore) {
+234         for (const row of docsStore.data) {
+235           await put(db, 'docs', row.key, row.value);
+236         }
+237       }
+238       db.close();
+239     }
+240   }, baseskillDbs);
+241   /* eslint-enable unicorn/consistent-function-scoping -- end of page.evaluate block */
+242 };
+243 
+244 test.beforeEach(async ({ page }) => {
+245   await seedMathRandom(page);
+246 });
+247 
+248 test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', async ({
+249   page,
+250 }) => {
+251   // Land on the origin so subsequent IndexedDB calls run against it.
+252   await page.goto('/en/');
+253   await page.getByRole('main').waitFor({ state: 'visible' });
+254 
+255   await seedBrokenV0BookmarksState(page);
+256 
+257   await page.reload();
+258   await page.getByRole('main').waitFor({ state: 'visible' });
+259 
+260   await expect(
+261     page.getByRole('button', { name: /^Play / }).first(),
+262   ).toBeVisible();
+263 
+264   await page.goto('/en/game/word-spell');
+265   await page.getByRole('main').waitFor({ state: 'visible' });
+266   await expect(
+267     page.getByRole('button', { name: /let's go/i }),
+268   ).toBeVisible();
+269 });
+270 
+271 const SEED_FROM_EXPORT = process.env['SEED_FROM_EXPORT'];
+272 
+273 test.describe('verify against a real DevTools IndexedDB export', () => {
+274   test.skip(
+275     !SEED_FROM_EXPORT,
+276     'set SEED_FROM_EXPORT=path/to/export.json to enable',
+277   );
+278 
+279   test('app boots after seeding the entire DB layout from an export', async ({
+280     page,
+281   }) => {
+282     const consoleErrors: string[] = [];
+283     page.on('console', (msg) => {
+284       if (msg.type() === 'error') consoleErrors.push(msg.text());
+285     });
+286     page.on('pageerror', (error) =>
+287       consoleErrors.push(`pageerror: ${error.message}`),
+288     );
+289 
+290     await page.goto('/en/');
+291     await page.getByRole('main').waitFor({ state: 'visible' });
+292 
+293     await seedFromDevtoolsExport(page, SEED_FROM_EXPORT as string);
+294 
+295     await page.reload();
+296     await page
+297       .getByRole('main')
+298       .waitFor({ state: 'visible', timeout: 60_000 });
+299 
+300     await expect(
+301       page.getByRole('button', { name: /^Play / }).first(),
+302     ).toBeVisible({ timeout: 60_000 });
+303 
+304     const fatal = consoleErrors.filter(
+305       (m) =>
+306         m.includes('DM4') ||
+307         m.includes('RxError') ||
+308         m.includes('is closed'),
+309     );
+310     expect(
+311       fatal,
+312       `unexpected RxDB errors:\n${fatal.join('\n')}`,
+313     ).toEqual([]);
+314   });
+315 });
 316
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:00:17Z)**_
@@ -3414,6 +3505,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:00:18Z)**_
 444:        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
 747:  if (gameId === 'word-spell') {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:00:27Z)**_
@@ -3423,112 +3515,113 @@ _**Agent (claude-opus-4-7 2026-04-21 08:00:27Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-96	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-97	  gameId: 'word-spell',
-98	  component: 'WordSpell',
-99	  inputMethod: 'drag',
-100	  wrongTileBehavior: 'lock-auto-eject',
-101	  tileBankMode: 'exact',
-102	  totalRounds: 8,
-103	  // Deterministic order by default. `buildRoundOrder` shuffles when this is
-104	  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
-105	  // cannot pin, causing baseline drift. Users can still opt into shuffling
-106	  // via the settings panel.
-107	  roundsInOrder: true,
-108	  ttsEnabled: true,
-109	  mode: 'picture',
-110	  tileUnit: 'letter',
-111	  rounds: sliceWordSpellRounds(8),
-112	};
-113	
-114	/**
-115	 * Deterministic default round values for NumberMatch. Using a fixed sequence
-116	 * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
-117	 * seeds in the route loader bypass any Math.random pin, so the only reliable
-118	 * fix is to remove randomness from the default config entirely. Users still
-119	 * customise via the settings panel.
-120	 */
-121	const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
-122	
-123	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-124	  gameId: 'number-match',
-125	  component: 'NumberMatch',
-126	  inputMethod: 'drag',
-127	  wrongTileBehavior: 'lock-auto-eject',
-128	  tileBankMode: 'distractors',
-129	  distractorCount: 2,
-130	  totalRounds: 3,
-131	  // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
-132	  roundsInOrder: true,
-133	  ttsEnabled: true,
-134	  mode: 'numeral-to-group',
-135	  tileStyle: 'dots',
-136	  range: { min: 1, max: 12 },
-137	  rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
-138	});
-139	
-140	export const resizeNumberMatchRounds = (
-141	  prev: NumberMatchRound[],
-142	  count: number,
-143	  range: { min: number; max: number },
-144	): NumberMatchRound[] => {
-145	  const n = Math.max(1, Math.min(count, 50));
-146	  const span = Math.max(1, range.max - range.min + 1);
-147	  // Deterministic fill: cycle through the range starting at `range.min`. This
-148	  // avoids `Math.random` so defaults stay stable (see note above) and is
-149	  // simple enough for users to understand at a glance. They can override any
-150	  // round value via the settings panel.
-151	  const fillValueAt = (index: number): number =>
-152	    range.min + (index % span);
-153	
-154	  // Detect a collapsed state: every round has the same value even though the
-155	  // range allows variety. This happens when the user narrows the range down
-156	  // to a single value (collapsing every round to that value) and then widens
-157	  // it again — without this check the preserved values stay stuck at the
-158	  // collapse point and the player sees the same number every round. Also
-159	  // handles the empty-prev case from a legacy saved config.
-160	  const firstValue = prev[0]?.value;
-161	  const allCollapsed =
-162	    prev.length >= 2 &&
-163	    span > 1 &&
-164	    prev.every((r) => r.value === firstValue);
-165	  if (prev.length === 0 || allCollapsed) {
-166	    return Array.from({ length: n }, (_, i) => ({
-167	      value: fillValueAt(i),
-168	    }));
-169	  }
-170	
-171	  const next = prev.slice(0, n).map((r, i) => {
-172	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-173	    return { value: fillValueAt(i) };
-174	  });
-175	  while (next.length < n) {
-176	    next.push({ value: fillValueAt(next.length) });
-177	  }
-178	  return next;
-179	};
-180	
-181	const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
-182	  resolveSimpleConfig({
-183	    configMode: 'simple',
-184	    direction: 'ascending',
-185	    start: 2,
-186	    step: 2,
-187	    quantity: 5,
-188	    distractors: false,
-189	  });
-190	
-191	export const resolveWordSpellConfig = (
-192	  saved: Record<string, unknown> | null,
-193	): WordSpellConfig => {
-194	  const base: WordSpellConfig = {
-195	    ...DEFAULT_WORD_SPELL_CONFIG,
-196	    rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
-197	      ...r,
-198	    })),
-199	  };
-200	  if (!saved || saved.component !== 'WordSpell') return base;
+96 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+97   gameId: 'word-spell',
+98   component: 'WordSpell',
+99   inputMethod: 'drag',
+100   wrongTileBehavior: 'lock-auto-eject',
+101   tileBankMode: 'exact',
+102   totalRounds: 8,
+103   // Deterministic order by default. `buildRoundOrder` shuffles when this is
+104   // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
+105   // cannot pin, causing baseline drift. Users can still opt into shuffling
+106   // via the settings panel.
+107   roundsInOrder: true,
+108   ttsEnabled: true,
+109   mode: 'picture',
+110   tileUnit: 'letter',
+111   rounds: sliceWordSpellRounds(8),
+112 };
+113 
+114 /**
+115  * Deterministic default round values for NumberMatch. Using a fixed sequence
+116  * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
+117  * seeds in the route loader bypass any Math.random pin, so the only reliable
+118  * fix is to remove randomness from the default config entirely. Users still
+119  * customise via the settings panel.
+120  */
+121 const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
+122 
+123 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+124   gameId: 'number-match',
+125   component: 'NumberMatch',
+126   inputMethod: 'drag',
+127   wrongTileBehavior: 'lock-auto-eject',
+128   tileBankMode: 'distractors',
+129   distractorCount: 2,
+130   totalRounds: 3,
+131   // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
+132   roundsInOrder: true,
+133   ttsEnabled: true,
+134   mode: 'numeral-to-group',
+135   tileStyle: 'dots',
+136   range: { min: 1, max: 12 },
+137   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
+138 });
+139 
+140 export const resizeNumberMatchRounds = (
+141   prev: NumberMatchRound[],
+142   count: number,
+143   range: { min: number; max: number },
+144 ): NumberMatchRound[] => {
+145   const n = Math.max(1, Math.min(count, 50));
+146   const span = Math.max(1, range.max - range.min + 1);
+147   // Deterministic fill: cycle through the range starting at `range.min`. This
+148   // avoids `Math.random` so defaults stay stable (see note above) and is
+149   // simple enough for users to understand at a glance. They can override any
+150   // round value via the settings panel.
+151   const fillValueAt = (index: number): number =>
+152     range.min + (index % span);
+153 
+154   // Detect a collapsed state: every round has the same value even though the
+155   // range allows variety. This happens when the user narrows the range down
+156   // to a single value (collapsing every round to that value) and then widens
+157   // it again — without this check the preserved values stay stuck at the
+158   // collapse point and the player sees the same number every round. Also
+159   // handles the empty-prev case from a legacy saved config.
+160   const firstValue = prev[0]?.value;
+161   const allCollapsed =
+162     prev.length >= 2 &&
+163     span > 1 &&
+164     prev.every((r) => r.value === firstValue);
+165   if (prev.length === 0 || allCollapsed) {
+166     return Array.from({ length: n }, (_, i) => ({
+167       value: fillValueAt(i),
+168     }));
+169   }
+170 
+171   const next = prev.slice(0, n).map((r, i) => {
+172     if (r.value >= range.min && r.value <= range.max) return { ...r };
+173     return { value: fillValueAt(i) };
+174   });
+175   while (next.length < n) {
+176     next.push({ value: fillValueAt(next.length) });
+177   }
+178   return next;
+179 };
+180 
+181 const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
+182   resolveSimpleConfig({
+183     configMode: 'simple',
+184     direction: 'ascending',
+185     start: 2,
+186     step: 2,
+187     quantity: 5,
+188     distractors: false,
+189   });
+190 
+191 export const resolveWordSpellConfig = (
+192   saved: Record<string, unknown> | null,
+193 ): WordSpellConfig => {
+194   const base: WordSpellConfig = {
+195     ...DEFAULT_WORD_SPELL_CONFIG,
+196     rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
+197       ...r,
+198     })),
+199   };
+200   if (!saved || saved.component !== 'WordSpell') return base;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:00:49Z)**_
@@ -3545,6 +3638,7 @@ Find the plan doc
 2026-04-03-group-fg-wordspell-bug-instructions.md
 2026-04-21-wordspell-resume-desync.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:00:54Z)**_
@@ -3566,6 +3660,7 @@ Look at plan tasks
 189-Per `CLAUDE.md`: changes touching `src/components/answer-game/` or `*reducer*` files must update co-located `.mdx` docs.
 190-
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:02Z)**_
@@ -3601,6 +3696,7 @@ Read task 4-5
 184-- [ ] **Step 12: Failing e2e.** Seed `session_history_index` with the fixture, navigate to `/en/game/word-spell`, click Audio, assert the spoken `prompt` matches `roundOrder[draftState.roundIndex].word` AND the rendered tiles' sorted letters equal that word's sorted letters.
 185-- [ ] **Step 13: Verify it passes after Tasks 1–4** are implemented.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:11Z)**_
@@ -3612,92 +3708,93 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:12Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/db/schemas/session_history_index.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type SessionHistoryIndexDoc = {
-4	  sessionId: string;
-5	  profileId: string;
-6	  gameId: string;
-7	  startedAt: string;
-8	  endedAt?: string | null;
-9	  duration?: number | null;
-10	  finalScore?: number | null;
-11	  totalEvents?: number;
-12	  totalChunks?: number;
-13	  gradeBand: string;
-14	  // v1 additions
-15	  status: 'in-progress' | 'completed' | 'abandoned';
-16	  seed: string;
-17	  initialContent: Record<string, unknown>;
-18	  initialState: Record<string, unknown>;
-19	  // v2 additions
-20	  draftState?: Record<string, unknown> | null;
-21	};
-22	
-23	export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
-24	  {
-25	    version: 2,
-26	    primaryKey: 'sessionId',
-27	    type: 'object',
-28	    properties: {
-29	      sessionId: { type: 'string', maxLength: 36 },
-30	      profileId: { type: 'string', maxLength: 36 },
-31	      gameId: { type: 'string', maxLength: 64 },
-32	      startedAt: { type: 'string', format: 'date-time' },
-33	      endedAt: {
-34	        oneOf: [
-35	          { type: 'string', format: 'date-time' },
-36	          { type: 'null' },
-37	        ],
-38	      },
-39	      duration: {
-40	        oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
-41	      },
-42	      finalScore: {
-43	        oneOf: [{ type: 'number' }, { type: 'null' }],
-44	      },
-45	      totalEvents: {
-46	        type: 'integer',
-47	        minimum: 0,
-48	        default: 0,
-49	        multipleOf: 1,
-50	      },
-51	      totalChunks: {
-52	        type: 'integer',
-53	        minimum: 1,
-54	        default: 1,
-55	        multipleOf: 1,
-56	      },
-57	      gradeBand: { type: 'string' },
-58	      status: {
-59	        type: 'string',
-60	        enum: ['in-progress', 'completed', 'abandoned'],
-61	      },
-62	      seed: { type: 'string' },
-63	      initialContent: { type: 'object', additionalProperties: true },
-64	      initialState: { type: 'object', additionalProperties: true },
-65	      draftState: {
-66	        oneOf: [
-67	          { type: 'object', additionalProperties: true },
-68	          { type: 'null' },
-69	        ],
-70	      },
-71	    },
-72	    required: [
-73	      'sessionId',
-74	      'profileId',
-75	      'gameId',
-76	      'startedAt',
-77	      'gradeBand',
-78	      'status',
-79	      'seed',
-80	      'initialContent',
-81	      'initialState',
-82	    ],
-83	    additionalProperties: false,
-84	  };
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type SessionHistoryIndexDoc = {
+4   sessionId: string;
+5   profileId: string;
+6   gameId: string;
+7   startedAt: string;
+8   endedAt?: string | null;
+9   duration?: number | null;
+10   finalScore?: number | null;
+11   totalEvents?: number;
+12   totalChunks?: number;
+13   gradeBand: string;
+14   // v1 additions
+15   status: 'in-progress' | 'completed' | 'abandoned';
+16   seed: string;
+17   initialContent: Record<string, unknown>;
+18   initialState: Record<string, unknown>;
+19   // v2 additions
+20   draftState?: Record<string, unknown> | null;
+21 };
+22 
+23 export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
+24   {
+25     version: 2,
+26     primaryKey: 'sessionId',
+27     type: 'object',
+28     properties: {
+29       sessionId: { type: 'string', maxLength: 36 },
+30       profileId: { type: 'string', maxLength: 36 },
+31       gameId: { type: 'string', maxLength: 64 },
+32       startedAt: { type: 'string', format: 'date-time' },
+33       endedAt: {
+34         oneOf: [
+35           { type: 'string', format: 'date-time' },
+36           { type: 'null' },
+37         ],
+38       },
+39       duration: {
+40         oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
+41       },
+42       finalScore: {
+43         oneOf: [{ type: 'number' }, { type: 'null' }],
+44       },
+45       totalEvents: {
+46         type: 'integer',
+47         minimum: 0,
+48         default: 0,
+49         multipleOf: 1,
+50       },
+51       totalChunks: {
+52         type: 'integer',
+53         minimum: 1,
+54         default: 1,
+55         multipleOf: 1,
+56       },
+57       gradeBand: { type: 'string' },
+58       status: {
+59         type: 'string',
+60         enum: ['in-progress', 'completed', 'abandoned'],
+61       },
+62       seed: { type: 'string' },
+63       initialContent: { type: 'object', additionalProperties: true },
+64       initialState: { type: 'object', additionalProperties: true },
+65       draftState: {
+66         oneOf: [
+67           { type: 'object', additionalProperties: true },
+68           { type: 'null' },
+69         ],
+70       },
+71     },
+72     required: [
+73       'sessionId',
+74       'profileId',
+75       'gameId',
+76       'startedAt',
+77       'gradeBand',
+78       'status',
+79       'seed',
+80       'initialContent',
+81       'initialState',
+82     ],
+83     additionalProperties: false,
+84   };
 85
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:17Z)**_
@@ -3711,6 +3808,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:17Z)**_
 111:  rounds: sliceWordSpellRounds(8),
 252:    merged.rounds = sliceWordSpellRounds(targetTotal);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:18Z)**_
@@ -3722,6 +3820,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:18Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:22Z)**_
@@ -3731,32 +3830,33 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:22Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-70	  meta: SessionMeta;
-71	  gameSpecificConfig: Record<string, unknown> | null;
-72	  customGameId: string | null;
-73	  customGameName: string | null;
-74	  customGameColor: string | null;
-75	  customGameCover: Cover | null;
-76	  /** Raw persisted `session_history_index.initialContent` for resume flows. */
-77	  persistedContent: Record<string, unknown> | null;
-78	}
-79	
-80	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-81	  { word: 'cat', emoji: '🐱' },
-82	  { word: 'dog', emoji: '🐶' },
-83	  { word: 'sun', emoji: '☀️' },
-84	  { word: 'pin', emoji: '📌' },
-85	  { word: 'sad', emoji: '☹️' },
-86	  { word: 'ant', emoji: '🐜' },
-87	  { word: 'can', emoji: '🥫' },
-88	  { word: 'mum', emoji: '🤱' },
-89	];
-90	
-91	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-92	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-93	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-94	};
+70   meta: SessionMeta;
+71   gameSpecificConfig: Record<string, unknown> | null;
+72   customGameId: string | null;
+73   customGameName: string | null;
+74   customGameColor: string | null;
+75   customGameCover: Cover | null;
+76   /** Raw persisted `session_history_index.initialContent` for resume flows. */
+77   persistedContent: Record<string, unknown> | null;
+78 }
+79 
+80 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+81   { word: 'cat', emoji: '🐱' },
+82   { word: 'dog', emoji: '🐶' },
+83   { word: 'sun', emoji: '☀️' },
+84   { word: 'pin', emoji: '📌' },
+85   { word: 'sad', emoji: '☹️' },
+86   { word: 'ant', emoji: '🐜' },
+87   { word: 'can', emoji: '🥫' },
+88   { word: 'mum', emoji: '🤱' },
+89 ];
+90 
+91 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+92   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+93   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+94 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:31Z)**_
@@ -3802,6 +3902,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:32Z)**_
 949:      sessionId,
 957:      persistedContent: initialLog
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:35Z)**_
@@ -3811,102 +3912,103 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:35Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-870	          initialState,
-871	        },
-872	        gameSpecificConfig: null,
-873	        customGameId: null,
-874	        customGameName: null,
-875	        customGameColor: null,
-876	        customGameCover: null,
-877	        persistedContent: null,
-878	      };
-879	    }
-880	
-881	    const db = await getOrCreateDatabase();
-882	    const config = await loadGameConfig(
-883	      gameId,
-884	      profileId,
-885	      defaultConfig.gradeBand,
-886	      db,
-887	      defaultConfig,
-888	    );
-889	
-890	    const inProgressSession: InProgressSession | null =
-891	      await findInProgressSession(profileId, gameId, db);
-892	    const initialLog = inProgressSession?.log ?? null;
-893	    const draftState = inProgressSession?.draftState ?? null;
-894	
-895	    let gameSpecificConfig: Record<string, unknown> | null = null;
-896	    let customGameId: string | null = null;
-897	    let customGameName: string | null = null;
-898	    let customGameColor: string | null = null;
-899	    let customGameCover: Cover | null = null;
-900	
-901	    if (deps.configId) {
-902	      const savedDoc = await db.custom_games
-903	        .findOne(deps.configId)
-904	        .exec();
-905	      if (savedDoc) {
-906	        gameSpecificConfig = savedDoc.config;
-907	        customGameId = savedDoc.id;
-908	        customGameName = savedDoc.name;
-909	        customGameColor = savedDoc.color;
-910	        customGameCover = savedDoc.cover ?? null;
-911	      }
-912	    } else {
-913	      const lastDoc = await db.saved_game_configs
-914	        .findOne(lastSessionConfigId(gameId))
-915	        .exec();
-916	      if (lastDoc) gameSpecificConfig = lastDoc.config;
-917	    }
-918	
-919	    const sessionId = initialLog?.sessionId ?? nanoid();
-920	    const seed = initialLog?.seed ?? nanoid();
-921	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-922	    const initialState: GameEngineState = initialLog?.initialState ?? {
-923	      phase: 'instructions',
-924	      roundIndex: 0,
-925	      score: 0,
-926	      streak: 0,
-927	      retryCount: 0,
-928	      content: initialContent,
-929	      currentRound: {
-930	        roundId: initialContent.rounds[0]?.id ?? '',
-931	        answer: null,
-932	        hintsUsed: 0,
-933	      },
-934	    };
-935	
-936	    const meta: SessionMeta = {
-937	      profileId,
-938	      gameId,
-939	      gradeBand: config.gradeBand,
-940	      seed,
-941	      initialContent,
-942	      initialState,
-943	    };
-944	
-945	    return {
-946	      config,
-947	      initialLog,
-948	      draftState,
-949	      sessionId,
-950	      seed,
-951	      meta,
-952	      gameSpecificConfig,
-953	      customGameId,
-954	      customGameName,
-955	      customGameColor,
-956	      customGameCover,
-957	      persistedContent: initialLog
-958	        ? (initialLog.initialContent as unknown as Record<
-959	            string,
-960	            unknown
-961	          >)
-962	        : null,
-963	    };
-964	  },
+870           initialState,
+871         },
+872         gameSpecificConfig: null,
+873         customGameId: null,
+874         customGameName: null,
+875         customGameColor: null,
+876         customGameCover: null,
+877         persistedContent: null,
+878       };
+879     }
+880 
+881     const db = await getOrCreateDatabase();
+882     const config = await loadGameConfig(
+883       gameId,
+884       profileId,
+885       defaultConfig.gradeBand,
+886       db,
+887       defaultConfig,
+888     );
+889 
+890     const inProgressSession: InProgressSession | null =
+891       await findInProgressSession(profileId, gameId, db);
+892     const initialLog = inProgressSession?.log ?? null;
+893     const draftState = inProgressSession?.draftState ?? null;
+894 
+895     let gameSpecificConfig: Record<string, unknown> | null = null;
+896     let customGameId: string | null = null;
+897     let customGameName: string | null = null;
+898     let customGameColor: string | null = null;
+899     let customGameCover: Cover | null = null;
+900 
+901     if (deps.configId) {
+902       const savedDoc = await db.custom_games
+903         .findOne(deps.configId)
+904         .exec();
+905       if (savedDoc) {
+906         gameSpecificConfig = savedDoc.config;
+907         customGameId = savedDoc.id;
+908         customGameName = savedDoc.name;
+909         customGameColor = savedDoc.color;
+910         customGameCover = savedDoc.cover ?? null;
+911       }
+912     } else {
+913       const lastDoc = await db.saved_game_configs
+914         .findOne(lastSessionConfigId(gameId))
+915         .exec();
+916       if (lastDoc) gameSpecificConfig = lastDoc.config;
+917     }
+918 
+919     const sessionId = initialLog?.sessionId ?? nanoid();
+920     const seed = initialLog?.seed ?? nanoid();
+921     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+922     const initialState: GameEngineState = initialLog?.initialState ?? {
+923       phase: 'instructions',
+924       roundIndex: 0,
+925       score: 0,
+926       streak: 0,
+927       retryCount: 0,
+928       content: initialContent,
+929       currentRound: {
+930         roundId: initialContent.rounds[0]?.id ?? '',
+931         answer: null,
+932         hintsUsed: 0,
+933       },
+934     };
+935 
+936     const meta: SessionMeta = {
+937       profileId,
+938       gameId,
+939       gradeBand: config.gradeBand,
+940       seed,
+941       initialContent,
+942       initialState,
+943     };
+944 
+945     return {
+946       config,
+947       initialLog,
+948       draftState,
+949       sessionId,
+950       seed,
+951       meta,
+952       gameSpecificConfig,
+953       customGameId,
+954       customGameName,
+955       customGameColor,
+956       customGameCover,
+957       persistedContent: initialLog
+958         ? (initialLog.initialContent as unknown as Record<
+959             string,
+960             unknown
+961           >)
+962         : null,
+963     };
+964   },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:58Z)**_
@@ -3924,6 +4026,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:01:58Z)**_
 src/lib/game-engine/debugging.mdx:152:  if (db) (window as any).__db = db;
 src/lib/game-engine/debugging.mdx:274:| Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:01:59Z)**_
@@ -3937,6 +4040,7 @@ src/db/index.ts:5:  getOrCreateDatabase,
 src/db/create-database.ts:134:export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
 src/db/create-database.ts:137:      'getOrCreateDatabase is only available in a browser with IndexedDB',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:04Z)**_
@@ -3946,37 +4050,38 @@ _**Agent (claude-opus-4-7 2026-04-21 08:02:04Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/db/create-database.ts`
 
 ```text
-130	
-131	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-132	
-133	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-134	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-135	  if (typeof indexedDB === 'undefined') {
-136	    throw new TypeError(
-137	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-138	    );
-139	  }
-140	  productionDbPromise ??= (async () => {
-141	    const open = async (): Promise<BaseSkillDatabase> => {
-142	      const db = await createRxDatabase<BaseSkillDatabase>({
-143	        name: PRODUCTION_DB_NAME,
-144	        storage: getRxStorageDexie(),
-145	        multiInstance: false,
-146	      });
-147	      try {
-148	        const withCols = await addBaseSkillCollections(db);
-149	        await checkVersionAndMigrate(withCols);
-150	        return withCols;
-151	      } catch (error) {
-152	        await db.close().catch(() => {});
-153	        throw error;
-154	      }
-155	    };
-156	    // RxDB's parallel migration plumbing intermittently throws DM4 with a
-157	    // closed-instance inner error during `addCollections` for users whose
-158	    // IndexedDB carries stale legacy schema versions. Recover by wiping
-159	    // the broken collection's old storage + meta and retrying. Loop a few
+130 
+131 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+132 
+133 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+134 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+135   if (typeof indexedDB === 'undefined') {
+136     throw new TypeError(
+137       'getOrCreateDatabase is only available in a browser with IndexedDB',
+138     );
+139   }
+140   productionDbPromise ??= (async () => {
+141     const open = async (): Promise<BaseSkillDatabase> => {
+142       const db = await createRxDatabase<BaseSkillDatabase>({
+143         name: PRODUCTION_DB_NAME,
+144         storage: getRxStorageDexie(),
+145         multiInstance: false,
+146       });
+147       try {
+148         const withCols = await addBaseSkillCollections(db);
+149         await checkVersionAndMigrate(withCols);
+150         return withCols;
+151       } catch (error) {
+152         await db.close().catch(() => {});
+153         throw error;
+154       }
+155     };
+156     // RxDB's parallel migration plumbing intermittently throws DM4 with a
+157     // closed-instance inner error during `addCollections` for users whose
+158     // IndexedDB carries stale legacy schema versions. Recover by wiping
+159     // the broken collection's old storage + meta and retrying. Loop a few
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:19Z)**_
@@ -4001,6 +4106,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:02:20Z)**_
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:21Z)**_
@@ -4015,6 +4121,7 @@ e2e/visual.spec.ts
 e2e/bookmarks-dm4-recovery.spec.ts
 e2e/a11y.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:31Z)**_
@@ -4032,6 +4139,7 @@ src/components/answer-game/AnswerGameProvider.tsx:22:import { useAnswerGameDraft
 src/components/answer-game/AnswerGameProvider.tsx:58:  /** Session ID used by useAnswerGameDraftSync to find the RxDB document. */
 src/components/answer-game/AnswerGameProvider.tsx:87:  useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:39Z)**_
@@ -4046,6 +4154,7 @@ Find draft sync source
 src/lib/game-engine/useAnswerGameDraftSync.test.ts
 src/lib/game-engine/useAnswerGameDraftSync.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:02:47Z)**_
@@ -4055,90 +4164,91 @@ _**Agent (claude-opus-4-7 2026-04-21 08:02:47Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/lib/game-engine/useAnswerGameDraftSync.ts`
 
 ```text
-1	import { useEffect, useLayoutEffect, useRef } from 'react';
-2	import type {
-3	  AnswerGameDraftState,
-4	  AnswerGameState,
-5	} from '@/components/answer-game/types';
-6	import type { BaseSkillDatabase } from '@/db/types';
-7	
-8	const buildDraft = (
-9	  state: AnswerGameState,
-10	): AnswerGameDraftState | null => {
-11	  if (state.phase === 'game-over') return null;
-12	  return {
-13	    allTiles: state.allTiles,
-14	    bankTileIds: state.bankTileIds,
-15	    zones: state.zones,
-16	    activeSlotIndex: state.activeSlotIndex,
-17	    phase: state.phase,
-18	    roundIndex: state.roundIndex,
-19	    retryCount: state.retryCount,
-20	    levelIndex: state.levelIndex,
-21	  };
-22	};
-23	
-24	/**
-25	 * Persists AnswerGameState snapshots to session_history_index.draftState.
-26	 * - Debounced 500 ms on every state change.
-27	 * - Flushes immediately on visibilitychange → hidden.
-28	 * - Writes null when phase === 'game-over' (clears draft on completion).
-29	 * - No-op when sessionId or db is null.
-30	 */
-31	export const useAnswerGameDraftSync = (
-32	  state: AnswerGameState,
-33	  sessionId: string | null,
-34	  db: BaseSkillDatabase | null,
-35	): void => {
-36	  // Refs so event-listener callbacks always read the latest values
-37	  const latestRef = useRef({ state, sessionId, db });
-38	  useLayoutEffect(() => {
-39	    latestRef.current = { state, sessionId, db };
-40	  });
-41	
-42	  // Debounced write: resets on every state/sessionId/db change
-43	  useEffect(() => {
-44	    if (!sessionId || !db) return;
-45	
-46	    const timer = setTimeout(async () => {
-47	      const { state: s, db: d, sessionId: sid } = latestRef.current;
-48	      if (!d || !sid) return;
-49	
-50	      const doc = await d.session_history_index.findOne(sid).exec();
-51	      if (!doc) return;
-52	
-53	      const draft = buildDraft(s);
-54	      await doc.incrementalPatch({
-55	        draftState: draft as unknown as Record<string, unknown> | null,
-56	      });
-57	    }, 500);
-58	
-59	    return () => clearTimeout(timer);
-60	  }, [state, sessionId, db]);
-61	
-62	  // Immediate flush on tab hidden
-63	  useEffect(() => {
-64	    const flush = async () => {
-65	      if (document.visibilityState !== 'hidden') return;
-66	      const { state: s, db: d, sessionId: sid } = latestRef.current;
-67	      if (!d || !sid) return;
-68	
-69	      const doc = await d.session_history_index.findOne(sid).exec();
-70	      if (!doc) return;
-71	
-72	      const draft = buildDraft(s);
-73	      await doc.incrementalPatch({
-74	        draftState: draft as unknown as Record<string, unknown> | null,
-75	      });
-76	    };
-77	
-78	    document.addEventListener('visibilitychange', flush);
-79	    return () =>
-80	      document.removeEventListener('visibilitychange', flush);
-81	  }, []);
-82	};
+1 import { useEffect, useLayoutEffect, useRef } from 'react';
+2 import type {
+3   AnswerGameDraftState,
+4   AnswerGameState,
+5 } from '@/components/answer-game/types';
+6 import type { BaseSkillDatabase } from '@/db/types';
+7 
+8 const buildDraft = (
+9   state: AnswerGameState,
+10 ): AnswerGameDraftState | null => {
+11   if (state.phase === 'game-over') return null;
+12   return {
+13     allTiles: state.allTiles,
+14     bankTileIds: state.bankTileIds,
+15     zones: state.zones,
+16     activeSlotIndex: state.activeSlotIndex,
+17     phase: state.phase,
+18     roundIndex: state.roundIndex,
+19     retryCount: state.retryCount,
+20     levelIndex: state.levelIndex,
+21   };
+22 };
+23 
+24 /**
+25  * Persists AnswerGameState snapshots to session_history_index.draftState.
+26  * - Debounced 500 ms on every state change.
+27  * - Flushes immediately on visibilitychange → hidden.
+28  * - Writes null when phase === 'game-over' (clears draft on completion).
+29  * - No-op when sessionId or db is null.
+30  */
+31 export const useAnswerGameDraftSync = (
+32   state: AnswerGameState,
+33   sessionId: string | null,
+34   db: BaseSkillDatabase | null,
+35 ): void => {
+36   // Refs so event-listener callbacks always read the latest values
+37   const latestRef = useRef({ state, sessionId, db });
+38   useLayoutEffect(() => {
+39     latestRef.current = { state, sessionId, db };
+40   });
+41 
+42   // Debounced write: resets on every state/sessionId/db change
+43   useEffect(() => {
+44     if (!sessionId || !db) return;
+45 
+46     const timer = setTimeout(async () => {
+47       const { state: s, db: d, sessionId: sid } = latestRef.current;
+48       if (!d || !sid) return;
+49 
+50       const doc = await d.session_history_index.findOne(sid).exec();
+51       if (!doc) return;
+52 
+53       const draft = buildDraft(s);
+54       await doc.incrementalPatch({
+55         draftState: draft as unknown as Record<string, unknown> | null,
+56       });
+57     }, 500);
+58 
+59     return () => clearTimeout(timer);
+60   }, [state, sessionId, db]);
+61 
+62   // Immediate flush on tab hidden
+63   useEffect(() => {
+64     const flush = async () => {
+65       if (document.visibilityState !== 'hidden') return;
+66       const { state: s, db: d, sessionId: sid } = latestRef.current;
+67       if (!d || !sid) return;
+68 
+69       const doc = await d.session_history_index.findOne(sid).exec();
+70       if (!doc) return;
+71 
+72       const draft = buildDraft(s);
+73       await doc.incrementalPatch({
+74         draftState: draft as unknown as Record<string, unknown> | null,
+75       });
+76     };
+77 
+78     document.addEventListener('visibilitychange', flush);
+79     return () =>
+80       document.removeEventListener('visibilitychange', flush);
+81   }, []);
+82 };
 83
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:04:17Z)**_
@@ -4150,77 +4260,78 @@ _**Agent (claude-opus-4-7 2026-04-21 08:04:18Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-484	
-485	  const answerGameConfig = useMemo(
-486	    (): AnswerGameConfig => ({
-487	      gameId: resolvedConfig.gameId,
-488	      inputMethod: resolvedConfig.inputMethod,
-489	      wrongTileBehavior: resolvedConfig.wrongTileBehavior,
-490	      tileBankMode: resolvedConfig.tileBankMode,
-491	      distractorCount: resolvedConfig.distractorCount,
-492	      totalRounds: resolvedRounds.length,
-493	      roundsInOrder: resolvedConfig.roundsInOrder,
-494	      ttsEnabled: resolvedConfig.ttsEnabled,
-495	      touchKeyboardInputMode: 'text',
-496	      initialTiles: tiles,
-497	      initialZones: zones,
-498	      slotInteraction:
-499	        resolvedConfig.mode === 'scramble' ||
-500	        resolvedConfig.mode === 'sentence-gap'
-501	          ? 'free-swap'
-502	          : 'ordered',
-503	    }),
-504	    [
-505	      resolvedConfig.gameId,
-506	      resolvedConfig.inputMethod,
-507	      resolvedConfig.wrongTileBehavior,
-508	      resolvedConfig.tileBankMode,
-509	      resolvedConfig.distractorCount,
-510	      resolvedRounds.length,
-511	      resolvedConfig.roundsInOrder,
-512	      resolvedConfig.ttsEnabled,
-513	      resolvedConfig.mode,
-514	      tiles,
-515	      zones,
-516	    ],
-517	  );
-518	
-519	  if (isLoading) {
-520	    return (
-521	      <div
-522	        role="status"
-523	        className="flex min-h-[200px] w-full items-center justify-center text-foreground"
-524	      >
-525	        Loading words…
-526	      </div>
-527	    );
-528	  }
-529	
-530	  if (!round0) return null;
-531	
-532	  return (
-533	    <div
-534	      className={`game-container skin-${skin.id}`}
-535	      style={skin.tokens as React.CSSProperties}
-536	    >
-537	      {skin.SceneBackground ? <skin.SceneBackground /> : null}
-538	      <AnswerGame
-539	        key={sessionEpoch}
-540	        config={answerGameConfig}
-541	        initialState={
-542	          sessionEpoch === 0 && !staleDraft ? initialState : undefined
-543	        }
-544	        sessionId={sessionId}
-545	        skin={skin}
-546	      >
-547	        <WordSpellSession
-548	          wordSpellConfig={resolvedConfig}
-549	          roundOrder={roundOrder}
-550	          skin={skin}
-551	          onRestartSession={() => {
-552	            setSessionEpoch((e) => e + 1);
-553	          }}
+484 
+485   const answerGameConfig = useMemo(
+486     (): AnswerGameConfig => ({
+487       gameId: resolvedConfig.gameId,
+488       inputMethod: resolvedConfig.inputMethod,
+489       wrongTileBehavior: resolvedConfig.wrongTileBehavior,
+490       tileBankMode: resolvedConfig.tileBankMode,
+491       distractorCount: resolvedConfig.distractorCount,
+492       totalRounds: resolvedRounds.length,
+493       roundsInOrder: resolvedConfig.roundsInOrder,
+494       ttsEnabled: resolvedConfig.ttsEnabled,
+495       touchKeyboardInputMode: 'text',
+496       initialTiles: tiles,
+497       initialZones: zones,
+498       slotInteraction:
+499         resolvedConfig.mode === 'scramble' ||
+500         resolvedConfig.mode === 'sentence-gap'
+501           ? 'free-swap'
+502           : 'ordered',
+503     }),
+504     [
+505       resolvedConfig.gameId,
+506       resolvedConfig.inputMethod,
+507       resolvedConfig.wrongTileBehavior,
+508       resolvedConfig.tileBankMode,
+509       resolvedConfig.distractorCount,
+510       resolvedRounds.length,
+511       resolvedConfig.roundsInOrder,
+512       resolvedConfig.ttsEnabled,
+513       resolvedConfig.mode,
+514       tiles,
+515       zones,
+516     ],
+517   );
+518 
+519   if (isLoading) {
+520     return (
+521       <div
+522         role="status"
+523         className="flex min-h-[200px] w-full items-center justify-center text-foreground"
+524       >
+525         Loading words…
+526       </div>
+527     );
+528   }
+529 
+530   if (!round0) return null;
+531 
+532   return (
+533     <div
+534       className={`game-container skin-${skin.id}`}
+535       style={skin.tokens as React.CSSProperties}
+536     >
+537       {skin.SceneBackground ? <skin.SceneBackground /> : null}
+538       <AnswerGame
+539         key={sessionEpoch}
+540         config={answerGameConfig}
+541         initialState={
+542           sessionEpoch === 0 && !staleDraft ? initialState : undefined
+543         }
+544         sessionId={sessionId}
+545         skin={skin}
+546       >
+547         <WordSpellSession
+548           wordSpellConfig={resolvedConfig}
+549           roundOrder={roundOrder}
+550           skin={skin}
+551           onRestartSession={() => {
+552             setSessionEpoch((e) => e + 1);
+553           }}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:04:30Z)**_
@@ -4237,6 +4348,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:04:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:05:42Z)**_
@@ -4251,6 +4363,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:05:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:06:01Z)**_
@@ -4307,6 +4420,7 @@ export default defineConfig({
     },
     {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:06:06Z)**_
@@ -4321,6 +4435,7 @@ Find e2e scripts
 16:    "test:e2e": "playwright test",
 17:    "test:e2e:a11y": "playwright test --grep @a11y",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:06:28Z)**_
@@ -4373,6 +4488,7 @@ Running 2 tests using 2 workers
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:06:34Z)**_
@@ -4389,6 +4505,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:06:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:06Z)**_
@@ -4430,6 +4547,7 @@ Running 2 tests using 2 workers
 [1A[2K  2 passed (11.1s)
 Done in 11.67s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:10Z)**_
@@ -4449,6 +4567,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.38s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:18Z)**_
@@ -4471,6 +4590,7 @@ Lint new file
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:18Z)**_
@@ -4486,6 +4606,7 @@ Checking formatting...
 [warn] e2e/wordspell-resume-desync.spec.ts
 [warn] Code style issues found in the above file. Run Prettier with --write to fix.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:38Z)**_
@@ -4498,6 +4619,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:07:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:44Z)**_
@@ -4507,37 +4629,38 @@ _**Agent (claude-opus-4-7 2026-04-21 08:07:44Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts`
 
 ```text
-50	      if (
-51	        raw['gameId'] !== 'word-spell' ||
-52	        raw['status'] !== 'in-progress'
-53	      ) {
-54	        continue;
-55	      }
-56	      targetSessionId = String(raw['sessionId'] ?? '');
-57	      const initialContent = {
-58	        ...((raw['initialContent'] as Record<string, unknown>) ?? {}),
-59	      };
-60	      delete initialContent['wordSpellRounds'];
-61	      delete initialContent['roundOrder'];
-62	
-63	      const existingMeta = (raw['_meta'] as Record<string, number>) ?? {};
-64	      const mutated = {
-65	        ...raw,
-66	        initialContent,
-67	        draftState: {
-68	          allTiles: [
-69	            { id: 't0', label: 'p', value: 'p' },
-70	            { id: 't1', label: 'a', value: 'a' },
-71	            { id: 't2', label: 'n', value: 'n' },
-72	            { id: 't3', label: 't', value: 't' },
-73	          ],
-74	          bankTileIds: ['t0', 't1', 't2', 't3'],
-75	          zones: [],
-76	          activeSlotIndex: 0,
-77	          phase: 'playing',
-78	          roundIndex: 2,
-79	          retryCount: 0,
+50       if (
+51         raw['gameId'] !== 'word-spell' ||
+52         raw['status'] !== 'in-progress'
+53       ) {
+54         continue;
+55       }
+56       targetSessionId = String(raw['sessionId'] ?? '');
+57       const initialContent = {
+58         ...((raw['initialContent'] as Record<string, unknown>) ?? {}),
+59       };
+60       delete initialContent['wordSpellRounds'];
+61       delete initialContent['roundOrder'];
+62 
+63       const existingMeta = (raw['_meta'] as Record<string, number>) ?? {};
+64       const mutated = {
+65         ...raw,
+66         initialContent,
+67         draftState: {
+68           allTiles: [
+69             { id: 't0', label: 'p', value: 'p' },
+70             { id: 't1', label: 'a', value: 'a' },
+71             { id: 't2', label: 'n', value: 'n' },
+72             { id: 't3', label: 't', value: 't' },
+73           ],
+74           bankTileIds: ['t0', 't1', 't2', 't3'],
+75           zones: [],
+76           activeSlotIndex: 0,
+77           phase: 'playing',
+78           roundIndex: 2,
+79           retryCount: 0,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:07:54Z)**_
@@ -4562,6 +4685,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/node_mod
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:08:36Z)**_
@@ -4573,22 +4697,23 @@ _**Agent (claude-opus-4-7 2026-04-21 08:08:38Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts`
 
 ```text
-88	      store.put(mutated);
-89	    }
-90	
-91	    await new Promise<void>((resolve, reject) => {
-92	      tx.addEventListener('complete', () => resolve());
-93	      tx.addEventListener('error', () => reject(tx.error));
-94	    });
-95	    db.close();
-96	
-97	    return targetSessionId;
-98	  }, SESSION_HISTORY_INDEX_IDB);
-99	};
-100	
-101	test.beforeEach(async ({ page }) => {
-102	  await seedMathRandom(page);
+88       store.put(mutated);
+89     }
+90 
+91     await new Promise<void>((resolve, reject) => {
+92       tx.addEventListener('complete', () => resolve());
+93       tx.addEventListener('error', () => reject(tx.error));
+94     });
+95     db.close();
+96 
+97     return targetSessionId;
+98   }, SESSION_HISTORY_INDEX_IDB);
+99 };
+100 
+101 test.beforeEach(async ({ page }) => {
+102   await seedMathRandom(page);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:08:44Z)**_
@@ -4600,17 +4725,18 @@ _**Agent (claude-opus-4-7 2026-04-21 08:08:45Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts`
 
 ```text
-20	 * Returns the in-progress sessionId so the test can correlate assertions.
-21	 */
-22	const seedDriftedInProgressSession = async (
-23	  page: Page,
-24	): Promise<string> =>
-25	  page.evaluate(async (dbName) => {
-26	    const open = () =>
-27	      new Promise<IDBDatabase>((resolve, reject) => {
-28	        const request = indexedDB.open(dbName);
-29	        request.addEventListener('success', () =>
+20  * Returns the in-progress sessionId so the test can correlate assertions.
+21  */
+22 const seedDriftedInProgressSession = async (
+23   page: Page,
+24 ): Promise<string> =>
+25   page.evaluate(async (dbName) => {
+26     const open = () =>
+27       new Promise<IDBDatabase>((resolve, reject) => {
+28         const request = indexedDB.open(dbName);
+29         request.addEventListener('success', () =>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:08:53Z)**_
@@ -4623,6 +4749,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:08:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:04Z)**_
@@ -4648,6 +4775,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/node_mod
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:11Z)**_
@@ -4658,6 +4786,7 @@ _**Agent (claude-opus-4-7 2026-04-21 08:09:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:18Z)**_
@@ -4673,6 +4802,7 @@ yarn run v1.22.22
 $ /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/node_modules/.bin/eslint e2e/wordspell-resume-desync.spec.ts
 Done in 2.84s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:22Z)**_
@@ -4691,6 +4821,7 @@ Prettier fix
 e2e/wordspell-resume-desync.spec.ts 44ms
 [This command modified 1 file you've previously read: e2e/wordspell-resume-desync.spec.ts. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:27Z)**_
@@ -4706,6 +4837,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 4.22s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:09:55Z)**_
@@ -4728,6 +4860,7 @@ Running 2 tests using 2 workers
 [1A[2K  2 passed (20.0s)
 Done in 21.74s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:10:09Z)**_
@@ -4785,6 +4918,7 @@ Done in 11.37s.
 [test/wordspell-drift-e2e 222e4895] test(word-spell): e2e coverage for drifted-draft safety-net recovery
  1 file changed, 160 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:11:16Z)**_
@@ -4805,6 +4939,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        test/wordspell-drift-e2e -> test/wordspell-drift-e2e
 branch 'test/wordspell-drift-e2e' set up to track 'origin/test/wordspell-drift-e2e'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:11:37Z)**_
@@ -4852,11 +4987,12 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/137
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 08:11:46Z)**_
 
-PR #137 open: https://github.com/leocaseiro/base-skill/pull/137
+PR #137 open: <https://github.com/leocaseiro/base-skill/pull/137>
 
 Quick state of #135 after this:
 
@@ -4898,6 +5034,7 @@ visual-regression.yml
 .github/workflows/e2e.yml
 .github/workflows/visual-regression.yml
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:37:31Z)**_
@@ -4913,6 +5050,7 @@ Check e2e artifact upload
 76:          name: playwright-report-${{ matrix.browser }}
 77:          path: playwright-report/
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:37:33Z)**_
@@ -4926,6 +5064,7 @@ Recent CI runs for branch
 ```text
 [{"conclusion":"","databaseId":24725386746,"name":"Visual Regression","status":"in_progress","workflowName":"Visual Regression"},{"conclusion":"success","databaseId":24725386777,"name":"PR Preview","status":"completed","workflowName":"PR Preview"},{"conclusion":"","databaseId":24725386761,"name":"CI","status":"in_progress","workflowName":"CI"}]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:37:37Z)**_
@@ -4935,27 +5074,28 @@ _**Agent (claude-opus-4-7 2026-04-21 13:37:37Z)**_
  `./worktrees/test-wordspell-drift-e2e/.github/workflows/e2e.yml`
 
 ```text
-60	      - if: needs.detect-changes.outputs.e2e == 'true'
-61	        run: npx playwright install --with-deps ${{ matrix.browser }}
-62	      - if: needs.detect-changes.outputs.e2e == 'true'
-63	        run: yarn build
-64	      - if: needs.detect-changes.outputs.e2e == 'true'
-65	        run: cp dist/client/_shell.html dist/client/index.html
-66	      - if: needs.detect-changes.outputs.e2e == 'true'
-67	        run: npx playwright test --project=${{ matrix.browser }}
-68	        env:
-69	          CI: true
-70	      - if: needs.detect-changes.outputs.e2e == 'true'
-71	        run: npx playwright test --project=${{ matrix.browser }} --grep @a11y
-72	        continue-on-error: false
-73	      - if: needs.detect-changes.outputs.e2e == 'true' && failure()
-74	        uses: actions/upload-artifact@v7
-75	        with:
-76	          name: playwright-report-${{ matrix.browser }}
-77	          path: playwright-report/
-78	          retention-days: 14
+60       - if: needs.detect-changes.outputs.e2e == 'true'
+61         run: npx playwright install --with-deps ${{ matrix.browser }}
+62       - if: needs.detect-changes.outputs.e2e == 'true'
+63         run: yarn build
+64       - if: needs.detect-changes.outputs.e2e == 'true'
+65         run: cp dist/client/_shell.html dist/client/index.html
+66       - if: needs.detect-changes.outputs.e2e == 'true'
+67         run: npx playwright test --project=${{ matrix.browser }}
+68         env:
+69           CI: true
+70       - if: needs.detect-changes.outputs.e2e == 'true'
+71         run: npx playwright test --project=${{ matrix.browser }} --grep @a11y
+72         continue-on-error: false
+73       - if: needs.detect-changes.outputs.e2e == 'true' && failure()
+74         uses: actions/upload-artifact@v7
+75         with:
+76           name: playwright-report-${{ matrix.browser }}
+77           path: playwright-report/
+78           retention-days: 14
 79
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:37:47Z)**_
@@ -5004,14 +5144,10 @@ yarn run v1.22.22
 $ playwright test e2e/wordspell-resume-desync.spec.ts --project=chromium --trace o
 error: option '--trace <mode>' argument 'o' is invalid. Allowed choices are on, off, on-first-retry, on-all-retries, retain-on-failure, retain-on-first-failure, retain-on-failure-and-retries.
 error Command failed with exit code 1.
-info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+info Visit <https://yarnpkg.com/en/docs/cli/run> for documentation about this command.
 
 ~/Sites/base-skill/worktrees/test-wordspell-drift-e2e test/wordspell-drift-e2e ���
-$ 
-
-
-
-
+$
 
 ---
 
@@ -5070,7 +5206,7 @@ const draftAfterReload = await page.evaluate(async (dbName) => {
 expect(draftAfterReload).toBeNull();
 ```
 
-Also — now that #136 is merged, we could rebase #137 on current master and add a visible toast check (`await expect(page.getByText("Saved progress couldn't be restored")).toBeVisible()`), which would make the two tests visually different in the trace *and* pin the end-to-end toast wiring. Want me to do both?
+Also — now that #136 is merged, we could rebase #137 on current master and add a visible toast check (`await expect(page.getByText("Saved progress couldn't be restored")).toBeVisible()`), which would make the two tests visually different in the trace _and_ pin the end-to-end toast wiring. Want me to do both?
 
 ---
 
@@ -5100,13 +5236,14 @@ e2e/visual.spec.ts:430:test('@visual Slot drag preview target dark (empty slot h
 e2e/visual.spec.ts:446:  await page.mouse.down();
 e2e/visual.spec.ts:460:    'slot-drag-preview-target-dark.png',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:47:03Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 13:47:18Z)**_
 
-Honest answer: dragging on its own doesn't strengthen the core assertion, because we **overwrite** `draftState` entirely in the seed step — the drag's effect gets clobbered. But pairing a drag with the right post-reload checks *does* make the test meaningfully stronger.
+Honest answer: dragging on its own doesn't strengthen the core assertion, because we **overwrite** `draftState` entirely in the seed step — the drag's effect gets clobbered. But pairing a drag with the right post-reload checks _does_ make the test meaningfully stronger.
 
 Here's the breakdown of what each piece adds:
 
@@ -5131,6 +5268,7 @@ Couple of tradeoffs to flag:
 - If we rebase this branch on current `master` (now that #136 is merged), we can also add `await expect(page.getByText("Saved progress couldn't be restored")).toBeVisible()` for a visible toast signal.
 
 Want me to:
+
 - **(a)** rebase on `master`, add drag + empty-slots + draft-null + toast assertions (maximum regression coverage),
 - **(b)** keep the branch as-is but add just drag + draft-null, leaving the toast for a later pass, or
 - **(c)** something else?
@@ -5151,9 +5289,9 @@ _**Agent (claude-opus-4-7 2026-04-21 13:49:43Z)**_
 
 Great observations — let me address all three:
 
-**1. Toast not visible**: Correct, and *expected* for this branch. PR #137 was cut from `master` **before** #136 merged, so the `toast()` call + `<Toaster />` mount don't exist in this worktree yet. After rebase they will.
+**1. Toast not visible**: Correct, and _expected_ for this branch. PR #137 was cut from `master` **before** #136 merged, so the `toast()` call + `<Toaster />` mount don't exist in this worktree yet. After rebase they will.
 
-**2. `p,a,n,t` tiles never hit the UI**: Also correct — and that's the **whole point**. `WordSpell.tsx:542` gates `initialState={sessionEpoch === 0 && !staleDraft ? initialState : undefined}`, so when drift is detected the drifted tiles are dropped *before* they reach the provider. If you ever saw `p,a,n,t` on screen, the safety net failed. The seed is the "poison"; never seeing it in the DOM is the success signal.
+**2. `p,a,n,t` tiles never hit the UI**: Also correct — and that's the **whole point**. `WordSpell.tsx:542` gates `initialState={sessionEpoch === 0 && !staleDraft ? initialState : undefined}`, so when drift is detected the drifted tiles are dropped _before_ they reach the provider. If you ever saw `p,a,n,t` on screen, the safety net failed. The seed is the "poison"; never seeing it in the DOM is the success signal.
 
 **3. Rebasing on master now.**
 
@@ -5166,8 +5304,10 @@ Rebase on master
 `git -C /Users/leocaseiro/Sites/base-skill fetch origin master --quiet && git -C /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e rebase origin/master 2>&1 | tail -10`
 
 ```text
-Rebasing (1/1)Successfully rebased and updated refs/heads/test/wordspell-drift-e2e.
+Rebasing (1/1)
+Successfully rebased and updated refs/heads/test/wordspell-drift-e2e.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:49:53Z)**_
@@ -5184,6 +5324,7 @@ Verify rebase picked up #136
 src/routes/__root.tsx:2
 src/games/word-spell/WordSpell/WordSpell.tsx:3
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:49:59Z)**_
@@ -5212,6 +5353,7 @@ src/components/answer-game/Slot/Slot.stories.tsx:27:  placedTileId: string | nul
 
 [Showing results with pagination = limit: 10]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:03Z)**_
@@ -5226,6 +5368,7 @@ Find e2e patterns
 e2e/custom-game-delete.spec.ts:40:    page.getByText(
 e2e/homepage.spec.ts:25:    page.getByText(/save these settings as a custom game\?/i),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:08Z)**_
@@ -5235,47 +5378,48 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:08Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/visual.spec.ts`
 
 ```text
-390	// ── Slot drag preview ────────────────────────────────────────────────────────
-391	
-392	test('@visual Slot drag preview target (empty slot hover)', async ({
-393	  page,
-394	}) => {
-395	  await page.goto('/en/game/word-spell');
-396	  await startGame(page);
-397	  const tileButton = page
-398	    .getByRole('button', { name: /^Letter /i })
-399	    .first();
-400	  await tileButton.waitFor({ state: 'visible' });
-401	
-402	  const tileBBox = await tileButton.boundingBox();
-403	  if (!tileBBox) throw new Error('Tile bounding box not found');
-404	
-405	  // Pick up the tile via pointer events
-406	  const tileX = tileBBox.x + tileBBox.width / 2;
-407	  const tileY = tileBBox.y + tileBBox.height / 2;
-408	  await page.mouse.move(tileX, tileY);
-409	  await page.mouse.down();
-410	
-411	  // Move to the first empty slot
-412	  const emptySlot = page.getByRole('listitem', {
-413	    name: /^Slot 1, empty/i,
-414	  });
-415	  const slotBBox = await emptySlot.boundingBox();
-416	  if (!slotBBox) throw new Error('Slot bounding box not found');
-417	
-418	  const slotX = slotBBox.x + slotBBox.width / 2;
-419	  const slotY = slotBBox.y + slotBBox.height / 2;
-420	  await page.mouse.move(slotX, slotY, { steps: 5 });
-421	
-422	  // Screenshot while dragging over the empty slot
-423	  await expect(page).toHaveScreenshot('slot-drag-preview-target.png', {
-424	    fullPage: true,
-425	  });
-426	
-427	  await page.mouse.up();
-428	});
+390 // ── Slot drag preview ────────────────────────────────────────────────────────
+391 
+392 test('@visual Slot drag preview target (empty slot hover)', async ({
+393   page,
+394 }) => {
+395   await page.goto('/en/game/word-spell');
+396   await startGame(page);
+397   const tileButton = page
+398     .getByRole('button', { name: /^Letter /i })
+399     .first();
+400   await tileButton.waitFor({ state: 'visible' });
+401 
+402   const tileBBox = await tileButton.boundingBox();
+403   if (!tileBBox) throw new Error('Tile bounding box not found');
+404 
+405   // Pick up the tile via pointer events
+406   const tileX = tileBBox.x + tileBBox.width / 2;
+407   const tileY = tileBBox.y + tileBBox.height / 2;
+408   await page.mouse.move(tileX, tileY);
+409   await page.mouse.down();
+410 
+411   // Move to the first empty slot
+412   const emptySlot = page.getByRole('listitem', {
+413     name: /^Slot 1, empty/i,
+414   });
+415   const slotBBox = await emptySlot.boundingBox();
+416   if (!slotBBox) throw new Error('Slot bounding box not found');
+417 
+418   const slotX = slotBBox.x + slotBBox.width / 2;
+419   const slotY = slotBBox.y + slotBBox.height / 2;
+420   await page.mouse.move(slotX, slotY, { steps: 5 });
+421 
+422   // Screenshot while dragging over the empty slot
+423   await expect(page).toHaveScreenshot('slot-drag-preview-target.png', {
+424     fullPage: true,
+425   });
+426 
+427   await page.mouse.up();
+428 });
 429
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:13Z)**_
@@ -5292,6 +5436,7 @@ src/components/answer-game/Slot/SentenceWithGaps.test.tsx:109:    expect(screen.
 src/components/answer-game/Slot/SentenceWithGaps.test.tsx:110:    expect(screen.getByLabelText('Slot 2, empty')).toBeInTheDocument();
 src/components/answer-game/Slot/Slot.test.tsx:202:      'Slot 1, empty',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:19Z)**_
@@ -5303,6 +5448,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:19Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:24Z)**_
@@ -5314,6 +5460,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:24Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:29Z)**_
@@ -5327,6 +5474,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:29Z)**_
 130-      data-zone-index={index}
 131-      className="relative p-1.5"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:43Z)**_
@@ -5339,6 +5487,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:43Z)**_
 64:  const ariaLabel = isEmpty
 129:      aria-label={ariaLabel}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:49Z)**_
@@ -5348,22 +5497,23 @@ _**Agent (claude-opus-4-7 2026-04-21 13:50:49Z)**_
  `./worktrees/test-wordspell-drift-e2e/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-60	  // the inner visual element must also be a <span> to avoid invalid
-61	  // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
-62	  const InnerTag = Tag === 'span' ? 'span' : 'div';
-63	
-64	  const ariaLabel = isEmpty
-65	    ? `Slot ${index + 1}, empty`
-66	    : `Slot ${index + 1}, filled with ${label}`;
-67	
-68	  const stateClasses = [
-69	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-70	    showCursor && isWrong
-71	      ? 'ring-2 ring-destructive ring-offset-2'
-72	      : showCursor
-73	        ? 'ring-2 ring-primary ring-offset-2'
-74	        : '',
+60   // the inner visual element must also be a <span> to avoid invalid
+61   // block-in-inline HTML nesting. For list/block contexts, <div> is correct.
+62   const InnerTag = Tag === 'span' ? 'span' : 'div';
+63 
+64   const ariaLabel = isEmpty
+65     ? `Slot ${index + 1}, empty`
+66     : `Slot ${index + 1}, filled with ${label}`;
+67 
+68   const stateClasses = [
+69     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+70     showCursor && isWrong
+71       ? 'ring-2 ring-destructive ring-offset-2'
+72       : showCursor
+73         ? 'ring-2 ring-primary ring-offset-2'
+74         : '',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:50:59Z)**_
@@ -5379,15 +5529,16 @@ _**Agent (claude-opus-4-7 2026-04-21 13:51:01Z)**_
  `./worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts`
 
 ```text
-102	  }, SESSION_HISTORY_INDEX_IDB);
-103	
-104	test.beforeEach(async ({ page }) => {
-105	  await seedMathRandom(page);
-106	});
-107	
-108	/**
-109	 * Regression for plan 2026-04-21-wordspell-resume-desync:
+102   }, SESSION_HISTORY_INDEX_IDB);
+103 
+104 test.beforeEach(async ({ page }) => {
+105   await seedMathRandom(page);
+106 });
+107 
+108 /**
+109  * Regression for plan 2026-04-21-wordspell-resume-desync:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:51:12Z)**_
@@ -5398,6 +5549,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:51:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:51:16Z)**_
@@ -5412,6 +5564,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:51:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/test-wordspell-drift-e2e/e2e/wordspell-resume-desync.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:51:57Z)**_
@@ -5453,6 +5606,7 @@ Running 2 tests using 2 workers
 [1A[2K  2 passed (11.4s)
 Done in 12.04s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:52:01Z)**_
@@ -5478,6 +5632,7 @@ Checking formatting...
 [warn] e2e/wordspell-resume-desync.spec.ts
 [warn] Code style issues found in the above file. Run Prettier with --write to fix.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:52:13Z)**_
@@ -5494,6 +5649,7 @@ Checking formatting...
 All matched files use Prettier code style!
 [This command modified 1 file you've previously read: e2e/wordspell-resume-desync.spec.ts. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:52:19Z)**_
@@ -5518,6 +5674,7 @@ Running 2 tests using 2 workers
 [1A[2K  2 passed (10.1s)
 Done in 10.53s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:52:34Z)**_
@@ -5549,6 +5706,7 @@ Done in 10.33s.
  Date: Tue Apr 21 18:10:19 2026 +1000
  1 file changed, 250 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:52:55Z)**_
@@ -5573,6 +5731,7 @@ To github.com:leocaseiro/base-skill.git
  ! [rejected]          test/wordspell-drift-e2e -> test/wordspell-drift-e2e (stale info)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:53:26Z)**_
@@ -5600,6 +5759,7 @@ exclude:  e2e/**, node_modules/**
 To github.com:leocaseiro/base-skill.git
  + c61e4878...be278150 test/wordspell-drift-e2e -> test/wordspell-drift-e2e (forced update)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:53:58Z)**_
@@ -5661,6 +5821,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/137
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 13:54:35Z)**_
@@ -5697,6 +5858,7 @@ _**Agent (claude-opus-4-7 2026-04-21 13:57:23Z)**_
 🎉 On to task 1 when you're ready — the `RESUME_ROUND` reducer action. Per the issue that's the last item left for #135, touching `answer-game-reducer.ts`, `AnswerGameProvider.tsx:89`, reducer + provider tests, and the co-located `.mdx` docs (CLAUDE.md requires it for any answer-game reducer change).
 
 Want me to:
+
 - **Wait** for #137 to merge first (cleaner worktree baseline), or
 - **Start now** from current `master` + #137 (stack them)?
 
@@ -5732,6 +5894,7 @@ HEAD is now at 688ee70c test(word-spell): e2e regression for drifted-draft safet
 $ husky
 Done in 10.84s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:03:48Z)**_
@@ -5745,132 +5908,133 @@ _**Agent (claude-opus-4-7 2026-04-21 14:03:48Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import {
-2	  createContext,
-3	  useContext,
-4	  useEffect,
-5	  useReducer,
-6	} from 'react';
-7	import {
-8	  answerGameReducer,
-9	  makeInitialState,
-10	} from './answer-game-reducer';
-11	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-12	import { TouchKeyboardContext } from './TouchKeyboardContext';
-13	import { useKeyboardInput } from './useKeyboardInput';
-14	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-15	import type {
-16	  AnswerGameAction,
-17	  AnswerGameConfig,
-18	  AnswerGameDraftState,
-19	  AnswerGameState,
-20	} from './types';
-21	import type { Dispatch, ReactNode } from 'react';
-22	import { useAnswerGameDraftSync } from '@/lib/game-engine/useAnswerGameDraftSync';
-23	import { DbContext } from '@/providers/DbProvider';
-24	
-25	export const AnswerGameStateContext =
-26	  createContext<AnswerGameState | null>(null);
-27	export const AnswerGameDispatchContext =
-28	  createContext<Dispatch<AnswerGameAction> | null>(null);
-29	
-30	const KeyboardInputAdapter = () => {
-31	  useKeyboardInput();
-32	  return null;
-33	};
-34	
-35	const TouchKeyboardAdapter = ({
-36	  inputMode,
-37	  children,
-38	}: {
-39	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-40	  children: ReactNode;
-41	}) => {
-42	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-43	  return (
-44	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-45	      <HiddenKeyboardInput
-46	        inputRef={hiddenInputRef}
-47	        inputMode={inputMode}
-48	      />
-49	      {children}
-50	    </TouchKeyboardContext.Provider>
-51	  );
-52	};
-53	
-54	interface AnswerGameProviderProps {
-55	  config: AnswerGameConfig;
-56	  /** When provided, state is restored from snapshot; INIT_ROUND effect is skipped. */
-57	  initialState?: AnswerGameDraftState;
-58	  /** Session ID used by useAnswerGameDraftSync to find the RxDB document. */
-59	  sessionId?: string;
-60	  children: ReactNode;
-61	}
-62	
-63	const buildStateFromDraft = (
-64	  config: AnswerGameConfig,
-65	  draft: AnswerGameDraftState,
-66	): AnswerGameState => ({
-67	  ...makeInitialState(config),
-68	  ...draft,
-69	  dragActiveTileId: null,
-70	});
-71	
-72	export const AnswerGameProvider = ({
-73	  config,
-74	  initialState,
-75	  sessionId,
-76	  children,
-77	}: AnswerGameProviderProps) => {
-78	  const [state, dispatch] = useReducer(
-79	    answerGameReducer,
-80	    initialState
-81	      ? buildStateFromDraft(config, initialState)
-82	      : makeInitialState(config),
-83	  );
-84	
-85	  // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
-86	  const dbCtx = useContext(DbContext);
-87	  useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
-88	
-89	  useEffect(() => {
-90	    // Skip INIT_ROUND when resuming from a snapshot
-91	    if (initialState) return;
-92	    const tiles = config.initialTiles;
-93	    const zones = config.initialZones;
-94	    if (tiles?.length && zones?.length) {
-95	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-96	    }
-97	  }, [
-98	    config.gameId,
-99	    config.initialTiles,
-100	    config.initialZones,
-101	    initialState,
-102	  ]);
-103	
-104	  const usesTyping = config.inputMethod !== 'drag';
-105	
-106	  return (
-107	    <AnswerGameStateContext.Provider value={state}>
-108	      <AnswerGameDispatchContext.Provider value={dispatch}>
-109	        {usesTyping ? (
-110	          <TouchKeyboardAdapter
-111	            inputMode={config.touchKeyboardInputMode ?? 'text'}
-112	          >
-113	            <KeyboardInputAdapter />
-114	            {children}
-115	          </TouchKeyboardAdapter>
-116	        ) : (
-117	          <TouchKeyboardContext.Provider value={null}>
-118	            {children}
-119	          </TouchKeyboardContext.Provider>
-120	        )}
-121	      </AnswerGameDispatchContext.Provider>
-122	    </AnswerGameStateContext.Provider>
-123	  );
-124	};
+1 import {
+2   createContext,
+3   useContext,
+4   useEffect,
+5   useReducer,
+6 } from 'react';
+7 import {
+8   answerGameReducer,
+9   makeInitialState,
+10 } from './answer-game-reducer';
+11 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+12 import { TouchKeyboardContext } from './TouchKeyboardContext';
+13 import { useKeyboardInput } from './useKeyboardInput';
+14 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+15 import type {
+16   AnswerGameAction,
+17   AnswerGameConfig,
+18   AnswerGameDraftState,
+19   AnswerGameState,
+20 } from './types';
+21 import type { Dispatch, ReactNode } from 'react';
+22 import { useAnswerGameDraftSync } from '@/lib/game-engine/useAnswerGameDraftSync';
+23 import { DbContext } from '@/providers/DbProvider';
+24 
+25 export const AnswerGameStateContext =
+26   createContext<AnswerGameState | null>(null);
+27 export const AnswerGameDispatchContext =
+28   createContext<Dispatch<AnswerGameAction> | null>(null);
+29 
+30 const KeyboardInputAdapter = () => {
+31   useKeyboardInput();
+32   return null;
+33 };
+34 
+35 const TouchKeyboardAdapter = ({
+36   inputMode,
+37   children,
+38 }: {
+39   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+40   children: ReactNode;
+41 }) => {
+42   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+43   return (
+44     <TouchKeyboardContext.Provider value={focusKeyboard}>
+45       <HiddenKeyboardInput
+46         inputRef={hiddenInputRef}
+47         inputMode={inputMode}
+48       />
+49       {children}
+50     </TouchKeyboardContext.Provider>
+51   );
+52 };
+53 
+54 interface AnswerGameProviderProps {
+55   config: AnswerGameConfig;
+56   /** When provided, state is restored from snapshot; INIT_ROUND effect is skipped. */
+57   initialState?: AnswerGameDraftState;
+58   /** Session ID used by useAnswerGameDraftSync to find the RxDB document. */
+59   sessionId?: string;
+60   children: ReactNode;
+61 }
+62 
+63 const buildStateFromDraft = (
+64   config: AnswerGameConfig,
+65   draft: AnswerGameDraftState,
+66 ): AnswerGameState => ({
+67   ...makeInitialState(config),
+68   ...draft,
+69   dragActiveTileId: null,
+70 });
+71 
+72 export const AnswerGameProvider = ({
+73   config,
+74   initialState,
+75   sessionId,
+76   children,
+77 }: AnswerGameProviderProps) => {
+78   const [state, dispatch] = useReducer(
+79     answerGameReducer,
+80     initialState
+81       ? buildStateFromDraft(config, initialState)
+82       : makeInitialState(config),
+83   );
+84 
+85   // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
+86   const dbCtx = useContext(DbContext);
+87   useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
+88 
+89   useEffect(() => {
+90     // Skip INIT_ROUND when resuming from a snapshot
+91     if (initialState) return;
+92     const tiles = config.initialTiles;
+93     const zones = config.initialZones;
+94     if (tiles?.length && zones?.length) {
+95       dispatch({ type: 'INIT_ROUND', tiles, zones });
+96     }
+97   }, [
+98     config.gameId,
+99     config.initialTiles,
+100     config.initialZones,
+101     initialState,
+102   ]);
+103 
+104   const usesTyping = config.inputMethod !== 'drag';
+105 
+106   return (
+107     <AnswerGameStateContext.Provider value={state}>
+108       <AnswerGameDispatchContext.Provider value={dispatch}>
+109         {usesTyping ? (
+110           <TouchKeyboardAdapter
+111             inputMode={config.touchKeyboardInputMode ?? 'text'}
+112           >
+113             <KeyboardInputAdapter />
+114             {children}
+115           </TouchKeyboardAdapter>
+116         ) : (
+117           <TouchKeyboardContext.Provider value={null}>
+118             {children}
+119           </TouchKeyboardContext.Provider>
+120         )}
+121       </AnswerGameDispatchContext.Provider>
+122     </AnswerGameStateContext.Provider>
+123   );
+124 };
 125
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:03:49Z)**_
@@ -5880,536 +6044,537 @@ _**Agent (claude-opus-4-7 2026-04-21 14:03:49Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGamePhase,
-5	  AnswerGameState,
-6	  AnswerZone,
-7	  TileItem,
-8	} from './types';
-9	
-10	export function makeInitialState(
-11	  config: AnswerGameConfig,
-12	): AnswerGameState {
-13	  return {
-14	    config,
-15	    allTiles: [],
-16	    bankTileIds: [],
-17	    zones: [],
-18	    activeSlotIndex: 0,
-19	    dragActiveTileId: null,
-20	    dragHoverZoneIndex: null,
-21	    dragHoverBankTileId: null,
-22	    phase: 'playing',
-23	    roundIndex: 0,
-24	    retryCount: 0,
-25	    levelIndex: 0,
-26	    isLevelMode: config.levelMode !== undefined,
-27	  };
-28	}
-29	
-30	/**
-31	 * Find the best next activeSlotIndex after a placement or removal.
-32	 * Priority: first empty slot after `afterIndex`, then first empty slot
-33	 * anywhere, then first wrong slot anywhere. Returns `fallback` when every
-34	 * slot is correctly filled.
-35	 */
-36	function findNextActiveSlot(
-37	  zones: AnswerZone[],
-38	  afterIndex: number,
-39	  fallback: number,
-40	): number {
-41	  // 1. First empty slot after the current action
-42	  const nextEmpty = zones.findIndex(
-43	    (z, i) => i > afterIndex && z.placedTileId === null,
-44	  );
-45	  if (nextEmpty !== -1) return nextEmpty;
-46	
-47	  // 2. First empty slot anywhere (wraps around)
-48	  const anyEmpty = zones.findIndex((z) => z.placedTileId === null);
-49	  if (anyEmpty !== -1) return anyEmpty;
-50	
-51	  // 3. First wrong slot anywhere (so user can retype)
-52	  const anyWrong = zones.findIndex((z) => z.isWrong);
-53	  if (anyWrong !== -1) return anyWrong;
-54	
-55	  return fallback;
-56	}
-57	
-58	function resolveCompletionPhase(
-59	  state: AnswerGameState,
-60	): AnswerGamePhase {
-61	  const isLastRound = state.roundIndex >= state.config.totalRounds - 1;
-62	  if (!isLastRound) return 'round-complete';
-63	  if (!state.isLevelMode) return 'game-over';
-64	  const maxLevels = state.config.levelMode?.maxLevels;
-65	  if (maxLevels && state.levelIndex + 1 >= maxLevels)
-66	    return 'game-over';
-67	  return 'level-complete';
-68	}
-69	
-70	export function answerGameReducer(
-71	  state: AnswerGameState,
-72	  action: AnswerGameAction,
-73	): AnswerGameState {
-74	  switch (action.type) {
-75	    case 'INIT_ROUND': {
-76	      return {
-77	        ...state,
-78	        allTiles: action.tiles,
-79	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-80	        zones: action.zones,
-81	        activeSlotIndex: 0,
-82	        phase: 'playing',
-83	        roundIndex: 0,
-84	        retryCount: 0,
-85	      };
-86	    }
-87	
-88	    case 'PLACE_TILE': {
-89	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-90	      const zone = state.zones[action.zoneIndex];
-91	      if (!tile || !zone) return state;
-92	
-93	      const correct = tile.value === zone.expectedValue;
-94	
-95	      // A tile placement always ends any active drag for that tile.
-96	      const dragActiveTileId =
-97	        state.dragActiveTileId === action.tileId
-98	          ? null
-99	          : state.dragActiveTileId;
-100	
-101	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-102	        return {
-103	          ...state,
-104	          dragActiveTileId,
-105	          retryCount: state.retryCount + 1,
-106	        };
-107	      }
-108	
-109	      if (correct) {
-110	        const previousId = zone.placedTileId;
-111	        const prevIsVirtual = previousId?.startsWith('typed-');
-112	        let newBankTileIds = state.bankTileIds.filter(
-113	          (id) => id !== action.tileId,
-114	        );
-115	        if (
-116	          previousId !== null &&
-117	          previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
-118	          !prevIsVirtual
-119	        ) {
-120	          newBankTileIds = [...newBankTileIds, previousId];
-121	        }
-122	        // Remove displaced virtual tile from allTiles
-123	        const newAllTiles = prevIsVirtual
-124	          ? state.allTiles.filter((t) => t.id !== previousId)
-125	          : state.allTiles;
-126	        const newZone: AnswerZone = {
-127	          ...zone,
-128	          placedTileId: action.tileId,
-129	          isWrong: false,
-130	          isLocked: false,
-131	        };
-132	        const newZones =
-133	          newAllTiles === state.allTiles
-134	            ? state.zones.map((z, i) =>
-135	                i === action.zoneIndex ? newZone : z,
-136	              )
-137	            : state.zones.map((z, i) =>
-138	                i === action.zoneIndex ? newZone : z,
-139	              );
-140	        const allFilledCorrectly = newZones.every(
-141	          (z) => z.placedTileId !== null && !z.isWrong,
-142	        );
-143	        return {
-144	          ...state,
-145	          allTiles: newAllTiles,
-146	          dragActiveTileId,
-147	          zones: newZones,
-148	          bankTileIds: newBankTileIds,
-149	          activeSlotIndex: findNextActiveSlot(
-150	            newZones,
-151	            action.zoneIndex,
-152	            state.activeSlotIndex,
-153	          ),
-154	          retryCount: state.retryCount,
-155	          phase: allFilledCorrectly
-156	            ? resolveCompletionPhase(state)
-157	            : 'playing',
-158	        };
-159	      }
-160	
-161	      const shouldLock =
-162	        state.config.wrongTileBehavior === 'lock-manual' ||
-163	        state.config.wrongTileBehavior === 'lock-auto-eject';
-164	      const previousId = zone.placedTileId;
-165	      const prevIsVirtual = previousId?.startsWith('typed-');
-166	      const newZone: AnswerZone = {
-167	        ...zone,
-168	        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
-169	        isWrong: true,
-170	        isLocked: true,
-171	      };
-172	      const newZones = state.zones.map((z, i) =>
-173	        i === action.zoneIndex ? newZone : z,
-174	      );
-175	      let newBankTileIds = shouldLock
-176	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-177	        : state.bankTileIds;
-178	      if (
-179	        shouldLock &&
-180	        previousId &&
-181	        previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
-182	        !prevIsVirtual
-183	      ) {
-184	        newBankTileIds = [...newBankTileIds, previousId];
-185	      }
-186	      // Remove displaced virtual tile from allTiles
-187	      const newAllTiles =
-188	        shouldLock && prevIsVirtual
-189	          ? state.allTiles.filter((t) => t.id !== previousId)
-190	          : state.allTiles;
-191	
-192	      return {
-193	        ...state,
-194	        allTiles: newAllTiles,
-195	        dragActiveTileId,
-196	        zones: newZones,
-197	        bankTileIds: newBankTileIds,
-198	        activeSlotIndex: state.activeSlotIndex,
-199	        retryCount: state.retryCount + 1,
-200	        phase: 'playing',
-201	      };
-202	    }
-203	
-204	    case 'TYPE_TILE': {
-205	      const zone = state.zones[action.zoneIndex];
-206	      if (!zone) return state;
-207	      // Allow typing over wrong locked tiles to replace them;
-208	      // only block correctly-locked tiles (shouldn't exist, but be safe).
-209	      if (zone.isLocked && !zone.isWrong) return state;
-210	
-211	      const virtualTile: TileItem = {
-212	        id: action.tileId,
-213	        label: action.value,
-214	        value: action.value,
-215	      };
-216	      const correct =
-217	        action.value.toLowerCase() === zone.expectedValue.toLowerCase();
-218	
-219	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-220	        return {
-221	          ...state,
-222	          retryCount: state.retryCount + 1,
-223	        };
-224	      }
-225	
-226	      // Clean up the previous wrong virtual tile being replaced
-227	      const previousId = zone.placedTileId;
-228	      const prevIsVirtual = previousId?.startsWith('typed-');
-229	      const baseTiles = prevIsVirtual
-230	        ? state.allTiles.filter((t) => t.id !== previousId)
-231	        : state.allTiles;
-232	      // If replacing a real (non-virtual) tile, return it to the bank
-233	      let baseBankTileIds = state.bankTileIds;
-234	      if (previousId && !prevIsVirtual) {
-235	        baseBankTileIds = [...baseBankTileIds, previousId];
-236	      }
-237	
-238	      const newAllTiles = [...baseTiles, virtualTile];
-239	      const newZone: AnswerZone = {
-240	        ...zone,
-241	        placedTileId: action.tileId,
-242	        isWrong: !correct,
-243	        isLocked: !correct,
-244	      };
-245	      const newZones = state.zones.map((z, i) =>
-246	        i === action.zoneIndex ? newZone : z,
-247	      );
-248	
-249	      if (correct) {
-250	        const allFilledCorrectly = newZones.every(
-251	          (z) => z.placedTileId !== null && !z.isWrong,
-252	        );
-253	        return {
-254	          ...state,
-255	          allTiles: newAllTiles,
-256	          bankTileIds: baseBankTileIds,
-257	          zones: newZones,
-258	          activeSlotIndex: findNextActiveSlot(
-259	            newZones,
-260	            action.zoneIndex,
-261	            state.activeSlotIndex,
-262	          ),
-263	          phase: allFilledCorrectly
-264	            ? resolveCompletionPhase(state)
-265	            : 'playing',
-266	        };
-267	      }
-268	
-269	      return {
-270	        ...state,
-271	        allTiles: newAllTiles,
-272	        bankTileIds: baseBankTileIds,
-273	        zones: newZones,
-274	        activeSlotIndex: state.activeSlotIndex,
-275	        retryCount: state.retryCount + 1,
-276	        phase: 'playing',
-277	      };
-278	    }
-279	
-280	    case 'REMOVE_TILE': {
-281	      const zone = state.zones[action.zoneIndex];
-282	      if (!zone?.placedTileId) return state;
-283	      const removedTileId = zone.placedTileId;
-284	      // Virtual tiles (created by TYPE_TILE) are removed from allTiles
-285	      // and NOT returned to the bank.
-286	      const isVirtual = removedTileId.startsWith('typed-');
-287	      return {
-288	        ...state,
-289	        dragActiveTileId:
-290	          state.dragActiveTileId === removedTileId
-291	            ? null
-292	            : state.dragActiveTileId,
-293	        allTiles: isVirtual
-294	          ? state.allTiles.filter((t) => t.id !== removedTileId)
-295	          : state.allTiles,
-296	        zones: state.zones.map((z, i) =>
-297	          i === action.zoneIndex
-298	            ? {
-299	                ...z,
-300	                placedTileId: null,
-301	                isWrong: false,
-302	                isLocked: false,
-303	              }
-304	            : z,
-305	        ),
-306	        bankTileIds: isVirtual
-307	          ? state.bankTileIds
-308	          : [...state.bankTileIds, removedTileId],
-309	        // Move cursor to the cleared slot so the user can retype
-310	        activeSlotIndex: action.zoneIndex,
-311	      };
-312	    }
-313	
-314	    case 'SWAP_TILES': {
-315	      const fromZone = state.zones[action.fromZoneIndex];
-316	      const toZone = state.zones[action.toZoneIndex];
-317	      if (!fromZone || !toZone) return state;
-318	
-319	      // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
-320	      // Either zone may become empty (null) when moving a tile to an empty slot.
-321	      const tileNowInFrom = toZone.placedTileId
-322	        ? state.allTiles.find((t) => t.id === toZone.placedTileId)
-323	        : null;
-324	      const tileNowInTo = fromZone.placedTileId
-325	        ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
-326	        : null;
-327	      // An empty zone is never wrong.
-328	      const fromCorrect = tileNowInFrom
-329	        ? tileNowInFrom.value === fromZone.expectedValue
-330	        : true;
-331	      const toCorrect = tileNowInTo
-332	        ? tileNowInTo.value === toZone.expectedValue
-333	        : true;
-334	      const shouldLock =
-335	        state.config.wrongTileBehavior === 'lock-manual' ||
-336	        state.config.wrongTileBehavior === 'lock-auto-eject';
-337	
-338	      const newZones = state.zones.map((z, i) => {
-339	        if (i === action.fromZoneIndex)
-340	          return {
-341	            ...z,
-342	            placedTileId: toZone.placedTileId,
-343	            isWrong: toZone.placedTileId !== null && !fromCorrect,
-344	            isLocked:
-345	              toZone.placedTileId !== null &&
-346	              !fromCorrect &&
-347	              shouldLock,
-348	          };
-349	        if (i === action.toZoneIndex)
-350	          return {
-351	            ...z,
-352	            placedTileId: fromZone.placedTileId,
-353	            isWrong: fromZone.placedTileId !== null && !toCorrect,
-354	            isLocked:
-355	              fromZone.placedTileId !== null &&
-356	              !toCorrect &&
-357	              shouldLock,
-358	          };
-359	        return z;
-360	      });
-361	
-362	      // Clear drag state for the tile that just finished dragging.
-363	      const dragActiveTileId =
-364	        state.dragActiveTileId === fromZone.placedTileId
-365	          ? null
-366	          : state.dragActiveTileId;
-367	
-368	      const allFilledCorrectly = newZones.every(
-369	        (z) => z.placedTileId !== null && !z.isWrong,
-370	      );
-371	
-372	      return {
-373	        ...state,
-374	        dragActiveTileId,
-375	        zones: newZones,
-376	        phase: allFilledCorrectly
-377	          ? resolveCompletionPhase(state)
-378	          : 'playing',
-379	      };
-380	    }
-381	
-382	    case 'EJECT_TILE': {
-383	      const zone = state.zones[action.zoneIndex];
-384	      if (!zone) return state;
-385	
-386	      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
-387	      if (!zone.isWrong && !zone.isLocked) return state;
-388	
-389	      if (zone.placedTileId) {
-390	        const ejectedTileId = zone.placedTileId;
-391	        const isVirtual = ejectedTileId.startsWith('typed-');
-392	        return {
-393	          ...state,
-394	          // If the ejected tile was mid-drag, clear drag state so the bank
-395	          // hole disappears immediately rather than waiting for the drag to end.
-396	          dragActiveTileId:
-397	            state.dragActiveTileId === ejectedTileId
-398	              ? null
-399	              : state.dragActiveTileId,
-400	          allTiles: isVirtual
-401	            ? state.allTiles.filter((t) => t.id !== ejectedTileId)
-402	            : state.allTiles,
-403	          zones: state.zones.map((z, i) =>
-404	            i === action.zoneIndex
-405	              ? {
-406	                  ...z,
-407	                  placedTileId: null,
-408	                  isWrong: false,
-409	                  isLocked: false,
-410	                }
-411	              : z,
-412	          ),
-413	          bankTileIds: isVirtual
-414	            ? state.bankTileIds
-415	            : [...state.bankTileIds, ejectedTileId],
-416	          // Move cursor to the ejected slot
-417	          activeSlotIndex: action.zoneIndex,
-418	        };
-419	      }
-420	
-421	      return {
-422	        ...state,
-423	        zones: state.zones.map((z, i) =>
-424	          i === action.zoneIndex
-425	            ? {
-426	                ...z,
-427	                placedTileId: null,
-428	                isWrong: false,
-429	                isLocked: false,
-430	              }
-431	            : z,
-432	        ),
-433	        // Move cursor to the ejected slot
-434	        activeSlotIndex: action.zoneIndex,
-435	      };
-436	    }
-437	
-438	    case 'ADVANCE_ROUND': {
-439	      return {
-440	        ...state,
-441	        allTiles: action.tiles,
-442	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-443	        zones: action.zones,
-444	        activeSlotIndex: 0,
-445	        phase: 'playing',
-446	        roundIndex: state.roundIndex + 1,
-447	        retryCount: 0,
-448	      };
-449	    }
-450	
-451	    case 'ADVANCE_LEVEL': {
-452	      return {
-453	        ...state,
-454	        allTiles: action.tiles,
-455	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-456	        zones: action.zones,
-457	        activeSlotIndex: 0,
-458	        phase: 'playing',
-459	        roundIndex: 0,
-460	        levelIndex: state.levelIndex + 1,
-461	      };
-462	    }
-463	
-464	    case 'COMPLETE_GAME': {
-465	      return { ...state, phase: 'game-over' };
-466	    }
-467	
-468	    case 'SET_DRAG_ACTIVE': {
-469	      return {
-470	        ...state,
-471	        dragActiveTileId: action.tileId,
-472	        dragHoverZoneIndex:
-473	          action.tileId === null ? null : state.dragHoverZoneIndex,
-474	        dragHoverBankTileId:
-475	          action.tileId === null ? null : state.dragHoverBankTileId,
-476	      };
-477	    }
-478	
-479	    case 'SET_DRAG_HOVER': {
-480	      return { ...state, dragHoverZoneIndex: action.zoneIndex };
-481	    }
-482	
-483	    case 'SET_DRAG_HOVER_BANK': {
-484	      return { ...state, dragHoverBankTileId: action.tileId };
-485	    }
-486	
-487	    case 'SWAP_SLOT_BANK': {
-488	      const zone = state.zones[action.zoneIndex];
-489	      if (!zone?.placedTileId) return state;
-490	      if (!state.bankTileIds.includes(action.bankTileId)) return state;
-491	
-492	      const slotTileId = zone.placedTileId;
-493	      const newBankTileIds = [
-494	        ...state.bankTileIds.filter((id) => id !== action.bankTileId),
-495	        slotTileId,
-496	      ];
-497	      const newZones = state.zones.map((z, i) =>
-498	        i === action.zoneIndex
-499	          ? {
-500	              ...z,
-501	              placedTileId: action.bankTileId,
-502	              isWrong: false,
-503	              isLocked: false,
-504	            }
-505	          : z,
-506	      );
-507	      return {
-508	        ...state,
-509	        bankTileIds: newBankTileIds,
-510	        zones: newZones,
-511	        dragActiveTileId: null,
-512	        dragHoverBankTileId: null,
-513	      };
-514	    }
-515	
-516	    case 'SET_ACTIVE_SLOT': {
-517	      const clamped = Math.max(
-518	        0,
-519	        Math.min(action.zoneIndex, state.zones.length - 1),
-520	      );
-521	      return { ...state, activeSlotIndex: clamped };
-522	    }
-523	
-524	    default: {
-525	      return state;
-526	    }
-527	  }
-528	}
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGamePhase,
+5   AnswerGameState,
+6   AnswerZone,
+7   TileItem,
+8 } from './types';
+9 
+10 export function makeInitialState(
+11   config: AnswerGameConfig,
+12 ): AnswerGameState {
+13   return {
+14     config,
+15     allTiles: [],
+16     bankTileIds: [],
+17     zones: [],
+18     activeSlotIndex: 0,
+19     dragActiveTileId: null,
+20     dragHoverZoneIndex: null,
+21     dragHoverBankTileId: null,
+22     phase: 'playing',
+23     roundIndex: 0,
+24     retryCount: 0,
+25     levelIndex: 0,
+26     isLevelMode: config.levelMode !== undefined,
+27   };
+28 }
+29 
+30 /**
+31  * Find the best next activeSlotIndex after a placement or removal.
+32  * Priority: first empty slot after `afterIndex`, then first empty slot
+33  * anywhere, then first wrong slot anywhere. Returns `fallback` when every
+34  * slot is correctly filled.
+35  */
+36 function findNextActiveSlot(
+37   zones: AnswerZone[],
+38   afterIndex: number,
+39   fallback: number,
+40 ): number {
+41   // 1. First empty slot after the current action
+42   const nextEmpty = zones.findIndex(
+43     (z, i) => i > afterIndex && z.placedTileId === null,
+44   );
+45   if (nextEmpty !== -1) return nextEmpty;
+46 
+47   // 2. First empty slot anywhere (wraps around)
+48   const anyEmpty = zones.findIndex((z) => z.placedTileId === null);
+49   if (anyEmpty !== -1) return anyEmpty;
+50 
+51   // 3. First wrong slot anywhere (so user can retype)
+52   const anyWrong = zones.findIndex((z) => z.isWrong);
+53   if (anyWrong !== -1) return anyWrong;
+54 
+55   return fallback;
+56 }
+57 
+58 function resolveCompletionPhase(
+59   state: AnswerGameState,
+60 ): AnswerGamePhase {
+61   const isLastRound = state.roundIndex >= state.config.totalRounds - 1;
+62   if (!isLastRound) return 'round-complete';
+63   if (!state.isLevelMode) return 'game-over';
+64   const maxLevels = state.config.levelMode?.maxLevels;
+65   if (maxLevels && state.levelIndex + 1 >= maxLevels)
+66     return 'game-over';
+67   return 'level-complete';
+68 }
+69 
+70 export function answerGameReducer(
+71   state: AnswerGameState,
+72   action: AnswerGameAction,
+73 ): AnswerGameState {
+74   switch (action.type) {
+75     case 'INIT_ROUND': {
+76       return {
+77         ...state,
+78         allTiles: action.tiles,
+79         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+80         zones: action.zones,
+81         activeSlotIndex: 0,
+82         phase: 'playing',
+83         roundIndex: 0,
+84         retryCount: 0,
+85       };
+86     }
+87 
+88     case 'PLACE_TILE': {
+89       const tile = state.allTiles.find((t) => t.id === action.tileId);
+90       const zone = state.zones[action.zoneIndex];
+91       if (!tile || !zone) return state;
+92 
+93       const correct = tile.value === zone.expectedValue;
+94 
+95       // A tile placement always ends any active drag for that tile.
+96       const dragActiveTileId =
+97         state.dragActiveTileId === action.tileId
+98           ? null
+99           : state.dragActiveTileId;
+100 
+101       if (!correct && state.config.wrongTileBehavior === 'reject') {
+102         return {
+103           ...state,
+104           dragActiveTileId,
+105           retryCount: state.retryCount + 1,
+106         };
+107       }
+108 
+109       if (correct) {
+110         const previousId = zone.placedTileId;
+111         const prevIsVirtual = previousId?.startsWith('typed-');
+112         let newBankTileIds = state.bankTileIds.filter(
+113           (id) => id !== action.tileId,
+114         );
+115         if (
+116           previousId !== null &&
+117           previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+118           !prevIsVirtual
+119         ) {
+120           newBankTileIds = [...newBankTileIds, previousId];
+121         }
+122         // Remove displaced virtual tile from allTiles
+123         const newAllTiles = prevIsVirtual
+124           ? state.allTiles.filter((t) => t.id !== previousId)
+125           : state.allTiles;
+126         const newZone: AnswerZone = {
+127           ...zone,
+128           placedTileId: action.tileId,
+129           isWrong: false,
+130           isLocked: false,
+131         };
+132         const newZones =
+133           newAllTiles === state.allTiles
+134             ? state.zones.map((z, i) =>
+135                 i === action.zoneIndex ? newZone : z,
+136               )
+137             : state.zones.map((z, i) =>
+138                 i === action.zoneIndex ? newZone : z,
+139               );
+140         const allFilledCorrectly = newZones.every(
+141           (z) => z.placedTileId !== null && !z.isWrong,
+142         );
+143         return {
+144           ...state,
+145           allTiles: newAllTiles,
+146           dragActiveTileId,
+147           zones: newZones,
+148           bankTileIds: newBankTileIds,
+149           activeSlotIndex: findNextActiveSlot(
+150             newZones,
+151             action.zoneIndex,
+152             state.activeSlotIndex,
+153           ),
+154           retryCount: state.retryCount,
+155           phase: allFilledCorrectly
+156             ? resolveCompletionPhase(state)
+157             : 'playing',
+158         };
+159       }
+160 
+161       const shouldLock =
+162         state.config.wrongTileBehavior === 'lock-manual' ||
+163         state.config.wrongTileBehavior === 'lock-auto-eject';
+164       const previousId = zone.placedTileId;
+165       const prevIsVirtual = previousId?.startsWith('typed-');
+166       const newZone: AnswerZone = {
+167         ...zone,
+168         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
+169         isWrong: true,
+170         isLocked: true,
+171       };
+172       const newZones = state.zones.map((z, i) =>
+173         i === action.zoneIndex ? newZone : z,
+174       );
+175       let newBankTileIds = shouldLock
+176         ? state.bankTileIds.filter((id) => id !== action.tileId)
+177         : state.bankTileIds;
+178       if (
+179         shouldLock &&
+180         previousId &&
+181         previousId !== action.tileId && // Virtual tiles are discarded; real tiles return to the bank.
+182         !prevIsVirtual
+183       ) {
+184         newBankTileIds = [...newBankTileIds, previousId];
+185       }
+186       // Remove displaced virtual tile from allTiles
+187       const newAllTiles =
+188         shouldLock && prevIsVirtual
+189           ? state.allTiles.filter((t) => t.id !== previousId)
+190           : state.allTiles;
+191 
+192       return {
+193         ...state,
+194         allTiles: newAllTiles,
+195         dragActiveTileId,
+196         zones: newZones,
+197         bankTileIds: newBankTileIds,
+198         activeSlotIndex: state.activeSlotIndex,
+199         retryCount: state.retryCount + 1,
+200         phase: 'playing',
+201       };
+202     }
+203 
+204     case 'TYPE_TILE': {
+205       const zone = state.zones[action.zoneIndex];
+206       if (!zone) return state;
+207       // Allow typing over wrong locked tiles to replace them;
+208       // only block correctly-locked tiles (shouldn't exist, but be safe).
+209       if (zone.isLocked && !zone.isWrong) return state;
+210 
+211       const virtualTile: TileItem = {
+212         id: action.tileId,
+213         label: action.value,
+214         value: action.value,
+215       };
+216       const correct =
+217         action.value.toLowerCase() === zone.expectedValue.toLowerCase();
+218 
+219       if (!correct && state.config.wrongTileBehavior === 'reject') {
+220         return {
+221           ...state,
+222           retryCount: state.retryCount + 1,
+223         };
+224       }
+225 
+226       // Clean up the previous wrong virtual tile being replaced
+227       const previousId = zone.placedTileId;
+228       const prevIsVirtual = previousId?.startsWith('typed-');
+229       const baseTiles = prevIsVirtual
+230         ? state.allTiles.filter((t) => t.id !== previousId)
+231         : state.allTiles;
+232       // If replacing a real (non-virtual) tile, return it to the bank
+233       let baseBankTileIds = state.bankTileIds;
+234       if (previousId && !prevIsVirtual) {
+235         baseBankTileIds = [...baseBankTileIds, previousId];
+236       }
+237 
+238       const newAllTiles = [...baseTiles, virtualTile];
+239       const newZone: AnswerZone = {
+240         ...zone,
+241         placedTileId: action.tileId,
+242         isWrong: !correct,
+243         isLocked: !correct,
+244       };
+245       const newZones = state.zones.map((z, i) =>
+246         i === action.zoneIndex ? newZone : z,
+247       );
+248 
+249       if (correct) {
+250         const allFilledCorrectly = newZones.every(
+251           (z) => z.placedTileId !== null && !z.isWrong,
+252         );
+253         return {
+254           ...state,
+255           allTiles: newAllTiles,
+256           bankTileIds: baseBankTileIds,
+257           zones: newZones,
+258           activeSlotIndex: findNextActiveSlot(
+259             newZones,
+260             action.zoneIndex,
+261             state.activeSlotIndex,
+262           ),
+263           phase: allFilledCorrectly
+264             ? resolveCompletionPhase(state)
+265             : 'playing',
+266         };
+267       }
+268 
+269       return {
+270         ...state,
+271         allTiles: newAllTiles,
+272         bankTileIds: baseBankTileIds,
+273         zones: newZones,
+274         activeSlotIndex: state.activeSlotIndex,
+275         retryCount: state.retryCount + 1,
+276         phase: 'playing',
+277       };
+278     }
+279 
+280     case 'REMOVE_TILE': {
+281       const zone = state.zones[action.zoneIndex];
+282       if (!zone?.placedTileId) return state;
+283       const removedTileId = zone.placedTileId;
+284       // Virtual tiles (created by TYPE_TILE) are removed from allTiles
+285       // and NOT returned to the bank.
+286       const isVirtual = removedTileId.startsWith('typed-');
+287       return {
+288         ...state,
+289         dragActiveTileId:
+290           state.dragActiveTileId === removedTileId
+291             ? null
+292             : state.dragActiveTileId,
+293         allTiles: isVirtual
+294           ? state.allTiles.filter((t) => t.id !== removedTileId)
+295           : state.allTiles,
+296         zones: state.zones.map((z, i) =>
+297           i === action.zoneIndex
+298             ? {
+299                 ...z,
+300                 placedTileId: null,
+301                 isWrong: false,
+302                 isLocked: false,
+303               }
+304             : z,
+305         ),
+306         bankTileIds: isVirtual
+307           ? state.bankTileIds
+308           : [...state.bankTileIds, removedTileId],
+309         // Move cursor to the cleared slot so the user can retype
+310         activeSlotIndex: action.zoneIndex,
+311       };
+312     }
+313 
+314     case 'SWAP_TILES': {
+315       const fromZone = state.zones[action.fromZoneIndex];
+316       const toZone = state.zones[action.toZoneIndex];
+317       if (!fromZone || !toZone) return state;
+318 
+319       // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
+320       // Either zone may become empty (null) when moving a tile to an empty slot.
+321       const tileNowInFrom = toZone.placedTileId
+322         ? state.allTiles.find((t) => t.id === toZone.placedTileId)
+323         : null;
+324       const tileNowInTo = fromZone.placedTileId
+325         ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
+326         : null;
+327       // An empty zone is never wrong.
+328       const fromCorrect = tileNowInFrom
+329         ? tileNowInFrom.value === fromZone.expectedValue
+330         : true;
+331       const toCorrect = tileNowInTo
+332         ? tileNowInTo.value === toZone.expectedValue
+333         : true;
+334       const shouldLock =
+335         state.config.wrongTileBehavior === 'lock-manual' ||
+336         state.config.wrongTileBehavior === 'lock-auto-eject';
+337 
+338       const newZones = state.zones.map((z, i) => {
+339         if (i === action.fromZoneIndex)
+340           return {
+341             ...z,
+342             placedTileId: toZone.placedTileId,
+343             isWrong: toZone.placedTileId !== null && !fromCorrect,
+344             isLocked:
+345               toZone.placedTileId !== null &&
+346               !fromCorrect &&
+347               shouldLock,
+348           };
+349         if (i === action.toZoneIndex)
+350           return {
+351             ...z,
+352             placedTileId: fromZone.placedTileId,
+353             isWrong: fromZone.placedTileId !== null && !toCorrect,
+354             isLocked:
+355               fromZone.placedTileId !== null &&
+356               !toCorrect &&
+357               shouldLock,
+358           };
+359         return z;
+360       });
+361 
+362       // Clear drag state for the tile that just finished dragging.
+363       const dragActiveTileId =
+364         state.dragActiveTileId === fromZone.placedTileId
+365           ? null
+366           : state.dragActiveTileId;
+367 
+368       const allFilledCorrectly = newZones.every(
+369         (z) => z.placedTileId !== null && !z.isWrong,
+370       );
+371 
+372       return {
+373         ...state,
+374         dragActiveTileId,
+375         zones: newZones,
+376         phase: allFilledCorrectly
+377           ? resolveCompletionPhase(state)
+378           : 'playing',
+379       };
+380     }
+381 
+382     case 'EJECT_TILE': {
+383       const zone = state.zones[action.zoneIndex];
+384       if (!zone) return state;
+385 
+386       // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+387       if (!zone.isWrong && !zone.isLocked) return state;
+388 
+389       if (zone.placedTileId) {
+390         const ejectedTileId = zone.placedTileId;
+391         const isVirtual = ejectedTileId.startsWith('typed-');
+392         return {
+393           ...state,
+394           // If the ejected tile was mid-drag, clear drag state so the bank
+395           // hole disappears immediately rather than waiting for the drag to end.
+396           dragActiveTileId:
+397             state.dragActiveTileId === ejectedTileId
+398               ? null
+399               : state.dragActiveTileId,
+400           allTiles: isVirtual
+401             ? state.allTiles.filter((t) => t.id !== ejectedTileId)
+402             : state.allTiles,
+403           zones: state.zones.map((z, i) =>
+404             i === action.zoneIndex
+405               ? {
+406                   ...z,
+407                   placedTileId: null,
+408                   isWrong: false,
+409                   isLocked: false,
+410                 }
+411               : z,
+412           ),
+413           bankTileIds: isVirtual
+414             ? state.bankTileIds
+415             : [...state.bankTileIds, ejectedTileId],
+416           // Move cursor to the ejected slot
+417           activeSlotIndex: action.zoneIndex,
+418         };
+419       }
+420 
+421       return {
+422         ...state,
+423         zones: state.zones.map((z, i) =>
+424           i === action.zoneIndex
+425             ? {
+426                 ...z,
+427                 placedTileId: null,
+428                 isWrong: false,
+429                 isLocked: false,
+430               }
+431             : z,
+432         ),
+433         // Move cursor to the ejected slot
+434         activeSlotIndex: action.zoneIndex,
+435       };
+436     }
+437 
+438     case 'ADVANCE_ROUND': {
+439       return {
+440         ...state,
+441         allTiles: action.tiles,
+442         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+443         zones: action.zones,
+444         activeSlotIndex: 0,
+445         phase: 'playing',
+446         roundIndex: state.roundIndex + 1,
+447         retryCount: 0,
+448       };
+449     }
+450 
+451     case 'ADVANCE_LEVEL': {
+452       return {
+453         ...state,
+454         allTiles: action.tiles,
+455         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+456         zones: action.zones,
+457         activeSlotIndex: 0,
+458         phase: 'playing',
+459         roundIndex: 0,
+460         levelIndex: state.levelIndex + 1,
+461       };
+462     }
+463 
+464     case 'COMPLETE_GAME': {
+465       return { ...state, phase: 'game-over' };
+466     }
+467 
+468     case 'SET_DRAG_ACTIVE': {
+469       return {
+470         ...state,
+471         dragActiveTileId: action.tileId,
+472         dragHoverZoneIndex:
+473           action.tileId === null ? null : state.dragHoverZoneIndex,
+474         dragHoverBankTileId:
+475           action.tileId === null ? null : state.dragHoverBankTileId,
+476       };
+477     }
+478 
+479     case 'SET_DRAG_HOVER': {
+480       return { ...state, dragHoverZoneIndex: action.zoneIndex };
+481     }
+482 
+483     case 'SET_DRAG_HOVER_BANK': {
+484       return { ...state, dragHoverBankTileId: action.tileId };
+485     }
+486 
+487     case 'SWAP_SLOT_BANK': {
+488       const zone = state.zones[action.zoneIndex];
+489       if (!zone?.placedTileId) return state;
+490       if (!state.bankTileIds.includes(action.bankTileId)) return state;
+491 
+492       const slotTileId = zone.placedTileId;
+493       const newBankTileIds = [
+494         ...state.bankTileIds.filter((id) => id !== action.bankTileId),
+495         slotTileId,
+496       ];
+497       const newZones = state.zones.map((z, i) =>
+498         i === action.zoneIndex
+499           ? {
+500               ...z,
+501               placedTileId: action.bankTileId,
+502               isWrong: false,
+503               isLocked: false,
+504             }
+505           : z,
+506       );
+507       return {
+508         ...state,
+509         bankTileIds: newBankTileIds,
+510         zones: newZones,
+511         dragActiveTileId: null,
+512         dragHoverBankTileId: null,
+513       };
+514     }
+515 
+516     case 'SET_ACTIVE_SLOT': {
+517       const clamped = Math.max(
+518         0,
+519         Math.min(action.zoneIndex, state.zones.length - 1),
+520       );
+521       return { ...state, activeSlotIndex: clamped };
+522     }
+523 
+524     default: {
+525       return state;
+526     }
+527   }
+528 }
 529
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:04:53Z)**_
@@ -6425,62 +6590,63 @@ _**Agent (claude-opus-4-7 2026-04-21 14:04:55Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/types.ts`
 
 ```text
-75	export type AnswerGamePhase =
-76	  | 'playing'
-77	  | 'round-complete'
-78	  | 'level-complete'
-79	  | 'game-over';
-80	
-81	export interface AnswerGameState {
-82	  config: AnswerGameConfig;
-83	  /** Full tile list for the current round — never mutated mid-round */
-84	  allTiles: TileItem[];
-85	  /** IDs of tiles currently visible in the choice bank */
-86	  bankTileIds: string[];
-87	  zones: AnswerZone[];
-88	  /** Index of next slot to fill in auto-next-slot mode */
-89	  activeSlotIndex: number;
-90	  dragActiveTileId: string | null;
-91	  dragHoverZoneIndex: number | null;
-92	  /** ID of the bank tile hole currently hovered by a dragged slot tile. */
-93	  dragHoverBankTileId: string | null;
-94	  phase: AnswerGamePhase;
-95	  roundIndex: number;
-96	  retryCount: number;
-97	  levelIndex: number;
-98	  isLevelMode: boolean;
-99	}
-100	
-101	export type AnswerGameAction =
-102	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-103	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-104	  | {
-105	      type: 'TYPE_TILE';
-106	      tileId: string;
-107	      value: string;
-108	      zoneIndex: number;
-109	    }
-110	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-111	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-112	  | { type: 'EJECT_TILE'; zoneIndex: number }
-113	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-114	  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
-115	  | { type: 'COMPLETE_GAME' }
-116	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
-117	  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
-118	  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
-119	  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
-120	  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
-121	
-122	/**
-123	 * Snapshot of AnswerGameState persisted to session_history_index.draftState.
-124	 * Excludes config (reconstructable from initialContent/initialState),
-125	 * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
-126	 */
-127	export interface AnswerGameDraftState {
-128	  allTiles: TileItem[];
-129	  bankTileIds: string[];
+75 export type AnswerGamePhase =
+76   | 'playing'
+77   | 'round-complete'
+78   | 'level-complete'
+79   | 'game-over';
+80 
+81 export interface AnswerGameState {
+82   config: AnswerGameConfig;
+83   /** Full tile list for the current round — never mutated mid-round */
+84   allTiles: TileItem[];
+85   /** IDs of tiles currently visible in the choice bank */
+86   bankTileIds: string[];
+87   zones: AnswerZone[];
+88   /** Index of next slot to fill in auto-next-slot mode */
+89   activeSlotIndex: number;
+90   dragActiveTileId: string | null;
+91   dragHoverZoneIndex: number | null;
+92   /** ID of the bank tile hole currently hovered by a dragged slot tile. */
+93   dragHoverBankTileId: string | null;
+94   phase: AnswerGamePhase;
+95   roundIndex: number;
+96   retryCount: number;
+97   levelIndex: number;
+98   isLevelMode: boolean;
+99 }
+100 
+101 export type AnswerGameAction =
+102   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+103   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+104   | {
+105       type: 'TYPE_TILE';
+106       tileId: string;
+107       value: string;
+108       zoneIndex: number;
+109     }
+110   | { type: 'REMOVE_TILE'; zoneIndex: number }
+111   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+112   | { type: 'EJECT_TILE'; zoneIndex: number }
+113   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+114   | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+115   | { type: 'COMPLETE_GAME' }
+116   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+117   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+118   | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+119   | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+120   | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number };
+121 
+122 /**
+123  * Snapshot of AnswerGameState persisted to session_history_index.draftState.
+124  * Excludes config (reconstructable from initialContent/initialState),
+125  * dragActiveTileId (transient), and 'game-over' phase (cleared on completion).
+126  */
+127 export interface AnswerGameDraftState {
+128   allTiles: TileItem[];
+129   bankTileIds: string[];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:04:56Z)**_
@@ -6510,6 +6676,7 @@ useSlotTileDrag.test.tsx
 useTileEvaluation.test.tsx
 useTouchKeyboardInput.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:03Z)**_
@@ -6524,6 +6691,7 @@ Find co-located MDX
 src/components/answer-game/AnswerGame/AnswerGame.flows.mdx
 src/components/answer-game/AnswerGame/AnswerGame.reference.mdx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:04Z)**_
@@ -6576,6 +6744,7 @@ const zones: AnswerZone[] = [
     index: 1,
     expectedValue: 'A',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:04Z)**_
@@ -6628,6 +6797,7 @@ describe('AnswerGameProvider', () => {
       <AnswerGameProvider config={gameConfig}>
         <StateReader />
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:08Z)**_
@@ -6644,6 +6814,7 @@ Look at resume-related provider tests
 175:  it('skips INIT_ROUND effect when initialState is provided', async () => {
 201:      <AnswerGameProvider config={cfgWithTiles} initialState={draft}>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:10Z)**_
@@ -6653,87 +6824,88 @@ _**Agent (claude-opus-4-7 2026-04-21 14:05:10Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.test.tsx`
 
 ```text
-40	        <StateReader />
-41	      </AnswerGameProvider>,
-42	    );
-43	    expect(screen.getByTestId('phase')).toHaveTextContent('playing');
-44	  });
-45	
-46	  it('dispatch updates state', async () => {
-47	    const user = userEvent.setup();
-48	    render(
-49	      <AnswerGameProvider config={gameConfig}>
-50	        <StateReader />
-51	        <Dispatcher />
-52	      </AnswerGameProvider>,
-53	    );
-54	    await user.click(screen.getByRole('button', { name: 'end' }));
-55	    expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
-56	  });
-57	
-58	  it('useAnswerGameContext throws outside provider', () => {
-59	    const consoleError = console.error;
-60	    console.error = () => {};
-61	    expect(() => render(<StateReader />)).toThrow(
-62	      'useAnswerGameContext must be used inside AnswerGameProvider',
-63	    );
-64	    console.error = consoleError;
-65	  });
-66	
-67	  it('useAnswerGameDispatch throws outside provider', () => {
-68	    const consoleError = console.error;
-69	    console.error = () => {};
-70	    expect(() => render(<Dispatcher />)).toThrow(
-71	      'useAnswerGameDispatch must be used inside AnswerGameProvider',
-72	    );
-73	    console.error = consoleError;
-74	  });
-75	
-76	  it('provides TouchKeyboardContext focusKeyboard fn for type mode on all devices', () => {
-77	    const FocusReader = () => {
-78	      const focusKeyboard = useTouchKeyboard();
-79	      return (
-80	        <div data-testid="has-focus">
-81	          {focusKeyboard === null ? 'null' : 'fn'}
-82	        </div>
-83	      );
-84	    };
-85	
-86	    render(
-87	      <AnswerGameProvider
-88	        config={{ ...gameConfig, inputMethod: 'type' }}
-89	      >
-90	        <FocusReader />
-91	      </AnswerGameProvider>,
-92	    );
-93	
-94	    expect(screen.getByTestId('has-focus')).toHaveTextContent('fn');
-95	  });
-96	
-97	  it('provides null TouchKeyboardContext for drag mode', () => {
-98	    const FocusReader = () => {
-99	      const focusKeyboard = useTouchKeyboard();
-100	      return (
-101	        <div data-testid="has-focus">
-102	          {focusKeyboard === null ? 'null' : 'fn'}
-103	        </div>
-104	      );
-105	    };
-106	
-107	    render(
-108	      <AnswerGameProvider
-109	        config={{ ...gameConfig, inputMethod: 'drag' }}
-110	      >
-111	        <FocusReader />
-112	      </AnswerGameProvider>,
-113	    );
-114	
-115	    expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
-116	  });
-117	
-118	  it('initialises from initialState when provided', () => {
-119	    const draft: AnswerGameDraftState = {
+40         <StateReader />
+41       </AnswerGameProvider>,
+42     );
+43     expect(screen.getByTestId('phase')).toHaveTextContent('playing');
+44   });
+45 
+46   it('dispatch updates state', async () => {
+47     const user = userEvent.setup();
+48     render(
+49       <AnswerGameProvider config={gameConfig}>
+50         <StateReader />
+51         <Dispatcher />
+52       </AnswerGameProvider>,
+53     );
+54     await user.click(screen.getByRole('button', { name: 'end' }));
+55     expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
+56   });
+57 
+58   it('useAnswerGameContext throws outside provider', () => {
+59     const consoleError = console.error;
+60     console.error = () => {};
+61     expect(() => render(<StateReader />)).toThrow(
+62       'useAnswerGameContext must be used inside AnswerGameProvider',
+63     );
+64     console.error = consoleError;
+65   });
+66 
+67   it('useAnswerGameDispatch throws outside provider', () => {
+68     const consoleError = console.error;
+69     console.error = () => {};
+70     expect(() => render(<Dispatcher />)).toThrow(
+71       'useAnswerGameDispatch must be used inside AnswerGameProvider',
+72     );
+73     console.error = consoleError;
+74   });
+75 
+76   it('provides TouchKeyboardContext focusKeyboard fn for type mode on all devices', () => {
+77     const FocusReader = () => {
+78       const focusKeyboard = useTouchKeyboard();
+79       return (
+80         <div data-testid="has-focus">
+81           {focusKeyboard === null ? 'null' : 'fn'}
+82         </div>
+83       );
+84     };
+85 
+86     render(
+87       <AnswerGameProvider
+88         config={{ ...gameConfig, inputMethod: 'type' }}
+89       >
+90         <FocusReader />
+91       </AnswerGameProvider>,
+92     );
+93 
+94     expect(screen.getByTestId('has-focus')).toHaveTextContent('fn');
+95   });
+96 
+97   it('provides null TouchKeyboardContext for drag mode', () => {
+98     const FocusReader = () => {
+99       const focusKeyboard = useTouchKeyboard();
+100       return (
+101         <div data-testid="has-focus">
+102           {focusKeyboard === null ? 'null' : 'fn'}
+103         </div>
+104       );
+105     };
+106 
+107     render(
+108       <AnswerGameProvider
+109         config={{ ...gameConfig, inputMethod: 'drag' }}
+110       >
+111         <FocusReader />
+112       </AnswerGameProvider>,
+113     );
+114 
+115     expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
+116   });
+117 
+118   it('initialises from initialState when provided', () => {
+119     const draft: AnswerGameDraftState = {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:14Z)**_
@@ -6743,97 +6915,98 @@ _**Agent (claude-opus-4-7 2026-04-21 14:05:14Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.test.tsx`
 
 ```text
-118	  it('initialises from initialState when provided', () => {
-119	    const draft: AnswerGameDraftState = {
-120	      allTiles: [
-121	        { id: 't-c', label: 'c', value: 'c' },
-122	        { id: 't-a', label: 'a', value: 'a' },
-123	        { id: 't-t', label: 't', value: 't' },
-124	      ],
-125	      bankTileIds: ['t-t'],
-126	      zones: [
-127	        {
-128	          id: 'z1',
-129	          index: 0,
-130	          expectedValue: 'c',
-131	          placedTileId: 't-c',
-132	          isWrong: false,
-133	          isLocked: false,
-134	        },
-135	        {
-136	          id: 'z2',
-137	          index: 1,
-138	          expectedValue: 'a',
-139	          placedTileId: 't-a',
-140	          isWrong: false,
-141	          isLocked: false,
-142	        },
-143	        {
-144	          id: 'z3',
-145	          index: 2,
-146	          expectedValue: 't',
-147	          placedTileId: null,
-148	          isWrong: false,
-149	          isLocked: false,
-150	        },
-151	      ],
-152	      activeSlotIndex: 2,
-153	      phase: 'playing',
-154	      roundIndex: 0,
-155	      retryCount: 0,
-156	      levelIndex: 0,
-157	    };
-158	
-159	    const BankReader = () => {
-160	      const state = useAnswerGameContext();
-161	      return (
-162	        <div data-testid="bank">{state.bankTileIds.join(',')}</div>
-163	      );
-164	    };
-165	
-166	    render(
-167	      <AnswerGameProvider config={gameConfig} initialState={draft}>
-168	        <BankReader />
-169	      </AnswerGameProvider>,
-170	    );
-171	
-172	    expect(screen.getByTestId('bank')).toHaveTextContent('t-t');
-173	  });
-174	
-175	  it('skips INIT_ROUND effect when initialState is provided', async () => {
-176	    const draft: AnswerGameDraftState = {
-177	      allTiles: [{ id: 'x', label: 'x', value: 'x' }],
-178	      bankTileIds: ['x'],
-179	      zones: [],
-180	      activeSlotIndex: 0,
-181	      phase: 'playing',
-182	      roundIndex: 0,
-183	      retryCount: 0,
-184	      levelIndex: 0,
-185	    };
-186	
-187	    const cfgWithTiles: AnswerGameConfig = {
-188	      ...gameConfig,
-189	      initialTiles: [{ id: 'y', label: 'y', value: 'y' }],
-190	      initialZones: [],
-191	    };
-192	
-193	    const BankReader = () => {
-194	      const state = useAnswerGameContext();
-195	      return (
-196	        <div data-testid="bank">{state.bankTileIds.join(',')}</div>
-197	      );
-198	    };
-199	
-200	    render(
-201	      <AnswerGameProvider config={cfgWithTiles} initialState={draft}>
-202	        <BankReader />
-203	      </AnswerGameProvider>,
-204	    );
-205	
-206	    // Should still show draft bankTileIds ('x'), not the config tiles ('y')
-207	    expect(screen.getByTestId('bank')).toHaveTextContent('x');
+118   it('initialises from initialState when provided', () => {
+119     const draft: AnswerGameDraftState = {
+120       allTiles: [
+121         { id: 't-c', label: 'c', value: 'c' },
+122         { id: 't-a', label: 'a', value: 'a' },
+123         { id: 't-t', label: 't', value: 't' },
+124       ],
+125       bankTileIds: ['t-t'],
+126       zones: [
+127         {
+128           id: 'z1',
+129           index: 0,
+130           expectedValue: 'c',
+131           placedTileId: 't-c',
+132           isWrong: false,
+133           isLocked: false,
+134         },
+135         {
+136           id: 'z2',
+137           index: 1,
+138           expectedValue: 'a',
+139           placedTileId: 't-a',
+140           isWrong: false,
+141           isLocked: false,
+142         },
+143         {
+144           id: 'z3',
+145           index: 2,
+146           expectedValue: 't',
+147           placedTileId: null,
+148           isWrong: false,
+149           isLocked: false,
+150         },
+151       ],
+152       activeSlotIndex: 2,
+153       phase: 'playing',
+154       roundIndex: 0,
+155       retryCount: 0,
+156       levelIndex: 0,
+157     };
+158 
+159     const BankReader = () => {
+160       const state = useAnswerGameContext();
+161       return (
+162         <div data-testid="bank">{state.bankTileIds.join(',')}</div>
+163       );
+164     };
+165 
+166     render(
+167       <AnswerGameProvider config={gameConfig} initialState={draft}>
+168         <BankReader />
+169       </AnswerGameProvider>,
+170     );
+171 
+172     expect(screen.getByTestId('bank')).toHaveTextContent('t-t');
+173   });
+174 
+175   it('skips INIT_ROUND effect when initialState is provided', async () => {
+176     const draft: AnswerGameDraftState = {
+177       allTiles: [{ id: 'x', label: 'x', value: 'x' }],
+178       bankTileIds: ['x'],
+179       zones: [],
+180       activeSlotIndex: 0,
+181       phase: 'playing',
+182       roundIndex: 0,
+183       retryCount: 0,
+184       levelIndex: 0,
+185     };
+186 
+187     const cfgWithTiles: AnswerGameConfig = {
+188       ...gameConfig,
+189       initialTiles: [{ id: 'y', label: 'y', value: 'y' }],
+190       initialZones: [],
+191     };
+192 
+193     const BankReader = () => {
+194       const state = useAnswerGameContext();
+195       return (
+196         <div data-testid="bank">{state.bankTileIds.join(',')}</div>
+197       );
+198     };
+199 
+200     render(
+201       <AnswerGameProvider config={cfgWithTiles} initialState={draft}>
+202         <BankReader />
+203       </AnswerGameProvider>,
+204     );
+205 
+206     // Should still show draft bankTileIds ('x'), not the config tiles ('y')
+207     expect(screen.getByTestId('bank')).toHaveTextContent('x');
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:20Z)**_
@@ -6843,11 +7016,12 @@ _**Agent (claude-opus-4-7 2026-04-21 14:05:20Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.test.tsx`
 
 ```text
-207	    expect(screen.getByTestId('bank')).toHaveTextContent('x');
-208	  });
-209	});
+207     expect(screen.getByTestId('bank')).toHaveTextContent('x');
+208   });
+209 });
 210
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:25Z)**_
@@ -6867,6 +7041,7 @@ Find reducer-doc section in mdx
 100:| `useBankDropTarget`     | `useBankDropTarget.ts`     | Makes the bank a drop target for slot tiles (no dispatch — returns `isDragOver`)              | —                                                                              |
 101:| `useTouchDrag`          | `useTouchDrag.ts`          | Low-level pointer event handler; calls `onDrop`, `onDropOnBank`, `onDropOnBankTile` callbacks | Callers dispatch                                                               |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:30Z)**_
@@ -6876,42 +7051,43 @@ _**Agent (claude-opus-4-7 2026-04-21 14:05:30Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGame/AnswerGame.reference.mdx`
 
 ```text
-58	---
-59	
-60	## Action Catalog
-61	
-62	Defined in `src/components/answer-game/types.ts` as `AnswerGameAction`.
-63	Handled in `src/components/answer-game/answer-game-reducer.ts`.
-64	
-65	| Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                           |
-66	| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-67	| `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect)                                               | Resets round state, populates tiles and zones                                                    |
-68	| `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: 'round-complete'` if all correct |
-69	| `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`           |
-70	| `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                         |
-71	| `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                   |
-72	| `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                         |
-73	| `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                           |
-74	| `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                      |
-75	| `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: 'game-over'`                                                                        |
-76	| `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                |
-77	| `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                     |
-78	| `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                    |
-79	| `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                  |
-80	| `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                 |
-81	
-82	---
-83	
-84	## Hook Index
-85	
-86	All hooks live in `src/components/answer-game/`.
-87	
-88	| Hook                    | File                       | Purpose                                                                                       | Dispatches                                                                     |
-89	| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-90	| `useAnswerGameContext`  | `useAnswerGameContext.ts`  | Read `AnswerGameState` from context                                                           | —                                                                              |
-91	| `useAnswerGameDispatch` | `useAnswerGameDispatch.ts` | Get `dispatch` from context                                                                   | —                                                                              |
-92	| `useTileEvaluation`     | `useTileEvaluation.ts`     | Core tile placement — evaluates correctness, emits sound/events                               | `PLACE_TILE`, `TYPE_TILE`                                                      |
+58 ---
+59 
+60 ## Action Catalog
+61 
+62 Defined in `src/components/answer-game/types.ts` as `AnswerGameAction`.
+63 Handled in `src/components/answer-game/answer-game-reducer.ts`.
+64 
+65 | Action                | Payload                          | Dispatched by                                                                     | Effect                                                                                           |
+66 | --------------------- | -------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+67 | `INIT_ROUND`          | `{ tiles, zones }`               | `AnswerGameProvider` (mount effect)                                               | Resets round state, populates tiles and zones                                                    |
+68 | `PLACE_TILE`          | `{ tileId, zoneIndex }`          | `useTileEvaluation`                                                               | Places bank tile in slot; marks wrong if mismatch; sets `phase: 'round-complete'` if all correct |
+69 | `TYPE_TILE`           | `{ tileId, value, zoneIndex }`   | `useTileEvaluation`                                                               | Creates a virtual typed tile (id `typed-${nanoid()}`); same evaluation as `PLACE_TILE`           |
+70 | `REMOVE_TILE`         | `{ zoneIndex }`                  | `useSlotBehavior`, `useSlotTileDrag`, `useKeyboardInput`, `useTouchKeyboardInput` | Removes tile from slot; returns it to bank (virtual tiles are discarded)                         |
+71 | `SWAP_TILES`          | `{ fromZoneIndex, toZoneIndex }` | `useSlotBehavior`, `useFreeSwap`                                                  | Exchanges tiles between two slots; re-evaluates both positions                                   |
+72 | `EJECT_TILE`          | `{ zoneIndex }`                  | `useSlotBehavior` (auto timer)                                                    | Removes wrong tile after lock-auto-eject animation; returns tile to bank                         |
+73 | `ADVANCE_ROUND`       | `{ tiles, zones }`               | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Increments `roundIndex`; replaces tiles and zones with next round data                           |
+74 | `ADVANCE_LEVEL`       | `{ tiles, zones }`               | `SortNumbers`                                                                     | Increments `levelIndex`; resets `roundIndex` to 0; replaces tiles and zones                      |
+75 | `COMPLETE_GAME`       | —                                | `WordSpell`, `NumberMatch`, `SortNumbers`                                         | Sets `phase: 'game-over'`                                                                        |
+76 | `SET_DRAG_ACTIVE`     | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`, `useSlotBehavior`                          | Tracks the tile being dragged; `null` clears it on drop or cancel                                |
+77 | `SET_DRAG_HOVER`      | `{ zoneIndex: number \| null }`  | `useSlotBehavior`, `useDraggableTile`                                             | Tracks which zone is hovered during drag for visual feedback                                     |
+78 | `SET_DRAG_HOVER_BANK` | `{ tileId: string \| null }`     | `useDraggableTile`, `useSlotTileDrag`                                             | Tracks which bank tile hole is hovered by a dragged slot tile                                    |
+79 | `SWAP_SLOT_BANK`      | `{ zoneIndex, bankTileId }`      | `useSlotTileDrag`                                                                 | Exchanges a slot tile with a specific bank tile                                                  |
+80 | `SET_ACTIVE_SLOT`     | `{ zoneIndex }`                  | `useKeyboardInput`                                                                | Moves the keyboard cursor to a specific slot (ordered mode only)                                 |
+81 
+82 ---
+83 
+84 ## Hook Index
+85 
+86 All hooks live in `src/components/answer-game/`.
+87 
+88 | Hook                    | File                       | Purpose                                                                                       | Dispatches                                                                     |
+89 | ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+90 | `useAnswerGameContext`  | `useAnswerGameContext.ts`  | Read `AnswerGameState` from context                                                           | —                                                                              |
+91 | `useAnswerGameDispatch` | `useAnswerGameDispatch.ts` | Get `dispatch` from context                                                                   | —                                                                              |
+92 | `useTileEvaluation`     | `useTileEvaluation.ts`     | Core tile placement — evaluates correctness, emits sound/events                               | `PLACE_TILE`, `TYPE_TILE`                                                      |
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:05:33Z)**_
@@ -6927,6 +7103,7 @@ Check flows mdx for resume content
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:07Z)**_
@@ -6936,6 +7113,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:06:10Z)**_
 Enough reading — design is clear. Here's the plan:
 
 **Design:**
+
 - Add `RESUME_ROUND` action to the reducer: takes a full draft snapshot, replaces round-state fields, preserves `config`, clears transient drag state.
 - `AnswerGameProvider`: keep the lazy-init in `useReducer` (no first-render flicker), but replace the "skip when initialState" early-return with an if/else that dispatches `RESUME_ROUND` on resume and `INIT_ROUND` on fresh. That way the reducer gets notified of lifecycle changes instead of silently relying on the initial snapshot.
 - Update `AnswerGame.reference.mdx` action catalog.
@@ -6949,67 +7127,68 @@ _**Agent (claude-opus-4-7 2026-04-21 14:06:11Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/answer-game-reducer.test.ts`
 
 ```text
-40	    expectedValue: 'A',
-41	    placedTileId: null,
-42	    isWrong: false,
-43	    isLocked: false,
-44	  },
-45	  {
-46	    id: 'z2',
-47	    index: 2,
-48	    expectedValue: 'T',
-49	    placedTileId: null,
-50	    isWrong: false,
-51	    isLocked: false,
-52	  },
-53	];
-54	
-55	describe('answerGameReducer', () => {
-56	  it('INIT_ROUND sets allTiles and bankTileIds', () => {
-57	    const state = makeInitialState(config);
-58	    const next = answerGameReducer(state, {
-59	      type: 'INIT_ROUND',
-60	      tiles,
-61	      zones,
-62	    });
-63	    expect(next.allTiles).toEqual(tiles);
-64	    expect(next.bankTileIds).toEqual(['t1', 't2', 't3']);
-65	    expect(next.zones).toEqual(zones);
-66	    expect(next.activeSlotIndex).toBe(0);
-67	  });
-68	
-69	  it('PLACE_TILE correct: removes tile from bank and places in zone', () => {
-70	    const state = answerGameReducer(makeInitialState(config), {
-71	      type: 'INIT_ROUND',
-72	      tiles,
-73	      zones,
-74	    });
-75	    const next = answerGameReducer(state, {
-76	      type: 'PLACE_TILE',
-77	      tileId: 't1',
-78	      zoneIndex: 0,
-79	    });
-80	    expect(next.bankTileIds).not.toContain('t1');
-81	    expect(next.zones[0]!.placedTileId).toBe('t1');
-82	    expect(next.zones[0]!.isWrong).toBe(false);
-83	    expect(next.retryCount).toBe(0);
-84	  });
-85	
-86	  it('PLACE_TILE wrong (lock-auto-eject): tile placed in slot, removed from bank, zone marked wrong', () => {
-87	    const state = answerGameReducer(makeInitialState(config), {
-88	      type: 'INIT_ROUND',
-89	      tiles,
-90	      zones,
-91	    });
-92	    const next = answerGameReducer(state, {
-93	      type: 'PLACE_TILE',
-94	      tileId: 't2',
-95	      zoneIndex: 0,
-96	    });
-97	    expect(next.zones[0]!.placedTileId).toBe('t2');
-98	    expect(next.bankTileIds).not.toContain('t2');
-99	    expect(next.zones[0]!.isWrong).toBe(true);
+40     expectedValue: 'A',
+41     placedTileId: null,
+42     isWrong: false,
+43     isLocked: false,
+44   },
+45   {
+46     id: 'z2',
+47     index: 2,
+48     expectedValue: 'T',
+49     placedTileId: null,
+50     isWrong: false,
+51     isLocked: false,
+52   },
+53 ];
+54 
+55 describe('answerGameReducer', () => {
+56   it('INIT_ROUND sets allTiles and bankTileIds', () => {
+57     const state = makeInitialState(config);
+58     const next = answerGameReducer(state, {
+59       type: 'INIT_ROUND',
+60       tiles,
+61       zones,
+62     });
+63     expect(next.allTiles).toEqual(tiles);
+64     expect(next.bankTileIds).toEqual(['t1', 't2', 't3']);
+65     expect(next.zones).toEqual(zones);
+66     expect(next.activeSlotIndex).toBe(0);
+67   });
+68 
+69   it('PLACE_TILE correct: removes tile from bank and places in zone', () => {
+70     const state = answerGameReducer(makeInitialState(config), {
+71       type: 'INIT_ROUND',
+72       tiles,
+73       zones,
+74     });
+75     const next = answerGameReducer(state, {
+76       type: 'PLACE_TILE',
+77       tileId: 't1',
+78       zoneIndex: 0,
+79     });
+80     expect(next.bankTileIds).not.toContain('t1');
+81     expect(next.zones[0]!.placedTileId).toBe('t1');
+82     expect(next.zones[0]!.isWrong).toBe(false);
+83     expect(next.retryCount).toBe(0);
+84   });
+85 
+86   it('PLACE_TILE wrong (lock-auto-eject): tile placed in slot, removed from bank, zone marked wrong', () => {
+87     const state = answerGameReducer(makeInitialState(config), {
+88       type: 'INIT_ROUND',
+89       tiles,
+90       zones,
+91     });
+92     const next = answerGameReducer(state, {
+93       type: 'PLACE_TILE',
+94       tileId: 't2',
+95       zoneIndex: 0,
+96     });
+97     expect(next.zones[0]!.placedTileId).toBe('t2');
+98     expect(next.bankTileIds).not.toContain('t2');
+99     expect(next.zones[0]!.isWrong).toBe(true);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:27Z)**_
@@ -7032,6 +7211,7 @@ Check end of reducer test file
   });
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:31Z)**_
@@ -7045,6 +7225,7 @@ Find the outer describe close
 ```text
 769:});
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:35Z)**_
@@ -7054,17 +7235,18 @@ _**Agent (claude-opus-4-7 2026-04-21 14:06:35Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/answer-game-reducer.test.ts`
 
 ```text
-760	        zoneIndex: 0,
-761	      });
-762	      expect(state.zones[0]!.placedTileId).toBeNull();
-763	      expect(
-764	        state.allTiles.find((t) => t.id === 'typed-ej'),
-765	      ).toBeUndefined();
-766	      expect(state.bankTileIds).not.toContain('typed-ej');
-767	    });
-768	  });
-769	});
+760         zoneIndex: 0,
+761       });
+762       expect(state.zones[0]!.placedTileId).toBeNull();
+763       expect(
+764         state.allTiles.find((t) => t.id === 'typed-ej'),
+765       ).toBeUndefined();
+766       expect(state.bankTileIds).not.toContain('typed-ej');
+767     });
+768   });
+769 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:39Z)**_
@@ -7079,6 +7261,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:06:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/answer-game-reducer.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:06:57Z)**_
@@ -7111,6 +7294,7 @@ Run failing reducer tests
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:07:06Z)**_
@@ -7127,6 +7311,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:07:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/types.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:07:12Z)**_
@@ -7139,6 +7324,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:07:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/answer-game-reducer.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:07:24Z)**_
@@ -7161,6 +7347,7 @@ Green?
 
 Done in 0.97s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:07:28Z)**_
@@ -7175,6 +7362,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:07:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:07:57Z)**_
@@ -7217,6 +7405,7 @@ Received:
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:03Z)**_
@@ -7233,6 +7422,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:08:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:16Z)**_
@@ -7245,6 +7435,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:08:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGameProvider.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:29Z)**_
@@ -7267,6 +7458,7 @@ Warning: useRouter must be used inside a <RouterProvider> component!
 
 Done in 2.61s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:34Z)**_
@@ -7293,6 +7485,7 @@ Full unit suite
 
 Done in 10.05s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:49Z)**_
@@ -7308,6 +7501,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.52s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:08:53Z)**_
@@ -7322,6 +7516,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:08:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGame/AnswerGame.reference.mdx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:07Z)**_
@@ -7339,6 +7534,7 @@ src/lib/game-event-bus.md 1ms (unchanged)
 src/components/answer-game/AnswerGame/AnswerGame.reference.mdx 8ms
 Done in 3.85s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:12Z)**_
@@ -7358,6 +7554,7 @@ yarn run v1.22.22
 $ /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/node_modules/.bin/eslint src/components/answer-game/answer-game-reducer.ts src/components/answer-game/answer-game-reducer.test.ts src/components/answer-game/AnswerGameProvider.tsx src/components/answer-game/AnswerGameProvider.test.tsx src/components/answer-game/types.ts
 Done in 3.70s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:17Z)**_
@@ -7373,6 +7570,7 @@ Checking formatting...
 [warn] src/components/answer-game/AnswerGameProvider.test.tsx
 [warn] Code style issues found in the above file. Run Prettier with --write to fix.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:18Z)**_
@@ -7390,6 +7588,7 @@ Linting: 103 file(s)
 Summary: 0 error(s)
 Done in 1.16s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:24Z)**_
@@ -7412,6 +7611,7 @@ src/components/answer-game/AnswerGameProvider.test.tsx 36ms
 Done in 1.10s.
 [This command modified 1 file you've previously read: src/components/answer-game/AnswerGameProvider.test.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:09:28Z)**_
@@ -7434,6 +7634,7 @@ Status
  M src/components/answer-game/answer-game-reducer.ts
  M src/components/answer-game/types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:10:04Z)**_
@@ -7494,6 +7695,7 @@ Done in 9.73s.
 [feat/wordspell-resume-round 815aeaa5] feat(answer-game): RESUME_ROUND action hardens resume lifecycle
  6 files changed, 240 insertions(+), 22 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:10:11Z)**_
@@ -7517,6 +7719,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        feat/wordspell-resume-round -> feat/wordspell-resume-round
 branch 'feat/wordspell-resume-round' set up to track 'origin/feat/wordspell-resume-round'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:11:05Z)**_
@@ -7577,11 +7780,12 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/139
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:11:12Z)**_
 
-PR #139 open: https://github.com/leocaseiro/base-skill/pull/139
+PR #139 open: <https://github.com/leocaseiro/base-skill/pull/139>
 
 **Issue #135 status after this:**
 
@@ -7636,6 +7840,7 @@ docs/superpowers/plans/2026-04-13-architecture-docs.md
 docs/superpowers/plans/2026-04-09-level-system.md
 docs/superpowers/plans/2026-04-08-drag-preview-sound-fix.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:13Z)**_
@@ -7667,6 +7872,7 @@ docs/architecture.md
 .specstory/history/2026-04-16_02-26-45Z-add-a-new-memory.md
 .specstory/history/2026-04-15_23-16-03Z-i-want-to-revisit.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:21Z)**_
@@ -7686,6 +7892,7 @@ src/lib/game-engine/debugging.mdx
 src/lib/game-engine/GameEngine.reference.mdx
 src/lib/game-engine/GameEngine.flows.mdx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:30Z)**_
@@ -7695,258 +7902,259 @@ _**Agent (claude-opus-4-7 2026-04-21 14:40:30Z)**_
  `./worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGame/AnswerGame.flows.mdx`
 
 ```text
-1	import { Meta } from '@storybook/blocks';
-2	
-3	<Meta title="answer-game/Flows" />
-4	
-5	# AnswerGame — Event Flows
-6	
-7	> Source: `src/components/answer-game/`
-8	>
-9	> Each diagram shows the sequence of dispatches and effects triggered by a user action.
-10	> Update this file when adding new dispatch chains or changing existing ones.
-11	> Run `/update-architecture-docs` for guided update prompts.
-12	
-13	---
-14	
-15	## 1. Tile Placement
-16	
-17	Bank tile click/tap or keyboard character press.
-18	
-19	```mermaid
-20	sequenceDiagram
-21	  actor User
-22	  participant Hook as useTileEvaluation
-23	  participant Reducer as answerGameReducer
-24	  participant Effect as useSlotBehavior (effect)
-25	
-26	  User->>Hook: click bank tile / press key
-27	  Hook->>Reducer: PLACE_TILE { tileId, zoneIndex }
-28	  Reducer-->>Reducer: move tile from bankTileIds → zones[zoneIndex].placedTileId
-29	  Reducer-->>Reducer: evaluate: all zones correct?
-30	  alt all zones correct
-31	    Reducer-->>Effect: phase = 'round-complete'
-32	    Effect->>Effect: triggerPop animation
-33	  else mismatch (wrongTileBehavior = 'reject')
-34	    Reducer-->>Reducer: tile not placed, bankTileIds unchanged
-35	  else mismatch (wrongTileBehavior = 'lock-manual' or 'lock-auto-eject')
-36	    Reducer-->>Reducer: zones[zoneIndex].isWrong = true, isLocked = true
-37	    Effect->>Effect: triggerShake animation
-38	  end
-39	```
-40	
-41	---
-42	
-43	## 2. Wrong Tile Auto-Eject
-44	
-45	Only when `config.wrongTileBehavior === 'lock-auto-eject'`.
-46	
-47	```mermaid
-48	sequenceDiagram
-49	  participant Reducer as answerGameReducer
-50	  participant Effect as useSlotBehavior (effect)
-51	
-52	  Reducer-->>Effect: zones[zoneIndex].isWrong = true
-53	  Effect->>Effect: triggerShake animation (immediate)
-54	  Effect->>Effect: wait 350ms
-55	  Effect->>Effect: triggerEjectReturn animation
-56	  Effect->>Effect: wait 1000ms
-57	  Effect->>Reducer: EJECT_TILE { zoneIndex }
-58	  Reducer-->>Reducer: zones[zoneIndex].placedTileId = null, isWrong = false, isLocked = false
-59	  Reducer-->>Reducer: tile id returned to bankTileIds
-60	```
-61	
-62	---
-63	
-64	## 3. Drag and Drop
-65	
-66	Dragging a bank tile or slot tile onto a slot.
-67	
-68	```mermaid
-69	flowchart TD
-70	  A([User starts drag]) --> B[SET_DRAG_ACTIVE tileId]
-71	  B --> C{Drag over slot?}
-72	  C -- enter --> D[SET_DRAG_HOVER zoneIndex]
-73	  C -- leave --> E[SET_DRAG_HOVER null]
-74	  D --> F{Drop?}
-75	  F -- bank tile on empty slot --> G[PLACE_TILE tileId zoneIndex]
-76	  F -- bank tile on occupied slot --> H[SWAP_TILES or PLACE_TILE]
-77	  F -- slot tile on slot --> I[SWAP_TILES fromZone toZone]
-78	  F -- slot tile on bank tile hole --> J[SWAP_SLOT_BANK zoneIndex bankTileId]
-79	  F -- slot tile on bank container --> K[REMOVE_TILE zoneIndex]
-80	  G & H & I & J & K --> L[SET_DRAG_ACTIVE null]
-81	  L --> M[SET_DRAG_HOVER null]
-82	```
-83	
-84	**Drag-over bank tile (slot tile being dragged):**
-85	
-86	```mermaid
-87	sequenceDiagram
-88	  participant Hook as useSlotTileDrag
-89	  participant Reducer as answerGameReducer
-90	
-91	  Hook->>Reducer: SET_DRAG_HOVER_BANK { tileId: bankTileId }
-92	  Note over Hook,Reducer: bank tile shows "hole" preview
-93	  Hook->>Reducer: drop → SWAP_SLOT_BANK { zoneIndex, bankTileId }
-94	  Hook->>Reducer: SET_DRAG_HOVER_BANK { tileId: null }
-95	  Hook->>Reducer: SET_DRAG_ACTIVE { tileId: null }
-96	```
-97	
-98	---
-99	
-100	## 4. Keyboard and Touch Input
-101	
-102	Desktop keyboard (`useKeyboardInput`) and mobile hidden input (`useTouchKeyboardInput`).
-103	
-104	```mermaid
-105	sequenceDiagram
-106	  actor User
-107	  participant KI as useKeyboardInput (global keydown)
-108	  participant TE as useTileEvaluation
-109	  participant Reducer as answerGameReducer
-110	
-111	  User->>KI: ArrowLeft / ArrowRight
-112	  KI->>Reducer: SET_ACTIVE_SLOT { zoneIndex: next }
-113	
-114	  User->>KI: Backspace / Delete
-115	  KI->>KI: find last filled slot ≤ activeSlotIndex
-116	  KI->>Reducer: REMOVE_TILE { zoneIndex: i }
-117	
-118	  User->>KI: printable character
-119	  KI->>KI: find matching tile in bank?
-120	  alt tile found in bank
-121	    KI->>TE: placeTile(matchingTile.id, activeSlotIndex)
-122	    TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
-123	  else no match
-124	    KI->>TE: typeTile(char, activeSlotIndex)
-125	    TE->>Reducer: TYPE_TILE { tileId: "typed-{id}", value: char, zoneIndex }
-126	  end
-127	```
-128	
-129	Touch keyboard follows the same path via `useTouchKeyboardInput`, using the hidden
-130	`<input>` element's `input` event instead of global `keydown`.
-131	
-132	---
-133	
-134	## 5. Level Progression (SortNumbers only)
-135	
-136	Only when `config.levelMode` is configured.
-137	
-138	```mermaid
-139	stateDiagram-v2
-140	  [*] --> playing
-141	
-142	  playing --> round_complete : all zones correct
-143	  round_complete --> playing : ADVANCE_ROUND\n(more rounds in level)
-144	  round_complete --> level_complete : ADVANCE_ROUND\n(last round in level)
-145	  level_complete --> playing : ADVANCE_LEVEL\n(user clicks Next Level)
-146	  level_complete --> game_over : COMPLETE_GAME\n(generateNextLevel returns null\nor maxLevels reached)
-147	  playing --> game_over : COMPLETE_GAME\n(no levelMode + last round)
-148	```
-149	
-150	**Dispatch sequence for level transition:**
-151	
-152	```mermaid
-153	sequenceDiagram
-154	  participant Component as SortNumbers
-155	  participant Reducer as answerGameReducer
-156	
-157	  Component->>Component: phase = 'level-complete' detected
-158	  Component->>Component: user taps "Next Level"
-159	  Component->>Component: config.levelMode.generateNextLevel(levelIndex)
-160	  alt returns { tiles, zones }
-161	    Component->>Reducer: ADVANCE_LEVEL { tiles, zones }
-162	    Reducer-->>Reducer: levelIndex++, roundIndex = 0
-163	  else returns null
-164	    Component->>Reducer: COMPLETE_GAME
-165	    Reducer-->>Reducer: phase = 'game-over'
-166	  end
-167	```
-168	
-169	---
-170	
-171	## 6. HUD Auto-Mount
-172	
-173	`AnswerGame` renders a `ProgressHUDRoot` as the first child of its outer
-174	flex container every time a session mounts. No per-game wiring is
-175	required.
-176	
-177	```mermaid
-178	sequenceDiagram
-179	  participant Game as WordSpell / NumberMatch / SortNumbers
-180	  participant AG as AnswerGame
-181	  participant Root as ProgressHUDRoot
-182	  participant Ctx as AnswerGameStateContext
-183	  participant HUD as ProgressHUD (default or skin.ProgressHUD)
-184	
-185	  Game->>AG: render <AnswerGame config skin>
-186	  AG->>Root: mount as first child
-187	  Root->>Ctx: read config, phase, roundIndex, levelIndex, isLevelMode
-188	  Root->>Root: resolveHudFlags(config.hud, isLevelMode)
-189	  alt skin.ProgressHUD defined
-190	    Root->>HUD: render skin.ProgressHUD with resolved props
-191	  else default
-192	    Root->>HUD: render built-in ProgressHUD with resolved props
-193	  end
-194	```
-195	
-196	---
-197	
-198	## 7. Custom Game Delete
-199	
-200	User deletes the current custom game from the `InstructionsOverlay` settings cog.
-201	
-202	```mermaid
-203	sequenceDiagram
-204	  actor User
-205	  participant GameBody as GameBody ($gameId.tsx)
-206	  participant IO as InstructionsOverlay
-207	  participant ACM as AdvancedConfigModal
-208	  participant Hook as useCustomGames
-209	  participant DB as custom_games (RxDB)
-210	  participant Nav as useNavigate
-211	
-212	  User->>IO: click cog (Configure)
-213	  IO->>ACM: open modal (mode = customGame)
-214	  User->>ACM: click Delete
-215	  ACM->>ACM: open confirmation dialog
-216	  User->>ACM: click Delete (confirm)
-217	  ACM->>IO: call onDeleteCustomGame(configId)
-218	  IO->>GameBody: onDeleteCustomGame(configId) [prop callback into $gameId.tsx]
-219	  GameBody->>Hook: remove(id)
-220	  Hook->>DB: doc.remove()
-221	  GameBody->>Nav: navigate({ search: prev => ({ ...prev, configId: undefined }) })
-222	  ACM->>ACM: close confirmation dialog + modal
-223	```
-224	
-225	---
-226	
-227	## 8. Round Progression
-228	
-229	> **Status: planned — not yet fully implemented.**
-230	> The phase transition to `'round-complete'` is implemented. The 750ms delay before
-231	> `ADVANCE_ROUND` is implemented in `WordSpell`, `NumberMatch`, and `SortNumbers`.
-232	> A shared round-progression hook is not yet extracted.
-233	
-234	```mermaid
-235	sequenceDiagram
-236	  participant Reducer as answerGameReducer
-237	  participant Component as WordSpell / NumberMatch / SortNumbers
-238	  participant Sound as sound system
-239	
-240	  Reducer-->>Component: phase = 'round-complete'
-241	  Component->>Component: wait for sound ready signal
-242	  Component->>Component: wait 750ms (confetti animation)
-243	  alt more rounds remain
-244	    Component->>Reducer: ADVANCE_ROUND { tiles, zones }
-245	    Reducer-->>Reducer: roundIndex++, zones cleared, bankTileIds reset
-246	  else last round
-247	    Component->>Reducer: COMPLETE_GAME
-248	    Reducer-->>Reducer: phase = 'game-over'
-249	  end
-250	```
+1 import { Meta } from '@storybook/blocks';
+2 
+3 <Meta title="answer-game/Flows" />
+4 
+5 # AnswerGame — Event Flows
+6 
+7 > Source: `src/components/answer-game/`
+8 >
+9 > Each diagram shows the sequence of dispatches and effects triggered by a user action.
+10 > Update this file when adding new dispatch chains or changing existing ones.
+11 > Run `/update-architecture-docs` for guided update prompts.
+12 
+13 ---
+14 
+15 ## 1. Tile Placement
+16 
+17 Bank tile click/tap or keyboard character press.
+18 
+19 ```mermaid
+20 sequenceDiagram
+21   actor User
+22   participant Hook as useTileEvaluation
+23   participant Reducer as answerGameReducer
+24   participant Effect as useSlotBehavior (effect)
+25 
+26   User->>Hook: click bank tile / press key
+27   Hook->>Reducer: PLACE_TILE { tileId, zoneIndex }
+28   Reducer-->>Reducer: move tile from bankTileIds → zones[zoneIndex].placedTileId
+29   Reducer-->>Reducer: evaluate: all zones correct?
+30   alt all zones correct
+31     Reducer-->>Effect: phase = 'round-complete'
+32     Effect->>Effect: triggerPop animation
+33   else mismatch (wrongTileBehavior = 'reject')
+34     Reducer-->>Reducer: tile not placed, bankTileIds unchanged
+35   else mismatch (wrongTileBehavior = 'lock-manual' or 'lock-auto-eject')
+36     Reducer-->>Reducer: zones[zoneIndex].isWrong = true, isLocked = true
+37     Effect->>Effect: triggerShake animation
+38   end
+39 ```
+40 
+41 ---
+42 
+43 ## 2. Wrong Tile Auto-Eject
+44 
+45 Only when `config.wrongTileBehavior === 'lock-auto-eject'`.
+46 
+47 ```mermaid
+48 sequenceDiagram
+49   participant Reducer as answerGameReducer
+50   participant Effect as useSlotBehavior (effect)
+51 
+52   Reducer-->>Effect: zones[zoneIndex].isWrong = true
+53   Effect->>Effect: triggerShake animation (immediate)
+54   Effect->>Effect: wait 350ms
+55   Effect->>Effect: triggerEjectReturn animation
+56   Effect->>Effect: wait 1000ms
+57   Effect->>Reducer: EJECT_TILE { zoneIndex }
+58   Reducer-->>Reducer: zones[zoneIndex].placedTileId = null, isWrong = false, isLocked = false
+59   Reducer-->>Reducer: tile id returned to bankTileIds
+60 ```
+61 
+62 ---
+63 
+64 ## 3. Drag and Drop
+65 
+66 Dragging a bank tile or slot tile onto a slot.
+67 
+68 ```mermaid
+69 flowchart TD
+70   A([User starts drag]) --> B[SET_DRAG_ACTIVE tileId]
+71   B --> C{Drag over slot?}
+72   C -- enter --> D[SET_DRAG_HOVER zoneIndex]
+73   C -- leave --> E[SET_DRAG_HOVER null]
+74   D --> F{Drop?}
+75   F -- bank tile on empty slot --> G[PLACE_TILE tileId zoneIndex]
+76   F -- bank tile on occupied slot --> H[SWAP_TILES or PLACE_TILE]
+77   F -- slot tile on slot --> I[SWAP_TILES fromZone toZone]
+78   F -- slot tile on bank tile hole --> J[SWAP_SLOT_BANK zoneIndex bankTileId]
+79   F -- slot tile on bank container --> K[REMOVE_TILE zoneIndex]
+80   G & H & I & J & K --> L[SET_DRAG_ACTIVE null]
+81   L --> M[SET_DRAG_HOVER null]
+82 ```
+83 
+84 **Drag-over bank tile (slot tile being dragged):**
+85 
+86 ```mermaid
+87 sequenceDiagram
+88   participant Hook as useSlotTileDrag
+89   participant Reducer as answerGameReducer
+90 
+91   Hook->>Reducer: SET_DRAG_HOVER_BANK { tileId: bankTileId }
+92   Note over Hook,Reducer: bank tile shows "hole" preview
+93   Hook->>Reducer: drop → SWAP_SLOT_BANK { zoneIndex, bankTileId }
+94   Hook->>Reducer: SET_DRAG_HOVER_BANK { tileId: null }
+95   Hook->>Reducer: SET_DRAG_ACTIVE { tileId: null }
+96 ```
+97 
+98 ---
+99 
+100 ## 4. Keyboard and Touch Input
+101 
+102 Desktop keyboard (`useKeyboardInput`) and mobile hidden input (`useTouchKeyboardInput`).
+103 
+104 ```mermaid
+105 sequenceDiagram
+106   actor User
+107   participant KI as useKeyboardInput (global keydown)
+108   participant TE as useTileEvaluation
+109   participant Reducer as answerGameReducer
+110 
+111   User->>KI: ArrowLeft / ArrowRight
+112   KI->>Reducer: SET_ACTIVE_SLOT { zoneIndex: next }
+113 
+114   User->>KI: Backspace / Delete
+115   KI->>KI: find last filled slot ≤ activeSlotIndex
+116   KI->>Reducer: REMOVE_TILE { zoneIndex: i }
+117 
+118   User->>KI: printable character
+119   KI->>KI: find matching tile in bank?
+120   alt tile found in bank
+121     KI->>TE: placeTile(matchingTile.id, activeSlotIndex)
+122     TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
+123   else no match
+124     KI->>TE: typeTile(char, activeSlotIndex)
+125     TE->>Reducer: TYPE_TILE { tileId: "typed-{id}", value: char, zoneIndex }
+126   end
+127 ```
+128 
+129 Touch keyboard follows the same path via `useTouchKeyboardInput`, using the hidden
+130 `<input>` element's `input` event instead of global `keydown`.
+131 
+132 ---
+133 
+134 ## 5. Level Progression (SortNumbers only)
+135 
+136 Only when `config.levelMode` is configured.
+137 
+138 ```mermaid
+139 stateDiagram-v2
+140   [*] --> playing
+141 
+142   playing --> round_complete : all zones correct
+143   round_complete --> playing : ADVANCE_ROUND\n(more rounds in level)
+144   round_complete --> level_complete : ADVANCE_ROUND\n(last round in level)
+145   level_complete --> playing : ADVANCE_LEVEL\n(user clicks Next Level)
+146   level_complete --> game_over : COMPLETE_GAME\n(generateNextLevel returns null\nor maxLevels reached)
+147   playing --> game_over : COMPLETE_GAME\n(no levelMode + last round)
+148 ```
+149 
+150 **Dispatch sequence for level transition:**
+151 
+152 ```mermaid
+153 sequenceDiagram
+154   participant Component as SortNumbers
+155   participant Reducer as answerGameReducer
+156 
+157   Component->>Component: phase = 'level-complete' detected
+158   Component->>Component: user taps "Next Level"
+159   Component->>Component: config.levelMode.generateNextLevel(levelIndex)
+160   alt returns { tiles, zones }
+161     Component->>Reducer: ADVANCE_LEVEL { tiles, zones }
+162     Reducer-->>Reducer: levelIndex++, roundIndex = 0
+163   else returns null
+164     Component->>Reducer: COMPLETE_GAME
+165     Reducer-->>Reducer: phase = 'game-over'
+166   end
+167 ```
+168 
+169 ---
+170 
+171 ## 6. HUD Auto-Mount
+172 
+173 `AnswerGame` renders a `ProgressHUDRoot` as the first child of its outer
+174 flex container every time a session mounts. No per-game wiring is
+175 required.
+176 
+177 ```mermaid
+178 sequenceDiagram
+179   participant Game as WordSpell / NumberMatch / SortNumbers
+180   participant AG as AnswerGame
+181   participant Root as ProgressHUDRoot
+182   participant Ctx as AnswerGameStateContext
+183   participant HUD as ProgressHUD (default or skin.ProgressHUD)
+184 
+185   Game->>AG: render <AnswerGame config skin>
+186   AG->>Root: mount as first child
+187   Root->>Ctx: read config, phase, roundIndex, levelIndex, isLevelMode
+188   Root->>Root: resolveHudFlags(config.hud, isLevelMode)
+189   alt skin.ProgressHUD defined
+190     Root->>HUD: render skin.ProgressHUD with resolved props
+191   else default
+192     Root->>HUD: render built-in ProgressHUD with resolved props
+193   end
+194 ```
+195 
+196 ---
+197 
+198 ## 7. Custom Game Delete
+199 
+200 User deletes the current custom game from the `InstructionsOverlay` settings cog.
+201 
+202 ```mermaid
+203 sequenceDiagram
+204   actor User
+205   participant GameBody as GameBody ($gameId.tsx)
+206   participant IO as InstructionsOverlay
+207   participant ACM as AdvancedConfigModal
+208   participant Hook as useCustomGames
+209   participant DB as custom_games (RxDB)
+210   participant Nav as useNavigate
+211 
+212   User->>IO: click cog (Configure)
+213   IO->>ACM: open modal (mode = customGame)
+214   User->>ACM: click Delete
+215   ACM->>ACM: open confirmation dialog
+216   User->>ACM: click Delete (confirm)
+217   ACM->>IO: call onDeleteCustomGame(configId)
+218   IO->>GameBody: onDeleteCustomGame(configId) [prop callback into $gameId.tsx]
+219   GameBody->>Hook: remove(id)
+220   Hook->>DB: doc.remove()
+221   GameBody->>Nav: navigate({ search: prev => ({ ...prev, configId: undefined }) })
+222   ACM->>ACM: close confirmation dialog + modal
+223 ```
+224 
+225 ---
+226 
+227 ## 8. Round Progression
+228 
+229 > **Status: planned — not yet fully implemented.**
+230 > The phase transition to `'round-complete'` is implemented. The 750ms delay before
+231 > `ADVANCE_ROUND` is implemented in `WordSpell`, `NumberMatch`, and `SortNumbers`.
+232 > A shared round-progression hook is not yet extracted.
+233 
+234 ```mermaid
+235 sequenceDiagram
+236   participant Reducer as answerGameReducer
+237   participant Component as WordSpell / NumberMatch / SortNumbers
+238   participant Sound as sound system
+239 
+240   Reducer-->>Component: phase = 'round-complete'
+241   Component->>Component: wait for sound ready signal
+242   Component->>Component: wait 750ms (confetti animation)
+243   alt more rounds remain
+244     Component->>Reducer: ADVANCE_ROUND { tiles, zones }
+245     Reducer-->>Reducer: roundIndex++, zones cleared, bankTileIds reset
+246   else last round
+247     Component->>Reducer: COMPLETE_GAME
+248     Reducer-->>Reducer: phase = 'game-over'
+249   end
+250 ```
 251
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:39Z)**_
@@ -7958,242 +8166,243 @@ _**Agent (claude-opus-4-7 2026-04-21 14:40:40Z)**_
  `./worktrees/feat-wordspell-resume-round/src/games/word-spell/WordSpell/WordSpell.flows.mdx`
 
 ```text
-1	import { Meta } from '@storybook/blocks';
-2	
-3	<Meta title="Games/word-spell/Flows" />
-4	
-5	# WordSpell — End-to-End Flows
-6	
-7	> Source: `src/games/word-spell/`
-8	>
-9	> These diagrams show the full lifecycle of a WordSpell session, including sound
-10	> effects, TTS, and UI feedback at each step. Update this file when the
-11	> WordSpell progression logic or sound timing changes.
-12	
-13	---
-14	
-15	## 1. Correct Tile Placement
-16	
-17	User places the right letter in a slot. Sound fires **before** the reducer
-18	dispatch so feedback is instant.
-19	
-20	```mermaid
-21	sequenceDiagram
-22	  actor User
-23	  participant TE as useTileEvaluation
-24	  participant Audio as AudioFeedback
-25	  participant Reducer as answerGameReducer
-26	  participant Bus as GameEventBus
-27	  participant Slot as useSlotBehavior (effect)
-28	
-29	  User->>TE: click bank tile / press key
-30	  TE->>TE: tile.value === zone.expectedValue? ✓
-31	  TE->>Audio: playSound('correct', 0.8)
-32	  Audio-->>Audio: interrupts current audio, plays immediately
-33	  TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
-34	  Reducer-->>Reducer: zones[i].placedTileId = tileId
-35	  Reducer-->>Reducer: zones[i].isWrong = false
-36	  TE->>Bus: emit game:evaluate { correct: true }
-37	
-38	  alt all zones now correct
-39	    Reducer-->>Slot: phase → 'round-complete'
-40	    Slot->>Slot: triggerPop animation on each slot
-41	  else some zones still empty
-42	    Reducer-->>Reducer: phase stays 'playing'
-43	    Note over TE: useAutoNextSlot advances cursor to next empty slot
-44	  end
-45	```
-46	
-47	---
-48	
-49	## 2. Wrong Tile Placement (lock-auto-eject)
-50	
-51	WordSpell defaults to `wrongTileBehavior: 'lock-auto-eject'`. The tile is
-52	placed, marked wrong, shaken, and automatically ejected.
-53	
-54	```mermaid
-55	sequenceDiagram
-56	  actor User
-57	  participant TE as useTileEvaluation
-58	  participant Audio as AudioFeedback
-59	  participant Reducer as answerGameReducer
-60	  participant Bus as GameEventBus
-61	  participant Slot as useSlotBehavior (effect)
-62	
-63	  User->>TE: click bank tile / press key
-64	  TE->>TE: tile.value === zone.expectedValue? ✗
-65	  TE->>Audio: playSound('wrong', 0.8)
-66	  Audio-->>Audio: interrupts current audio, plays immediately
-67	  TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
-68	  Reducer-->>Reducer: zones[i].placedTileId = tileId
-69	  Reducer-->>Reducer: zones[i].isWrong = true, isLocked = true
-70	  Reducer-->>Reducer: retryCount++
-71	  TE->>Bus: emit game:evaluate { correct: false }
-72	
-73	  Reducer-->>Slot: isWrong = true detected
-74	  Slot->>Slot: triggerShake animation (immediate)
-75	  Slot->>Slot: wait 350 ms
-76	  Slot->>Slot: triggerEjectReturn animation
-77	  Slot->>Slot: wait 1000 ms
-78	  Slot->>Reducer: EJECT_TILE { zoneIndex }
-79	  Reducer-->>Reducer: zones[i].placedTileId = null
-80	  Reducer-->>Reducer: zones[i].isWrong = false, isLocked = false
-81	  Reducer-->>Reducer: tile id returned to bankTileIds
-82	```
-83	
-84	### Other wrong-tile modes
-85	
-86	| Mode          | Behavior after wrong placement                         |
-87	| ------------- | ------------------------------------------------------ |
-88	| `reject`      | Tile bounces back immediately; never enters the slot   |
-89	| `lock-manual` | Tile stays in slot marked wrong; user clicks to remove |
-90	
-91	---
-92	
-93	## 3. Round Complete → Next Round
-94	
-95	When all zones are filled correctly, the round-complete phase triggers a
-96	cascade: phase sound → confetti → delay → advance to next round → TTS
-97	announces the new word.
-98	
-99	```mermaid
-100	sequenceDiagram
-101	  participant Reducer as answerGameReducer
-102	  participant GS as useGameSounds
-103	  participant Audio as AudioFeedback
-104	  participant UI as ScoreAnimation (confetti)
-105	  participant WS as WordSpellSession (effect)
-106	  participant TTS as useRoundTTS
-107	
-108	  Note over Reducer: last PLACE_TILE made all zones correct
-109	  Reducer-->>GS: phase = 'round-complete'
-110	
-111	  GS->>Audio: playSound('round-complete')
-112	  Audio-->>Audio: interrupts queue, plays immediately
-113	  GS->>GS: await microtask
-114	  GS-->>UI: confettiReady = true
-115	  UI->>UI: render confetti burst
-116	
-117	  WS->>WS: phase === 'round-complete' && confettiReady
-118	  WS->>WS: start 750 ms timer
-119	
-120	  Note over WS: timer fires
-121	
-122	  alt more rounds remain
-123	    WS->>WS: build next round tiles/zones
-124	    WS->>Reducer: ADVANCE_ROUND { tiles, zones }
-125	    Reducer-->>Reducer: roundIndex++, zones/bankTileIds reset
-126	    Reducer-->>GS: phase = 'playing'
-127	    GS-->>UI: confettiReady = false
-128	
-129	    TTS->>Audio: whenSoundEnds()
-130	    Audio-->>TTS: queue drained
-131	    TTS->>TTS: speak(nextWord) via Web Speech API
-132	  else last round
-133	    WS->>Reducer: COMPLETE_GAME
-134	    Note over Reducer: see §4 Game Complete
-135	  end
-136	```
-137	
-138	### Timing breakdown
-139	
-140	| Offset   | Event                                                 |
-141	| -------- | ----------------------------------------------------- |
-142	| 0 ms     | Reducer sets `phase = 'round-complete'`               |
-143	| ~0 ms    | `playSound('round-complete')` fires                   |
-144	| ~1 ms    | `confettiReady` flag set (microtask)                  |
-145	| ~1 ms    | Confetti animation starts rendering                   |
-146	| 750 ms   | Timer fires → `ADVANCE_ROUND` or `COMPLETE_GAME`      |
-147	| ~750+ ms | `whenSoundEnds()` resolves → TTS speaks the next word |
-148	
-149	---
-150	
-151	## 4. Game Complete
-152	
-153	Dispatched when the last round finishes or when no more rounds exist.
-154	
-155	```mermaid
-156	sequenceDiagram
-157	  participant WS as WordSpellSession
-158	  participant Reducer as answerGameReducer
-159	  participant GS as useGameSounds
-160	  participant Audio as AudioFeedback
-161	  participant Overlay as GameOverOverlay
-162	
-163	  WS->>Reducer: COMPLETE_GAME
-164	  Reducer-->>Reducer: phase = 'game-over'
-165	  Reducer-->>GS: phase change detected
-166	
-167	  GS->>Audio: playSound('game-complete')
-168	  GS->>GS: await microtask
-169	  GS-->>Overlay: gameOverReady = true
-170	  Overlay->>Overlay: render game-over screen
-171	  Overlay->>Overlay: show retryCount, Play Again, Home buttons
-172	
-173	  alt user taps Play Again
-174	    Overlay->>WS: onRestartSession()
-175	    WS->>WS: setSessionEpoch(e + 1)
-176	    Note over WS: AnswerGame remounts with key={epoch}, fresh round order
-177	  else user taps Home
-178	    Overlay->>WS: navigate('/$locale')
-179	  end
-180	```
-181	
-182	---
-183	
-184	## 5. Full Session Lifecycle (state diagram)
-185	
-186	```mermaid
-187	stateDiagram-v2
-188	  [*] --> loading : WordSpell mounts
-189	  loading --> playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
-190	
-191	  playing --> round_complete : all zones correct
-192	  playing --> playing : wrong tile placed\n(auto-eject returns tile)
-193	
-194	  round_complete --> playing : ADVANCE_ROUND\n(more rounds, 750 ms delay)
-195	  round_complete --> game_over : COMPLETE_GAME\n(last round)
-196	
-197	  game_over --> loading : Play Again\n(sessionEpoch++)
-198	  game_over --> [*] : Home
-199	```
-200	
-201	---
-202	
-203	## 6. Sound and TTS Pipeline
-204	
-205	All game sounds flow through `AudioFeedback.ts`. TTS waits for the audio
-206	queue to drain before speaking.
-207	
-208	```mermaid
-209	flowchart LR
-210	  subgraph "Tile feedback (instant)"
-211	    A["useTileEvaluation"] -->|"playSound('correct'/'wrong')"| B["AudioFeedback\n(interrupts queue)"]
-212	  end
-213	
-214	  subgraph "Phase sounds (on transition)"
-215	    C["useGameSounds"] -->|"playSound('round-complete')\nplaySound('level-complete')\nplaySound('game-complete')"| B
-216	  end
-217	
-218	  subgraph "TTS (after sounds)"
-219	    D["useRoundTTS"] -->|"whenSoundEnds()"| B
-220	    B -->|"queue drained"| E["useGameTTS.speakPrompt()\nWeb Speech API"]
-221	  end
-222	```
-223	
-224	### AudioFeedback API
-225	
-226	| Function          | Behavior                                            | Use case                  |
-227	| ----------------- | --------------------------------------------------- | ------------------------- |
-228	| `playSound()`     | Interrupts current audio + resets queue             | Tile correct/wrong sounds |
-229	| `queueSound()`    | Appends to queue; resolves when sound **starts**    | Phase transition sounds   |
-230	| `whenSoundEnds()` | Resolves when entire queue (current + pending) ends | TTS delay                 |
-231	
-232	> **Note:** `useGameSounds` currently uses `playSound()` (interrupt), not
-233	> `queueSound()`. This means a rapid correct tile + round-complete can cut off
-234	> the tile sound. This is intentional — the phase sound takes priority.
+1 import { Meta } from '@storybook/blocks';
+2 
+3 <Meta title="Games/word-spell/Flows" />
+4 
+5 # WordSpell — End-to-End Flows
+6 
+7 > Source: `src/games/word-spell/`
+8 >
+9 > These diagrams show the full lifecycle of a WordSpell session, including sound
+10 > effects, TTS, and UI feedback at each step. Update this file when the
+11 > WordSpell progression logic or sound timing changes.
+12 
+13 ---
+14 
+15 ## 1. Correct Tile Placement
+16 
+17 User places the right letter in a slot. Sound fires **before** the reducer
+18 dispatch so feedback is instant.
+19 
+20 ```mermaid
+21 sequenceDiagram
+22   actor User
+23   participant TE as useTileEvaluation
+24   participant Audio as AudioFeedback
+25   participant Reducer as answerGameReducer
+26   participant Bus as GameEventBus
+27   participant Slot as useSlotBehavior (effect)
+28 
+29   User->>TE: click bank tile / press key
+30   TE->>TE: tile.value === zone.expectedValue? ✓
+31   TE->>Audio: playSound('correct', 0.8)
+32   Audio-->>Audio: interrupts current audio, plays immediately
+33   TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
+34   Reducer-->>Reducer: zones[i].placedTileId = tileId
+35   Reducer-->>Reducer: zones[i].isWrong = false
+36   TE->>Bus: emit game:evaluate { correct: true }
+37 
+38   alt all zones now correct
+39     Reducer-->>Slot: phase → 'round-complete'
+40     Slot->>Slot: triggerPop animation on each slot
+41   else some zones still empty
+42     Reducer-->>Reducer: phase stays 'playing'
+43     Note over TE: useAutoNextSlot advances cursor to next empty slot
+44   end
+45 ```
+46 
+47 ---
+48 
+49 ## 2. Wrong Tile Placement (lock-auto-eject)
+50 
+51 WordSpell defaults to `wrongTileBehavior: 'lock-auto-eject'`. The tile is
+52 placed, marked wrong, shaken, and automatically ejected.
+53 
+54 ```mermaid
+55 sequenceDiagram
+56   actor User
+57   participant TE as useTileEvaluation
+58   participant Audio as AudioFeedback
+59   participant Reducer as answerGameReducer
+60   participant Bus as GameEventBus
+61   participant Slot as useSlotBehavior (effect)
+62 
+63   User->>TE: click bank tile / press key
+64   TE->>TE: tile.value === zone.expectedValue? ✗
+65   TE->>Audio: playSound('wrong', 0.8)
+66   Audio-->>Audio: interrupts current audio, plays immediately
+67   TE->>Reducer: PLACE_TILE { tileId, zoneIndex }
+68   Reducer-->>Reducer: zones[i].placedTileId = tileId
+69   Reducer-->>Reducer: zones[i].isWrong = true, isLocked = true
+70   Reducer-->>Reducer: retryCount++
+71   TE->>Bus: emit game:evaluate { correct: false }
+72 
+73   Reducer-->>Slot: isWrong = true detected
+74   Slot->>Slot: triggerShake animation (immediate)
+75   Slot->>Slot: wait 350 ms
+76   Slot->>Slot: triggerEjectReturn animation
+77   Slot->>Slot: wait 1000 ms
+78   Slot->>Reducer: EJECT_TILE { zoneIndex }
+79   Reducer-->>Reducer: zones[i].placedTileId = null
+80   Reducer-->>Reducer: zones[i].isWrong = false, isLocked = false
+81   Reducer-->>Reducer: tile id returned to bankTileIds
+82 ```
+83 
+84 ### Other wrong-tile modes
+85 
+86 | Mode          | Behavior after wrong placement                         |
+87 | ------------- | ------------------------------------------------------ |
+88 | `reject`      | Tile bounces back immediately; never enters the slot   |
+89 | `lock-manual` | Tile stays in slot marked wrong; user clicks to remove |
+90 
+91 ---
+92 
+93 ## 3. Round Complete → Next Round
+94 
+95 When all zones are filled correctly, the round-complete phase triggers a
+96 cascade: phase sound → confetti → delay → advance to next round → TTS
+97 announces the new word.
+98 
+99 ```mermaid
+100 sequenceDiagram
+101   participant Reducer as answerGameReducer
+102   participant GS as useGameSounds
+103   participant Audio as AudioFeedback
+104   participant UI as ScoreAnimation (confetti)
+105   participant WS as WordSpellSession (effect)
+106   participant TTS as useRoundTTS
+107 
+108   Note over Reducer: last PLACE_TILE made all zones correct
+109   Reducer-->>GS: phase = 'round-complete'
+110 
+111   GS->>Audio: playSound('round-complete')
+112   Audio-->>Audio: interrupts queue, plays immediately
+113   GS->>GS: await microtask
+114   GS-->>UI: confettiReady = true
+115   UI->>UI: render confetti burst
+116 
+117   WS->>WS: phase === 'round-complete' && confettiReady
+118   WS->>WS: start 750 ms timer
+119 
+120   Note over WS: timer fires
+121 
+122   alt more rounds remain
+123     WS->>WS: build next round tiles/zones
+124     WS->>Reducer: ADVANCE_ROUND { tiles, zones }
+125     Reducer-->>Reducer: roundIndex++, zones/bankTileIds reset
+126     Reducer-->>GS: phase = 'playing'
+127     GS-->>UI: confettiReady = false
+128 
+129     TTS->>Audio: whenSoundEnds()
+130     Audio-->>TTS: queue drained
+131     TTS->>TTS: speak(nextWord) via Web Speech API
+132   else last round
+133     WS->>Reducer: COMPLETE_GAME
+134     Note over Reducer: see §4 Game Complete
+135   end
+136 ```
+137 
+138 ### Timing breakdown
+139 
+140 | Offset   | Event                                                 |
+141 | -------- | ----------------------------------------------------- |
+142 | 0 ms     | Reducer sets `phase = 'round-complete'`               |
+143 | ~0 ms    | `playSound('round-complete')` fires                   |
+144 | ~1 ms    | `confettiReady` flag set (microtask)                  |
+145 | ~1 ms    | Confetti animation starts rendering                   |
+146 | 750 ms   | Timer fires → `ADVANCE_ROUND` or `COMPLETE_GAME`      |
+147 | ~750+ ms | `whenSoundEnds()` resolves → TTS speaks the next word |
+148 
+149 ---
+150 
+151 ## 4. Game Complete
+152 
+153 Dispatched when the last round finishes or when no more rounds exist.
+154 
+155 ```mermaid
+156 sequenceDiagram
+157   participant WS as WordSpellSession
+158   participant Reducer as answerGameReducer
+159   participant GS as useGameSounds
+160   participant Audio as AudioFeedback
+161   participant Overlay as GameOverOverlay
+162 
+163   WS->>Reducer: COMPLETE_GAME
+164   Reducer-->>Reducer: phase = 'game-over'
+165   Reducer-->>GS: phase change detected
+166 
+167   GS->>Audio: playSound('game-complete')
+168   GS->>GS: await microtask
+169   GS-->>Overlay: gameOverReady = true
+170   Overlay->>Overlay: render game-over screen
+171   Overlay->>Overlay: show retryCount, Play Again, Home buttons
+172 
+173   alt user taps Play Again
+174     Overlay->>WS: onRestartSession()
+175     WS->>WS: setSessionEpoch(e + 1)
+176     Note over WS: AnswerGame remounts with key={epoch}, fresh round order
+177   else user taps Home
+178     Overlay->>WS: navigate('/$locale')
+179   end
+180 ```
+181 
+182 ---
+183 
+184 ## 5. Full Session Lifecycle (state diagram)
+185 
+186 ```mermaid
+187 stateDiagram-v2
+188   [*] --> loading : WordSpell mounts
+189   loading --> playing : useLibraryRounds resolves,\nINIT_ROUND dispatched
+190 
+191   playing --> round_complete : all zones correct
+192   playing --> playing : wrong tile placed\n(auto-eject returns tile)
+193 
+194   round_complete --> playing : ADVANCE_ROUND\n(more rounds, 750 ms delay)
+195   round_complete --> game_over : COMPLETE_GAME\n(last round)
+196 
+197   game_over --> loading : Play Again\n(sessionEpoch++)
+198   game_over --> [*] : Home
+199 ```
+200 
+201 ---
+202 
+203 ## 6. Sound and TTS Pipeline
+204 
+205 All game sounds flow through `AudioFeedback.ts`. TTS waits for the audio
+206 queue to drain before speaking.
+207 
+208 ```mermaid
+209 flowchart LR
+210   subgraph "Tile feedback (instant)"
+211     A["useTileEvaluation"] -->|"playSound('correct'/'wrong')"| B["AudioFeedback\n(interrupts queue)"]
+212   end
+213 
+214   subgraph "Phase sounds (on transition)"
+215     C["useGameSounds"] -->|"playSound('round-complete')\nplaySound('level-complete')\nplaySound('game-complete')"| B
+216   end
+217 
+218   subgraph "TTS (after sounds)"
+219     D["useRoundTTS"] -->|"whenSoundEnds()"| B
+220     B -->|"queue drained"| E["useGameTTS.speakPrompt()\nWeb Speech API"]
+221   end
+222 ```
+223 
+224 ### AudioFeedback API
+225 
+226 | Function          | Behavior                                            | Use case                  |
+227 | ----------------- | --------------------------------------------------- | ------------------------- |
+228 | `playSound()`     | Interrupts current audio + resets queue             | Tile correct/wrong sounds |
+229 | `queueSound()`    | Appends to queue; resolves when sound **starts**    | Phase transition sounds   |
+230 | `whenSoundEnds()` | Resolves when entire queue (current + pending) ends | TTS delay                 |
+231 
+232 > **Note:** `useGameSounds` currently uses `playSound()` (interrupt), not
+233 > `queueSound()`. This means a rapid correct tile + round-complete can cut off
+234 > the tile sound. This is intentional — the phase sound takes priority.
 235
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:46Z)**_
@@ -8214,6 +8423,7 @@ Check debugging mdx
 230:  answerGameReducer,
 235:const next = answerGameReducer(state, {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:48Z)**_
@@ -8235,6 +8445,7 @@ src/lib/game-engine/GameEngine.flows.mdx:95:  Provider->>Hook: mount with initia
 src/lib/game-engine/GameEngine.flows.mdx:96:  Hook->>Provider: dispatch INIT_ROUND with restored tiles/zones
 src/lib/game-engine/GameEngine.flows.mdx:97:  Provider-->>Provider: game resumes at exact mid-round state
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:55Z)**_
@@ -8244,29 +8455,30 @@ _**Agent (claude-opus-4-7 2026-04-21 14:40:55Z)**_
  `./worktrees/feat-wordspell-resume-round/src/lib/game-engine/GameEngine.flows.mdx`
 
 ```text
-78	---
-79	
-80	## 4. Draft State Sync (AnswerGame mid-round persistence)
-81	
-82	`useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
-83	restores exactly where the player left off.
-84	
-85	```mermaid
-86	sequenceDiagram
-87	  participant Provider as AnswerGameProvider
-88	  participant Hook as useAnswerGameDraftSync
-89	  participant DB as RxDB
-90	
-91	  Provider->>Hook: state changes (every dispatch)
-92	  Hook->>DB: upsert session_history_index.draftState (debounced)
-93	
-94	  Note over Hook,DB: On page refresh / remount
-95	  Provider->>Hook: mount with initialState prop from route loader
-96	  Hook->>Provider: dispatch INIT_ROUND with restored tiles/zones
-97	  Provider-->>Provider: game resumes at exact mid-round state
-98	```
+78 ---
+79 
+80 ## 4. Draft State Sync (AnswerGame mid-round persistence)
+81 
+82 `useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
+83 restores exactly where the player left off.
+84 
+85 ```mermaid
+86 sequenceDiagram
+87   participant Provider as AnswerGameProvider
+88   participant Hook as useAnswerGameDraftSync
+89   participant DB as RxDB
+90 
+91   Provider->>Hook: state changes (every dispatch)
+92   Hook->>DB: upsert session_history_index.draftState (debounced)
+93 
+94   Note over Hook,DB: On page refresh / remount
+95   Provider->>Hook: mount with initialState prop from route loader
+96   Hook->>Provider: dispatch INIT_ROUND with restored tiles/zones
+97   Provider-->>Provider: game resumes at exact mid-round state
+98 ```
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:40:56Z)**_
@@ -8276,57 +8488,58 @@ _**Agent (claude-opus-4-7 2026-04-21 14:40:56Z)**_
  `./worktrees/feat-wordspell-resume-round/src/lib/game-engine/debugging.mdx`
 
 ```text
-1	import { Meta } from '@storybook/blocks';
-2	
-3	<Meta title="game-engine/Debugging" />
-4	
-5	# Debugging the Game Engine
-6	
-7	> Techniques for inspecting state transitions, dispatched actions, sound
-8	> playback, and persisted session data during development.
-9	
-10	---
-11	
-12	## 1. React DevTools — Reducer and Context Inspection
-13	
-14	Both the outer `GameEngineProvider` and the inner `AnswerGameProvider` use
-15	plain `useReducer`. React DevTools is the primary way to inspect their state.
-16	
-17	### Viewing AnswerGame state
-18	
-19	1. Open **React DevTools** → Components tab
-20	2. Search for `AnswerGameStateContext.Provider`
-21	3. Expand the **value** prop to see the full `AnswerGameState`:
-22	   `phase`, `zones`, `bankTileIds`, `activeSlotIndex`, `retryCount`, etc.
-23	
-24	### Viewing dispatched actions
-25	
-26	React DevTools does not log individual `useReducer` dispatches by default.
-27	To trace every action through the AnswerGame reducer, add a temporary
-28	logging wrapper in `AnswerGameProvider.tsx`:
-29	
-30	```ts
-31	// Temporary — remove before committing
-32	const [state, rawDispatch] = useReducer(
-33	  answerGameReducer,
-34	  initialState,
-35	);
-36	const dispatch = (action: AnswerGameAction) => {
-37	  console.group(`[AnswerGame] ${action.type}`);
-38	  console.log('payload', action);
-39	  console.log('state before', state);
-40	  rawDispatch(action);
-41	  console.groupEnd();
-42	};
-43	```
-44	
-45	The same pattern works for the GameEngine lifecycle reducer in
-46	`lifecycle.ts`:
-47	
-48	```ts
-49	const [state, rawDispatch] = useReducer(reducer, initial);
-50	const dispatch = (move: Move) => {
+1 import { Meta } from '@storybook/blocks';
+2 
+3 <Meta title="game-engine/Debugging" />
+4 
+5 # Debugging the Game Engine
+6 
+7 > Techniques for inspecting state transitions, dispatched actions, sound
+8 > playback, and persisted session data during development.
+9 
+10 ---
+11 
+12 ## 1. React DevTools — Reducer and Context Inspection
+13 
+14 Both the outer `GameEngineProvider` and the inner `AnswerGameProvider` use
+15 plain `useReducer`. React DevTools is the primary way to inspect their state.
+16 
+17 ### Viewing AnswerGame state
+18 
+19 1. Open **React DevTools** → Components tab
+20 2. Search for `AnswerGameStateContext.Provider`
+21 3. Expand the **value** prop to see the full `AnswerGameState`:
+22    `phase`, `zones`, `bankTileIds`, `activeSlotIndex`, `retryCount`, etc.
+23 
+24 ### Viewing dispatched actions
+25 
+26 React DevTools does not log individual `useReducer` dispatches by default.
+27 To trace every action through the AnswerGame reducer, add a temporary
+28 logging wrapper in `AnswerGameProvider.tsx`:
+29 
+30 ```ts
+31 // Temporary — remove before committing
+32 const [state, rawDispatch] = useReducer(
+33   answerGameReducer,
+34   initialState,
+35 );
+36 const dispatch = (action: AnswerGameAction) => {
+37   console.group(`[AnswerGame] ${action.type}`);
+38   console.log('payload', action);
+39   console.log('state before', state);
+40   rawDispatch(action);
+41   console.groupEnd();
+42 };
+43 ```
+44 
+45 The same pattern works for the GameEngine lifecycle reducer in
+46 `lifecycle.ts`:
+47 
+48 ```ts
+49 const [state, rawDispatch] = useReducer(reducer, initial);
+50 const dispatch = (move: Move) => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:41:12Z)**_
@@ -8338,47 +8551,48 @@ _**Agent (claude-opus-4-7 2026-04-21 14:41:13Z)**_
  `./worktrees/feat-wordspell-resume-round/src/lib/game-engine/GameEngine.reference.mdx`
 
 ```text
-90	`SessionRecorderBridge` (inside `GameEngineProvider`) subscribes to move dispatches
-91	and writes them to RxDB via `useSessionRecorder`.
-92	
-93	### MoveLog structure
-94	
-95	```ts
-96	interface MoveLog {
-97	  gameId: string;
-98	  sessionId: string;
-99	  profileId: string;
-100	  seed: string;
-101	  initialContent: ResolvedContent;
-102	  initialState: GameEngineState;
-103	  moves: Move[]; // append-only list of every dispatched move
-104	}
-105	```
-106	
-107	Stored in RxDB collection `session_history_index`. Replay by passing `initialLog` to
-108	`GameEngineProvider`.
-109	
-110	---
-111	
-112	## Draft Sync
-113	
-114	`useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
-115	`AnswerGameState` to RxDB's `session_history_index.draftState` field on every state
-116	change, and reads it back on mount when `initialState` is provided.
-117	
-118	### AnswerGameDraftState (persisted subset)
-119	
-120	```ts
-121	interface AnswerGameDraftState {
-122	  allTiles: TileItem[];
-123	  bankTileIds: string[];
-124	  zones: AnswerZone[];
-125	  activeSlotIndex: number;
-126	  phase: 'playing' | 'round-complete' | 'level-complete'; // 'game-over' never persisted
-127	  roundIndex: number;
-128	  retryCount: number;
-129	  levelIndex: number;
+90 `SessionRecorderBridge` (inside `GameEngineProvider`) subscribes to move dispatches
+91 and writes them to RxDB via `useSessionRecorder`.
+92 
+93 ### MoveLog structure
+94 
+95 ```ts
+96 interface MoveLog {
+97   gameId: string;
+98   sessionId: string;
+99   profileId: string;
+100   seed: string;
+101   initialContent: ResolvedContent;
+102   initialState: GameEngineState;
+103   moves: Move[]; // append-only list of every dispatched move
+104 }
+105 ```
+106 
+107 Stored in RxDB collection `session_history_index`. Replay by passing `initialLog` to
+108 `GameEngineProvider`.
+109 
+110 ---
+111 
+112 ## Draft Sync
+113 
+114 `useAnswerGameDraftSync` (in `src/components/answer-game/`) serialises the current
+115 `AnswerGameState` to RxDB's `session_history_index.draftState` field on every state
+116 change, and reads it back on mount when `initialState` is provided.
+117 
+118 ### AnswerGameDraftState (persisted subset)
+119 
+120 ```ts
+121 interface AnswerGameDraftState {
+122   allTiles: TileItem[];
+123   bankTileIds: string[];
+124   zones: AnswerZone[];
+125   activeSlotIndex: number;
+126   phase: 'playing' | 'round-complete' | 'level-complete'; // 'game-over' never persisted
+127   roundIndex: number;
+128   retryCount: number;
+129   levelIndex: number;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:41:23Z)**_
@@ -8397,6 +8611,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:41:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/lib/game-engine/GameEngine.flows.mdx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:41:34Z)**_
@@ -8411,6 +8626,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:41:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/components/answer-game/AnswerGame/AnswerGame.flows.mdx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:02Z)**_
@@ -8425,6 +8641,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:42:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/games/word-spell/WordSpell/WordSpell.flows.mdx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:18Z)**_
@@ -8439,6 +8656,7 @@ _**Agent (claude-opus-4-7 2026-04-21 14:42:23Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-wordspell-resume-round/src/lib/game-engine/GameEngine.reference.mdx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:28Z)**_
@@ -8460,6 +8678,7 @@ src/lib/game-engine/GameEngine.flows.mdx 1ms (unchanged)
 src/lib/game-engine/GameEngine.reference.mdx 4ms (unchanged)
 Done in 4.12s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:35Z)**_
@@ -8477,6 +8696,7 @@ Linting: 106 file(s)
 Summary: 0 error(s)
 Done in 1.19s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:36Z)**_
@@ -8491,6 +8711,7 @@ Prettier check mdx
 Checking formatting...
 All matched files use Prettier code style!
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:42:41Z)**_
@@ -8513,6 +8734,7 @@ Check status
  M src/lib/game-engine/GameEngine.flows.mdx
  M src/lib/game-engine/GameEngine.reference.mdx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:43:10Z)**_
@@ -8562,6 +8784,7 @@ Done in 11.62s.
 [feat/wordspell-resume-round 9b2b3b09] docs(answer-game): document RESUME_ROUND in diagrams and flows
  4 files changed, 68 insertions(+), 4 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:43:47Z)**_
@@ -8579,6 +8802,7 @@ hint: its remote counterpart. If you want to integrate the remote changes,
 hint: use 'git pull' before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:43:54Z)**_
@@ -8605,6 +8829,7 @@ d71fc100 stories(answer-game/Slot): render real dice/domino faces in playground
 b9561b3f stories(answer-game/ProgressHUD): collapse nine variants to Playground
 d3ece64f stories(answer-game/EncouragementAnnouncer): collapse Hidden/Visible
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:44:07Z)**_
@@ -8620,8 +8845,10 @@ Rebase on remote tip
 ```text
 From github.com:leocaseiro/base-skill
  * branch              feat/wordspell-resume-round -> FETCH_HEAD
-Rebasing (1/1)Successfully rebased and updated refs/heads/feat/wordspell-resume-round.
+Rebasing (1/1)
+Successfully rebased and updated refs/heads/feat/wordspell-resume-round.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:44:17Z)**_
@@ -8639,6 +8866,7 @@ b77239c8 chore(release): v0.11.1 (#140)
 cc85d537 stories(answer-game): audit retrofit per new controls policy (#134)
 d71fc100 stories(answer-game/Slot): render real dice/domino faces in playground
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:44:55Z)**_
@@ -8656,6 +8884,7 @@ Push
 To github.com:leocaseiro/base-skill.git
    195de578..cd53414d  feat/wordspell-resume-round -> feat/wordspell-resume-round
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 14:45:10Z)**_
