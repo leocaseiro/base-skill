@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { compareHomeScreenCardRows } from './home-screen-card-order';
 import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import type { CustomGameDoc } from '@/db/schemas/custom_games';
 import type { GameColorKey } from '@/lib/game-colors';
@@ -87,31 +88,67 @@ const HomeScreen = (): JSX.Element => {
     });
   };
 
-  const defaults = GAME_CATALOG.map((entry) => (
-    <GameCard
-      key={`default-${entry.id}`}
-      variant="default"
-      gameId={entry.id}
-      title={t(entry.titleKey)}
-      chips={configToChips(
-        entry.id,
-        lastSessionConfigs[entry.id] ?? {},
-      )}
-      onPlay={() => handlePlayDefault(entry.id)}
-      onOpenCog={() => void openDefaultCog(entry.id)}
-      isBookmarked={isBookmarked({
-        targetType: 'game',
-        targetId: entry.id,
-      })}
-      onToggleBookmark={() =>
-        void toggle({ targetType: 'game', targetId: entry.id })
-      }
-    />
-  ));
-  const customCards = customGames.flatMap((doc) => {
-    const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
-    if (!entry) return [];
-    return [
+  const unsortedCards = [
+    ...GAME_CATALOG.map((entry, index) => ({
+      row: {
+        kind: 'default' as const,
+        index,
+        bookmarked: isBookmarked({
+          targetType: 'game',
+          targetId: entry.id,
+        }),
+      },
+      kind: 'default' as const,
+      entry,
+    })),
+    ...customGames.flatMap((doc, listIndex) => {
+      const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
+      if (!entry) return [];
+      return [
+        {
+          row: {
+            kind: 'custom' as const,
+            index: listIndex,
+            bookmarked: isBookmarked({
+              targetType: 'customGame',
+              targetId: doc.id,
+            }),
+          },
+          kind: 'custom' as const,
+          doc,
+          entry,
+        },
+      ];
+    }),
+  ].toSorted((a, b) => compareHomeScreenCardRows(a.row, b.row));
+
+  const cards = unsortedCards.map((item) => {
+    if (item.kind === 'default') {
+      const { entry } = item;
+      return (
+        <GameCard
+          key={`default-${entry.id}`}
+          variant="default"
+          gameId={entry.id}
+          title={t(entry.titleKey)}
+          chips={configToChips(
+            entry.id,
+            lastSessionConfigs[entry.id] ?? {},
+          )}
+          onPlay={() => handlePlayDefault(entry.id)}
+          onOpenCog={() => void openDefaultCog(entry.id)}
+          isBookmarked={isBookmarked({
+            targetType: 'game',
+            targetId: entry.id,
+          })}
+          onToggleBookmark={() =>
+            void toggle({ targetType: 'game', targetId: entry.id })
+          }
+        />
+      );
+    }
+    const { doc, entry } = item;
+    return (
       <GameCard
         key={`custom-${doc.id}`}
         variant="customGame"
@@ -130,10 +167,9 @@ const HomeScreen = (): JSX.Element => {
         onToggleBookmark={() =>
           void toggle({ targetType: 'customGame', targetId: doc.id })
         }
-      />,
-    ];
+      />
+    );
   });
-  const cards = [...defaults, ...customCards];
 
   return (
     <div className="px-4 py-4">
