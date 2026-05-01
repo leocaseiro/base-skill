@@ -185,6 +185,52 @@ describe('useLibraryRounds', () => {
     expect(seen.size).toBe(0);
   });
 
+  it('falls back to non-visual rounds when hasVisual filter returns zero hits', async () => {
+    const config: WordSpellConfig = {
+      ...baseConfig,
+      mode: 'picture',
+      totalRounds: 3,
+      source: {
+        type: 'word-library',
+        // Level 8 has no emoji-tagged words → zero visual hits → fallback triggers
+        filter: { region: 'aus', level: 8, hasVisual: true },
+      },
+    };
+    const { result } = renderHook(() =>
+      useLibraryRounds(config, undefined, store),
+    );
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    // Fallback retried without hasVisual, so we get level 8 words without emoji
+    expect(result.current.rounds.length).toBeGreaterThan(0);
+    expect(
+      result.current.rounds.some((r) => !r.emoji && !r.image),
+    ).toBe(true);
+  });
+
+  it('returns visual rounds when hasVisual filter matches enough words', async () => {
+    const config: WordSpellConfig = {
+      ...baseConfig,
+      mode: 'picture',
+      totalRounds: 2,
+      source: {
+        type: 'word-library',
+        filter: { region: 'aus', hasVisual: true },
+      },
+    };
+    const { result } = renderHook(() =>
+      useLibraryRounds(config, undefined, store),
+    );
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    expect(result.current.rounds).toHaveLength(2);
+    for (const r of result.current.rounds) {
+      expect(r.emoji ?? r.image).toBeDefined();
+    }
+  });
+
   it('returns the whole pool when it is smaller than limit (silent cap)', async () => {
     const libraryConfig: WordSpellConfig = {
       ...baseConfig,
