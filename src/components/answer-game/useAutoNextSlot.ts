@@ -1,43 +1,100 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useTileEvaluation } from './useTileEvaluation';
 
-export interface AutoNextSlot {
-  placeInNextSlot: (tileId: string) => void;
+export interface PlaceResult {
+  placed: boolean;
+  zoneIndex: number;
+  rejected: boolean;
 }
 
+export interface AutoNextSlot {
+  placeInNextSlot: (tileId: string) => PlaceResult;
+}
+
+// Module-scoped: shared across all hook instances on the page (single AnswerGame
+// instance assumed). For multi-instance support, lift to AnswerGameProvider context.
+let pendingPlacements: Array<{ tileId: string; zoneIndex: number }> =
+  [];
+
+export const clearPendingPlacements = (): void => {
+  pendingPlacements = [];
+};
+
 export const useAutoNextSlot = (): AutoNextSlot => {
-  const { activeSlotIndex, zones } = useAnswerGameContext();
+  const state = useAnswerGameContext();
+  const { zones, activeSlotIndex, config, allTiles, roundIndex } =
+    state;
   const { placeTile } = useTileEvaluation();
 
-  const placeInNextSlot = useCallback(
-    (tileId: string) => {
-      // Guard: if the active slot is in a wrong state (e.g. a wrong tile was
-      // just placed with lock-auto-eject), block further placements until it
-      // clears. This prevents double/triple taps from skipping past the slot.
-      if (zones[activeSlotIndex]?.isWrong) return;
+  useEffect(() => {
+    clearPendingPlacements();
+  }, [roundIndex, zones.length]);
 
-      // Look for the next available slot from activeSlotIndex forward...
-      let targetIndex = zones.findIndex(
-        (z, i) =>
-          i >= activeSlotIndex &&
-          z.placedTileId === null &&
-          !z.isLocked,
+  const placeInNextSlot = useCallback(
+    (tileId: string): PlaceResult => {
+      pendingPlacements = pendingPlacements.filter(
+        (entry) =>
+          zones[entry.zoneIndex]?.placedTileId !== entry.tileId,
       );
 
-      // ...and wrap around if needed. This handles out-of-order placements
-      // (e.g. via drag) where earlier slots were left empty and activeSlotIndex
-      // has already advanced past them.
+      const claimedZones = new Set(
+        pendingPlacements.map((e) => e.zoneIndex),
+      );
+
+      const isAvailable = (i: number) =>
+        zones[i] &&
+        !zones[i].placedTileId &&
+        !zones[i].isLocked &&
+        !claimedZones.has(i);
+
+      let targetIndex = -1;
+      for (let i = activeSlotIndex; i < zones.length; i++) {
+        if (isAvailable(i)) {
+          targetIndex = i;
+          break;
+        }
+      }
       if (targetIndex === -1) {
-        targetIndex = zones.findIndex(
-          (z) => z.placedTileId === null && !z.isLocked,
-        );
+        for (let i = 0; i < activeSlotIndex; i++) {
+          if (isAvailable(i)) {
+            targetIndex = i;
+            break;
+          }
+        }
       }
 
-      if (targetIndex === -1) return;
-      placeTile(tileId, targetIndex);
+      if (targetIndex === -1) {
+        return { placed: false, zoneIndex: -1, rejected: false };
+      }
+
+      if (config.wrongTileBehavior !== 'lock-manual') {
+        const tile = allTiles.find((t) => t.id === tileId);
+        const targetZone = zones[targetIndex];
+        if (
+          tile &&
+          targetZone &&
+          tile.value !== targetZone.expectedValue
+        ) {
+          return {
+            placed: false,
+            zoneIndex: targetIndex,
+            rejected: true,
+          };
+        }
+      }
+
+      pendingPlacements.push({ tileId, zoneIndex: targetIndex });
+      void placeTile(tileId, targetIndex);
+      return { placed: true, zoneIndex: targetIndex, rejected: false };
     },
-    [placeTile, activeSlotIndex, zones],
+    [
+      zones,
+      activeSlotIndex,
+      config.wrongTileBehavior,
+      allTiles,
+      placeTile,
+    ],
   );
 
   return { placeInNextSlot };
