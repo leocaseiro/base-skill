@@ -33,6 +33,29 @@ describe('resolveSimpleConfig', () => {
     expect(full.mode).toBe('picture');
   });
 
+  it('picture mode sets hasVisual: true in the filter', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: [],
+      region: 'aus',
+      inputMethod: 'drag',
+      mode: 'picture',
+    };
+    const full = resolveSimpleConfig(simple);
+    expect(full.source?.filter.hasVisual).toBe(true);
+  });
+
+  it('recall mode does not set hasVisual in the filter', () => {
+    const simple: WordSpellSimpleConfig = {
+      configMode: 'simple',
+      selectedUnits: L1,
+      region: 'aus',
+      inputMethod: 'drag',
+    };
+    const full = resolveSimpleConfig(simple);
+    expect(full.source?.filter.hasVisual).toBeUndefined();
+  });
+
   it('picture mode opens the filter to all levels and skips required graphemes', () => {
     const simple: WordSpellSimpleConfig = {
       configMode: 'simple',

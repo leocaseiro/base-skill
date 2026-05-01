@@ -86,6 +86,7 @@ export const resolveSimpleConfig = (
         region,
         graphemesAllowed,
         graphemesRequired,
+        ...(mode === 'picture' ? { hasVisual: true } : {}),
       },
     },
   };
