@@ -261,7 +261,12 @@ export const resolveWordSpellConfig = (
 
   // When the picker set selectedUnits, re-derive source.filter so
   // the filter stays in sync even in advanced mode.
-  if (Array.isArray(merged.selectedUnits) && merged.source) {
+  // Picture mode ignores selectedUnits entirely (no grapheme scope).
+  if (
+    merged.mode !== 'picture' &&
+    Array.isArray(merged.selectedUnits) &&
+    merged.source
+  ) {
     const derived = resolveWordSpellSimpleConfig({
       configMode: 'simple',
       selectedUnits: merged.selectedUnits,

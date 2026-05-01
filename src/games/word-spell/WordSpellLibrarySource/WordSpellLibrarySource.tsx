@@ -224,12 +224,14 @@ const LevelRow = ({
 const buildPreviewFilter = (
   selected: LevelGraphemeUnit[],
   region: Region,
+  mode?: 'picture' | 'recall',
 ): WordFilter => {
   const resolved = resolveSimpleConfig({
     configMode: 'simple',
     selectedUnits: selected,
     region,
     inputMethod: 'drag',
+    mode,
   });
   return resolved.source!.filter;
 };
@@ -279,7 +281,13 @@ export const WordSpellLibrarySource = ({
           onChange={setSelected}
         />
       ))}
-      <WordPreviewBar filter={buildPreviewFilter(selected, region)} />
+      <WordPreviewBar
+        filter={buildPreviewFilter(
+          selected,
+          region,
+          mode === 'picture' ? 'picture' : 'recall',
+        )}
+      />
       {invalid && (
         <p className="mt-2 text-xs text-destructive">
           Pick at least one sound to play.
