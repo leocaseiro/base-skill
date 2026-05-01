@@ -9431,7 +9431,7 @@ const toTile = (args: StoryArgs): SpotAllTileData =&gt; ({
   label: args.label,
   isCorrect: true,
   transform: args.transform === &#39;none&#39; ? undefined : args.transform,
-  visualVariation: {
+  tileStyle: {
     fontFamily:
       args.fontFamily === &#39;inherit&#39; ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,
@@ -9614,7 +9614,7 @@ const baseConfig: SpotAllConfig = {
   correctTileCount: 3,
   distractorCount: 4,
   totalRounds: 3,
-  visualVariationEnabled: true,
+
   enabledFontIds: [&#39;sans&#39;],
   roundsInOrder: false,
   ttsEnabled: false,
@@ -17100,7 +17100,7 @@ const toTile = (args: StoryArgs): SpotAllTileData =&gt; ({
   label: args.label,
   isCorrect: true,
   transform: args.transform === &#39;none&#39; ? undefined : args.transform,
-  visualVariation: {
+  tileStyle: {
     fontFamily:
       args.fontFamily === &#39;inherit&#39; ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,
@@ -17283,7 +17283,7 @@ const baseConfig: SpotAllConfig = {
   correctTileCount: 3,
   distractorCount: 4,
   totalRounds: 3,
-  visualVariationEnabled: true,
+
   enabledFontIds: [&#39;sans&#39;],
   roundsInOrder: false,
   ttsEnabled: false,
