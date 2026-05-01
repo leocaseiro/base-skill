@@ -3,7 +3,7 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { useEffect, useRef } from 'react';
-import { triggerShake } from './Slot/slot-animations';
+import { flashBankTileRejectFeedback } from './bank-tile-reject-feedback';
 import { useAnswerGameContext } from './useAnswerGameContext';
 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
 import { useAutoNextSlot } from './useAutoNextSlot';
@@ -111,27 +111,12 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         const { correct } = placeTile(droppedTileId, zoneIndex);
         if (
           !correct &&
-          stateRef.current.config.wrongTileBehavior === 'reject' &&
-          ref.current
+          stateRef.current.config.wrongTileBehavior === 'reject'
         ) {
           requestAnimationFrame(() => {
-            if (ref.current) {
-              triggerShake(ref.current);
-              ref.current.style.background =
-                'var(--skin-wrong-bg, #f87171)';
-              ref.current.style.borderColor =
-                'var(--skin-wrong-border, #ef4444)';
-              ref.current.addEventListener(
-                'animationend',
-                () => {
-                  if (ref.current) {
-                    ref.current.style.background = '';
-                    ref.current.style.borderColor = '';
-                  }
-                },
-                { once: true },
-              );
-            }
+            flashBankTileRejectFeedback(droppedTileId, {
+              element: ref.current,
+            });
           });
         }
       },
@@ -161,21 +146,15 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
     speakTile(tile.label);
     const result = placeInNextSlot(tile.id);
 
-    if (result.rejected && ref.current) {
-      ref.current.dataset.shaking = 'true';
-      triggerShake(ref.current);
-      const el = ref.current;
-      el.style.background = 'var(--skin-wrong-bg, #f87171)';
-      el.style.borderColor = 'var(--skin-wrong-border, #ef4444)';
-      el.addEventListener(
-        'animationend',
-        () => {
-          el.style.background = '';
-          el.style.borderColor = '';
-          delete el.dataset.shaking;
+    const bankEl = ref.current;
+    if (result.rejected && bankEl) {
+      bankEl.dataset.shaking = 'true';
+      flashBankTileRejectFeedback(tile.id, {
+        element: bankEl,
+        onAnimationEnd: () => {
+          delete bankEl.dataset.shaking;
         },
-        { once: true },
-      );
+      });
 
       if (!skin.suppressDefaultSounds) {
         playSound('wrong', 0.8);
