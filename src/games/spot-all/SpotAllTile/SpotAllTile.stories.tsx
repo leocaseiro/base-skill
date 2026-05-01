@@ -27,7 +27,7 @@ const toTile = (args: StoryArgs): SpotAllTileData => ({
   label: args.label,
   isCorrect: true,
   transform: args.transform === 'none' ? undefined : args.transform,
-  visualVariation: {
+  tileStyle: {
     fontFamily:
       args.fontFamily === 'inherit' ? undefined : args.fontFamily,
     fontSizePx: args.fontSizePx,

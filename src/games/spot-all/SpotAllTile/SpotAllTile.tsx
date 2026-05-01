@@ -1,6 +1,6 @@
 import type { SpotAllTile as SpotAllTileData } from '../types';
 import type { CSSProperties, JSX } from 'react';
-import { tileStyle } from '@/components/answer-game/styles';
+import { tileStyle as cardTileStyle } from '@/components/answer-game/styles';
 import { cn } from '@/lib/utils';
 
 export interface SpotAllTileProps {
@@ -40,12 +40,12 @@ export const SpotAllTile = ({
         'outline-none focus-visible:border-primary',
         inCooldown && 'animate-[shake_300ms_ease-in-out]',
       )}
-      style={{ ...tileStyle(), ...stateStyle }}
+      style={{ ...cardTileStyle(), ...stateStyle }}
     >
       <span
         style={{
-          fontFamily: tile.visualVariation?.fontFamily,
-          fontSize: tile.visualVariation?.fontSizePx,
+          fontFamily: tile.tileStyle?.fontFamily,
+          fontSize: tile.tileStyle?.fontSizePx,
           transform: tile.transform,
           display: 'inline-block',
         }}

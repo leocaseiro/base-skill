@@ -54,8 +54,7 @@
         "transposition": "Transposition",
         "reversible": "Reversible (self-mirror)"
       },
-      "font-pool": { "label": "Font pool" },
-      "visual-variation": { "label": "Visual variation on tiles" },
+      "tile-styles": { "label": "Tile styles" },
       "invalid-selection": "Pick at least one group to play"
     }
   },

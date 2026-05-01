@@ -12,7 +12,6 @@ export const resolveSimpleConfig = (
   correctTileCount: 4,
   distractorCount: 4,
   totalRounds: 6,
-  visualVariationEnabled: true,
   enabledFontIds: [...DEFAULT_ENABLED_FONT_IDS],
   roundsInOrder: false,
   ttsEnabled: true,

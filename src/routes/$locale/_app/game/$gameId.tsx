@@ -747,6 +747,7 @@ const SpotAllGameBody = ({
   gameId,
   sessionId,
   seed,
+  draftState,
   gameSpecificConfig,
   customGameId,
   customGameName,
@@ -757,6 +758,7 @@ const SpotAllGameBody = ({
   gameId: string;
   sessionId: string;
   seed: string;
+  draftState: AnswerGameDraftState | null;
   gameSpecificConfig: Record<string, unknown> | null;
   customGameId: string | null;
   customGameName: string | null;
@@ -765,7 +767,13 @@ const SpotAllGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -781,14 +789,12 @@ const SpotAllGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -862,6 +868,9 @@ const SpotAllGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -1105,6 +1114,7 @@ const GameBody = ({
         gameId={gameId}
         sessionId={sessionId}
         seed={seed}
+        draftState={draftState}
         gameSpecificConfig={gameSpecificConfig}
         customGameId={customGameId}
         customGameName={customGameName}

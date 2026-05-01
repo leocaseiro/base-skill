@@ -46,12 +46,14 @@ export const buildSpotAllRound = (
     rng,
   );
 
+  const stylesEnabled = config.enabledFontIds.length > 0;
+
   const distractorTiles: SpotAllTile[] = candidates.map((c) => ({
     id: nanoid(),
     label: c.label,
     isCorrect: false,
     transform: c.transform,
-    visualVariation: config.visualVariationEnabled
+    tileStyle: stylesEnabled
       ? pickVariation(rng, config.enabledFontIds)
       : undefined,
   }));
@@ -64,7 +66,7 @@ export const buildSpotAllRound = (
       id: nanoid(),
       label: target,
       isCorrect: true,
-      visualVariation: config.visualVariationEnabled
+      tileStyle: stylesEnabled
         ? pickVariation(rng, config.enabledFontIds)
         : undefined,
     }),

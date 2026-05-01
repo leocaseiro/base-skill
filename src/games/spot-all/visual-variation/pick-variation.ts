@@ -1,6 +1,6 @@
 import { FONT_POOL, SIZE_POOL } from './pools';
 
-export interface SpotAllVisualVariation {
+export interface SpotAllTileStyle {
   fontFamily?: string;
   fontSizePx: number;
 }
@@ -8,7 +8,7 @@ export interface SpotAllVisualVariation {
 export const pickVariation = (
   rng: () => number,
   enabledFontIds: readonly string[],
-): SpotAllVisualVariation => {
+): SpotAllTileStyle => {
   const fonts = FONT_POOL.filter((f) => enabledFontIds.includes(f.id));
   const font =
     fonts.length > 0

@@ -124,8 +124,6 @@ export const SpotAllConfigForm = ({
     commit(next, selectedReversibles);
   };
 
-  const visualVariationEnabled =
-    current.visualVariationEnabled !== false;
   const enabledFontIds = current.enabledFontIds ?? [
     ...DEFAULT_ENABLED_FONT_IDS,
   ];
@@ -133,13 +131,6 @@ export const SpotAllConfigForm = ({
   const isFontEnabled = (fontId: string): boolean =>
     enabledFontIds.includes(fontId);
   const allFontsOn = FONT_POOL.every((f) => isFontEnabled(f.id));
-
-  const toggleVisualVariation = (): void => {
-    onChange({
-      ...current,
-      visualVariationEnabled: !visualVariationEnabled,
-    });
-  };
 
   const toggleAllFonts = (): void => {
     const next = allFontsOn ? [] : FONT_POOL.map((f) => f.id);
@@ -196,50 +187,36 @@ export const SpotAllConfigForm = ({
       <div className="flex flex-col gap-2">
         <button
           type="button"
-          onClick={toggleVisualVariation}
+          onClick={toggleAllFonts}
           className={[
             'rounded-lg px-3 py-2 text-left font-semibold transition-colors',
-            visualVariationEnabled
+            allFontsOn
               ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-foreground',
+              : enabledFontIds.length > 0
+                ? 'bg-primary/40 text-primary-foreground'
+                : 'bg-muted text-foreground',
           ].join(' ')}
         >
-          {t('spot-all-ui.config.visual-variation.label')}
+          {t('spot-all-ui.config.tile-styles.label')}
         </button>
-        {visualVariationEnabled && (
-          <>
+        <div className="flex flex-wrap gap-2 pl-2">
+          {FONT_POOL.map((font) => (
             <button
+              key={font.id}
               type="button"
-              onClick={toggleAllFonts}
+              onClick={() => toggleFont(font.id)}
+              style={{ fontFamily: font.family }}
               className={[
-                'rounded-lg px-3 py-2 text-left text-sm font-semibold transition-colors',
-                allFontsOn
-                  ? 'bg-primary/40 text-primary-foreground'
-                  : 'bg-muted text-foreground',
+                'rounded-full border px-3 py-1 text-sm',
+                isFontEnabled(font.id)
+                  ? 'border-primary bg-primary/20'
+                  : 'border-border bg-card',
               ].join(' ')}
             >
-              {t('spot-all-ui.config.font-pool.label')}
+              {font.label}
             </button>
-            <div className="flex flex-wrap gap-2 pl-2">
-              {FONT_POOL.map((font) => (
-                <button
-                  key={font.id}
-                  type="button"
-                  onClick={() => toggleFont(font.id)}
-                  style={{ fontFamily: font.family }}
-                  className={[
-                    'rounded-full border px-3 py-1 text-sm',
-                    isFontEnabled(font.id)
-                      ? 'border-primary bg-primary/20'
-                      : 'border-border bg-card',
-                  ].join(' ')}
-                >
-                  {font.label}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
+          ))}
+        </div>
       </div>
       {empty && (
         <p className="text-destructive">
