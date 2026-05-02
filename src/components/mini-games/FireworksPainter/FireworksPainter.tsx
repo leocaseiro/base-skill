@@ -44,10 +44,10 @@ export const FireworksPainter = ({
   const stars = useMemo(() => generateStars(), []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    const timer = globalThis.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          globalThis.clearInterval(timer);
           setIsDone(true);
           onComplete?.();
           return 0;
@@ -58,14 +58,14 @@ export const FireworksPainter = ({
 
     let hintTimer: ReturnType<typeof setTimeout> | undefined;
     if (showHandHint) {
-      hintTimer = setTimeout(() => {
+      hintTimer = globalThis.setTimeout(() => {
         setShowHint(false);
       }, 3000);
     }
 
     return () => {
-      clearInterval(timer);
-      if (hintTimer !== undefined) clearTimeout(hintTimer);
+      globalThis.clearInterval(timer);
+      if (hintTimer !== undefined) globalThis.clearTimeout(hintTimer);
       confetti.reset();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- duration and showHandHint are init-only; onComplete is intentionally excluded to avoid re-mounting the timer on every render
