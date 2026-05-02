@@ -32,7 +32,23 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   return {
     ...actual,
     useNavigate: () => vi.fn(),
+    useLocation: () => ({
+      pathname: '/en/game/word-builder/sess-shell-001',
+    }),
     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+    Link: ({
+      children,
+      className,
+      to: _to,
+    }: {
+      children?: ReactNode;
+      className?: string;
+      to: string;
+    }): ReactNode => (
+      <a className={className} href="http://test/">
+        {children}
+      </a>
+    ),
   };
 });
 
@@ -78,11 +94,43 @@ let db: BaseSkillDatabase;
 
 beforeEach(async () => {
   db = await createTestDatabase();
+  Object.defineProperty(globalThis, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((q: string) => ({
+      matches: false,
+      media: q,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 });
 
 afterEach(async () => {
   await destroyTestDatabase(db);
 });
+
+const setFullscreenSupport = (
+  supported: boolean,
+  request?: () => Promise<void>,
+  exit?: () => Promise<void>,
+) => {
+  Object.defineProperty(document, 'fullscreenEnabled', {
+    configurable: true,
+    value: supported,
+  });
+  Object.defineProperty(document.documentElement, 'requestFullscreen', {
+    configurable: true,
+    value: request ?? (() => Promise.resolve()),
+  });
+  Object.defineProperty(document, 'exitFullscreen', {
+    configurable: true,
+    value: exit ?? (() => Promise.resolve()),
+  });
+};
 
 function renderShell(
   configOverride?: Partial<ResolvedGameConfig>,
@@ -115,11 +163,9 @@ describe('GameShell', () => {
 
   it('portals the top chrome to document.body with z-45 (above instructions z-40)', () => {
     renderShell();
-    const exit = screen.getByRole('button', { name: /exit/i });
-    const bar = exit.parentElement;
-    expect(bar).not.toBeNull();
-    expect(document.body.contains(exit)).toBe(true);
-    expect(bar).toHaveClass('fixed', 'z-[45]');
+    const chrome = screen.getByTestId('game-chrome');
+    expect(document.body.contains(chrome)).toBe(true);
+    expect(chrome).toHaveClass('fixed', 'z-[45]');
   });
 
   it('does not render a round counter (HUD now owns round display)', () => {
@@ -134,13 +180,8 @@ describe('GameShell', () => {
     ).toBeNull();
   });
 
-  it('renders timer when timerVisible is true', () => {
+  it('does not render a timer (lean game-mode chrome — games own their own HUD)', () => {
     renderShell({ timerVisible: true });
-    expect(screen.getByTestId('game-timer')).toBeInTheDocument();
-  });
-
-  it('hides timer when timerVisible is false', () => {
-    renderShell({ timerVisible: false });
     expect(screen.queryByTestId('game-timer')).not.toBeInTheDocument();
   });
 
@@ -195,5 +236,52 @@ describe('GameShell', () => {
       .findOne('sess-shell-001')
       .exec();
     expect(index?.status).toBe('abandoned');
+  });
+
+  describe('menu', () => {
+    it('renders a menu trigger', () => {
+      renderShell();
+      expect(
+        screen.getByRole('button', { name: /menu/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('opens the menu drawer when the menu trigger is clicked', async () => {
+      renderShell();
+      await userEvent.click(
+        screen.getByRole('button', { name: /menu/i }),
+      );
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    });
+  });
+
+  describe('fullscreen', () => {
+    // i18n is not loaded in tests, so aria-labels render as the camelCase
+    // i18n keys (e.g. "shell.enterFullscreen"). The regex matches that key form.
+    it('renders the fullscreen control when the API is supported', () => {
+      setFullscreenSupport(true);
+      renderShell();
+      expect(
+        screen.getByRole('button', { name: /enterFullscreen/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('hides the fullscreen control when the API is not supported', () => {
+      setFullscreenSupport(false);
+      renderShell();
+      expect(
+        screen.queryByRole('button', { name: /fullscreen/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls requestFullscreen when the fullscreen button is clicked', async () => {
+      const request = vi.fn<() => Promise<void>>().mockResolvedValue();
+      setFullscreenSupport(true, request);
+      renderShell();
+      await userEvent.click(
+        screen.getByRole('button', { name: /enterFullscreen/i }),
+      );
+      expect(request).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -1,5 +1,6 @@
 {
   "appName": "BaseSkill",
+  "closeMenu": "Close menu",
   "home": {
     "title": "Home"
   },
