@@ -11,6 +11,7 @@ export type SettingsDoc = {
   themeId?: string;
   preferredVoiceURI?: string;
   preferredVoiceDeviceId?: string;
+  tapForgivenessThreshold?: number;
   updatedAt: string;
 };
 
@@ -34,6 +35,12 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
     themeId: { type: 'string' },
     preferredVoiceURI: { type: 'string' },
     preferredVoiceDeviceId: { type: 'string' },
+    tapForgivenessThreshold: {
+      type: 'number',
+      minimum: 8,
+      maximum: 60,
+      default: 20,
+    },
     updatedAt: { type: 'string', format: 'date-time' },
   },
   required: ['id', 'profileId', 'updatedAt'],
