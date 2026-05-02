@@ -18,10 +18,10 @@ const getStarsFromCoins = (coins: number): number => {
 
 const StarDisplay = ({ count }: { count: number }) => (
   <div className="flex justify-center gap-1 text-4xl">
-    {Array.from({ length: 5 }, (_, i) => (
+    {[1, 2, 3, 4, 5].map((star) => (
       <span
-        key={i}
-        className={i < count ? 'opacity-100' : 'opacity-30'}
+        key={star}
+        className={star <= count ? 'opacity-100' : 'opacity-30'}
       >
         ⭐
       </span>
