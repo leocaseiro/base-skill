@@ -1170,37 +1170,26 @@ export const GameRoute = ({
   </GameShell>
 );
 
+export const buildGamePageTitle = (name: string | null): string =>
+  name ? `${name} | BaseSkill` : 'BaseSkill';
+
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
-  const { locale } = Route.useParams();
   const search = Route.useSearch();
   const debug = search.debug === true || import.meta.env.DEV;
+  const { t } = useTranslation('games');
+  const gameId = data.config.gameId;
+  const gameName =
+    data.customGameName ?? t(gameId as Parameters<typeof t>[0]);
 
   useEffect(() => {
-    document.title = buildGamePageTitle(
-      data.config.title,
-      data.customGameName,
-      locale,
-    );
+    document.title = buildGamePageTitle(gameName);
     return () => {
       document.title = 'BaseSkill';
     };
-  }, [data.config.title, data.customGameName, locale]);
+  }, [gameName]);
 
   return <GameRoute {...data} debug={debug} />;
-};
-
-export const buildGamePageTitle = (
-  configTitle: Record<string, string>,
-  customGameName: string | null,
-  locale?: string,
-): string => {
-  const name =
-    customGameName ??
-    (locale
-      ? (configTitle[locale] ?? configTitle['en'])
-      : configTitle['en']);
-  return name ? `${name} | BaseSkill` : 'BaseSkill';
 };
 
 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
