@@ -68,6 +68,10 @@ interface UseTouchDragOptions {
   onHoverZone?: (zoneIndex: number | null) => void;
   /** Called when the ghost enters or leaves a bank tile hole during drag. */
   onHoverBankTile?: (bankTileId: string | null) => void;
+  /** If set, micro-drags below this px distance are treated as taps. */
+  tapForgivenessThreshold?: number;
+  /** Called instead of cancel when displacement < tapForgivenessThreshold. */
+  onTapFallback?: () => void;
 }
 
 export const useTouchDrag = ({
@@ -80,11 +84,18 @@ export const useTouchDrag = ({
   onDropOnBankTile,
   onHoverZone,
   onHoverBankTile,
+  tapForgivenessThreshold,
+  onTapFallback,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
   useEffect(() => {
     onDragCancelRef.current = onDragCancel;
   }, [onDragCancel]);
+
+  const onTapFallbackRef = useRef(onTapFallback);
+  useEffect(() => {
+    onTapFallbackRef.current = onTapFallback;
+  }, [onTapFallback]);
 
   const onHoverZoneRef = useRef(onHoverZone);
   useEffect(() => {
@@ -283,6 +294,40 @@ export const useTouchDrag = ({
       if (e.pointerType === 'mouse' || !startPos.current) return;
 
       if (isDragging.current) {
+        // Tap forgiveness: if the total displacement is below the threshold
+        // and no slot zone is under the pointer, treat this as a tap.
+        if (
+          tapForgivenessThreshold !== undefined &&
+          onTapFallbackRef.current
+        ) {
+          const dx = e.clientX - startPos.current.x;
+          const dy = e.clientY - startPos.current.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < tapForgivenessThreshold) {
+            // Check there's no zone under the center point before treating as tap.
+            ghostRef.current?.el.remove();
+            ghostRef.current = null;
+            let zoneUnderPointer = false;
+            for (const el of document.elementsFromPoint(
+              e.clientX,
+              e.clientY,
+            )) {
+              if (
+                el instanceof HTMLElement &&
+                el.dataset['zoneIndex'] !== undefined
+              ) {
+                zoneUnderPointer = true;
+                break;
+              }
+            }
+            if (!zoneUnderPointer) {
+              onTapFallbackRef.current();
+              cleanup();
+              return;
+            }
+          }
+        }
+
         // Capture ghost dimensions before removing.
         const ghostHalfW = ghostRef.current?.halfW ?? 0;
         const ghostHalfH = ghostRef.current?.halfH ?? 0;
@@ -421,7 +466,14 @@ export const useTouchDrag = ({
 
       cleanup();
     },
-    [tileId, onDrop, onDropOnBank, onDropOnBankTile, cleanup],
+    [
+      tileId,
+      onDrop,
+      onDropOnBank,
+      onDropOnBankTile,
+      tapForgivenessThreshold,
+      cleanup,
+    ],
   );
 
   const onPointerCancel = useCallback(

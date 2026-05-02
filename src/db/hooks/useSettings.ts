@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   speechRate: 1,
   ttsEnabled: true,
   showSubtitles: true,
+  tapForgivenessThreshold: 20,
 };
 
 function plainSettingsFromQuery(
