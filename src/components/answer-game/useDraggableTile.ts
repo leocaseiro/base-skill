@@ -140,10 +140,47 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
           });
         }
       },
-      tapForgivenessThreshold: settings.tapForgivenessThreshold,
+      tapForgivenessThreshold: settings.tapForgivenessThreshold ?? 20,
       onTapFallback: () => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-        placeInNextSlot(tile.id);
+        const result = placeInNextSlot(tile.id);
+
+        const bankEl = ref.current;
+        if (result.rejected && bankEl) {
+          bankEl.dataset.shaking = 'true';
+          flashBankTileRejectFeedback(tile.id, {
+            element: bankEl,
+            onAnimationEnd: () => {
+              delete bankEl.dataset.shaking;
+            },
+          });
+
+          if (!skin.suppressDefaultSounds) {
+            playSound('wrong', 0.8);
+          }
+
+          dispatch({
+            type: 'REJECT_TAP',
+            tileId: tile.id,
+            zoneIndex: result.zoneIndex,
+          });
+
+          getGameEventBus().emit({
+            type: 'game:evaluate',
+            gameId: stateRef.current.config.gameId,
+            sessionId: '',
+            profileId: '',
+            timestamp: Date.now(),
+            roundIndex: stateRef.current.roundIndex,
+            answer: tile.id,
+            correct: false,
+            nearMiss: false,
+            zoneIndex: result.zoneIndex,
+            expected:
+              stateRef.current.zones[result.zoneIndex]?.expectedValue ??
+              '',
+          });
+        }
       },
     });
 

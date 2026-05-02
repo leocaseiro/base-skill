@@ -141,7 +141,7 @@ describe('useTouchDrag — tap forgiveness', () => {
     expect(onTapFallback).not.toHaveBeenCalled();
   });
 
-  it('does not call onTapFallback when it is undefined (slot tile case)', () => {
+  it('cancels drag normally when tap forgiveness is not configured (slot tile case)', () => {
     const onDrop = vi.fn();
     const onDragCancel = vi.fn();
 
@@ -151,7 +151,6 @@ describe('useTouchDrag — tap forgiveness', () => {
         label: 'A',
         onDrop,
         onDragCancel,
-        tapForgivenessThreshold: 20,
       }),
     );
 
