@@ -40,7 +40,23 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    useLocation: () => ({
+      pathname: '/en/game/word-builder',
+    }),
     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+    Link: ({
+      children,
+      className,
+      to: _to,
+    }: {
+      children?: ReactNode;
+      className?: string;
+      to: string;
+    }): ReactNode => (
+      <a className={className} href="http://test/">
+        {children}
+      </a>
+    ),
   };
 });
 
