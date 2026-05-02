@@ -6,6 +6,8 @@
   "theme": "Tema",
   "voice": "Voz",
   "voiceDefault": "Padrão do sistema",
+  "tapForgiveness": "Tolerância ao toque — distância ({{px}}px)",
+  "tapForgivenessTime": "Tolerância ao toque — duração ({{ms}}ms)",
   "themes": {
     "theme_ocean_preset": "Oceano",
     "theme_forest_preset": "Floresta"

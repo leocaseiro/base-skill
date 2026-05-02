@@ -41,6 +41,8 @@ export const SettingsPanel = ({
   const preferredVoice = settings.preferredVoiceURI ?? '';
   const voiceSelectValue =
     preferredVoice === '' ? '__default__' : preferredVoice;
+  const tapForgiveness = settings.tapForgivenessThreshold ?? 17;
+  const tapForgivenessTime = settings.tapForgivenessTimeMs ?? 150;
 
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [voicesLoaded, setVoicesLoaded] = useState(() => {
@@ -173,6 +175,38 @@ export const SettingsPanel = ({
           </Select>
         </div>
       )}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-tapForgiveness">
+          {t('tapForgiveness', { px: tapForgiveness })}
+        </Label>
+        <Slider
+          id="settings-tapForgiveness"
+          min={0}
+          max={100}
+          step={1}
+          value={[tapForgiveness]}
+          onValueChange={([v]) =>
+            void update({ tapForgivenessThreshold: v })
+          }
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-tapForgivenessTime">
+          {t('tapForgivenessTime', { ms: tapForgivenessTime })}
+        </Label>
+        <Slider
+          id="settings-tapForgivenessTime"
+          min={0}
+          max={500}
+          step={10}
+          value={[tapForgivenessTime]}
+          onValueChange={([v]) =>
+            void update({ tapForgivenessTimeMs: v })
+          }
+        />
+      </div>
     </div>
   );
 };
