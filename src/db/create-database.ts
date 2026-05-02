@@ -68,6 +68,7 @@ const COLLECTIONS = {
     schema: settingsSchema,
     migrationStrategies: {
       1: (oldDoc: Record<string, unknown>) => oldDoc,
+      2: (oldDoc: Record<string, unknown>) => oldDoc,
     },
   },
   game_config_overrides: { schema: gameConfigOverridesSchema },

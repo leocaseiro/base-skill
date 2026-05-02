@@ -141,6 +141,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
         }
       },
       tapForgivenessThreshold: settings.tapForgivenessThreshold ?? 20,
+      tapForgivenessTimeMs: settings.tapForgivenessTimeMs ?? 150,
       onTapFallback: () => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
         const result = placeInNextSlot(tile.id);

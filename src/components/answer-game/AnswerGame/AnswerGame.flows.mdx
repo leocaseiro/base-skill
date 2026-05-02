@@ -111,10 +111,23 @@ sequenceDiagram
 
 **Tap forgiveness (micro-drag → tap, touch only):**
 
-When a touch drag ends and total displacement from start is below
-`tapForgivenessThreshold` (configurable per-profile, default 20px)
-and no slot zone is under the pointer, the gesture is treated as a
-tap instead of a cancelled drag.
+When a touch drag ends, the gesture is treated as a tap (placing the
+tile in the next available slot) when **either** signal is below its
+threshold AND no slot zone is under the pointer:
+
+- **Distance:** Euclidean displacement from `pointerdown` to
+  `pointerup` < `tapForgivenessThreshold` (default 20px). Catches slow
+  careful taps where the finger barely moved.
+- **Duration:** elapsed time from `pointerdown` to `pointerup` <
+  `tapForgivenessTimeMs` (default 150ms). Catches thumb-release drift
+  — on touch devices a brief tap can register 75–100px of contact
+  movement in 50–65ms even when the user perceives no movement.
+
+Both thresholds are configurable per-profile in the settings page.
+Setting either to 0 disables that signal. The same check fires from
+`onPointerCancel` so platforms that fire `pointercancel` instead of
+`pointerup` for short gestures (documented iOS Safari behaviour) are
+also covered.
 
 ```mermaid
 sequenceDiagram
