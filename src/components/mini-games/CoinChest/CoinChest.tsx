@@ -185,10 +185,10 @@ export const CoinChest = ({
 
   const startTimer = useCallback(() => {
     setTimeLeft(collectWindow);
-    timerIntervalRef.current = globalThis.setInterval(() => {
+    const intervalId = globalThis.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          globalThis.clearInterval(timerIntervalRef.current!);
+          globalThis.clearInterval(intervalId);
           timerIntervalRef.current = null;
           stopLoop();
           setPhase('complete');
@@ -198,6 +198,7 @@ export const CoinChest = ({
         return prev - 1;
       });
     }, 1000);
+    timerIntervalRef.current = intervalId;
   }, [collectWindow, stopLoop]);
 
   const handleChestTap = useCallback(() => {
