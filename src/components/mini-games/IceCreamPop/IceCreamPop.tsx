@@ -73,11 +73,11 @@ export const IceCreamPop = ({
     setFallen(true);
 
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      globalThis.clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    completeTimeoutRef.current = setTimeout(() => {
+    completeTimeoutRef.current = globalThis.setTimeout(() => {
       onCompleteRef.current?.(finalScoops);
     }, 1500);
   }, []);
@@ -101,7 +101,7 @@ export const IceCreamPop = ({
         );
 
         if (newWobble >= 100 || newScoops >= maxScoops) {
-          setTimeout(() => triggerFall(newScoops), 0);
+          globalThis.setTimeout(() => triggerFall(newScoops), 0);
         }
 
         return newWobble;
@@ -114,15 +114,15 @@ export const IceCreamPop = ({
   useEffect(() => {
     if (!gameStarted || fallen || timeUp) return;
 
-    timerRef.current = setInterval(() => {
+    timerRef.current = globalThis.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setTimeUp(true);
           if (timerRef.current) {
-            clearInterval(timerRef.current);
+            globalThis.clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          completeTimeoutRef.current = setTimeout(() => {
+          completeTimeoutRef.current = globalThis.setTimeout(() => {
             onCompleteRef.current?.(scoops);
           }, 0);
           return 0;
@@ -133,7 +133,7 @@ export const IceCreamPop = ({
 
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
+        globalThis.clearInterval(timerRef.current);
         timerRef.current = null;
       }
     };
@@ -142,9 +142,9 @@ export const IceCreamPop = ({
 
   useEffect(
     () => () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) globalThis.clearInterval(timerRef.current);
       if (completeTimeoutRef.current)
-        clearTimeout(completeTimeoutRef.current);
+        globalThis.clearTimeout(completeTimeoutRef.current);
     },
     [],
   );
