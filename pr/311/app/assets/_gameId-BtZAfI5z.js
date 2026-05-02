@@ -1,1 +1,0 @@
-import{a8 as t,r as o,a9 as c,j as u,aa as r}from"./main-Ud5q2cr_.js";const i=()=>{const e=t.useLoaderData(),{locale:a}=t.useParams(),s=t.useSearch().debug===!0||!1;return o.useEffect(()=>(document.title=c(e.config.title,e.customGameName,a),()=>{document.title="BaseSkill"}),[e.config.title,e.customGameName,a]),u.jsx(r,{...e,debug:s})};export{i as component};
