@@ -132,12 +132,12 @@ export const DinoEggHatch = ({
 
     confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
 
-    const timer = setTimeout(() => {
+    const timer = globalThis.setTimeout(() => {
       onCompleteRef.current?.();
     }, 3000);
 
     return () => {
-      clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, [hatched]);
 
