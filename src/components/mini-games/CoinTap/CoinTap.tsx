@@ -1,6 +1,5 @@
 import confetti from 'canvas-confetti';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { JSX } from 'react';
 
 interface CoinTapProps {
   starRating?: 1 | 2 | 3 | 4 | 5;
@@ -17,7 +16,7 @@ const getStarsFromCoins = (coins: number): number => {
   return 5;
 };
 
-const StarDisplay = ({ count }: { count: number }): JSX.Element => (
+const StarDisplay = ({ count }: { count: number }) => (
   <div className="flex justify-center gap-1 text-4xl">
     {Array.from({ length: 5 }, (_, i) => (
       <span
@@ -33,7 +32,7 @@ const StarDisplay = ({ count }: { count: number }): JSX.Element => (
 export const CoinTap = ({
   starRating = 3,
   onComplete,
-}: CoinTapProps): JSX.Element => {
+}: CoinTapProps) => {
   const totalDuration = getDuration(starRating);
 
   const [coins, setCoins] = useState(0);
