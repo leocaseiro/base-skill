@@ -75,11 +75,11 @@ export const CoinChest = ({
 
   const stopLoop = useCallback(() => {
     if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
+      globalThis.cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
     if (timerIntervalRef.current !== null) {
-      clearInterval(timerIntervalRef.current);
+      globalThis.clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
   }, []);
@@ -177,18 +177,18 @@ export const CoinChest = ({
         return;
       }
 
-      rafRef.current = requestAnimationFrame(loop);
+      rafRef.current = globalThis.requestAnimationFrame(loop);
     };
 
-    rafRef.current = requestAnimationFrame(loop);
+    rafRef.current = globalThis.requestAnimationFrame(loop);
   }, [collectWindow, speed, stopLoop]);
 
   const startTimer = useCallback(() => {
     setTimeLeft(collectWindow);
-    timerIntervalRef.current = setInterval(() => {
+    timerIntervalRef.current = globalThis.setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          clearInterval(timerIntervalRef.current!);
+          globalThis.clearInterval(timerIntervalRef.current!);
           timerIntervalRef.current = null;
           stopLoop();
           setPhase('complete');
@@ -205,15 +205,15 @@ export const CoinChest = ({
     setPhase('opening');
     phaseRef.current = 'opening';
 
-    setTimeout(() => {
+    globalThis.setTimeout(() => {
       setIsLidOpen(true);
     }, 0);
 
-    setTimeout(() => {
+    globalThis.setTimeout(() => {
       spawnCoins();
     }, 200);
 
-    setTimeout(() => {
+    globalThis.setTimeout(() => {
       setPhase('collecting');
       phaseRef.current = 'collecting';
       startTimer();
@@ -231,7 +231,7 @@ export const CoinChest = ({
     scoreRef.current += 1;
     setScore(scoreRef.current);
     setScorePopped(true);
-    setTimeout(() => setScorePopped(false), 300);
+    globalThis.setTimeout(() => setScorePopped(false), 300);
   }, []);
 
   // Fire confetti and call onComplete when phase becomes complete
@@ -248,12 +248,12 @@ export const CoinChest = ({
       colors: ['#fbbf24', '#f59e0b', '#fcd34d', '#ffffff', '#fb923c'],
     });
 
-    const timer = setTimeout(() => {
+    const timer = globalThis.setTimeout(() => {
       onComplete?.(scoreRef.current);
     }, 1500);
 
     return () => {
-      clearTimeout(timer);
+      globalThis.clearTimeout(timer);
     };
   }, [phase, coinCount, onComplete]);
 
