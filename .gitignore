@@ -22,5 +22,6 @@ worktrees/
 .specstory/statistics.json
 .superpowers/
 .local-debug/
+debug/
 .claude/settings.local.json
 *.code-workspace
