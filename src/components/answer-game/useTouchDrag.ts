@@ -72,8 +72,23 @@ interface UseTouchDragBaseOptions {
 
 type UseTouchDragOptions = UseTouchDragBaseOptions &
   (
-    | { tapForgivenessThreshold?: undefined; onTapFallback?: undefined }
-    | { tapForgivenessThreshold: number; onTapFallback: () => void }
+    | {
+        tapForgivenessThreshold?: undefined;
+        tapForgivenessTimeMs?: undefined;
+        onTapFallback?: undefined;
+      }
+    | {
+        tapForgivenessThreshold: number;
+        /**
+         * Optional duration ceiling (milliseconds). If the gesture's
+         * total time from pointerdown to up/cancel is shorter, treat as
+         * a tap regardless of distance. Catches thumb-release drift
+         * where the contact point can travel 75–100px in 50–65ms even
+         * for what the user perceives as a tap.
+         */
+        tapForgivenessTimeMs?: number;
+        onTapFallback: () => void;
+      }
   );
 
 export const useTouchDrag = ({
@@ -87,6 +102,7 @@ export const useTouchDrag = ({
   onHoverZone,
   onHoverBankTile,
   tapForgivenessThreshold,
+  tapForgivenessTimeMs,
   onTapFallback,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
@@ -112,6 +128,7 @@ export const useTouchDrag = ({
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
+  const startTime = useRef<number | null>(null);
   const capturedElRef = useRef<HTMLElement | null>(null);
   const capturedPointerIdRef = useRef<number | null>(null);
   const safetyTimerRef = useRef<ReturnType<
@@ -155,6 +172,7 @@ export const useTouchDrag = ({
     lastHoverZoneRef.current = null;
     lastHoverBankTileRef.current = null;
     startPos.current = null;
+    startTime.current = null;
     cleanupInProgressRef.current = false;
   }, []);
 
@@ -169,6 +187,7 @@ export const useTouchDrag = ({
       capturedElRef.current = e.currentTarget;
       capturedPointerIdRef.current = e.pointerId;
       startPos.current = { x: e.clientX, y: e.clientY };
+      startTime.current = Date.now();
       isDragging.current = false;
 
       // When the captured element is removed from the DOM (e.g. a slot tile
@@ -296,8 +315,11 @@ export const useTouchDrag = ({
       if (e.pointerType === 'mouse' || !startPos.current) return;
 
       if (isDragging.current) {
-        // Tap forgiveness: if the total displacement is below the threshold
-        // and no slot zone is under the pointer, treat this as a tap.
+        // Tap forgiveness: treat as a tap if EITHER displacement is small
+        // (slow careful tap) OR duration is short (thumb-release drift —
+        // the contact point can travel 75–100px in 50–65ms during release
+        // even when the user perceives no movement). Both signals are
+        // configurable per-profile.
         if (
           tapForgivenessThreshold !== undefined &&
           onTapFallbackRef.current
@@ -305,7 +327,15 @@ export const useTouchDrag = ({
           const dx = e.clientX - startPos.current.x;
           const dy = e.clientY - startPos.current.y;
           const dist = Math.hypot(dx, dy);
-          if (dist < tapForgivenessThreshold) {
+          const duration =
+            startTime.current === null
+              ? Number.POSITIVE_INFINITY
+              : Date.now() - startTime.current;
+          const distancePassed = dist < tapForgivenessThreshold;
+          const timePassed =
+            tapForgivenessTimeMs !== undefined &&
+            duration < tapForgivenessTimeMs;
+          if (distancePassed || timePassed) {
             // Check there's no zone under the center point before treating as tap.
             ghostRef.current?.el.remove();
             ghostRef.current = null;
@@ -474,6 +504,7 @@ export const useTouchDrag = ({
       onDropOnBank,
       onDropOnBankTile,
       tapForgivenessThreshold,
+      tapForgivenessTimeMs,
       cleanup,
     ],
   );
@@ -482,9 +513,10 @@ export const useTouchDrag = ({
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
       if (isDragging.current) {
-        // Tap forgiveness: iOS Safari (and some Android browsers) fire pointercancel
-        // instead of pointerup for short gestures, even with touch-action:none set.
-        // Apply the same micro-drag check here so the threshold actually takes effect.
+        // Mirror the same tap forgiveness rules here. Defends against any
+        // platform that fires pointercancel rather than pointerup for short
+        // gestures (documented but not observed on Chrome Android or Brave
+        // iOS in our captures — kept as defence in depth).
         if (
           startPos.current &&
           tapForgivenessThreshold !== undefined &&
@@ -492,7 +524,16 @@ export const useTouchDrag = ({
         ) {
           const dx = e.clientX - startPos.current.x;
           const dy = e.clientY - startPos.current.y;
-          if (Math.hypot(dx, dy) < tapForgivenessThreshold) {
+          const dist = Math.hypot(dx, dy);
+          const duration =
+            startTime.current === null
+              ? Number.POSITIVE_INFINITY
+              : Date.now() - startTime.current;
+          const distancePassed = dist < tapForgivenessThreshold;
+          const timePassed =
+            tapForgivenessTimeMs !== undefined &&
+            duration < tapForgivenessTimeMs;
+          if (distancePassed || timePassed) {
             onTapFallbackRef.current();
             cleanupGhost();
             return;
@@ -502,7 +543,7 @@ export const useTouchDrag = ({
       }
       cleanupGhost();
     },
-    [tapForgivenessThreshold, cleanupGhost],
+    [tapForgivenessThreshold, tapForgivenessTimeMs, cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };

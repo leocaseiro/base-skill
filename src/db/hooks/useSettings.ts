@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   ttsEnabled: true,
   showSubtitles: true,
   tapForgivenessThreshold: 20,
+  tapForgivenessTimeMs: 150,
 };
 
 function plainSettingsFromQuery(
