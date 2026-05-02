@@ -1,7 +1,13 @@
 import confetti from 'canvas-confetti';
 import { useEffect, useRef, useState } from 'react';
 
-type Animal = 'dino' | 'turtle' | 'chicken' | 'bunny' | 'chick' | 'duck';
+type Animal =
+  | 'dino'
+  | 'turtle'
+  | 'chicken'
+  | 'bunny'
+  | 'chick'
+  | 'duck';
 
 interface DinoEggHatchProps {
   animal?: Animal | 'random';
@@ -33,7 +39,11 @@ const CrackSvg = ({ stage }: { stage: number }) => {
   return (
     <svg
       className="pointer-events-none absolute inset-0 h-full w-full"
-      style={stage >= 3 ? { filter: 'drop-shadow(0 0 12px gold)' } : undefined}
+      style={
+        stage >= 3
+          ? { filter: 'drop-shadow(0 0 12px gold)' }
+          : undefined
+      }
       viewBox="0 0 160 160"
       aria-hidden="true"
     >
@@ -99,7 +109,10 @@ export const DinoEggHatch = ({
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
-  const crackStage = Math.min(4, Math.floor(tapCount / (tapsToHatch / 4)));
+  const crackStage = Math.min(
+    4,
+    Math.floor(tapCount / (tapsToHatch / 4)),
+  );
   const progressPct = Math.min(100, (tapCount / tapsToHatch) * 100);
 
   const handleTap = () => {
@@ -140,8 +153,12 @@ export const DinoEggHatch = ({
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-indigo-950 to-purple-950">
       {hatched ? (
         <div className="flex flex-col items-center">
-          <div className="animate-pop text-[10rem] leading-none">{animalData.emoji}</div>
-          <p className="mt-4 text-4xl font-bold text-white">{"It's a " + animalData.name + '!'}</p>
+          <div className="animate-pop text-[10rem] leading-none">
+            {animalData.emoji}
+          </div>
+          <p className="mt-4 text-4xl font-bold text-white">
+            {"It's a " + animalData.name + '!'}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6">
@@ -152,7 +169,9 @@ export const DinoEggHatch = ({
             aria-label="Tap the egg to hatch it"
             className={[
               'relative cursor-pointer select-none',
-              crackStage >= 3 ? 'ring-4 ring-yellow-400 ring-opacity-75 rounded-full' : '',
+              crackStage >= 3
+                ? 'ring-4 ring-yellow-400 ring-opacity-75 rounded-full'
+                : '',
               getShakeClass(crackStage),
             ]
               .filter(Boolean)
@@ -181,7 +200,10 @@ export const DinoEggHatch = ({
           {/* Progress bar */}
           <div className="h-4 w-64 overflow-hidden rounded-full bg-white/20">
             <div
-              className={['h-full rounded-full transition-all duration-150', getProgressColor(progressPct)].join(' ')}
+              className={[
+                'h-full rounded-full transition-all duration-150',
+                getProgressColor(progressPct),
+              ].join(' ')}
               style={{ width: `${progressPct}%` }}
             />
           </div>
