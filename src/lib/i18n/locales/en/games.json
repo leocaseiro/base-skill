@@ -8,7 +8,10 @@
   "shell": {
     "undo": "Undo",
     "pause": "Pause",
-    "exit": "Exit"
+    "exit": "Exit",
+    "menu": "Menu",
+    "enterFullscreen": "Enter fullscreen",
+    "exitFullscreen": "Exit fullscreen"
   },
   "ui": {
     "choose-a-letter": "Choose a letter",
