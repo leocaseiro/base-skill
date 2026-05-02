@@ -13,6 +13,7 @@ import { useTouchDrag } from './useTouchDrag';
 import type { TileItem } from './types';
 import type { TouchDragHandlers } from './useTouchDrag';
 import type { RefObject } from 'react';
+import { useSettings } from '@/db/hooks/useSettings';
 import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
 import { resolveSkin } from '@/lib/skin';
@@ -34,6 +35,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   const { speakTile } = useGameTTS();
   const speakTileRef = useRef(speakTile);
   const { placeTile } = useTileEvaluation();
+  const { settings } = useSettings();
   const skin = resolveSkin(state.config.gameId, state.config.skin);
 
   useEffect(() => {
@@ -137,6 +139,11 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
             zoneIndex,
           });
         }
+      },
+      tapForgivenessThreshold: settings.tapForgivenessThreshold,
+      onTapFallback: () => {
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+        placeInNextSlot(tile.id);
       },
     });
 
