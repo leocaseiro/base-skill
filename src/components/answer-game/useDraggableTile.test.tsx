@@ -97,10 +97,24 @@ vi.mock('@/lib/game-event-bus', () => ({
   getGameEventBus: () => ({ emit: mockEmit, subscribe: vi.fn() }),
 }));
 
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      tapForgivenessThreshold: 17,
+      tapForgivenessTimeMs: 150,
+    },
+    update: vi.fn(),
+  }),
+}));
+
+// Capture the options passed to useTouchDrag so tests can invoke the touch
+// callbacks directly without simulating real pointer events.
 type CapturedTouchDragOptions = {
   onDrop?: (tileId: string, zoneIndex: number) => void;
   onDropOnBank?: () => void;
   onDropOnBankTile?: (bankTileId: string) => void;
+  onTapFallback?: () => void;
+  tapForgivenessThreshold?: number;
 };
 
 let capturedTouchDragOptions: CapturedTouchDragOptions | null = null;
@@ -372,6 +386,38 @@ describe('useDraggableTile', () => {
       act(() => onDrop?.('t2', 0));
 
       expect(mockTriggerShake).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('touch drag — tap forgiveness', () => {
+    it('passes tapForgivenessThreshold from settings to useTouchDrag', () => {
+      capturedTouchDragOptions = null;
+      renderHook(() => useDraggableTile(tile));
+
+      expect(capturedTouchDragOptions).not.toBeNull();
+      const opts =
+        capturedTouchDragOptions as unknown as CapturedTouchDragOptions;
+      expect(opts.tapForgivenessThreshold).toBe(17);
+    });
+
+    it('onTapFallback clears drag state and places tile in next slot', () => {
+      capturedTouchDragOptions = null;
+      mockDispatch.mockClear();
+      mockPlaceInNextSlot.mockClear();
+
+      renderHook(() => useDraggableTile(tile));
+
+      expect(capturedTouchDragOptions).not.toBeNull();
+      const opts =
+        capturedTouchDragOptions as unknown as CapturedTouchDragOptions;
+      expect(opts.onTapFallback).toBeDefined();
+      act(() => opts.onTapFallback?.());
+
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'SET_DRAG_ACTIVE',
+        tileId: null,
+      });
+      expect(mockPlaceInNextSlot).toHaveBeenCalledWith(tile.id);
     });
   });
 });
