@@ -84,7 +84,15 @@ export const FireworksPainter = ({
       startVelocity: 35,
       gravity: 0.8,
       ticks: 200,
-      colors: ['#ff0', '#f0f', '#0ff', '#f80', '#0f8', '#ff6b6b', '#ffd93d'],
+      colors: [
+        '#ff0',
+        '#f0f',
+        '#0ff',
+        '#f80',
+        '#0f8',
+        '#ff6b6b',
+        '#ffd93d',
+      ],
     });
 
     setFireworkCount((prev) => prev + 1);
