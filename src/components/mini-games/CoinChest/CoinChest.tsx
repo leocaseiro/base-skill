@@ -64,7 +64,9 @@ export const CoinChest = ({
   const phaseRef = useRef<Phase>('closed');
   const startTimeRef = useRef<number>(0);
   const scoreRef = useRef(0);
-  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerIntervalRef = useRef<ReturnType<
+    typeof setInterval
+  > | null>(null);
 
   // Keep phaseRef in sync
   useEffect(() => {
@@ -90,26 +92,29 @@ export const CoinChest = ({
     const chestX = w / 2;
     const chestY = h * 0.72;
 
-    const newCoins: Coin[] = Array.from({ length: coinCount }, (_, i) => {
-      const angle = Math.random() * Math.PI - Math.PI; // -π to 0 (upward arc)
-      const power = (3 + Math.random() * 7) * speed;
-      const vx = Math.cos(angle) * power;
-      const vy = Math.sin(angle) * power - 2;
+    const newCoins: Coin[] = Array.from(
+      { length: coinCount },
+      (_, i) => {
+        const angle = Math.random() * Math.PI - Math.PI; // -π to 0 (upward arc)
+        const power = (3 + Math.random() * 7) * speed;
+        const vx = Math.cos(angle) * power;
+        const vy = Math.sin(angle) * power - 2;
 
-      return {
-        id: i,
-        x: chestX - 20,
-        y: chestY - 20,
-        vx,
-        vy,
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 10,
-        collected: false,
-        fading: false,
-        opacity: 1,
-        hasBounced: false,
-      };
-    });
+        return {
+          id: i,
+          x: chestX - 20,
+          y: chestY - 20,
+          vx,
+          vy,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10,
+          collected: false,
+          fading: false,
+          opacity: 1,
+          hasBounced: false,
+        };
+      },
+    );
 
     coinsRef.current = newCoins;
     setRenderCoins([...newCoins]);
@@ -216,21 +221,18 @@ export const CoinChest = ({
     }, 1000);
   }, [phase, spawnCoins, startTimer, startPhysicsLoop]);
 
-  const collectCoin = useCallback(
-    (id: number) => {
-      if (phaseRef.current !== 'collecting') return;
+  const collectCoin = useCallback((id: number) => {
+    if (phaseRef.current !== 'collecting') return;
 
-      const coin = coinsRef.current.find((c) => c.id === id);
-      if (!coin || coin.collected) return;
+    const coin = coinsRef.current.find((c) => c.id === id);
+    if (!coin || coin.collected) return;
 
-      coin.collected = true;
-      scoreRef.current += 1;
-      setScore(scoreRef.current);
-      setScorePopped(true);
-      setTimeout(() => setScorePopped(false), 300);
-    },
-    [],
-  );
+    coin.collected = true;
+    scoreRef.current += 1;
+    setScore(scoreRef.current);
+    setScorePopped(true);
+    setTimeout(() => setScorePopped(false), 300);
+  }, []);
 
   // Fire confetti and call onComplete when phase becomes complete
   useEffect(() => {
@@ -322,7 +324,8 @@ export const CoinChest = ({
             tabIndex={-1}
             onClick={() => collectCoin(coin.id)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') collectCoin(coin.id);
+              if (e.key === 'Enter' || e.key === ' ')
+                collectCoin(coin.id);
             }}
           >
             🪙
