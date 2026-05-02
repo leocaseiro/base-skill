@@ -53,7 +53,7 @@ export interface TouchDragHandlers {
   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
 }
 
-interface UseTouchDragOptions {
+interface UseTouchDragBaseOptions {
   /** Empty string disables the drag (no pointer capture, no ghost). */
   tileId: string;
   label: string;
@@ -68,11 +68,13 @@ interface UseTouchDragOptions {
   onHoverZone?: (zoneIndex: number | null) => void;
   /** Called when the ghost enters or leaves a bank tile hole during drag. */
   onHoverBankTile?: (bankTileId: string | null) => void;
-  /** If set, micro-drags below this px distance are treated as taps. */
-  tapForgivenessThreshold?: number;
-  /** Called instead of cancel when displacement < tapForgivenessThreshold. */
-  onTapFallback?: () => void;
 }
+
+type UseTouchDragOptions = UseTouchDragBaseOptions &
+  (
+    | { tapForgivenessThreshold?: undefined; onTapFallback?: undefined }
+    | { tapForgivenessThreshold: number; onTapFallback: () => void }
+  );
 
 export const useTouchDrag = ({
   tileId,

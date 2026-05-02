@@ -64,7 +64,12 @@ const COLLECTIONS = {
   },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
-  settings: { schema: settingsSchema },
+  settings: {
+    schema: settingsSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => oldDoc,
+    },
+  },
   game_config_overrides: { schema: gameConfigOverridesSchema },
   saved_game_configs: {
     schema: savedGameConfigsSchema,
