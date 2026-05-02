@@ -40,7 +40,7 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
       type: 'number',
       minimum: 0,
       maximum: 100,
-      default: 20,
+      default: 17,
     },
     tapForgivenessTimeMs: {
       type: 'number',

@@ -140,7 +140,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
           });
         }
       },
-      tapForgivenessThreshold: settings.tapForgivenessThreshold ?? 20,
+      tapForgivenessThreshold: settings.tapForgivenessThreshold ?? 17,
       tapForgivenessTimeMs: settings.tapForgivenessTimeMs ?? 150,
       onTapFallback: () => {
         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
