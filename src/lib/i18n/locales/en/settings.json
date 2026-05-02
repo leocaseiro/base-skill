@@ -6,6 +6,7 @@
   "theme": "Theme",
   "voice": "Voice",
   "voiceDefault": "System default",
+  "tapForgiveness": "Tap forgiveness ({{px}}px)",
   "themes": {
     "theme_ocean_preset": "Ocean",
     "theme_forest_preset": "Forest"
