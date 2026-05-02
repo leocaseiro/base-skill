@@ -7,51 +7,14 @@ import {
 import { MenuIcon, SearchIcon } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SettingsPanel } from '@/components/SettingsPanel';
+import type { AppLocale } from '@/components/AppMenuPanel';
+import { AppMenuPanel } from '@/components/AppMenuPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import { isAppGameSessionPath } from '@/lib/app-paths';
 import { APP_VERSION, IS_BETA } from '@/lib/version';
-
-type HeaderLocale = 'en' | 'pt-BR';
-
-const HeaderMenuPanel = ({
-  appName,
-  locale,
-  onLocaleChange,
-}: {
-  appName: string;
-  locale: string;
-  onLocaleChange: (locale: HeaderLocale) => void;
-}) => (
-  <SheetContent side="right">
-    <SheetHeader>
-      <SheetTitle>{appName}</SheetTitle>
-    </SheetHeader>
-    <div className="flex flex-col gap-6 p-4">
-      <div className="flex items-center justify-between">
-        <a
-          href="/base-skill/docs/"
-          className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Docs
-        </a>
-        <ThemeToggle />
-      </div>
-      <SettingsPanel locale={locale} onLocaleChange={onLocaleChange} />
-    </div>
-  </SheetContent>
-);
 
 const MenuSheetTrigger = () => (
   <SheetTrigger asChild>
@@ -81,7 +44,7 @@ export const Header = () => {
     }, 300);
   };
 
-  const switchLocale = (newLocale: HeaderLocale) => {
+  const switchLocale = (newLocale: AppLocale) => {
     const newPath = location.pathname.replace(
       /^\/(en|pt-BR)/,
       `/${newLocale}`,
@@ -96,6 +59,11 @@ export const Header = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-lg">
       <div className="flex items-center gap-3 px-4 py-3">
+        <Sheet>
+          <MenuSheetTrigger />
+          <AppMenuPanel locale={locale} onLocaleChange={switchLocale} />
+        </Sheet>
+
         <Link
           to="/$locale"
           params={{ locale }}
@@ -139,15 +107,6 @@ export const Header = () => {
         <span className="hidden sm:flex">
           <ThemeToggle />
         </span>
-
-        <Sheet>
-          <MenuSheetTrigger />
-          <HeaderMenuPanel
-            appName={t('appName')}
-            locale={locale}
-            onLocaleChange={switchLocale}
-          />
-        </Sheet>
       </div>
     </header>
   );
