@@ -10,7 +10,15 @@ const meta: Meta<typeof DinoEggHatch> = {
   argTypes: {
     animal: {
       control: { type: 'select' },
-      options: ['random', 'dino', 'turtle', 'chicken', 'bunny', 'chick', 'duck'],
+      options: [
+        'random',
+        'dino',
+        'turtle',
+        'chicken',
+        'bunny',
+        'chick',
+        'duck',
+      ],
     },
     tapsToHatch: {
       control: { type: 'range', min: 4, max: 40, step: 4 },
