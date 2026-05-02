@@ -227,7 +227,7 @@ export const IceCreamPop = ({
 
         {/* Tower wrapper with wobble + fall animation */}
         <div
-          className={`flex flex-col-reverse items-center ${fallen ? '' : wobbleClass} ${severeBorderClass} rounded-xl p-1`}
+          className={`flex flex-col items-center ${fallen ? '' : wobbleClass} ${severeBorderClass} rounded-xl p-1`}
           style={fallen ? towerStyle : {}}
         >
           {/* Scoops stack — rendered in reverse so latest is visually on top */}
