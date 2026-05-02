@@ -1,5 +1,11 @@
 import confetti from 'canvas-confetti';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 interface BubblePopProps {
   bubbleCount?: number; // default 12
@@ -87,7 +93,10 @@ const generateBubbles = (count: number, seed: number): Bubble[] => {
   return bubbles;
 };
 
-export const BubblePop = ({ bubbleCount = 12, onComplete }: BubblePopProps) => {
+export const BubblePop = ({
+  bubbleCount = 12,
+  onComplete,
+}: BubblePopProps) => {
   const seedRef = useRef<number>(Date.now());
 
   const initialBubbles = useMemo(
@@ -108,13 +117,19 @@ export const BubblePop = ({ bubbleCount = 12, onComplete }: BubblePopProps) => {
       if (isComplete) return;
 
       setBubbles((prev) =>
-        prev.map((b) => (b.id === id && !b.popped && !b.popping ? { ...b, popping: true } : b)),
+        prev.map((b) =>
+          b.id === id && !b.popped && !b.popping
+            ? { ...b, popping: true }
+            : b,
+        ),
       );
 
       // After pop animation completes, mark as popped
       setTimeout(() => {
         setBubbles((prev) => {
-          const updated = prev.map((b) => (b.id === id ? { ...b, popping: false, popped: true } : b));
+          const updated = prev.map((b) =>
+            b.id === id ? { ...b, popping: false, popped: true } : b,
+          );
           const allPopped = updated.every((b) => b.popped);
           if (allPopped) {
             setIsComplete(true);
@@ -126,7 +141,14 @@ export const BubblePop = ({ bubbleCount = 12, onComplete }: BubblePopProps) => {
               startVelocity: 40,
               gravity: 0.7,
               ticks: 300,
-              colors: ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bdb', '#ffb347'],
+              colors: [
+                '#ff6b6b',
+                '#ffd93d',
+                '#6bcb77',
+                '#4d96ff',
+                '#ff6bdb',
+                '#ffb347',
+              ],
             });
             onCompleteRef.current?.();
           }
@@ -173,7 +195,9 @@ export const BubblePop = ({ bubbleCount = 12, onComplete }: BubblePopProps) => {
         <div className="h-3 w-full overflow-hidden rounded-full bg-white/60 shadow-inner">
           <div
             className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 ease-out"
-            style={{ width: `${bubbleCount > 0 ? (poppedCount / bubbleCount) * 100 : 0}%` }}
+            style={{
+              width: `${bubbleCount > 0 ? (poppedCount / bubbleCount) * 100 : 0}%`,
+            }}
             role="progressbar"
             aria-valuenow={poppedCount}
             aria-valuemin={0}
