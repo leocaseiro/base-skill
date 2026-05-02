@@ -125,7 +125,7 @@ export const BubblePop = ({
       );
 
       // After pop animation completes, mark as popped
-      setTimeout(() => {
+      globalThis.setTimeout(() => {
         setBubbles((prev) => {
           const updated = prev.map((b) =>
             b.id === id ? { ...b, popping: false, popped: true } : b,
