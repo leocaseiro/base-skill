@@ -5,6 +5,7 @@
   "language": "Language",
   "theme": "Theme",
   "voice": "Voice",
+  "voiceDefault": "System default",
   "themes": {
     "theme_ocean_preset": "Ocean",
     "theme_forest_preset": "Forest"

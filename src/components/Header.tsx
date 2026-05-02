@@ -5,21 +5,12 @@ import {
   useParams,
 } from '@tanstack/react-router';
 import { MenuIcon, SearchIcon } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EMPTY } from 'rxjs';
-import type { ThemeDoc } from '@/db/schemas/themes';
+import { SettingsPanel } from '@/components/SettingsPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Sheet,
   SheetContent,
@@ -27,20 +18,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Slider } from '@/components/ui/slider';
-import { useRxDB } from '@/db/hooks/useRxDB';
-import { useRxQuery } from '@/db/hooks/useRxQuery';
-import { useSettings } from '@/db/hooks/useSettings';
 import { isAppGameSessionPath } from '@/lib/app-paths';
-import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { APP_VERSION, IS_BETA } from '@/lib/version';
 
-const LOCALES = [
-  { code: 'en', label: '🇬🇧 English' },
-  { code: 'pt-BR', label: '🇧🇷 Português' },
-] as const;
-
-type HeaderLocale = (typeof LOCALES)[number]['code'];
+type HeaderLocale = 'en' | 'pt-BR';
 
 const HeaderMenuPanel = ({
   appName,
@@ -50,155 +31,27 @@ const HeaderMenuPanel = ({
   appName: string;
   locale: string;
   onLocaleChange: (locale: HeaderLocale) => void;
-}) => {
-  const { t } = useTranslation('settings');
-  const { settings, update } = useSettings();
-  const { db } = useRxDB();
-  const volume = settings.volume ?? 0.8;
-  const speechRate = settings.speechRate ?? 1;
-  const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
-  const preferredVoice = settings.preferredVoiceURI ?? '';
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  useEffect(() => {
-    const synth = (
-      globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-    ).speechSynthesis;
-    if (!synth) return;
-    const load = () => setVoices(safeGetVoices(synth));
-    load();
-    synth.addEventListener('voiceschanged', load);
-    return () => synth.removeEventListener('voiceschanged', load);
-  }, []);
-
-  const themes$ = useMemo(
-    () => (db ? db.themes.find().$ : EMPTY),
-    [db],
-  );
-  const themeDocs = useRxQuery<{ toJSON: () => ThemeDoc }[]>(
-    themes$,
-    [],
-  );
-  const themes = themeDocs.map((d) => d.toJSON());
-
-  return (
-    <SheetContent side="right">
-      <SheetHeader>
-        <SheetTitle>{appName}</SheetTitle>
-      </SheetHeader>
-      <div className="flex flex-col gap-6 p-4">
-        <div className="flex items-center justify-between">
-          <a
-            href="/base-skill/docs/"
-            className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Docs
-          </a>
-          <ThemeToggle />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="drawer-volume">
-            {t('volume', { percent: Math.round(volume * 100) })}
-          </Label>
-          <Slider
-            id="drawer-volume"
-            min={0}
-            max={1}
-            step={0.05}
-            value={[volume]}
-            onValueChange={([v]) => {
-              void update({ volume: v });
-            }}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="drawer-speechRate">
-            {t('speechRate', { rate: speechRate })}
-          </Label>
-          <Slider
-            id="drawer-speechRate"
-            min={0.5}
-            max={2}
-            step={0.1}
-            value={[speechRate]}
-            onValueChange={([v]) => {
-              void update({ speechRate: v });
-            }}
-          />
-        </div>
-
-        {voices.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="drawer-voice">{t('voice')}</Label>
-            <Select
-              value={preferredVoice}
-              onValueChange={(v) =>
-                void update({ preferredVoiceURI: v })
-              }
-            >
-              <SelectTrigger id="drawer-voice">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {voices.map((v) => (
-                  <SelectItem key={v.name} value={v.name}>
-                    {v.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="drawer-language">{t('language')}</Label>
-          <Select
-            value={locale}
-            onValueChange={(v) => onLocaleChange(v as HeaderLocale)}
-          >
-            <SelectTrigger id="drawer-language">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LOCALES.map(({ code, label }) => (
-                <SelectItem key={code} value={code}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {themes.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="drawer-theme">{t('theme')}</Label>
-            <Select
-              value={activeThemeId}
-              onValueChange={(v) => void update({ themeId: v })}
-            >
-              <SelectTrigger id="drawer-theme">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {themes.map(({ id, name, isPreset }) => (
-                  <SelectItem key={id} value={id}>
-                    {isPreset
-                      ? t(`themes.${id}`, { defaultValue: name })
-                      : name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+}) => (
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>{appName}</SheetTitle>
+    </SheetHeader>
+    <div className="flex flex-col gap-6 p-4">
+      <div className="flex items-center justify-between">
+        <a
+          href="/base-skill/docs/"
+          className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Docs
+        </a>
+        <ThemeToggle />
       </div>
-    </SheetContent>
-  );
-};
+      <SettingsPanel locale={locale} onLocaleChange={onLocaleChange} />
+    </div>
+  </SheetContent>
+);
 
 const MenuSheetTrigger = () => (
   <SheetTrigger asChild>
@@ -217,8 +70,6 @@ export const Header = () => {
     null,
   );
 
-  // The search input is uncontrolled — it navigates to the home route on change.
-  // It does not read the current search param (avoiding router hook complexity in a layout component).
   const handleSearchChange = (value: string) => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
