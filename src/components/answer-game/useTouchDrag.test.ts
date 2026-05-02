@@ -196,3 +196,99 @@ describe('useTouchDrag — tap forgiveness', () => {
     expect(onTapFallback).not.toHaveBeenCalled();
   });
 });
+
+describe('useTouchDrag — tap forgiveness on pointercancel', () => {
+  it('calls onTapFallback when pointercancel fires with small displacement', () => {
+    const onTapFallback = vi.fn();
+    const onDrop = vi.fn();
+    const onDragCancel = vi.fn();
+
+    const { result } = renderHook(() =>
+      useTouchDrag({
+        tileId: 'tile-1',
+        label: 'A',
+        onDrop,
+        onDragCancel,
+        onTapFallback,
+        tapForgivenessThreshold: 20,
+      }),
+    );
+
+    act(() => {
+      result.current.onPointerDown(ev({ clientX: 100, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerMove(ev({ clientX: 110, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerCancel(
+        ev({ clientX: 112, clientY: 100 }),
+      );
+    });
+
+    expect(onTapFallback).toHaveBeenCalledOnce();
+    expect(onDragCancel).not.toHaveBeenCalled();
+    expect(onDrop).not.toHaveBeenCalled();
+  });
+
+  it('calls onDragCancel when pointercancel displacement exceeds threshold', () => {
+    const onTapFallback = vi.fn();
+    const onDrop = vi.fn();
+    const onDragCancel = vi.fn();
+
+    const { result } = renderHook(() =>
+      useTouchDrag({
+        tileId: 'tile-1',
+        label: 'A',
+        onDrop,
+        onDragCancel,
+        onTapFallback,
+        tapForgivenessThreshold: 20,
+      }),
+    );
+
+    act(() => {
+      result.current.onPointerDown(ev({ clientX: 100, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerMove(ev({ clientX: 130, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerCancel(
+        ev({ clientX: 135, clientY: 100 }),
+      );
+    });
+
+    expect(onTapFallback).not.toHaveBeenCalled();
+    expect(onDragCancel).toHaveBeenCalled();
+  });
+
+  it('calls onDragCancel (not onTapFallback) when tap forgiveness is not configured', () => {
+    const onDrop = vi.fn();
+    const onDragCancel = vi.fn();
+
+    const { result } = renderHook(() =>
+      useTouchDrag({
+        tileId: 'tile-1',
+        label: 'A',
+        onDrop,
+        onDragCancel,
+      }),
+    );
+
+    act(() => {
+      result.current.onPointerDown(ev({ clientX: 100, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerMove(ev({ clientX: 110, clientY: 100 }));
+    });
+    act(() => {
+      result.current.onPointerCancel(
+        ev({ clientX: 112, clientY: 100 }),
+      );
+    });
+
+    expect(onDragCancel).toHaveBeenCalled();
+    expect(onDrop).not.toHaveBeenCalled();
+  });
+});
