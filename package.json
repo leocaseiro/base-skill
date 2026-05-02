@@ -9,6 +9,7 @@
   "scripts": {
     "start": "yarn dev",
     "dev": "vite dev --port 3000",
+    "devhost": "VITE_HTTPS=1 vite dev --host --port 3000",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -96,6 +97,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/coverage-v8": "3.2.4",
     "eslint": "^9.18.0",

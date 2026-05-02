@@ -74,4 +74,18 @@ describe('SettingsPanel', () => {
     renderSettingsPanel(db);
     expect(screen.getByText(/system default/i)).toBeInTheDocument();
   });
+
+  it('renders tap forgiveness distance slider with default 17px', () => {
+    renderSettingsPanel(db);
+    expect(
+      screen.getByText(/tap forgiveness — distance \(17px\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it('renders tap forgiveness duration slider with default 150ms', () => {
+    renderSettingsPanel(db);
+    expect(
+      screen.getByText(/tap forgiveness — duration \(150ms\)/i),
+    ).toBeInTheDocument();
+  });
 });

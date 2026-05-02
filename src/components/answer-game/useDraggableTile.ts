@@ -13,6 +13,7 @@ import { useTouchDrag } from './useTouchDrag';
 import type { TileItem } from './types';
 import type { TouchDragHandlers } from './useTouchDrag';
 import type { RefObject } from 'react';
+import { useSettings } from '@/db/hooks/useSettings';
 import { playSound } from '@/lib/audio/AudioFeedback';
 import { getGameEventBus } from '@/lib/game-event-bus';
 import { resolveSkin } from '@/lib/skin';
@@ -34,6 +35,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
   const { speakTile } = useGameTTS();
   const speakTileRef = useRef(speakTile);
   const { placeTile } = useTileEvaluation();
+  const { settings } = useSettings();
   const skin = resolveSkin(state.config.gameId, state.config.skin);
 
   useEffect(() => {
@@ -135,6 +137,49 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
             timestamp: Date.now(),
             roundIndex: stateRef.current.roundIndex,
             zoneIndex,
+          });
+        }
+      },
+      tapForgivenessThreshold: settings.tapForgivenessThreshold ?? 17,
+      tapForgivenessTimeMs: settings.tapForgivenessTimeMs ?? 150,
+      onTapFallback: () => {
+        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+        const result = placeInNextSlot(tile.id);
+
+        const bankEl = ref.current;
+        if (result.rejected && bankEl) {
+          bankEl.dataset.shaking = 'true';
+          flashBankTileRejectFeedback(tile.id, {
+            element: bankEl,
+            onAnimationEnd: () => {
+              delete bankEl.dataset.shaking;
+            },
+          });
+
+          if (!skin.suppressDefaultSounds) {
+            playSound('wrong', 0.8);
+          }
+
+          dispatch({
+            type: 'REJECT_TAP',
+            tileId: tile.id,
+            zoneIndex: result.zoneIndex,
+          });
+
+          getGameEventBus().emit({
+            type: 'game:evaluate',
+            gameId: stateRef.current.config.gameId,
+            sessionId: '',
+            profileId: '',
+            timestamp: Date.now(),
+            roundIndex: stateRef.current.roundIndex,
+            answer: tile.id,
+            correct: false,
+            nearMiss: false,
+            zoneIndex: result.zoneIndex,
+            expected:
+              stateRef.current.zones[result.zoneIndex]?.expectedValue ??
+              '',
           });
         }
       },
