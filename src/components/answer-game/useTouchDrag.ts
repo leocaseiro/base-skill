@@ -482,11 +482,27 @@ export const useTouchDrag = ({
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
       if (isDragging.current) {
+        // Tap forgiveness: iOS Safari (and some Android browsers) fire pointercancel
+        // instead of pointerup for short gestures, even with touch-action:none set.
+        // Apply the same micro-drag check here so the threshold actually takes effect.
+        if (
+          startPos.current &&
+          tapForgivenessThreshold !== undefined &&
+          onTapFallbackRef.current
+        ) {
+          const dx = e.clientX - startPos.current.x;
+          const dy = e.clientY - startPos.current.y;
+          if (Math.hypot(dx, dy) < tapForgivenessThreshold) {
+            onTapFallbackRef.current();
+            cleanupGhost();
+            return;
+          }
+        }
         onDragCancelRef.current?.();
       }
       cleanupGhost();
     },
-    [cleanupGhost],
+    [tapForgivenessThreshold, cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
