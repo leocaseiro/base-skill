@@ -53,10 +53,14 @@ export const IceCreamPop = ({
   const [timeUp, setTimeUp] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [gameStarted, setGameStarted] = useState(false);
-  const [fellDirection, setFellDirection] = useState<'left' | 'right'>('left');
+  const [fellDirection, setFellDirection] = useState<'left' | 'right'>(
+    'left',
+  );
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const completeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const completeTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
@@ -160,7 +164,9 @@ export const IceCreamPop = ({
     : {};
 
   const severeBorderClass =
-    wobble >= 85 && !fallen ? 'ring-4 ring-red-500 ring-opacity-80' : '';
+    wobble >= 85 && !fallen
+      ? 'ring-4 ring-red-500 ring-opacity-80'
+      : '';
 
   return (
     <div className="relative flex h-full min-h-screen flex-col items-center justify-between overflow-hidden bg-gradient-to-b from-sky-300 to-pink-100 select-none">
