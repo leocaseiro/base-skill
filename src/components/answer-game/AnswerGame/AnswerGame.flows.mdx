@@ -109,6 +109,29 @@ sequenceDiagram
   Hook->>Reducer: SET_DRAG_ACTIVE { tileId: null }
 ```
 
+**Tap forgiveness (micro-drag → tap, touch only):**
+
+When a touch drag ends and total displacement from start is below
+`tapForgivenessThreshold` (configurable per-profile, default 20px)
+and no slot zone is under the pointer, the gesture is treated as a
+tap instead of a cancelled drag.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Hook as useTouchDrag (onPointerUp)
+  participant Fallback as useDraggableTile (onTapFallback)
+  participant Reducer as answerGameReducer
+  participant Auto as useAutoNextSlot
+
+  User->>Hook: pointer up (displacement < threshold)
+  Hook->>Hook: check: no zone under pointer?
+  Hook->>Fallback: onTapFallback()
+  Fallback->>Reducer: SET_DRAG_ACTIVE { tileId: null }
+  Fallback->>Auto: placeInNextSlot(tile.id)
+  Auto->>Reducer: PLACE_TILE { tileId, zoneIndex: activeSlotIndex }
+```
+
 ---
 
 ## 4. Keyboard and Touch Input
