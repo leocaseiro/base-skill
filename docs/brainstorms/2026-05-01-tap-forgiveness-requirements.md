@@ -2,7 +2,33 @@
 
 **Date:** 2026-05-01
 **Issue:** [#298](https://github.com/leocaseiro/base-skill/issues/298)
-**Status:** Ready for planning
+**Status:** Implemented (with revision — see Findings below)
+
+## Findings from device testing (2026-05-02)
+
+Distance-only forgiveness (the original spec below) failed in the field with
+**zero behavioural change** even at 40px threshold. Captures from a debug
+harness on real Chrome Android and Brave iOS devices revealed why:
+
+- A typical thumb tap registers **75–100px** of contact movement in
+  **50–65ms** due to **thumb-release drift** — the contact point pivots
+  toward the base of the thumb as pressure releases. Distance alone cannot
+  separate this from a deliberate drag without unacceptable false positives.
+- `pointercancel` never fires for these gestures (contradicting an early
+  hypothesis about iOS Safari). `lostpointercapture` fires correctly **after**
+  `pointerup`. The existing onPointerUp check IS reached — the displacement
+  check just always fails by a wide margin.
+- Duration is a much cleaner discriminator. Every captured failing tap
+  completed in <80ms; the shortest deliberate drag took 287ms — clean gap.
+
+Revised rule: treat as tap if **either** displacement is below
+`tapForgivenessThreshold` (default 17px) **OR** duration is below
+`tapForgivenessTimeMs` (default 150ms — below human reaction time, so any
+gesture this short is ballistic motion, not deliberate drag).
+
+Both thresholds are configurable per-profile; setting either to 0 disables
+that signal. Captured device logs are preserved in
+`debug/logs/` (gitignored) for future regression checks.
 
 ## Problem
 

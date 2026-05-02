@@ -1,10 +1,24 @@
 ---
 title: 'fix: Tap forgiveness — treat micro-drags as taps'
 type: fix
-status: active
+status: shipped
 date: 2026-05-01
 origin: docs/brainstorms/2026-05-01-tap-forgiveness-requirements.md
 ---
+
+## Spec Delta — distance-only was insufficient
+
+Implementation initially followed this plan (distance check only). Real-device
+testing on Chrome Android and Brave iOS showed distance-only forgiveness has
+**zero behavioural impact** because a typical thumb tap registers 75–100px in
+50–65ms (thumb-release drift). See the Findings section in the origin
+brainstorm for the captured device data.
+
+The shipped implementation adds a duration-based gate alongside the distance
+gate: tap if `duration < tapForgivenessTimeMs` (default 150ms) OR
+`distance < tapForgivenessThreshold` (default 17px). Same `onTapFallback`
+hook contract; same priority order; same per-profile configurability with two
+sliders instead of one.
 
 ## Summary
 
