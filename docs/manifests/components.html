@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -18285,6 +18285,42 @@ sequenceDiagram
   Hook-&gt;&gt;Reducer: drop → SWAP_SLOT_BANK { zoneIndex, bankTileId }
   Hook-&gt;&gt;Reducer: SET_DRAG_HOVER_BANK { tileId: null }
   Hook-&gt;&gt;Reducer: SET_DRAG_ACTIVE { tileId: null }
+```
+
+**Tap forgiveness (micro-drag → tap, touch only):**
+
+When a touch drag ends, the gesture is treated as a tap (placing the
+tile in the next available slot) when **either** signal is below its
+threshold AND no slot zone is under the pointer:
+
+- **Distance:** Euclidean displacement from `pointerdown` to
+  `pointerup` &lt; `tapForgivenessThreshold` (default 20px). Catches slow
+  careful taps where the finger barely moved.
+- **Duration:** elapsed time from `pointerdown` to `pointerup` &lt;
+  `tapForgivenessTimeMs` (default 150ms). Catches thumb-release drift
+  — on touch devices a brief tap can register 75–100px of contact
+  movement in 50–65ms even when the user perceives no movement.
+
+Both thresholds are configurable per-profile in the settings page.
+Setting either to 0 disables that signal. The same check fires from
+`onPointerCancel` so platforms that fire `pointercancel` instead of
+`pointerup` for short gestures (documented iOS Safari behaviour) are
+also covered.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Hook as useTouchDrag (onPointerUp)
+  participant Fallback as useDraggableTile (onTapFallback)
+  participant Reducer as answerGameReducer
+  participant Auto as useAutoNextSlot
+
+  User-&gt;&gt;Hook: pointer up (displacement &lt; threshold)
+  Hook-&gt;&gt;Hook: check: no zone under pointer?
+  Hook-&gt;&gt;Fallback: onTapFallback()
+  Fallback-&gt;&gt;Reducer: SET_DRAG_ACTIVE { tileId: null }
+  Fallback-&gt;&gt;Auto: placeInNextSlot(tile.id)
+  Auto-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex: activeSlotIndex }
 ```
 
 ---
