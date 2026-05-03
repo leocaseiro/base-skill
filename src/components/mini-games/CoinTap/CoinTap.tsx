@@ -180,7 +180,7 @@ export const CoinTap = ({
 
       {/* Coin counter */}
       <p className="text-4xl font-bold text-yellow-300">
-        {coins} coin{coins !== 1 ? 's' : ''}
+        {coins} coin{coins === 1 ? '' : 's'}
       </p>
 
       {/* Streak display */}
