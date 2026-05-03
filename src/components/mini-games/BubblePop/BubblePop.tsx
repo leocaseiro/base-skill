@@ -160,7 +160,7 @@ export const BubblePop = ({
   );
 
   // Clean up confetti on unmount
-  useEffect(() => () => confetti.reset(), []);
+  useEffect(() => () => void confetti.reset(), []);
 
   return (
     <div
