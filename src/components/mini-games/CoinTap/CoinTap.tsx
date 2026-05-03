@@ -93,7 +93,9 @@ export const CoinTap = ({
     setPopKey((prev) => prev + 1);
 
     setStreak(
-      timeSinceLastTap <= 300 && lastTapTime !== 0 ? (prev) => prev + 1 : 1,
+      timeSinceLastTap <= 300 && lastTapTime !== 0
+        ? (prev) => prev + 1
+        : 1,
     );
   };
 
