@@ -33,7 +33,8 @@ const seededRandom = (seed: number) => {
   };
 };
 
-const confettiCleanupEffect = () => () => void confetti.reset();
+const cleanupConfetti = () => void confetti.reset();
+const confettiEffect = () => cleanupConfetti;
 
 const generateBubbles = (count: number, seed: number): Bubble[] => {
   const rand = seededRandom(seed);
@@ -162,7 +163,7 @@ export const BubblePop = ({
   );
 
   // Clean up confetti on unmount
-  useEffect(confettiCleanupEffect, []);
+  useEffect(confettiEffect, []);
 
   return (
     <div
