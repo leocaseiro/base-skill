@@ -31,6 +31,8 @@ const generateStars = (): Star[] =>
     };
   });
 
+const increment = (prev: number) => prev + 1;
+
 export const FireworksPainter = ({
   duration = 30,
   showHandHint = true,
@@ -41,7 +43,7 @@ export const FireworksPainter = ({
   const [showHint, setShowHint] = useState(showHandHint);
   const [isDone, setIsDone] = useState(false);
 
-  const stars = useMemo(() => generateStars(), []);
+  const stars = useMemo(generateStars, []);
 
   useEffect(() => {
     const timer = globalThis.setInterval(() => {
@@ -90,7 +92,7 @@ export const FireworksPainter = ({
         '#ffd93d',
       ],
     });
-    setFireworkCount((prev) => prev + 1);
+    setFireworkCount(increment);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
