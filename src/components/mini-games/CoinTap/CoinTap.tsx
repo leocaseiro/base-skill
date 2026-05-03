@@ -16,6 +16,8 @@ const getStarsFromCoins = (coins: number): number => {
   return 5;
 };
 
+const increment = (prev: number) => prev + 1;
+
 const StarDisplay = ({ count }: { count: number }) => (
   <div className="flex justify-center gap-1 text-4xl">
     {[1, 2, 3, 4, 5].map((star) => (
@@ -88,14 +90,12 @@ export const CoinTap = ({
     const now = Date.now();
     const timeSinceLastTap = now - lastTapTime;
 
-    setCoins((prev) => prev + 1);
+    setCoins(increment);
     setLastTapTime(now);
-    setPopKey((prev) => prev + 1);
+    setPopKey(increment);
 
     setStreak(
-      timeSinceLastTap <= 300 && lastTapTime !== 0
-        ? (prev) => prev + 1
-        : 1,
+      timeSinceLastTap <= 300 && lastTapTime !== 0 ? increment : 1,
     );
   };
 
