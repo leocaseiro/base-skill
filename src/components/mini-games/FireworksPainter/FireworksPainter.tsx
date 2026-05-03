@@ -102,7 +102,9 @@ export const FireworksPainter = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') launchFirework({ x: 0.5, y: 0.5 });
+    if (e.key === 'Enter' || e.key === ' ') {
+      launchFirework({ x: 0.5, y: 0.5 });
+    }
   };
 
   return (
