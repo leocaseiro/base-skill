@@ -112,7 +112,9 @@ export const BubblePop = ({
   const [bubbles, setBubbles] = useState<Bubble[]>(initialBubbles);
   const [isComplete, setIsComplete] = useState(false);
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
 
   const poppedCount = bubbles.filter(isBubblePopped).length;
 
