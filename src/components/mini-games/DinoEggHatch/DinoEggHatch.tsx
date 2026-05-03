@@ -106,7 +106,9 @@ export const DinoEggHatch = ({
   const [tapCount, setTapCount] = useState(0);
   const [hatched, setHatched] = useState(false);
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
 
   const crackStage = Math.min(
     4,
