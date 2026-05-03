@@ -1,1 +1,0 @@
-import{j as o}from"./iframe-SILljcV9.js";import{D as t,c as a}from"./DbProvider-CfgTkrO7.js";const e=s=>o.jsx(t,{openDatabase:a,children:o.jsx(s,{})});e.__docgenInfo={description:"",methods:[],displayName:"withDb"};export{e as w};
