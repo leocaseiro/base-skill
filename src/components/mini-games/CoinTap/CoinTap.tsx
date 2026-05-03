@@ -1,11 +1,6 @@
 import confetti from 'canvas-confetti';
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 
 interface CoinTapProps {
   starRating?: 1 | 2 | 3 | 4 | 5;
@@ -77,9 +72,11 @@ export const CoinTap = ({
   const [popKey, setPopKey] = useState(0);
 
   const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
   const coinsRef = useRef(coins);
-  coinsRef.current = coins;
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+    coinsRef.current = coins;
+  });
 
   const handleComplete = useCallback(() => {
     setIsComplete(true);
