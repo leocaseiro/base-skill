@@ -160,9 +160,7 @@ export const BubblePop = ({
   );
 
   // Clean up confetti on unmount
-  useEffect(() => () => {
-    confetti.reset();
-  }, []);
+  useEffect(() => () => confetti.reset(), []);
 
   return (
     <div
@@ -234,9 +232,7 @@ export const BubblePop = ({
                 transform: 'translate(-50%, -50%)',
                 ...animationStyle,
               }}
-              onClick={() => {
-                handleBubbleClick(bubble.id);
-              }}
+              onClick={() => handleBubbleClick(bubble.id)}
             >
               {/* Shine highlight */}
               <span
