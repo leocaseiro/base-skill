@@ -28,7 +28,7 @@ interface Bubble {
 const seededRandom = (seed: number) => {
   let s = seed;
   return () => {
-    s = (s * 1_664_525 + 1_013_904_223) & 0xff_ff_ff_ff;
+    s = (s * 1_664_525 + 1_013_904_223) & 0xFF_FF_FF_FF;
     return (s >>> 0) / 0x1_00_00_00_00;
   };
 };
@@ -160,10 +160,8 @@ export const BubblePop = ({
   );
 
   // Clean up confetti on unmount
-  useEffect(() => {
-    return () => {
-      confetti.reset();
-    };
+  useEffect(() => () => {
+    confetti.reset();
   }, []);
 
   return (
@@ -238,7 +236,6 @@ export const BubblePop = ({
               }}
               onClick={() => {
                 handleBubbleClick(bubble.id);
-                // TODO: Play bubble pop sound effect (future enhancement)
               }}
             >
               {/* Shine highlight */}
