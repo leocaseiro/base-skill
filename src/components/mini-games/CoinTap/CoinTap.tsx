@@ -92,11 +92,9 @@ export const CoinTap = ({
     setLastTapTime(now);
     setPopKey((prev) => prev + 1);
 
-    if (timeSinceLastTap <= 300 && lastTapTime !== 0) {
-      setStreak((prev) => prev + 1);
-    } else {
-      setStreak(1);
-    }
+    setStreak(
+      timeSinceLastTap <= 300 && lastTapTime !== 0 ? (prev) => prev + 1 : 1,
+    );
   };
 
   const progressPercent =
