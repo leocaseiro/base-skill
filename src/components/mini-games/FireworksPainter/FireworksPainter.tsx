@@ -71,16 +71,12 @@ export const FireworksPainter = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- duration and showHandHint are init-only; onComplete is intentionally excluded to avoid re-mounting the timer on every render
   }, []);
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const launchFirework = (origin: { x: number; y: number }) => {
     if (isDone) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-
     void confetti({
       particleCount: 80,
       spread: 60,
-      origin: { x, y },
+      origin,
       startVelocity: 35,
       gravity: 0.8,
       ticks: 200,
@@ -94,16 +90,29 @@ export const FireworksPainter = ({
         '#ffd93d',
       ],
     });
-
     setFireworkCount((prev) => prev + 1);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    launchFirework({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') launchFirework({ x: 0.5, y: 0.5 });
   };
 
   return (
     <div
-      role="main"
+      role="application"
       aria-label="Fireworks Painter game"
+      tabIndex={0}
       className="relative flex h-full min-h-screen w-full cursor-crosshair select-none items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-indigo-950"
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       {stars.map((star) => (
         <span
