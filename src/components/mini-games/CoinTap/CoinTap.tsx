@@ -1,5 +1,5 @@
 import confetti from 'canvas-confetti';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 
 interface CoinTapProps {
   starRating?: 1 | 2 | 3 | 4 | 5;
@@ -17,6 +17,29 @@ const getStarsFromCoins = (coins: number): number => {
 };
 
 const increment = (prev: number) => prev + 1;
+
+const getTimerBarColor = (percent: number): string => {
+  if (percent > 50) return 'bg-green-400';
+  if (percent > 25) return 'bg-orange-400';
+  return 'bg-red-400';
+};
+
+const getGoldGlowStyle = (streak: number): CSSProperties | undefined => {
+  if (streak >= 10) {
+    return {
+      filter: `drop-shadow(0 0 ${String(Math.min(streak, 20))}px gold) drop-shadow(0 0 ${String(Math.min(streak * 2, 40))}px rgba(255,215,0,0.6))`,
+    };
+  }
+  if (streak >= 5) return { filter: `drop-shadow(0 0 8px gold)` };
+  return undefined;
+};
+
+const getEarnedMessage = (stars: number): string => {
+  if (stars >= 4) return 'Amazing tapping!';
+  if (stars >= 3) return 'Great job!';
+  if (stars >= 2) return 'Nice work!';
+  return 'Keep practising!';
+};
 
 const StarDisplay = ({ count }: { count: number }) => (
   <div className="flex justify-center gap-1 text-4xl">
@@ -102,25 +125,11 @@ export const CoinTap = ({
   const progressPercent =
     totalDuration > 0 ? (timeLeft / totalDuration) * 100 : 0;
 
-  const timerBarColor =
-    progressPercent > 50
-      ? 'bg-green-400'
-      : progressPercent > 25
-        ? 'bg-orange-400'
-        : 'bg-red-400';
+  const timerBarColor = getTimerBarColor(progressPercent);
 
   const coinSize = coins >= 100 ? 'text-[10rem]' : 'text-[8rem]';
 
-  const goldGlowStyle =
-    streak >= 10
-      ? {
-          filter: `drop-shadow(0 0 ${String(Math.min(streak, 20))}px gold) drop-shadow(0 0 ${String(Math.min(streak * 2, 40))}px rgba(255,215,0,0.6))`,
-        }
-      : streak >= 5
-        ? {
-            filter: `drop-shadow(0 0 8px gold)`,
-          }
-        : undefined;
+  const goldGlowStyle = getGoldGlowStyle(streak);
 
   if (isComplete) {
     const earnedStars = getStarsFromCoins(coins);
@@ -133,13 +142,7 @@ export const CoinTap = ({
           </h1>
           <StarDisplay count={earnedStars} />
           <p className="text-lg text-yellow-100/80">
-            {earnedStars >= 4
-              ? 'Amazing tapping!'
-              : earnedStars >= 3
-                ? 'Great job!'
-                : earnedStars >= 2
-                  ? 'Nice work!'
-                  : 'Keep practising!'}
+            {getEarnedMessage(earnedStars)}
           </p>
         </div>
       </div>
