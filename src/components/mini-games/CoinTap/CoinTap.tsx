@@ -1,5 +1,11 @@
 import confetti from 'canvas-confetti';
-import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 interface CoinTapProps {
   starRating?: 1 | 2 | 3 | 4 | 5;
@@ -24,7 +30,9 @@ const getTimerBarColor = (percent: number): string => {
   return 'bg-red-400';
 };
 
-const getGoldGlowStyle = (streak: number): CSSProperties | undefined => {
+const getGoldGlowStyle = (
+  streak: number,
+): CSSProperties | undefined => {
   if (streak >= 10) {
     return {
       filter: `drop-shadow(0 0 ${String(Math.min(streak, 20))}px gold) drop-shadow(0 0 ${String(Math.min(streak * 2, 40))}px rgba(255,215,0,0.6))`,
