@@ -1179,8 +1179,7 @@ const RouteComponent = (): JSX.Element => {
   const debug = search.debug === true || import.meta.env.DEV;
   const { t } = useTranslation('games');
   const gameId = data.config.gameId;
-  const gameName =
-    data.customGameName ?? t(gameId);
+  const gameName = data.customGameName ?? t(gameId);
 
   useEffect(() => {
     document.title = buildGamePageTitle(gameName);
