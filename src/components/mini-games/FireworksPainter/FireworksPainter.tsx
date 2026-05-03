@@ -111,7 +111,7 @@ export const FireworksPainter = ({
 
   return (
     <div
-      role="application"
+      role="button"
       aria-label="Fireworks Painter game"
       tabIndex={0}
       className="relative flex h-full min-h-screen w-full cursor-crosshair select-none items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-indigo-950"
@@ -146,8 +146,7 @@ export const FireworksPainter = ({
 
       {showHint && !isDone && (
         <div
-          className="pointer-events-none flex flex-col items-center gap-3 transition-opacity duration-500"
-          style={{ opacity: showHint ? 1 : 0 }}
+          className="pointer-events-none flex flex-col items-center gap-3"
           aria-hidden="true"
         >
           <span className="animate-bounce text-6xl">👆</span>
