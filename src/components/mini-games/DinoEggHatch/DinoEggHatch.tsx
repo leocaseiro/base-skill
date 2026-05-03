@@ -42,7 +42,7 @@ const CrackSvg = ({ stage }: { stage: number }) => {
       style={
         stage >= 3
           ? { filter: 'drop-shadow(0 0 12px gold)' }
-          : undefined
+          : {}
       }
       viewBox="0 0 160 160"
       aria-hidden="true"
