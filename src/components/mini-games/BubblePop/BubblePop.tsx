@@ -28,7 +28,7 @@ interface Bubble {
 const seededRandom = (seed: number) => {
   let s = seed;
   return () => {
-    s = (s * 1_664_525 + 1_013_904_223) & 0xFFFF_FFFF;
+    s = (s * 1_664_525 + 1_013_904_223) & 0xffff_ffff;
     return (s >>> 0) / 0x1_0000_0000;
   };
 };
