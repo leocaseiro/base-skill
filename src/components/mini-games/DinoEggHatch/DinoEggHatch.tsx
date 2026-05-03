@@ -91,6 +91,8 @@ const getProgressColor = (pct: number): string => {
   return 'bg-red-500';
 };
 
+const confettiCleanupEffect = () => () => void confetti.reset();
+
 export const DinoEggHatch = ({
   animal = 'random',
   tapsToHatch = 20,
@@ -141,7 +143,7 @@ export const DinoEggHatch = ({
     };
   }, [hatched]);
 
-  useEffect(() => () => void confetti.reset(), []);
+  useEffect(confettiCleanupEffect, []);
 
   const animalData = ANIMALS[chosenAnimal];
 
