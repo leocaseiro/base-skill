@@ -39,11 +39,7 @@ const CrackSvg = ({ stage }: { stage: number }) => {
   return (
     <svg
       className="pointer-events-none absolute inset-0 h-full w-full"
-      style={
-        stage >= 3
-          ? { filter: 'drop-shadow(0 0 12px gold)' }
-          : {}
-      }
+      style={stage >= 3 ? { filter: 'drop-shadow(0 0 12px gold)' } : {}}
       viewBox="0 0 160 160"
       aria-hidden="true"
     >
