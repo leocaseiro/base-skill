@@ -141,9 +141,7 @@ export const DinoEggHatch = ({
     };
   }, [hatched]);
 
-  useEffect(() => () => {
-    confetti.reset();
-  }, []);
+  useEffect(() => () => confetti.reset(), []);
 
   const animalData = ANIMALS[chosenAnimal];
 
