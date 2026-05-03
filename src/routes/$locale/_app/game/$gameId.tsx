@@ -1180,7 +1180,7 @@ const RouteComponent = (): JSX.Element => {
   const { t } = useTranslation('games');
   const gameId = data.config.gameId;
   const gameName =
-    data.customGameName ?? t(gameId as Parameters<typeof t>[0]);
+    data.customGameName ?? t(gameId);
 
   useEffect(() => {
     document.title = buildGamePageTitle(gameName);
