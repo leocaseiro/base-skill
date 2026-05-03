@@ -28,13 +28,14 @@ interface Bubble {
 const seededRandom = (seed: number) => {
   let s = seed;
   return () => {
-    s = (s * 1_664_525 + 1_013_904_223) & 0xffff_ffff;
+    s = (s * 1_664_525 + 1_013_904_223) & 0xFFFF_FFFF;
     return (s >>> 0) / 0x1_0000_0000;
   };
 };
 
 const cleanupConfetti = () => void confetti.reset();
 const confettiEffect = () => cleanupConfetti;
+const isBubblePopped = (b: Bubble) => b.popped;
 
 const generateBubbles = (count: number, seed: number): Bubble[] => {
   const rand = seededRandom(seed);
@@ -113,7 +114,7 @@ export const BubblePop = ({
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
-  const poppedCount = bubbles.filter((b) => b.popped).length;
+  const poppedCount = bubbles.filter(isBubblePopped).length;
 
   const handleBubbleClick = useCallback(
     (id: number) => {
@@ -133,7 +134,7 @@ export const BubblePop = ({
           const updated = prev.map((b) =>
             b.id === id ? { ...b, popping: false, popped: true } : b,
           );
-          const allPopped = updated.every((b) => b.popped);
+          const allPopped = updated.every(isBubblePopped);
           if (allPopped) {
             setIsComplete(true);
             // Fire confetti celebration
