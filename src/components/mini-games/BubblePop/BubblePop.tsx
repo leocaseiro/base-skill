@@ -28,14 +28,13 @@ interface Bubble {
 const seededRandom = (seed: number) => {
   let s = seed;
   return () => {
-    s = (s * 1_664_525 + 1_013_904_223) & 0xffff_ffff;
-    return (s >>> 0) / 0x1_0000_0000;
+    s = (s * 1_664_525 + 1_013_904_223) & 0xff_ff_ff_ff;
+    return (s >>> 0) / 0x1_00_00_00_00;
   };
 };
 
 const cleanupConfetti = () => void confetti.reset();
 const confettiEffect = () => cleanupConfetti;
-const isBubblePopped = (b: Bubble) => b.popped;
 
 const generateBubbles = (count: number, seed: number): Bubble[] => {
   const rand = seededRandom(seed);
@@ -59,7 +58,7 @@ const generateBubbles = (count: number, seed: number): Bubble[] => {
         // Convert to approximate pixel distance (assume 600px container for heuristic)
         const dx = ((candidateX - existing.x) / 100) * 600;
         const dy = ((candidateY - existing.y) / 100) * 400;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const dist = Math.hypot(dx, dy);
         const minDist = (size + existing.size) / 2;
         if (dist < minDist) {
           overlaps = true;
@@ -116,7 +115,7 @@ export const BubblePop = ({
     onCompleteRef.current = onComplete;
   });
 
-  const poppedCount = bubbles.filter(isBubblePopped).length;
+  const poppedCount = bubbles.filter((b) => b.popped).length;
 
   const handleBubbleClick = useCallback(
     (id: number) => {
@@ -136,7 +135,7 @@ export const BubblePop = ({
           const updated = prev.map((b) =>
             b.id === id ? { ...b, popping: false, popped: true } : b,
           );
-          const allPopped = updated.every(isBubblePopped);
+          const allPopped = updated.every((b) => b.popped);
           if (allPopped) {
             setIsComplete(true);
             // Fire confetti celebration
