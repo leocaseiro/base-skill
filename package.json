@@ -56,7 +56,6 @@
     "clsx": "^2.1.1",
     "dexie": "4.0.10",
     "eslint-plugin-unicorn": "^64.0.0",
-    "fireworks-js": "^2.10.8",
     "i18next": "^26.0.3",
     "lucide-react": "^0.545.0",
     "mermaid": "^11.14.0",
