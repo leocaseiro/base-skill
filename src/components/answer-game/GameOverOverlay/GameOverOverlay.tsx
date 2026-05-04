@@ -1,5 +1,4 @@
-import confetti from 'canvas-confetti';
-import { useEffect } from 'react';
+import { Fireworks } from '@fireworks-js/react';
 
 interface GameOverOverlayProps {
   retryCount: number;
@@ -15,6 +14,13 @@ const starsFromRetries = (retryCount: number): number => {
   return 1;
 };
 
+const fireworkOptions = {
+  mouse: { click: false, move: false },
+  sound: { enabled: false },
+  intensity: 50,
+  traceSpeed: 3,
+} as const;
+
 export const GameOverOverlay = ({
   retryCount,
   onPlayAgain,
@@ -22,76 +28,57 @@ export const GameOverOverlay = ({
 }: GameOverOverlayProps) => {
   const stars = starsFromRetries(retryCount);
 
-  useEffect(() => {
-    const duration = 2700;
-    const end = Date.now() + duration;
-    let rafId: number;
-
-    const frame = () => {
-      void confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-      });
-      void confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-      });
-      if (Date.now() < end) {
-        rafId = requestAnimationFrame(frame);
-      }
-    };
-
-    rafId = requestAnimationFrame(frame);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      confetti.reset();
-    };
-  }, []);
-
   return (
     <div
       role="dialog"
       aria-label="Game complete"
-      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+      className="fixed inset-0 bg-background/80"
     >
-      <span className="animate-bounce text-8xl" aria-hidden="true">
-        🐨
-      </span>
+      <Fireworks
+        options={fireworkOptions}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+        }}
+      />
 
-      <div
-        aria-label={`You scored ${stars} out of 5 stars`}
-        className="flex gap-2"
-      >
-        {Array.from({ length: 5 }, (_, i) => (
-          <span
-            key={i}
-            className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8">
+        <span className="animate-bounce text-8xl" aria-hidden="true">
+          🐨
+        </span>
+
+        <div
+          aria-label={`You scored ${stars} out of 5 stars`}
+          className="flex gap-2"
+        >
+          {Array.from({ length: 5 }, (_, i) => (
+            <span
+              key={i}
+              className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={onPlayAgain}
+            className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
           >
-            ★
-          </span>
-        ))}
-      </div>
-
-      <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={onPlayAgain}
-          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
-        >
-          Play again
-        </button>
-        <button
-          type="button"
-          onClick={onHome}
-          className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
-        >
-          Home
-        </button>
+            Play again
+          </button>
+          <button
+            type="button"
+            onClick={onHome}
+            className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
+          >
+            Home
+          </button>
+        </div>
       </div>
     </div>
   );
