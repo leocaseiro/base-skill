@@ -1,5 +1,4 @@
-import confetti from 'canvas-confetti';
-import { useEffect } from 'react';
+import { Fireworks } from '@fireworks-js/react';
 
 interface LevelCompleteOverlayProps {
   level: number;
@@ -7,30 +6,34 @@ interface LevelCompleteOverlayProps {
   onDone: () => void;
 }
 
+const fireworkOptions = {
+  mouse: { click: false, move: false },
+  sound: { enabled: false },
+  intensity: 30,
+  traceSpeed: 3,
+} as const;
+
 export const LevelCompleteOverlay = ({
   level,
   onNextLevel,
   onDone,
-}: LevelCompleteOverlayProps) => {
-  useEffect(() => {
-    void confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.5 },
-      ticks: 310,
-    });
+}: LevelCompleteOverlayProps) => (
+  <div
+    role="dialog"
+    aria-label={`Level ${level} complete`}
+    className="fixed inset-0 bg-background/80"
+  >
+    <Fireworks
+      options={fireworkOptions}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+      }}
+    />
 
-    return () => {
-      confetti.reset();
-    };
-  }, []);
-
-  return (
-    <div
-      role="dialog"
-      aria-label={`Level ${level} complete`}
-      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
-    >
+    <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8">
       <span className="animate-bounce text-8xl" aria-hidden="true">
         🐨
       </span>
@@ -56,5 +59,5 @@ export const LevelCompleteOverlay = ({
         </button>
       </div>
     </div>
-  );
-};
+  </div>
+);

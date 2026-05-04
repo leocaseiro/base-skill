@@ -1,5 +1,6 @@
-import confetti from 'canvas-confetti';
-import { useEffect, useMemo, useState } from 'react';
+import { Fireworks } from '@fireworks-js/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { FireworksHandlers } from '@fireworks-js/react';
 
 interface FireworksPainterProps {
   duration?: number;
@@ -17,7 +18,6 @@ interface Star {
 
 const generateStars = (): Star[] =>
   Array.from({ length: 25 }, (_, i) => {
-    // Deterministic pseudo-random using index-based seed
     const seed1 = ((i * 137 + 11) % 97) / 97;
     const seed2 = ((i * 71 + 43) % 89) / 89;
     const seed3 = ((i * 53 + 17) % 61) / 61;
@@ -33,11 +33,24 @@ const generateStars = (): Star[] =>
 
 const increment = (prev: number) => prev + 1;
 
+const fireworkOptions = {
+  mouse: { click: true, move: false, max: 1 },
+  sound: { enabled: false },
+  intensity: 30,
+  traceSpeed: 3,
+} as const;
+
 export const FireworksPainter = ({
   duration = 30,
   showHandHint = true,
   onComplete,
 }: FireworksPainterProps) => {
+  const fireworksRef = useRef<FireworksHandlers>(null);
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
+
   const [fireworkCount, setFireworkCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration);
   const [showHint, setShowHint] = useState(showHandHint);
@@ -51,7 +64,7 @@ export const FireworksPainter = ({
         if (prev <= 1) {
           globalThis.clearInterval(timer);
           setIsDone(true);
-          onComplete?.();
+          onCompleteRef.current?.();
           return 0;
         }
         return prev - 1;
@@ -68,44 +81,23 @@ export const FireworksPainter = ({
     return () => {
       globalThis.clearInterval(timer);
       if (hintTimer !== undefined) globalThis.clearTimeout(hintTimer);
-      confetti.reset();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- duration and showHandHint are init-only; onComplete is intentionally excluded to avoid re-mounting the timer on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- duration and showHandHint are init-only
   }, []);
 
-  const launchFirework = (origin: { x: number; y: number }) => {
-    if (isDone) return;
-    void confetti({
-      particleCount: 80,
-      spread: 60,
-      origin,
-      startVelocity: 35,
-      gravity: 0.8,
-      ticks: 200,
-      colors: [
-        '#ff0',
-        '#f0f',
-        '#0ff',
-        '#f80',
-        '#0f8',
-        '#ff6b6b',
-        '#ffd93d',
-      ],
-    });
-    setFireworkCount(increment);
-  };
+  useEffect(() => {
+    if (isDone) fireworksRef.current?.stop();
+  }, [isDone]);
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    launchFirework({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    });
+  const handleContainerClick = () => {
+    if (!isDone) setFireworkCount(increment);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isDone) return;
     if (e.key === 'Enter' || e.key === ' ') {
-      launchFirework({ x: 0.5, y: 0.5 });
+      fireworksRef.current?.launch(1);
+      setFireworkCount(increment);
     }
   };
 
@@ -114,10 +106,23 @@ export const FireworksPainter = ({
       role="button"
       aria-label="Fireworks Painter game"
       tabIndex={0}
-      className="relative flex h-full min-h-screen w-full cursor-crosshair select-none items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-indigo-950"
-      onClick={handleClick}
+      className="relative flex h-full min-h-screen w-full cursor-crosshair select-none overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950 to-indigo-950"
+      onClick={handleContainerClick}
       onKeyDown={handleKeyDown}
     >
+      {!isDone && (
+        <Fireworks
+          ref={fireworksRef}
+          options={fireworkOptions}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+          }}
+        />
+      )}
+
       {stars.map((star) => (
         <span
           key={star.id}
