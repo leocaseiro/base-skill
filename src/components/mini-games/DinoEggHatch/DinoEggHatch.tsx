@@ -147,10 +147,7 @@ export const DinoEggHatch = ({
   const animalData = ANIMALS[chosenAnimal];
 
   return (
-    <div
-      className="flex min-h-screen flex-col items-center justify-center"
-      style={{ backgroundColor: '#900192' }}
-    >
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#900192]">
       {hatched ? (
         <div className="flex flex-col items-center">
           <div className="animate-pop text-[10rem] leading-none">
