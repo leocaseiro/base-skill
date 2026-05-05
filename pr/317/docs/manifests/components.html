@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3582,7 +3582,7 @@ export const ReplayTrigger: Story = {
             <pre><code>Props:</code></pre>
             <pre><code>duration?: number = 10
 
-onComplete?: (fireworkCount: number) =&gt; void
+onComplete?: () =&gt; void
 
 showHandHint?: boolean = true</code></pre>
           </div>
@@ -3596,7 +3596,8 @@ showHandHint?: boolean = true</code></pre>
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { FireworksPainter } from "base-skill";</code></pre>
+                <pre><code>import { FireworksPainter } from "base-skill";
+import { Maximize, Menu, X } from "lucide-react";</code></pre>
               </div>
           
           
@@ -4277,20 +4278,55 @@ title: string</code></pre>
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  25 | };
-  26 |
-&gt; 27 | const meta: Meta&lt;StoryArgs&gt; = {
+  60 | };
+  61 |
+&gt; 62 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  28 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  29 |   title: &#39;AnswerGame/GameOverOverlay&#39;,
-  30 |   tags: [&#39;autodocs&#39;],
+  63 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  64 |   title: &#39;AnswerGame/GameOverOverlay&#39;,
+  65 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
+import { Maximize, Menu, X } from &#39;lucide-react&#39;;
 import { fn } from &#39;storybook/test&#39;;
 
 import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
+
+const ICON_BUTTON_CLASS =
+  &#39;pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border&#39;;
+
+const GameChromeDecorator = ({ children }: { children: ReactNode }) =&gt; (
+  &lt;&gt;
+    {children}
+    &lt;div className=&quot;pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-4&quot;&gt;
+      &lt;button
+        type=&quot;button&quot;
+        className={ICON_BUTTON_CLASS}
+        aria-label=&quot;Menu&quot;
+      &gt;
+        &lt;Menu aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+      &lt;/button&gt;
+      &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+        &lt;button
+          type=&quot;button&quot;
+          className={ICON_BUTTON_CLASS}
+          aria-label=&quot;Fullscreen&quot;
+        &gt;
+          &lt;Maximize aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+        &lt;/button&gt;
+        &lt;button
+          type=&quot;button&quot;
+          className={ICON_BUTTON_CLASS}
+          aria-label=&quot;Exit&quot;
+        &gt;
+          &lt;X aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/&gt;
+);
 
 interface StoryArgs {
   stars: number;
@@ -4316,6 +4352,13 @@ const meta: Meta&lt;StoryArgs&gt; = {
   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;AnswerGame/GameOverOverlay&#39;,
   tags: [&#39;autodocs&#39;],
+  decorators: [
+    (Story) =&gt; (
+      &lt;GameChromeDecorator&gt;
+        &lt;Story /&gt;
+      &lt;/GameChromeDecorator&gt;
+    ),
+  ],
   args: {
     stars: 5,
     onPlayAgain: fn(),
@@ -4361,7 +4404,8 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GameOverOverlay } from "base-skill";</code></pre>
+                <pre><code>import { GameOverOverlay } from "base-skill";
+import { Maximize, Menu, X } from "lucide-react";</code></pre>
               </div>
           
           
@@ -13942,20 +13986,55 @@ export const Playground: Story = {};
     <div class="note err">
       <div class="note-title">Prop type error</div>
       <div class="note-body"><pre><code>No component file found for the &quot;GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;&quot; component.
-  25 | };
-  26 |
-&gt; 27 | const meta: Meta&lt;StoryArgs&gt; = {
+  60 | };
+  61 |
+&gt; 62 | const meta: Meta&lt;StoryArgs&gt; = {
      | ^
-  28 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
-  29 |   title: &#39;AnswerGame/GameOverOverlay&#39;,
-  30 |   tags: [&#39;autodocs&#39;],
+  63 |   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
+  64 |   title: &#39;AnswerGame/GameOverOverlay&#39;,
+  65 |   tags: [&#39;autodocs&#39;],
 
 ./src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:
+import { Maximize, Menu, X } from &#39;lucide-react&#39;;
 import { fn } from &#39;storybook/test&#39;;
 
 import { GameOverOverlay } from &#39;./GameOverOverlay&#39;;
 import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
-import type { ComponentType } from &#39;react&#39;;
+import type { ComponentType, ReactNode } from &#39;react&#39;;
+
+const ICON_BUTTON_CLASS =
+  &#39;pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border&#39;;
+
+const GameChromeDecorator = ({ children }: { children: ReactNode }) =&gt; (
+  &lt;&gt;
+    {children}
+    &lt;div className=&quot;pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-4&quot;&gt;
+      &lt;button
+        type=&quot;button&quot;
+        className={ICON_BUTTON_CLASS}
+        aria-label=&quot;Menu&quot;
+      &gt;
+        &lt;Menu aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+      &lt;/button&gt;
+      &lt;div className=&quot;flex items-center gap-2&quot;&gt;
+        &lt;button
+          type=&quot;button&quot;
+          className={ICON_BUTTON_CLASS}
+          aria-label=&quot;Fullscreen&quot;
+        &gt;
+          &lt;Maximize aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+        &lt;/button&gt;
+        &lt;button
+          type=&quot;button&quot;
+          className={ICON_BUTTON_CLASS}
+          aria-label=&quot;Exit&quot;
+        &gt;
+          &lt;X aria-hidden className=&quot;size-5&quot; strokeWidth={2.25} /&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/&gt;
+);
 
 interface StoryArgs {
   stars: number;
@@ -13981,6 +14060,13 @@ const meta: Meta&lt;StoryArgs&gt; = {
   component: GameOverOverlay as unknown as ComponentType&lt;StoryArgs&gt;,
   title: &#39;AnswerGame/GameOverOverlay&#39;,
   tags: [&#39;autodocs&#39;],
+  decorators: [
+    (Story) =&gt; (
+      &lt;GameChromeDecorator&gt;
+        &lt;Story /&gt;
+      &lt;/GameChromeDecorator&gt;
+    ),
+  ],
   args: {
     stars: 5,
     onPlayAgain: fn(),
@@ -14026,7 +14112,8 @@ export const Playground: Story = {};
                 <div class="row">
                   <span class="ex-name">Imports</span>
                 </div>
-                <pre><code>import { GameOverOverlay } from "base-skill";</code></pre>
+                <pre><code>import { GameOverOverlay } from "base-skill";
+import { Maximize, Menu, X } from "lucide-react";</code></pre>
               </div>
           
           
