@@ -1,6 +1,7 @@
 import { fn } from 'storybook/test';
 
 import { DinoEggHatch } from './DinoEggHatch';
+import { ANIMAL_KEYS } from './sprites';
 import type { Meta, StoryObj } from '@storybook/react';
 
 const meta: Meta<typeof DinoEggHatch> = {
@@ -10,15 +11,7 @@ const meta: Meta<typeof DinoEggHatch> = {
   argTypes: {
     animal: {
       control: { type: 'select' },
-      options: [
-        'random',
-        'dino',
-        'turtle',
-        'chicken',
-        'bunny',
-        'chick',
-        'duck',
-      ],
+      options: ['random', ...ANIMAL_KEYS],
     },
     tapsToHatch: {
       control: { type: 'range', min: 4, max: 40, step: 4 },
