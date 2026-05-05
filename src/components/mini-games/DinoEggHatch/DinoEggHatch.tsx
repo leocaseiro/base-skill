@@ -47,8 +47,7 @@ interface DinoEggHatchProps {
   forceReducedMotion?: boolean;
   /**
    * Background CSS color for the game stage. Accepts any valid CSS color
-   * (hex, rgb, named). Default `#7e48c0` (matches the master art's
-   * chroma-key colour for a seamless backdrop).
+   * (hex, rgb, named). Default `#900192`.
    */
   backgroundColor?: string;
   /**
@@ -99,7 +98,7 @@ export const DinoEggHatch = ({
   crackVolume = 0.8,
   celebrateVolume = 0.9,
   forceReducedMotion,
-  backgroundColor = '#7e48c0',
+  backgroundColor = '#900192',
   scaleOverrides,
 }: DinoEggHatchProps) => {
   const systemReducedMotion = usePrefersReducedMotion();
