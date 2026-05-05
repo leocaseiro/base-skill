@@ -18,13 +18,9 @@ vi.mock('@fireworks-js/react', () => ({
 vi.mock(
   '@/components/mini-games/FireworksPainter/FireworksPainter',
   () => ({
-    FireworksPainter: ({
-      onComplete,
-    }: {
-      onComplete?: (count: number) => void;
-    }) => {
+    FireworksPainter: ({ onComplete }: { onComplete?: () => void }) => {
       queueMicrotask(() => {
-        onComplete?.(0);
+        onComplete?.();
       });
       return null;
     },
