@@ -9,7 +9,8 @@ const SettingsInner = () => {
 
   return (
     <div className="flex flex-col gap-2 p-4 font-mono text-sm">
-      <div>volume: {settings.volume}</div>
+      <div>soundEffectsVolume: {settings.soundEffectsVolume}</div>
+      <div>voiceVolume: {settings.voiceVolume}</div>
       <div>speechRate: {settings.speechRate}</div>
       <div>ttsEnabled: {String(settings.ttsEnabled)}</div>
       <div>showSubtitles: {String(settings.showSubtitles)}</div>

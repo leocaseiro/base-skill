@@ -20,7 +20,7 @@ export const SpotAllPrompt = ({
   const speakPrompt = (): void => {
     speak(prompt, {
       rate: settings.speechRate ?? 1,
-      volume: settings.volume ?? 0.8,
+      volume: settings.voiceVolume ?? 0.8,
       voiceName: settings.preferredVoiceURI,
       lang: i18n.language,
     });

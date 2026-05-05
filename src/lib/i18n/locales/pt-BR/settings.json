@@ -1,6 +1,7 @@
 {
   "title": "Configurações",
-  "volume": "Volume ({{percent}}%)",
+  "soundEffectsVolume": "Efeitos sonoros ({{percent}}%)",
+  "voiceVolume": "Voz ({{percent}}%)",
   "speechRate": "Velocidade da fala ({{rate}}×)",
   "language": "Idioma",
   "theme": "Tema",
