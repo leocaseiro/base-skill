@@ -23,7 +23,7 @@ export const useGameTTS = (): GameTTS => {
       }
       speak(label, {
         rate: settings.speechRate ?? 1,
-        volume: settings.volume ?? 0.8,
+        volume: settings.voiceVolume ?? 0.8,
         voiceName: settings.preferredVoiceURI,
         lang: i18n.language,
       });
@@ -31,7 +31,7 @@ export const useGameTTS = (): GameTTS => {
     [
       config.ttsEnabled,
       settings.speechRate,
-      settings.volume,
+      settings.voiceVolume,
       settings.preferredVoiceURI,
       i18n.language,
     ],
@@ -42,7 +42,7 @@ export const useGameTTS = (): GameTTS => {
       if (!config.ttsEnabled) return;
       speak(text, {
         rate: settings.speechRate ?? 1,
-        volume: settings.volume ?? 0.8,
+        volume: settings.voiceVolume ?? 0.8,
         voiceName: settings.preferredVoiceURI,
         lang: i18n.language,
       });
@@ -50,7 +50,7 @@ export const useGameTTS = (): GameTTS => {
     [
       config.ttsEnabled,
       settings.speechRate,
-      settings.volume,
+      settings.voiceVolume,
       settings.preferredVoiceURI,
       i18n.language,
     ],

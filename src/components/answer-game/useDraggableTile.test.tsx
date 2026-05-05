@@ -298,7 +298,7 @@ describe('useDraggableTile', () => {
         tileId: 't2',
         zoneIndex: 0,
       });
-      expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
+      expect(playSound).toHaveBeenCalledWith('wrong');
     });
 
     it('emits game:evaluate with expected field on rejection', () => {

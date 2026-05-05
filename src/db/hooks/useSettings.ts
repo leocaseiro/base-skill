@@ -10,7 +10,8 @@ const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
 const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   id: ANONYMOUS_SETTINGS_ID,
   profileId: ANONYMOUS_PROFILE_ID,
-  volume: 0.8,
+  soundEffectsVolume: 0.8,
+  voiceVolume: 0.8,
   speechRate: 1,
   ttsEnabled: true,
   showSubtitles: true,
