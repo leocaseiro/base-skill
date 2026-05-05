@@ -10677,3 +10677,198 @@ _**User (2026-04-21 04:12:02Z)**_
 _**User (2026-04-21 04:12:02Z)**_
 
 <local-command-stdout>Goodbye!</local-command-stdout>
+
+---
+
+_**Agent (<synthetic> 2026-04-21 20:18:40Z)**_
+
+No response requested.
+
+---
+
+_**User (2026-04-21 20:19:02Z)**_
+
+I want to check if we still need the worktree fix-dm4-bookmarks-recovery
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:23Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:26Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Worktrees + bookmarks/dm4 branches
+
+`git -C /Users/leocaseiro/Sites/base-skill worktree list && echo === && git -C /Users/leocaseiro/Sites/base-skill branch -a | grep -E "dm4|bookmarks|db6"`
+
+```text
+/Users/leocaseiro/Sites/base-skill                                           86df355d [master]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/gifted-bouman           f7cb4c51 [feat/phonics-word-library-task-11-filterWords]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/musing-merkle           294f9e7a [claude/musing-merkle]
+/Users/leocaseiro/Sites/base-skill/.claude/worktrees/stupefied-satoshi       67d8d1fd [claude/stupefied-satoshi]
+/Users/leocaseiro/Sites/base-skill/worktrees/audit-storybook-controls        9b5a9353 [audit/storybook-controls]
+/Users/leocaseiro/Sites/base-skill/worktrees/ci-auto-merge-release           4ef53c28 [ci/auto-merge-release]
+/Users/leocaseiro/Sites/base-skill/worktrees/docs/tdd-rule                   4b1c577f [docs/tdd-rule]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-answer-game-primitive      39f4922f [feat/answer-game-primitive]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-bookmarks-phase-2          f9140721 [feat/bookmarks-phase-2]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-game-tile-auto-font-sizing 873241e2 [feat/game-tile-auto-font-sizing]
+/Users/leocaseiro/Sites/base-skill/worktrees/feat-word-syllables             6503b0af [feat/word-syllables]
+/Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users     fe28ddb8 [fix/bookmarks-dm4-old-users]
+/Users/leocaseiro/Sites/base-skill/worktrees/fix-dm4-bookmarks-recovery      6428c73e [fix/dm4-bookmarks-recovery]
+/Users/leocaseiro/Sites/base-skill/worktrees/game-no-menu                    ef97b569 [feat/game-no-menu]
+/Users/leocaseiro/Sites/base-skill/worktrees/specstory-sync-2026-04-16       bfad83b2 [specstory-sync-2026-04-16]
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay    ccdeca82 [stories/instructions-overlay-audit]
+/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner             a69cf440 [tools/phoneme-tuner]
+(eval):1: == not found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:38Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:39Z)**_
+
+Let me check what's in that worktree before recommending removal.
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check stale worktree state + PR existence
+
+`git -C /Users/leocaseiro/Sites/base-skill/worktrees/fix-dm4-bookmarks-recovery status && echo === && git log fix/dm4-bookmarks-recovery --not master --oneline | head -5 && echo "(if empty, branch has no unique commits)" && echo === && gh pr list --state all --head fix/dm4-bookmarks-recovery 2>&1 | head -5`
+
+```text
+Exit code 1
+On branch fix/dm4-bookmarks-recovery
+Your branch is behind 'origin/master' by 80 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   src/db/create-database.ts
+	new file:   src/db/open-with-bookmarks-recovery.test.ts
+	new file:   src/db/open-with-bookmarks-recovery.ts
+
+(eval):1: == not found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:54Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:55Z)**_
+
+It has uncommitted WIP — superseded by what we shipped in PR #127, but let me verify there's nothing unique worth salvaging.
+
+_**Agent (claude-opus-4-7 2026-04-21 20:19:56Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Inspect WIP in stale worktree
+
+`git -C /Users/leocaseiro/Sites/base-skill/worktrees/fix-dm4-bookmarks-recovery diff --cached --stat && echo === && git -C /Users/leocaseiro/Sites/base-skill/worktrees/fix-dm4-bookmarks-recovery diff --cached -- src/db/create-database.ts | head -40`
+
+```text
+Exit code 1
+ src/db/create-database.ts                   |  31 ++++++---
+ src/db/open-with-bookmarks-recovery.test.ts | 103 ++++++++++++++++++++++++++++
+ src/db/open-with-bookmarks-recovery.ts      |  43 ++++++++++++
+ 3 files changed, 167 insertions(+), 10 deletions(-)
+(eval):1: == not found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:20:01Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Show the abandoned recovery impl
+
+`git -C /Users/leocaseiro/Sites/base-skill/worktrees/fix-dm4-bookmarks-recovery diff --cached -- src/db/open-with-bookmarks-recovery.ts | head -80`
+
+```text
+diff --git a/src/db/open-with-bookmarks-recovery.ts b/src/db/open-with-bookmarks-recovery.ts
+new file mode 100644
+index 00000000..ccb3b24d
+--- /dev/null
++++ b/src/db/open-with-bookmarks-recovery.ts
+@@ -0,0 +1,43 @@
++const BOOKMARKS_DEXIE_DB_NAME = 'baseskill-data-bookmarks';
++
++type RxErrorLike = Error & {
++  code?: unknown;
++  parameters?: { collection?: unknown } & Record<string, unknown>;
++};
++
++export const isBookmarksDM4 = (err: unknown): boolean => {
++  if (!(err instanceof Error)) return false;
++  const rx = err as RxErrorLike;
++  if (rx.code === 'DM4' && rx.parameters?.collection === 'bookmarks') {
++    return true;
++  }
++  return err.message.includes(BOOKMARKS_DEXIE_DB_NAME);
++};
++
++/**
++ * Opens the database, recovering from a Dexie DM4 error on the `bookmarks`
++ * collection. The recovery path deletes the phantom per-collection Dexie
++ * database and retries once.
++ *
++ * Why: RxDB's Dexie storage can leave the underlying IndexedDB for a single
++ * collection in a closed/inconsistent state across schema-version migrations.
++ * When that happens `addCollections` throws DM4 and the whole app fails to
++ * boot. Dropping the per-collection store lets RxDB recreate it cleanly on
++ * next open; the only data lost is the user's bookmarks (already unreadable).
++ */
++export const openWithBookmarksRecovery = async <T>(
++  createDb: () => Promise<T>,
++  deleteDexieDb: (name: string) => Promise<void>,
++): Promise<T> => {
++  try {
++    return await createDb();
++  } catch (err) {
++    if (!isBookmarksDM4(err)) throw err;
++    console.warn(
++      '[db] DM4 on bookmarks detected — dropping Dexie store and retrying',
++      err,
++    );
++    await deleteDexieDb(BOOKMARKS_DEXIE_DB_NAME);
++    return createDb();
++  }
++};
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:20:43Z)**_
+
+Verdict: safe to delete. The WIP was an earlier, incomplete attempt — and it wouldn't have worked.
+
+## Comparison
+
+| Aspect | Stale `fix-dm4-bookmarks-recovery` WIP | Shipped PR #127 |
+|---|---|---|
+| Dexie DB name targeted | `baseskill-data-bookmarks` ❌ wrong format | `rxdb-dexie-baseskill-data--<v>--bookmarks` ✅ |
+| Collections handled | bookmarks only | any collection (generalized) |
+| Retries | 1 | up to 5 |
+| `_rxdb_internal` cleanup | none ❌ would re-trigger DM4 next boot | full ✅ |
+| Branch is | 80 commits behind master, no PR | merged path |
+
+The wrong Dexie DB name alone would have made the WIP a no-op in real Chrome — `deleteDatabase('baseskill-data-bookmarks')` deletes nothing, since RxDB stores it under `rxdb-dexie-baseskill-data--<v>--bookmarks`.
+
+## To clean up
+
+```bash
+git -C /Users/leocaseiro/Sites/base-skill worktree remove --force ./worktrees/fix-dm4-bookmarks-recovery
+git -C /Users/leocaseiro/Sites/base-skill branch -D fix/dm4-bookmarks-recovery
+git -C /Users/leocaseiro/Sites/base-skill push origin --delete fix/dm4-bookmarks-recovery
+```
+
+`--force` is needed because of the staged WIP. The third line drops the remote branch (you can keep it if you want a paper trail, but it'll just clutter the branch list).
+
+Want me to run those?
+
+---
+
+_**User (2026-04-21 20:35:49Z)**_
+
+ /exit

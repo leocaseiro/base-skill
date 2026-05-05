@@ -2740,3 +2740,751 @@ _**User (2026-04-21 19:48:31Z)**_
 I just realised that we have multiple scenarios to cover for each game, such as src/routes/$locale/_app/game/$gameId.tsx. 
 
 1. Do we have a storybook covering each scenario yet? If not, we should have one per game, instead of 1 for all of them.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:00Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:00Z)**_
+
+Let me check what per-game coverage already exists before recommending.
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:02Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/stories-instructions-overlay/src/games` pattern `InstructionsOverlay`
+
+```text
+No files found
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:04Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+List all per-game story files
+
+`find /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games -name "*.stories.tsx" | sort`
+
+```text
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumberMatch/NumberMatch.skin.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumberMatch/NumberMatch.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbers/SortNumbers.skin.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/WordSpell/WordSpell.skin.stories.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/WordSpell/WordSpell.stories.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:18Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:24Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Find all tests referencing InstructionsOverlay or instructions
+
+`find /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src -name "*.test.ts*" | xargs grep -l "InstructionsOverlay\|showInstructions\|instructions\." 2>/dev/null | sort`
+
+```text
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/routes/$locale/_app/game/$gameId.test.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:30Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/stories-instructions-overlay/src/routes/$locale/_app/game/$gameId.test.tsx` pattern `^\s*(it|test|describe)\(`
+
+```text
+104:describe('GameRoute', () => {
+105:  it('renders the game shell with title from loaderData', async () => {
+128:  it('deletes a custom game: removes doc from DB and triggers navigation', async () => {
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:46Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:49:58Z)**_
+
+**Findings (both questions):**
+
+**Storybook:**
+- Per-game stories exist for each game's gameplay: `WordSpell.stories.tsx`, `NumberMatch.stories.tsx`, `SortNumbers.stories.tsx` (+ `.skin.stories.tsx` each).
+- **None of them mount `InstructionsOverlay`** — they all skip past the instructions phase into gameplay. Your single-Playground story is the only Instructions coverage today.
+
+**Unit tests:**
+- `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx` (13 tests) — component-level: save prompt, custom-game start, cog-opens-modal, bookmark toggle, customGameName render, simple-form expansion. **Game-agnostic** — uses a `gameId: 'word-spell'` default but doesn't iterate.
+- `src/routes/$locale/_app/game/$gameId.test.tsx` (2 tests) — route-level: "renders the game shell with title from loaderData" and "deletes a custom game". **Does not** assert per-game instruction text / per-game SimpleConfigForm mount / per-game bookmark wiring.
+
+So: zero per-game Instructions coverage today, Storybook or Vitest.
+
+**Recommendation — cheap and aligned with post-#134 pattern:**
+
+Keep the `Playground` + add three pinned-args sibling stories — `SortNumbersScenario`, `WordSpellScenario`, `NumberMatchScenario` — each with args matching the real route mount (real instruction copy, real config defaults, correct gameTitle). No new meta, no new decorators. They become canonical VR baselines for each game's pre-game shell; the Playground stays for exploration.
+
+Tradeoff: story count grows 1 → 4 after we just collapsed 5 → 1. But these four are categorically different (1 interactive + 3 fixed VR baselines) vs. the old 5 (all redundant with the Vitest file). Still net 5 → 4, and per-game coverage is real.
+
+For Vitest: optional follow-up to add a small parametrised test in `InstructionsOverlay.test.tsx` that iterates `['sort-numbers', 'word-spell', 'number-match']` and asserts each maps to a defined SimpleConfigForm + real instructions key. Catches registry drift.
+
+**Want me to proceed with the 3 scenario stories now?** If yes, I'll need the real default config shapes (will read `resolveWordSpellConfig`, `resolveNumberMatchConfig`, `resolveSortNumbersConfig`). Confirm and I'll execute.
+
+---
+
+_**User (2026-04-21 19:53:05Z)**_
+
+Yes, I agree, is it worth to refactor, and have those settings near the games instead? e.g. `src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx`.
+ Are we even using the SimpleGameConfigForm at all? IMO, we should have those simple forms as each InstructionsOverlay.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:13Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:14Z)**_
+
+Let me check the current state of the registry and simple forms before recommending.
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:15Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Find registry and simple form files
+
+`find /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src -name "config-fields-registry*" -o -name "*SimpleConfigForm*" -o -name "*SimpleForm*" | sort`
+
+```text
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx
+/Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:16Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/stories-instructions-overlay/src` pattern `getSimpleConfigFormRenderer|SimpleConfigForm`
+
+```text
+worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx:17:export const WordSpellSimpleConfigForm = ({
+worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx:5:import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx:21:    <WordSpellSimpleConfigForm config={config} onChange={setConfig} />
+worktrees/stories-instructions-overlay/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.test.tsx:25:describe('WordSpellSimpleConfigForm', () => {
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:1:import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:3:import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:6:import { WordSpellSimpleConfigForm } from './word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:38:export const getSimpleConfigFormRenderer = (
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:43:      return WordSpellSimpleConfigForm;
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:46:      return NumberMatchSimpleConfigForm;
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts:49:      return SortNumbersSimpleConfigForm;
+worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.tsx:28:export const NumberMatchSimpleConfigForm = ({
+worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx:5:import { NumberMatchSimpleConfigForm } from './NumberMatchSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx:18:    <NumberMatchSimpleConfigForm config={config} onChange={setConfig} />
+worktrees/stories-instructions-overlay/src/games/number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm.test.tsx:22:describe('NumberMatchSimpleConfigForm', () => {
+worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx:5:import { SortNumbersSimpleConfigForm } from './SortNumbersSimpleConfigForm';
+worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx:17:    <SortNumbersSimpleConfigForm config={config} onChange={setConfig} />
+worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.test.tsx:21:describe('SortNumbersSimpleConfigForm', () => {
+worktrees/stories-instructions-overlay/src/games/sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm.tsx:11:export const SortNumbersSimpleConfigForm = ({
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:18:import { getSimpleConfigFormRenderer } from '@/games/config-fields-registry';
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:159:  const SimpleForm = getSimpleConfigFormRenderer(gameId);
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.test.tsx:145:    // WordSpellSimpleConfigForm renders a "Level" label in CellSelect — no toggle needed
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:73:[Omitted long matching line]
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx:99:        'Drives the GameCover art and the inline SimpleConfigForm renderer.',
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:39Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:53:51Z)**_
+
+**Direct answers:**
+
+1. **Already using `SimpleConfigForm` — yes, actively.** `InstructionsOverlay.tsx:159` calls `getSimpleConfigFormRenderer(gameId)` and mounts it inline below the "Let's go!" button. You saw it in all four screenshots earlier (Sort Numbers "HOW MANY / START AT / SKIP BY", Word Spell "LEVEL / SOUNDS AT THIS LEVEL", Number Match "MIN / MAX" + dot group). Each has a co-located Vitest test: `{Game}SimpleConfigForm.test.tsx`.
+
+2. **Already co-located with each game.** The per-game forms live at `src/games/<game>/<Game>SimpleConfigForm/<Game>SimpleConfigForm.tsx` exactly as you described. The only "central" piece is `src/games/config-fields-registry.ts` — a 15-line switch mapping `gameId` → form component.
+
+**Real architectural smell worth naming** (but probably out of scope for this audit): `InstructionsOverlay.tsx` imports from `@/games/config-fields-registry`, i.e. a shared presentation component reaches into game-specific code. An alternative that removes that inversion:
+
+- Turn `InstructionsOverlay` into a compound or prop-injected shell: `<InstructionsOverlay simpleForm={<WordSpellSimpleConfigForm config={cfg} onChange={setCfg} />}>` (or an `InstructionsOverlay.SimpleForm` slot). Each route in `$gameId.tsx` passes its own form. The registry and the `@/games` import in `answer-game/` both go away.
+
+Tradeoff: 3 call sites grow by one prop each; registry disappears; coupling direction becomes game → shell (correct) instead of shell → games (inverted). Adding a new game stops touching two files — only the game folder + the route branch.
+
+**Recommendation:** treat that refactor as a separate branch/PR. For *this* audit, just do the 3 per-game scenario stories I proposed — they're cheap and add the VR coverage you asked about. The compound/prop-injection refactor is worth doing but belongs in its own brainstorm (touches `$gameId.tsx`, `InstructionsOverlay.tsx`, the registry, and likely the `AdvancedConfigModal` path too).
+
+Want me to (a) just add the 3 scenario stories now and log the refactor as a follow-up, or (b) pause this branch and brainstorm the refactor first?
+
+---
+
+_**User (2026-04-21 19:55:07Z)**_
+
+Ok, I am happy with your proposal, but I want each of the components of the InstructionsOverlay imported from their game directory instead.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 19:55:40Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:55:41Z)**_
+
+Understood. Let me check one thing before laying out the concrete plan: whether `config-fields-registry` has any consumers beyond `InstructionsOverlay`.
+
+_**Agent (claude-opus-4-7 2026-04-21 19:55:43Z)**_
+
+<tool-use data-tool-type="search" data-tool-name="Grep"><details>
+<summary>Tool use: **Grep**</summary>
+ path `./worktrees/stories-instructions-overlay/src` pattern `config-fields-registry|getSimpleConfigFormRenderer`
+
+```text
+Found 3 files
+worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts
+worktrees/stories-instructions-overlay/src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx
+worktrees/stories-instructions-overlay/src/components/AdvancedConfigModal.tsx
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:55:43Z)**_
+
+<tool-use data-tool-type="read" data-tool-name="Read"><details>
+<summary>Tool use: **Read**</summary>
+ `./worktrees/stories-instructions-overlay/src/games/config-fields-registry.ts`
+
+```text
+1	import { NumberMatchSimpleConfigForm } from './number-match/NumberMatchSimpleConfigForm/NumberMatchSimpleConfigForm';
+2	import { numberMatchConfigFields } from './number-match/types';
+3	import { SortNumbersSimpleConfigForm } from './sort-numbers/SortNumbersSimpleConfigForm/SortNumbersSimpleConfigForm';
+4	import { sortNumbersConfigFields } from './sort-numbers/types';
+5	import { wordSpellConfigFields } from './word-spell/types';
+6	import { WordSpellSimpleConfigForm } from './word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
+7	import type { ConfigField } from '@/lib/config-fields';
+8	import type { JSX } from 'react';
+9	
+10	export const getConfigFields = (gameId: string): ConfigField[] => {
+11	  switch (gameId) {
+12	    case 'word-spell': {
+13	      return wordSpellConfigFields;
+14	    }
+15	    case 'number-match': {
+16	      return numberMatchConfigFields;
+17	    }
+18	    case 'sort-numbers': {
+19	      return sortNumbersConfigFields;
+20	    }
+21	    default: {
+22	      return [];
+23	    }
+24	  }
+25	};
+26	
+27	export const getAdvancedConfigFields = getConfigFields;
+28	
+29	type ConfigFormRendererProps = {
+30	  config: Record<string, unknown>;
+31	  onChange: (config: Record<string, unknown>) => void;
+32	};
+33	
+34	type ConfigFormRenderer = (
+35	  props: ConfigFormRendererProps,
+36	) => JSX.Element;
+37	
+38	export const getSimpleConfigFormRenderer = (
+39	  gameId: string,
+40	): ConfigFormRenderer | undefined => {
+41	  switch (gameId) {
+42	    case 'word-spell': {
+43	      return WordSpellSimpleConfigForm;
+44	    }
+45	    case 'number-match': {
+46	      return NumberMatchSimpleConfigForm;
+47	    }
+48	    case 'sort-numbers': {
+49	      return SortNumbersSimpleConfigForm;
+50	    }
+51	    default: {
+52	      return undefined;
+53	    }
+54	  }
+55	};
+56
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 19:56:38Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 19:56:54Z)**_
+
+Confirmed the structure. Here's the concrete plan for the per-game wrappers.
+
+**Target shape:**
+
+- `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` — generic shell only. Drops `@/games/config-fields-registry` import. Adds `simpleForm?: ReactNode` prop that replaces the registry call. Cover/title/bookmark/cog/AdvancedConfigModal/save-on-play all stay (still generic).
+
+- `src/games/<game>/<Game>InstructionsOverlay/` for each of `word-spell`, `number-match`, `sort-numbers`:
+  - `<Game>InstructionsOverlay.tsx` — thin wrapper: imports generic shell + own `<Game>SimpleConfigForm`, passes the form via `simpleForm` prop. Same external API as today minus the form concern.
+  - `<Game>InstructionsOverlay.stories.tsx` — one Playground pinned to real route defaults. Becomes the canonical per-game VR baseline (this is where the "scenario stories" live, not under `answer-game/`).
+  - `<Game>InstructionsOverlay.test.tsx` — smoke test that the game's own SimpleConfigForm is mounted inside the shell (catches drift).
+
+- `src/routes/$locale/_app/game/$gameId.tsx` — 3 call sites swap `<InstructionsOverlay>` → `<WordSpellInstructionsOverlay>` / `<NumberMatchInstructionsOverlay>` / `<SortNumbersInstructionsOverlay>`.
+
+- `src/games/config-fields-registry.ts` — remove `getSimpleConfigFormRenderer` + the 3 form imports. Keep `getConfigFields`/`getAdvancedConfigFields` (still used by `AdvancedConfigModal`).
+
+- Existing `InstructionsOverlay.stories.tsx` (generic) — two options:
+  - **a)** keep as shell Playground with a local gameId→form map (file imports all three forms, no registry).
+  - **b)** drop it; rely on 3 per-game story files for coverage.
+
+  I lean **(b)** — cleanest: one story file per game, co-located with the component that actually owns the behaviour. The generic shell is tested via the per-game wrappers; its own story becomes dead weight.
+
+- `InstructionsOverlay.test.tsx` (generic) — tests that assert form content (e.g., "renders the simple settings form expanded by default", "Level" label in Word Spell context) move to the per-game wrapper test files. Shell-only tests (save prompt, bookmark, cog, customGameName heading) stay and pass a stub `<div />` as `simpleForm`.
+
+**Commits (grouped by concern, not strictly per-file for this refactor):**
+
+1. `refactor(answer-game/InstructionsOverlay): accept simpleForm prop; drop games registry dep`
+2. `feat(games/word-spell): add WordSpellInstructionsOverlay wrapper + story + test`
+3. `feat(games/number-match): add NumberMatchInstructionsOverlay wrapper + story + test`
+4. `feat(games/sort-numbers): add SortNumbersInstructionsOverlay wrapper + story + test`
+5. `refactor(route/$gameId): use per-game InstructionsOverlay wrappers`
+6. `chore(games): remove getSimpleConfigFormRenderer from registry`
+7. `stories(answer-game/InstructionsOverlay): remove generic story` (if (b))
+8. `test(answer-game/InstructionsOverlay): move form-specific assertions to per-game wrappers`
+
+**Open questions:**
+
+1. Story strategy **(a)** or **(b)** above?
+2. Also rename the branch? Current is `stories/instructions-overlay-audit` — the work has grown beyond stories. Suggest `refactor/per-game-instructions-overlay`. I'd cherry-pick the one already-landed commit onto the new branch.
+3. The existing Playground commit `ccdeca82` is already pushed. Keep it on the new branch or drop it since the story itself is going away under option (b)?
+
+Confirm (1), (2), (3) and I'll execute.
+
+---
+
+_**User (2026-04-21 20:00:18Z)**_
+
+nvm, let's just merge this PR, and plan a refactor later on. Create a quick issue to refactor later on.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 20:00:25Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:00:41Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Open PR to master
+
+```bash
+gh pr create --base master --title "stories(answer-game/InstructionsOverlay): collapse to Playground + derive custom-game mode" --body "$(cat <<'EOF'
+## Summary
+
+- Collapses InstructionsOverlay stories from 5 (Default, WithCustomGame, StartsGame, TogglesBookmark, OpensSettings) to a single `Playground`. Play-flow assertions were redundant with `InstructionsOverlay.test.tsx`.
+- Drops the `customGameId` control — the id itself is never rendered; non-empty `customGameName` now auto-supplies a stub id, so typing a name is the single control that flips the shell into custom-game mode.
+- Promotes `gameId` from a free-text control to a select across the 3 real ids (`sort-numbers`, `word-spell`, `number-match`) so the Playground exercises the actual `GameCover` art and inline `SimpleConfigForm` a game loads at runtime — both visible.
+- No skin-wrapper — `InstructionsOverlay` uses theme tokens (`bg-background`, `bg-card`, `bg-primary`, ...), not `--skin-*` custom properties. Confirmed by grep and by visual inspection of all 3 gameIds rendering correctly without the wrapper.
+
+Follows the controls policy from #134: every remaining control maps to a visible change (text, gameTitle, customGameName, customGameColor, ttsEnabled, isBookmarked, totalRounds, gameId).
+
+Part of the audit tracked in #125.
+
+## Test plan
+
+- [x] \`yarn typecheck\` — 0 errors
+- [x] \`yarn lint\` — 0 errors
+- [x] \`yarn test:storybook\` — 44 suites / 174 tests green against a local Storybook
+- [x] Visual inspection via Playwright of 4 variants (default Sort Numbers; custom-game teal Easy Mode; Word Spell bookmarked; Number Match custom rose Dice Dash) — each shows the correct cover + SimpleConfigForm + heading color
+- [ ] CI green
+
+## Follow-up
+
+Refactor tracked separately: per-game \`<Game>InstructionsOverlay\` wrappers that inject the SimpleConfigForm directly, removing the \`components/answer-game → games/config-fields-registry\` inversion. Issue to be filed.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+```text
+Exit code 1
+Warning: 12 uncommitted changes
+head branch "master" is the same as base branch "master", cannot create a pull request
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:00:58Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Create follow-up refactor issue
+
+```bash
+gh issue create --title "refactor: per-game InstructionsOverlay wrappers, remove config-fields-registry inversion" --body "$(cat <<'EOF'
+## Context
+
+Today \`src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx\` imports \`getSimpleConfigFormRenderer\` from \`@/games/config-fields-registry\` and switches on \`gameId\` to mount the right inline \`<Game>SimpleConfigForm\`. That's an inverted dependency: a generic presentation component in \`components/answer-game/\` reaches into game-specific code in \`src/games/\`.
+
+Adding a new game currently means editing:
+
+1. the new game folder
+2. \`src/games/config-fields-registry.ts\` (adds a switch case)
+
+Both touch points should collapse into (1).
+
+## Proposed target shape
+
+- \`src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx\` — stays generic: cover, title, bookmark, cog, \`AdvancedConfigModal\`, save-on-play dialog. Drops the \`@/games/config-fields-registry\` import. New prop \`simpleForm?: ReactNode\` (or slot) replaces the registry call.
+- \`src/games/<game>/<Game>InstructionsOverlay/\` for each of \`word-spell\`, \`number-match\`, \`sort-numbers\`:
+  - \`<Game>InstructionsOverlay.tsx\` — thin wrapper; imports generic shell + own \`<Game>SimpleConfigForm\`; passes form via \`simpleForm\` prop.
+  - \`<Game>InstructionsOverlay.stories.tsx\` — canonical VR baseline with args matching real route defaults (replaces the current generic Playground as the primary per-game coverage).
+  - \`<Game>InstructionsOverlay.test.tsx\` — smoke test confirming the game's own form actually mounts inside the shell.
+- \`src/routes/\$locale/_app/game/\$gameId.tsx\` — 3 call sites swap generic \`<InstructionsOverlay>\` → per-game wrappers.
+- \`src/games/config-fields-registry.ts\` — remove \`getSimpleConfigFormRenderer\` + 3 form imports. Keep \`getConfigFields\`/\`getAdvancedConfigFields\` (still used by \`AdvancedConfigModal\`).
+- Tests: move form-specific assertions from \`InstructionsOverlay.test.tsx\` to per-game wrapper tests; shell-only assertions (save prompt, bookmark, cog, customGameName heading) stay with a stub \`<div />\` as \`simpleForm\`.
+
+## Why
+
+- Coupling direction becomes correct: game → shell, not shell → games.
+- Adding a new game stops touching the shell or the registry.
+- Per-game VR baselines become the natural home for scenario coverage (today there is none — the generic shell Playground is the only Instructions coverage).
+- Each game's full pre-game experience gets a canonical unit test + story, co-located with the game.
+
+## Commit plan (when picked up)
+
+1. \`refactor(answer-game/InstructionsOverlay): accept simpleForm prop; drop games registry dep\`
+2. \`feat(games/word-spell): add WordSpellInstructionsOverlay wrapper + story + test\`
+3. \`feat(games/number-match): add NumberMatchInstructionsOverlay wrapper + story + test\`
+4. \`feat(games/sort-numbers): add SortNumbersInstructionsOverlay wrapper + story + test\`
+5. \`refactor(route/\$gameId): use per-game InstructionsOverlay wrappers\`
+6. \`chore(games): remove getSimpleConfigFormRenderer from registry\`
+7. \`stories(answer-game/InstructionsOverlay): remove generic story\` (superseded by per-game stories)
+8. \`test(answer-game/InstructionsOverlay): move form-specific assertions to per-game wrappers\`
+
+## Open decisions
+
+- **Naming:** \`WordSpellInstructionsOverlay\` (matches \`WordSpellSimpleConfigForm\` convention) vs. \`WordSpellInstructions\` (shorter).
+- **Generic story fate:** keep a shell Playground with a local gameId→form map, or drop it entirely and let per-game stories be the only coverage. Recommendation: drop it — single source of truth per game.
+- **Same pattern for cover?** Today \`resolveCover(..., gameId)\` is still a utility lookup. Stays as-is unless we want to apply the same slot pattern.
+
+## Related
+
+- Audit thread: #125
+- Playground audit that surfaced this: #141 (assuming PR numbering)
+
+EOF
+)"
+```
+
+```text
+<tool_use_error>Cancelled: parallel tool call Bash(gh pr create --base master --title "stor…) errored</tool_use_error>
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:07Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:08Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Check current cwd and branch
+
+`pwd && git rev-parse --abbrev-ref HEAD && git status -s | head -20`
+
+```text
+/Users/leocaseiro/Sites/base-skill
+master
+ M .specstory/history/2026-04-07_17-42-40Z-i-have-been-trying.md
+ M .specstory/history/2026-04-16_11-19-09Z-review-the-current-git.md
+ M .specstory/history/2026-04-16_12-26-54Z-your-goal-is-to.md
+ M .specstory/history/2026-04-17_07-04-05Z-i-am-trying-to.md
+ M .specstory/history/2026-04-21_03-45-52Z-tmp-audit-rollout-prompts.md
+ M .specstory/statistics.json
+?? .specstory/history/2026-04-17_08-11-52Z.md
+?? .specstory/history/2026-04-21_05-30-37Z.md
+?? .specstory/history/2026-04-21_06-50-46Z-is-this-already-finished.md
+?? .specstory/history/2026-04-21_07-49-00Z-game-mobile-layout-improvements.md
+?? .specstory/history/2026-04-21_07-59-16Z-continue-the-storybook-controls.md
+?? .specstory/history/2026-04-21_14-33-19Z-continue-the-storybook-controls.md
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:16Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:31Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Open PR from worktree
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay && gh pr create --base master --title "stories(answer-game/InstructionsOverlay): collapse to Playground + derive custom-game mode" --body "$(cat <<'EOF'
+## Summary
+
+- Collapses InstructionsOverlay stories from 5 (Default, WithCustomGame, StartsGame, TogglesBookmark, OpensSettings) to a single `Playground`. Play-flow assertions were redundant with `InstructionsOverlay.test.tsx`.
+- Drops the `customGameId` control — the id itself is never rendered; non-empty `customGameName` now auto-supplies a stub id, so typing a name is the single control that flips the shell into custom-game mode.
+- Promotes `gameId` from free-text to a select across the 3 real ids (`sort-numbers`, `word-spell`, `number-match`) so the Playground exercises the actual `GameCover` art and inline `SimpleConfigForm` a game loads at runtime — both visible.
+- No skin-wrapper — `InstructionsOverlay` uses theme tokens (`bg-background`, `bg-card`, `bg-primary`, …), not `--skin-*` custom properties. Confirmed via grep + visual inspection.
+
+Follows the controls policy from #134. Part of the audit tracked in #125.
+
+## Test plan
+
+- [x] yarn typecheck — 0 errors
+- [x] yarn lint — 0 errors
+- [x] yarn test:storybook — 44 suites / 174 tests green against a local Storybook
+- [x] Visual inspection via Playwright of 4 variants (default Sort Numbers; custom-game teal Easy Mode; Word Spell bookmarked; Number Match custom rose Dice Dash) — each shows the correct cover + SimpleConfigForm + heading colour
+- [ ] CI green
+
+## Follow-up
+
+Per-game \`<Game>InstructionsOverlay\` wrapper refactor tracked in a follow-up issue (filed separately).
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+```text
+Exit code 1
+Warning: 3 uncommitted changes
+a pull request for branch "stories/instructions-overlay-audit" into branch "master" already exists:
+https://github.com/leocaseiro/base-skill/pull/141
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:39Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:40Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Inspect PR #141
+
+`cd /Users/leocaseiro/Sites/base-skill/worktrees/stories-instructions-overlay && gh pr view 141 --json title,body,state,author,url`
+
+```text
+{"author":{"id":"MDQ6VXNlcjk0MDA3MA==","is_bot":false,"login":"leocaseiro","name":"Leo Caseiro"},"body":"stories(answer-game/InstructionsOverlay): collapse to Playground + derive custom-game mode from name\r\n\r\nRemoves Default, WithCustomGame, StartsGame, TogglesBookmark, and OpensSettings in favour of a single Playground. Play-flow assertions (save prompt, custom-game immediate start, cog opens AdvancedConfigModal, bookmark toggle) are already covered by InstructionsOverlay.test.tsx and no longer duplicated here.\r\n\r\nDrops the customGameId text control — the id itself is never visible; non-empty customGameName now auto-supplies a stub id, so typing a name is the single control that flips the shell into custom-game mode.\r\n\r\nPromotes gameId from a free-text control to a select across the three real ids (sort-numbers, word-spell, number-match) so the preview exercises the actual GameCover art and SimpleConfigForm renderer a game loads at runtime — both visible in the playground.","state":"OPEN","title":"stories(answer-game/InstructionsOverlay): collapse to Playground + de…","url":"https://github.com/leocaseiro/base-skill/pull/141"}
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:01:50Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Update PR #141 body and title
+
+```bash
+gh pr edit 141 --title "stories(answer-game/InstructionsOverlay): collapse to Playground + derive custom-game mode" --body "$(cat <<'EOF'
+## Summary
+
+- Collapses InstructionsOverlay stories from 5 (Default, WithCustomGame, StartsGame, TogglesBookmark, OpensSettings) to a single `Playground`. Play-flow assertions were redundant with `InstructionsOverlay.test.tsx`.
+- Drops the `customGameId` control — the id itself is never rendered; non-empty `customGameName` now auto-supplies a stub id, so typing a name is the single control that flips the shell into custom-game mode.
+- Promotes `gameId` from free-text to a select across the 3 real ids (`sort-numbers`, `word-spell`, `number-match`) so the Playground exercises the actual `GameCover` art and inline `SimpleConfigForm` a game loads at runtime — both visible.
+- No skin-wrapper — `InstructionsOverlay` uses theme tokens (`bg-background`, `bg-card`, `bg-primary`, …), not `--skin-*` custom properties. Confirmed via grep + visual inspection.
+
+Follows the controls policy from #134. Part of the audit tracked in #125.
+
+## Test plan
+
+- [x] yarn typecheck — 0 errors
+- [x] yarn lint — 0 errors
+- [x] yarn test:storybook — 44 suites / 174 tests green against a local Storybook
+- [x] Visual inspection via Playwright of 4 variants (default Sort Numbers; custom-game teal Easy Mode; Word Spell bookmarked; Number Match custom rose Dice Dash) — each shows the correct cover + SimpleConfigForm + heading colour
+- [ ] CI green
+
+## Follow-up
+
+Per-game \`<Game>InstructionsOverlay\` wrapper refactor tracked separately (issue filed).
+EOF
+)"
+```
+
+```text
+https://github.com/leocaseiro/base-skill/pull/141
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:02:13Z)**_
+
+<tool-use data-tool-type="shell" data-tool-name="Bash"><details>
+<summary>Tool use: **Bash**</summary>
+Create follow-up refactor issue
+
+```bash
+gh issue create --title "refactor: per-game InstructionsOverlay wrappers, remove config-fields-registry inversion" --body "$(cat <<'EOF'
+## Context
+
+`src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` imports `getSimpleConfigFormRenderer` from `@/games/config-fields-registry` and switches on `gameId` to mount the right inline `<Game>SimpleConfigForm`. That's an inverted dependency: a generic presentation component in `components/answer-game/` reaches into game-specific code in `src/games/`.
+
+Adding a new game currently touches two places:
+
+1. the new game folder
+2. `src/games/config-fields-registry.ts` (adds a switch case)
+
+Both should collapse into (1).
+
+Surfaced during the Playground audit in #141.
+
+## Proposed target shape
+
+- `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` — stays generic: cover, title, bookmark, cog, `AdvancedConfigModal`, save-on-play dialog. Drops the `@/games/config-fields-registry` import. New prop `simpleForm?: ReactNode` (or slot) replaces the registry call.
+- `src/games/<game>/<Game>InstructionsOverlay/` for each of `word-spell`, `number-match`, `sort-numbers`:
+  - `<Game>InstructionsOverlay.tsx` — thin wrapper; imports generic shell + own `<Game>SimpleConfigForm`; passes form via `simpleForm` prop.
+  - `<Game>InstructionsOverlay.stories.tsx` — canonical VR baseline with args matching real route defaults (becomes the primary per-game coverage).
+  - `<Game>InstructionsOverlay.test.tsx` — smoke test that the game's own form actually mounts inside the shell.
+- `src/routes/\$locale/_app/game/\$gameId.tsx` — 3 call sites swap generic `<InstructionsOverlay>` → per-game wrappers.
+- `src/games/config-fields-registry.ts` — remove `getSimpleConfigFormRenderer` + 3 form imports. Keep `getConfigFields`/`getAdvancedConfigFields` (still used by `AdvancedConfigModal`).
+- Tests: move form-specific assertions from `InstructionsOverlay.test.tsx` to per-game wrapper tests; shell-only assertions (save prompt, bookmark, cog, customGameName heading) stay with a stub `<div />` as `simpleForm`.
+
+## Why
+
+- Coupling direction becomes correct: game → shell, not shell → games.
+- Adding a new game stops touching the shell or the registry.
+- Per-game VR baselines become the natural home for scenario coverage (today there is none beyond the generic Playground).
+- Each game gets a canonical pre-game test + story co-located with the game.
+
+## Commit plan
+
+1. `refactor(answer-game/InstructionsOverlay): accept simpleForm prop; drop games registry dep`
+2. `feat(games/word-spell): add WordSpellInstructionsOverlay wrapper + story + test`
+3. `feat(games/number-match): add NumberMatchInstructionsOverlay wrapper + story + test`
+4. `feat(games/sort-numbers): add SortNumbersInstructionsOverlay wrapper + story + test`
+5. `refactor(route/\$gameId): use per-game InstructionsOverlay wrappers`
+6. `chore(games): remove getSimpleConfigFormRenderer from registry`
+7. `stories(answer-game/InstructionsOverlay): remove generic story` (superseded)
+8. `test(answer-game/InstructionsOverlay): move form-specific assertions to per-game wrappers`
+
+## Open decisions
+
+- **Naming:** `WordSpellInstructionsOverlay` (matches `WordSpellSimpleConfigForm` convention) vs. `WordSpellInstructions` (shorter).
+- **Generic story fate:** drop (recommended — per-game stories become the single source of truth) vs. keep as shell Playground with local gameId→form map.
+- **Same pattern for cover?** `resolveCover(..., gameId)` is a utility lookup today. Stays as-is unless we want to apply the same slot pattern.
+
+## Related
+
+- #141 — the Playground audit PR that surfaced this
+- #125 — storybook controls audit tracking issue
+EOF
+)"
+```
+
+```text
+https://github.com/leocaseiro/base-skill/issues/143
+```
+</details></tool-use>
+
+_**Agent (claude-opus-4-7 2026-04-21 20:02:19Z)**_
+
+Done.
+
+- **PR #141** — body + title updated with the full summary, test plan, and follow-up pointer: <https://github.com/leocaseiro/base-skill/pull/141>
+- **Issue #143** — refactor plan for per-game `<Game>InstructionsOverlay` wrappers + removing the `config-fields-registry` inversion: <https://github.com/leocaseiro/base-skill/issues/143>
+
+Waiting on CI for the PR. Anything else?
+
+---
+
+_**User (2026-04-21 20:03:15Z)**_
+
+PR Merged, give me a prompt to continue the storybook audit work.
+
+---
+
+_**Agent (claude-opus-4-7 2026-04-21 20:03:33Z)**_
+
+_**Agent (claude-opus-4-7 2026-04-21 20:04:02Z)**_
+
+Here's a reusable prompt for the next target. Paste it into a fresh session and fill in `<TARGET>`.
+
+---
+
+Continue the Storybook controls audit on `src/components/answer-game/*` (or the broader audit scope — you can direct).
+
+**Next target:** `<TARGET_FILE>.stories.tsx` (I'll name it)
+
+**Before touching code**
+
+1. Run `/resync` — confirm you're on master and clean.
+2. Invoke `superpowers:using-git-worktrees`. Create a new worktree from master:
+
+   ```bash
+   git worktree add ./worktrees/stories-<target> -b stories/<target>-audit master
+   cd ./worktrees/stories-<target> && yarn install
+   ```
+
+3. Launch Storybook on a free port (6106+) in the background and actually view every story for the target in a browser before writing any diffs. Use Playwright for screenshots if needed (script can live in `/tmp`, run from inside the worktree so `node_modules` resolves).
+
+**Per-file audit checklist**
+
+1. **Controls policy.** Each control must map to something visible. Drop text controls for invisible values (ids, etc.) — derive them from a visible control if they toggle behaviour (e.g. InstructionsOverlay's `customGameId` is now derived from non-empty `customGameName`). Prefer `select` / `radio` / `boolean` / `range` over raw text where the domain is enumerable.
+2. **Skin tokens.** Grep the component for `--skin-*` / `skin.tokens`. If it consumes them, wrap the render in:
+
+   ```tsx
+   <div className={`game-container skin-${classicSkin.id}`} style={classicSkin.tokens as CSSProperties}>
+     <Component ... />
+   </div>
+   ```
+
+   If it uses only theme tokens (`bg-background`, etc.), do NOT add the wrapper — flag it in the PR body.
+3. **Docgen rows.** Hide raw component props that are either shadowed by your StoryArgs, derived, or not meaningful in a playground: declare as `?: never` on the StoryArgs interface AND `{ table: { disable: true } }` in argTypes.
+4. **Collapse redundant stories.** If play-flow interaction stories duplicate Vitest coverage (`<Target>.test.tsx`), collapse to a single `Playground`. Keep scenario stories only when they add per-game or per-mode visual coverage not otherwise captured.
+5. **Real-game parity.** Compare the Storybook render to how the feature actually mounts at runtime (`src/routes/…` or `src/games/…`). Any visual drift = flag in PR body.
+6. **Propose changes in plain English before writing diffs.** Wait for LGTM.
+
+**Per-file verification gate**
+
+- `yarn typecheck` → 0 errors
+- `yarn lint` → 0 errors
+- `yarn test:storybook --url http://127.0.0.1:<port>` → all suites green (don't let ours regress)
+- Kill Storybook when done.
+
+**Canonical references**
+
+- Controls policy: `.claude/skills/write-storybook/SKILL.md`
+- Shell-slim canonical example: `src/components/answer-game/AnswerGame/AnswerGame.stories.tsx`
+- Skin-wrapped canonical example: `src/components/answer-game/ProgressHUD/ProgressHUD.stories.tsx`
+- Real dice/domino renderers: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx` exports `DiceFace`, `DominoTile`
+- Tracking issue: `#125` (audit rollout)
+- Recent precedent: `#134` (retrofit batch), `#141` (InstructionsOverlay Playground collapse), `#143` (per-game wrapper refactor — follow-up, do NOT tackle in the audit)
+
+**Project rules (CLAUDE.md)**
+
+- Never commit to master directly — worktree only.
+- Markdown edits must pass `yarn fix:md` before commit.
+- TDD for any bug fix or feature: write the failing test first.
+- One commit per file; commit message shape: `stories(answer-game/<name>): <imperative summary>`.
+- PRs always target `master`.
+
+**Behavioral notes (memory)**
+
+- Commit freely; push freely for features, confirm before push for bug fixes.
+- Named exports only (no `export default` outside framework config).
+- Direct execution style — no preamble. Make the fix, verify, commit, proceed.
+- If a GitHub action auto-opens the PR on push, edit its body/title rather than trying to create a new one.
+- Run Playwright scripts from inside the worktree (has `node_modules`), not `/tmp`.
+
+Start with `superpowers:using-git-worktrees`, then `/resync`, then read the target's `.stories.tsx` + the component before proposing any change.
+
+---
+
+_**User (2026-04-21 20:36:24Z)**_
+
+<local-command-caveat>Caveat: The messages below were generated by the user while running local commands. DO NOT respond to these messages or otherwise consider them in your response unless the user explicitly asks you to.</local-command-caveat>
+
+_**User (2026-04-21 20:36:24Z)**_
+
+<command-name>/exit</command-name>
+            <command-message>exit</command-message>
+            <command-args></command-args>
+
+_**User (2026-04-21 20:36:24Z)**_
+
+<local-command-stdout>See ya!</local-command-stdout>

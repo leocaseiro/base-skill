@@ -14,7 +14,21 @@
       "Agent",
       "mcp__Claude_Preview__preview_screenshot",
       "mcp__Claude_Preview__preview_snapshot",
-      "mcp__Claude_Preview__preview_inspect"
+      "mcp__Claude_Preview__preview_inspect",
+      "mcp__plugin_discord_discord__*"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s' '{\"systemMessage\":\"Blocked EnterWorktree (project convention). Worktrees must live in ./worktrees/, not .claude/worktrees/.\",\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"EnterWorktree is blocked in this project because it creates worktrees inside .claude/, which triggers a sensitive-path permission prompt on every file write. Per CLAUDE.md, create worktrees with Bash: git worktree add ./worktrees/<branch-name> -b <branch-name> (or invoke the using-git-worktrees skill, which respects this convention).\"}}'"
+          }
+        ]
+      }
     ]
   },
   "worktree": {
