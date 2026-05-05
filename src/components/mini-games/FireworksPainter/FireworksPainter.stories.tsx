@@ -9,13 +9,13 @@ const meta: Meta<typeof FireworksPainter> = {
   tags: ['autodocs'],
   argTypes: {
     duration: {
-      control: { type: 'range', min: 5, max: 60, step: 5 },
+      control: { type: 'range', min: 5, max: 30, step: 1 },
     },
     showHandHint: { control: 'boolean' },
     onComplete: { table: { disable: true } },
   },
   args: {
-    duration: 30,
+    duration: 10,
     showHandHint: true,
     onComplete: fn(),
   },
