@@ -74,3 +74,35 @@ describe('playSoundUrl', () => {
     expect(audios).toHaveLength(2);
   });
 });
+
+describe('playSoundConcurrentUrl', () => {
+  it('plays the URL fire-and-forget', async () => {
+    const { playSoundConcurrentUrl } = await import('./AudioFeedback');
+    playSoundConcurrentUrl('/crack.mp3', 0.6);
+    expect(audios).toHaveLength(1);
+    expect(audios[0]!.src).toContain('crack.mp3');
+    expect(audios[0]!.volume).toBe(0.6);
+    expect(audios[0]!.play).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT pause prior audio when called repeatedly', async () => {
+    const { playSoundConcurrentUrl } = await import('./AudioFeedback');
+    playSoundConcurrentUrl('/crack.mp3');
+    playSoundConcurrentUrl('/crack.mp3');
+    playSoundConcurrentUrl('/crack.mp3');
+    expect(audios).toHaveLength(3);
+    for (const audio of audios) {
+      expect(audio.pause).not.toHaveBeenCalled();
+    }
+  });
+
+  it('does NOT cancel a queue-managed sound', async () => {
+    const { playSoundUrl, playSoundConcurrentUrl } =
+      await import('./AudioFeedback');
+    playSoundUrl('/queued.mp3');
+    playSoundConcurrentUrl('/crack.mp3');
+    // The queued audio (audios[0]) was NOT paused by the concurrent play
+    expect(audios[0]!.pause).not.toHaveBeenCalled();
+    expect(audios).toHaveLength(2);
+  });
+});

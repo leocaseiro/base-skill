@@ -113,6 +113,27 @@ export function queueSoundUrl(
   return startsAt;
 }
 
+/**
+ * Plays an arbitrary audio URL fire-and-forget, layered. Does NOT touch
+ * the queue and does NOT pause any in-flight audio — each call spawns a
+ * fresh Audio element that plays concurrently with any others.
+ *
+ * Use for rapid-fire game feedback (e.g. tap-the-egg) where every click
+ * should produce its own crack and overlapping plays sound natural.
+ * The browser caches the asset after the first request, so subsequent
+ * plays don't re-fetch.
+ */
+export function playSoundConcurrentUrl(
+  url: string,
+  volume = 0.8,
+): void {
+  const audio = new Audio(url);
+  audio.volume = volume;
+  void audio.play().catch(() => {
+    console.error(`Failed to play sound ${url}`);
+  });
+}
+
 /** Exposed so skins can check / extend the built-in sound key set. */
 export const SOUND_KEYS = [
   'correct',

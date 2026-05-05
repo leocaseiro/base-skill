@@ -13,7 +13,7 @@ import {
   stripUrl,
 } from './sprites';
 import type { Animal } from './sprites';
-import { playSoundUrl } from '@/lib/audio/AudioFeedback';
+import { playSoundConcurrentUrl } from '@/lib/audio/AudioFeedback';
 
 interface DinoEggHatchProps {
   animal?: Animal | 'random';
@@ -78,10 +78,10 @@ export const DinoEggHatch = ({
   const handleTap = () => {
     if (hatched) return;
 
-    // Crack sound on every tap. playSoundUrl cancels any in-flight crack
-    // and plays the new one, giving rapid taps a satisfying click-cluck-
-    // click feel rather than overlapping echoes.
-    playSoundUrl(CRACK_SOUND_URL);
+    // Crack sound on every tap, layered. playSoundConcurrentUrl spawns a
+    // fresh Audio element each call so rapid taps stack into a flurry of
+    // overlapping cracks instead of cutting each other off.
+    playSoundConcurrentUrl(CRACK_SOUND_URL);
 
     setTapCount((prev) => {
       const next = prev + 1;
