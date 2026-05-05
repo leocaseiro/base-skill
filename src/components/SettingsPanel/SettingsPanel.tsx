@@ -36,7 +36,8 @@ export const SettingsPanel = ({
   const { settings, update } = useSettings();
   const { db } = useRxDB();
 
-  const volume = settings.volume ?? 0.8;
+  const soundEffectsVolume = settings.soundEffectsVolume ?? 0.8;
+  const voiceVolume = settings.voiceVolume ?? 0.8;
   const speechRate = settings.speechRate ?? 1;
   const preferredVoice = settings.preferredVoiceURI ?? '';
   const voiceSelectValue =
@@ -80,16 +81,36 @@ export const SettingsPanel = ({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="settings-volume">
-          {t('volume', { percent: Math.round(volume * 100) })}
+        <Label htmlFor="settings-soundEffectsVolume">
+          {t('soundEffectsVolume', {
+            percent: Math.round(soundEffectsVolume * 100),
+          })}
         </Label>
         <Slider
-          id="settings-volume"
+          id="settings-soundEffectsVolume"
           min={0}
           max={1}
           step={0.05}
-          value={[volume]}
-          onValueChange={([v]) => void update({ volume: v })}
+          value={[soundEffectsVolume]}
+          onValueChange={([v]) =>
+            void update({ soundEffectsVolume: v })
+          }
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-voiceVolume">
+          {t('voiceVolume', {
+            percent: Math.round(voiceVolume * 100),
+          })}
+        </Label>
+        <Slider
+          id="settings-voiceVolume"
+          min={0}
+          max={1}
+          step={0.05}
+          value={[voiceVolume]}
+          onValueChange={([v]) => void update({ voiceVolume: v })}
         />
       </div>
 

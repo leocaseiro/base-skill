@@ -50,9 +50,16 @@ afterEach(async () => {
 });
 
 describe('SettingsPanel', () => {
-  it('renders volume slider', () => {
+  it('renders sound effects volume slider with default 80%', () => {
     renderSettingsPanel(db);
-    expect(screen.getByText(/volume/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/sound effects \(80%\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it('renders voice volume slider with default 80%', () => {
+    renderSettingsPanel(db);
+    expect(screen.getByText(/voice \(80%\)/i)).toBeInTheDocument();
   });
 
   it('renders speech rate slider', () => {

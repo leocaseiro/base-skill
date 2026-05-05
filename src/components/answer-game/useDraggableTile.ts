@@ -157,7 +157,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
           });
 
           if (!skin.suppressDefaultSounds) {
-            playSound('wrong', 0.8);
+            playSound('wrong');
           }
 
           dispatch({
@@ -202,7 +202,7 @@ export const useDraggableTile = (tile: TileItem): DraggableTile => {
       });
 
       if (!skin.suppressDefaultSounds) {
-        playSound('wrong', 0.8);
+        playSound('wrong');
       }
 
       // Tap/click path only — drag rejects are handled in useTileEvaluation.placeTile

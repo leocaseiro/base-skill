@@ -20,6 +20,11 @@ const SOUND_PATHS: Record<SoundKey, string> = {
 let currentAudio: HTMLAudioElement | null = null;
 let currentResolve: (() => void) | null = null;
 let queueTail: Promise<void> = Promise.resolve();
+let defaultSoundEffectsVolume = 0.8;
+
+export function setSoundEffectsVolume(volume: number): void {
+  defaultSoundEffectsVolume = volume;
+}
 
 function playSoundInternal(
   path: string,
@@ -55,7 +60,10 @@ function playSoundInternal(
  * Plays immediately, cancelling any current audio and resetting the queue.
  * Use for tile feedback (correct/wrong) where the latest sound always wins.
  */
-export function playSound(key: SoundKey, volume = 0.8): void {
+export function playSound(
+  key: SoundKey,
+  volume = defaultSoundEffectsVolume,
+): void {
   currentResolve?.();
   currentResolve = null;
   queueTail = playSoundInternal(SOUND_PATHS[key], volume);
@@ -66,7 +74,10 @@ export function playSound(key: SoundKey, volume = 0.8): void {
  * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
  * Returns a promise that resolves when the queued sound **starts** (not ends).
  */
-export function queueSound(key: SoundKey, volume = 0.8): Promise<void> {
+export function queueSound(
+  key: SoundKey,
+  volume = defaultSoundEffectsVolume,
+): Promise<void> {
   const startsAt = queueTail;
   queueTail = startsAt.then(() =>
     playSoundInternal(SOUND_PATHS[key], volume),
@@ -83,7 +94,10 @@ export function whenSoundEnds(): Promise<void> {
 }
 
 /** Plays an arbitrary audio URL through the same queue/cancel machinery. */
-export function playSoundUrl(url: string, volume = 0.8): void {
+export function playSoundUrl(
+  url: string,
+  volume = defaultSoundEffectsVolume,
+): void {
   currentResolve?.();
   currentResolve = null;
   queueTail = playSoundInternal(url, volume);
@@ -92,7 +106,7 @@ export function playSoundUrl(url: string, volume = 0.8): void {
 /** Queues an arbitrary audio URL behind any in-flight audio. */
 export function queueSoundUrl(
   url: string,
-  volume = 0.8,
+  volume = defaultSoundEffectsVolume,
 ): Promise<void> {
   const startsAt = queueTail;
   queueTail = startsAt.then(() => playSoundInternal(url, volume));
