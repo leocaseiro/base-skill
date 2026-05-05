@@ -576,13 +576,13 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">31/56 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">56/56 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">6/163 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">17 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">32/57 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">57/57 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">7/167 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">17 docs ok</a></div>
   </div>
 </header>
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>1.7s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.3s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -2792,9 +2792,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> DinoEggHatch</h2>
       <div class="badges">
-        <label for="c-9-minigames-dinoegghatch-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-9-minigames-dinoegghatch-props" class="badge ok as-toggle">10 prop types</label>
         <label for="c-9-minigames-dinoegghatch-info" class="badge info as-toggle">1 info</label>
-        <label for="c-9-minigames-dinoegghatch-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-9-minigames-dinoegghatch-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -2826,13 +2826,62 @@ export const Playground: Story = {};
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
+              <span class="badge ok">10 prop types</span>
             </div>
             <pre><code>Component: src/components/mini-games/DinoEggHatch/DinoEggHatch.tsx::DinoEggHatch</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>animal?: Animal | &#39;random&#39; = &#39;random&#39;
 
+/**
+ * Background CSS color for the game stage. Accepts any valid CSS color
+ * (hex, rgb, named). Default `#7e48c0` (matches the master art&#39;s
+ * chroma-key colour for a seamless backdrop).
+ */
+backgroundColor?: string = &#39;#7e48c0&#39;
+
+/**
+ * Celebration-sound volume in [0, 1]. Default: 0.9.
+ */
+celebrateVolume?: number = 0.9
+
+/**
+ * Max simultaneous crack-sound voices. Layered plays sound natural up
+ * to this cap; further plays are dropped until a voice frees. Default: 4.
+ */
+crackMaxConcurrent?: number = 4
+
+/**
+ * Minimum ms between crack-sound plays. Higher values prevent buzz on
+ * rapid taps but make some taps silent. 0 disables throttling.
+ * Default: 60 (~16 plays/sec — above realistic finger speed).
+ */
+crackThrottleMs?: number = 60
+
+/**
+ * Crack-sound volume in [0, 1]. Default: 0.8.
+ */
+crackVolume?: number = 0.8
+
+/**
+ * Force the reduced-motion code path on/off, ignoring the user&#39;s OS
+ * setting. Leave `undefined` (default) to honour `prefers-reduced-motion`.
+ * Useful for Storybook to preview the a11y branch without tweaking macOS
+ * System Settings.
+ */
+forceReducedMotion?: boolean
+
 onComplete?: () =&gt; void
+
+/**
+ * Per-asset render-time tweak overrides — see `DISPLAY_TWEAKS` in
+ * sprites.ts for the shipped defaults. Each value can be either a bare
+ * `number` (treated as `scale`) or a `DisplayTweak` object with
+ * `scale`/`x`/`y`. The override is merged on top of the static default,
+ * so partial overrides (e.g. just `{ x: 5 }`) preserve the rest.
+ */
+scaleOverrides?: Partial&lt;
+  Record&lt;Animal | &#39;egg&#39;, number | DisplayTweak&gt;
+&gt;
 
 tapsToHatch?: number = 20</code></pre>
           </div>
@@ -2857,7 +2906,52 @@ tapsToHatch?: number = 20</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;DinoEggHatch animal=&quot;random&quot; tapsToHatch={20} onComplete={fn()} /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;DinoEggHatch
+    animal=&quot;random&quot;
+    tapsToHatch={20}
+    crackThrottleMs={60}
+    crackMaxConcurrent={4}
+    crackVolume={0.8}
+    celebrateVolume={0.9}
+    forceReducedMotion={undefined}
+    backgroundColor=&quot;#7e48c0&quot;
+    onComplete={fn()} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">No Throttle</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const NoThrottle = () =&gt; &lt;DinoEggHatch
+    animal=&quot;random&quot;
+    tapsToHatch={20}
+    crackThrottleMs={0}
+    crackMaxConcurrent={8}
+    crackVolume={0.8}
+    celebrateVolume={0.9}
+    forceReducedMotion={undefined}
+    backgroundColor=&quot;#7e48c0&quot;
+    onComplete={fn()} /&gt;;</code></pre>
+            </div>
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">Reduced Motion</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              
+              <pre><code>const ReducedMotion = () =&gt; &lt;DinoEggHatch
+    animal=&quot;random&quot;
+    tapsToHatch={20}
+    crackThrottleMs={60}
+    crackMaxConcurrent={4}
+    crackVolume={0.8}
+    celebrateVolume={0.9}
+    forceReducedMotion
+    backgroundColor=&quot;#7e48c0&quot;
+    onComplete={fn()} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -7736,6 +7830,433 @@ export const OpensAndClosesOnEscape: Story = {
 </article>
 <article
   class="card 
+  has-error 
+  has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="SingleSpriteFrame">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> SingleSpriteFrame</h2>
+      <div class="badges">
+        <label for="c-38-minigames-dinoegghatch-spriteinspector-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-38-minigames-dinoegghatch-spriteinspector-info" class="badge info as-toggle">1 info</label>
+        <label for="c-38-minigames-dinoegghatch-spriteinspector-stories" class="badge err as-toggle">1/2 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx">minigames-dinoegghatch-spriteinspector · ./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-38-minigames-dinoegghatch-spriteinspector-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-38-minigames-dinoegghatch-spriteinspector-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-38-minigames-dinoegghatch-spriteinspector-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;SingleSpriteFrame&quot; component.
+  65 | };
+  66 |
+&gt; 67 | const meta: Meta&lt;typeof SingleSpriteFrame&gt; = {
+     | ^
+  68 |   component: SingleSpriteFrame,
+  69 |   title: &#39;MiniGames/DinoEggHatch/SpriteInspector&#39;,
+  70 |   tags: [&#39;autodocs&#39;],
+
+./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx:
+import { SpriteFrame } from &#39;./SpriteFrame&#39;;
+import {
+  ANIMALS,
+  ANIMAL_FRAMES,
+  ANIMAL_KEYS,
+  EGG_FRAMES,
+  getDisplayTweak,
+  stripUrl,
+  tweakToTransform,
+} from &#39;./sprites&#39;;
+import type { Animal } from &#39;./sprites&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+
+interface InspectorArgs {
+  source: Animal | &#39;egg&#39;;
+  frameIndex: number;
+  displayWidth: number;
+  displayHeight: number;
+  backgroundColor: string;
+  showBorder: boolean;
+  borderColor: string;
+}
+
+const SingleSpriteFrame = ({
+  source,
+  frameIndex,
+  displayWidth,
+  displayHeight,
+  backgroundColor,
+  showBorder,
+  borderColor,
+}: InspectorArgs) =&gt; {
+  const totalFrames = source === &#39;egg&#39; ? EGG_FRAMES : ANIMAL_FRAMES;
+  const safeFrame = Math.min(Math.max(0, frameIndex), totalFrames - 1);
+  const tweak = getDisplayTweak(source);
+  const transform = tweakToTransform(tweak);
+  return (
+    &lt;div
+      className=&quot;flex min-h-screen flex-col items-center justify-center gap-4 p-8&quot;
+      style={{ backgroundColor }}
+    &gt;
+      &lt;div
+        style={{
+          outline: showBorder ? `2px dashed ${borderColor}` : &#39;none&#39;,
+          outlineOffset: &#39;0px&#39;,
+        }}
+      &gt;
+        &lt;div style={transform ? { transform } : undefined}&gt;
+          &lt;SpriteFrame
+            src={stripUrl(source)}
+            totalFrames={totalFrames}
+            frameIndex={safeFrame}
+            displayWidth={displayWidth}
+            displayHeight={displayHeight}
+            alt={`${source} frame ${safeFrame.toString()}`}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;rounded bg-white/90 px-3 py-1 font-mono text-sm text-black&quot;&gt;
+        {source} · frame {safeFrame.toString()} / {totalFrames - 1}
+        {transform ? ` · ${transform}` : &#39;&#39;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+const meta: Meta&lt;typeof SingleSpriteFrame&gt; = {
+  component: SingleSpriteFrame,
+  title: &#39;MiniGames/DinoEggHatch/SpriteInspector&#39;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Asset QA tool — pick any sprite and frame, toggle the boundary box, and try background colors to spot bleed from neighbouring frames or transparent edges that disappear against certain backgrounds.&#39;,
+      },
+    },
+  },
+  argTypes: {
+    source: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;egg&#39;, ...ANIMAL_KEYS],
+    },
+    frameIndex: {
+      control: {
+        type: &#39;range&#39;,
+        min: 0,
+        max: ANIMAL_FRAMES - 1,
+        step: 1,
+      },
+    },
+    displayWidth: {
+      control: { type: &#39;range&#39;, min: 120, max: 600, step: 20 },
+    },
+    displayHeight: {
+      control: { type: &#39;range&#39;, min: 120, max: 700, step: 20 },
+    },
+    backgroundColor: { control: { type: &#39;color&#39; } },
+    borderColor: { control: { type: &#39;color&#39; } },
+    showBorder: { control: { type: &#39;boolean&#39; } },
+  },
+  args: {
+    source: &#39;owl&#39;,
+    frameIndex: 3,
+    displayWidth: 240,
+    displayHeight: 268,
+    backgroundColor: &#39;#7e48c0&#39;,
+    showBorder: true,
+    borderColor: &#39;#ff00ff&#39;,
+  },
+};
+
+export default meta;
+
+type Story = StoryObj&lt;typeof SingleSpriteFrame&gt;;
+
+export const SingleFrame: Story = {};
+
+/**
+ * Grid that lays out every frame of every sprite in the catalog. Use this
+ * to scan all assets at once for cropping, alignment drift, or transparent
+ * edges — the boundary outline makes frame-bleed instantly visible.
+ */
+export const AllFrames: StoryObj&lt;{
+  backgroundColor: string;
+  showBorder: boolean;
+  borderColor: string;
+  cellWidth: number;
+  cellHeight: number;
+}&gt; = {
+  argTypes: {
+    backgroundColor: { control: { type: &#39;color&#39; } },
+    borderColor: { control: { type: &#39;color&#39; } },
+    showBorder: { control: { type: &#39;boolean&#39; } },
+    cellWidth: {
+      control: { type: &#39;range&#39;, min: 80, max: 320, step: 20 },
+    },
+    cellHeight: {
+      control: { type: &#39;range&#39;, min: 90, max: 360, step: 20 },
+    },
+  },
+  args: {
+    backgroundColor: &#39;#7e48c0&#39;,
+    showBorder: true,
+    borderColor: &#39;#ff00ff&#39;,
+    cellWidth: 160,
+    cellHeight: 178,
+  },
+  render: ({
+    backgroundColor,
+    showBorder,
+    borderColor,
+    cellWidth,
+    cellHeight,
+  }) =&gt; {
+    // Egg is shown as a reference card with only its intact frame (no
+    // cracks) so it sits at the top of the grid as a visual baseline for
+    // animal sizes. `framesInStrip` is the strip&#39;s real frame count
+    // (passed to SpriteFrame for correct background-position math);
+    // `framesToShow` controls how many cells we actually render.
+    const sources: Array&lt;{
+      key: Animal | &#39;egg&#39;;
+      label: string;
+      framesInStrip: number;
+      framesToShow: number;
+    }&gt; = [
+      {
+        key: &#39;egg&#39;,
+        label: &#39;Egg (intact — reference)&#39;,
+        framesInStrip: EGG_FRAMES,
+        framesToShow: 1,
+      },
+      ...ANIMAL_KEYS.map((key) =&gt; ({
+        key,
+        label: ANIMALS[key].name,
+        framesInStrip: ANIMAL_FRAMES,
+        framesToShow: ANIMAL_FRAMES,
+      })),
+    ];
+
+    return (
+      &lt;div className=&quot;min-h-screen p-6&quot; style={{ backgroundColor }}&gt;
+        &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
+          {sources.map(
+            ({ key, label, framesInStrip, framesToShow }) =&gt; (
+              &lt;div key={key} className=&quot;flex flex-col gap-2&quot;&gt;
+                &lt;div className=&quot;font-mono text-sm font-bold text-white&quot;&gt;
+                  {label}{&#39; &#39;}
+                  &lt;span className=&quot;opacity-60&quot;&gt;
+                    ({key} · {framesInStrip.toString()} frames)
+                  &lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div className=&quot;flex flex-wrap gap-3&quot;&gt;
+                  {Array.from({ length: framesToShow }, (_, i) =&gt; {
+                    const cellTransform = tweakToTransform(
+                      getDisplayTweak(key),
+                    );
+                    return (
+                      &lt;div
+                        key={i}
+                        className=&quot;flex flex-col items-center gap-1&quot;
+                      &gt;
+                        &lt;div
+                          style={{
+                            outline: showBorder
+                              ? `2px dashed ${borderColor}`
+                              : &#39;none&#39;,
+                          }}
+                        &gt;
+                          &lt;div
+                            style={
+                              cellTransform
+                                ? { transform: cellTransform }
+                                : undefined
+                            }
+                          &gt;
+                            &lt;SpriteFrame
+                              src={stripUrl(key)}
+                              totalFrames={framesInStrip}
+                              frameIndex={i}
+                              displayWidth={cellWidth}
+                              displayHeight={cellHeight}
+                              alt={`${key} frame ${i.toString()}`}
+                            /&gt;
+                          &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div className=&quot;font-mono text-xs text-white/80&quot;&gt;
+                          frame {i}
+                        &lt;/div&gt;
+                      &lt;/div&gt;
+                    );
+                  })}
+                &lt;/div&gt;
+              &lt;/div&gt;
+            ),
+          )}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Single Frame</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SpriteFrame } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">All Frames</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Grid that lays out every frame of every sprite in the catalog. Use this to scan all assets at once for cropping, alignment drift, or transparent edges — the boundary outline makes frame-bleed instantly visible.</div>
+              <pre><code>const AllFrames = ({
+  backgroundColor,
+  showBorder,
+  borderColor,
+  cellWidth,
+  cellHeight,
+}) =&gt; {
+  // Egg is shown as a reference card with only its intact frame (no
+  // cracks) so it sits at the top of the grid as a visual baseline for
+  // animal sizes. `framesInStrip` is the strip&#39;s real frame count
+  // (passed to SpriteFrame for correct background-position math);
+  // `framesToShow` controls how many cells we actually render.
+  const sources: Array&lt;{
+    key: Animal | &#39;egg&#39;;
+    label: string;
+    framesInStrip: number;
+    framesToShow: number;
+  }&gt; = [
+    {
+      key: &#39;egg&#39;,
+      label: &#39;Egg (intact — reference)&#39;,
+      framesInStrip: EGG_FRAMES,
+      framesToShow: 1,
+    },
+    ...ANIMAL_KEYS.map((key) =&gt; ({
+      key,
+      label: ANIMALS[key].name,
+      framesInStrip: ANIMAL_FRAMES,
+      framesToShow: ANIMAL_FRAMES,
+    })),
+  ];
+
+  return (
+    &lt;div className=&quot;min-h-screen p-6&quot; style={{ backgroundColor }}&gt;
+      &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
+        {sources.map(
+          ({ key, label, framesInStrip, framesToShow }) =&gt; (
+            &lt;div key={key} className=&quot;flex flex-col gap-2&quot;&gt;
+              &lt;div className=&quot;font-mono text-sm font-bold text-white&quot;&gt;
+                {label}{&#39; &#39;}
+                &lt;span className=&quot;opacity-60&quot;&gt;
+                  ({key} · {framesInStrip.toString()} frames)
+                &lt;/span&gt;
+              &lt;/div&gt;
+              &lt;div className=&quot;flex flex-wrap gap-3&quot;&gt;
+                {Array.from({ length: framesToShow }, (_, i) =&gt; {
+                  const cellTransform = tweakToTransform(
+                    getDisplayTweak(key),
+                  );
+                  return (
+                    &lt;div
+                      key={i}
+                      className=&quot;flex flex-col items-center gap-1&quot;
+                    &gt;
+                      &lt;div
+                        style={{
+                          outline: showBorder
+                            ? `2px dashed ${borderColor}`
+                            : &#39;none&#39;,
+                        }}
+                      &gt;
+                        &lt;div
+                          style={
+                            cellTransform
+                              ? { transform: cellTransform }
+                              : undefined
+                          }
+                        &gt;
+                          &lt;SpriteFrame
+                            src={stripUrl(key)}
+                            totalFrames={framesInStrip}
+                            frameIndex={i}
+                            displayWidth={cellWidth}
+                            displayHeight={cellHeight}
+                            alt={`${key} frame ${i.toString()}`}
+                          /&gt;
+                        &lt;/div&gt;
+                      &lt;/div&gt;
+                      &lt;div className=&quot;font-mono text-xs text-white/80&quot;&gt;
+                        frame {i}
+                      &lt;/div&gt;
+                    &lt;/div&gt;
+                  );
+                })}
+              &lt;/div&gt;
+            &lt;/div&gt;
+          ),
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
   no-error 
   has-info 
   no-story-error
@@ -7746,9 +8267,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> Slider</h2>
       <div class="badges">
-        <label for="c-38-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-38-ui-slider-info" class="badge info as-toggle">1 info</label>
-        <label for="c-38-ui-slider-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-39-ui-slider-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-39-ui-slider-info" class="badge info as-toggle">1 info</label>
+        <label for="c-39-ui-slider-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -7760,10 +8281,10 @@ export const OpensAndClosesOnEscape: Story = {
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-38-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-38-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-39-ui-slider-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-39-ui-slider-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-38-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-39-ui-slider-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -7903,9 +8424,9 @@ min?: any = 0</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-39-answergame-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-39-answergame-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-39-answergame-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-40-answergame-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-40-answergame-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-40-answergame-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -7916,9 +8437,9 @@ min?: any = 0</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-39-answergame-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-39-answergame-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-39-answergame-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-40-answergame-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-40-answergame-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-40-answergame-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -8379,9 +8900,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-40-games-sortnumbers-skin-harness-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-40-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-40-games-sortnumbers-skin-harness-stories" class="badge ok as-toggle">5 stories</label>
+        <label for="c-41-games-sortnumbers-skin-harness-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-41-games-sortnumbers-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-41-games-sortnumbers-skin-harness-stories" class="badge ok as-toggle">5 stories</label>
         
       </div>
     </div>
@@ -8393,10 +8914,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-40-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-40-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-41-games-sortnumbers-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-41-games-sortnumbers-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-40-games-sortnumbers-skin-harness-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-41-games-sortnumbers-skin-harness-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8515,9 +9036,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbers</h2>
       <div class="badges">
-        <label for="c-41-games-sortnumbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
-        <label for="c-41-games-sortnumbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
-        <label for="c-41-games-sortnumbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
+        <label for="c-42-games-sortnumbers-sortnumbers-props" class="badge ok as-toggle">4 prop types</label>
+        <label for="c-42-games-sortnumbers-sortnumbers-info" class="badge info as-toggle">1 info</label>
+        <label for="c-42-games-sortnumbers-sortnumbers-stories" class="badge ok as-toggle">17 stories</label>
         
       </div>
     </div>
@@ -8529,10 +9050,10 @@ sessionId?: string</code></pre>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-41-games-sortnumbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-41-games-sortnumbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumbers-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumbers-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-41-games-sortnumbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-42-games-sortnumbers-sortnumbers-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -8778,9 +9299,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SortNumbersConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-42-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-42-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-42-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-43-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-43-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-43-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -8791,9 +9312,9 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-42-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-42-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-42-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-43-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-43-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-43-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9020,9 +9541,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SortNumbersTileBank</h2>
       <div class="badges">
-        <label for="c-43-games-sortnumbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
-        <label for="c-43-games-sortnumbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
-        <label for="c-43-games-sortnumbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-44-games-sortnumbers-sortnumberstilebank-props" class="badge ok as-toggle">1 prop type</label>
+        <label for="c-44-games-sortnumbers-sortnumberstilebank-info" class="badge info as-toggle">1 info</label>
+        <label for="c-44-games-sortnumbers-sortnumberstilebank-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -9034,10 +9555,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-43-games-sortnumbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-43-games-sortnumbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-44-games-sortnumbers-sortnumberstilebank-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-44-games-sortnumbers-sortnumberstilebank-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-43-games-sortnumbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-44-games-sortnumbers-sortnumberstilebank-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -9117,9 +9638,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SpotAll</h2>
       <div class="badges">
-        <label for="c-44-games-spotall-spotall-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-44-games-spotall-spotall-info" class="badge info as-toggle">1 info</label>
-        <label for="c-44-games-spotall-spotall-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-45-games-spotall-spotall-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-45-games-spotall-spotall-info" class="badge info as-toggle">1 info</label>
+        <label for="c-45-games-spotall-spotall-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9131,10 +9652,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-44-games-spotall-spotall-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-44-games-spotall-spotall-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-45-games-spotall-spotall-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-45-games-spotall-spotall-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-44-games-spotall-spotall-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-45-games-spotall-spotall-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -9198,9 +9719,9 @@ seed?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-45-games-spotall-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-45-games-spotall-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-45-games-spotall-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-46-games-spotall-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-46-games-spotall-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-46-games-spotall-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9211,9 +9732,9 @@ seed?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-45-games-spotall-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-45-games-spotall-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-45-games-spotall-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-46-games-spotall-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-46-games-spotall-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-46-games-spotall-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9369,9 +9890,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> SpotAllPrompt</h2>
       <div class="badges">
-        <label for="c-46-games-spotall-spotallprompt-props" class="badge ok as-toggle">2 prop types</label>
-        <label for="c-46-games-spotall-spotallprompt-info" class="badge info as-toggle">1 info</label>
-        <label for="c-46-games-spotall-spotallprompt-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-47-games-spotall-spotallprompt-props" class="badge ok as-toggle">2 prop types</label>
+        <label for="c-47-games-spotall-spotallprompt-info" class="badge info as-toggle">1 info</label>
+        <label for="c-47-games-spotall-spotallprompt-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9383,10 +9904,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-46-games-spotall-spotallprompt-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-46-games-spotall-spotallprompt-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-47-games-spotall-spotallprompt-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-47-games-spotall-spotallprompt-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-46-games-spotall-spotallprompt-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-47-games-spotall-spotallprompt-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -9450,9 +9971,9 @@ ttsEnabled: boolean</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-47-games-spotall-spotalltile-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-47-games-spotall-spotalltile-info" class="badge info as-toggle">1 info</label>
-        <label for="c-47-games-spotall-spotalltile-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-48-games-spotall-spotalltile-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-48-games-spotall-spotalltile-info" class="badge info as-toggle">1 info</label>
+        <label for="c-48-games-spotall-spotalltile-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9463,9 +9984,9 @@ ttsEnabled: boolean</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-47-games-spotall-spotalltile-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-47-games-spotall-spotalltile-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-47-games-spotall-spotalltile-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-48-games-spotall-spotalltile-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-48-games-spotall-spotalltile-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-48-games-spotall-spotalltile-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9625,9 +10146,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllWithHarness</h2>
       <div class="badges">
-        <label for="c-48-games-spotall-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-48-games-spotall-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-48-games-spotall-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-49-games-spotall-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-49-games-spotall-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-49-games-spotall-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -9638,9 +10159,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-48-games-spotall-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-48-games-spotall-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-48-games-spotall-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-49-games-spotall-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-49-games-spotall-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-49-games-spotall-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9774,9 +10295,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-49-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-49-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-49-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-50-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-50-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-50-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9787,9 +10308,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-49-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-49-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-49-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-50-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-50-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-50-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9917,8 +10438,8 @@ export const Playground: Story = {};
       <h2><span class="status-dot dot-ok"></span> ThemeToggle</h2>
       <div class="badges">
         
-        <label for="c-50-components-themetoggle-info" class="badge info as-toggle">1 info</label>
-        <label for="c-50-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-51-components-themetoggle-info" class="badge info as-toggle">1 info</label>
+        <label for="c-51-components-themetoggle-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9930,8 +10451,8 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-50-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-50-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-51-components-themetoggle-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-51-components-themetoggle-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -9984,9 +10505,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-51-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-51-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-51-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-52-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-52-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-52-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -9997,9 +10518,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-51-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-51-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-51-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-52-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-52-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-52-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10142,8 +10663,8 @@ export const Playground: Story = {};
       <h2><span class="status-dot dot-ok"></span> WordLibraryExplorer</h2>
       <div class="badges">
         
-        <label for="c-52-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
-        <label for="c-52-data-wordlibraryexplorer-stories" class="badge ok as-toggle">3 stories</label>
+        <label for="c-53-data-wordlibraryexplorer-info" class="badge info as-toggle">1 info</label>
+        <label for="c-53-data-wordlibraryexplorer-stories" class="badge ok as-toggle">3 stories</label>
         
       </div>
     </div>
@@ -10155,8 +10676,8 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-52-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-52-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-53-data-wordlibraryexplorer-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-53-data-wordlibraryexplorer-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10227,9 +10748,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> WordSpell</h2>
       <div class="badges">
-        <label for="c-53-games-wordspell-wordspell-props" class="badge ok as-toggle">5 prop types</label>
-        <label for="c-53-games-wordspell-wordspell-info" class="badge info as-toggle">1 info</label>
-        <label for="c-53-games-wordspell-wordspell-stories" class="badge ok as-toggle">6 stories</label>
+        <label for="c-54-games-wordspell-wordspell-props" class="badge ok as-toggle">5 prop types</label>
+        <label for="c-54-games-wordspell-wordspell-info" class="badge info as-toggle">1 info</label>
+        <label for="c-54-games-wordspell-wordspell-stories" class="badge ok as-toggle">6 stories</label>
         
       </div>
     </div>
@@ -10241,10 +10762,10 @@ export const Playground: Story = {};
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="c-53-games-wordspell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-53-games-wordspell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-54-games-wordspell-wordspell-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-54-games-wordspell-wordspell-stories" class="tg tg-stories" type="checkbox" hidden />
   
-  <input id="c-53-games-wordspell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
+  <input id="c-54-games-wordspell-wordspell-props" class="tg tg-props" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -10408,9 +10929,9 @@ sessionId?: string</code></pre>
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-54-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-54-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-54-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-55-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-55-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-55-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -10421,9 +10942,9 @@ sessionId?: string</code></pre>
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-54-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-54-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-54-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-55-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-55-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-55-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10647,9 +11168,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-55-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-55-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-55-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-56-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-56-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-56-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -10660,9 +11181,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-55-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-55-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-55-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-56-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-56-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-56-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -10902,7 +11423,7 @@ export const HUD_Round5Of5: Story = {
           <label for="no-component-import-found-toggle" class="group-header">
             <span class="caret">▸</span>
             <span class="group-title">No component import found</span>
-            <span class="group-count">31</span>
+            <span class="group-count">32</span>
           </label>
           <div class="group-cards">
 <article
@@ -16222,6 +16743,433 @@ export const OpensAndClosesOnEscape: Story = {
   class="card 
   has-error 
   has-info 
+  has-story-error
+  no-doc-error"
+  role="listitem"
+  aria-label="SingleSpriteFrame">
+  <div class="head">
+    <div class="title">
+      <h2><span class="status-dot dot-err"></span> SingleSpriteFrame</h2>
+      <div class="badges">
+        <label for="c-error-22-minigames-dinoegghatch-spriteinspector-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-22-minigames-dinoegghatch-spriteinspector-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-22-minigames-dinoegghatch-spriteinspector-stories" class="badge err as-toggle">1/2 story errors</label>
+        
+      </div>
+    </div>
+    <div class="meta" title="./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx">minigames-dinoegghatch-spriteinspector · ./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx</div>
+    
+    
+    
+  </div>
+
+  <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
+  <input id="c-error-22-minigames-dinoegghatch-spriteinspector-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-22-minigames-dinoegghatch-spriteinspector-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-22-minigames-dinoegghatch-spriteinspector-stories" class="tg tg-stories" type="checkbox" hidden />
+  
+  
+
+  <div class="panels">
+    
+        <div class="panel panel-err">
+          
+    <div class="note err">
+      <div class="note-title">Prop type error</div>
+      <div class="note-body"><pre><code>No component file found for the &quot;SingleSpriteFrame&quot; component.
+  65 | };
+  66 |
+&gt; 67 | const meta: Meta&lt;typeof SingleSpriteFrame&gt; = {
+     | ^
+  68 |   component: SingleSpriteFrame,
+  69 |   title: &#39;MiniGames/DinoEggHatch/SpriteInspector&#39;,
+  70 |   tags: [&#39;autodocs&#39;],
+
+./src/components/mini-games/DinoEggHatch/SpriteInspector.stories.tsx:
+import { SpriteFrame } from &#39;./SpriteFrame&#39;;
+import {
+  ANIMALS,
+  ANIMAL_FRAMES,
+  ANIMAL_KEYS,
+  EGG_FRAMES,
+  getDisplayTweak,
+  stripUrl,
+  tweakToTransform,
+} from &#39;./sprites&#39;;
+import type { Animal } from &#39;./sprites&#39;;
+import type { Meta, StoryObj } from &#39;@storybook/react&#39;;
+
+interface InspectorArgs {
+  source: Animal | &#39;egg&#39;;
+  frameIndex: number;
+  displayWidth: number;
+  displayHeight: number;
+  backgroundColor: string;
+  showBorder: boolean;
+  borderColor: string;
+}
+
+const SingleSpriteFrame = ({
+  source,
+  frameIndex,
+  displayWidth,
+  displayHeight,
+  backgroundColor,
+  showBorder,
+  borderColor,
+}: InspectorArgs) =&gt; {
+  const totalFrames = source === &#39;egg&#39; ? EGG_FRAMES : ANIMAL_FRAMES;
+  const safeFrame = Math.min(Math.max(0, frameIndex), totalFrames - 1);
+  const tweak = getDisplayTweak(source);
+  const transform = tweakToTransform(tweak);
+  return (
+    &lt;div
+      className=&quot;flex min-h-screen flex-col items-center justify-center gap-4 p-8&quot;
+      style={{ backgroundColor }}
+    &gt;
+      &lt;div
+        style={{
+          outline: showBorder ? `2px dashed ${borderColor}` : &#39;none&#39;,
+          outlineOffset: &#39;0px&#39;,
+        }}
+      &gt;
+        &lt;div style={transform ? { transform } : undefined}&gt;
+          &lt;SpriteFrame
+            src={stripUrl(source)}
+            totalFrames={totalFrames}
+            frameIndex={safeFrame}
+            displayWidth={displayWidth}
+            displayHeight={displayHeight}
+            alt={`${source} frame ${safeFrame.toString()}`}
+          /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div className=&quot;rounded bg-white/90 px-3 py-1 font-mono text-sm text-black&quot;&gt;
+        {source} · frame {safeFrame.toString()} / {totalFrames - 1}
+        {transform ? ` · ${transform}` : &#39;&#39;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+const meta: Meta&lt;typeof SingleSpriteFrame&gt; = {
+  component: SingleSpriteFrame,
+  title: &#39;MiniGames/DinoEggHatch/SpriteInspector&#39;,
+  tags: [&#39;autodocs&#39;],
+  parameters: {
+    docs: {
+      description: {
+        component:
+          &#39;Asset QA tool — pick any sprite and frame, toggle the boundary box, and try background colors to spot bleed from neighbouring frames or transparent edges that disappear against certain backgrounds.&#39;,
+      },
+    },
+  },
+  argTypes: {
+    source: {
+      control: { type: &#39;select&#39; },
+      options: [&#39;egg&#39;, ...ANIMAL_KEYS],
+    },
+    frameIndex: {
+      control: {
+        type: &#39;range&#39;,
+        min: 0,
+        max: ANIMAL_FRAMES - 1,
+        step: 1,
+      },
+    },
+    displayWidth: {
+      control: { type: &#39;range&#39;, min: 120, max: 600, step: 20 },
+    },
+    displayHeight: {
+      control: { type: &#39;range&#39;, min: 120, max: 700, step: 20 },
+    },
+    backgroundColor: { control: { type: &#39;color&#39; } },
+    borderColor: { control: { type: &#39;color&#39; } },
+    showBorder: { control: { type: &#39;boolean&#39; } },
+  },
+  args: {
+    source: &#39;owl&#39;,
+    frameIndex: 3,
+    displayWidth: 240,
+    displayHeight: 268,
+    backgroundColor: &#39;#7e48c0&#39;,
+    showBorder: true,
+    borderColor: &#39;#ff00ff&#39;,
+  },
+};
+
+export default meta;
+
+type Story = StoryObj&lt;typeof SingleSpriteFrame&gt;;
+
+export const SingleFrame: Story = {};
+
+/**
+ * Grid that lays out every frame of every sprite in the catalog. Use this
+ * to scan all assets at once for cropping, alignment drift, or transparent
+ * edges — the boundary outline makes frame-bleed instantly visible.
+ */
+export const AllFrames: StoryObj&lt;{
+  backgroundColor: string;
+  showBorder: boolean;
+  borderColor: string;
+  cellWidth: number;
+  cellHeight: number;
+}&gt; = {
+  argTypes: {
+    backgroundColor: { control: { type: &#39;color&#39; } },
+    borderColor: { control: { type: &#39;color&#39; } },
+    showBorder: { control: { type: &#39;boolean&#39; } },
+    cellWidth: {
+      control: { type: &#39;range&#39;, min: 80, max: 320, step: 20 },
+    },
+    cellHeight: {
+      control: { type: &#39;range&#39;, min: 90, max: 360, step: 20 },
+    },
+  },
+  args: {
+    backgroundColor: &#39;#7e48c0&#39;,
+    showBorder: true,
+    borderColor: &#39;#ff00ff&#39;,
+    cellWidth: 160,
+    cellHeight: 178,
+  },
+  render: ({
+    backgroundColor,
+    showBorder,
+    borderColor,
+    cellWidth,
+    cellHeight,
+  }) =&gt; {
+    // Egg is shown as a reference card with only its intact frame (no
+    // cracks) so it sits at the top of the grid as a visual baseline for
+    // animal sizes. `framesInStrip` is the strip&#39;s real frame count
+    // (passed to SpriteFrame for correct background-position math);
+    // `framesToShow` controls how many cells we actually render.
+    const sources: Array&lt;{
+      key: Animal | &#39;egg&#39;;
+      label: string;
+      framesInStrip: number;
+      framesToShow: number;
+    }&gt; = [
+      {
+        key: &#39;egg&#39;,
+        label: &#39;Egg (intact — reference)&#39;,
+        framesInStrip: EGG_FRAMES,
+        framesToShow: 1,
+      },
+      ...ANIMAL_KEYS.map((key) =&gt; ({
+        key,
+        label: ANIMALS[key].name,
+        framesInStrip: ANIMAL_FRAMES,
+        framesToShow: ANIMAL_FRAMES,
+      })),
+    ];
+
+    return (
+      &lt;div className=&quot;min-h-screen p-6&quot; style={{ backgroundColor }}&gt;
+        &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
+          {sources.map(
+            ({ key, label, framesInStrip, framesToShow }) =&gt; (
+              &lt;div key={key} className=&quot;flex flex-col gap-2&quot;&gt;
+                &lt;div className=&quot;font-mono text-sm font-bold text-white&quot;&gt;
+                  {label}{&#39; &#39;}
+                  &lt;span className=&quot;opacity-60&quot;&gt;
+                    ({key} · {framesInStrip.toString()} frames)
+                  &lt;/span&gt;
+                &lt;/div&gt;
+                &lt;div className=&quot;flex flex-wrap gap-3&quot;&gt;
+                  {Array.from({ length: framesToShow }, (_, i) =&gt; {
+                    const cellTransform = tweakToTransform(
+                      getDisplayTweak(key),
+                    );
+                    return (
+                      &lt;div
+                        key={i}
+                        className=&quot;flex flex-col items-center gap-1&quot;
+                      &gt;
+                        &lt;div
+                          style={{
+                            outline: showBorder
+                              ? `2px dashed ${borderColor}`
+                              : &#39;none&#39;,
+                          }}
+                        &gt;
+                          &lt;div
+                            style={
+                              cellTransform
+                                ? { transform: cellTransform }
+                                : undefined
+                            }
+                          &gt;
+                            &lt;SpriteFrame
+                              src={stripUrl(key)}
+                              totalFrames={framesInStrip}
+                              frameIndex={i}
+                              displayWidth={cellWidth}
+                              displayHeight={cellHeight}
+                              alt={`${key} frame ${i.toString()}`}
+                            /&gt;
+                          &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div className=&quot;font-mono text-xs text-white/80&quot;&gt;
+                          frame {i}
+                        &lt;/div&gt;
+                      &lt;/div&gt;
+                    );
+                  })}
+                &lt;/div&gt;
+              &lt;/div&gt;
+            ),
+          )}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  },
+};
+</code></pre></div>
+    </div>
+        </div>
+    
+        <div class="panel panel-info">
+          
+    <div class="note info">
+      <div class="note-title">Info</div>
+      <div class="note-body">No description found. Write a jsdoc comment such as /** Component description */.</div>
+    </div>
+        </div>
+    
+    
+        <div class="panel panel-stories">
+          
+            <div class="note err">
+              <div class="row">
+                <span class="ex-name">Single Frame</span>
+                <span class="badge err">story error</span>
+              </div>
+              
+              
+              
+              <pre><code>Could not generate snippet without component name.</code></pre>
+            </div>
+          
+          
+          <div class="note ok">
+                <div class="row">
+                  <span class="ex-name">Imports</span>
+                </div>
+                <pre><code>import { SpriteFrame } from "base-skill";</code></pre>
+              </div>
+          
+          
+            <div class="note ok">
+              <div class="row">
+                <span class="ex-name">All Frames</span>
+                <span class="badge ok">story ok</span>
+              </div>
+              
+              <div class="hint">Grid that lays out every frame of every sprite in the catalog. Use this to scan all assets at once for cropping, alignment drift, or transparent edges — the boundary outline makes frame-bleed instantly visible.</div>
+              <pre><code>const AllFrames = ({
+  backgroundColor,
+  showBorder,
+  borderColor,
+  cellWidth,
+  cellHeight,
+}) =&gt; {
+  // Egg is shown as a reference card with only its intact frame (no
+  // cracks) so it sits at the top of the grid as a visual baseline for
+  // animal sizes. `framesInStrip` is the strip&#39;s real frame count
+  // (passed to SpriteFrame for correct background-position math);
+  // `framesToShow` controls how many cells we actually render.
+  const sources: Array&lt;{
+    key: Animal | &#39;egg&#39;;
+    label: string;
+    framesInStrip: number;
+    framesToShow: number;
+  }&gt; = [
+    {
+      key: &#39;egg&#39;,
+      label: &#39;Egg (intact — reference)&#39;,
+      framesInStrip: EGG_FRAMES,
+      framesToShow: 1,
+    },
+    ...ANIMAL_KEYS.map((key) =&gt; ({
+      key,
+      label: ANIMALS[key].name,
+      framesInStrip: ANIMAL_FRAMES,
+      framesToShow: ANIMAL_FRAMES,
+    })),
+  ];
+
+  return (
+    &lt;div className=&quot;min-h-screen p-6&quot; style={{ backgroundColor }}&gt;
+      &lt;div className=&quot;flex flex-col gap-6&quot;&gt;
+        {sources.map(
+          ({ key, label, framesInStrip, framesToShow }) =&gt; (
+            &lt;div key={key} className=&quot;flex flex-col gap-2&quot;&gt;
+              &lt;div className=&quot;font-mono text-sm font-bold text-white&quot;&gt;
+                {label}{&#39; &#39;}
+                &lt;span className=&quot;opacity-60&quot;&gt;
+                  ({key} · {framesInStrip.toString()} frames)
+                &lt;/span&gt;
+              &lt;/div&gt;
+              &lt;div className=&quot;flex flex-wrap gap-3&quot;&gt;
+                {Array.from({ length: framesToShow }, (_, i) =&gt; {
+                  const cellTransform = tweakToTransform(
+                    getDisplayTweak(key),
+                  );
+                  return (
+                    &lt;div
+                      key={i}
+                      className=&quot;flex flex-col items-center gap-1&quot;
+                    &gt;
+                      &lt;div
+                        style={{
+                          outline: showBorder
+                            ? `2px dashed ${borderColor}`
+                            : &#39;none&#39;,
+                        }}
+                      &gt;
+                        &lt;div
+                          style={
+                            cellTransform
+                              ? { transform: cellTransform }
+                              : undefined
+                          }
+                        &gt;
+                          &lt;SpriteFrame
+                            src={stripUrl(key)}
+                            totalFrames={framesInStrip}
+                            frameIndex={i}
+                            displayWidth={cellWidth}
+                            displayHeight={cellHeight}
+                            alt={`${key} frame ${i.toString()}`}
+                          /&gt;
+                        &lt;/div&gt;
+                      &lt;/div&gt;
+                      &lt;div className=&quot;font-mono text-xs text-white/80&quot;&gt;
+                        frame {i}
+                      &lt;/div&gt;
+                    &lt;/div&gt;
+                  );
+                })}
+              &lt;/div&gt;
+            &lt;/div&gt;
+          ),
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</code></pre>
+            </div>
+        </div>
+    
+  </div>
+</article>
+<article
+  class="card 
+  has-error 
+  has-info 
   no-story-error
   no-doc-error"
   role="listitem"
@@ -16230,9 +17178,9 @@ export const OpensAndClosesOnEscape: Story = {
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SlotRow as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-22-answergame-slot-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-22-answergame-slot-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-22-answergame-slot-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-23-answergame-slot-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-23-answergame-slot-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-23-answergame-slot-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -16243,9 +17191,9 @@ export const OpensAndClosesOnEscape: Story = {
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-22-answergame-slot-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-22-answergame-slot-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-22-answergame-slot-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-23-answergame-slot-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-23-answergame-slot-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-23-answergame-slot-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -16706,9 +17654,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SortNumbersConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-23-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-23-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-23-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-24-games-sortnumbers-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-24-games-sortnumbers-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-24-games-sortnumbers-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -16719,9 +17667,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-23-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-23-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-23-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-24-games-sortnumbers-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-24-games-sortnumbers-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-24-games-sortnumbers-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -16948,9 +17896,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-24-games-spotall-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-24-games-spotall-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-24-games-spotall-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-25-games-spotall-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-25-games-spotall-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-25-games-spotall-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -16961,9 +17909,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-24-games-spotall-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-24-games-spotall-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-24-games-spotall-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-25-games-spotall-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-25-games-spotall-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-25-games-spotall-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17119,9 +18067,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllTile as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-25-games-spotall-spotalltile-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-25-games-spotall-spotalltile-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-25-games-spotall-spotalltile-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-26-games-spotall-spotalltile-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-26-games-spotall-spotalltile-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-26-games-spotall-spotalltile-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -17132,9 +18080,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-25-games-spotall-spotalltile-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-25-games-spotall-spotalltile-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-25-games-spotall-spotalltile-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-26-games-spotall-spotalltile-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-26-games-spotall-spotalltile-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-26-games-spotall-spotalltile-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17294,9 +18242,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> SpotAllWithHarness</h2>
       <div class="badges">
-        <label for="c-error-26-games-spotall-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-26-games-spotall-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-26-games-spotall-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
+        <label for="c-error-27-games-spotall-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-27-games-spotall-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-27-games-spotall-skin-harness-stories" class="badge err as-toggle">1/1 story errors</label>
         
       </div>
     </div>
@@ -17307,9 +18255,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-26-games-spotall-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-26-games-spotall-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-26-games-spotall-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-27-games-spotall-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-27-games-spotall-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-27-games-spotall-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17443,9 +18391,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> TextQuestion as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-27-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-27-questions-textquestion-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-27-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-28-questions-textquestion-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-28-questions-textquestion-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-28-questions-textquestion-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -17456,9 +18404,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-27-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-27-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-27-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-28-questions-textquestion-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-28-questions-textquestion-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-28-questions-textquestion-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17585,9 +18533,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> UpdateBanner as unknown as ComponentType&lt;StoryArgs&gt;</h2>
       <div class="badges">
-        <label for="c-error-28-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-28-components-updatebanner-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-28-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-29-components-updatebanner-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-29-components-updatebanner-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-29-components-updatebanner-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -17598,9 +18546,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-28-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-28-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-28-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-29-components-updatebanner-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-29-components-updatebanner-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-29-components-updatebanner-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17742,9 +18690,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellConfigFormHarness</h2>
       <div class="badges">
-        <label for="c-error-29-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-29-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-29-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
+        <label for="c-error-30-games-wordspell-configform-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-30-games-wordspell-configform-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-30-games-wordspell-configform-stories" class="badge ok as-toggle">1 story</label>
         
       </div>
     </div>
@@ -17755,9 +18703,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-29-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-29-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-29-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-30-games-wordspell-configform-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-30-games-wordspell-configform-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-30-games-wordspell-configform-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
@@ -17981,9 +18929,9 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-err"></span> WordSpellWithHarness</h2>
       <div class="badges">
-        <label for="c-error-30-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
-        <label for="c-error-30-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
-        <label for="c-error-30-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
+        <label for="c-error-31-games-wordspell-skin-harness-err" class="badge err as-toggle">prop type error</label>
+        <label for="c-error-31-games-wordspell-skin-harness-info" class="badge info as-toggle">1 info</label>
+        <label for="c-error-31-games-wordspell-skin-harness-stories" class="badge err as-toggle">3/3 story errors</label>
         
       </div>
     </div>
@@ -17994,9 +18942,9 @@ export const Playground: Story = {};
   </div>
 
   <!-- ⬇️ Hidden toggles must be siblings BEFORE .panels -->
-  <input id="c-error-30-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
-  <input id="c-error-30-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
-  <input id="c-error-30-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
+  <input id="c-error-31-games-wordspell-skin-harness-err" class="tg tg-err" type="checkbox" hidden />
+  <input id="c-error-31-games-wordspell-skin-harness-info" class="tg tg-info" type="checkbox" hidden />
+  <input id="c-error-31-games-wordspell-skin-harness-stories" class="tg tg-stories" type="checkbox" hidden />
   
   
 
