@@ -5,31 +5,87 @@ import {
   ANIMAL_FRAMES,
   ANIMAL_KEYS,
   EGG_FRAMES,
+  PRE_HATCH_STAGES,
   SPRITE_BASE,
-  eggFrameForStage,
+  spriteForPreHatchStage,
   stripUrl,
 } from './sprites';
 
-describe('eggFrameForStage', () => {
-  it('returns intact egg (frame 0) for stage 0 and below', () => {
-    expect(eggFrameForStage(0)).toBe(0);
-    expect(eggFrameForStage(-1)).toBe(0);
+describe('PRE_HATCH_STAGES', () => {
+  it('covers every clickable frame: 3 egg + (4 animal - 1 celebration) = 6', () => {
+    expect(PRE_HATCH_STAGES).toBe(EGG_FRAMES + (ANIMAL_FRAMES - 1));
+    expect(PRE_HATCH_STAGES).toBe(6);
+  });
+});
+
+describe('spriteForPreHatchStage', () => {
+  it('returns egg frames for stages 0, 1, 2', () => {
+    expect(spriteForPreHatchStage(0)).toEqual({
+      phase: 'egg',
+      frameIndex: 0,
+    });
+    expect(spriteForPreHatchStage(1)).toEqual({
+      phase: 'egg',
+      frameIndex: 1,
+    });
+    expect(spriteForPreHatchStage(2)).toEqual({
+      phase: 'egg',
+      frameIndex: 2,
+    });
   });
 
-  it('returns light crack (frame 1) for stage 1', () => {
-    expect(eggFrameForStage(1)).toBe(1);
+  it('returns animal peek frames for stages 3, 4, 5', () => {
+    expect(spriteForPreHatchStage(3)).toEqual({
+      phase: 'animal',
+      frameIndex: 0,
+    });
+    expect(spriteForPreHatchStage(4)).toEqual({
+      phase: 'animal',
+      frameIndex: 1,
+    });
+    expect(spriteForPreHatchStage(5)).toEqual({
+      phase: 'animal',
+      frameIndex: 2,
+    });
   });
 
-  it('returns heavy crack (frame 2) for stages 2 and above', () => {
-    expect(eggFrameForStage(2)).toBe(2);
-    expect(eggFrameForStage(3)).toBe(2);
-    expect(eggFrameForStage(99)).toBe(2);
+  it('never produces the celebration frame (animal frame 3)', () => {
+    for (let stage = -5; stage <= 20; stage++) {
+      const result = spriteForPreHatchStage(stage);
+      if (result.phase === 'animal') {
+        expect(result.frameIndex).toBeLessThan(ANIMAL_FRAMES - 1);
+      }
+    }
   });
 
-  it('never exceeds the available egg frames', () => {
-    for (let stage = -5; stage <= 10; stage++) {
-      expect(eggFrameForStage(stage)).toBeLessThan(EGG_FRAMES);
-      expect(eggFrameForStage(stage)).toBeGreaterThanOrEqual(0);
+  it('clamps below the range to the intact egg (phase egg, frame 0)', () => {
+    expect(spriteForPreHatchStage(-1)).toEqual({
+      phase: 'egg',
+      frameIndex: 0,
+    });
+    expect(spriteForPreHatchStage(-99)).toEqual({
+      phase: 'egg',
+      frameIndex: 0,
+    });
+  });
+
+  it('clamps above the range to the last clickable animal frame', () => {
+    expect(spriteForPreHatchStage(PRE_HATCH_STAGES)).toEqual({
+      phase: 'animal',
+      frameIndex: 2,
+    });
+    expect(spriteForPreHatchStage(99)).toEqual({
+      phase: 'animal',
+      frameIndex: 2,
+    });
+  });
+
+  it('returns frame indices within the source strip in every case', () => {
+    for (let stage = -5; stage <= 20; stage++) {
+      const { phase, frameIndex } = spriteForPreHatchStage(stage);
+      const max = phase === 'egg' ? EGG_FRAMES : ANIMAL_FRAMES;
+      expect(frameIndex).toBeGreaterThanOrEqual(0);
+      expect(frameIndex).toBeLessThan(max);
     }
   });
 });
@@ -48,9 +104,5 @@ describe('ANIMALS catalogue', () => {
       expect(ANIMALS[key]).toBeDefined();
       expect(ANIMALS[key].name).toMatch(/\S/);
     }
-  });
-
-  it('has 4 frames per animal (matching the asset strip layout)', () => {
-    expect(ANIMAL_FRAMES).toBe(4);
   });
 });
