@@ -69,18 +69,44 @@ export const ANIMALS: Record<Animal, { name: string }> = {
 export const ANIMAL_KEYS = Object.keys(ANIMALS) as Animal[];
 
 /**
- * Map a 0..3 crack stage to an egg sprite frame index (0..2).
+ * Total clickable stages before the egg hatches:
  *
- * - Stage 0 (no taps yet)        -> frame 0 (intact)
- * - Stage 1 (light crack)         -> frame 1 (hairline crack)
- * - Stage 2 or 3 (heavy crack)    -> frame 2 (heavy jagged crack)
+ *   0 -> egg.png      frame 0 (intact)
+ *   1 -> egg.png      frame 1 (hairline crack)
+ *   2 -> egg.png      frame 2 (heavy crack)
+ *   3 -> <animal>.png frame 0 (peeking)
+ *   4 -> <animal>.png frame 1 (half-out)
+ *   5 -> <animal>.png frame 2 (mostly-out)
  *
- * The egg sequence ends at frame 2; from there the animal sprite plays.
+ * Stage 6 == hatched, where <animal>.png frame 3 (free standing) is shown
+ * as a non-clickable celebration pose.
  */
-export const eggFrameForStage = (stage: number): number => {
-  if (stage <= 0) return 0;
-  if (stage === 1) return 1;
-  return EGG_FRAMES - 1;
+export const PRE_HATCH_STAGES = EGG_FRAMES + (ANIMAL_FRAMES - 1);
+
+export type SpritePhase = 'egg' | 'animal';
+
+export interface PreHatchSprite {
+  phase: SpritePhase;
+  frameIndex: number;
+}
+
+/**
+ * Map a 0..PRE_HATCH_STAGES-1 stage onto its sprite source + frame.
+ *
+ * Out-of-range stages clamp to the nearest valid value: negative stages
+ * resolve to the intact egg (phase egg, frame 0); stages at or beyond
+ * PRE_HATCH_STAGES resolve to the last clickable animal frame (phase
+ * animal, frame 2). The hatched celebration frame (animal frame 3) is
+ * not produced here — see DinoEggHatch's hatched branch.
+ */
+export const spriteForPreHatchStage = (
+  stage: number,
+): PreHatchSprite => {
+  const clamped = Math.max(0, Math.min(PRE_HATCH_STAGES - 1, stage));
+  if (clamped < EGG_FRAMES) {
+    return { phase: 'egg', frameIndex: clamped };
+  }
+  return { phase: 'animal', frameIndex: clamped - EGG_FRAMES };
 };
 
 export const stripUrl = (name: Animal | 'egg'): string =>
