@@ -22,17 +22,19 @@
 const PUBLIC_BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 export const SPRITE_BASE = `${PUBLIC_BASE}/sprites/egg-hatch/strips`;
-export const SOUND_BASE = `${PUBLIC_BASE}/sprites/egg-hatch/sounds`;
+
+/**
+ * Sound effects live under the shared `/sounds/` folder so the same
+ * crack/celebration assets can be reused across mini-games rather than
+ * duplicated under each game's sprite folder.
+ */
+export const SOUND_BASE = `${PUBLIC_BASE}/sounds`;
 
 /** URL of the egg-cracking sound played on each pre-hatch tap. */
 export const CRACK_SOUND_URL = `${SOUND_BASE}/crack.mp3`;
 
-/**
- * URL of the celebration sound played once when the egg fully hatches.
- * Lives under the shared `/sounds/` folder (not the egg-hatch sprites
- * folder) because the same effect is reused across mini-games.
- */
-export const CELEBRATE_SOUND_URL = `${PUBLIC_BASE}/sounds/celebration.mp3`;
+/** URL of the celebration sound played once when the egg fully hatches. */
+export const CELEBRATE_SOUND_URL = `${SOUND_BASE}/celebration.mp3`;
 
 export const EGG_FRAMES = 3;
 export const ANIMAL_FRAMES = 4;
