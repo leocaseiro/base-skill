@@ -5,7 +5,7 @@ import type { FireworksHandlers } from '@fireworks-js/react';
 interface FireworksPainterProps {
   duration?: number;
   showHandHint?: boolean;
-  onComplete?: (fireworkCount: number) => void;
+  onComplete?: () => void;
 }
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -22,17 +22,11 @@ export const FireworksPainter = ({
   onComplete,
 }: FireworksPainterProps) => {
   const ref = useRef<FireworksHandlers>(null);
-  const [fireworkCount, setFireworkCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isStarted, setIsStarted] = useState(false);
   const [isDone, setIsDone] = useState(false);
 
-  const fireworkCountRef = useRef(0);
   const onCompleteRef = useRef(onComplete);
-
-  useEffect(() => {
-    fireworkCountRef.current = fireworkCount;
-  }, [fireworkCount]);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -46,7 +40,7 @@ export const FireworksPainter = ({
         if (prev <= 1) {
           globalThis.clearInterval(timer);
           setIsDone(true);
-          onCompleteRef.current?.(fireworkCountRef.current);
+          onCompleteRef.current?.();
           return 0;
         }
         return prev - 1;
@@ -60,7 +54,6 @@ export const FireworksPainter = ({
 
   const handleClick = () => {
     if (isDone) return;
-    setFireworkCount((prev) => prev + 1);
     if (!isStarted) setIsStarted(true);
   };
 
@@ -87,13 +80,13 @@ export const FireworksPainter = ({
         options={{
           mouse: {
             click: true,
-            move: true,
+            move: false,
             max: 1,
           },
           sound: {
             enabled: true,
             files: EXPLOSION_SOUNDS,
-            volume: { min: 4, max: 8 },
+            volume: { min: 20, max: 90 },
           },
           intensity: 1,
           traceSpeed: 95,
@@ -107,12 +100,9 @@ export const FireworksPainter = ({
         }}
       />
 
-      <div className="pointer-events-none absolute left-0 right-0 top-4 z-10 flex items-center justify-between px-6">
-        <span className="text-lg font-bold text-white drop-shadow-md">
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-10 flex justify-center px-6">
+        <span className="rounded-full bg-black/40 px-4 py-1 text-lg font-bold text-white drop-shadow-md">
           ⏱ {timeLeft}s
-        </span>
-        <span className="text-lg font-bold text-white drop-shadow-md">
-          🎆 {fireworkCount}
         </span>
       </div>
 

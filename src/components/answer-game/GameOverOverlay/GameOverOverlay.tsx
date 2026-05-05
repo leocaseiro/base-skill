@@ -36,7 +36,7 @@ export const GameOverOverlay = ({
         }}
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-20 z-20 flex flex-col items-center gap-4">
+      <div className="pointer-events-none absolute inset-x-0 top-36 z-20 flex flex-col items-center gap-4">
         <span
           className="animate-bounce text-8xl drop-shadow-lg"
           aria-hidden="true"
