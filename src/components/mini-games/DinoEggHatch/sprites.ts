@@ -27,6 +27,13 @@ export const SOUND_BASE = `${PUBLIC_BASE}/sprites/egg-hatch/sounds`;
 /** URL of the egg-cracking sound played on each pre-hatch tap. */
 export const CRACK_SOUND_URL = `${SOUND_BASE}/crack.mp3`;
 
+/**
+ * URL of the celebration sound played once when the egg fully hatches.
+ * Lives under the shared `/sounds/` folder (not the egg-hatch sprites
+ * folder) because the same effect is reused across mini-games.
+ */
+export const CELEBRATE_SOUND_URL = `${PUBLIC_BASE}/sounds/celebration.mp3`;
+
 export const EGG_FRAMES = 3;
 export const ANIMAL_FRAMES = 4;
 
@@ -78,6 +85,72 @@ export const ANIMALS: Record<Animal, { name: string }> = {
 };
 
 export const ANIMAL_KEYS = Object.keys(ANIMALS) as Animal[];
+
+/**
+ * Per-asset render-time tweaks, applied as a CSS transform on the
+ * SpriteFrame so you can nudge a single sprite's appearance without
+ * regenerating the strip. EDIT THIS MAP DIRECTLY to dial each animal in.
+ *
+ *   scale   1.0 = strip's natural size. Values > 1 grow the silhouette;
+ *           beyond ~1.10 may overlap into adjacent slots in a grid view.
+ *   x       horizontal nudge in CSS pixels (positive = right). Useful
+ *           when an animal sits visibly off-centre in the cell.
+ *   y       vertical nudge in CSS pixels (positive = down).
+ *
+ * The 'egg' key applies to the pre-hatch egg sequence (egg.png frames
+ * 0-2). Animal keys apply to that animal's hatching frames + final
+ * celebration pose.
+ *
+ * Add a key only when you need a non-default value; missing keys mean
+ * "no transform applied".
+ */
+export interface DisplayTweak {
+  scale?: number;
+  x?: number;
+  y?: number;
+}
+
+export const DISPLAY_TWEAKS: Record<Animal | 'egg', DisplayTweak> = {
+  egg: { scale: 0.9 },
+  'blue-bird': { scale: 0.9 },
+  crocodile: { scale: 0.9 },
+  dino: {},
+  'dragon-female': {},
+  'dragon-male': { scale: 0.9 },
+  duck: { scale: 0.9 },
+  echidna: { scale: 0.9 },
+  emu: {},
+  owl: { scale: 1.05 },
+  parrot: { scale: 1.05 },
+  penguin: { scale: 1.1 },
+  'pink-bird': {},
+  platypus: { scale: 0.95 },
+  snake: {},
+  't-rex': {},
+  tortoise: {},
+  triceratops: { scale: 0.9 },
+  turtle: { scale: 1.2 },
+  'yellow-bird': { scale: 0.9 },
+};
+
+export const getDisplayTweak = (key: Animal | 'egg'): DisplayTweak =>
+  DISPLAY_TWEAKS[key];
+
+/** Build a CSS `transform` value from a tweak, or undefined for default. */
+export const tweakToTransform = (
+  tweak: DisplayTweak,
+): string | undefined => {
+  const parts: string[] = [];
+  if (tweak.x || tweak.y) {
+    parts.push(
+      `translate(${(tweak.x ?? 0).toString()}px, ${(tweak.y ?? 0).toString()}px)`,
+    );
+  }
+  if (tweak.scale && tweak.scale !== 1) {
+    parts.push(`scale(${tweak.scale.toString()})`);
+  }
+  return parts.length > 0 ? parts.join(' ') : undefined;
+};
 
 /**
  * Total clickable stages before the egg hatches:
