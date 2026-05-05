@@ -24,7 +24,53 @@ Explicit invocation: `/handoff` or `/continue`.
 
 ## Worktree rule
 
-Handoffs are written inside the **active worktree**, never on `master`. If the current working directory is not under `worktrees/<name>/`, stop and ask the user whether to create a worktree first (see [CLAUDE.md](../../../CLAUDE.md) worktree gate).
+Handoffs are written inside the **active worktree**, never on `master`. The
+worktree must live at `<project-root>/worktrees/<name>/` — **not** inside
+`.claude/worktrees/`.
+
+### Why this matters
+
+`.claude/` is a hardcoded sensitive directory in Claude Code. Every file
+write inside it (including `.claude/worktrees/<anything>/...`) triggers a
+permission prompt that **no `permissions.allow` rule can override**. A
+handoff written inside `.claude/worktrees/<name>/.claude/handoffs/` will
+prompt on every write — `mkdir`, the Markdown file itself, and the commit.
+
+### Before writing the handoff, check `pwd`
+
+| Current directory                  | Action                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------ |
+| `<root>/worktrees/<name>/`         | ✅ proceed                                                                                 |
+| `<root>` (master)                  | ❌ stop; ask user to create a worktree (see below)                                         |
+| `<root>/.claude/worktrees/<name>/` | ❌ stop; tell the user this path is broken (see "Recovering" below) and ask how to proceed |
+
+### Creating a worktree
+
+Use Bash — **never the `EnterWorktree` tool**:
+
+```bash
+git worktree add ./worktrees/<branch-name> -b <branch-name>
+cd ./worktrees/<branch-name>
+```
+
+`EnterWorktree` hardcodes the base path to `.claude/worktrees/<random-slug>/`
+and is blocked by a `PreToolUse` hook in `.claude/settings.json`. If the hook
+ever misfires, refuse the tool anyway and use the Bash recipe above.
+
+The `using-git-worktrees` skill follows this convention automatically.
+
+### Recovering from a `.claude/worktrees/` worktree
+
+If `pwd` is already inside `.claude/worktrees/<name>/`, do **not** write the
+handoff there. Surface this to the user:
+
+> "I'm in `.claude/worktrees/<name>/`, which triggers a permission prompt on
+> every file write. Two options: (a) move it with
+> `git worktree move .claude/worktrees/<name> worktrees/<branch>` then `cd`
+> over and continue, or (b) leave the existing worktree alone and create a
+> fresh one at `worktrees/<branch>` for the new work. Which do you prefer?"
+
+Wait for the user's choice before writing.
 
 ## Process
 

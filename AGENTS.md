@@ -43,3 +43,4 @@ See [CLAUDE.md → Before writing a plan](./CLAUDE.md#before-writing-a-plan) for
 - [CLAUDE.md](./CLAUDE.md) — React/ESLint expectations, TDD, markdown, CI buckets, VR tests.
 - `.cursor/rules/` — Cursor-specific always-on rules.
 - [.claude/skills/handoff/SKILL.md](./.claude/skills/handoff/SKILL.md) — session handoff workflow (also available as `/handoff` or `/continue` in Claude Code, mirrored as `.cursor/rules/handoff.mdc` for Cursor).
+- `docs/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `problem_type`). Relevant when implementing or debugging in documented areas.
