@@ -232,3 +232,49 @@ When modifying game state logic — any file in `src/components/answer-game/`,
 `*Behavior*`, `*Drag*` — update the co-located `.mdx` docs in the same PR.
 
 Run `/update-architecture-docs` to get guided prompts for what sections need updating.
+
+## gstack
+
+Use the `/browse` skill from gstack for **all web browsing**. Never use
+`mcp__claude-in-chrome__*` tools.
+
+### Available gstack skills
+
+- `/office-hours` — Product ideas and brainstorming
+- `/plan-ceo-review` — Strategy and scope review
+- `/plan-eng-review` — Architecture review
+- `/plan-design-review` — Design system and plan review
+- `/design-consultation` — Design consultation
+- `/design-shotgun` — Rapid design iteration
+- `/design-html` — Design to HTML
+- `/review` — Code review and diff check
+- `/ship` — Ship, deploy, and PR
+- `/land-and-deploy` — Land and deploy
+- `/canary` — Canary deploy
+- `/benchmark` — Benchmark
+- `/browse` — Headless browser for QA and dogfooding
+- `/connect-chrome` — Connect to real Chrome browser
+- `/qa` — Full QA: test, fix, and verify
+- `/qa-only` — Report-only QA (no fixes)
+- `/design-review` — Visual polish review
+- `/setup-browser-cookies` — Import browser cookies
+- `/setup-deploy` — Configure deploy settings
+- `/setup-gbrain` — Configure GBrain
+- `/retro` — Retrospective
+- `/investigate` — Bug investigation
+- `/document-release` — Document a release
+- `/codex` — Codex integration
+- `/cso` — Chief Strategy Officer review
+- `/autoplan` — Full review pipeline
+- `/plan-devex-review` — Developer experience review
+- `/devex-review` — DevEx review
+- `/careful` — Extra caution mode
+- `/freeze` — Freeze changes
+- `/guard` — Guard mode
+- `/unfreeze` — Unfreeze changes
+- `/gstack-upgrade` — Upgrade gstack
+- `/learn` — Capture learnings
+
+## AskUserQuestion Padding (temporary)
+
+End your text with a horizontal rule (`---`) followed by two blank lines before calling AskUserQuestion — the input overlay obscures the last ~2 lines of output, so the padding gets hidden instead of content.
