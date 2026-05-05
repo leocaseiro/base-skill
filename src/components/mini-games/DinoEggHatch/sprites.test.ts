@@ -4,8 +4,10 @@ import {
   ANIMALS,
   ANIMAL_FRAMES,
   ANIMAL_KEYS,
+  CRACK_SOUND_URL,
   EGG_FRAMES,
   PRE_HATCH_STAGES,
+  SOUND_BASE,
   SPRITE_BASE,
   spriteForPreHatchStage,
   stripUrl,
@@ -95,6 +97,16 @@ describe('stripUrl', () => {
     expect(stripUrl('egg')).toBe(`${SPRITE_BASE}/egg.png`);
     expect(stripUrl('owl')).toBe(`${SPRITE_BASE}/owl.png`);
     expect(stripUrl('t-rex')).toBe(`${SPRITE_BASE}/t-rex.png`);
+  });
+});
+
+describe('sound URLs', () => {
+  it('places SOUND_BASE alongside SPRITE_BASE so assets co-locate', () => {
+    expect(SOUND_BASE).toMatch(/\/sprites\/egg-hatch\/sounds$/);
+  });
+
+  it('exposes CRACK_SOUND_URL pointing at crack.mp3 under SOUND_BASE', () => {
+    expect(CRACK_SOUND_URL).toBe(`${SOUND_BASE}/crack.mp3`);
   });
 });
 
