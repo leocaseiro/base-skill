@@ -101,8 +101,9 @@ describe('stripUrl', () => {
 });
 
 describe('sound URLs', () => {
-  it('places SOUND_BASE alongside SPRITE_BASE so assets co-locate', () => {
-    expect(SOUND_BASE).toMatch(/\/sprites\/egg-hatch\/sounds$/);
+  it('points SOUND_BASE at the shared /sounds/ folder', () => {
+    expect(SOUND_BASE).toMatch(/\/sounds$/);
+    expect(SOUND_BASE).not.toMatch(/sprites\/egg-hatch/);
   });
 
   it('exposes CRACK_SOUND_URL pointing at crack.mp3 under SOUND_BASE', () => {
