@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.0s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -3580,9 +3580,9 @@ export const ReplayTrigger: Story = {
             </div>
             <pre><code>Component: src/components/mini-games/FireworksPainter/FireworksPainter.tsx::FireworksPainter</code></pre>
             <pre><code>Props:</code></pre>
-            <pre><code>duration?: number = 30
+            <pre><code>duration?: number = 10
 
-onComplete?: () =&gt; void
+onComplete?: (fireworkCount: number) =&gt; void
 
 showHandHint?: boolean = true</code></pre>
           </div>
@@ -3607,7 +3607,7 @@ showHandHint?: boolean = true</code></pre>
               </div>
               
               
-              <pre><code>const Playground = () =&gt; &lt;FireworksPainter duration={30} showHandHint onComplete={fn()} /&gt;;</code></pre>
+              <pre><code>const Playground = () =&gt; &lt;FireworksPainter duration={10} showHandHint onComplete={fn()} /&gt;;</code></pre>
             </div>
         </div>
     
