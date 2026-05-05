@@ -7,7 +7,8 @@ import {
   ANIMAL_FRAMES,
   ANIMAL_KEYS,
   EGG_FRAMES,
-  eggFrameForStage,
+  PRE_HATCH_STAGES,
+  spriteForPreHatchStage,
   stripUrl,
 } from './sprites';
 import type { Animal } from './sprites';
@@ -21,14 +22,16 @@ interface DinoEggHatchProps {
 const SPRITE_DISPLAY_W = 240;
 const SPRITE_DISPLAY_H = 268;
 
-/** Per-frame delay of the post-hatch animal animation (frames 0 -> 3). */
-const HATCH_FRAME_INTERVAL_MS = 280;
-
+/**
+ * Map the 0..PRE_HATCH_STAGES-1 click stage to a shake speed. Faster shakes
+ * cue the player that the egg is closer to hatching. Stage 0 (intact egg)
+ * stays still.
+ */
 const getShakeClass = (stage: number): string => {
-  if (stage === 1) return 'animate-[shake_1s_ease-in-out_infinite]';
-  if (stage === 2) return 'animate-[shake_0.5s_ease-in-out_infinite]';
-  if (stage >= 3) return 'animate-[shake_0.25s_ease-in-out_infinite]';
-  return '';
+  if (stage <= 0) return '';
+  if (stage <= 2) return 'animate-[shake_1s_ease-in-out_infinite]';
+  if (stage <= 4) return 'animate-[shake_0.5s_ease-in-out_infinite]';
+  return 'animate-[shake_0.25s_ease-in-out_infinite]';
 };
 
 const getProgressColor = (pct: number): string => {
@@ -56,16 +59,17 @@ export const DinoEggHatch = ({
 
   const [tapCount, setTapCount] = useState(0);
   const [hatched, setHatched] = useState(false);
-  const [hatchFrame, setHatchFrame] = useState(0);
 
   const onCompleteRef = useRef(onComplete);
   useEffect(() => {
     onCompleteRef.current = onComplete;
   });
 
-  const crackStage = Math.min(
-    4,
-    Math.floor(tapCount / (tapsToHatch / 4)),
+  // Six clickable stages — egg frames 0-2, then animal peek frames 0-2.
+  // Stage 6 = hatched (animal frame 3, the free-standing celebration pose).
+  const tapStage = Math.min(
+    PRE_HATCH_STAGES,
+    Math.floor(tapCount / (tapsToHatch / PRE_HATCH_STAGES)),
   );
   const progressPct = Math.min(100, (tapCount / tapsToHatch) * 100);
 
@@ -96,30 +100,18 @@ export const DinoEggHatch = ({
     };
   }, [hatched]);
 
-  // Step the animal sprite from frame 0 -> ANIMAL_FRAMES-1 once after hatch.
-  // No reset to 0 here — `hatchFrame` already starts at 0 and the component
-  // is mounted fresh per game session.
-  useEffect(() => {
-    if (!hatched) return;
-
-    const id = globalThis.setInterval(() => {
-      setHatchFrame((prev) => {
-        if (prev >= ANIMAL_FRAMES - 1) {
-          globalThis.clearInterval(id);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, HATCH_FRAME_INTERVAL_MS);
-
-    return () => {
-      globalThis.clearInterval(id);
-    };
-  }, [hatched]);
-
   useEffect(confettiEffect, []);
 
   const animalData = ANIMALS[chosenAnimal];
+  const preHatch = spriteForPreHatchStage(tapStage);
+  const preHatchSrc =
+    preHatch.phase === 'egg' ? stripUrl('egg') : stripUrl(chosenAnimal);
+  const preHatchTotalFrames =
+    preHatch.phase === 'egg' ? EGG_FRAMES : ANIMAL_FRAMES;
+  const preHatchAlt =
+    preHatch.phase === 'egg'
+      ? 'Egg'
+      : `${animalData.name} hatching out of the egg`;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#900192]">
@@ -128,7 +120,7 @@ export const DinoEggHatch = ({
           <SpriteFrame
             src={stripUrl(chosenAnimal)}
             totalFrames={ANIMAL_FRAMES}
-            frameIndex={hatchFrame}
+            frameIndex={ANIMAL_FRAMES - 1}
             displayWidth={SPRITE_DISPLAY_W}
             displayHeight={SPRITE_DISPLAY_H}
             className="animate-pop"
@@ -140,17 +132,14 @@ export const DinoEggHatch = ({
         </div>
       ) : (
         <div className="flex flex-col items-center gap-6">
-          {/* Egg area */}
+          {/* Egg area — clickable through every pre-hatch stage. */}
           <div
             role="button"
             tabIndex={0}
             aria-label="Tap the egg to hatch it"
             className={[
               'cursor-pointer select-none',
-              crackStage >= 3
-                ? 'rounded-full ring-4 ring-yellow-400 ring-opacity-75'
-                : '',
-              getShakeClass(crackStage),
+              getShakeClass(tapStage),
             ]
               .filter(Boolean)
               .join(' ')}
@@ -160,20 +149,21 @@ export const DinoEggHatch = ({
             }}
           >
             <SpriteFrame
-              src={stripUrl('egg')}
-              totalFrames={EGG_FRAMES}
-              frameIndex={eggFrameForStage(crackStage)}
+              src={preHatchSrc}
+              totalFrames={preHatchTotalFrames}
+              frameIndex={preHatch.frameIndex}
               displayWidth={SPRITE_DISPLAY_W}
               displayHeight={SPRITE_DISPLAY_H}
-              alt="Egg"
+              alt={preHatchAlt}
             />
           </div>
 
-          {/* Prompt text */}
+          {/* Prompt text — pulses in the final two stages when the animal
+              is already mostly out of the shell. */}
           <p
             className={[
               'text-2xl font-semibold text-white',
-              crackStage >= 3 ? 'animate-pulse' : '',
+              tapStage >= PRE_HATCH_STAGES - 2 ? 'animate-pulse' : '',
             ]
               .filter(Boolean)
               .join(' ')}
