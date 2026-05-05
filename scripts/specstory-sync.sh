@@ -234,3 +234,23 @@ EOF
   )"
 
 echo "✓ PR opened for $new_branch"
+
+# --- Cleanup: remove synced specstory files from all worktrees ---
+cd "$primary_root"
+cleaned=0
+while IFS= read -r wt_path; do
+  [[ -z "$wt_path" ]] && continue
+  wt_abs=$(cd "$wt_path" 2>/dev/null && pwd -P) || continue
+  [[ "$wt_abs" = "$new_wt_abs" ]] && continue
+  hist_dir="$wt_abs/.specstory/history"
+  [[ -d "$hist_dir" ]] || continue
+  shopt -s nullglob
+  for f in "$hist_dir"/*.md; do
+    rm -f "$f"
+    cleaned=$((cleaned + 1))
+  done
+  shopt -u nullglob
+  rmdir "$hist_dir" 2>/dev/null || true
+  rmdir "$wt_abs/.specstory" 2>/dev/null || true
+done < <(git worktree list --porcelain | awk '/^worktree /{ $1=""; sub(/^ /,""); print }')
+echo "→ cleaned $cleaned specstory history files from worktrees"
