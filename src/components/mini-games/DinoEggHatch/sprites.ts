@@ -14,7 +14,18 @@
  * native 600x669; pngquant'd lossy to ~200KB per strip).
  */
 
-export const SPRITE_BASE = '/sprites/egg-hatch/strips';
+/**
+ * Vite base URL prefix without trailing slash. Production deploys live under
+ * `/base-skill/`; PR previews under `/base-skill/pr/<n>/`. Always concatenate
+ * via `${PUBLIC_BASE}/...` so asset URLs work in every environment.
+ */
+const PUBLIC_BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+export const SPRITE_BASE = `${PUBLIC_BASE}/sprites/egg-hatch/strips`;
+export const SOUND_BASE = `${PUBLIC_BASE}/sprites/egg-hatch/sounds`;
+
+/** URL of the egg-cracking sound played on each pre-hatch tap. */
+export const CRACK_SOUND_URL = `${SOUND_BASE}/crack.mp3`;
 
 export const EGG_FRAMES = 3;
 export const ANIMAL_FRAMES = 4;
