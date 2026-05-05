@@ -186,7 +186,7 @@ export const AllFrames: StoryObj<{
               <div key={key} className="flex flex-col gap-2">
                 <div className="font-mono text-sm font-bold text-white">
                   {label}{' '}
-                  <span className="opacity-60">
+                  <span className="text-sm font-normal">
                     ({key} · {framesInStrip.toString()} frames)
                   </span>
                 </div>
@@ -224,7 +224,7 @@ export const AllFrames: StoryObj<{
                             />
                           </div>
                         </div>
-                        <div className="font-mono text-xs text-white/80">
+                        <div className="font-mono text-xs text-white">
                           frame {i}
                         </div>
                       </div>
