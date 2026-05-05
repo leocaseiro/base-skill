@@ -57,7 +57,7 @@ const meta: Meta<typeof DinoEggHatch> = {
     crackVolume: 0.8,
     celebrateVolume: 0.9,
     forceReducedMotion: undefined,
-    backgroundColor: '#7e48c0',
+    backgroundColor: '#900192',
     onComplete: fn(),
   },
 };
