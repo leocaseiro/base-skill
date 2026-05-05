@@ -1,5 +1,7 @@
 # Australia vocabulary
 
+- words missing: [Nat,ant,tip,tap,sip,sap,pit,pat,pin,nip,nap,pan,tan,sin,sits,pips,nits,ants,tips,taps,spin,spit,spat,pats,pits,snip,snap,pins,pant,pans,nips,naps,sits,pants,spits]
+
 ## level 1
 
 - grapheme: [s,a,t,p,i,n]
