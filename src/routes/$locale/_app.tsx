@@ -9,34 +9,40 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { UpdateBanner } from '@/components/UpdateBanner';
+import { useAudioVolumes } from '@/db/hooks/useAudioVolumes';
 import { seedThemesOnce } from '@/db/seed-themes';
 import { shouldRenderAppHeaderFooter } from '@/lib/app-paths';
 import { i18n } from '@/lib/i18n/i18n';
 import { DbProvider } from '@/providers/DbProvider';
 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
 
-const AppLayout = (): JSX.Element => {
+const AppLayoutInner = (): JSX.Element => {
   const { pathname } = useLocation();
   const showAppChrome = shouldRenderAppHeaderFooter(pathname);
+  useAudioVolumes();
 
   return (
-    <DbProvider onDatabaseReady={seedThemesOnce}>
-      <I18nextProvider i18n={i18n}>
-        <ThemeRuntimeProvider>
-          <div className="flex min-h-screen flex-col">
-            {showAppChrome ? <Header /> : null}
-            <OfflineIndicator />
-            <UpdateBanner />
-            <main className="flex-1">
-              <Outlet />
-            </main>
-            {showAppChrome ? <Footer /> : null}
-          </div>
-        </ThemeRuntimeProvider>
-      </I18nextProvider>
-    </DbProvider>
+    <ThemeRuntimeProvider>
+      <div className="flex min-h-screen flex-col">
+        {showAppChrome ? <Header /> : null}
+        <OfflineIndicator />
+        <UpdateBanner />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        {showAppChrome ? <Footer /> : null}
+      </div>
+    </ThemeRuntimeProvider>
   );
 };
+
+const AppLayout = (): JSX.Element => (
+  <DbProvider onDatabaseReady={seedThemesOnce}>
+    <I18nextProvider i18n={i18n}>
+      <AppLayoutInner />
+    </I18nextProvider>
+  </DbProvider>
+);
 
 export const Route = createFileRoute('/$locale/_app')({
   component: AppLayout,

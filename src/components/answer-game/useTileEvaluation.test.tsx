@@ -93,7 +93,7 @@ describe('useTileEvaluation', () => {
       { wrapper: createWrapper(baseConfig) },
     );
     act(() => result.current.placeTile('t1', 0));
-    expect(playSound).toHaveBeenCalledWith('correct', 0.8);
+    expect(playSound).toHaveBeenCalledWith('correct');
   });
 
   it('plays "wrong" sound on incorrect tile placement', () => {
@@ -101,7 +101,7 @@ describe('useTileEvaluation', () => {
       wrapper: createWrapper(baseConfig),
     });
     act(() => result.current.placeTile('t2', 0));
-    expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
+    expect(playSound).toHaveBeenCalledWith('wrong');
   });
 
   it('correct placement: zone not marked wrong', () => {

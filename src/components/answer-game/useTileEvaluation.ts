@@ -32,7 +32,7 @@ export function useTileEvaluation(): TileEvaluation {
 
       const correct = tile.value === zone.expectedValue;
       if (!skin.suppressDefaultSounds) {
-        playSound(correct ? 'correct' : 'wrong', 0.8);
+        playSound(correct ? 'correct' : 'wrong');
       }
 
       // Drag path only — tap/click rejects are handled in useDraggableTile.handleClick
@@ -70,7 +70,7 @@ export function useTileEvaluation(): TileEvaluation {
       const correct =
         value.toLowerCase() === zone.expectedValue.toLowerCase();
       if (!skin.suppressDefaultSounds) {
-        playSound(correct ? 'correct' : 'wrong', 0.8);
+        playSound(correct ? 'correct' : 'wrong');
       }
       dispatch({
         type: 'TYPE_TILE',
