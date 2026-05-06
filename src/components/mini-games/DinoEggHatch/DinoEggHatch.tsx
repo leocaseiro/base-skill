@@ -224,13 +224,27 @@ export const DinoEggHatch = ({
     ? { transform: eggTransform }
     : undefined;
 
+  const sunburstBackground =
+    'radial-gradient(ellipse at center, transparent 0%, #7e48c0cc 70%), ' +
+    'repeating-conic-gradient(from 212deg, #7e48c0 0deg 11.25deg, #bf8cff 11.25deg 22.5deg)';
+
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center"
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden"
       style={{ backgroundColor }}
     >
+      <div
+        className={[
+          'absolute inset-[-50%] h-[200%] w-[200%]',
+          hatched && !reducedMotion ? 'animate-sunburst-spin' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={{ background: sunburstBackground }}
+        aria-hidden="true"
+      />
       {hatched ? (
-        <div className="flex flex-col items-center">
+        <div className="relative z-10 flex flex-col items-center">
           <div style={animalScaleStyle}>
             <SpriteFrame
               src={stripUrl(chosenAnimal)}
@@ -242,12 +256,15 @@ export const DinoEggHatch = ({
               alt={animalData.name}
             />
           </div>
-          <p className="mt-4 text-4xl font-bold text-white">
+          <p
+            className="mt-4 text-4xl font-bold text-white"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}
+          >
             {"It's a " + animalData.name + '!'}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-6">
+        <div className="relative z-10 flex flex-col items-center gap-6">
           {/* Egg area — clickable through every pre-hatch stage. */}
           <div
             role="button"
@@ -294,12 +311,13 @@ export const DinoEggHatch = ({
             ]
               .filter(Boolean)
               .join(' ')}
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}
           >
             Tap the egg!
           </p>
 
           {/* Progress bar */}
-          <div className="h-4 w-64 overflow-hidden rounded-full bg-white/20">
+          <div className="h-4 w-64 overflow-hidden rounded-full bg-black/40 shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
             <div
               className={[
                 'h-full rounded-full transition-all duration-150',
