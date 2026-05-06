@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
-# After a merge, if this checkout is on master, fetch origin and remove linked
-# worktrees whose HEAD is already in origin/master. Failures do not block the merge.
+# Post-merge hook.
 #
-# Disable: SKIP_AUTO_PRUNE_WORKTREES=1
+# Auto-prune was removed because it silently destroyed uncommitted work in
+# worktrees whose branch HEAD happened to be an ancestor of master (e.g. a
+# branch created from master where the spec commit hadn't been pushed yet).
+# Run `./scripts/prune-merged-worktrees.sh` manually instead.
 
 set -euo pipefail
-
-if [[ "${SKIP_AUTO_PRUNE_WORKTREES:-}" == "1" ]]; then
-  exit 0
-fi
-
-if [[ "$(git symbolic-ref -q HEAD 2>/dev/null || true)" != "refs/heads/master" ]]; then
-  exit 0
-fi
-
-REPO=$(git rev-parse --show-toplevel)
-"$REPO/scripts/prune-merged-worktrees-auto.sh" || true

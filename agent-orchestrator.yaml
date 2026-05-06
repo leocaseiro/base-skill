@@ -1,0 +1,75 @@
+port: 3000
+defaults:
+  runtime: tmux
+  agent: claude-code
+  workspace: worktree
+  workspaceConfig:
+    worktreeDir: .claude/worktrees/
+  notifiers: []
+projects:
+  base-skill:
+    name: base-skill
+    sessionPrefix: bs
+    repo: leocaseiro/base-skill
+    path: /Users/leocaseiro/Sites/base-skill
+    defaultBranch: master
+    orchestrator:
+      agent: claude-code
+      agentConfig:
+        model: claude-opus-4.7
+    worker:
+      agent: claude-code
+      agentConfig:
+        model: sonnet
+    workspace: worktree
+    workspaceConfig:
+      worktreeDir: .claude/worktrees/
+    agentRules: >-
+      Always run tests before pushing.
+
+      Use conventional commits (feat:, fix:, chore:, docs:, refactor:, test:).
+
+      Link issue numbers in commit messages.
+
+      Write clear commit messages that explain WHY, not just WHAT.
+
+
+      Use TypeScript strict mode.
+
+      Use ESM modules with .js extensions in imports (e.g., import { foo } from
+      "./bar.js").
+
+      Use node: prefix for built-in modules (e.g., import { readFile } from
+      "node:fs").
+
+      Prefer const over let, never use var.
+
+      Use type imports for type-only imports: import type { Foo } from
+      "./bar.js".
+
+      No any types - use unknown with type guards instead.
+
+
+      Use React best practices:
+
+
+      - Use functional components with hooks, not class components
+
+      - Keep components small and focused (single responsibility)
+
+      - Use composition over inheritance
+
+      - Lift state up when multiple components need it
+
+      - Use TypeScript for prop types (if using TypeScript)
+
+      - Follow hooks rules (no conditionals, no loops, no nested functions)
+
+
+      Before pushing, run these commands:
+
+      - yarn run typecheck
+
+      - yarn run lint
+
+      - yarn test
