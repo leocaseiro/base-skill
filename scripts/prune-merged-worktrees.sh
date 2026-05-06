@@ -19,7 +19,8 @@ Usage: prune-merged-worktrees.sh [-w] [-t <ref>] [-h]
   Dry run by default: prints linked worktrees whose HEAD is an ancestor of <ref>.
 
   -t    Merge target ref (default: master). Example: origin/master after fetch.
-  -w    Remove those worktrees (git worktree remove <path>).
+  -w    Remove those worktrees (git worktree remove <path>). Prompts for
+        confirmation unless PRUNE_WORKTREES_YES=1.
   -h    Show this help.
 
 Must be run from inside the repository (any worktree). Does not remove the primary
@@ -174,6 +175,16 @@ if [[ "$WRITE" != true ]]; then
   echo
   echo "Re-run with -w to remove these worktrees."
   exit 0
+fi
+
+if [[ "${PRUNE_WORKTREES_YES:-}" != "1" ]]; then
+  echo
+  printf "Remove %d worktree(s) listed above? [y/N] " "${#sorted_remove_paths[@]}"
+  read -r answer
+  if [[ "$answer" != [yY] && "$answer" != [yY][eE][sS] ]]; then
+    echo "Aborted."
+    exit 0
+  fi
 fi
 
 declare -a remove_errors=()
