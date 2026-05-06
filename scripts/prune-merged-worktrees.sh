@@ -2,8 +2,9 @@
 # List linked worktrees whose HEAD is already contained in master, then optionally remove them.
 # Default: dry-run only. Use -w to run `git worktree remove`.
 #
-# "Merged" means: git merge-base --is-ancestor <worktree-HEAD> master
-# (your local master; run `git fetch origin master` first if you care about remote state).
+# Safety: worktrees with uncommitted changes or unpushed commits are flagged
+# and require individual y/N confirmation. Fully merged worktrees (clean tree,
+# all commits on the remote) are removed without per-worktree prompts.
 #
 # Usage:
 #   ./scripts/prune-merged-worktrees.sh              # dry run vs master
@@ -19,8 +20,9 @@ Usage: prune-merged-worktrees.sh [-w] [-t <ref>] [-h]
   Dry run by default: prints linked worktrees whose HEAD is an ancestor of <ref>.
 
   -t    Merge target ref (default: master). Example: origin/master after fetch.
-  -w    Remove those worktrees (git worktree remove <path>). Prompts for
-        confirmation unless PRUNE_WORKTREES_YES=1.
+  -w    Remove worktrees. Fully merged (clean + pushed) are removed automatically.
+        Worktrees with local-only work require individual y/N confirmation.
+        Set PRUNE_WORKTREES_YES=1 to skip all confirmations (dangerous).
   -h    Show this help.
 
 Must be run from inside the repository (any worktree). Does not remove the primary
@@ -74,8 +76,6 @@ declare -a merged_paths
 declare -a merged_heads
 declare -a merged_branches
 
-declare -a sorted_remove_paths
-
 wt_path=""
 wt_head=""
 wt_branch=""
@@ -126,19 +126,65 @@ if [[ ${#merged_paths[@]} -eq 0 ]]; then
   exit 0
 fi
 
+# --- Classify each worktree as SAFE or HAS LOCAL WORK ---
+
+declare -a wt_warnings
+
+classify_worktree() {
+  local path="$1" head="$2" branch="$3"
+  local warnings=""
+
+  # Check for uncommitted changes (staged, unstaged, untracked)
+  local dirty
+  dirty=$(git -C "$path" status --porcelain 2>/dev/null | head -1)
+  if [[ -n "$dirty" ]]; then
+    warnings="${warnings}uncommitted changes, "
+  fi
+
+  # Check for commits not on the merge target
+  local branch_name="${branch#refs/heads/}"
+  local ahead
+  ahead=$(git -C "$here" rev-list --count "$merge_target".."$head" 2>/dev/null || echo 0)
+  if [[ "$ahead" -gt 0 ]]; then
+    warnings="${warnings}${ahead} unpushed commit(s), "
+  fi
+
+  # Check if branch has no remote tracking branch
+  if [[ -n "$branch_name" ]]; then
+    local remote_ref
+    remote_ref=$(git -C "$here" config "branch.${branch_name}.remote" 2>/dev/null || true)
+    if [[ -z "$remote_ref" ]]; then
+      warnings="${warnings}no remote tracking branch, "
+    fi
+  fi
+
+  # Trim trailing ", "
+  warnings="${warnings%, }"
+  echo "$warnings"
+}
+
+for i in "${!merged_paths[@]}"; do
+  wt_warnings+=("$(classify_worktree "${merged_paths[$i]}" "${merged_heads[$i]}" "${merged_branches[$i]}")")
+done
+
+# --- Display table ---
+
 mode="dry-run"
 if [[ "$WRITE" == true ]]; then
   mode="remove"
 fi
 
-print_merged_table_and_sort_paths() {
+declare -a sorted_indices
+
+print_merged_table() {
   declare -a lines=()
-  local i path head branch modified date_fmt branch_display
+  local i path head branch modified date_fmt branch_display warning status
 
   for i in "${!merged_paths[@]}"; do
     path="${merged_paths[$i]}"
     head="${merged_heads[$i]}"
     branch="${merged_branches[$i]}"
+    warning="${wt_warnings[$i]}"
     modified=$(stat -f "%m" "$path" 2>/dev/null || stat -c "%Y" "$path" 2>/dev/null || echo 0)
     date_fmt=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$path" 2>/dev/null \
       || date -d "@$modified" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "?")
@@ -147,54 +193,86 @@ print_merged_table_and_sort_paths() {
     else
       branch_display="detached@${head:0:7}"
     fi
-    lines+=("${modified}"$'\t'"${date_fmt}"$'\t'"${branch_display}"$'\t'"${path}")
+    if [[ -n "$warning" ]]; then
+      status="⚠ ${warning}"
+    else
+      status="✓ clean"
+    fi
+    lines+=("${modified}"$'\t'"${date_fmt}"$'\t'"${branch_display}"$'\t'"${status}"$'\t'"${path}"$'\t'"${i}")
   done
 
   local sorted
   sorted=$(printf '%s\n' "${lines[@]}" | LC_ALL=C sort -t $'\t' -k1,1nr)
 
   echo "($mode) Linked worktrees whose HEAD is an ancestor of $merge_target (newest mtime first):"
+  echo
   echo "$sorted" | awk -F'\t' '
     BEGIN {
-      printf "%-14s  %-30s  %s\n", "MODIFIED", "BRANCH", "PATH"
-      printf "%-14s  %-30s  %s\n", "──────────────", "──────────────────────────────", "────────────────────────────────"
+      printf "%-14s  %-30s  %-30s  %s\n", "MODIFIED", "BRANCH", "STATUS", "PATH"
+      printf "%-14s  %-30s  %-30s  %s\n", "──────────────", "──────────────────────────────", "──────────────────────────────", "────────────────────────────────"
     }
-    NF >= 4 { printf "%-14s  %-30s  %s\n", $2, $3, $4 }
+    NF >= 5 { printf "%-14s  %-30s  %-30s  %s\n", $2, $3, $4, $5 }
   '
 
-  sorted_remove_paths=()
-  while IFS=$'\t' read -r _epoch _df _bd pth; do
-    [[ -z "$pth" ]] && continue
-    sorted_remove_paths+=("$pth")
+  sorted_indices=()
+  while IFS=$'\t' read -r _epoch _df _bd _st _pth idx; do
+    [[ -z "$idx" ]] && continue
+    sorted_indices+=("$idx")
   done <<< "$sorted"
 }
 
-print_merged_table_and_sort_paths
+print_merged_table
 
 if [[ "$WRITE" != true ]]; then
   echo
   echo "Re-run with -w to remove these worktrees."
+  echo "Worktrees marked ⚠ have local-only work and will require individual confirmation."
   exit 0
 fi
 
-if [[ "${PRUNE_WORKTREES_YES:-}" != "1" ]]; then
-  echo
-  printf "Remove %d worktree(s) listed above? [y/N] " "${#sorted_remove_paths[@]}"
-  read -r answer
-  if [[ "$answer" != [yY] && "$answer" != [yY][eE][sS] ]]; then
-    echo "Aborted."
-    exit 0
-  fi
-fi
+# --- Remove worktrees ---
 
 declare -a remove_errors=()
+removed=0
+skipped=0
 
-for p in "${sorted_remove_paths[@]}"; do
-  echo "Removing: $p"
-  if ! err=$(git -C "$here" worktree remove "$p" 2>&1); then
-    remove_errors+=("$p"$'\n'"$err")
+for idx in "${sorted_indices[@]}"; do
+  path="${merged_paths[$idx]}"
+  warning="${wt_warnings[$idx]}"
+  branch="${merged_branches[$idx]}"
+  branch_display="${branch:+${branch#refs/heads/}}"
+  branch_display="${branch_display:-detached}"
+
+  if [[ -n "$warning" ]]; then
+    # Worktree has local work — require per-worktree confirmation
+    if [[ "${PRUNE_WORKTREES_YES:-}" == "1" ]]; then
+      echo "Removing (forced): $path [$branch_display] — $warning"
+    else
+      echo
+      echo "⚠  $path"
+      echo "   Branch: $branch_display"
+      echo "   Warning: $warning"
+      printf "   Remove this worktree? [y/N] "
+      read -r answer
+      if [[ "$answer" != [yY] && "$answer" != [yY][eE][sS] ]]; then
+        echo "   Skipped."
+        ((skipped++))
+        continue
+      fi
+    fi
+  else
+    echo "Removing: $path [$branch_display] (clean)"
+  fi
+
+  if ! err=$(git -C "$here" worktree remove "$path" 2>&1); then
+    remove_errors+=("$path"$'\n'"$err")
+  else
+    ((removed++))
   fi
 done
+
+echo
+echo "Removed $removed worktree(s), skipped $skipped."
 
 if [[ ${#remove_errors[@]} -gt 0 ]]; then
   echo >&2
@@ -208,4 +286,4 @@ if [[ ${#remove_errors[@]} -gt 0 ]]; then
   exit 1
 fi
 
-echo "Done. Optional: delete merged local branches with git branch -d <name>"
+echo "Optional: delete merged local branches with git branch -d <name>"
