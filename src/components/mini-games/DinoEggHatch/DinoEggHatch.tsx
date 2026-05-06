@@ -246,7 +246,7 @@ export const DinoEggHatch = ({
         aria-hidden="true"
       />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-[1]"
         style={{
           background:
             'radial-gradient(ellipse at center, transparent 0%, #7e48c0cc 70%)',
