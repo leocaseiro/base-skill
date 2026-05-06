@@ -224,10 +224,6 @@ export const DinoEggHatch = ({
     ? { transform: eggTransform }
     : undefined;
 
-  const sunburstBackground =
-    'radial-gradient(ellipse at center, transparent 0%, #7e48c0cc 70%), ' +
-    'repeating-conic-gradient(from 212deg, #7e48c0 0deg 11.25deg, #bf8cff 11.25deg 22.5deg)';
-
   return (
     <div
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden"
@@ -241,10 +237,19 @@ export const DinoEggHatch = ({
           .filter(Boolean)
           .join(' ')}
         style={{
-          background: sunburstBackground,
+          background:
+            'repeating-conic-gradient(from 212deg, #7e48c0 0deg 11.25deg, #bf8cff 11.25deg 22.5deg)',
           width: '300vmax',
           height: '300vmax',
           translate: '-50% -50%',
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 0%, #7e48c0cc 70%)',
         }}
         aria-hidden="true"
       />
