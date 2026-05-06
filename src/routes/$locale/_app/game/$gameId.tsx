@@ -9,10 +9,8 @@ import type {
   NumberMatchRound,
 } from '@/games/number-match/types';
 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-import type {
-  WordSpellConfig,
-  WordSpellRound,
-} from '@/games/word-spell/types';
+import type { SpotAllConfig } from '@/games/spot-all/types';
+import type { WordSpellConfig } from '@/games/word-spell/types';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { InProgressSession } from '@/lib/game-engine/session-finder';
 import type {
@@ -30,7 +28,6 @@ import { cumulativeGraphemes } from '@/data/words';
 import { getOrCreateDatabase } from '@/db/create-database';
 import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
-import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
 import { lastSessionConfigId } from '@/db/last-session-game-config';
 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
@@ -38,6 +35,8 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { resolveSimpleConfig as resolveSpotAllSimpleConfig } from '@/games/spot-all/resolve-simple-config';
+import { SpotAll } from '@/games/spot-all/SpotAll/SpotAll';
 import { defaultSelection } from '@/games/word-spell/level-unit-selection';
 import { resolveSimpleConfig as resolveWordSpellSimpleConfig } from '@/games/word-spell/resolve-simple-config';
 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
@@ -80,22 +79,6 @@ interface GameRouteLoaderData {
   persistedContent: Record<string, unknown> | null;
 }
 
-const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-  { word: 'cat', emoji: '🐱' },
-  { word: 'dog', emoji: '🐶' },
-  { word: 'sun', emoji: '☀️' },
-  { word: 'pin', emoji: '📌' },
-  { word: 'sad', emoji: '☹️' },
-  { word: 'ant', emoji: '🐜' },
-  { word: 'can', emoji: '🥫' },
-  { word: 'mum', emoji: '🤱' },
-];
-
-const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-};
-
 const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
   component: 'WordSpell',
@@ -131,7 +114,13 @@ const DEFAULT_PICTURE_CONFIG: WordSpellConfig = {
   ttsEnabled: true,
   mode: 'picture',
   tileUnit: 'letter',
-  rounds: sliceWordSpellRounds(8),
+  source: {
+    type: 'word-library',
+    filter: {
+      region: 'aus',
+      hasVisual: true,
+    },
+  },
 };
 
 /**
@@ -151,7 +140,7 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   tileBankMode: 'distractors',
   distractorCount: 2,
   totalRounds: 3,
-  // Deterministic order by default — see DEFAULT_PICTURE_CONFIG comment.
+  // Deterministic order by default — keeps VR baselines stable (see note above).
   roundsInOrder: true,
   ttsEnabled: true,
   mode: 'numeral-to-group',
@@ -159,6 +148,16 @@ const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
   range: { min: 1, max: 12 },
   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
 });
+
+const makeDefaultSpotAllConfig = (): SpotAllConfig =>
+  resolveSpotAllSimpleConfig({
+    configMode: 'simple',
+    selectedConfusablePairs: [
+      { pair: ['b', 'd'], type: 'mirror-horizontal' },
+      { pair: ['p', 'q'], type: 'mirror-horizontal' },
+    ],
+    selectedReversibleChars: [],
+  });
 
 export const resizeNumberMatchRounds = (
   prev: NumberMatchRound[],
@@ -262,7 +261,12 @@ export const resolveWordSpellConfig = (
 
   // When the picker set selectedUnits, re-derive source.filter so
   // the filter stays in sync even in advanced mode.
-  if (Array.isArray(merged.selectedUnits) && merged.source) {
+  // Picture mode ignores selectedUnits entirely (no grapheme scope).
+  if (
+    merged.mode !== 'picture' &&
+    Array.isArray(merged.selectedUnits) &&
+    merged.source
+  ) {
     const derived = resolveWordSpellSimpleConfig({
       configMode: 'simple',
       selectedUnits: merged.selectedUnits,
@@ -274,7 +278,7 @@ export const resolveWordSpellConfig = (
 
   // Mode invariant:
   // recall  ⇒ source defined ∧ rounds undefined
-  // picture ⇒ rounds defined ∧ source undefined
+  // picture ⇒ explicit rounds ⇒ honor rounds (drop source); else source with hasVisual ∧ rounds undefined
   if (merged.mode === 'recall') {
     if (merged.rounds) {
       const { rounds: _ignored, ...rest } = merged;
@@ -284,17 +288,22 @@ export const resolveWordSpellConfig = (
   }
 
   // mode === 'picture' (or 'sentence-gap' — treat as picture for default fallback)
+  // picture with explicit rounds ⇒ honor them, drop source
+  if (Array.isArray(merged.rounds) && merged.rounds.length > 0) {
+    const { source: _ignored, ...rest } = merged;
+    return rest;
+  }
+  // picture without explicit rounds ⇒ source with hasVisual only, drop rounds
+  // Strip grapheme constraints — picture mode uses the full word pool.
   const picture = { ...merged };
-  if (picture.source) {
-    delete picture.source;
+  if (picture.rounds) {
+    delete picture.rounds;
   }
-  if (!Array.isArray(picture.rounds) || picture.rounds.length === 0) {
-    picture.rounds = sliceWordSpellRounds(8);
-  }
-  picture.totalRounds = Math.min(
-    picture.rounds.length,
-    WORD_SPELL_ROUND_POOL.length,
-  );
+  const pictureRegion = picture.source?.filter.region ?? 'aus';
+  picture.source = {
+    type: 'word-library',
+    filter: { region: pictureRegion, hasVisual: true },
+  };
   return picture;
 };
 
@@ -316,6 +325,24 @@ const resolveNumberMatchConfig = (
     targetLen,
     merged.range,
   );
+  return merged;
+};
+
+const resolveSpotAllConfig = (
+  saved: Record<string, unknown> | null,
+): SpotAllConfig => {
+  const fallback = makeDefaultSpotAllConfig();
+  if (!saved || typeof saved !== 'object') return fallback;
+
+  const merged = { ...fallback, ...saved } as SpotAllConfig;
+  if (
+    (!Array.isArray(merged.selectedConfusablePairs) ||
+      merged.selectedConfusablePairs.length === 0) &&
+    (!Array.isArray(merged.selectedReversibleChars) ||
+      merged.selectedReversibleChars.length === 0)
+  ) {
+    return fallback;
+  }
   return merged;
 };
 
@@ -444,7 +471,13 @@ const WordSpellGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -460,16 +493,14 @@ const WordSpellGameBody = ({
     [gameSpecificConfig],
   );
   const [cfg, setCfg] = useState(initial);
-  const [showInstructions, setShowInstructions] = useState(
-    draftState === null,
-  );
+  // When draftState is null the user saw the instructions overlay,
+  // so there is nothing to resume — discard stale persisted content.
+  const hasResumableDraft = draftState !== null;
+  const [showInstructions, setShowInstructions] =
+    useState(!hasResumableDraft);
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -541,6 +572,9 @@ const WordSpellGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -552,10 +586,10 @@ const WordSpellGameBody = ({
       <WordSpell
         key={cfg.inputMethod}
         config={cfg}
-        initialState={draftState ?? undefined}
+        initialState={hasResumableDraft ? draftState : undefined}
         sessionId={sessionId}
         seed={seed}
-        persistedContent={persistedContent}
+        persistedContent={hasResumableDraft ? persistedContent : null}
       />
       {debugPanel}
     </>
@@ -586,7 +620,13 @@ const NumberMatchGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -608,10 +648,6 @@ const NumberMatchGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -683,6 +719,9 @@ const NumberMatchGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -698,6 +737,148 @@ const NumberMatchGameBody = ({
         sessionId={sessionId}
         seed={seed}
       />
+      {debugPanel}
+    </>
+  );
+};
+
+const SpotAllGameBody = ({
+  gameId,
+  sessionId,
+  seed,
+  draftState,
+  gameSpecificConfig,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
+  debug,
+}: {
+  gameId: string;
+  sessionId: string;
+  seed: string;
+  draftState: AnswerGameDraftState | null;
+  gameSpecificConfig: Record<string, unknown> | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
+  debug: boolean;
+}): JSX.Element => {
+  const { t } = useTranslation('games');
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
+    () =>
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
+  );
+  const initial = useMemo(
+    () => resolveSpotAllConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [cfg, setCfg] = useState(initial);
+  const [showInstructions, setShowInstructions] = useState(
+    draftState === null,
+  );
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
+
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        draftState: null,
+        persistedContent: null,
+      }}
+      rounds={[]}
+    />
+  ) : null;
+
+  if (showInstructions) {
+    return (
+      <>
+        <InstructionsOverlay
+          text={t('instructions.spot-all')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('spot-all')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={(config) =>
+            setCfg(resolveSpotAllConfig(config))
+          }
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({
+              gameId,
+              name,
+              color,
+              config,
+              cover,
+            })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
+        />
+        {debugPanel}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SpotAll config={cfg} seed={seed} />
       {debugPanel}
     </>
   );
@@ -727,7 +908,13 @@ const SortNumbersGameBody = ({
   debug: boolean;
 }): JSX.Element => {
   const { t } = useTranslation('games');
-  const { save, update, remove, customGames } = useCustomGames();
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const bookmarkTarget = customGameId
     ? ({ targetType: 'customGame', targetId: customGameId } as const)
@@ -749,10 +936,6 @@ const SortNumbersGameBody = ({
   useEffect(() => {
     setCfg(initial);
   }, [initial]);
-  usePersistLastGameConfig(
-    gameId,
-    cfg as unknown as Record<string, unknown>,
-  );
 
   const debugPanel = debug ? (
     <DebugPanel
@@ -824,6 +1007,9 @@ const SortNumbersGameBody = ({
           existingCustomGameNames={existingCustomGameNames}
           isBookmarked={isBookmarked(bookmarkTarget)}
           onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
         />
         {debugPanel}
       </>
@@ -921,6 +1107,23 @@ const GameBody = ({
     );
   }
 
+  if (gameId === 'spot-all') {
+    return (
+      <SpotAllGameBody
+        gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        draftState={draftState}
+        gameSpecificConfig={gameSpecificConfig}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
+        debug={debug}
+      />
+    );
+  }
+
   return (
     <div className="flex h-full items-center justify-center text-muted-foreground">
       <p>Game not found</p>
@@ -967,10 +1170,25 @@ export const GameRoute = ({
   </GameShell>
 );
 
+export const buildGamePageTitle = (name: string | null): string =>
+  name ? `${name} | BaseSkill` : 'BaseSkill';
+
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
   const search = Route.useSearch();
   const debug = search.debug === true || import.meta.env.DEV;
+  const { t } = useTranslation('games');
+  const gameId = data.config.gameId;
+  const gameName =
+    data.customGameName ?? t(gameId as Parameters<typeof t>[0]);
+
+  useEffect(() => {
+    document.title = buildGamePageTitle(gameName);
+    return () => {
+      document.title = 'BaseSkill';
+    };
+  }, [gameName]);
+
   return <GameRoute {...data} debug={debug} />;
 };
 

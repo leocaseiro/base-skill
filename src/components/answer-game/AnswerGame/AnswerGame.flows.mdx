@@ -38,6 +38,20 @@ sequenceDiagram
   end
 ```
 
+### Tap / click via `useAutoNextSlot` (ordered slots)
+
+Bank **tap** (not drag) goes through `useDraggableTile.handleClick` → `useAutoNextSlot.placeInNextSlot`:
+
+1. **`pendingPlacements`** (module-scoped write-ahead log) records `{ tileId, zoneIndex }` before React applies `PLACE_TILE`, so rapid taps see prior claims synchronously.
+2. Entries are **drained** when `zones[entry.zoneIndex].placedTileId === entry.tileId`. The queue is **cleared** on round transitions (`roundIndex` / `zones.length` changes in `useEffect`).
+3. **Pre-validation**: for `reject` and `lock-auto-eject`, wrong tiles never call `placeTile`; `handleClick` applies bank shake + wrong sound + **`REJECT_TAP`** + `game:evaluate` (with `expected`). For **`lock-manual`**, there is no bank pre-validation — wrong tiles still flow through `PLACE_TILE` into the slot.
+
+### `REJECT_TAP`
+
+Reducer increments **`retryCount`** only (no zone or bank mutation). Dispatched from **`handleClick`** on bank-side rejection, and from **`useTileEvaluation.placeTile`** for drag-drop wrong tiles when `wrongTileBehavior === 'reject'`.
+
+Wrong bank feedback (**shake + wrong colors**) uses **`flashBankTileRejectFeedback`** so the tile matches **`Slot`** wrong styling (`border-2` equivalent and **`--skin-wrong-*`** tokens). **Touch** drops invoke it from **`useDraggableTile`** (after `requestAnimationFrame`). **Pragmatic drag-and-drop** bank→slot drops invoke it from **`useSlotBehavior.handleDrop`** when `placeTile` returns incorrect in **`reject`** mode (same helper, resolved via **`data-tile-bank-hole`**).
+
 ---
 
 ## 2. Wrong Tile Auto-Eject
@@ -93,6 +107,42 @@ sequenceDiagram
   Hook->>Reducer: drop → SWAP_SLOT_BANK { zoneIndex, bankTileId }
   Hook->>Reducer: SET_DRAG_HOVER_BANK { tileId: null }
   Hook->>Reducer: SET_DRAG_ACTIVE { tileId: null }
+```
+
+**Tap forgiveness (micro-drag → tap, touch only):**
+
+When a touch drag ends, the gesture is treated as a tap (placing the
+tile in the next available slot) when **either** signal is below its
+threshold AND no slot zone is under the pointer:
+
+- **Distance:** Euclidean displacement from `pointerdown` to
+  `pointerup` < `tapForgivenessThreshold` (default 20px). Catches slow
+  careful taps where the finger barely moved.
+- **Duration:** elapsed time from `pointerdown` to `pointerup` <
+  `tapForgivenessTimeMs` (default 150ms). Catches thumb-release drift
+  — on touch devices a brief tap can register 75–100px of contact
+  movement in 50–65ms even when the user perceives no movement.
+
+Both thresholds are configurable per-profile in the settings page.
+Setting either to 0 disables that signal. The same check fires from
+`onPointerCancel` so platforms that fire `pointercancel` instead of
+`pointerup` for short gestures (documented iOS Safari behaviour) are
+also covered.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Hook as useTouchDrag (onPointerUp)
+  participant Fallback as useDraggableTile (onTapFallback)
+  participant Reducer as answerGameReducer
+  participant Auto as useAutoNextSlot
+
+  User->>Hook: pointer up (displacement < threshold)
+  Hook->>Hook: check: no zone under pointer?
+  Hook->>Fallback: onTapFallback()
+  Fallback->>Reducer: SET_DRAG_ACTIVE { tileId: null }
+  Fallback->>Auto: placeInNextSlot(tile.id)
+  Auto->>Reducer: PLACE_TILE { tileId, zoneIndex: activeSlotIndex }
 ```
 
 ---

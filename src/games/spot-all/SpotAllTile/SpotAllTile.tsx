@@ -1,0 +1,58 @@
+import type { SpotAllTile as SpotAllTileData } from '../types';
+import type { CSSProperties, JSX } from 'react';
+import { tileStyle as cardTileStyle } from '@/components/answer-game/styles';
+import { cn } from '@/lib/utils';
+
+export interface SpotAllTileProps {
+  tile: SpotAllTileData;
+  isSelected: boolean;
+  inCooldown: boolean;
+  onTap: () => void;
+}
+
+export const SpotAllTile = ({
+  tile,
+  isSelected,
+  inCooldown,
+  onTap,
+}: SpotAllTileProps): JSX.Element => {
+  const stateStyle: CSSProperties = isSelected
+    ? {
+        background: 'var(--skin-correct-bg)',
+        borderColor: 'var(--skin-correct-border)',
+      }
+    : inCooldown
+      ? {
+          background: 'var(--skin-wrong-bg)',
+          borderColor: 'var(--skin-wrong-border)',
+        }
+      : {};
+
+  return (
+    <button
+      type="button"
+      onClick={onTap}
+      disabled={inCooldown}
+      aria-pressed={isSelected}
+      data-cooldown={inCooldown || undefined}
+      className={cn(
+        'flex min-h-24 min-w-24 items-center justify-center rounded-xl border-2 border-transparent px-3 py-2 transition-[background-color,border-color,transform]',
+        'outline-none focus-visible:border-primary',
+        inCooldown && 'animate-[shake_300ms_ease-in-out]',
+      )}
+      style={{ ...cardTileStyle(), ...stateStyle }}
+    >
+      <span
+        style={{
+          fontFamily: tile.tileStyle?.fontFamily,
+          fontSize: tile.tileStyle?.fontSizePx,
+          transform: tile.transform,
+          display: 'inline-block',
+        }}
+        className="font-bold leading-none"
+      >
+        {tile.label}
+      </span>
+    </button>
+  );
+};

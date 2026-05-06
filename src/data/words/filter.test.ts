@@ -137,6 +137,28 @@ describe('entryMatches', () => {
     ).toBe(false);
   });
 
+  it('empty graphemesRequired/graphemesAllowed arrays do not reject words', () => {
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: [],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesAllowed: [],
+      }),
+    ).toBe(true);
+    expect(
+      entryMatches(hit(), {
+        region: 'aus',
+        graphemesRequired: [],
+        graphemesAllowed: [],
+      }),
+    ).toBe(true);
+  });
+
   it('phonemesAllowed + Required: "c making /k/" case', () => {
     // cat: c/k, a/æ, t/t
     expect(
@@ -191,6 +213,34 @@ describe('entryMatches', () => {
     ).toBe(false);
     expect(entryMatches(tier1, { region: 'aus', level: 2 })).toBe(true);
   });
+
+  it('hasVisual: passes when emoji is set and hasVisual is true', () => {
+    expect(
+      entryMatches(hit({ emoji: '🐱' }), {
+        region: 'aus',
+        hasVisual: true,
+      }),
+    ).toBe(true);
+  });
+
+  it('hasVisual: passes when image is set and hasVisual is true', () => {
+    expect(
+      entryMatches(hit({ image: '/img/cat.svg' }), {
+        region: 'aus',
+        hasVisual: true,
+      }),
+    ).toBe(true);
+  });
+
+  it('hasVisual: rejects when neither emoji nor image is set', () => {
+    expect(
+      entryMatches(hit(), { region: 'aus', hasVisual: true }),
+    ).toBe(false);
+  });
+
+  it('hasVisual: omitted → no visual filtering', () => {
+    expect(entryMatches(hit(), { region: 'aus' })).toBe(true);
+  });
 });
 
 describe('filterWords (integration against seeded chunks)', () => {
@@ -210,6 +260,16 @@ describe('filterWords (integration against seeded chunks)', () => {
   it('joins WordCore + CurriculumEntry (hit has syllableCount)', async () => {
     const result = await filterWords({ region: 'aus', level: 1 });
     expect(result.hits[0]!.syllableCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('propagates emoji from curriculum entry into WordHit', async () => {
+    const result = await filterWords({
+      region: 'aus',
+      hasVisual: true,
+    });
+    const cat = result.hits.find((h) => h.word === 'cat');
+    expect(cat).toBeDefined();
+    expect(cat!.emoji).toBe('🐱');
   });
 
   it('Tier-2 filter excludes Tier-1-only words', async () => {

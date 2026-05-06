@@ -5,8 +5,9 @@ import {
 } from '@tanstack/react-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { compareHomeScreenCardRows } from './home-screen-card-order';
+import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
 import type { CustomGameDoc } from '@/db/schemas/custom_games';
-import type { Cover } from '@/games/cover-type';
 import type { GameColorKey } from '@/lib/game-colors';
 import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
@@ -26,14 +27,8 @@ type ModalState =
       gameId: string;
       mode:
         | { kind: 'default' }
-        | {
-            kind: 'customGame';
-            configId: string;
-            name: string;
-            color: GameColorKey;
-            cover: Cover | undefined;
-          };
-      config: Record<string, unknown>;
+        | { kind: 'customGame'; configId: string };
+      draft: Draft;
     };
 
 const HomeScreen = (): JSX.Element => {
@@ -70,7 +65,12 @@ const HomeScreen = (): JSX.Element => {
       kind: 'open',
       gameId,
       mode: { kind: 'default' },
-      config: lastDoc?.config ?? {},
+      draft: {
+        config: lastDoc?.config ?? {},
+        name: '',
+        color: 'indigo',
+        cover: undefined,
+      },
     });
   };
 
@@ -78,42 +78,77 @@ const HomeScreen = (): JSX.Element => {
     setModal({
       kind: 'open',
       gameId,
-      mode: {
-        kind: 'customGame',
-        configId: doc.id,
+      mode: { kind: 'customGame', configId: doc.id },
+      draft: {
+        config: doc.config,
         name: doc.name,
         color: doc.color as GameColorKey,
         cover: doc.cover,
       },
-      config: doc.config,
     });
   };
 
-  const defaults = GAME_CATALOG.map((entry) => (
-    <GameCard
-      key={`default-${entry.id}`}
-      variant="default"
-      gameId={entry.id}
-      title={t(entry.titleKey)}
-      chips={configToChips(
-        entry.id,
-        lastSessionConfigs[entry.id] ?? {},
-      )}
-      onPlay={() => handlePlayDefault(entry.id)}
-      onOpenCog={() => void openDefaultCog(entry.id)}
-      isBookmarked={isBookmarked({
-        targetType: 'game',
-        targetId: entry.id,
-      })}
-      onToggleBookmark={() =>
-        void toggle({ targetType: 'game', targetId: entry.id })
-      }
-    />
-  ));
-  const customCards = customGames.flatMap((doc) => {
-    const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
-    if (!entry) return [];
-    return [
+  const unsortedCards = [
+    ...GAME_CATALOG.map((entry, index) => ({
+      row: {
+        kind: 'default' as const,
+        index,
+        bookmarked: isBookmarked({
+          targetType: 'game',
+          targetId: entry.id,
+        }),
+      },
+      kind: 'default' as const,
+      entry,
+    })),
+    ...customGames.flatMap((doc, listIndex) => {
+      const entry = GAME_CATALOG.find((g) => g.id === doc.gameId);
+      if (!entry) return [];
+      return [
+        {
+          row: {
+            kind: 'custom' as const,
+            index: listIndex,
+            bookmarked: isBookmarked({
+              targetType: 'customGame',
+              targetId: doc.id,
+            }),
+          },
+          kind: 'custom' as const,
+          doc,
+          entry,
+        },
+      ];
+    }),
+  ].toSorted((a, b) => compareHomeScreenCardRows(a.row, b.row));
+
+  const cards = unsortedCards.map((item) => {
+    if (item.kind === 'default') {
+      const { entry } = item;
+      return (
+        <GameCard
+          key={`default-${entry.id}`}
+          variant="default"
+          gameId={entry.id}
+          title={t(entry.titleKey)}
+          chips={configToChips(
+            entry.id,
+            lastSessionConfigs[entry.id] ?? {},
+          )}
+          onPlay={() => handlePlayDefault(entry.id)}
+          onOpenCog={() => void openDefaultCog(entry.id)}
+          isBookmarked={isBookmarked({
+            targetType: 'game',
+            targetId: entry.id,
+          })}
+          onToggleBookmark={() =>
+            void toggle({ targetType: 'game', targetId: entry.id })
+          }
+        />
+      );
+    }
+    const { doc, entry } = item;
+    return (
       <GameCard
         key={`custom-${doc.id}`}
         variant="customGame"
@@ -132,10 +167,9 @@ const HomeScreen = (): JSX.Element => {
         onToggleBookmark={() =>
           void toggle({ targetType: 'customGame', targetId: doc.id })
         }
-      />,
-    ];
+      />
+    );
   });
-  const cards = [...defaults, ...customCards];
 
   return (
     <div className="px-4 py-4">
@@ -150,7 +184,14 @@ const HomeScreen = (): JSX.Element => {
           }}
           gameId={modal.gameId}
           mode={modal.mode}
-          config={modal.config}
+          value={modal.draft}
+          onChange={(patch) =>
+            setModal((prev) =>
+              prev.kind === 'open'
+                ? { ...prev, draft: { ...prev.draft, ...patch } }
+                : prev,
+            )
+          }
           existingCustomGameNames={customGames
             .filter((d) => d.gameId === modal.gameId)
             .map((d) => d.name)}

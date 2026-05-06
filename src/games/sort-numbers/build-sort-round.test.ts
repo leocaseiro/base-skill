@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   buildDistractorPool,
   buildSortRound,
@@ -6,6 +6,10 @@ import {
 } from './build-sort-round';
 
 describe('buildSortRound', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('creates zones in ascending order for ascending direction', () => {
     const { zones } = buildSortRound([3, 1, 2], 'ascending');
     expect(zones.map((z) => z.expectedValue)).toEqual(['1', '2', '3']);
@@ -39,6 +43,28 @@ describe('buildSortRound', () => {
     });
     // 3 sequence tiles + 2 distractor tiles
     expect(tiles).toHaveLength(5);
+  });
+
+  it('tiles are never in the correct ascending sorted order', () => {
+    const numbers = [1, 2, 3];
+    const correctOrder = ['1', '2', '3'];
+    for (let i = 0; i < 30; i++) {
+      vi.restoreAllMocks();
+      const { tiles } = buildSortRound(numbers, 'ascending');
+      const tileValues = tiles.map((t) => t.value);
+      expect(tileValues).not.toEqual(correctOrder);
+    }
+  });
+
+  it('tiles are never in the correct descending sorted order', () => {
+    const numbers = [1, 2, 3];
+    const correctOrder = ['3', '2', '1'];
+    for (let i = 0; i < 30; i++) {
+      vi.restoreAllMocks();
+      const { tiles } = buildSortRound(numbers, 'descending');
+      const tileValues = tiles.map((t) => t.value);
+      expect(tileValues).not.toEqual(correctOrder);
+    }
   });
 
   it('distractor tiles are not part of the zones expectedValue set', () => {
