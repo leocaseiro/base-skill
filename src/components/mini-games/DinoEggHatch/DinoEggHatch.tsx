@@ -250,6 +250,7 @@ export const DinoEggHatch = ({
         style={{
           background:
             'radial-gradient(ellipse at center, transparent 0%, #7e48c0cc 70%)',
+          filter: 'drop-shadow(0 0 34px rgba(0,0,0,1))',
         }}
         aria-hidden="true"
       />
