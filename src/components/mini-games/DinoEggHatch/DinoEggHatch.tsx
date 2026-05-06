@@ -235,12 +235,17 @@ export const DinoEggHatch = ({
     >
       <div
         className={[
-          'absolute inset-[-50%] h-[200%] w-[200%]',
+          'absolute left-1/2 top-1/2',
           hatched && !reducedMotion ? 'animate-sunburst-spin' : '',
         ]
           .filter(Boolean)
           .join(' ')}
-        style={{ background: sunburstBackground }}
+        style={{
+          background: sunburstBackground,
+          width: '300vmax',
+          height: '300vmax',
+          translate: '-50% -50%',
+        }}
         aria-hidden="true"
       />
       {hatched ? (
