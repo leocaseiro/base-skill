@@ -31,6 +31,7 @@ db8fe95b chore(mcp): drop storybook MCP from committed config
 81db0d46 fix(db): recover from broken DM4 migrations on boot
 e543a89d chore(e2e/VR): update VR tests changes with docker fixes
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:21Z)**_
@@ -70,6 +71,7 @@ Create worktree for untracking settings file
 Preparing worktree (new branch 'chore/untrack-claude-settings')
 HEAD is now at cbae11fb chore(release): v0.17.3 (#210)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:36Z)**_
@@ -83,6 +85,7 @@ Untrack settings.local.json in worktree
 ```text
 rm '.claude/settings.local.json'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:39Z)**_
@@ -97,6 +100,7 @@ Verify status and gitignore match
 Exit code 1
 (eval):cd:1: no such file or directory: ./worktrees/untrack-claude-settings
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:42Z)**_
@@ -113,11 +117,12 @@ Verify status and gitignore match
 On branch chore/untrack-claude-settings
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	deleted:    .claude/settings.local.json
+ deleted:    .claude/settings.local.json
 
 ---
-.gitignore:25:.claude/settings.local.json	.claude/settings.local.json
+.gitignore:25:.claude/settings.local.json .claude/settings.local.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:48Z)**_
@@ -146,6 +151,7 @@ EOF
  1 file changed, 5 deletions(-)
  delete mode 100644 .claude/settings.local.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:19:56Z)**_
@@ -165,6 +171,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        chore/untrack-claude-settings -> chore/untrack-claude-settings
 branch 'chore/untrack-claude-settings' set up to track 'origin/chore/untrack-claude-settings'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:20:06Z)**_
@@ -193,11 +200,12 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/211
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-28 10:20:09Z)**_
 
-PR opened: https://github.com/leocaseiro/base-skill/pull/211
+PR opened: <https://github.com/leocaseiro/base-skill/pull/211>
 
 Once it merges, pull master locally and `.claude/settings.local.json` will stop showing in `git status` — the file stays on disk, just untracked.
 

@@ -33,6 +33,8 @@ export const entryMatches = (
 ): boolean => {
   if (hit.region !== filter.region) return false;
 
+  if (filter.hasVisual && !hit.emoji && !hit.image) return false;
+
   if (filter.level !== undefined && hit.level !== filter.level)
     return false;
   if (filter.levels && !filter.levels.includes(hit.level)) return false;
@@ -50,35 +52,36 @@ export const entryMatches = (
   )
     return false;
 
+  const ga = filter.graphemesAllowed;
+  const gr = filter.graphemesRequired;
+  const pa = filter.phonemesAllowed;
+  const pr = filter.phonemesRequired;
+
   const hasGraphemeFilter =
-    filter.graphemesAllowed !== undefined ||
-    filter.graphemesRequired !== undefined ||
-    filter.phonemesAllowed !== undefined ||
-    filter.phonemesRequired !== undefined;
+    (ga !== undefined && ga.length > 0) ||
+    (gr !== undefined && gr.length > 0) ||
+    (pa !== undefined && pa.length > 0) ||
+    (pr !== undefined && pr.length > 0);
 
   if (!hasGraphemeFilter) return true;
   if (!hit.graphemes) return false;
 
-  if (filter.graphemesAllowed) {
-    const allowed = new Set(
-      filter.graphemesAllowed.map((u) => `${u.g}|${u.p}`),
-    );
+  if (ga && ga.length > 0) {
+    const allowed = new Set(ga.map((u) => `${u.g}|${u.p}`));
     if (!hit.graphemes.every((g) => allowed.has(`${g.g}|${g.p}`)))
       return false;
   }
-  if (filter.graphemesRequired) {
-    const required = new Set(
-      filter.graphemesRequired.map((u) => `${u.g}|${u.p}`),
-    );
+  if (gr && gr.length > 0) {
+    const required = new Set(gr.map((u) => `${u.g}|${u.p}`));
     if (!hit.graphemes.some((g) => required.has(`${g.g}|${g.p}`)))
       return false;
   }
-  if (filter.phonemesAllowed) {
-    const allowed = new Set(filter.phonemesAllowed);
+  if (pa && pa.length > 0) {
+    const allowed = new Set(pa);
     if (!hit.graphemes.every((g) => allowed.has(g.p))) return false;
   }
-  if (filter.phonemesRequired) {
-    const required = new Set(filter.phonemesRequired);
+  if (pr && pr.length > 0) {
+    const required = new Set(pr);
     if (!hit.graphemes.some((g) => required.has(g.p))) return false;
   }
 
@@ -162,6 +165,8 @@ const draftToHit = (d: DraftEntry): WordHit => ({
   variants: d.variants,
   ipa: d.ipa || undefined,
   graphemes: d.graphemes,
+  emoji: d.emoji,
+  image: d.image,
   provenance: 'draft' satisfies Provenance,
   draftId: d.id,
 });
@@ -184,6 +189,8 @@ const joinHits = (
         variants: c.variants,
         ipa: entry.ipa || undefined,
         graphemes: entry.graphemes,
+        emoji: entry.emoji,
+        image: entry.image,
         provenance: 'shipped',
       } as WordHit,
     ];

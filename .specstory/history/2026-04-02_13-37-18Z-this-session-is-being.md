@@ -9,6 +9,7 @@ _**User (2026-04-02 13:37:18Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user asked to continue implementing M4 (milestone 4 game engine) in the existing worktree `./worktrees/milestone-4-game-engine` through to completion. Specific requirements:
    - Follow the plan at `docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md`
@@ -37,16 +38,16 @@ Summary:
 3. Files and Code Sections:
    - `.claude/settings.local.json`
      - Updated to use `"allow": ["Bash"]` catch-all to avoid confirmation prompts on all bash commands
-   
+
    - `src/test-setup.ts`
      - No change from original (dev-mode plugin was added then removed)
      - Final content: `import 'fake-indexeddb/auto'; import '@testing-library/jest-dom';`
-   
+
    - `src/db/schemas/session_history_index.ts`
      - Bumped from version 0 to version 1
      - Added fields: `status: 'in-progress' | 'completed' | 'abandoned'`, `seed: string`, `initialContent: Record<string, unknown>`, `initialState: Record<string, unknown>`
      - Added all new fields to `required` array
-   
+
    - `src/db/create-database.ts`
      - Added `import { addRxPlugin } from 'rxdb'`
      - Added `import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema'`
@@ -54,11 +55,12 @@ Summary:
      - Added `addRxPlugin(RxDBMigrationSchemaPlugin)` at module level
      - Updated `session_history_index` in COLLECTIONS to include `migrationStrategies: { 1: (oldDoc) => ({ ...oldDoc, status: 'completed', seed: '', initialContent: { rounds: [] }, initialState: {} }) }`
      - Updated `createTestDatabase` to use `wrappedValidateAjvStorage({ storage: getRxStorageMemory() })` for schema validation in tests
-   
+
    - `src/db/schemas/session_history_index.test.ts` (new)
      - 3 tests: inserts with new fields, rejects without status, queries by status
-   
+
    - `src/lib/game-engine/replay.ts` (new)
+
      ```typescript
      export function replayToStep(log: MoveLog, stepIndex: number, moveHandlers: Record<string, MoveHandler>): GameEngineState {
        let state = log.initialState;
@@ -75,17 +77,18 @@ Summary:
        return state;
      }
      ```
-   
+
    - `src/lib/game-engine/replay.test.ts` (new) - 6 tests, all passing
-   
+
    - `src/lib/game-engine/lifecycle.ts` (new)
      - `useGameLifecycle(config, gameMovers, initialState?)` → `[GameEngineState, dispatch]`
      - Uses `useReducer` with `createReducer` factory
      - Handles: SKIP_INSTRUCTIONS, SUBMIT_ANSWER (with correct/wrong/retry/game-over logic), NEXT_ROUND, RETRY, END_GAME, REQUEST_HINT, RESTORE_STATE
-   
+
    - `src/lib/game-engine/lifecycle.test.ts` (new) - 12 tests, all passing
-   
+
    - `src/lib/game-engine/move-log.ts` (new)
+
      ```typescript
      export function useMoveLog(maxUndoDepth: number | null): UseMoveLogReturn {
        const [moves, setMoves] = useState<Move[]>([]);
@@ -106,31 +109,31 @@ Summary:
        return { moves, canUndo, appendMove };
      }
      ```
-   
+
    - `src/lib/game-engine/move-log.test.ts` (new) - 10 tests, all passing
-   
+
    - `src/lib/game-engine/config-loader.ts` (new)
      - `loadGameConfig(gameId, profileId, gradeBand, db, defaultConfig)` → `Promise<ResolvedGameConfig>`
      - Applies overrides in priority order: global → grade-band → game
-   
+
    - `src/lib/game-engine/config-loader.test.ts` (new) - 7 tests, all passing
-   
+
    - `src/lib/game-engine/session-recorder.ts` (new)
      - `useSessionRecorder(moves, sessionId, meta, db, phase): void`
      - Creates session_history_index on mount (status: 'in-progress')
      - Writes chunks to session_history on every move (CHUNK_MAX_MOVES=200, CHUNK_MAX_BYTES=50KB)
      - Marks completed + emits game:end event when phase='game-over'
      - Flushes on visibilitychange
-   
+
    - `src/lib/game-engine/session-recorder.test.tsx` (new) - 4 tests, all passing
-   
+
    - `src/lib/game-engine/session-finder.ts` (new)
      - `findInProgressSession(profileId, gameId, db)` → `Promise<MoveLog | null>`
      - Returns null for no session, completed session, or stale >24h (marks abandoned)
      - Hydrates MoveLog from session_history chunks sorted by chunkIndex using `.toSorted()`
-   
+
    - `src/lib/game-engine/session-finder.test.ts` (new) - 6 tests, all passing
-   
+
    - `src/lib/game-engine/index.tsx` (new, currently being debugged)
      - Exports: `GameEngineProvider`, `useGameState`, `useGameDispatch`
      - Uses split contexts: `GameStateContext` (state) and `GameDispatchContext` (dispatch)
@@ -139,28 +142,28 @@ Summary:
      - `GameEngineProvider` composes: `useGameLifecycle`, `useMoveLog`, session recorder gate
      - UNDO handling: uses `replayToStep` to compute recovered state, then calls `RESTORE_STATE`
      - `resolvedInitialState` computed once from `initialLog` via `replayToStep` if provided
-   
+
    - `src/lib/game-engine/game-engine-provider.test.tsx` (new, currently failing)
      - 6 tests wrapping with `<DbProvider><GameEngineProvider>`
 
 4. Errors and fixes:
    - **Missing RxDBMigrationSchemaPlugin**: When adding `migrationStrategies` to COLLECTIONS, RxDB threw "function must be overwritten by a plugin". Fixed by adding `addRxPlugin(RxDBMigrationSchemaPlugin)` to `create-database.ts`.
-   
+
    - **RxDB Dev Mode DVM1 error**: Adding `RxDBDevModePlugin` to test-setup caused DVM1 error ("dev mode cannot be used with non-dev-mode storage"). Fixed by using `wrappedValidateAjvStorage` from `rxdb/plugins/validate-ajv` to wrap memory storage in `createTestDatabase` instead.
-   
+
    - **addRxPlugin call between import statements**: ESBuild/ESLint may complain about code between imports. Fixed by rewriting `create-database.ts` with all imports first, then `addRxPlugin` call.
-   
+
    - **COL23 RxDB error (collection already exists)**: When `migrationStrategies` was present without the migration plugin, DB creation threw on the first test, leaking registered collections. Subsequent test DBs then conflicted. Fixed by registering the migration plugin properly.
-   
+
    - **unicorn/no-array-callback-reference in session-recorder.ts**: ESLint rejected `.map(moveToEvent)`. Fixed by changing to `.map((m) => moveToEvent(m))`.
-   
+
    - **unicorn/no-array-sort in session-finder.ts**: ESLint rejected `.sort()`. Fixed by using `.toSorted()` instead.
-   
+
    - **JSX in .ts file**: `index.ts` used JSX syntax (return `<SessionRecorderBridge {...props} />`), causing esbuild error "Expected '>' but found '{'". Fixed by renaming to `index.tsx`.
-   
+
    - **3 tests failing in game-engine-provider.test.tsx**: After renaming to `.tsx`, 3 tests still fail:
-     - `provides stable dispatch via useGameDispatch` 
-     - `SUBMIT_ANSWER correct transitions` 
+     - `provides stable dispatch via useGameDispatch`
+     - `SUBMIT_ANSWER correct transitions`
      - `resumes from initialLog` (phase is "instructions" instead of "next-round")
      These are being actively debugged. The issue likely relates to async DbProvider initialization affecting the SessionRecorderGate and/or the `resolvedInitialState` computation from `initialLog`.
 
@@ -183,30 +186,32 @@ Summary:
 
 8. Current Work:
    Task 9 (GameEngineProvider) was being actively debugged. The `src/lib/game-engine/index.tsx` file was just created and the tests in `src/lib/game-engine/game-engine-provider.test.tsx` were run showing 3 failures:
-   
+
    The last test output showed:
+
    ```
    Tests  3 failed | 3 passed (6)
    ```
-   
+
    The failing test `resumes from initialLog when provided` shows:
+
    ```
    Received: "instructions"  (expected: "next-round")
    ```
-   
+
    The current `index.tsx` implementation uses `SessionRecorderGate` (renders null when db=undefined) to avoid conditional hook violations, and `resolvedInitialState` computed once via `useMemo` with empty deps array.
 
 9. Optional Next Step:
    Fix the 3 failing tests in `src/lib/game-engine/game-engine-provider.test.tsx`. The test output showed:
-   
+
    ```
    ❯ src/lib/game-engine/game-engine-provider.test.tsx:247:34
       247|     expect(result.current.phase).toBe('next-round');
    Received: "instructions"
    ```
-   
+
    The `resumes from initialLog` test is failing because `resolvedInitialState` isn't being computed correctly from `initialLog`. The `useMemo` with empty deps `[]` should compute it on mount. The issue is that `gameMovers` (passed as `moves` prop) includes `SUBMIT_ANSWER` handler which sets `currentRound.answer`, but the `submitHandler` in the test sets answer to 'A', and the lifecycle reducer checks `currentRound.answer === roundDef.correctAnswer` ('A' === 'A' = correct), which should transition to 'next-round'. The replayToStep function should work correctly since it was tested independently.
-   
+
    The debug focus should be on why `resolvedInitialState` from `replayToStep(initialLog, 1, gameMovers)` returns phase='instructions' - likely the `gameMovers` reference in the `useMemo` closure captures an empty object or the `submitHandler` isn't correctly applied. The `useMemo` has `// eslint-disable-next-line react-hooks/exhaustive-deps` with empty deps, meaning `gameMovers` isn't included - this could mean it captures the initial (possibly stale) value. Need to fix by computing outside of hook or including `gameMovers` in memo deps.
 
 If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/0f36b62d-67a0-4af8-bc9b-0293f5ae3aa7.jsonl
@@ -227,194 +232,195 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:37:22Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import {
-3	  createContext,
-4	  useCallback,
-5	  useContext,
-6	  useEffect,
-7	  useMemo,
-8	  type ReactNode,
-9	} from 'react';
-10	import { useRxDB } from '@/db/hooks/useRxDB';
-11	import { replayToStep } from './replay';
-12	import { useGameLifecycle } from './lifecycle';
-13	import { useMoveLog } from './move-log';
-14	import { useSessionRecorder } from './session-recorder';
-15	import type {
-16	  GameEngineState,
-17	  Move,
-18	  MoveHandler,
-19	  MoveLog,
-20	  ResolvedGameConfig,
-21	  SessionMeta,
-22	} from './types';
-23	
-24	// --- Contexts ---
-25	
-26	const GameStateContext = createContext<GameEngineState | null>(null);
-27	const GameDispatchContext = createContext<
-28	  ((move: Move) => void) | null
-29	>(null);
-30	
-31	// --- Consumer hooks ---
-32	
-33	export function useGameState(): GameEngineState {
-34	  const ctx = useContext(GameStateContext);
-35	  if (!ctx)
-36	    throw new Error(
-37	      'useGameState must be used within GameEngineProvider',
-38	    );
-39	  return ctx;
-40	}
-41	
-42	export function useGameDispatch(): (move: Move) => void {
-43	  const ctx = useContext(GameDispatchContext);
-44	  if (!ctx)
-45	    throw new Error(
-46	      'useGameDispatch must be used within GameEngineProvider',
-47	    );
-48	  return ctx;
-49	}
-50	
-51	// --- Inner component that calls useSessionRecorder once db is ready ---
-52	
-53	interface RecorderProps {
-54	  moves: Move[];
-55	  sessionId: string;
-56	  meta: SessionMeta;
-57	  phase: string;
-58	}
-59	
-60	function SessionRecorderBridge({
-61	  moves,
-62	  sessionId,
-63	  meta,
-64	  phase,
-65	}: RecorderProps) {
-66	  const { db } = useRxDB();
-67	  // db can be undefined during initial load; hook is called unconditionally
-68	  useSessionRecorder(
-69	    moves,
-70	    sessionId,
-71	    meta,
-72	    db as NonNullable<typeof db>,
-73	    phase,
-74	  );
-75	  // If db is undefined this is a no-op since useSessionRecorder guards internally
-76	  return null;
-77	}
-78	
-79	// Wrapper that only mounts SessionRecorderBridge once db is available
-80	function SessionRecorderGate(props: RecorderProps) {
-81	  const { db } = useRxDB();
-82	  if (!db) return null;
-83	  return <SessionRecorderBridge {...props} />;
-84	}
-85	
-86	// --- Provider ---
-87	
-88	interface GameEngineProviderProps {
-89	  config: ResolvedGameConfig;
-90	  moves: Record<string, MoveHandler>;
-91	  initialState: GameEngineState;
-92	  sessionId: string;
-93	  meta: SessionMeta;
-94	  initialLog?: MoveLog;
-95	  children: ReactNode;
-96	}
-97	
-98	export function GameEngineProvider({
-99	  config,
-100	  moves: gameMovers,
-101	  initialState,
-102	  sessionId,
-103	  meta,
-104	  initialLog,
-105	  children,
-106	}: GameEngineProviderProps): JSX.Element {
-107	  // Compute resumed initial state if initialLog provided
-108	  const resolvedInitialState = useMemo(() => {
-109	    if (!initialLog || initialLog.moves.length === 0) return initialState;
-110	    return replayToStep(
-111	      initialLog,
-112	      initialLog.moves.length - 1,
-113	      gameMovers,
-114	    );
-115	    // eslint-disable-next-line react-hooks/exhaustive-deps
-116	  }, []); // intentionally run once on mount
-117	
-118	  const [state, lifecycleDispatch] = useGameLifecycle(
-119	    config,
-120	    gameMovers,
-121	    resolvedInitialState,
-122	  );
-123	
-124	  const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
-125	
-126	  const dispatch = useCallback(
-127	    (move: Move) => {
-128	      if (move.type === 'UNDO') {
-129	        if (!canUndo) return;
-130	        const accepted = appendMove(move);
-131	        if (!accepted) return;
-132	
-133	        // Build a temporary log to replay
-134	        const currentMoves = [...moves, move];
-135	        const targetStep = move.args['targetStep'] as number;
-136	        const tempLog: MoveLog = {
-137	          gameId: meta.gameId,
-138	          sessionId,
-139	          profileId: meta.profileId,
-140	          seed: meta.seed,
-141	          initialContent: meta.initialContent,
-142	          initialState,
-143	          moves: currentMoves,
-144	        };
-145	        const recoveredState = replayToStep(
-146	          tempLog,
-147	          targetStep > 0 ? targetStep - 1 : 0,
-148	          gameMovers,
-149	        );
-150	        lifecycleDispatch({
-151	          type: 'RESTORE_STATE',
-152	          args: { _state: JSON.stringify(recoveredState) },
-153	          timestamp: move.timestamp,
-154	        });
-155	        return;
-156	      }
-157	
-158	      appendMove(move);
-159	      lifecycleDispatch(move);
-160	    },
-161	    [
-162	      canUndo,
-163	      appendMove,
-164	      moves,
-165	      meta,
-166	      sessionId,
-167	      initialState,
-168	      gameMovers,
-169	      lifecycleDispatch,
-170	    ],
-171	  );
-172	
-173	  return (
-174	    <GameStateContext.Provider value={state}>
-175	      <GameDispatchContext.Provider value={dispatch}>
-176	        <SessionRecorderGate
-177	          moves={moves}
-178	          sessionId={sessionId}
-179	          meta={meta}
-180	          phase={state.phase}
-181	        />
-182	        {children}
-183	      </GameDispatchContext.Provider>
-184	    </GameStateContext.Provider>
-185	  );
-186	}
+1 // src/lib/game-engine/index.ts
+2 import {
+3   createContext,
+4   useCallback,
+5   useContext,
+6   useEffect,
+7   useMemo,
+8   type ReactNode,
+9 } from 'react';
+10 import { useRxDB } from '@/db/hooks/useRxDB';
+11 import { replayToStep } from './replay';
+12 import { useGameLifecycle } from './lifecycle';
+13 import { useMoveLog } from './move-log';
+14 import { useSessionRecorder } from './session-recorder';
+15 import type {
+16   GameEngineState,
+17   Move,
+18   MoveHandler,
+19   MoveLog,
+20   ResolvedGameConfig,
+21   SessionMeta,
+22 } from './types';
+23 
+24 // --- Contexts ---
+25 
+26 const GameStateContext = createContext<GameEngineState | null>(null);
+27 const GameDispatchContext = createContext<
+28   ((move: Move) => void) | null
+29 >(null);
+30 
+31 // --- Consumer hooks ---
+32 
+33 export function useGameState(): GameEngineState {
+34   const ctx = useContext(GameStateContext);
+35   if (!ctx)
+36     throw new Error(
+37       'useGameState must be used within GameEngineProvider',
+38     );
+39   return ctx;
+40 }
+41 
+42 export function useGameDispatch(): (move: Move) => void {
+43   const ctx = useContext(GameDispatchContext);
+44   if (!ctx)
+45     throw new Error(
+46       'useGameDispatch must be used within GameEngineProvider',
+47     );
+48   return ctx;
+49 }
+50 
+51 // --- Inner component that calls useSessionRecorder once db is ready ---
+52 
+53 interface RecorderProps {
+54   moves: Move[];
+55   sessionId: string;
+56   meta: SessionMeta;
+57   phase: string;
+58 }
+59 
+60 function SessionRecorderBridge({
+61   moves,
+62   sessionId,
+63   meta,
+64   phase,
+65 }: RecorderProps) {
+66   const { db } = useRxDB();
+67   // db can be undefined during initial load; hook is called unconditionally
+68   useSessionRecorder(
+69     moves,
+70     sessionId,
+71     meta,
+72     db as NonNullable<typeof db>,
+73     phase,
+74   );
+75   // If db is undefined this is a no-op since useSessionRecorder guards internally
+76   return null;
+77 }
+78 
+79 // Wrapper that only mounts SessionRecorderBridge once db is available
+80 function SessionRecorderGate(props: RecorderProps) {
+81   const { db } = useRxDB();
+82   if (!db) return null;
+83   return <SessionRecorderBridge {...props} />;
+84 }
+85 
+86 // --- Provider ---
+87 
+88 interface GameEngineProviderProps {
+89   config: ResolvedGameConfig;
+90   moves: Record<string, MoveHandler>;
+91   initialState: GameEngineState;
+92   sessionId: string;
+93   meta: SessionMeta;
+94   initialLog?: MoveLog;
+95   children: ReactNode;
+96 }
+97 
+98 export function GameEngineProvider({
+99   config,
+100   moves: gameMovers,
+101   initialState,
+102   sessionId,
+103   meta,
+104   initialLog,
+105   children,
+106 }: GameEngineProviderProps): JSX.Element {
+107   // Compute resumed initial state if initialLog provided
+108   const resolvedInitialState = useMemo(() => {
+109     if (!initialLog || initialLog.moves.length === 0) return initialState;
+110     return replayToStep(
+111       initialLog,
+112       initialLog.moves.length - 1,
+113       gameMovers,
+114     );
+115     // eslint-disable-next-line react-hooks/exhaustive-deps
+116   }, []); // intentionally run once on mount
+117 
+118   const [state, lifecycleDispatch] = useGameLifecycle(
+119     config,
+120     gameMovers,
+121     resolvedInitialState,
+122   );
+123 
+124   const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
+125 
+126   const dispatch = useCallback(
+127     (move: Move) => {
+128       if (move.type === 'UNDO') {
+129         if (!canUndo) return;
+130         const accepted = appendMove(move);
+131         if (!accepted) return;
+132 
+133         // Build a temporary log to replay
+134         const currentMoves = [...moves, move];
+135         const targetStep = move.args['targetStep'] as number;
+136         const tempLog: MoveLog = {
+137           gameId: meta.gameId,
+138           sessionId,
+139           profileId: meta.profileId,
+140           seed: meta.seed,
+141           initialContent: meta.initialContent,
+142           initialState,
+143           moves: currentMoves,
+144         };
+145         const recoveredState = replayToStep(
+146           tempLog,
+147           targetStep > 0 ? targetStep - 1 : 0,
+148           gameMovers,
+149         );
+150         lifecycleDispatch({
+151           type: 'RESTORE_STATE',
+152           args: { _state: JSON.stringify(recoveredState) },
+153           timestamp: move.timestamp,
+154         });
+155         return;
+156       }
+157 
+158       appendMove(move);
+159       lifecycleDispatch(move);
+160     },
+161     [
+162       canUndo,
+163       appendMove,
+164       moves,
+165       meta,
+166       sessionId,
+167       initialState,
+168       gameMovers,
+169       lifecycleDispatch,
+170     ],
+171   );
+172 
+173   return (
+174     <GameStateContext.Provider value={state}>
+175       <GameDispatchContext.Provider value={dispatch}>
+176         <SessionRecorderGate
+177           moves={moves}
+178           sessionId={sessionId}
+179           meta={meta}
+180           phase={state.phase}
+181         />
+182         {children}
+183       </GameDispatchContext.Provider>
+184     </GameStateContext.Provider>
+185   );
+186 }
 187
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:37:44Z)**_
@@ -426,7 +432,7 @@ Looking at the issues:
 
 2. **`SUBMIT_ANSWER correct transitions to next-round and records in move log`** - The RxDB write verification might be failing because SessionRecorderGate doesn't mount (db isn't ready? or the chunk isn't written).
 
-3. **`resumes from initialLog when provided`** - The `useMemo` with empty deps is computed once, but the issue is that `gameMovers` is captured at render time. 
+3. **`resumes from initialLog when provided`** - The `useMemo` with empty deps is computed once, but the issue is that `gameMovers` is captured at render time.
 
 Let me trace through the test more carefully. The wrapper passes `gameMovers` as `{ SUBMIT_ANSWER: submitHandler }`, where `submitHandler` sets `currentRound.answer = args['answer']`. After SKIP_INSTRUCTIONS + SUBMIT_ANSWER('A'), the state should have phase = 'playing' from the first move, then the answer gets set to 'A' by the handler before the lifecycle runs.
 
@@ -440,161 +446,162 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:37:44Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/lifecycle.ts`
 
 ```text
-1	// src/lib/game-engine/lifecycle.ts
-2	import { useReducer } from 'react';
-3	import type {
-4	  GameEngineState,
-5	  Move,
-6	  MoveHandler,
-7	  ResolvedGameConfig,
-8	} from './types';
-9	
-10	type InternalMove =
-11	  | Move
-12	  | {
-13	      type: 'RESTORE_STATE';
-14	      args: { _state: string };
-15	      timestamp: number;
-16	    };
-17	
-18	function buildInitialState(
-19	  config: ResolvedGameConfig,
-20	  override?: GameEngineState,
-21	): GameEngineState {
-22	  if (override) return override;
-23	  return {
-24	    phase: 'instructions',
-25	    roundIndex: 0,
-26	    score: 0,
-27	    streak: 0,
-28	    retryCount: 0,
-29	    content: { rounds: [] },
-30	    currentRound: { roundId: '', answer: null, hintsUsed: 0 },
-31	  };
-32	}
-33	
-34	function createReducer(
-35	  config: ResolvedGameConfig,
-36	  gameMovers: Record<string, MoveHandler>,
-37	) {
-38	  return function reducer(
-39	    state: GameEngineState,
-40	    action: InternalMove,
-41	  ): GameEngineState {
-42	    // RESTORE_STATE — force set (used for UNDO by provider)
-43	    if (action.type === 'RESTORE_STATE') {
-44	      return JSON.parse(
-45	        action.args['_state'] as string,
-46	      ) as GameEngineState;
-47	    }
-48	
-49	    // Apply game-specific handler first (if any)
-50	    const gameHandler = gameMovers[action.type];
-51	    const s = gameHandler ? gameHandler(state, action.args) : state;
-52	
-53	    switch (action.type) {
-54	      case 'SKIP_INSTRUCTIONS': {
-55	        if (s.phase !== 'instructions') return s;
-56	        return { ...s, phase: 'playing' };
-57	      }
-58	
-59	      case 'SUBMIT_ANSWER': {
-60	        if (s.phase !== 'playing') return s;
-61	        const roundDef = s.content.rounds[s.roundIndex];
-62	        const correct =
-63	          s.currentRound.answer === roundDef?.correctAnswer;
-64	        const newScore = correct ? s.score + 1 : s.score;
-65	        const newStreak = correct ? s.streak + 1 : 0;
-66	
-67	        if (!correct && s.retryCount < config.maxRetries) {
-68	          return {
-69	            ...s,
-70	            score: newScore,
-71	            streak: newStreak,
-72	            retryCount: s.retryCount + 1,
-73	            phase: 'retry',
-74	          };
-75	        }
-76	
-77	        const isLastRound = s.roundIndex >= config.maxRounds - 1;
-78	        if (isLastRound) {
-79	          return {
-80	            ...s,
-81	            score: newScore,
-82	            streak: newStreak,
-83	            phase: 'game-over',
-84	          };
-85	        }
-86	        return {
-87	          ...s,
-88	          score: newScore,
-89	          streak: newStreak,
-90	          phase: 'next-round',
-91	        };
-92	      }
-93	
-94	      case 'NEXT_ROUND': {
-95	        if (s.phase !== 'next-round') return s;
-96	        const nextIndex = s.roundIndex + 1;
-97	        const nextRound = s.content.rounds[nextIndex];
-98	        return {
-99	          ...s,
-100	          phase: 'playing',
-101	          roundIndex: nextIndex,
-102	          retryCount: 0,
-103	          currentRound: {
-104	            roundId: nextRound?.id ?? '',
-105	            answer: null,
-106	            hintsUsed: 0,
-107	          },
-108	        };
-109	      }
-110	
-111	      case 'RETRY': {
-112	        if (s.phase !== 'retry') return s;
-113	        return {
-114	          ...s,
-115	          phase: 'playing',
-116	          currentRound: { ...s.currentRound, answer: null },
-117	        };
-118	      }
-119	
-120	      case 'END_GAME': {
-121	        if (s.phase !== 'game-over') return s;
-122	        return { ...s, phase: 'idle' };
-123	      }
-124	
-125	      case 'REQUEST_HINT': {
-126	        return {
-127	          ...s,
-128	          currentRound: {
-129	            ...s.currentRound,
-130	            hintsUsed: s.currentRound.hintsUsed + 1,
-131	          },
-132	        };
-133	      }
-134	
-135	      default: {
-136	        return s;
-137	      }
-138	    }
-139	  };
-140	}
-141	
-142	export function useGameLifecycle(
-143	  config: ResolvedGameConfig,
-144	  gameMovers: Record<string, MoveHandler>,
-145	  initialState?: GameEngineState,
-146	): [GameEngineState, (move: InternalMove) => void] {
-147	  const reducer = createReducer(config, gameMovers);
-148	  const [state, dispatch] = useReducer(
-149	    reducer,
-150	    buildInitialState(config, initialState),
-151	  );
-152	  return [state, dispatch];
-153	}
+1 // src/lib/game-engine/lifecycle.ts
+2 import { useReducer } from 'react';
+3 import type {
+4   GameEngineState,
+5   Move,
+6   MoveHandler,
+7   ResolvedGameConfig,
+8 } from './types';
+9 
+10 type InternalMove =
+11   | Move
+12   | {
+13       type: 'RESTORE_STATE';
+14       args: { _state: string };
+15       timestamp: number;
+16     };
+17 
+18 function buildInitialState(
+19   config: ResolvedGameConfig,
+20   override?: GameEngineState,
+21 ): GameEngineState {
+22   if (override) return override;
+23   return {
+24     phase: 'instructions',
+25     roundIndex: 0,
+26     score: 0,
+27     streak: 0,
+28     retryCount: 0,
+29     content: { rounds: [] },
+30     currentRound: { roundId: '', answer: null, hintsUsed: 0 },
+31   };
+32 }
+33 
+34 function createReducer(
+35   config: ResolvedGameConfig,
+36   gameMovers: Record<string, MoveHandler>,
+37 ) {
+38   return function reducer(
+39     state: GameEngineState,
+40     action: InternalMove,
+41   ): GameEngineState {
+42     // RESTORE_STATE — force set (used for UNDO by provider)
+43     if (action.type === 'RESTORE_STATE') {
+44       return JSON.parse(
+45         action.args['_state'] as string,
+46       ) as GameEngineState;
+47     }
+48 
+49     // Apply game-specific handler first (if any)
+50     const gameHandler = gameMovers[action.type];
+51     const s = gameHandler ? gameHandler(state, action.args) : state;
+52 
+53     switch (action.type) {
+54       case 'SKIP_INSTRUCTIONS': {
+55         if (s.phase !== 'instructions') return s;
+56         return { ...s, phase: 'playing' };
+57       }
+58 
+59       case 'SUBMIT_ANSWER': {
+60         if (s.phase !== 'playing') return s;
+61         const roundDef = s.content.rounds[s.roundIndex];
+62         const correct =
+63           s.currentRound.answer === roundDef?.correctAnswer;
+64         const newScore = correct ? s.score + 1 : s.score;
+65         const newStreak = correct ? s.streak + 1 : 0;
+66 
+67         if (!correct && s.retryCount < config.maxRetries) {
+68           return {
+69             ...s,
+70             score: newScore,
+71             streak: newStreak,
+72             retryCount: s.retryCount + 1,
+73             phase: 'retry',
+74           };
+75         }
+76 
+77         const isLastRound = s.roundIndex >= config.maxRounds - 1;
+78         if (isLastRound) {
+79           return {
+80             ...s,
+81             score: newScore,
+82             streak: newStreak,
+83             phase: 'game-over',
+84           };
+85         }
+86         return {
+87           ...s,
+88           score: newScore,
+89           streak: newStreak,
+90           phase: 'next-round',
+91         };
+92       }
+93 
+94       case 'NEXT_ROUND': {
+95         if (s.phase !== 'next-round') return s;
+96         const nextIndex = s.roundIndex + 1;
+97         const nextRound = s.content.rounds[nextIndex];
+98         return {
+99           ...s,
+100           phase: 'playing',
+101           roundIndex: nextIndex,
+102           retryCount: 0,
+103           currentRound: {
+104             roundId: nextRound?.id ?? '',
+105             answer: null,
+106             hintsUsed: 0,
+107           },
+108         };
+109       }
+110 
+111       case 'RETRY': {
+112         if (s.phase !== 'retry') return s;
+113         return {
+114           ...s,
+115           phase: 'playing',
+116           currentRound: { ...s.currentRound, answer: null },
+117         };
+118       }
+119 
+120       case 'END_GAME': {
+121         if (s.phase !== 'game-over') return s;
+122         return { ...s, phase: 'idle' };
+123       }
+124 
+125       case 'REQUEST_HINT': {
+126         return {
+127           ...s,
+128           currentRound: {
+129             ...s.currentRound,
+130             hintsUsed: s.currentRound.hintsUsed + 1,
+131           },
+132         };
+133       }
+134 
+135       default: {
+136         return s;
+137       }
+138     }
+139   };
+140 }
+141 
+142 export function useGameLifecycle(
+143   config: ResolvedGameConfig,
+144   gameMovers: Record<string, MoveHandler>,
+145   initialState?: GameEngineState,
+146 ): [GameEngineState, (move: InternalMove) => void] {
+147   const reducer = createReducer(config, gameMovers);
+148   const [state, dispatch] = useReducer(
+149     reducer,
+150     buildInitialState(config, initialState),
+151   );
+152   return [state, dispatch];
+153 }
 154
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:35Z)**_
@@ -605,9 +612,9 @@ Now I understand the problem clearly.
 The `replayToStep` function only applies `gameMovers` handlers (which in the test is just `SUBMIT_ANSWER: submitHandler`). It does NOT apply the lifecycle transitions (SKIP_INSTRUCTIONS → 'playing', etc.).
 
 So when replaying [SKIP_INSTRUCTIONS, SUBMIT_ANSWER('A')]:
+
 1. SKIP_INSTRUCTIONS: no handler in `gameMovers`, so state stays `{phase: 'instructions', ...}`
 2. SUBMIT_ANSWER: `submitHandler` runs → `{phase: 'instructions', ..., currentRound: {..., answer: 'A'}}`
-
 
 3. Result: phase='instructions', NOT 'next-round'.
 
@@ -647,6 +654,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:36Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:40Z)**_
@@ -658,6 +666,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:40Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:43Z)**_
@@ -699,6 +708,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:43Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/db/hooks/useSettings.ts
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/db/hooks/useSettings.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:46Z)**_
@@ -708,19 +718,20 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:46Z)**_
  `./worktrees/milestone-4-game-engine/src/db/hooks/useRxDB.ts`
 
 ```text
-1	import { useContext } from 'react';
-2	import type { DbContextValue } from '@/providers/DbProvider';
-3	import { DbContext } from '@/providers/DbProvider';
-4	
-5	export function useRxDB(): DbContextValue {
-6	  const ctx = useContext(DbContext);
-7	  if (!ctx) {
-8	    throw new Error('useRxDB must be used within DbProvider');
-9	  }
-10	  return ctx;
-11	}
+1 import { useContext } from 'react';
+2 import type { DbContextValue } from '@/providers/DbProvider';
+3 import { DbContext } from '@/providers/DbProvider';
+4 
+5 export function useRxDB(): DbContextValue {
+6   const ctx = useContext(DbContext);
+7   if (!ctx) {
+8     throw new Error('useRxDB must be used within DbProvider');
+9   }
+10   return ctx;
+11 }
 12
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:50Z)**_
@@ -735,6 +746,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:50Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/providers/DbProvider.test.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/providers/DbProvider.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:38:53Z)**_
@@ -744,92 +756,93 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:38:53Z)**_
  `./worktrees/milestone-4-game-engine/src/providers/DbProvider.tsx`
 
 ```text
-1	import {
-2	  createContext,
-3	  useCallback,
-4	  useEffect,
-5	  useMemo,
-6	  useState,
-7	} from 'react';
-8	import type { BaseSkillDatabase } from '@/db/types';
-9	import type { ReactNode } from 'react';
-10	import { getOrCreateDatabase } from '@/db';
-11	
-12	export type DbContextValue = {
-13	  db: BaseSkillDatabase | undefined;
-14	  error: Error | undefined;
-15	  isReady: boolean;
-16	};
-17	
-18	export const DbContext = createContext<DbContextValue | null>(null);
-19	
-20	type DbProviderProps = {
-21	  children: ReactNode;
-22	  /** Tests can inject a factory instead of opening IndexedDB */
-23	  openDatabase?: () => Promise<BaseSkillDatabase>;
-24	  /** Optional hook after DB is ready (e.g. theme seed) */
-25	  onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>;
-26	};
-27	
-28	export const DbProvider = ({
-29	  children,
-30	  openDatabase = getOrCreateDatabase,
-31	  onDatabaseReady,
-32	}: DbProviderProps) => {
-33	  const [db, setDb] = useState<BaseSkillDatabase | undefined>();
-34	  const [error, setError] = useState<Error | undefined>();
-35	  const [isReady, setIsReady] = useState(false);
-36	
-37	  const runReady = useCallback(
-38	    async (instance: BaseSkillDatabase) => {
-39	      if (onDatabaseReady) {
-40	        await onDatabaseReady(instance);
-41	      }
-42	    },
-43	    [onDatabaseReady],
-44	  );
-45	
-46	  useEffect(() => {
-47	    let cancelled = false;
-48	    openDatabase()
-49	      .then(async (instance) => {
-50	        if (cancelled) {
-51	          return;
-52	        }
-53	        setDb(instance);
-54	        await runReady(instance);
-55	        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- cleanup can run during await
-56	        if (cancelled) {
-57	          return;
-58	        }
-59	        setIsReady(true);
-60	      })
-61	      .catch((error_: unknown) => {
-62	        if (!cancelled) {
-63	          setError(
-64	            error_ instanceof Error
-65	              ? error_
-66	              : new Error(String(error_)),
-67	          );
-68	          setIsReady(true);
-69	        }
-70	      });
-71	    return () => {
-72	      cancelled = true;
-73	    };
-74	  }, [openDatabase, runReady]);
-75	
-76	  const value = useMemo(
-77	    () => ({ db, error, isReady }),
-78	    [db, error, isReady],
-79	  );
-80	
-81	  return (
-82	    <DbContext.Provider value={value}>{children}</DbContext.Provider>
-83	  );
-84	};
+1 import {
+2   createContext,
+3   useCallback,
+4   useEffect,
+5   useMemo,
+6   useState,
+7 } from 'react';
+8 import type { BaseSkillDatabase } from '@/db/types';
+9 import type { ReactNode } from 'react';
+10 import { getOrCreateDatabase } from '@/db';
+11 
+12 export type DbContextValue = {
+13   db: BaseSkillDatabase | undefined;
+14   error: Error | undefined;
+15   isReady: boolean;
+16 };
+17 
+18 export const DbContext = createContext<DbContextValue | null>(null);
+19 
+20 type DbProviderProps = {
+21   children: ReactNode;
+22   /** Tests can inject a factory instead of opening IndexedDB */
+23   openDatabase?: () => Promise<BaseSkillDatabase>;
+24   /** Optional hook after DB is ready (e.g. theme seed) */
+25   onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>;
+26 };
+27 
+28 export const DbProvider = ({
+29   children,
+30   openDatabase = getOrCreateDatabase,
+31   onDatabaseReady,
+32 }: DbProviderProps) => {
+33   const [db, setDb] = useState<BaseSkillDatabase | undefined>();
+34   const [error, setError] = useState<Error | undefined>();
+35   const [isReady, setIsReady] = useState(false);
+36 
+37   const runReady = useCallback(
+38     async (instance: BaseSkillDatabase) => {
+39       if (onDatabaseReady) {
+40         await onDatabaseReady(instance);
+41       }
+42     },
+43     [onDatabaseReady],
+44   );
+45 
+46   useEffect(() => {
+47     let cancelled = false;
+48     openDatabase()
+49       .then(async (instance) => {
+50         if (cancelled) {
+51           return;
+52         }
+53         setDb(instance);
+54         await runReady(instance);
+55         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- cleanup can run during await
+56         if (cancelled) {
+57           return;
+58         }
+59         setIsReady(true);
+60       })
+61       .catch((error_: unknown) => {
+62         if (!cancelled) {
+63           setError(
+64             error_ instanceof Error
+65               ? error_
+66               : new Error(String(error_)),
+67           );
+68           setIsReady(true);
+69         }
+70       });
+71     return () => {
+72       cancelled = true;
+73     };
+74   }, [openDatabase, runReady]);
+75 
+76   const value = useMemo(
+77     () => ({ db, error, isReady }),
+78     [db, error, isReady],
+79   );
+80 
+81   return (
+82     <DbContext.Provider value={value}>{children}</DbContext.Provider>
+83   );
+84 };
 85
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:39:48Z)**_
@@ -838,13 +851,14 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:39:48Z)**_
 Now I understand. `DbProvider` is async - it calls `openDatabase()` in a `useEffect`, so `db` starts as `undefined` and gets set after the promise resolves. Even with `Promise.resolve(db)`, it's still asynchronous (microtask), so db won't be available on first render.
 
 This confirms:
+
 1. `SessionRecorderGate` renders `null` initially (db=undefined), then re-renders and mounts `SessionRecorderBridge` once db is available.
 2. For test 2 (`SUBMIT_ANSWER records in move log`), this is OK because `waitFor` gives time for the async write.
-
 
 3. But when `SessionRecorderGate` conditionally renders with `if (!db) return null`, it's unmounting and remounting the child component, which might be causing the moves to not persist correctly.
 
 Actually, I need to trace through the timing more carefully. The db promise resolves asynchronously, so `SessionRecorderBridge` doesn't mount until after the test's `act()` calls have already dispatched the moves. By the time the recorder mounts and runs its effects, the moves have already been recorded in state, but the question is whether the recorder's effect is capturing them correctly or if there's a stale closure issue. is:
+
 - First render → db=undefined
 - Microtask resolves → setDb(instance) → setIsReady(true)
 - Re-render → db is available → SessionRecorderGate mounts SessionRecorderBridge
@@ -852,6 +866,7 @@ Actually, I need to trace through the timing more carefully. The db promise reso
 This should happen within the `act()` calls or the `waitFor`. Actually, `act()` in React Testing Library flushes effects and state updates. So after the first `act()` (renderHook), the db should be available.
 
 Hmm, but actually `renderHook` itself is wrapped in `act` by @testing-library/react. The effects run during `act`. So:
+
 1. During `renderHook`: DbProvider effect runs, Promise.resolve resolves (microtask), setDb and setIsReady run, re-render happens, SessionRecorderGate mounts SessionRecorderBridge with empty moves → index is created
 2. First dispatch creates a move and triggers a write, second dispatch adds another move and writes again
 
@@ -879,98 +894,99 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:39:48Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/types.ts`
 
 ```text
-1	// src/lib/game-engine/types.ts
-2	import type { GradeBand } from '@/types/game-events';
-3	
-4	export type GamePhase =
-5	  | 'idle'
-6	  | 'loading'
-7	  | 'instructions'
-8	  | 'playing'
-9	  | 'evaluating'
-10	  | 'scoring'
-11	  | 'next-round'
-12	  | 'retry'
-13	  | 'game-over';
-14	
-15	export interface RoundDefinition {
-16	  id: string;
-17	  prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
-18	  correctAnswer: string;
-19	  distractors?: string[];
-20	}
-21	
-22	export interface ResolvedContent {
-23	  rounds: RoundDefinition[];
-24	}
-25	
-26	export interface RoundState {
-27	  roundId: string;
-28	  answer: string | null;
-29	  hintsUsed: number;
-30	}
-31	
-32	export interface GameEngineState {
-33	  phase: GamePhase;
-34	  roundIndex: number;
-35	  score: number;
-36	  streak: number;
-37	  retryCount: number;
-38	  content: ResolvedContent;
-39	  currentRound: RoundState;
-40	}
-41	
-42	export type MoveType =
-43	  | 'SUBMIT_ANSWER'
-44	  | 'REQUEST_HINT'
-45	  | 'SKIP_INSTRUCTIONS'
-46	  | 'UNDO';
-47	
-48	export interface Move {
-49	  type: MoveType | string; // string allows game-specific types in M5
-50	  args: Record<string, string | number | boolean>;
-51	  timestamp: number;
-52	}
-53	
-54	export interface MoveLog {
-55	  gameId: string;
-56	  sessionId: string;
-57	  profileId: string;
-58	  seed: string;
-59	  initialContent: ResolvedContent;
-60	  initialState: GameEngineState;
-61	  moves: Move[];
-62	}
-63	
-64	export interface ResolvedGameConfig {
-65	  gameId: string;
-66	  title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
-67	  gradeBand: GradeBand;
-68	  maxRounds: number;
-69	  maxRetries: number;
-70	  maxUndoDepth: number | null; // null = unlimited; 0 = no undo
-71	  timerVisible: boolean;
-72	  timerDurationSeconds: number | null;
-73	  difficulty: string;
-74	}
-75	
-76	export type MoveHandler = (
-77	  state: GameEngineState,
-78	  args: Move['args'],
-79	) => GameEngineState;
-80	
-81	export interface SessionMeta {
-82	  profileId: string;
-83	  gameId: string;
-84	  gradeBand: GradeBand;
-85	  seed: string;
-86	  initialContent: ResolvedContent;
-87	  initialState: GameEngineState;
-88	}
-89	
-90	export { type GradeBand } from '@/types/game-events';
+1 // src/lib/game-engine/types.ts
+2 import type { GradeBand } from '@/types/game-events';
+3 
+4 export type GamePhase =
+5   | 'idle'
+6   | 'loading'
+7   | 'instructions'
+8   | 'playing'
+9   | 'evaluating'
+10   | 'scoring'
+11   | 'next-round'
+12   | 'retry'
+13   | 'game-over';
+14 
+15 export interface RoundDefinition {
+16   id: string;
+17   prompt: Record<string, string>; // locale-keyed: { en: '...', 'pt-BR': '...' }
+18   correctAnswer: string;
+19   distractors?: string[];
+20 }
+21 
+22 export interface ResolvedContent {
+23   rounds: RoundDefinition[];
+24 }
+25 
+26 export interface RoundState {
+27   roundId: string;
+28   answer: string | null;
+29   hintsUsed: number;
+30 }
+31 
+32 export interface GameEngineState {
+33   phase: GamePhase;
+34   roundIndex: number;
+35   score: number;
+36   streak: number;
+37   retryCount: number;
+38   content: ResolvedContent;
+39   currentRound: RoundState;
+40 }
+41 
+42 export type MoveType =
+43   | 'SUBMIT_ANSWER'
+44   | 'REQUEST_HINT'
+45   | 'SKIP_INSTRUCTIONS'
+46   | 'UNDO';
+47 
+48 export interface Move {
+49   type: MoveType | string; // string allows game-specific types in M5
+50   args: Record<string, string | number | boolean>;
+51   timestamp: number;
+52 }
+53 
+54 export interface MoveLog {
+55   gameId: string;
+56   sessionId: string;
+57   profileId: string;
+58   seed: string;
+59   initialContent: ResolvedContent;
+60   initialState: GameEngineState;
+61   moves: Move[];
+62 }
+63 
+64 export interface ResolvedGameConfig {
+65   gameId: string;
+66   title: Record<string, string>; // { en: '...', 'pt-BR': '...' }
+67   gradeBand: GradeBand;
+68   maxRounds: number;
+69   maxRetries: number;
+70   maxUndoDepth: number | null; // null = unlimited; 0 = no undo
+71   timerVisible: boolean;
+72   timerDurationSeconds: number | null;
+73   difficulty: string;
+74 }
+75 
+76 export type MoveHandler = (
+77   state: GameEngineState,
+78   args: Move['args'],
+79 ) => GameEngineState;
+80 
+81 export interface SessionMeta {
+82   profileId: string;
+83   gameId: string;
+84   gradeBand: GradeBand;
+85   seed: string;
+86   initialContent: ResolvedContent;
+87   initialState: GameEngineState;
+88 }
+89 
+90 export { type GradeBand } from '@/types/game-events';
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:40:33Z)**_
@@ -986,7 +1002,6 @@ The `dispatch` callback has `moves` in deps. Fix: use a ref to track current mov
 
 **Issue 3: UNDO targetStep in dispatch**
 When UNDO is dispatched with `targetStep: 1`, the `dispatch` function does:
-
 
 Replaying to the previous step using `replayToStep`, but since it only applies game movers and not lifecycle transitions, the phase won't recover correctly. Actually, wait—the UNDO test isn't in the failing list, so let me focus on what's actually broken: the dispatch stability issue and the SUBMIT_ANSWER transition. The UNDO dispatch constructs a temporary log with the UNDO move appended, then replays back to the step before the target (step 0 in this case), which means it skips the SKIP_INSTRUCTIONS handler since there's no matching handler in gameMovers, leaving the phase stuck at 'instructions' instead of rolling back to 'playing'.
 
@@ -1062,12 +1077,14 @@ Received: "instructions"
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 13:41:22Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I can see the actual 3 failing tests:
+
 1. `provides stable dispatch via useGameDispatch` - dispatch reference changes on rerender
 2. `UNDO rolls back to previous state` - replayToStep doesn't apply lifecycle transitions
 3. `resumes from initialLog when provided` - same issue with replayToStep
@@ -1075,9 +1092,9 @@ Now I can see the actual 3 failing tests:
 And the `SUBMIT_ANSWER correct transitions to next-round and records in move log` test PASSES! I was wrong earlier.
 
 So the three failing tests all point to:
+
 1. dispatch stability issue
 2. replayToStep not applying lifecycle transitions (for UNDO and initialLog)
-
 
 The root cause is that `moves` is in the deps array of `useCallback`, causing dispatch to recreate on every change, and `replayToStep` only applies game moves without running lifecycle transitions. I'll fix the dispatch stability by using a ref to track moves instead of including it in dependencies, and I'll replace `replayToStep` with the lifecycle reducer for UNDO and initialLog scenarios.
 
@@ -1113,11 +1130,13 @@ Writing the updated files...
 _**Agent (claude-sonnet-4-6 2026-04-02 13:41:23Z)**_
 
 Now I can see the 3 actual failing tests:
+
 1. `provides stable dispatch` — dispatch recreates on every render because `moves` is in deps
 2. `UNDO rolls back to previous state` — `replayToStep` only applies `gameMovers`, not lifecycle transitions
 3. `resumes from initialLog` — same issue; `replayToStep` misses lifecycle transitions (SKIP_INSTRUCTIONS → 'playing')
 
 **Fix plan:**
+
 1. Export `createReducer` from lifecycle.ts to use the full reducer in replay
 2. Replace UNDO/initialLog replay with the lifecycle reducer
 3. Use a ref for `moves` in dispatch to remove it from deps
@@ -1130,6 +1149,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 13:41:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/lifecycle.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (<synthetic> 2026-04-02 13:41:26Z)**_
@@ -1150,9 +1170,9 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:47:44Z)**_
 Now let me fix the `replayToStep` function in `replay.ts` to use the full lifecycle reducer instead of only `gameMovers`. Wait, actually `replayToStep` is a pure function that takes `MoveLog` and `moveHandlers` - it's used in session-finder too. I need to think about this differently.
 
 The issue is:
+
 1. `replayToStep` in `replay.ts` only applies `gameMovers` handlers (custom move handlers), not the lifecycle transitions (SKIP_INSTRUCTIONS → 'playing', etc.)
 2. For `initialLog` replay, we need to replay through the full lifecycle reducer
-
 
 3. The lifecycle reducer applies `gameHandler` first, then handles lifecycle transitions like SKIP_INSTRUCTIONS and SUBMIT_ANSWER
 
@@ -1369,6 +1389,7 @@ export function GameEngineProvider({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:07Z)**_
@@ -1420,6 +1441,7 @@ Compared values have no visual difference.**
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:28Z)**_
@@ -1428,7 +1450,6 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:48:28Z)**_
 Good progress! 2 tests now passing. The remaining issue is `dispatch` stability. The problem is that `canUndo` and `appendMove` from `useMoveLog` change on every render (as `moves` changes). Let me look at the `useMoveLog` hook more carefully.
 
 The `dispatch` `useCallback` has `canUndo` and `appendMove` in deps. `canUndo` changes when `moves.length` changes. `appendMove` is `useCallback` with `[maxUndoDepth]` dep, so it should be stable... Wait, let me re-check.
-
 
 Actually, `appendMove` should be stable since `maxUndoDepth` doesn't change, but `canUndo` flips from false to true when the first move happens. Looking at the test though, it's just rerendering with no moves at all, so `canUndo` stays false both times—that shouldn't cause instability.
 
@@ -1451,6 +1472,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:48:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:43Z)**_
@@ -1482,6 +1504,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 1.25s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:48Z)**_
@@ -1518,6 +1541,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:48:51Z)**_
 
 Done in 2.50s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:55Z)**_
@@ -1535,6 +1559,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:48:55Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:48:59Z)**_
@@ -1564,6 +1589,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:49:05Z)**_
 ```text
 File content (32039 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:49:11Z)**_
@@ -1826,6 +1852,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:49:11Z)**_
 
 [Showing results with pagination = limit: 250]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:49:15Z)**_
@@ -1845,327 +1872,328 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:49:17Z)**_
  `./docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md`
 
 ```text
-2700	
-2701	`GameShell` needs: `config`, `moves` (MoveHandlers), `initialState`, `sessionId`, `meta`, optional `initialLog`, and a `children` slot for the game component.
-2702	
-2703	- [ ] **Step 1: Write the failing tests**
-2704	
-2705	Create `src/components/game/GameShell.test.tsx`:
-2706	
-2707	```typescript
-2708	// src/components/game/GameShell.test.tsx
-2709	import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
-2710	import { render, screen } from '@testing-library/react';
-2711	import userEvent from '@testing-library/user-event';
-2712	import type { ReactNode } from 'react';
-2713	import { GameShell } from './GameShell';
-2714	import { createTestDatabase, destroyTestDatabase } from '@/db/create-database';
-2715	import { DbProvider } from '@/providers/DbProvider';
-2716	import type { BaseSkillDatabase } from '@/db/types';
-2717	import type { GameEngineState, ResolvedContent, ResolvedGameConfig, SessionMeta } from '@/lib/game-engine/types';
-2718	
-2719	// Mock TanStack Router navigate
-2720	vi.mock('@tanstack/react-router', async (importOriginal) => {
-2721	  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
-2722	  return {
-2723	    ...actual,
-2724	    useNavigate: () => vi.fn(),
-2725	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-2726	  };
-2727	});
-2728	
-2729	const content: ResolvedContent = {
-2730	  rounds: [
-2731	    { id: 'r1', prompt: { en: 'Q1' }, correctAnswer: 'A' },
-2732	    { id: 'r2', prompt: { en: 'Q2' }, correctAnswer: 'B' },
-2733	  ],
-2734	};
-2735	
-2736	const baseConfig: ResolvedGameConfig = {
-2737	  gameId: 'word-builder',
-2738	  title: { en: 'Word Builder' },
-2739	  gradeBand: 'year1-2',
-2740	  maxRounds: 2,
-2741	  maxRetries: 1,
-2742	  maxUndoDepth: 3,
-2743	  timerVisible: true,
-2744	  timerDurationSeconds: 60,
-2745	  difficulty: 'medium',
-2746	};
-2747	
-2748	const initialState: GameEngineState = {
-2749	  phase: 'playing',
-2750	  roundIndex: 1, // round 2 of 2 (1-indexed display)
-2751	  score: 3,
-2752	  streak: 1,
-2753	  retryCount: 0,
-2754	  content,
-2755	  currentRound: { roundId: 'r2', answer: null, hintsUsed: 0 },
-2756	};
-2757	
-2758	const meta: SessionMeta = {
-2759	  profileId: 'prof-shell',
-2760	  gameId: 'word-builder',
-2761	  gradeBand: 'year1-2',
-2762	  seed: 'seed-shell',
-2763	  initialContent: content,
-2764	  initialState,
-2765	};
-2766	
-2767	let db: BaseSkillDatabase;
-2768	
-2769	beforeEach(async () => {
-2770	  db = await createTestDatabase();
-2771	});
-2772	
-2773	afterEach(async () => {
-2774	  await destroyTestDatabase(db);
-2775	});
-2776	
-2777	function renderShell(configOverride?: Partial<ResolvedGameConfig>, children?: ReactNode) {
-2778	  const config = { ...baseConfig, ...configOverride };
-2779	  return render(
-2780	    <DbProvider openDatabase={() => Promise.resolve(db)}>
-2781	      <GameShell
-2782	        config={config}
-2783	        moves={{}}
-2784	        initialState={initialState}
-2785	        sessionId="sess-shell-001"
-2786	        meta={meta}
-2787	      >
-2788	        {children ?? <div data-testid="game-content">Game Here</div>}
-2789	      </GameShell>
-2790	    </DbProvider>,
-2791	  );
-2792	}
-2793	
-2794	describe('GameShell', () => {
-2795	  it('renders game title in top bar', () => {
-2796	    renderShell();
-2797	    expect(screen.getByText('Word Builder')).toBeInTheDocument();
-2798	  });
-2799	
-2800	  it('renders round counter (1-indexed)', () => {
-2801	    renderShell();
-2802	    // roundIndex=1 → "Round 2 / 2"
-2803	    expect(screen.getByText(/Round 2/)).toBeInTheDocument();
-2804	  });
-2805	
-2806	  it('renders score in sub-bar', () => {
-2807	    renderShell();
-2808	    expect(screen.getByText('3')).toBeInTheDocument();
-2809	  });
-2810	
-2811	  it('renders timer when timerVisible is true', () => {
-2812	    renderShell({ timerVisible: true });
-2813	    expect(screen.getByTestId('game-timer')).toBeInTheDocument();
-2814	  });
-2815	
-2816	  it('hides timer when timerVisible is false', () => {
-2817	    renderShell({ timerVisible: false });
-2818	    expect(screen.queryByTestId('game-timer')).not.toBeInTheDocument();
-2819	  });
-2820	
-2821	  it('renders undo button when maxUndoDepth is non-zero', () => {
-2822	    renderShell({ maxUndoDepth: 3 });
-2823	    expect(screen.getByRole('button', { name: /undo/i })).toBeInTheDocument();
-2824	  });
-2825	
-2826	  it('hides undo button when maxUndoDepth is 0', () => {
-2827	    renderShell({ maxUndoDepth: 0 });
-2828	    expect(screen.queryByRole('button', { name: /undo/i })).not.toBeInTheDocument();
-2829	  });
-2830	
-2831	  it('renders the game component children', () => {
-2832	    renderShell();
-2833	    expect(screen.getByTestId('game-content')).toBeInTheDocument();
-2834	  });
-2835	
-2836	  it('renders Exit button in footer', () => {
-2837	    renderShell();
-2838	    expect(screen.getByRole('button', { name: /exit/i })).toBeInTheDocument();
-2839	  });
-2840	});
-2841	```
-2842	
-2843	- [ ] **Step 2: Run test to verify it fails**
-2844	
-2845	Run: `yarn test src/components/game/GameShell.test.tsx`
-2846	Expected: FAIL — `GameShell` is not defined
-2847	
-2848	- [ ] **Step 3: Implement GameShell.tsx**
-2849	
-2850	Create `src/components/game/GameShell.tsx`:
-2851	
-2852	```tsx
-2853	// src/components/game/GameShell.tsx
-2854	import { useNavigate } from '@tanstack/react-router';
-2855	import type { ReactNode } from 'react';
-2856	import {
-2857	  GameEngineProvider,
-2858	  useGameDispatch,
-2859	  useGameState,
-2860	} from '@/lib/game-engine/index';
-2861	import type {
-2862	  MoveHandler,
-2863	  MoveLog,
-2864	  ResolvedGameConfig,
-2865	  GameEngineState,
-2866	  SessionMeta,
-2867	} from '@/lib/game-engine/types';
-2868	
-2869	interface GameShellProps {
-2870	  config: ResolvedGameConfig;
-2871	  moves: Record<string, MoveHandler>;
-2872	  initialState: GameEngineState;
-2873	  sessionId: string;
-2874	  meta: SessionMeta;
-2875	  initialLog?: MoveLog;
-2876	  children: ReactNode;
-2877	}
-2878	
-2879	interface GameShellChromeProps {
-2880	  config: ResolvedGameConfig;
-2881	  children: ReactNode;
-2882	}
-2883	
-2884	function GameShellChrome({ config, children }: GameShellChromeProps) {
-2885	  const state = useGameState();
-2886	  const dispatch = useGameDispatch();
-2887	  const navigate = useNavigate();
-2888	  const locale = 'en'; // TODO: use i18n locale in M5
-2889	
-2890	  const roundDisplay = state.roundIndex + 1;
-2891	  const title = config.title['en'] ?? config.gameId;
-2892	
-2893	  function handleExit() {
-2894	    void navigate({ to: `/${locale}/dashboard` });
-2895	  }
-2896	
-2897	  function handleUndo() {
-2898	    dispatch({
-2899	      type: 'UNDO',
-2900	      args: { targetStep: Math.max(0, state.roundIndex) },
-2901	      timestamp: Date.now(),
-2902	    });
-2903	  }
-2904	
-2905	  return (
-2906	    <div className="flex h-full flex-col">
-2907	      {/* Top bar */}
-2908	      <header className="flex items-center justify-between border-b px-4 py-2">
-2909	        <button
-2910	          className="text-sm text-muted-foreground"
-2911	          onClick={handleExit}
-2912	          aria-label="Back"
-2913	          type="button"
-2914	        >
-2915	          ← {title}
-2916	        </button>
-2917	        <span className="text-sm font-medium">
-2918	          Round {roundDisplay} / {config.maxRounds}
-2919	        </span>
-2920	      </header>
-2921	
-2922	      {/* Sub-bar: score + progress + optional timer */}
-2923	      <div className="flex items-center gap-4 border-b px-4 py-2 text-sm">
-2924	        <span>⭐ {state.score}</span>
-2925	        <div className="flex-1">
-2926	          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-2927	            <div
-2928	              className="h-full rounded-full bg-primary transition-all"
-2929	              style={{
-2930	                width: `${Math.round((roundDisplay / config.maxRounds) * 100)}%`,
-2931	              }}
-2932	            />
-2933	          </div>
-2934	        </div>
-2935	        {config.timerVisible &&
-2936	          config.timerDurationSeconds !== null && (
-2937	            <span data-testid="game-timer">
-2938	              ⏱ {config.timerDurationSeconds}s
-2939	            </span>
-2940	          )}
-2941	      </div>
-2942	
-2943	      {/* Game area */}
-2944	      <main className="min-h-0 flex-1 overflow-auto p-4">
-2945	        {children}
-2946	      </main>
-2947	
-2948	      {/* Footer */}
-2949	      <footer className="flex items-center justify-around border-t px-4 py-2">
-2950	        {config.maxUndoDepth !== 0 && (
-2951	          <button
-2952	            className="flex items-center gap-1 rounded px-3 py-1 text-sm hover:bg-muted disabled:opacity-40"
-2953	            onClick={handleUndo}
-2954	            aria-label="Undo"
-2955	            type="button"
-2956	          >
-2957	            ⟲ Undo
-2958	          </button>
-2959	        )}
-2960	        <button
-2961	          className="rounded px-3 py-1 text-sm hover:bg-muted"
-2962	          type="button"
-2963	          aria-label="Pause"
-2964	        >
-2965	          II Pause
-2966	        </button>
-2967	        <button
-2968	          className="rounded px-3 py-1 text-sm hover:bg-muted"
-2969	          onClick={handleExit}
-2970	          aria-label="Exit"
-2971	          type="button"
-2972	        >
-2973	          ✕ Exit
-2974	        </button>
-2975	      </footer>
-2976	    </div>
-2977	  );
-2978	}
-2979	
-2980	export function GameShell({
-2981	  config,
-2982	  moves,
-2983	  initialState,
-2984	  sessionId,
-2985	  meta,
-2986	  initialLog,
-2987	  children,
-2988	}: GameShellProps) {
-2989	  return (
-2990	    <GameEngineProvider
-2991	      config={config}
-2992	      moves={moves}
-2993	      initialState={initialState}
-2994	      sessionId={sessionId}
-2995	      meta={meta}
-2996	      initialLog={initialLog}
-2997	    >
-2998	      <GameShellChrome config={config}>{children}</GameShellChrome>
-2999	    </GameEngineProvider>
-3000	  );
-3001	}
-3002	```
-3003	
-3004	- [ ] **Step 4: Run test to verify it passes**
-3005	
-3006	Run: `yarn test src/components/game/GameShell.test.tsx`
-3007	Expected: PASS — all 9 tests green
-3008	
-3009	- [ ] **Step 5: Commit**
-3010	
-3011	```bash
-3012	git add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx
-3013	git commit -m "feat(m4): add GameShell Layout B component with undo/timer/exit conditionals"
-3014	```
-3015	
-3016	---
-3017	
-3018	## Task 11: Route Wiring
+2700 
+2701 `GameShell` needs: `config`, `moves` (MoveHandlers), `initialState`, `sessionId`, `meta`, optional `initialLog`, and a `children` slot for the game component.
+2702 
+2703 - [ ] **Step 1: Write the failing tests**
+2704 
+2705 Create `src/components/game/GameShell.test.tsx`:
+2706 
+2707 ```typescript
+2708 // src/components/game/GameShell.test.tsx
+2709 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
+2710 import { render, screen } from '@testing-library/react';
+2711 import userEvent from '@testing-library/user-event';
+2712 import type { ReactNode } from 'react';
+2713 import { GameShell } from './GameShell';
+2714 import { createTestDatabase, destroyTestDatabase } from '@/db/create-database';
+2715 import { DbProvider } from '@/providers/DbProvider';
+2716 import type { BaseSkillDatabase } from '@/db/types';
+2717 import type { GameEngineState, ResolvedContent, ResolvedGameConfig, SessionMeta } from '@/lib/game-engine/types';
+2718 
+2719 // Mock TanStack Router navigate
+2720 vi.mock('@tanstack/react-router', async (importOriginal) => {
+2721   const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+2722   return {
+2723     ...actual,
+2724     useNavigate: () => vi.fn(),
+2725     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+2726   };
+2727 });
+2728 
+2729 const content: ResolvedContent = {
+2730   rounds: [
+2731     { id: 'r1', prompt: { en: 'Q1' }, correctAnswer: 'A' },
+2732     { id: 'r2', prompt: { en: 'Q2' }, correctAnswer: 'B' },
+2733   ],
+2734 };
+2735 
+2736 const baseConfig: ResolvedGameConfig = {
+2737   gameId: 'word-builder',
+2738   title: { en: 'Word Builder' },
+2739   gradeBand: 'year1-2',
+2740   maxRounds: 2,
+2741   maxRetries: 1,
+2742   maxUndoDepth: 3,
+2743   timerVisible: true,
+2744   timerDurationSeconds: 60,
+2745   difficulty: 'medium',
+2746 };
+2747 
+2748 const initialState: GameEngineState = {
+2749   phase: 'playing',
+2750   roundIndex: 1, // round 2 of 2 (1-indexed display)
+2751   score: 3,
+2752   streak: 1,
+2753   retryCount: 0,
+2754   content,
+2755   currentRound: { roundId: 'r2', answer: null, hintsUsed: 0 },
+2756 };
+2757 
+2758 const meta: SessionMeta = {
+2759   profileId: 'prof-shell',
+2760   gameId: 'word-builder',
+2761   gradeBand: 'year1-2',
+2762   seed: 'seed-shell',
+2763   initialContent: content,
+2764   initialState,
+2765 };
+2766 
+2767 let db: BaseSkillDatabase;
+2768 
+2769 beforeEach(async () => {
+2770   db = await createTestDatabase();
+2771 });
+2772 
+2773 afterEach(async () => {
+2774   await destroyTestDatabase(db);
+2775 });
+2776 
+2777 function renderShell(configOverride?: Partial<ResolvedGameConfig>, children?: ReactNode) {
+2778   const config = { ...baseConfig, ...configOverride };
+2779   return render(
+2780     <DbProvider openDatabase={() => Promise.resolve(db)}>
+2781       <GameShell
+2782         config={config}
+2783         moves={{}}
+2784         initialState={initialState}
+2785         sessionId="sess-shell-001"
+2786         meta={meta}
+2787       >
+2788         {children ?? <div data-testid="game-content">Game Here</div>}
+2789       </GameShell>
+2790     </DbProvider>,
+2791   );
+2792 }
+2793 
+2794 describe('GameShell', () => {
+2795   it('renders game title in top bar', () => {
+2796     renderShell();
+2797     expect(screen.getByText('Word Builder')).toBeInTheDocument();
+2798   });
+2799 
+2800   it('renders round counter (1-indexed)', () => {
+2801     renderShell();
+2802     // roundIndex=1 → "Round 2 / 2"
+2803     expect(screen.getByText(/Round 2/)).toBeInTheDocument();
+2804   });
+2805 
+2806   it('renders score in sub-bar', () => {
+2807     renderShell();
+2808     expect(screen.getByText('3')).toBeInTheDocument();
+2809   });
+2810 
+2811   it('renders timer when timerVisible is true', () => {
+2812     renderShell({ timerVisible: true });
+2813     expect(screen.getByTestId('game-timer')).toBeInTheDocument();
+2814   });
+2815 
+2816   it('hides timer when timerVisible is false', () => {
+2817     renderShell({ timerVisible: false });
+2818     expect(screen.queryByTestId('game-timer')).not.toBeInTheDocument();
+2819   });
+2820 
+2821   it('renders undo button when maxUndoDepth is non-zero', () => {
+2822     renderShell({ maxUndoDepth: 3 });
+2823     expect(screen.getByRole('button', { name: /undo/i })).toBeInTheDocument();
+2824   });
+2825 
+2826   it('hides undo button when maxUndoDepth is 0', () => {
+2827     renderShell({ maxUndoDepth: 0 });
+2828     expect(screen.queryByRole('button', { name: /undo/i })).not.toBeInTheDocument();
+2829   });
+2830 
+2831   it('renders the game component children', () => {
+2832     renderShell();
+2833     expect(screen.getByTestId('game-content')).toBeInTheDocument();
+2834   });
+2835 
+2836   it('renders Exit button in footer', () => {
+2837     renderShell();
+2838     expect(screen.getByRole('button', { name: /exit/i })).toBeInTheDocument();
+2839   });
+2840 });
+2841 ```
+2842 
+2843 - [ ] **Step 2: Run test to verify it fails**
+2844 
+2845 Run: `yarn test src/components/game/GameShell.test.tsx`
+2846 Expected: FAIL — `GameShell` is not defined
+2847 
+2848 - [ ] **Step 3: Implement GameShell.tsx**
+2849 
+2850 Create `src/components/game/GameShell.tsx`:
+2851 
+2852 ```tsx
+2853 // src/components/game/GameShell.tsx
+2854 import { useNavigate } from '@tanstack/react-router';
+2855 import type { ReactNode } from 'react';
+2856 import {
+2857   GameEngineProvider,
+2858   useGameDispatch,
+2859   useGameState,
+2860 } from '@/lib/game-engine/index';
+2861 import type {
+2862   MoveHandler,
+2863   MoveLog,
+2864   ResolvedGameConfig,
+2865   GameEngineState,
+2866   SessionMeta,
+2867 } from '@/lib/game-engine/types';
+2868 
+2869 interface GameShellProps {
+2870   config: ResolvedGameConfig;
+2871   moves: Record<string, MoveHandler>;
+2872   initialState: GameEngineState;
+2873   sessionId: string;
+2874   meta: SessionMeta;
+2875   initialLog?: MoveLog;
+2876   children: ReactNode;
+2877 }
+2878 
+2879 interface GameShellChromeProps {
+2880   config: ResolvedGameConfig;
+2881   children: ReactNode;
+2882 }
+2883 
+2884 function GameShellChrome({ config, children }: GameShellChromeProps) {
+2885   const state = useGameState();
+2886   const dispatch = useGameDispatch();
+2887   const navigate = useNavigate();
+2888   const locale = 'en'; // TODO: use i18n locale in M5
+2889 
+2890   const roundDisplay = state.roundIndex + 1;
+2891   const title = config.title['en'] ?? config.gameId;
+2892 
+2893   function handleExit() {
+2894     void navigate({ to: `/${locale}/dashboard` });
+2895   }
+2896 
+2897   function handleUndo() {
+2898     dispatch({
+2899       type: 'UNDO',
+2900       args: { targetStep: Math.max(0, state.roundIndex) },
+2901       timestamp: Date.now(),
+2902     });
+2903   }
+2904 
+2905   return (
+2906     <div className="flex h-full flex-col">
+2907       {/* Top bar */}
+2908       <header className="flex items-center justify-between border-b px-4 py-2">
+2909         <button
+2910           className="text-sm text-muted-foreground"
+2911           onClick={handleExit}
+2912           aria-label="Back"
+2913           type="button"
+2914         >
+2915           ← {title}
+2916         </button>
+2917         <span className="text-sm font-medium">
+2918           Round {roundDisplay} / {config.maxRounds}
+2919         </span>
+2920       </header>
+2921 
+2922       {/* Sub-bar: score + progress + optional timer */}
+2923       <div className="flex items-center gap-4 border-b px-4 py-2 text-sm">
+2924         <span>⭐ {state.score}</span>
+2925         <div className="flex-1">
+2926           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+2927             <div
+2928               className="h-full rounded-full bg-primary transition-all"
+2929               style={{
+2930                 width: `${Math.round((roundDisplay / config.maxRounds) * 100)}%`,
+2931               }}
+2932             />
+2933           </div>
+2934         </div>
+2935         {config.timerVisible &&
+2936           config.timerDurationSeconds !== null && (
+2937             <span data-testid="game-timer">
+2938               ⏱ {config.timerDurationSeconds}s
+2939             </span>
+2940           )}
+2941       </div>
+2942 
+2943       {/* Game area */}
+2944       <main className="min-h-0 flex-1 overflow-auto p-4">
+2945         {children}
+2946       </main>
+2947 
+2948       {/* Footer */}
+2949       <footer className="flex items-center justify-around border-t px-4 py-2">
+2950         {config.maxUndoDepth !== 0 && (
+2951           <button
+2952             className="flex items-center gap-1 rounded px-3 py-1 text-sm hover:bg-muted disabled:opacity-40"
+2953             onClick={handleUndo}
+2954             aria-label="Undo"
+2955             type="button"
+2956           >
+2957             ⟲ Undo
+2958           </button>
+2959         )}
+2960         <button
+2961           className="rounded px-3 py-1 text-sm hover:bg-muted"
+2962           type="button"
+2963           aria-label="Pause"
+2964         >
+2965           II Pause
+2966         </button>
+2967         <button
+2968           className="rounded px-3 py-1 text-sm hover:bg-muted"
+2969           onClick={handleExit}
+2970           aria-label="Exit"
+2971           type="button"
+2972         >
+2973           ✕ Exit
+2974         </button>
+2975       </footer>
+2976     </div>
+2977   );
+2978 }
+2979 
+2980 export function GameShell({
+2981   config,
+2982   moves,
+2983   initialState,
+2984   sessionId,
+2985   meta,
+2986   initialLog,
+2987   children,
+2988 }: GameShellProps) {
+2989   return (
+2990     <GameEngineProvider
+2991       config={config}
+2992       moves={moves}
+2993       initialState={initialState}
+2994       sessionId={sessionId}
+2995       meta={meta}
+2996       initialLog={initialLog}
+2997     >
+2998       <GameShellChrome config={config}>{children}</GameShellChrome>
+2999     </GameEngineProvider>
+3000   );
+3001 }
+3002 ```
+3003 
+3004 - [ ] **Step 4: Run test to verify it passes**
+3005 
+3006 Run: `yarn test src/components/game/GameShell.test.tsx`
+3007 Expected: PASS — all 9 tests green
+3008 
+3009 - [ ] **Step 5: Commit**
+3010 
+3011 ```bash
+3012 git add src/components/game/GameShell.tsx src/components/game/GameShell.test.tsx
+3013 git commit -m "feat(m4): add GameShell Layout B component with undo/timer/exit conditionals"
+3014 ```
+3015 
+3016 ---
+3017 
+3018 ## Task 11: Route Wiring
 3019
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:49:21Z)**_
@@ -2182,6 +2210,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:49:23Z)**_
 ```text
 does not exist
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:49:26Z)**_
@@ -2194,6 +2223,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:49:26Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:49:30Z)**_
@@ -2366,6 +2396,7 @@ describe('GameShell', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:05Z)**_
@@ -2528,6 +2559,7 @@ export function GameShell({
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:10Z)**_
@@ -2564,6 +2596,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:10Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:15Z)**_
@@ -2586,11 +2619,13 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:15Z)**_
  FAIL  src/components/game/GameShell.test.tsx > GameShell > renders game title in top bar
  FAIL  src/components/game/GameShell.test.tsx > GameShell > renders score in sub-bar
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:21Z)**_
 
 Two failures:
+
 1. "renders game title" — `getByText('Word Builder')` doesn't find exact text since the button text is `← Word Builder`
 2. "renders score" — `getByText('3')` is ambiguous since `Round 2 / 2` contains numbers, or the `⭐ 3` renders as a span
 
@@ -2744,6 +2779,7 @@ Ignored nodes: comments, script, style
         <span
           class="text-sm font-medium"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:29Z)**_
@@ -2760,6 +2796,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:36Z)**_
@@ -2770,11 +2807,13 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:43Z)**_
 
 Wait — `getByText('Word Builder')` still won't match `← Word Builder`. And `getByText('3')` won't match `⭐ 3`. The test expects exact string `'Word Builder'` and `'3'`. The plan says these tests pass, so either:
+
 - The title should be rendered separately (not inside the button text), OR
 - We need to use `getByText(/Word Builder/)` (regex) in the test
 
@@ -2788,6 +2827,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:50Z)**_
@@ -2798,6 +2838,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:50:57Z)**_
@@ -2819,6 +2860,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:50:57Z)**_
  ✓ src/components/game/GameShell.test.tsx > GameShell > renders Exit button in footer 39ms
       Tests  9 passed (9)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:02Z)**_
@@ -2834,6 +2876,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:02Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:05Z)**_
@@ -2855,6 +2898,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:05Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/ui/slider.stories.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/ui/alert-dialog.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:09Z)**_
@@ -2864,61 +2908,62 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:09Z)**_
  `./worktrees/milestone-4-game-engine/src/components/ui/button.stories.tsx`
 
 ```text
-1	import { Button } from './button';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	
-4	const meta: Meta<typeof Button> = {
-5	  component: Button,
-6	  tags: ['autodocs'],
-7	  argTypes: {
-8	    onClick: { action: 'clicked' },
-9	  },
-10	};
-11	export default meta;
-12	
-13	type Story = StoryObj<typeof Button>;
-14	
-15	export const Default: Story = {
-16	  args: { children: 'Button', variant: 'default' },
-17	};
-18	
-19	export const Outline: Story = {
-20	  args: { children: 'Outline', variant: 'outline' },
-21	};
-22	
-23	export const Secondary: Story = {
-24	  args: { children: 'Secondary', variant: 'secondary' },
-25	};
-26	
-27	export const Ghost: Story = {
-28	  args: { children: 'Ghost', variant: 'ghost' },
-29	};
-30	
-31	export const Destructive: Story = {
-32	  args: { children: 'Delete', variant: 'destructive' },
-33	};
-34	
-35	export const Link: Story = {
-36	  args: { children: 'Link', variant: 'link' },
-37	};
-38	
-39	export const Small: Story = {
-40	  args: { children: 'Small', size: 'sm' },
-41	};
-42	
-43	export const Large: Story = {
-44	  args: { children: 'Large', size: 'lg' },
-45	};
-46	
-47	export const Icon: Story = {
-48	  args: { children: '★', size: 'icon', 'aria-label': 'Star' },
-49	};
-50	
-51	export const Disabled: Story = {
-52	  args: { children: 'Disabled', disabled: true },
-53	};
+1 import { Button } from './button';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 
+4 const meta: Meta<typeof Button> = {
+5   component: Button,
+6   tags: ['autodocs'],
+7   argTypes: {
+8     onClick: { action: 'clicked' },
+9   },
+10 };
+11 export default meta;
+12 
+13 type Story = StoryObj<typeof Button>;
+14 
+15 export const Default: Story = {
+16   args: { children: 'Button', variant: 'default' },
+17 };
+18 
+19 export const Outline: Story = {
+20   args: { children: 'Outline', variant: 'outline' },
+21 };
+22 
+23 export const Secondary: Story = {
+24   args: { children: 'Secondary', variant: 'secondary' },
+25 };
+26 
+27 export const Ghost: Story = {
+28   args: { children: 'Ghost', variant: 'ghost' },
+29 };
+30 
+31 export const Destructive: Story = {
+32   args: { children: 'Delete', variant: 'destructive' },
+33 };
+34 
+35 export const Link: Story = {
+36   args: { children: 'Link', variant: 'link' },
+37 };
+38 
+39 export const Small: Story = {
+40   args: { children: 'Small', size: 'sm' },
+41 };
+42 
+43 export const Large: Story = {
+44   args: { children: 'Large', size: 'lg' },
+45 };
+46 
+47 export const Icon: Story = {
+48   args: { children: '★', size: 'icon', 'aria-label': 'Star' },
+49 };
+50 
+51 export const Disabled: Story = {
+52   args: { children: 'Disabled', disabled: true },
+53 };
 54
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:13Z)**_
@@ -2935,6 +2980,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:13Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/db/hooks/useSettings.demo.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/db/hooks/useBookmarks.demo.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:16Z)**_
@@ -2944,94 +2990,95 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:16Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-event-bus.demo.tsx`
 
 ```text
-1	import { useEffect, useRef, useState } from 'react';
-2	import { createGameEventBus } from './game-event-bus';
-3	import type { GameEvent } from '#/types/game-events';
-4	import { Button } from '#/components/ui/button';
-5	
-6	const base = {
-7	  gameId: 'demo',
-8	  sessionId: 'demo-session',
-9	  profileId: 'anonymous',
-10	  timestamp: Date.now(),
-11	  roundIndex: 0,
-12	};
-13	
-14	export const GameEventBusDemo = () => {
-15	  const busRef = useRef(createGameEventBus());
-16	  const [log, setLog] = useState<string[]>([]);
-17	
-18	  useEffect(() => {
-19	    const unsubscribe = busRef.current.subscribe(
-20	      'game:*',
-21	      (event: GameEvent) => {
-22	        setLog((prev) => [
-23	          `[${event.type}] ${JSON.stringify(event)}`,
-24	          ...prev.slice(0, 9),
-25	        ]);
-26	      },
-27	    );
-28	    return unsubscribe;
-29	  }, []);
-30	
-31	  const emitStart = () => {
-32	    const event: GameEvent = {
-33	      type: 'game:start',
-34	      ...base,
-35	      locale: 'en',
-36	      difficulty: 'easy',
-37	      gradeBand: 'k',
-38	    };
-39	    busRef.current.emit(event);
-40	  };
-41	
-42	  const emitEnd = () => {
-43	    const event: GameEvent = {
-44	      type: 'game:end',
-45	      ...base,
-46	      finalScore: 0,
-47	      totalRounds: 1,
-48	      correctCount: 0,
-49	      durationMs: 0,
-50	    };
-51	    busRef.current.emit(event);
-52	  };
-53	
-54	  const emitInstructions = () => {
-55	    const event: GameEvent = {
-56	      type: 'game:instructions_shown',
-57	      ...base,
-58	    };
-59	    busRef.current.emit(event);
-60	  };
-61	
-62	  return (
-63	    <div className="flex flex-col gap-4 p-4">
-64	      <div className="flex flex-wrap gap-2">
-65	        <Button size="sm" onClick={emitStart}>
-66	          Emit game:start
-67	        </Button>
-68	        <Button size="sm" onClick={emitEnd}>
-69	          Emit game:end
-70	        </Button>
-71	        <Button size="sm" onClick={emitInstructions}>
-72	          Emit game:instructions_shown
-73	        </Button>
-74	      </div>
-75	      <div className="rounded border p-2 font-mono text-xs">
-76	        {log.length === 0 ? (
-77	          <span className="text-muted-foreground">
-78	            No events yet — click a button above.
-79	          </span>
-80	        ) : (
-81	          log.map((entry) => <div key={entry}>{entry}</div>)
-82	        )}
-83	      </div>
-84	    </div>
-85	  );
-86	};
+1 import { useEffect, useRef, useState } from 'react';
+2 import { createGameEventBus } from './game-event-bus';
+3 import type { GameEvent } from '#/types/game-events';
+4 import { Button } from '#/components/ui/button';
+5 
+6 const base = {
+7   gameId: 'demo',
+8   sessionId: 'demo-session',
+9   profileId: 'anonymous',
+10   timestamp: Date.now(),
+11   roundIndex: 0,
+12 };
+13 
+14 export const GameEventBusDemo = () => {
+15   const busRef = useRef(createGameEventBus());
+16   const [log, setLog] = useState<string[]>([]);
+17 
+18   useEffect(() => {
+19     const unsubscribe = busRef.current.subscribe(
+20       'game:*',
+21       (event: GameEvent) => {
+22         setLog((prev) => [
+23           `[${event.type}] ${JSON.stringify(event)}`,
+24           ...prev.slice(0, 9),
+25         ]);
+26       },
+27     );
+28     return unsubscribe;
+29   }, []);
+30 
+31   const emitStart = () => {
+32     const event: GameEvent = {
+33       type: 'game:start',
+34       ...base,
+35       locale: 'en',
+36       difficulty: 'easy',
+37       gradeBand: 'k',
+38     };
+39     busRef.current.emit(event);
+40   };
+41 
+42   const emitEnd = () => {
+43     const event: GameEvent = {
+44       type: 'game:end',
+45       ...base,
+46       finalScore: 0,
+47       totalRounds: 1,
+48       correctCount: 0,
+49       durationMs: 0,
+50     };
+51     busRef.current.emit(event);
+52   };
+53 
+54   const emitInstructions = () => {
+55     const event: GameEvent = {
+56       type: 'game:instructions_shown',
+57       ...base,
+58     };
+59     busRef.current.emit(event);
+60   };
+61 
+62   return (
+63     <div className="flex flex-col gap-4 p-4">
+64       <div className="flex flex-wrap gap-2">
+65         <Button size="sm" onClick={emitStart}>
+66           Emit game:start
+67         </Button>
+68         <Button size="sm" onClick={emitEnd}>
+69           Emit game:end
+70         </Button>
+71         <Button size="sm" onClick={emitInstructions}>
+72           Emit game:instructions_shown
+73         </Button>
+74       </div>
+75       <div className="rounded border p-2 font-mono text-xs">
+76         {log.length === 0 ? (
+77           <span className="text-muted-foreground">
+78             No events yet — click a button above.
+79           </span>
+80         ) : (
+81           log.map((entry) => <div key={entry}>{entry}</div>)
+82         )}
+83       </div>
+84     </div>
+85   );
+86 };
 87
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:20Z)**_
@@ -3051,6 +3098,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:22Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/OfflineIndicator.stories.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/Footer.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:24Z)**_
@@ -3060,22 +3108,23 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:24Z)**_
  `./worktrees/milestone-4-game-engine/src/components/Header.stories.tsx`
 
 ```text
-1	import { withRouter } from '../../.storybook/decorators/withRouter';
-2	import { Header } from './Header';
-3	import type { Meta, StoryObj } from '@storybook/react';
-4	
-5	const meta: Meta<typeof Header> = {
-6	  component: Header,
-7	  tags: ['autodocs'],
-8	  decorators: [withRouter],
-9	};
-10	export default meta;
-11	
-12	type Story = StoryObj<typeof Header>;
-13	
-14	export const Default: Story = {};
+1 import { withRouter } from '../../.storybook/decorators/withRouter';
+2 import { Header } from './Header';
+3 import type { Meta, StoryObj } from '@storybook/react';
+4 
+5 const meta: Meta<typeof Header> = {
+6   component: Header,
+7   tags: ['autodocs'],
+8   decorators: [withRouter],
+9 };
+10 export default meta;
+11 
+12 type Story = StoryObj<typeof Header>;
+13 
+14 export const Default: Story = {};
 15
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:29Z)**_
@@ -3089,6 +3138,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:29Z)**_
 withRouter.tsx
 withTheme.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:32Z)**_
@@ -3098,47 +3148,48 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:32Z)**_
  `./worktrees/milestone-4-game-engine/.storybook/decorators/withRouter.tsx`
 
 ```text
-1	import {
-2	  Outlet,
-3	  RouterProvider,
-4	  createMemoryHistory,
-5	  createRootRoute,
-6	  createRoute,
-7	  createRouter,
-8	} from '@tanstack/react-router';
-9	import React from 'react';
-10	import type { Decorator } from '@storybook/react';
-11	
-12	export const withRouter: Decorator = (Story) => {
-13	  // eslint-disable-next-line react-hooks/rules-of-hooks -- Storybook decorator factory
-14	  const router = React.useMemo(() => {
-15	    const rootRoute = createRootRoute({
-16	      component: () => (
-17	        <div>
-18	          <Outlet />
-19	        </div>
-20	      ),
-21	    });
-22	    const localeRoute = createRoute({
-23	      getParentRoute: () => rootRoute,
-24	      path: '/$locale',
-25	      component: function StorybookLocaleRoute() {
-26	        const Cmp = Story as React.ComponentType;
-27	        return <Cmp />;
-28	      },
-29	    });
-30	    const routeTree = rootRoute.addChildren([localeRoute]);
-31	    return createRouter({
-32	      routeTree,
-33	      history: createMemoryHistory({ initialEntries: ['/en'] }),
-34	    });
-35	    /* `Story` identity changes per story — router must be recreated. */
-36	  }, [Story]);
-37	
-38	  return <RouterProvider router={router} />;
-39	};
+1 import {
+2   Outlet,
+3   RouterProvider,
+4   createMemoryHistory,
+5   createRootRoute,
+6   createRoute,
+7   createRouter,
+8 } from '@tanstack/react-router';
+9 import React from 'react';
+10 import type { Decorator } from '@storybook/react';
+11 
+12 export const withRouter: Decorator = (Story) => {
+13   // eslint-disable-next-line react-hooks/rules-of-hooks -- Storybook decorator factory
+14   const router = React.useMemo(() => {
+15     const rootRoute = createRootRoute({
+16       component: () => (
+17         <div>
+18           <Outlet />
+19         </div>
+20       ),
+21     });
+22     const localeRoute = createRoute({
+23       getParentRoute: () => rootRoute,
+24       path: '/$locale',
+25       component: function StorybookLocaleRoute() {
+26         const Cmp = Story as React.ComponentType;
+27         return <Cmp />;
+28       },
+29     });
+30     const routeTree = rootRoute.addChildren([localeRoute]);
+31     return createRouter({
+32       routeTree,
+33       history: createMemoryHistory({ initialEntries: ['/en'] }),
+34     });
+35     /* `Story` identity changes per story — router must be recreated. */
+36   }, [Story]);
+37 
+38   return <RouterProvider router={router} />;
+39 };
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:37Z)**_
@@ -3152,122 +3203,123 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:51:37Z)**_
  `./worktrees/milestone-4-game-engine/src/db/create-database.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { addRxPlugin, createRxDatabase } from 'rxdb';
-3	import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
-4	import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-5	import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
-6	import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
-7	import { checkVersionAndMigrate } from './migrations';
-8	import {
-9	  appMetaSchema,
-10	  bookmarksSchema,
-11	  gameConfigOverridesSchema,
-12	  profilesSchema,
-13	  progressSchema,
-14	  sessionHistoryIndexSchema,
-15	  sessionHistorySchema,
-16	  settingsSchema,
-17	  syncMetaSchema,
-18	  themesSchema,
-19	} from './schemas';
-20	import type { BaseSkillCollections, BaseSkillDatabase } from './types';
-21	import type { RxDatabase } from 'rxdb';
-22	
-23	addRxPlugin(RxDBMigrationSchemaPlugin);
-24	
-25	const DB_NAME = 'baseskill-data-test';
-26	const PRODUCTION_DB_NAME = 'baseskill-data';
-27	
-28	const COLLECTIONS = {
-29	  app_meta: { schema: appMetaSchema },
-30	  profiles: { schema: profilesSchema },
-31	  progress: { schema: progressSchema },
-32	  settings: { schema: settingsSchema },
-33	  game_config_overrides: { schema: gameConfigOverridesSchema },
-34	  bookmarks: { schema: bookmarksSchema },
-35	  themes: { schema: themesSchema },
-36	  session_history: { schema: sessionHistorySchema },
-37	  session_history_index: {
-38	    schema: sessionHistoryIndexSchema,
-39	    migrationStrategies: {
-40	      1: (oldDoc: Record<string, unknown>) => ({
-41	        ...oldDoc,
-42	        status: 'completed',
-43	        seed: '',
-44	        initialContent: { rounds: [] },
-45	        initialState: {},
-46	      }),
-47	    },
-48	  },
-49	  sync_meta: { schema: syncMetaSchema },
-50	} as const;
-51	
-52	async function addBaseSkillCollections(
-53	  db: RxDatabase<BaseSkillCollections>,
-54	): Promise<BaseSkillDatabase> {
-55	  await db.addCollections(COLLECTIONS);
-56	  return db as BaseSkillDatabase;
-57	}
-58	
-59	/** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
-60	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-61	  const db = await createRxDatabase<BaseSkillDatabase>({
-62	    name: `${DB_NAME}-${nanoid()}`,
-63	    storage: wrappedValidateAjvStorage({
-64	      storage: getRxStorageMemory(),
-65	    }),
-66	    multiInstance: false,
-67	  });
-68	  return addBaseSkillCollections(db);
-69	}
-70	
-71	const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
-72	
-73	/**
-74	 * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
-75	 * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
-76	 */
-77	export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
-78	  const db = await createRxDatabase<BaseSkillDatabase>({
-79	    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
-80	    storage: getRxStorageMemory(),
-81	    multiInstance: false,
-82	  });
-83	  const withCols = await addBaseSkillCollections(db);
-84	  await checkVersionAndMigrate(withCols);
-85	  return withCols;
-86	}
-87	
-88	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-89	
-90	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-91	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-92	  if (typeof indexedDB === 'undefined') {
-93	    throw new TypeError(
-94	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-95	    );
-96	  }
-97	  productionDbPromise ??= (async () => {
-98	    const db = await createRxDatabase<BaseSkillDatabase>({
-99	      name: PRODUCTION_DB_NAME,
-100	      storage: getRxStorageDexie(),
-101	      multiInstance: false,
-102	    });
-103	    const withCols = await addBaseSkillCollections(db);
-104	    await checkVersionAndMigrate(withCols);
-105	    return withCols;
-106	  })();
-107	  return productionDbPromise;
-108	}
-109	
-110	export async function destroyTestDatabase(
-111	  db?: BaseSkillDatabase,
-112	): Promise<void> {
-113	  if (db) await db.remove();
-114	}
+1 import { nanoid } from 'nanoid';
+2 import { addRxPlugin, createRxDatabase } from 'rxdb';
+3 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
+4 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+5 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+6 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+7 import { checkVersionAndMigrate } from './migrations';
+8 import {
+9   appMetaSchema,
+10   bookmarksSchema,
+11   gameConfigOverridesSchema,
+12   profilesSchema,
+13   progressSchema,
+14   sessionHistoryIndexSchema,
+15   sessionHistorySchema,
+16   settingsSchema,
+17   syncMetaSchema,
+18   themesSchema,
+19 } from './schemas';
+20 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
+21 import type { RxDatabase } from 'rxdb';
+22 
+23 addRxPlugin(RxDBMigrationSchemaPlugin);
+24 
+25 const DB_NAME = 'baseskill-data-test';
+26 const PRODUCTION_DB_NAME = 'baseskill-data';
+27 
+28 const COLLECTIONS = {
+29   app_meta: { schema: appMetaSchema },
+30   profiles: { schema: profilesSchema },
+31   progress: { schema: progressSchema },
+32   settings: { schema: settingsSchema },
+33   game_config_overrides: { schema: gameConfigOverridesSchema },
+34   bookmarks: { schema: bookmarksSchema },
+35   themes: { schema: themesSchema },
+36   session_history: { schema: sessionHistorySchema },
+37   session_history_index: {
+38     schema: sessionHistoryIndexSchema,
+39     migrationStrategies: {
+40       1: (oldDoc: Record<string, unknown>) => ({
+41         ...oldDoc,
+42         status: 'completed',
+43         seed: '',
+44         initialContent: { rounds: [] },
+45         initialState: {},
+46       }),
+47     },
+48   },
+49   sync_meta: { schema: syncMetaSchema },
+50 } as const;
+51 
+52 async function addBaseSkillCollections(
+53   db: RxDatabase<BaseSkillCollections>,
+54 ): Promise<BaseSkillDatabase> {
+55   await db.addCollections(COLLECTIONS);
+56   return db as BaseSkillDatabase;
+57 }
+58 
+59 /** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
+60 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+61   const db = await createRxDatabase<BaseSkillDatabase>({
+62     name: `${DB_NAME}-${nanoid()}`,
+63     storage: wrappedValidateAjvStorage({
+64       storage: getRxStorageMemory(),
+65     }),
+66     multiInstance: false,
+67   });
+68   return addBaseSkillCollections(db);
+69 }
+70 
+71 const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+72 
+73 /**
+74  * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+75  * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+76  */
+77 export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+78   const db = await createRxDatabase<BaseSkillDatabase>({
+79     name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+80     storage: getRxStorageMemory(),
+81     multiInstance: false,
+82   });
+83   const withCols = await addBaseSkillCollections(db);
+84   await checkVersionAndMigrate(withCols);
+85   return withCols;
+86 }
+87 
+88 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+89 
+90 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+91 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+92   if (typeof indexedDB === 'undefined') {
+93     throw new TypeError(
+94       'getOrCreateDatabase is only available in a browser with IndexedDB',
+95     );
+96   }
+97   productionDbPromise ??= (async () => {
+98     const db = await createRxDatabase<BaseSkillDatabase>({
+99       name: PRODUCTION_DB_NAME,
+100       storage: getRxStorageDexie(),
+101       multiInstance: false,
+102     });
+103     const withCols = await addBaseSkillCollections(db);
+104     await checkVersionAndMigrate(withCols);
+105     return withCols;
+106   })();
+107   return productionDbPromise;
+108 }
+109 
+110 export async function destroyTestDatabase(
+111   db?: BaseSkillDatabase,
+112 ): Promise<void> {
+113   if (db) await db.remove();
+114 }
 115
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:51:41Z)**_
@@ -3401,6 +3453,7 @@ export const LastRound: Story = {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:02Z)**_
@@ -3436,6 +3489,7 @@ src/lib/game-engine/session-recorder.ts(45,21): error TS2352: Conversion of type
 error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:10Z)**_
@@ -3447,7 +3501,6 @@ There are some TypeScript errors to fix:
 2. `session-finder.ts`: type assertions need to go through `unknown` first
 3. `session-finder.test.ts`: `Object is possibly 'undefined'` for `result?.moves[0]` - need to assert non-null
 4. `session-recorder.ts`: type assertion issues with `Record<string, unknown>`
-
 
 5. `session-recorder.test.tsx`: type issues with `Move[]`
 
@@ -3467,6 +3520,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:10Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:14Z)**_
@@ -3476,22 +3530,23 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:14Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/session-recorder.ts`
 
 ```text
-36	    void db.session_history_index.upsert({
-37	      sessionId,
-38	      profileId: meta.profileId,
-39	      gameId: meta.gameId,
-40	      startedAt: startedAt.current,
-41	      gradeBand: meta.gradeBand,
-42	      status: 'in-progress',
-43	      seed: meta.seed,
-44	      initialContent: meta.initialContent as Record<string, unknown>,
-45	      initialState: meta.initialState as Record<string, unknown>,
-46	      totalChunks: 1,
-47	      totalEvents: 0,
-48	    });
-49	  }, [db, sessionId, meta]);
+36     void db.session_history_index.upsert({
+37       sessionId,
+38       profileId: meta.profileId,
+39       gameId: meta.gameId,
+40       startedAt: startedAt.current,
+41       gradeBand: meta.gradeBand,
+42       status: 'in-progress',
+43       seed: meta.seed,
+44       initialContent: meta.initialContent as Record<string, unknown>,
+45       initialState: meta.initialState as Record<string, unknown>,
+46       totalChunks: 1,
+47       totalEvents: 0,
+48     });
+49   }, [db, sessionId, meta]);
 50
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:19Z)**_
@@ -3502,6 +3557,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-recorder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:24Z)**_
@@ -3516,6 +3572,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:33Z)**_
@@ -3526,6 +3583,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:33Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:39Z)**_
@@ -3536,6 +3594,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:43Z)**_
@@ -3549,17 +3608,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:44Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.test.ts`
 
 ```text
-180	
-181	    const result = await findInProgressSession(
-182	      'prof-finder',
-183	      'word-builder',
-184	      db,
-185	    );
-186	    expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
-187	    expect(result?.moves[1].type).toBe('NEXT_ROUND');
-188	  });
-189	});
+180 
+181     const result = await findInProgressSession(
+182       'prof-finder',
+183       'word-builder',
+184       db,
+185     );
+186     expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
+187     expect(result?.moves[1].type).toBe('NEXT_ROUND');
+188   });
+189 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:49Z)**_
@@ -3570,6 +3630,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:53Z)**_
@@ -3583,32 +3644,33 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:52:54Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/session-recorder.test.tsx`
 
 ```text
-79	  it('writes moves to session_history chunk on every move addition', async () => {
-80	    const sessionId = 'sess-recorder-002';
-81	    const moves1: Move[] = [makeMove('SUBMIT_ANSWER', { answer: 'A' })];
-82	
-83	    const { rerender } = renderHook(
-84	      ({ moves, phase }: { moves: Move[]; phase: string }) =>
-85	        useSessionRecorder(moves, sessionId, meta, db, phase),
-86	      { initialProps: { moves: [], phase: 'playing' } },
-87	    );
-88	
-89	    act(() => {
-90	      rerender({ moves: moves1, phase: 'playing' });
-91	    });
-92	
-93	    await waitFor(async () => {
-94	      const chunkId = `${sessionId}-chunk-0`;
-95	      const chunk = await db.session_history.findOne(chunkId).exec();
-96	      expect(chunk).not.toBeNull();
-97	      expect(chunk?.events).toHaveLength(1);
-98	      expect(chunk?.events[0].action).toBe('SUBMIT_ANSWER');
-99	    });
-100	  });
-101	
-102	  it('marks session as completed and sets endedAt when phase is game-over', async () => {
-103	    const sessionId = 'sess-recorder-003';
+79   it('writes moves to session_history chunk on every move addition', async () => {
+80     const sessionId = 'sess-recorder-002';
+81     const moves1: Move[] = [makeMove('SUBMIT_ANSWER', { answer: 'A' })];
+82 
+83     const { rerender } = renderHook(
+84       ({ moves, phase }: { moves: Move[]; phase: string }) =>
+85         useSessionRecorder(moves, sessionId, meta, db, phase),
+86       { initialProps: { moves: [], phase: 'playing' } },
+87     );
+88 
+89     act(() => {
+90       rerender({ moves: moves1, phase: 'playing' });
+91     });
+92 
+93     await waitFor(async () => {
+94       const chunkId = `${sessionId}-chunk-0`;
+95       const chunk = await db.session_history.findOne(chunkId).exec();
+96       expect(chunk).not.toBeNull();
+97       expect(chunk?.events).toHaveLength(1);
+98       expect(chunk?.events[0].action).toBe('SUBMIT_ANSWER');
+99     });
+100   });
+101 
+102   it('marks session as completed and sets endedAt when phase is game-over', async () => {
+103     const sessionId = 'sess-recorder-003';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:52:59Z)**_
@@ -3623,6 +3685,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-recorder.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:05Z)**_
@@ -3637,6 +3700,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-recorder.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:12Z)**_
@@ -3658,6 +3722,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:12Z)**_
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:16Z)**_
@@ -3693,6 +3758,7 @@ src/lib/game-engine/session-finder.test.ts(97,12): error TS2532: Object is possi
 error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:23Z)**_
@@ -3707,6 +3773,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:25Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:30Z)**_
@@ -3721,6 +3788,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:37Z)**_
@@ -3735,6 +3803,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:43Z)**_
@@ -3744,19 +3813,20 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:43Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import {
-3	  createContext,
-4	  useCallback,
-5	  useContext,
-6	  useRef,
-7	  useMemo,
-8	  type ReactNode,
-9	} from 'react';
-10	import { useRxDB } from '@/db/hooks/useRxDB';
-11	import { createReducer, useGameLifecycle } from './lifecycle';
-12	import { useMoveLog } from './move-log';
+1 // src/lib/game-engine/index.ts
+2 import {
+3   createContext,
+4   useCallback,
+5   useContext,
+6   useRef,
+7   useMemo,
+8   type ReactNode,
+9 } from 'react';
+10 import { useRxDB } from '@/db/hooks/useRxDB';
+11 import { createReducer, useGameLifecycle } from './lifecycle';
+12 import { useMoveLog } from './move-log';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:48Z)**_
@@ -3767,6 +3837,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:52Z)**_
@@ -3780,22 +3851,23 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:53Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/lifecycle.ts`
 
 ```text
-18	function buildInitialState(
-19	  config: ResolvedGameConfig,
-20	  override?: GameEngineState,
-21	): GameEngineState {
-22	  if (override) return override;
-23	  return {
-24	    phase: 'instructions',
-25	    roundIndex: 0,
-26	    score: 0,
-27	    streak: 0,
-28	    retryCount: 0,
-29	    content: { rounds: [] },
-30	    currentRound: { roundId: '', answer: null, hintsUsed: 0 },
-31	  };
-32	}
+18 function buildInitialState(
+19   config: ResolvedGameConfig,
+20   override?: GameEngineState,
+21 ): GameEngineState {
+22   if (override) return override;
+23   return {
+24     phase: 'instructions',
+25     roundIndex: 0,
+26     score: 0,
+27     streak: 0,
+28     retryCount: 0,
+29     content: { rounds: [] },
+30     currentRound: { roundId: '', answer: null, hintsUsed: 0 },
+31   };
+32 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:53:57Z)**_
@@ -3806,6 +3878,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:53:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/lifecycle.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:02Z)**_
@@ -3819,37 +3892,38 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:03Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/move-log.test.ts`
 
 ```text
-55	      result.current.appendMove(
-56	        makeMove('SUBMIT_ANSWER', { answer: 'A' }),
-57	      );
-58	      result.current.appendMove(makeMove('REQUEST_HINT', {}));
-59	    });
-60	    expect(result.current.moves).toHaveLength(2);
-61	    expect(result.current.moves[0].type).toBe('SUBMIT_ANSWER');
-62	    expect(result.current.moves[1].type).toBe('REQUEST_HINT');
-63	  });
-64	
-65	  it('accepts UNDO move within allowed depth', () => {
-66	    const { result } = renderHook(() => useMoveLog(2));
-67	    act(() => {
-68	      result.current.appendMove(
-69	        makeMove('SUBMIT_ANSWER', { answer: 'A' }),
-70	      ); // index 0
-71	      result.current.appendMove(
-72	        makeMove('SUBMIT_ANSWER', { answer: 'B' }),
-73	      ); // index 1
-74	      // UNDO to step 0: undoDepth = moves.length(2) - targetStep(0) = 2 (allowed, maxUndoDepth=2)
-75	      result.current.appendMove(makeMove('UNDO', { targetStep: 0 }));
-76	    });
-77	    expect(result.current.moves).toHaveLength(3);
-78	    expect(result.current.moves[2].type).toBe('UNDO');
-79	  });
-80	
-81	  it('rejects UNDO move when maxUndoDepth is 0 (returns false)', () => {
-82	    const { result } = renderHook(() => useMoveLog(0));
-83	    let accepted = true;
-84	    act(() => {
+55       result.current.appendMove(
+56         makeMove('SUBMIT_ANSWER', { answer: 'A' }),
+57       );
+58       result.current.appendMove(makeMove('REQUEST_HINT', {}));
+59     });
+60     expect(result.current.moves).toHaveLength(2);
+61     expect(result.current.moves[0].type).toBe('SUBMIT_ANSWER');
+62     expect(result.current.moves[1].type).toBe('REQUEST_HINT');
+63   });
+64 
+65   it('accepts UNDO move within allowed depth', () => {
+66     const { result } = renderHook(() => useMoveLog(2));
+67     act(() => {
+68       result.current.appendMove(
+69         makeMove('SUBMIT_ANSWER', { answer: 'A' }),
+70       ); // index 0
+71       result.current.appendMove(
+72         makeMove('SUBMIT_ANSWER', { answer: 'B' }),
+73       ); // index 1
+74       // UNDO to step 0: undoDepth = moves.length(2) - targetStep(0) = 2 (allowed, maxUndoDepth=2)
+75       result.current.appendMove(makeMove('UNDO', { targetStep: 0 }));
+76     });
+77     expect(result.current.moves).toHaveLength(3);
+78     expect(result.current.moves[2].type).toBe('UNDO');
+79   });
+80 
+81   it('rejects UNDO move when maxUndoDepth is 0 (returns false)', () => {
+82     const { result } = renderHook(() => useMoveLog(0));
+83     let accepted = true;
+84     act(() => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:07Z)**_
@@ -3860,6 +3934,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/move-log.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:13Z)**_
@@ -3870,6 +3945,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/move-log.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:17Z)**_
@@ -3883,22 +3959,23 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:18Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/replay.test.ts`
 
 ```text
-38	
-39	// A simple handler that sets the answer and bumps score if correct
-40	const submitHandler: MoveHandler = (state, args) => ({
-41	  ...state,
-42	  score:
-43	    args['answer'] ===
-44	    state.content.rounds[state.roundIndex].correctAnswer
-45	      ? state.score + 1
-46	      : state.score,
-47	  currentRound: {
-48	    ...state.currentRound,
-49	    answer: args['answer'] as string,
-50	  },
-51	});
+38 
+39 // A simple handler that sets the answer and bumps score if correct
+40 const submitHandler: MoveHandler = (state, args) => ({
+41   ...state,
+42   score:
+43     args['answer'] ===
+44     state.content.rounds[state.roundIndex].correctAnswer
+45       ? state.score + 1
+46       : state.score,
+47   currentRound: {
+48     ...state.currentRound,
+49     answer: args['answer'] as string,
+50   },
+51 });
 52
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:22Z)**_
@@ -3909,6 +3986,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/replay.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:26Z)**_
@@ -3922,43 +4000,44 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:27Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/replay.ts`
 
 ```text
-1	// src/lib/game-engine/replay.ts
-2	import type { GameEngineState, MoveHandler, MoveLog } from './types';
-3	
-4	/**
-5	 * Pure function — no React, no side effects, no RxDB.
-6	 * Replays moves 0..stepIndex from log.initialState using provided move handlers.
-7	 * UNDO moves are handled by re-replaying from initialState to the targetStep.
-8	 */
-9	export function replayToStep(
-10	  log: MoveLog,
-11	  stepIndex: number,
-12	  moveHandlers: Record<string, MoveHandler>,
-13	): GameEngineState {
-14	  let state = log.initialState;
-15	
-16	  for (let i = 0; i <= stepIndex && i < log.moves.length; i++) {
-17	    const move = log.moves[i];
-18	
-19	    if (move.type === 'UNDO') {
-20	      const targetStep = move.args['targetStep'] as number;
-21	      // Replay from initial state to targetStep (exclusive — gives state BEFORE targetStep was applied)
-22	      state =
-23	        targetStep > 0
-24	          ? replayToStep(log, targetStep - 1, moveHandlers)
-25	          : log.initialState;
-26	    } else {
-27	      const handler = moveHandlers[move.type];
-28	      if (handler) {
-29	        state = handler(state, move.args);
-30	      }
-31	    }
-32	  }
-33	
-34	  return state;
-35	}
+1 // src/lib/game-engine/replay.ts
+2 import type { GameEngineState, MoveHandler, MoveLog } from './types';
+3 
+4 /**
+5  * Pure function — no React, no side effects, no RxDB.
+6  * Replays moves 0..stepIndex from log.initialState using provided move handlers.
+7  * UNDO moves are handled by re-replaying from initialState to the targetStep.
+8  */
+9 export function replayToStep(
+10   log: MoveLog,
+11   stepIndex: number,
+12   moveHandlers: Record<string, MoveHandler>,
+13 ): GameEngineState {
+14   let state = log.initialState;
+15 
+16   for (let i = 0; i <= stepIndex && i < log.moves.length; i++) {
+17     const move = log.moves[i];
+18 
+19     if (move.type === 'UNDO') {
+20       const targetStep = move.args['targetStep'] as number;
+21       // Replay from initial state to targetStep (exclusive — gives state BEFORE targetStep was applied)
+22       state =
+23         targetStep > 0
+24           ? replayToStep(log, targetStep - 1, moveHandlers)
+25           : log.initialState;
+26     } else {
+27       const handler = moveHandlers[move.type];
+28       if (handler) {
+29         state = handler(state, move.args);
+30       }
+31     }
+32   }
+33 
+34   return state;
+35 }
 36
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:34Z)**_
@@ -3969,6 +4048,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/replay.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:38Z)**_
@@ -3982,19 +4062,20 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:38Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.test.ts`
 
 ```text
-90	    );
-91	
-92	    expect(result).not.toBeNull();
-93	    expect(result?.sessionId).toBe('sess-finder-001');
-94	    expect(result?.seed).toBe('seed-xyz');
-95	    expect(result?.moves).toHaveLength(1);
-96	    expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
-97	    expect(result?.moves[0].args).toEqual({ answer: 'A' });
-98	  });
-99	
-100	  it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
-101	    const staleDate = new Date(
+90     );
+91 
+92     expect(result).not.toBeNull();
+93     expect(result?.sessionId).toBe('sess-finder-001');
+94     expect(result?.seed).toBe('seed-xyz');
+95     expect(result?.moves).toHaveLength(1);
+96     expect(result?.moves[0].type).toBe('SUBMIT_ANSWER');
+97     expect(result?.moves[0].args).toEqual({ answer: 'A' });
+98   });
+99 
+100   it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
+101     const staleDate = new Date(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:43Z)**_
@@ -4005,6 +4086,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:43Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:49Z)**_
@@ -4019,6 +4101,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 1.67s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:54:52Z)**_
@@ -4064,6 +4147,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:54:58Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:18Z)**_
@@ -4074,7 +4158,6 @@ There are many lint errors to fix. Let me address each:
 1. `session-finder.ts`: must use `Array#toSorted()` instead of `Array#sort()`. But TS lib is ES2022 which doesn't have `toSorted`... But ESLint says to use it. The tsconfig needs to be updated or we use a workaround. Let me check the tsconfig more carefully.
 
 Actually wait - the eslint rule says "use `toSorted` instead of `sort`" but TypeScript says toSorted doesn't exist in ES2022. I need to either:
-
 
 - Update tsconfig lib to include ES2023
 - Use a type assertion (cast to any[])
@@ -4101,6 +4184,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:20Z)**_
 ```text
 21:    "lib": ["ES2022", "DOM", "DOM.Iterable"],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:24Z)**_
@@ -4111,6 +4195,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:24Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:28Z)**_
@@ -4120,50 +4205,51 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:28Z)**_
  `./worktrees/milestone-4-game-engine/tsconfig.json`
 
 ```text
-1	{
-2	  "include": [
-3	    ".storybook/**/*.ts",
-4	    ".storybook/**/*.tsx",
-5	    "**/*.ts",
-6	    "**/*.tsx",
-7	    "eslint.config.js",
-8	    "prettier.config.js",
-9	    "vite.config.js"
-10	  ],
-11	
-12	  "compilerOptions": {
-13	    "target": "ES2022",
-14	    "jsx": "react-jsx",
-15	    "module": "ESNext",
-16	    "baseUrl": ".",
-17	    "paths": {
-18	      "#/*": ["./src/*"],
-19	      "@/*": ["./src/*"]
-20	    },
-21	    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-22	    "types": ["vite/client"],
-23	
-24	    /* Bundler mode */
-25	    "moduleResolution": "bundler",
-26	    "resolveJsonModule": true,
-27	    "allowImportingTsExtensions": true,
-28	    "verbatimModuleSyntax": true,
-29	    "noEmit": true,
-30	
-31	    /* Linting */
-32	    "skipLibCheck": true,
-33	    "strict": true,
-34	    "noImplicitAny": true,
-35	    "strictNullChecks": true,
-36	    "noUncheckedIndexedAccess": true,
-37	    "noUnusedLocals": true,
-38	    "noUnusedParameters": true,
-39	    "noFallthroughCasesInSwitch": true,
-40	    "noUncheckedSideEffectImports": true
-41	  }
-42	}
+1 {
+2   "include": [
+3     ".storybook/**/*.ts",
+4     ".storybook/**/*.tsx",
+5     "**/*.ts",
+6     "**/*.tsx",
+7     "eslint.config.js",
+8     "prettier.config.js",
+9     "vite.config.js"
+10   ],
+11 
+12   "compilerOptions": {
+13     "target": "ES2022",
+14     "jsx": "react-jsx",
+15     "module": "ESNext",
+16     "baseUrl": ".",
+17     "paths": {
+18       "#/*": ["./src/*"],
+19       "@/*": ["./src/*"]
+20     },
+21     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+22     "types": ["vite/client"],
+23 
+24     /* Bundler mode */
+25     "moduleResolution": "bundler",
+26     "resolveJsonModule": true,
+27     "allowImportingTsExtensions": true,
+28     "verbatimModuleSyntax": true,
+29     "noEmit": true,
+30 
+31     /* Linting */
+32     "skipLibCheck": true,
+33     "strict": true,
+34     "noImplicitAny": true,
+35     "strictNullChecks": true,
+36     "noUncheckedIndexedAccess": true,
+37     "noUnusedLocals": true,
+38     "noUnusedParameters": true,
+39     "noFallthroughCasesInSwitch": true,
+40     "noUncheckedSideEffectImports": true
+41   }
+42 }
 43
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:35Z)**_
@@ -4174,6 +4260,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/tsconfig.json has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:39Z)**_
@@ -4188,6 +4275,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:47Z)**_
@@ -4202,6 +4290,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/session-finder.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:55:53Z)**_
@@ -4215,203 +4304,204 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:55:53Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import React, {
-3	  createContext,
-4	  useCallback,
-5	  useContext,
-6	  useRef,
-7	  useMemo,
-8	  type ReactNode,
-9	} from 'react';
-10	import { useRxDB } from '@/db/hooks/useRxDB';
-11	import { createReducer, useGameLifecycle } from './lifecycle';
-12	import { useMoveLog } from './move-log';
-13	import { useSessionRecorder } from './session-recorder';
-14	import type {
-15	  GameEngineState,
-16	  Move,
-17	  MoveHandler,
-18	  MoveLog,
-19	  ResolvedGameConfig,
-20	  SessionMeta,
-21	} from './types';
-22	
-23	// --- Contexts ---
-24	
-25	const GameStateContext = createContext<GameEngineState | null>(null);
-26	const GameDispatchContext = createContext<
-27	  ((move: Move) => void) | null
-28	>(null);
-29	
-30	// --- Consumer hooks ---
-31	
-32	export function useGameState(): GameEngineState {
-33	  const ctx = useContext(GameStateContext);
-34	  if (!ctx)
-35	    throw new Error(
-36	      'useGameState must be used within GameEngineProvider',
-37	    );
-38	  return ctx;
-39	}
-40	
-41	export function useGameDispatch(): (move: Move) => void {
-42	  const ctx = useContext(GameDispatchContext);
-43	  if (!ctx)
-44	    throw new Error(
-45	      'useGameDispatch must be used within GameEngineProvider',
-46	    );
-47	  return ctx;
-48	}
-49	
-50	// --- Inner component that calls useSessionRecorder once db is ready ---
-51	
-52	interface RecorderProps {
-53	  moves: Move[];
-54	  sessionId: string;
-55	  meta: SessionMeta;
-56	  phase: string;
-57	}
-58	
-59	function SessionRecorderBridge({
-60	  moves,
-61	  sessionId,
-62	  meta,
-63	  phase,
-64	}: RecorderProps) {
-65	  const { db } = useRxDB();
-66	  useSessionRecorder(
-67	    moves,
-68	    sessionId,
-69	    meta,
-70	    db as NonNullable<typeof db>,
-71	    phase,
-72	  );
-73	  return null;
-74	}
-75	
-76	// Wrapper that only mounts SessionRecorderBridge once db is available
-77	function SessionRecorderGate(props: RecorderProps) {
-78	  const { db } = useRxDB();
-79	  if (!db) return null;
-80	  return <SessionRecorderBridge {...props} />;
-81	}
-82	
-83	// Helper: replay a MoveLog through the full lifecycle reducer
-84	function replayLog(
-85	  log: MoveLog,
-86	  config: ResolvedGameConfig,
-87	  gameMovers: Record<string, MoveHandler>,
-88	): GameEngineState {
-89	  const reducer = createReducer(config, gameMovers);
-90	  let state = log.initialState;
-91	  for (const move of log.moves) {
-92	    state = reducer(state, move);
-93	  }
-94	  return state;
-95	}
-96	
-97	// --- Provider ---
-98	
-99	interface GameEngineProviderProps {
-100	  config: ResolvedGameConfig;
-101	  moves: Record<string, MoveHandler>;
-102	  initialState: GameEngineState;
-103	  sessionId: string;
-104	  meta: SessionMeta;
-105	  initialLog?: MoveLog;
-106	  children: ReactNode;
-107	}
-108	
-109	export function GameEngineProvider({
-110	  config,
-111	  moves: gameMovers,
-112	  initialState,
-113	  sessionId,
-114	  meta,
-115	  initialLog,
-116	  children,
-117	}: GameEngineProviderProps): React.JSX.Element {
-118	  // Compute resumed initial state if initialLog provided — run once on mount
-119	  const resolvedInitialState = useMemo(() => {
-120	    if (!initialLog || initialLog.moves.length === 0) return initialState;
-121	    return replayLog(initialLog, config, gameMovers);
-122	    // eslint-disable-next-line react-hooks/exhaustive-deps
-123	  }, []); // intentionally once on mount
-124	
-125	  const [state, lifecycleDispatch] = useGameLifecycle(
-126	    config,
-127	    gameMovers,
-128	    resolvedInitialState,
-129	  );
-130	
-131	  const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
-132	
-133	  // Keep refs so dispatch closure stays stable across re-renders
-134	  const movesRef = useRef<Move[]>(moves);
-135	  movesRef.current = moves;
-136	  const metaRef = useRef<SessionMeta>(meta);
-137	  metaRef.current = meta;
-138	  const canUndoRef = useRef<boolean>(canUndo);
-139	  canUndoRef.current = canUndo;
-140	
-141	  const dispatch = useCallback(
-142	    (move: Move) => {
-143	      if (move.type === 'UNDO') {
-144	        if (!canUndoRef.current) return;
-145	        const accepted = appendMove(move);
-146	        if (!accepted) return;
-147	
-148	        const targetStep = move.args['targetStep'] as number;
-149	        // Replay all moves up to targetStep using full lifecycle reducer
-150	        const currentMeta = metaRef.current;
-151	        const tempLog: MoveLog = {
-152	          gameId: currentMeta.gameId,
-153	          sessionId,
-154	          profileId: currentMeta.profileId,
-155	          seed: currentMeta.seed,
-156	          initialContent: currentMeta.initialContent,
-157	          initialState,
-158	          moves: movesRef.current.slice(0, targetStep),
-159	        };
-160	        const recoveredState = replayLog(tempLog, config, gameMovers);
-161	        lifecycleDispatch({
-162	          type: 'RESTORE_STATE',
-163	          args: { _state: JSON.stringify(recoveredState) },
-164	          timestamp: move.timestamp,
-165	        });
-166	        return;
-167	      }
-168	
-169	      appendMove(move);
-170	      lifecycleDispatch(move);
-171	    },
-172	    [
-173	      appendMove,
-174	      sessionId,
-175	      initialState,
-176	      config,
-177	      gameMovers,
-178	      lifecycleDispatch,
-179	    ],
-180	  );
-181	
-182	  return (
-183	    <GameStateContext.Provider value={state}>
-184	      <GameDispatchContext.Provider value={dispatch}>
-185	        <SessionRecorderGate
-186	          moves={moves}
-187	          sessionId={sessionId}
-188	          meta={meta}
-189	          phase={state.phase}
-190	        />
-191	        {children}
-192	      </GameDispatchContext.Provider>
-193	    </GameStateContext.Provider>
-194	  );
-195	}
+1 // src/lib/game-engine/index.ts
+2 import React, {
+3   createContext,
+4   useCallback,
+5   useContext,
+6   useRef,
+7   useMemo,
+8   type ReactNode,
+9 } from 'react';
+10 import { useRxDB } from '@/db/hooks/useRxDB';
+11 import { createReducer, useGameLifecycle } from './lifecycle';
+12 import { useMoveLog } from './move-log';
+13 import { useSessionRecorder } from './session-recorder';
+14 import type {
+15   GameEngineState,
+16   Move,
+17   MoveHandler,
+18   MoveLog,
+19   ResolvedGameConfig,
+20   SessionMeta,
+21 } from './types';
+22 
+23 // --- Contexts ---
+24 
+25 const GameStateContext = createContext<GameEngineState | null>(null);
+26 const GameDispatchContext = createContext<
+27   ((move: Move) => void) | null
+28 >(null);
+29 
+30 // --- Consumer hooks ---
+31 
+32 export function useGameState(): GameEngineState {
+33   const ctx = useContext(GameStateContext);
+34   if (!ctx)
+35     throw new Error(
+36       'useGameState must be used within GameEngineProvider',
+37     );
+38   return ctx;
+39 }
+40 
+41 export function useGameDispatch(): (move: Move) => void {
+42   const ctx = useContext(GameDispatchContext);
+43   if (!ctx)
+44     throw new Error(
+45       'useGameDispatch must be used within GameEngineProvider',
+46     );
+47   return ctx;
+48 }
+49 
+50 // --- Inner component that calls useSessionRecorder once db is ready ---
+51 
+52 interface RecorderProps {
+53   moves: Move[];
+54   sessionId: string;
+55   meta: SessionMeta;
+56   phase: string;
+57 }
+58 
+59 function SessionRecorderBridge({
+60   moves,
+61   sessionId,
+62   meta,
+63   phase,
+64 }: RecorderProps) {
+65   const { db } = useRxDB();
+66   useSessionRecorder(
+67     moves,
+68     sessionId,
+69     meta,
+70     db as NonNullable<typeof db>,
+71     phase,
+72   );
+73   return null;
+74 }
+75 
+76 // Wrapper that only mounts SessionRecorderBridge once db is available
+77 function SessionRecorderGate(props: RecorderProps) {
+78   const { db } = useRxDB();
+79   if (!db) return null;
+80   return <SessionRecorderBridge {...props} />;
+81 }
+82 
+83 // Helper: replay a MoveLog through the full lifecycle reducer
+84 function replayLog(
+85   log: MoveLog,
+86   config: ResolvedGameConfig,
+87   gameMovers: Record<string, MoveHandler>,
+88 ): GameEngineState {
+89   const reducer = createReducer(config, gameMovers);
+90   let state = log.initialState;
+91   for (const move of log.moves) {
+92     state = reducer(state, move);
+93   }
+94   return state;
+95 }
+96 
+97 // --- Provider ---
+98 
+99 interface GameEngineProviderProps {
+100   config: ResolvedGameConfig;
+101   moves: Record<string, MoveHandler>;
+102   initialState: GameEngineState;
+103   sessionId: string;
+104   meta: SessionMeta;
+105   initialLog?: MoveLog;
+106   children: ReactNode;
+107 }
+108 
+109 export function GameEngineProvider({
+110   config,
+111   moves: gameMovers,
+112   initialState,
+113   sessionId,
+114   meta,
+115   initialLog,
+116   children,
+117 }: GameEngineProviderProps): React.JSX.Element {
+118   // Compute resumed initial state if initialLog provided — run once on mount
+119   const resolvedInitialState = useMemo(() => {
+120     if (!initialLog || initialLog.moves.length === 0) return initialState;
+121     return replayLog(initialLog, config, gameMovers);
+122     // eslint-disable-next-line react-hooks/exhaustive-deps
+123   }, []); // intentionally once on mount
+124 
+125   const [state, lifecycleDispatch] = useGameLifecycle(
+126     config,
+127     gameMovers,
+128     resolvedInitialState,
+129   );
+130 
+131   const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
+132 
+133   // Keep refs so dispatch closure stays stable across re-renders
+134   const movesRef = useRef<Move[]>(moves);
+135   movesRef.current = moves;
+136   const metaRef = useRef<SessionMeta>(meta);
+137   metaRef.current = meta;
+138   const canUndoRef = useRef<boolean>(canUndo);
+139   canUndoRef.current = canUndo;
+140 
+141   const dispatch = useCallback(
+142     (move: Move) => {
+143       if (move.type === 'UNDO') {
+144         if (!canUndoRef.current) return;
+145         const accepted = appendMove(move);
+146         if (!accepted) return;
+147 
+148         const targetStep = move.args['targetStep'] as number;
+149         // Replay all moves up to targetStep using full lifecycle reducer
+150         const currentMeta = metaRef.current;
+151         const tempLog: MoveLog = {
+152           gameId: currentMeta.gameId,
+153           sessionId,
+154           profileId: currentMeta.profileId,
+155           seed: currentMeta.seed,
+156           initialContent: currentMeta.initialContent,
+157           initialState,
+158           moves: movesRef.current.slice(0, targetStep),
+159         };
+160         const recoveredState = replayLog(tempLog, config, gameMovers);
+161         lifecycleDispatch({
+162           type: 'RESTORE_STATE',
+163           args: { _state: JSON.stringify(recoveredState) },
+164           timestamp: move.timestamp,
+165         });
+166         return;
+167       }
+168 
+169       appendMove(move);
+170       lifecycleDispatch(move);
+171     },
+172     [
+173       appendMove,
+174       sessionId,
+175       initialState,
+176       config,
+177       gameMovers,
+178       lifecycleDispatch,
+179     ],
+180   );
+181 
+182   return (
+183     <GameStateContext.Provider value={state}>
+184       <GameDispatchContext.Provider value={dispatch}>
+185         <SessionRecorderGate
+186           moves={moves}
+187           sessionId={sessionId}
+188           meta={meta}
+189           phase={state.phase}
+190         />
+191         {children}
+192       </GameDispatchContext.Provider>
+193     </GameStateContext.Provider>
+194   );
+195 }
 196
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:56:10Z)**_
@@ -4622,6 +4712,7 @@ export const GameEngineProvider = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:56:14Z)**_
@@ -4893,6 +4984,7 @@ describe('GameEngineProvider', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/game-engine-provider.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:56:45Z)**_
@@ -5061,6 +5153,7 @@ export const GameShell = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:11Z)**_
@@ -5095,6 +5188,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
   16 errors and 0 warnings potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:14Z)**_
@@ -5115,6 +5209,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:20Z)**_
 ✖ 1 problem (1 error, 0 warnings)
 [This command modified 4 files you've previously read: src/lib/game-engine/index.tsx, src/components/game/GameShell.test.tsx, src/components/game/GameShell.stories.tsx, src/lib/game-engine/game-engine-provider.test.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:24Z)**_
@@ -5128,17 +5223,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:25Z)**_
  `./worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx`
 
 ```text
-19	// Mock TanStack Router navigate
-20	vi.mock('@tanstack/react-router', async (importOriginal) => {
-21	  const actual =
-22	    await importOriginal<typeof import('@tanstack/react-router')>();
-23	  return {
-24	    ...actual,
-25	    useNavigate: () => vi.fn(),
-26	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-27	  };
-28	});
+19 // Mock TanStack Router navigate
+20 vi.mock('@tanstack/react-router', async (importOriginal) => {
+21   const actual =
+22     await importOriginal<typeof import('@tanstack/react-router')>();
+23   return {
+24     ...actual,
+25     useNavigate: () => vi.fn(),
+26     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+27   };
+28 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:31Z)**_
@@ -5155,6 +5251,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:32Z)**_
 ```text
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:36Z)**_
@@ -5169,6 +5266,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:43Z)**_
@@ -5182,32 +5280,33 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:44Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import {
-3	  
-4	  createContext,
-5	  useCallback,
-6	  useContext,
-7	  useMemo,
-8	  useRef
-9	} from 'react';
-10	import { createReducer, useGameLifecycle } from './lifecycle';
-11	import { useMoveLog } from './move-log';
-12	import { useSessionRecorder } from './session-recorder';
-13	import type {
-14	  GameEngineState,
-15	  Move,
-16	  MoveHandler,
-17	  MoveLog,
-18	  ResolvedGameConfig,
-19	  SessionMeta,
-20	} from './types';
-21	import type {JSX, ReactNode } from 'react';
-22	import { useRxDB } from '@/db/hooks/useRxDB';
-23	
-24	// --- Contexts ---
+1 // src/lib/game-engine/index.ts
+2 import {
+3   
+4   createContext,
+5   useCallback,
+6   useContext,
+7   useMemo,
+8   useRef
+9 } from 'react';
+10 import { createReducer, useGameLifecycle } from './lifecycle';
+11 import { useMoveLog } from './move-log';
+12 import { useSessionRecorder } from './session-recorder';
+13 import type {
+14   GameEngineState,
+15   Move,
+16   MoveHandler,
+17   MoveLog,
+18   ResolvedGameConfig,
+19   SessionMeta,
+20 } from './types';
+21 import type {JSX, ReactNode } from 'react';
+22 import { useRxDB } from '@/db/hooks/useRxDB';
+23 
+24 // --- Contexts ---
 25
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:57:47Z)**_
@@ -5217,204 +5316,205 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:57:47Z)**_
  `./worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx`
 
 ```text
-1	// src/lib/game-engine/index.ts
-2	import {
-3	  
-4	  createContext,
-5	  useCallback,
-6	  useContext,
-7	  useMemo,
-8	  useRef
-9	} from 'react';
-10	import { createReducer, useGameLifecycle } from './lifecycle';
-11	import { useMoveLog } from './move-log';
-12	import { useSessionRecorder } from './session-recorder';
-13	import type {
-14	  GameEngineState,
-15	  Move,
-16	  MoveHandler,
-17	  MoveLog,
-18	  ResolvedGameConfig,
-19	  SessionMeta,
-20	} from './types';
-21	import type {JSX, ReactNode } from 'react';
-22	import { useRxDB } from '@/db/hooks/useRxDB';
-23	
-24	// --- Contexts ---
-25	
-26	const GameStateContext = createContext<GameEngineState | null>(null);
-27	const GameDispatchContext = createContext<
-28	  ((move: Move) => void) | null
-29	>(null);
-30	
-31	// --- Consumer hooks ---
-32	
-33	export const useGameState = (): GameEngineState => {
-34	  const ctx = useContext(GameStateContext);
-35	  if (!ctx)
-36	    throw new Error(
-37	      'useGameState must be used within GameEngineProvider',
-38	    );
-39	  return ctx;
-40	};
-41	
-42	export const useGameDispatch = (): ((move: Move) => void) => {
-43	  const ctx = useContext(GameDispatchContext);
-44	  if (!ctx)
-45	    throw new Error(
-46	      'useGameDispatch must be used within GameEngineProvider',
-47	    );
-48	  return ctx;
-49	};
-50	
-51	// --- Inner component that calls useSessionRecorder once db is ready ---
-52	
-53	interface RecorderProps {
-54	  moves: Move[];
-55	  sessionId: string;
-56	  meta: SessionMeta;
-57	  phase: string;
-58	}
-59	
-60	const SessionRecorderBridge = ({
-61	  moves,
-62	  sessionId,
-63	  meta,
-64	  phase,
-65	}: RecorderProps): null => {
-66	  const { db } = useRxDB();
-67	  useSessionRecorder(
-68	    moves,
-69	    sessionId,
-70	    meta,
-71	    db as NonNullable<typeof db>,
-72	    phase,
-73	  );
-74	  return null;
-75	};
-76	
-77	// Wrapper that only mounts SessionRecorderBridge once db is available
-78	const SessionRecorderGate = (props: RecorderProps): JSX.Element | null => {
-79	  const { db } = useRxDB();
-80	  if (!db) return null;
-81	  return <SessionRecorderBridge {...props} />;
-82	};
-83	
-84	// Helper: replay a MoveLog through the full lifecycle reducer
-85	function replayLog(
-86	  log: MoveLog,
-87	  config: ResolvedGameConfig,
-88	  gameMovers: Record<string, MoveHandler>,
-89	): GameEngineState {
-90	  const reducer = createReducer(config, gameMovers);
-91	  let state = log.initialState;
-92	  for (const move of log.moves) {
-93	    state = reducer(state, move);
-94	  }
-95	  return state;
-96	}
-97	
-98	// --- Provider ---
-99	
-100	interface GameEngineProviderProps {
-101	  config: ResolvedGameConfig;
-102	  moves: Record<string, MoveHandler>;
-103	  initialState: GameEngineState;
-104	  sessionId: string;
-105	  meta: SessionMeta;
-106	  initialLog?: MoveLog;
-107	  children: ReactNode;
-108	}
-109	
-110	export const GameEngineProvider = ({
-111	  config,
-112	  moves: gameMovers,
-113	  initialState,
-114	  sessionId,
-115	  meta,
-116	  initialLog,
-117	  children,
-118	}: GameEngineProviderProps): JSX.Element => {
-119	  // Compute resumed initial state if initialLog provided — run once on mount
-120	  const resolvedInitialState = useMemo(() => {
-121	    if (!initialLog || initialLog.moves.length === 0) return initialState;
-122	    return replayLog(initialLog, config, gameMovers);
-123	    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount; initialLog is treated as immutable
-124	  }, []);
-125	
-126	  const [state, lifecycleDispatch] = useGameLifecycle(
-127	    config,
-128	    gameMovers,
-129	    resolvedInitialState,
-130	  );
-131	
-132	  const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
-133	
-134	  // Keep refs so dispatch closure stays stable across re-renders
-135	  const movesRef = useRef<Move[]>(moves);
-136	  movesRef.current = moves;
-137	  const metaRef = useRef<SessionMeta>(meta);
-138	  metaRef.current = meta;
-139	  const canUndoRef = useRef<boolean>(canUndo);
-140	  canUndoRef.current = canUndo;
-141	
-142	  const dispatch = useCallback(
-143	    (move: Move) => {
-144	      if (move.type === 'UNDO') {
-145	        if (!canUndoRef.current) return;
-146	        const accepted = appendMove(move);
-147	        if (!accepted) return;
-148	
-149	        const targetStep = move.args['targetStep'] as number;
-150	        // Replay all moves up to targetStep using full lifecycle reducer
-151	        const currentMeta = metaRef.current;
-152	        const tempLog: MoveLog = {
-153	          gameId: currentMeta.gameId,
-154	          sessionId,
-155	          profileId: currentMeta.profileId,
-156	          seed: currentMeta.seed,
-157	          initialContent: currentMeta.initialContent,
-158	          initialState,
-159	          moves: movesRef.current.slice(0, targetStep),
-160	        };
-161	        const recoveredState = replayLog(tempLog, config, gameMovers);
-162	        lifecycleDispatch({
-163	          type: 'RESTORE_STATE',
-164	          args: { _state: JSON.stringify(recoveredState) },
-165	          timestamp: move.timestamp,
-166	        });
-167	        return;
-168	      }
-169	
-170	      appendMove(move);
-171	      lifecycleDispatch(move);
-172	    },
-173	    [
-174	      appendMove,
-175	      sessionId,
-176	      initialState,
-177	      config,
-178	      gameMovers,
-179	      lifecycleDispatch,
-180	    ],
-181	  );
-182	
-183	  return (
-184	    <GameStateContext.Provider value={state}>
-185	      <GameDispatchContext.Provider value={dispatch}>
-186	        <SessionRecorderGate
-187	          moves={moves}
-188	          sessionId={sessionId}
-189	          meta={meta}
-190	          phase={state.phase}
-191	        />
-192	        {children}
-193	      </GameDispatchContext.Provider>
-194	    </GameStateContext.Provider>
-195	  );
-196	};
+1 // src/lib/game-engine/index.ts
+2 import {
+3   
+4   createContext,
+5   useCallback,
+6   useContext,
+7   useMemo,
+8   useRef
+9 } from 'react';
+10 import { createReducer, useGameLifecycle } from './lifecycle';
+11 import { useMoveLog } from './move-log';
+12 import { useSessionRecorder } from './session-recorder';
+13 import type {
+14   GameEngineState,
+15   Move,
+16   MoveHandler,
+17   MoveLog,
+18   ResolvedGameConfig,
+19   SessionMeta,
+20 } from './types';
+21 import type {JSX, ReactNode } from 'react';
+22 import { useRxDB } from '@/db/hooks/useRxDB';
+23 
+24 // --- Contexts ---
+25 
+26 const GameStateContext = createContext<GameEngineState | null>(null);
+27 const GameDispatchContext = createContext<
+28   ((move: Move) => void) | null
+29 >(null);
+30 
+31 // --- Consumer hooks ---
+32 
+33 export const useGameState = (): GameEngineState => {
+34   const ctx = useContext(GameStateContext);
+35   if (!ctx)
+36     throw new Error(
+37       'useGameState must be used within GameEngineProvider',
+38     );
+39   return ctx;
+40 };
+41 
+42 export const useGameDispatch = (): ((move: Move) => void) => {
+43   const ctx = useContext(GameDispatchContext);
+44   if (!ctx)
+45     throw new Error(
+46       'useGameDispatch must be used within GameEngineProvider',
+47     );
+48   return ctx;
+49 };
+50 
+51 // --- Inner component that calls useSessionRecorder once db is ready ---
+52 
+53 interface RecorderProps {
+54   moves: Move[];
+55   sessionId: string;
+56   meta: SessionMeta;
+57   phase: string;
+58 }
+59 
+60 const SessionRecorderBridge = ({
+61   moves,
+62   sessionId,
+63   meta,
+64   phase,
+65 }: RecorderProps): null => {
+66   const { db } = useRxDB();
+67   useSessionRecorder(
+68     moves,
+69     sessionId,
+70     meta,
+71     db as NonNullable<typeof db>,
+72     phase,
+73   );
+74   return null;
+75 };
+76 
+77 // Wrapper that only mounts SessionRecorderBridge once db is available
+78 const SessionRecorderGate = (props: RecorderProps): JSX.Element | null => {
+79   const { db } = useRxDB();
+80   if (!db) return null;
+81   return <SessionRecorderBridge {...props} />;
+82 };
+83 
+84 // Helper: replay a MoveLog through the full lifecycle reducer
+85 function replayLog(
+86   log: MoveLog,
+87   config: ResolvedGameConfig,
+88   gameMovers: Record<string, MoveHandler>,
+89 ): GameEngineState {
+90   const reducer = createReducer(config, gameMovers);
+91   let state = log.initialState;
+92   for (const move of log.moves) {
+93     state = reducer(state, move);
+94   }
+95   return state;
+96 }
+97 
+98 // --- Provider ---
+99 
+100 interface GameEngineProviderProps {
+101   config: ResolvedGameConfig;
+102   moves: Record<string, MoveHandler>;
+103   initialState: GameEngineState;
+104   sessionId: string;
+105   meta: SessionMeta;
+106   initialLog?: MoveLog;
+107   children: ReactNode;
+108 }
+109 
+110 export const GameEngineProvider = ({
+111   config,
+112   moves: gameMovers,
+113   initialState,
+114   sessionId,
+115   meta,
+116   initialLog,
+117   children,
+118 }: GameEngineProviderProps): JSX.Element => {
+119   // Compute resumed initial state if initialLog provided — run once on mount
+120   const resolvedInitialState = useMemo(() => {
+121     if (!initialLog || initialLog.moves.length === 0) return initialState;
+122     return replayLog(initialLog, config, gameMovers);
+123     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount; initialLog is treated as immutable
+124   }, []);
+125 
+126   const [state, lifecycleDispatch] = useGameLifecycle(
+127     config,
+128     gameMovers,
+129     resolvedInitialState,
+130   );
+131 
+132   const { moves, canUndo, appendMove } = useMoveLog(config.maxUndoDepth);
+133 
+134   // Keep refs so dispatch closure stays stable across re-renders
+135   const movesRef = useRef<Move[]>(moves);
+136   movesRef.current = moves;
+137   const metaRef = useRef<SessionMeta>(meta);
+138   metaRef.current = meta;
+139   const canUndoRef = useRef<boolean>(canUndo);
+140   canUndoRef.current = canUndo;
+141 
+142   const dispatch = useCallback(
+143     (move: Move) => {
+144       if (move.type === 'UNDO') {
+145         if (!canUndoRef.current) return;
+146         const accepted = appendMove(move);
+147         if (!accepted) return;
+148 
+149         const targetStep = move.args['targetStep'] as number;
+150         // Replay all moves up to targetStep using full lifecycle reducer
+151         const currentMeta = metaRef.current;
+152         const tempLog: MoveLog = {
+153           gameId: currentMeta.gameId,
+154           sessionId,
+155           profileId: currentMeta.profileId,
+156           seed: currentMeta.seed,
+157           initialContent: currentMeta.initialContent,
+158           initialState,
+159           moves: movesRef.current.slice(0, targetStep),
+160         };
+161         const recoveredState = replayLog(tempLog, config, gameMovers);
+162         lifecycleDispatch({
+163           type: 'RESTORE_STATE',
+164           args: { _state: JSON.stringify(recoveredState) },
+165           timestamp: move.timestamp,
+166         });
+167         return;
+168       }
+169 
+170       appendMove(move);
+171       lifecycleDispatch(move);
+172     },
+173     [
+174       appendMove,
+175       sessionId,
+176       initialState,
+177       config,
+178       gameMovers,
+179       lifecycleDispatch,
+180     ],
+181   );
+182 
+183   return (
+184     <GameStateContext.Provider value={state}>
+185       <GameDispatchContext.Provider value={dispatch}>
+186         <SessionRecorderGate
+187           moves={moves}
+188           sessionId={sessionId}
+189           meta={meta}
+190           phase={state.phase}
+191         />
+192         {children}
+193       </GameDispatchContext.Provider>
+194     </GameStateContext.Provider>
+195   );
+196 };
 197
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:04Z)**_
@@ -5626,6 +5726,7 @@ export const GameEngineProvider = ({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/lib/game-engine/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:18Z)**_
@@ -5652,6 +5753,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:58:18Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:24Z)**_
@@ -5668,6 +5770,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:58:24Z)**_
 ✖ 1 problem (1 error, 0 warnings)
 [This command modified 3 files you've previously read: src/lib/game-engine/index.tsx, src/components/game/GameShell.tsx, src/components/game/GameShell.test.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:29Z)**_
@@ -5681,19 +5784,20 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:58:30Z)**_
  `./worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx`
 
 ```text
-19	// Mock TanStack Router navigate
-20	vi.mock('@tanstack/react-router', async (importOriginal) => {
-21	   
-22	  const actual =
-23	    await importOriginal<typeof import('@tanstack/react-router')>();
-24	  return {
-25	    ...actual,
-26	    useNavigate: () => vi.fn(),
-27	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-28	  };
-29	});
+19 // Mock TanStack Router navigate
+20 vi.mock('@tanstack/react-router', async (importOriginal) => {
+21    
+22   const actual =
+23     await importOriginal<typeof import('@tanstack/react-router')>();
+24   return {
+25     ...actual,
+26     useNavigate: () => vi.fn(),
+27     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+28   };
+29 });
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:35Z)**_
@@ -5704,6 +5808,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:58:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:49Z)**_
@@ -5718,6 +5823,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 6.13s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:52Z)**_
@@ -5748,6 +5854,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:58:55Z)**_
 
 Done in 2.61s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:58:58Z)**_
@@ -6197,6 +6304,7 @@ Done in 2.54s.
  create mode 100644 src/lib/game-engine/game-engine-provider.test.tsx
  create mode 100644 src/lib/game-engine/index.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:59:20Z)**_
@@ -6222,187 +6330,188 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:59:25Z)**_
  `./docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md`
 
 ```text
-3017	
-3018	## Task 11: Route Wiring
-3019	
-3020	**Files:**
-3021	
-3022	- Modify: `src/routes/$locale/_app/game/$gameId.tsx`
-3023	
-3024	**Context:** Replace the placeholder component with a real loader that calls `loadGameConfig` and `findInProgressSession`, then mounts `GameShell` with a placeholder game component (real game components come in M5). The route requires `profileId` from the parent layout context (or from a URL search param for testing). For M4, use a hardcoded `profileId: 'default'` and a stub `defaultConfig` — the profile context integration is M5 work.
-3025	
-3026	The loader runs server-side/at-navigation-time via TanStack Router's `loader` function. It gets the database from a module-level import of `getOrCreateDatabase`.
-3027	
-3028	- [ ] **Step 1: Check what the existing route parent provides**
-3029	
-3030	Read the parent layout file to understand what context/loaderData flows down:
-3031	
-3032	```bash
-3033	cat src/routes/'$locale'/_app.tsx
-3034	```
-3035	
-3036	Look for `loaderData` and `context` — note the shape so we can match it.
-3037	
-3038	- [ ] **Step 2: Write the route test**
-3039	
-3040	Create `src/routes/$locale/_app/game/$gameId.test.tsx`:
-3041	
-3042	```typescript
-3043	// Note: this file lives alongside the route — TanStack Router colocation
-3044	// src/routes/$locale/_app/game/$gameId.test.tsx
-3045	import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-3046	import { render, screen, waitFor } from '@testing-library/react';
-3047	import type { ReactNode } from 'react';
-3048	import { createTestDatabase, destroyTestDatabase } from '@/db/create-database';
-3049	import { DbProvider } from '@/providers/DbProvider';
-3050	import type { BaseSkillDatabase } from '@/db/types';
-3051	
-3052	// We test the GameRoute component by rendering it directly
-3053	// with a mocked database (bypassing TanStack Router loader)
-3054	import { GameRoute } from './$gameId';
-3055	
-3056	vi.mock('@tanstack/react-router', async (importOriginal) => {
-3057	  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
-3058	  return {
-3059	    ...actual,
-3060	    useNavigate: () => vi.fn(),
-3061	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-3062	    useLoaderData: () => ({
-3063	      config: {
-3064	        gameId: 'word-builder',
-3065	        title: { en: 'Word Builder' },
-3066	        gradeBand: 'year1-2',
-3067	        maxRounds: 3,
-3068	        maxRetries: 1,
-3069	        maxUndoDepth: 3,
-3070	        timerVisible: false,
-3071	        timerDurationSeconds: null,
-3072	        difficulty: 'medium',
-3073	      },
-3074	      initialLog: null,
-3075	      sessionId: 'sess-route-001',
-3076	      meta: {
-3077	        profileId: 'prof-route',
-3078	        gameId: 'word-builder',
-3079	        gradeBand: 'year1-2',
-3080	        seed: 'seed-route',
-3081	        initialContent: { rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }] },
-3082	        initialState: {
-3083	          phase: 'instructions',
-3084	          roundIndex: 0,
-3085	          score: 0,
-3086	          streak: 0,
-3087	          retryCount: 0,
-3088	          content: { rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }] },
-3089	          currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-3090	        },
-3091	      },
-3092	    }),
-3093	  };
-3094	});
-3095	
-3096	let db: BaseSkillDatabase;
-3097	
-3098	beforeEach(async () => {
-3099	  db = await createTestDatabase();
-3100	});
-3101	
-3102	afterEach(async () => {
-3103	  await destroyTestDatabase(db);
-3104	});
-3105	
-3106	function wrapper({ children }: { children: ReactNode }) {
-3107	  return (
-3108	    <DbProvider openDatabase={() => Promise.resolve(db)}>
-3109	      {children}
-3110	    </DbProvider>
-3111	  );
-3112	}
-3113	
-3114	describe('GameRoute', () => {
-3115	  it('renders the game shell with title from loaderData', async () => {
-3116	    render(<GameRoute />, { wrapper });
-3117	    await waitFor(() => {
-3118	      expect(screen.getByText('Word Builder')).toBeInTheDocument();
-3119	    });
-3120	  });
-3121	
-3122	  it('renders instructions phase placeholder', async () => {
-3123	    render(<GameRoute />, { wrapper });
-3124	    await waitFor(() => {
-3125	      expect(screen.getByText(/Round 1/)).toBeInTheDocument();
-3126	    });
-3127	  });
-3128	});
-3129	```
-3130	
-3131	- [ ] **Step 3: Run test to verify it fails**
-3132	
-3133	Run: `yarn test 'src/routes/$locale/_app/game/$gameId.test.tsx'`
-3134	Expected: FAIL — `GameRoute` is not exported
-3135	
-3136	- [ ] **Step 4: Implement the route**
-3137	
-3138	Replace `src/routes/$locale/_app/game/$gameId.tsx` entirely:
-3139	
-3140	```tsx
-3141	// src/routes/$locale/_app/game/$gameId.tsx
-3142	import { createFileRoute } from '@tanstack/react-router';
-3143	import { nanoid } from 'nanoid';
-3144	import { getOrCreateDatabase } from '@/db/create-database';
-3145	import { GameShell } from '@/components/game/GameShell';
-3146	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-3147	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-3148	import type {
-3149	  GameEngineState,
-3150	  MoveLog,
-3151	  ResolvedContent,
-3152	  ResolvedGameConfig,
-3153	  SessionMeta,
-3154	} from '@/lib/game-engine/types';
-3155	
-3156	// Stub default config used until M5 introduces game registrations
-3157	const STUB_CONTENT: ResolvedContent = {
-3158	  rounds: [
-3159	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-3160	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-3161	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-3162	  ],
-3163	};
-3164	
-3165	function makeDefaultConfig(gameId: string): ResolvedGameConfig {
-3166	  return {
-3167	    gameId,
-3168	    title: { en: gameId },
-3169	    gradeBand: 'year1-2',
-3170	    maxRounds: 3,
-3171	    maxRetries: 1,
-3172	    maxUndoDepth: 3,
-3173	    timerVisible: false,
-3174	    timerDurationSeconds: null,
-3175	    difficulty: 'medium',
-3176	  };
-3177	}
-3178	
-3179	interface GameRouteLoaderData {
-3180	  config: ResolvedGameConfig;
-3181	  initialLog: MoveLog | null;
-3182	  sessionId: string;
-3183	  meta: SessionMeta;
-3184	}
-3185	
-3186	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-3187	  loader: async ({ params }): Promise<GameRouteLoaderData> => {
-3188	    const { gameId } = params;
-3189	    const profileId = 'default'; // M5: pull from profile context
-3190	
-3191	    const db = await getOrCreateDatabase();
-3192	    const defaultConfig = makeDefaultConfig(gameId);
-3193	    const config = await loadGameConfig(
-3194	      gameId,
-3195	      profileId,
-3196	      defaultConfig.gradeBand,
+3017 
+3018 ## Task 11: Route Wiring
+3019 
+3020 **Files:**
+3021 
+3022 - Modify: `src/routes/$locale/_app/game/$gameId.tsx`
+3023 
+3024 **Context:** Replace the placeholder component with a real loader that calls `loadGameConfig` and `findInProgressSession`, then mounts `GameShell` with a placeholder game component (real game components come in M5). The route requires `profileId` from the parent layout context (or from a URL search param for testing). For M4, use a hardcoded `profileId: 'default'` and a stub `defaultConfig` — the profile context integration is M5 work.
+3025 
+3026 The loader runs server-side/at-navigation-time via TanStack Router's `loader` function. It gets the database from a module-level import of `getOrCreateDatabase`.
+3027 
+3028 - [ ] **Step 1: Check what the existing route parent provides**
+3029 
+3030 Read the parent layout file to understand what context/loaderData flows down:
+3031 
+3032 ```bash
+3033 cat src/routes/'$locale'/_app.tsx
+3034 ```
+3035 
+3036 Look for `loaderData` and `context` — note the shape so we can match it.
+3037 
+3038 - [ ] **Step 2: Write the route test**
+3039 
+3040 Create `src/routes/$locale/_app/game/$gameId.test.tsx`:
+3041 
+3042 ```typescript
+3043 // Note: this file lives alongside the route — TanStack Router colocation
+3044 // src/routes/$locale/_app/game/$gameId.test.tsx
+3045 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+3046 import { render, screen, waitFor } from '@testing-library/react';
+3047 import type { ReactNode } from 'react';
+3048 import { createTestDatabase, destroyTestDatabase } from '@/db/create-database';
+3049 import { DbProvider } from '@/providers/DbProvider';
+3050 import type { BaseSkillDatabase } from '@/db/types';
+3051 
+3052 // We test the GameRoute component by rendering it directly
+3053 // with a mocked database (bypassing TanStack Router loader)
+3054 import { GameRoute } from './$gameId';
+3055 
+3056 vi.mock('@tanstack/react-router', async (importOriginal) => {
+3057   const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+3058   return {
+3059     ...actual,
+3060     useNavigate: () => vi.fn(),
+3061     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+3062     useLoaderData: () => ({
+3063       config: {
+3064         gameId: 'word-builder',
+3065         title: { en: 'Word Builder' },
+3066         gradeBand: 'year1-2',
+3067         maxRounds: 3,
+3068         maxRetries: 1,
+3069         maxUndoDepth: 3,
+3070         timerVisible: false,
+3071         timerDurationSeconds: null,
+3072         difficulty: 'medium',
+3073       },
+3074       initialLog: null,
+3075       sessionId: 'sess-route-001',
+3076       meta: {
+3077         profileId: 'prof-route',
+3078         gameId: 'word-builder',
+3079         gradeBand: 'year1-2',
+3080         seed: 'seed-route',
+3081         initialContent: { rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }] },
+3082         initialState: {
+3083           phase: 'instructions',
+3084           roundIndex: 0,
+3085           score: 0,
+3086           streak: 0,
+3087           retryCount: 0,
+3088           content: { rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }] },
+3089           currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+3090         },
+3091       },
+3092     }),
+3093   };
+3094 });
+3095 
+3096 let db: BaseSkillDatabase;
+3097 
+3098 beforeEach(async () => {
+3099   db = await createTestDatabase();
+3100 });
+3101 
+3102 afterEach(async () => {
+3103   await destroyTestDatabase(db);
+3104 });
+3105 
+3106 function wrapper({ children }: { children: ReactNode }) {
+3107   return (
+3108     <DbProvider openDatabase={() => Promise.resolve(db)}>
+3109       {children}
+3110     </DbProvider>
+3111   );
+3112 }
+3113 
+3114 describe('GameRoute', () => {
+3115   it('renders the game shell with title from loaderData', async () => {
+3116     render(<GameRoute />, { wrapper });
+3117     await waitFor(() => {
+3118       expect(screen.getByText('Word Builder')).toBeInTheDocument();
+3119     });
+3120   });
+3121 
+3122   it('renders instructions phase placeholder', async () => {
+3123     render(<GameRoute />, { wrapper });
+3124     await waitFor(() => {
+3125       expect(screen.getByText(/Round 1/)).toBeInTheDocument();
+3126     });
+3127   });
+3128 });
+3129 ```
+3130 
+3131 - [ ] **Step 3: Run test to verify it fails**
+3132 
+3133 Run: `yarn test 'src/routes/$locale/_app/game/$gameId.test.tsx'`
+3134 Expected: FAIL — `GameRoute` is not exported
+3135 
+3136 - [ ] **Step 4: Implement the route**
+3137 
+3138 Replace `src/routes/$locale/_app/game/$gameId.tsx` entirely:
+3139 
+3140 ```tsx
+3141 // src/routes/$locale/_app/game/$gameId.tsx
+3142 import { createFileRoute } from '@tanstack/react-router';
+3143 import { nanoid } from 'nanoid';
+3144 import { getOrCreateDatabase } from '@/db/create-database';
+3145 import { GameShell } from '@/components/game/GameShell';
+3146 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+3147 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+3148 import type {
+3149   GameEngineState,
+3150   MoveLog,
+3151   ResolvedContent,
+3152   ResolvedGameConfig,
+3153   SessionMeta,
+3154 } from '@/lib/game-engine/types';
+3155 
+3156 // Stub default config used until M5 introduces game registrations
+3157 const STUB_CONTENT: ResolvedContent = {
+3158   rounds: [
+3159     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+3160     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+3161     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+3162   ],
+3163 };
+3164 
+3165 function makeDefaultConfig(gameId: string): ResolvedGameConfig {
+3166   return {
+3167     gameId,
+3168     title: { en: gameId },
+3169     gradeBand: 'year1-2',
+3170     maxRounds: 3,
+3171     maxRetries: 1,
+3172     maxUndoDepth: 3,
+3173     timerVisible: false,
+3174     timerDurationSeconds: null,
+3175     difficulty: 'medium',
+3176   };
+3177 }
+3178 
+3179 interface GameRouteLoaderData {
+3180   config: ResolvedGameConfig;
+3181   initialLog: MoveLog | null;
+3182   sessionId: string;
+3183   meta: SessionMeta;
+3184 }
+3185 
+3186 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+3187   loader: async ({ params }): Promise<GameRouteLoaderData> => {
+3188     const { gameId } = params;
+3189     const profileId = 'default'; // M5: pull from profile context
+3190 
+3191     const db = await getOrCreateDatabase();
+3192     const defaultConfig = makeDefaultConfig(gameId);
+3193     const config = await loadGameConfig(
+3194       gameId,
+3195       profileId,
+3196       defaultConfig.gradeBand,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:59:30Z)**_
@@ -6412,121 +6521,122 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:59:30Z)**_
  `./docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md`
 
 ```text
-3196	      defaultConfig.gradeBand,
-3197	      db,
-3198	      defaultConfig,
-3199	    );
-3200	
-3201	    const initialLog = await findInProgressSession(
-3202	      profileId,
-3203	      gameId,
-3204	      db,
-3205	    );
-3206	
-3207	    const sessionId = initialLog?.sessionId ?? nanoid();
-3208	    const seed = initialLog?.seed ?? nanoid();
-3209	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-3210	    const initialState: GameEngineState = initialLog?.initialState ?? {
-3211	      phase: 'instructions',
-3212	      roundIndex: 0,
-3213	      score: 0,
-3214	      streak: 0,
-3215	      retryCount: 0,
-3216	      content: initialContent,
-3217	      currentRound: {
-3218	        roundId: initialContent.rounds[0]?.id ?? '',
-3219	        answer: null,
-3220	        hintsUsed: 0,
-3221	      },
-3222	    };
-3223	
-3224	    const meta: SessionMeta = {
-3225	      profileId,
-3226	      gameId,
-3227	      gradeBand: config.gradeBand,
-3228	      seed,
-3229	      initialContent,
-3230	      initialState,
-3231	    };
-3232	
-3233	    return { config, initialLog, sessionId, meta };
-3234	  },
-3235	  component: GameRoute,
-3236	});
-3237	
-3238	export function GameRoute() {
-3239	  const { config, initialLog, sessionId, meta } = Route.useLoaderData();
-3240	
-3241	  return (
-3242	    <GameShell
-3243	      config={config}
-3244	      moves={{}}
-3245	      initialState={meta.initialState}
-3246	      sessionId={sessionId}
-3247	      meta={meta}
-3248	      initialLog={initialLog ?? undefined}
-3249	    >
-3250	      <div className="flex h-full items-center justify-center text-muted-foreground">
-3251	        <p>Game component placeholder — real game in M5</p>
-3252	      </div>
-3253	    </GameShell>
-3254	  );
-3255	}
-3256	```
-3257	
-3258	- [ ] **Step 5: Run test to verify it passes**
-3259	
-3260	Run: `yarn test 'src/routes/$locale/_app/game/$gameId.test.tsx'`
-3261	Expected: PASS
-3262	
-3263	- [ ] **Step 6: Full verification**
-3264	
-3265	Run: `yarn typecheck && yarn test && yarn build`
-3266	Expected: all green
-3267	
-3268	- [ ] **Step 7: Commit**
-3269	
-3270	```bash
-3271	git add 'src/routes/$locale/_app/game/$gameId.tsx' 'src/routes/$locale/_app/game/$gameId.test.tsx'
-3272	git commit -m "feat(m4): wire game route with config loader, silent resume, and GameShell"
-3273	```
-3274	
-3275	---
-3276	
-3277	## Self-Review
-3278	
-3279	**Spec coverage check:**
-3280	
-3281	| Spec Section                                          | Task Covering It |
-3282	| ----------------------------------------------------- | ---------------- |
-3283	| §3 Types                                              | Task 1           |
-3284	| §4 Lifecycle State Machine (9 transitions)            | Task 4           |
-3285	| §5 Move Log — UNDO as first-class move                | Task 5           |
-3286	| §6 Replay Engine — pure fn, UNDO handling             | Task 3           |
-3287	| §7 Config Loader + Override Merging (4 levels)        | Task 6           |
-3288	| §8 GameEngineProvider — split contexts                | Task 9           |
-3289	| §9 Session Recorder — RxDB writes, flush triggers     | Task 7           |
-3290	| §9a Silent Resume — findInProgressSession, stale >24h | Task 8           |
-3291	| §10 GameShell UI — Layout B                           | Task 10          |
-3292	| §11 Directory Structure                               | All tasks        |
-3293	| §12 Existing utilities reused                         | Tasks 7-11       |
-3294	| §13 Modified: session_history_index status + bump     | Task 2           |
-3295	| §13 Modified: game/$gameId.tsx route wiring           | Task 11          |
-3296	| §14 Testing — unit replay/move-log/config/lifecycle   | Tasks 3-6        |
-3297	| §14 Testing — integration provider/recorder           | Tasks 7, 9       |
-3298	
-3299	**Spec gap noted:** `src/types/game-events.ts` — spec §13 says "verify `GameEventType` covers all move-triggered bus events". Review the file; `game:end` is already present; all needed types exist. No code change needed.
-3300	
-3301	**Type consistency check:**
-3302	
-3303	- `MoveHandler` defined in Task 1, used in Tasks 4, 5, 9, 10, 11 ✓
-3304	- `SessionMeta` defined in Task 1, used in Tasks 7, 9, 10, 11 ✓
-3305	- `BaseSkillDatabase` (not `AppDatabase`) used throughout ✓
-3306	- `findInProgressSession` returns `MoveLog | null`, consumed in Task 9 (UNDO) and Task 11 (route) ✓
-3307	- `GameEngineProvider` props (`initialState`, `sessionId`, `meta`) match usage in `GameShell` Task 10 ✓
-3308	- `useSessionRecorder` signature `(moves, sessionId, meta, db, phase)` used consistently in Tasks 7 and 9 ✓
+3196       defaultConfig.gradeBand,
+3197       db,
+3198       defaultConfig,
+3199     );
+3200 
+3201     const initialLog = await findInProgressSession(
+3202       profileId,
+3203       gameId,
+3204       db,
+3205     );
+3206 
+3207     const sessionId = initialLog?.sessionId ?? nanoid();
+3208     const seed = initialLog?.seed ?? nanoid();
+3209     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+3210     const initialState: GameEngineState = initialLog?.initialState ?? {
+3211       phase: 'instructions',
+3212       roundIndex: 0,
+3213       score: 0,
+3214       streak: 0,
+3215       retryCount: 0,
+3216       content: initialContent,
+3217       currentRound: {
+3218         roundId: initialContent.rounds[0]?.id ?? '',
+3219         answer: null,
+3220         hintsUsed: 0,
+3221       },
+3222     };
+3223 
+3224     const meta: SessionMeta = {
+3225       profileId,
+3226       gameId,
+3227       gradeBand: config.gradeBand,
+3228       seed,
+3229       initialContent,
+3230       initialState,
+3231     };
+3232 
+3233     return { config, initialLog, sessionId, meta };
+3234   },
+3235   component: GameRoute,
+3236 });
+3237 
+3238 export function GameRoute() {
+3239   const { config, initialLog, sessionId, meta } = Route.useLoaderData();
+3240 
+3241   return (
+3242     <GameShell
+3243       config={config}
+3244       moves={{}}
+3245       initialState={meta.initialState}
+3246       sessionId={sessionId}
+3247       meta={meta}
+3248       initialLog={initialLog ?? undefined}
+3249     >
+3250       <div className="flex h-full items-center justify-center text-muted-foreground">
+3251         <p>Game component placeholder — real game in M5</p>
+3252       </div>
+3253     </GameShell>
+3254   );
+3255 }
+3256 ```
+3257 
+3258 - [ ] **Step 5: Run test to verify it passes**
+3259 
+3260 Run: `yarn test 'src/routes/$locale/_app/game/$gameId.test.tsx'`
+3261 Expected: PASS
+3262 
+3263 - [ ] **Step 6: Full verification**
+3264 
+3265 Run: `yarn typecheck && yarn test && yarn build`
+3266 Expected: all green
+3267 
+3268 - [ ] **Step 7: Commit**
+3269 
+3270 ```bash
+3271 git add 'src/routes/$locale/_app/game/$gameId.tsx' 'src/routes/$locale/_app/game/$gameId.test.tsx'
+3272 git commit -m "feat(m4): wire game route with config loader, silent resume, and GameShell"
+3273 ```
+3274 
+3275 ---
+3276 
+3277 ## Self-Review
+3278 
+3279 **Spec coverage check:**
+3280 
+3281 | Spec Section                                          | Task Covering It |
+3282 | ----------------------------------------------------- | ---------------- |
+3283 | §3 Types                                              | Task 1           |
+3284 | §4 Lifecycle State Machine (9 transitions)            | Task 4           |
+3285 | §5 Move Log — UNDO as first-class move                | Task 5           |
+3286 | §6 Replay Engine — pure fn, UNDO handling             | Task 3           |
+3287 | §7 Config Loader + Override Merging (4 levels)        | Task 6           |
+3288 | §8 GameEngineProvider — split contexts                | Task 9           |
+3289 | §9 Session Recorder — RxDB writes, flush triggers     | Task 7           |
+3290 | §9a Silent Resume — findInProgressSession, stale >24h | Task 8           |
+3291 | §10 GameShell UI — Layout B                           | Task 10          |
+3292 | §11 Directory Structure                               | All tasks        |
+3293 | §12 Existing utilities reused                         | Tasks 7-11       |
+3294 | §13 Modified: session_history_index status + bump     | Task 2           |
+3295 | §13 Modified: game/$gameId.tsx route wiring           | Task 11          |
+3296 | §14 Testing — unit replay/move-log/config/lifecycle   | Tasks 3-6        |
+3297 | §14 Testing — integration provider/recorder           | Tasks 7, 9       |
+3298 
+3299 **Spec gap noted:** `src/types/game-events.ts` — spec §13 says "verify `GameEventType` covers all move-triggered bus events". Review the file; `game:end` is already present; all needed types exist. No code change needed.
+3300 
+3301 **Type consistency check:**
+3302 
+3303 - `MoveHandler` defined in Task 1, used in Tasks 4, 5, 9, 10, 11 ✓
+3304 - `SessionMeta` defined in Task 1, used in Tasks 7, 9, 10, 11 ✓
+3305 - `BaseSkillDatabase` (not `AppDatabase`) used throughout ✓
+3306 - `findInProgressSession` returns `MoveLog | null`, consumed in Task 9 (UNDO) and Task 11 (route) ✓
+3307 - `GameEngineProvider` props (`initialState`, `sessionId`, `meta`) match usage in `GameShell` Task 10 ✓
+3308 - `useSessionRecorder` signature `(moves, sessionId, meta, db, phase)` used consistently in Tasks 7 and 9 ✓
 3309
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:59:33Z)**_
@@ -6540,25 +6650,26 @@ _**Agent (claude-sonnet-4-6 2026-04-02 17:59:33Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const GameShell = () => {
-4	  const { gameId } = Route.useParams();
-5	  return (
-6	    <div className="p-8">
-7	      <h1 className="text-2xl font-bold">Game Shell</h1>
-8	      <p className="mt-2 text-muted-foreground">
-9	        Loading game: {gameId}
-10	      </p>
-11	    </div>
-12	  );
-13	};
-14	
-15	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-16	  component: GameShell,
-17	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const GameShell = () => {
+4   const { gameId } = Route.useParams();
+5   return (
+6     <div className="p-8">
+7       <h1 className="text-2xl font-bold">Game Shell</h1>
+8       <p className="mt-2 text-muted-foreground">
+9         Loading game: {gameId}
+10       </p>
+11     </div>
+12   );
+13 };
+14 
+15 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+16   component: GameShell,
+17 });
 18
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 17:59:38Z)**_
@@ -6671,6 +6782,7 @@ describe('GameRoute', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:03Z)**_
@@ -6794,6 +6906,7 @@ export const GameRoute = (): JSX.Element => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:10Z)**_
@@ -6825,6 +6938,7 @@ ReferenceError: Cannot access 'GameRoute' before initialization
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:14Z)**_
@@ -6839,6 +6953,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:00:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:22Z)**_
@@ -6849,6 +6964,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:00:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:27Z)**_
@@ -6978,6 +7094,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:42Z)**_
@@ -6995,6 +7112,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:00:42Z)**_
  FAIL  src/routes/$locale/_app/game/$gameId.test.tsx > GameRoute > renders instructions phase placeholder
       Tests  2 failed (2)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:46Z)**_
@@ -7032,6 +7150,7 @@ TypeError: Cannot read properties of null (reading 'isServer')
      47|   const { config, initialLog, sessionId, meta } = Route.useLoaderData(…
        |                                                         ^
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:00:57Z)**_
@@ -7047,17 +7166,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:00:57Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/index.test.tsx`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	
-3	describe('Home screen', () => {
-4	  it('renders without crashing', () => {
-5	    // The HomeScreen component depends on TanStack Router hooks (useSearch, useNavigate).
-6	    // Full rendering is covered by E2E tests. This is a smoke test for the module.
-7	    expect(true).toBe(true);
-8	  });
-9	});
+1 import { describe, expect, it } from 'vitest';
+2 
+3 describe('Home screen', () => {
+4   it('renders without crashing', () => {
+5     // The HomeScreen component depends on TanStack Router hooks (useSearch, useNavigate).
+6     // Full rendering is covered by E2E tests. This is a smoke test for the module.
+7     expect(true).toBe(true);
+8   });
+9 });
 10
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:01:04Z)**_
@@ -7198,6 +7318,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:01:21Z)**_
@@ -7328,6 +7449,7 @@ describe('GameRoute', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:01:38Z)**_
@@ -7342,6 +7464,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:01:38Z)**_
  ✓ src/routes/$locale/_app/game/$gameId.test.tsx > GameRoute > renders instructions phase placeholder 31ms
       Tests  2 passed (2)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:01:41Z)**_
@@ -7369,6 +7492,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 1.67s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:01:55Z)**_
@@ -7381,6 +7505,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:01:55Z)**_
 ```text
 [This command modified 2 files you've previously read: src/routes/$locale/_app/game/$gameId.tsx, src/routes/$locale/_app/game/$gameId.test.tsx. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:01Z)**_
@@ -7401,6 +7526,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:02:06Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:14Z)**_
@@ -7418,6 +7544,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
   0 errors and 1 warning potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:18Z)**_
@@ -7431,17 +7558,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:02:19Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-19	vi.mock('@tanstack/react-router', async (importOriginal) => {
-20	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-21	  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
-22	  return {
-23	    ...actual,
-24	    useNavigate: () => vi.fn(),
-25	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-26	  };
-27	});
+19 vi.mock('@tanstack/react-router', async (importOriginal) => {
+20   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+21   const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+22   return {
+23     ...actual,
+24     useNavigate: () => vi.fn(),
+25     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+26   };
+27 });
 28
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:25Z)**_
@@ -7457,22 +7585,23 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:02:27Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-17	import { DbProvider } from '@/providers/DbProvider';
-18	
-19	vi.mock('@tanstack/react-router', async (importOriginal) => {
-20	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-21	  const actual = await importOriginal<typeof import('@tanstack/react-router')>();
-22	  return {
-23	    ...actual,
-24	    useNavigate: () => vi.fn(),
-25	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-26	  };
-27	});
-28	
-29	const content: ResolvedContent = {
-30	  rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
-31	};
+17 import { DbProvider } from '@/providers/DbProvider';
+18 
+19 vi.mock('@tanstack/react-router', async (importOriginal) => {
+20   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+21   const actual = await importOriginal<typeof import('@tanstack/react-router')>();
+22   return {
+23     ...actual,
+24     useNavigate: () => vi.fn(),
+25     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+26   };
+27 });
+28 
+29 const content: ResolvedContent = {
+30   rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
+31 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:33Z)**_
@@ -7487,6 +7616,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:02:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:45Z)**_
@@ -7503,6 +7633,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:02:45Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:02:53Z)**_
@@ -7521,6 +7652,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
   0 errors and 1 warning potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:03Z)**_
@@ -7528,16 +7660,15 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:03Z)**_
 <think><details><summary>Thought Process</summary>
 The issue is that the error is on line 30, col 33 which is `typeof import(...)`. This is in the `$gameId.test.tsx` file. But line 30 based on my last read starts at `const content:...`. Maybe the file numbering is different after my edit. Let me look at where line 30 is:
 
-Actually looking at the last edit, I added extra lines, so lines shifted. Let me count: 
+Actually looking at the last edit, I added extra lines, so lines shifted. Let me count:
 1: `// src/routes/$locale/_app/game/$gameId.test.tsx`
-
 
 2: `import { render, screen, waitFor } from '@testing-library/react';`
 3: ...
 19: `vi.mock('@tanstack/react-router', async (importOriginal) => {`
-20: `  /* eslint-disable @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type */`
-21: `  const actual = await importOriginal<typeof import('@tanstack/react-router')>();`
-22: `  /* eslint-enable @typescript-eslint/consistent-type-imports */`
+20: `/* eslint-disable @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type */`
+21: `const actual = await importOriginal<typeof import('@tanstack/react-router')>();`
+22: `/* eslint-enable @typescript-eslint/consistent-type-imports */`
 
 Wait, error on line 30 col 33 - that doesn't match line 21. The lint error must be pointing to a different location than I'm counting.
 
@@ -7562,6 +7693,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx
   22:0  error  Unexpected undescribed directive comment. Include descriptions to explain why the comment is necessary  eslint-comments/require-description
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:11Z)**_
@@ -7575,21 +7707,22 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:12Z)**_
  `./worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx`
 
 ```text
-19	import type { ReactNode } from 'react';
-20	import {
-21	  createTestDatabase,
-22	  destroyTestDatabase,
-23	} from '@/db/create-database';
-24	import { DbProvider } from '@/providers/DbProvider';
-25	
-26	// Mock TanStack Router navigate
-27	vi.mock('@tanstack/react-router', async (importOriginal) => {
-28	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-29	  const actual =
-30	    await importOriginal<typeof import('@tanstack/react-router')>();
-31	  return {
-32	    ...actual,
+19 import type { ReactNode } from 'react';
+20 import {
+21   createTestDatabase,
+22   destroyTestDatabase,
+23 } from '@/db/create-database';
+24 import { DbProvider } from '@/providers/DbProvider';
+25 
+26 // Mock TanStack Router navigate
+27 vi.mock('@tanstack/react-router', async (importOriginal) => {
+28   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+29   const actual =
+30     await importOriginal<typeof import('@tanstack/react-router')>();
+31   return {
+32     ...actual,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:17Z)**_
@@ -7604,6 +7737,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:24Z)**_
@@ -7618,6 +7752,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:37Z)**_
@@ -7634,6 +7769,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:37Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:46Z)**_
@@ -7646,6 +7782,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:46Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:54Z)**_
@@ -7664,6 +7801,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
   0 errors and 1 warning potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:03:58Z)**_
@@ -7677,17 +7815,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:03:59Z)**_
  `./worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx`
 
 ```text
-26	// Mock TanStack Router navigate
-27	vi.mock('@tanstack/react-router', async (importOriginal) => {
-28	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-29	  const actual = await importOriginal<
-30	    typeof import('@tanstack/react-router')
-31	  >();
-32	  return {
-33	    ...actual,
-34	    useNavigate: () => vi.fn(),
-35	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+26 // Mock TanStack Router navigate
+27 vi.mock('@tanstack/react-router', async (importOriginal) => {
+28   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+29   const actual = await importOriginal<
+30     typeof import('@tanstack/react-router')
+31   >();
+32   return {
+33     ...actual,
+34     useNavigate: () => vi.fn(),
+35     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:04Z)**_
@@ -7702,6 +7841,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:04:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:16Z)**_
@@ -7716,6 +7856,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 5.78s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:20Z)**_
@@ -7741,6 +7882,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:04:24Z)**_
 
 Done in 2.67s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:27Z)**_
@@ -8184,6 +8326,7 @@ Done in 2.54s.
  2 files changed, 235 insertions(+), 10 deletions(-)
  create mode 100644 src/routes/$locale/_app/game/$gameId.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:45Z)**_
@@ -8212,6 +8355,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:04:49Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:04:57Z)**_
@@ -8233,6 +8377,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:04:57Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/comment-parser/tests/unit/util.spec.ts
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/node_modules/comment-parser/tests/unit/parser.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:02Z)**_
@@ -8245,6 +8390,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:02Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:06Z)**_
@@ -8260,6 +8406,7 @@ a11y.spec.ts
 smoke.spec.ts
 visual.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:10Z)**_
@@ -8271,6 +8418,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:10Z)**_
 ```text
 File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:13Z)**_
@@ -8283,6 +8431,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:13Z)**_
 ```text
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/e2e/visual.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:17Z)**_
@@ -8292,23 +8441,24 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:17Z)**_
  `./worktrees/milestone-4-game-engine/e2e/visual.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	
-3	test('@visual home page', async ({ page }) => {
-4	  await page.goto('/en/');
-5	  await page.getByRole('main').waitFor({ state: 'visible' });
-6	  await page
-7	    .getByRole('group', { name: /filter by grade level/i })
-8	    .waitFor({ state: 'visible' });
-9	  await expect(page).toHaveScreenshot('home.png', { fullPage: true });
-10	});
+1 import { expect, test } from '@playwright/test';
+2 
+3 test('@visual home page', async ({ page }) => {
+4   await page.goto('/en/');
+5   await page.getByRole('main').waitFor({ state: 'visible' });
+6   await page
+7     .getByRole('group', { name: /filter by grade level/i })
+8     .waitFor({ state: 'visible' });
+9   await expect(page).toHaveScreenshot('home.png', { fullPage: true });
+10 });
 11
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:24Z)**_
 
-VR tests are Playwright e2e tests that navigate to real pages. They need a running dev server. The GameShell VR test would navigate to a game URL. However, since there's no real game content yet (M5), a VR test on the actual game route would show the placeholder. 
+VR tests are Playwright e2e tests that navigate to real pages. They need a running dev server. The GameShell VR test would navigate to a game URL. However, since there's no real game content yet (M5), a VR test on the actual game route would show the placeholder.
 
 The better approach for VR is to test against a Storybook story URL. Let me check if there's a storybook VR pattern or if VR just tests the live app:
 
@@ -8351,6 +8501,7 @@ export default defineConfig({
     timeout: 120 * 1000,
   },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:30Z)**_
@@ -8370,6 +8521,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:30Z)**_
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/games/registry.test.ts
 /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/games/registry.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:33Z)**_
@@ -8401,6 +8553,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     id: 'math-subtraction',
     titleKey: 'math-subtraction',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:38Z)**_
@@ -8416,6 +8569,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:38Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:46Z)**_
@@ -8426,6 +8580,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/e2e/visual.spec.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:05:52Z)**_
@@ -8446,6 +8601,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:05:57Z)**_
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:05Z)**_
@@ -8464,6 +8620,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:05Z)**_
   0 errors and 2 warnings potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:10Z)**_
@@ -8486,6 +8643,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:15Z)**_
   0 errors and 2 warnings potentially fixable with the `--fix` option.
 error Command failed with exit code 1.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:19Z)**_
@@ -8499,15 +8657,16 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:20Z)**_
  `./worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx`
 
 ```text
-26	// Mock TanStack Router navigate
-27	vi.mock('@tanstack/react-router', async (importOriginal) => {
-28	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-29	  const actual =
-30	    await importOriginal<typeof import('@tanstack/react-router')>();
-31	  return {
-32	    ...actual,
-33	    useNavigate: () => vi.fn(),
+26 // Mock TanStack Router navigate
+27 vi.mock('@tanstack/react-router', async (importOriginal) => {
+28   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+29   const actual =
+30     await importOriginal<typeof import('@tanstack/react-router')>();
+31   return {
+32     ...actual,
+33     useNavigate: () => vi.fn(),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:25Z)**_
@@ -8522,6 +8681,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/components/game/GameShell.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:32Z)**_
@@ -8531,17 +8691,18 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:32Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-19	import type { ReactNode } from 'react';
-20	import {
-21	  createTestDatabase,
-22	  destroyTestDatabase,
-23	} from '@/db/create-database';
-24	import { DbProvider } from '@/providers/DbProvider';
-25	
-26	vi.mock('@tanstack/react-router', async (importOriginal) => {
-27	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-28	  const actual =
+19 import type { ReactNode } from 'react';
+20 import {
+21   createTestDatabase,
+22   destroyTestDatabase,
+23 } from '@/db/create-database';
+24 import { DbProvider } from '@/providers/DbProvider';
+25 
+26 vi.mock('@tanstack/react-router', async (importOriginal) => {
+27   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+28   const actual =
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:36Z)**_
@@ -8551,15 +8712,16 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:36Z)**_
  `./worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-26	vi.mock('@tanstack/react-router', async (importOriginal) => {
-27	  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-28	  const actual =
-29	    await importOriginal<typeof import('@tanstack/react-router')>();
-30	  return {
-31	    ...actual,
-32	    useNavigate: () => vi.fn(),
-33	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+26 vi.mock('@tanstack/react-router', async (importOriginal) => {
+27   // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+28   const actual =
+29     await importOriginal<typeof import('@tanstack/react-router')>();
+30   return {
+31     ...actual,
+32     useNavigate: () => vi.fn(),
+33     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:41Z)**_
@@ -8570,6 +8732,7 @@ _**Agent (claude-sonnet-4-6 2026-04-02 18:06:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-4-game-engine/src/routes/$locale/_app/game/$gameId.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:52Z)**_
@@ -8584,6 +8747,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 5.59s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-02 18:06:56Z)**_
@@ -8613,6 +8777,7 @@ The user doesn't want to proceed with this tool use. The tool use was rejected (
 
 Note: The user's next message may contain a correction or preference. Pay close attention — if they explain what went wrong or how they'd prefer you to work, consider saving that to memory for future sessions.
 ```
+
 </details></tool-use>
 
 ---
@@ -8646,21 +8811,26 @@ Here's a continuation prompt for your next session:
 We're in the worktree `./worktrees/milestone-4-game-engine`. All tasks from the plan at `docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md` are **complete except the final commit of the VR test**.
 
 **What's done (already committed):**
+
 - Tasks 1–9: types, DB schema bump, replay, lifecycle, move-log, config-loader, session-recorder, session-finder, GameEngineProvider — all 118 tests passing
 - Task 10: `src/components/game/GameShell.tsx` + tests + `GameShell.stories.tsx` (5 Storybook variants)
 - Task 11: `src/routes/$locale/_app/game/$gameId.tsx` wired with loader + `GameRoute` exported for testing
 
 **Staged but not yet committed:**
+
 - `e2e/visual.spec.ts` — added `@visual game shell layout` test that navigates to `/en/game/math-addition` and screenshots the GameShell chrome
 - `src/components/game/GameShell.test.tsx` — eslint-disable placement fix
 - `src/routes/$locale/_app/game/$gameId.test.tsx` — eslint-disable placement fix
 
 **Next steps:**
+
 1. Commit the staged VR test and lint fixes:
+
    ```
    git add e2e/visual.spec.ts src/components/game/GameShell.test.tsx "src/routes/\$locale/_app/game/\$gameId.test.tsx"
    git commit -m "feat(m4): add VR baseline test for game shell layout"
    ```
+
 2. Run `yarn lint && yarn typecheck && yarn test` — confirm all 118 tests green
 3. Open a PR from `milestone-4-game-engine` → `master` using `gh pr create`
 4. After PR is merged, clean up the worktree: `git worktree remove ./worktrees/milestone-4-game-engine`

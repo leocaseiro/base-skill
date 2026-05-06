@@ -279,7 +279,7 @@
   {
     "word": "brown",
     "level": 6,
-    "ipa": "broʊn",
+    "ipa": "braʊn",
     "graphemes": [
       {
         "g": "b",
@@ -291,7 +291,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -500,7 +500,7 @@
   {
     "word": "clown",
     "level": 6,
-    "ipa": "kloʊn",
+    "ipa": "klaʊn",
     "graphemes": [
       {
         "g": "c",
@@ -512,7 +512,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -668,7 +668,7 @@
   {
     "word": "cow",
     "level": 6,
-    "ipa": "koʊ",
+    "ipa": "kaʊ",
     "graphemes": [
       {
         "g": "c",
@@ -676,14 +676,14 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       }
     ]
   },
   {
     "word": "crowd",
     "level": 6,
-    "ipa": "kroʊd",
+    "ipa": "kraʊd",
     "graphemes": [
       {
         "g": "c",
@@ -695,7 +695,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "d",
@@ -782,7 +782,7 @@
   {
     "word": "down",
     "level": 6,
-    "ipa": "doʊn",
+    "ipa": "daʊn",
     "graphemes": [
       {
         "g": "d",
@@ -790,7 +790,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -801,7 +801,7 @@
   {
     "word": "drown",
     "level": 6,
-    "ipa": "droʊn",
+    "ipa": "draʊn",
     "graphemes": [
       {
         "g": "d",
@@ -813,7 +813,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -1073,7 +1073,7 @@
   {
     "word": "frown",
     "level": 6,
-    "ipa": "froʊn",
+    "ipa": "fraʊn",
     "graphemes": [
       {
         "g": "f",
@@ -1085,7 +1085,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -1286,7 +1286,7 @@
   {
     "word": "how",
     "level": 6,
-    "ipa": "hoʊ",
+    "ipa": "haʊ",
     "graphemes": [
       {
         "g": "h",
@@ -1294,14 +1294,14 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       }
     ]
   },
   {
     "word": "howl",
     "level": 6,
-    "ipa": "hoʊl",
+    "ipa": "haʊl",
     "graphemes": [
       {
         "g": "h",
@@ -1309,7 +1309,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "l",
@@ -1560,7 +1560,7 @@
   {
     "word": "now",
     "level": 6,
-    "ipa": "noʊ",
+    "ipa": "naʊ",
     "graphemes": [
       {
         "g": "n",
@@ -1568,7 +1568,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       }
     ]
   },
@@ -1643,11 +1643,11 @@
   {
     "word": "owl",
     "level": 6,
-    "ipa": "oʊl",
+    "ipa": "aʊl",
     "graphemes": [
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "l",
@@ -2479,7 +2479,7 @@
   {
     "word": "town",
     "level": 6,
-    "ipa": "toʊn",
+    "ipa": "taʊn",
     "graphemes": [
       {
         "g": "t",
@@ -2487,7 +2487,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       },
       {
         "g": "n",
@@ -2685,7 +2685,7 @@
   {
     "word": "wow",
     "level": 6,
-    "ipa": "woʊ",
+    "ipa": "waʊ",
     "graphemes": [
       {
         "g": "w",
@@ -2693,7 +2693,7 @@
       },
       {
         "g": "ow",
-        "p": "oʊ"
+        "p": "aʊ"
       }
     ]
   },

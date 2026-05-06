@@ -90,5 +90,13 @@ export const classicSkin: GameSkin = {
     '--skin-hud-fraction-color': 'var(--bs-foreground)',
     '--skin-hud-fraction-sep-color': 'var(--skin-hud-dot-fill)',
     '--skin-hud-level-color': 'var(--bs-primary)',
+
+    // ── Visual variation tokens (cross-game palette) ──────────────
+    '--skin-variation-1': 'var(--bs-primary)',
+    '--skin-variation-2': 'var(--destructive)',
+    '--skin-variation-3': 'var(--bs-success)',
+    '--skin-variation-4': 'oklch(54% 0.22 295)',
+    '--skin-variation-5': 'oklch(63% 0.18 35)',
+    '--skin-variation-6': 'var(--skin-tile-text)',
   },
 };

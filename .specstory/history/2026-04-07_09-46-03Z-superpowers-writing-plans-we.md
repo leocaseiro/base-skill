@@ -43,6 +43,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:06Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -64,6 +65,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -84,6 +86,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -154,6 +157,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -162,6 +166,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -192,13 +197,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -225,6 +231,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:11Z)**_
 ```text
 File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:14Z)**_
@@ -276,6 +283,7 @@ useTouchDrag.ts
 useTouchKeyboardInput.test.tsx
 useTouchKeyboardInput.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:18Z)**_
@@ -295,6 +303,7 @@ docs/superpowers/specs/2026-04-05-game-config-ui-redesign.md
 docs/superpowers/specs/2026-04-06-touch-keyboard-type-mode-design.md
 docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:17Z)**_
@@ -304,106 +313,107 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:17Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-1	import { createContext, useEffect, useReducer } from 'react';
-2	import {
-3	  answerGameReducer,
-4	  makeInitialState,
-5	} from './answer-game-reducer';
-6	import { HiddenKeyboardInput } from './HiddenKeyboardInput';
-7	import { TouchKeyboardContext } from './TouchKeyboardContext';
-8	import { useKeyboardInput } from './useKeyboardInput';
-9	import { useTouchKeyboardInput } from './useTouchKeyboardInput';
-10	import type {
-11	  AnswerGameAction,
-12	  AnswerGameConfig,
-13	  AnswerGameState,
-14	} from './types';
-15	import type { Dispatch, ReactNode } from 'react';
-16	import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
-17	
-18	export const AnswerGameStateContext =
-19	  createContext<AnswerGameState | null>(null);
-20	export const AnswerGameDispatchContext =
-21	  createContext<Dispatch<AnswerGameAction> | null>(null);
-22	
-23	const KeyboardInputAdapter = () => {
-24	  useKeyboardInput();
-25	  return null;
-26	};
-27	
-28	const TouchKeyboardAdapter = ({
-29	  inputMode,
-30	  children,
-31	}: {
-32	  inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
-33	  children: ReactNode;
-34	}) => {
-35	  const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
-36	  return (
-37	    <TouchKeyboardContext.Provider value={focusKeyboard}>
-38	      <HiddenKeyboardInput
-39	        inputRef={hiddenInputRef}
-40	        inputMode={inputMode}
-41	      />
-42	      {children}
-43	    </TouchKeyboardContext.Provider>
-44	  );
-45	};
-46	
-47	interface AnswerGameProviderProps {
-48	  config: AnswerGameConfig;
-49	  children: ReactNode;
-50	}
-51	
-52	export const AnswerGameProvider = ({
-53	  config,
-54	  children,
-55	}: AnswerGameProviderProps) => {
-56	  const [state, dispatch] = useReducer(
-57	    answerGameReducer,
-58	    config,
-59	    makeInitialState,
-60	  );
-61	
-62	  useEffect(() => {
-63	    const tiles = config.initialTiles;
-64	    const zones = config.initialZones;
-65	    if (tiles?.length && zones?.length) {
-66	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-67	    }
-68	  }, [config.gameId, config.initialTiles, config.initialZones]);
-69	
-70	  const roundProgress = {
-71	    current: state.roundIndex + 1,
-72	    total: config.totalRounds,
-73	  };
-74	
-75	  const usesTouchKeyboard =
-76	    navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
-77	
-78	  return (
-79	    <GameRoundContext.Provider value={roundProgress}>
-80	      <AnswerGameStateContext.Provider value={state}>
-81	        <AnswerGameDispatchContext.Provider value={dispatch}>
-82	          {usesTouchKeyboard ? (
-83	            <TouchKeyboardAdapter
-84	              inputMode={config.touchKeyboardInputMode ?? 'text'}
-85	            >
-86	              {children}
-87	            </TouchKeyboardAdapter>
-88	          ) : (
-89	            <TouchKeyboardContext.Provider value={null}>
-90	              <KeyboardInputAdapter />
-91	              {children}
-92	            </TouchKeyboardContext.Provider>
-93	          )}
-94	        </AnswerGameDispatchContext.Provider>
-95	      </AnswerGameStateContext.Provider>
-96	    </GameRoundContext.Provider>
-97	  );
-98	};
+1 import { createContext, useEffect, useReducer } from 'react';
+2 import {
+3   answerGameReducer,
+4   makeInitialState,
+5 } from './answer-game-reducer';
+6 import { HiddenKeyboardInput } from './HiddenKeyboardInput';
+7 import { TouchKeyboardContext } from './TouchKeyboardContext';
+8 import { useKeyboardInput } from './useKeyboardInput';
+9 import { useTouchKeyboardInput } from './useTouchKeyboardInput';
+10 import type {
+11   AnswerGameAction,
+12   AnswerGameConfig,
+13   AnswerGameState,
+14 } from './types';
+15 import type { Dispatch, ReactNode } from 'react';
+16 import { GameRoundContext } from '@/lib/game-engine/GameRoundContext';
+17 
+18 export const AnswerGameStateContext =
+19   createContext<AnswerGameState | null>(null);
+20 export const AnswerGameDispatchContext =
+21   createContext<Dispatch<AnswerGameAction> | null>(null);
+22 
+23 const KeyboardInputAdapter = () => {
+24   useKeyboardInput();
+25   return null;
+26 };
+27 
+28 const TouchKeyboardAdapter = ({
+29   inputMode,
+30   children,
+31 }: {
+32   inputMode: NonNullable<AnswerGameConfig['touchKeyboardInputMode']>;
+33   children: ReactNode;
+34 }) => {
+35   const { hiddenInputRef, focusKeyboard } = useTouchKeyboardInput();
+36   return (
+37     <TouchKeyboardContext.Provider value={focusKeyboard}>
+38       <HiddenKeyboardInput
+39         inputRef={hiddenInputRef}
+40         inputMode={inputMode}
+41       />
+42       {children}
+43     </TouchKeyboardContext.Provider>
+44   );
+45 };
+46 
+47 interface AnswerGameProviderProps {
+48   config: AnswerGameConfig;
+49   children: ReactNode;
+50 }
+51 
+52 export const AnswerGameProvider = ({
+53   config,
+54   children,
+55 }: AnswerGameProviderProps) => {
+56   const [state, dispatch] = useReducer(
+57     answerGameReducer,
+58     config,
+59     makeInitialState,
+60   );
+61 
+62   useEffect(() => {
+63     const tiles = config.initialTiles;
+64     const zones = config.initialZones;
+65     if (tiles?.length && zones?.length) {
+66       dispatch({ type: 'INIT_ROUND', tiles, zones });
+67     }
+68   }, [config.gameId, config.initialTiles, config.initialZones]);
+69 
+70   const roundProgress = {
+71     current: state.roundIndex + 1,
+72     total: config.totalRounds,
+73   };
+74 
+75   const usesTouchKeyboard =
+76     navigator.maxTouchPoints > 0 && config.inputMethod !== 'drag';
+77 
+78   return (
+79     <GameRoundContext.Provider value={roundProgress}>
+80       <AnswerGameStateContext.Provider value={state}>
+81         <AnswerGameDispatchContext.Provider value={dispatch}>
+82           {usesTouchKeyboard ? (
+83             <TouchKeyboardAdapter
+84               inputMode={config.touchKeyboardInputMode ?? 'text'}
+85             >
+86               {children}
+87             </TouchKeyboardAdapter>
+88           ) : (
+89             <TouchKeyboardContext.Provider value={null}>
+90               <KeyboardInputAdapter />
+91               {children}
+92             </TouchKeyboardContext.Provider>
+93           )}
+94         </AnswerGameDispatchContext.Provider>
+95       </AnswerGameStateContext.Provider>
+96     </GameRoundContext.Provider>
+97   );
+98 };
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:20Z)**_
@@ -425,6 +435,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:22Z)**_
 ```text
 worktrees/feat/service-worker-workbox-offline-setup/docs/superpowers/specs/2026-04-07-service-worker-workbox-offline-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:22Z)**_
@@ -447,6 +458,7 @@ Check worktree docs directory
 2026-04-07-dark-mode-a11y-vr-design.md
 2026-04-07-service-worker-workbox-offline-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:25Z)**_
@@ -456,433 +468,434 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:25Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/docs/superpowers/specs/2026-04-07-service-worker-workbox-offline-design.md`
 
 ```text
-1	# Service Worker, Workbox & Offline-First Design Spec
-2	
-3	**Date:** 2026-04-07
-4	**Status:** Approved
-5	**Branch:** feat/service-worker-workbox-offline-setup
-6	
-7	---
-8	
-9	## 1. Overview
-10	
-11	This spec delivers three tightly related capabilities as a single offline-first milestone:
-12	
-13	1. **Game session resume** — `AnswerGameState` (tiles, zones, round position) persisted to RxDB so a page refresh silently resumes mid-game. Uses a hybrid approach: event log (`MoveLog`) for parent replay viewer, snapshot for fast reload.
-14	2. **Service worker hardening** — completes the existing `vite-plugin-pwa` setup with `navigateFallback`, cache cleanup, SW update notification (non-intrusive banner when not in a game; deferred to natural game exit when mid-game).
-15	3. **Version + Beta display** — app version and "Beta" badge in the header (all users) and in Parent Settings > About (with install ID and schema version detail).
-16	
-17	**Out of scope:** cloud sync (M6), full parent replay viewer (M7), PWA install prompt (M8).
-18	
-19	**Design decisions:**
-20	
-21	| Decision | Choice |
-22	|---|---|
-23	| Resume UX | Silent instant resume — no prompt, skip instructions overlay |
-24	| SW update mid-game | Defer banner until natural exit (back/game-over) |
-25	| SW update elsewhere | Non-intrusive banner: "New version available — tap to update" |
-26	| Version display | Header (all users) + Parent Settings > About |
-27	| Game state storage | Snapshot on `session_history_index.draftState` (no new collection) |
-28	| Replay history | Existing `MoveLog` event sourcing (unchanged) |
-29	
-30	---
-31	
-32	## 2. Game Session Resume
-33	
-34	### 2.1 Architecture
-35	
-36	Two parallel persistence layers serve different purposes:
-37	
-38	```
-39	AnswerGameProvider dispatch
-40	  │
-41	  ├── answerGameReducer → new AnswerGameState
-42	  │       │
-43	  │       └── useAnswerGameDraftSync (debounced 500ms)
-44	  │               └── RxDB session_history_index.draftState  ← fast resume
-45	  │
-46	  └── GameEngineProvider (existing)
-47	          └── useSessionRecorder → session_history chunks    ← parent replay
-48	```
-49	
-50	On page reload:
-51	
-52	```
-53	Route loader
-54	  ├── findInProgressSession() → MoveLog (existing, for GameEngineProvider)
-55	  └── findInProgressSession() → draftState (new, for AnswerGameProvider)
-56	        │
-57	        ├── initialLog → GameEngineProvider (score / phase replay)
-58	        └── draftState → AnswerGameProvider (tile / zone visual state)
-59	```
-60	
-61	### 2.2 Schema change — `session_history_index` version 1 → 2
-62	
-63	Add optional `draftState` field to the existing `session_history_index` schema.
-64	
-65	```ts
-66	// src/db/schemas/session_history_index.ts
-67	// version bump: 1 → 2
-68	
-69	interface AnswerGameDraftState {
-70	  allTiles: TileItem[];
-71	  bankTileIds: string[];
-72	  zones: AnswerZone[];
-73	  activeSlotIndex: number;
-74	  phase: 'playing' | 'round-complete'; // never 'game-over'
-75	  roundIndex: number;
-76	  retryCount: number;
-77	}
-78	
-79	// Added to schema:
-80	draftState: AnswerGameDraftState | null;
-81	```
-82	
-83	`dragActiveTileId` is excluded — transient drag UI state cannot survive a refresh.
-84	
-85	Migration: existing documents get `draftState: null` (no data loss, optional field).
-86	
-87	### 2.3 `useAnswerGameDraftSync` hook
-88	
-89	New hook mounted inside `AnswerGameProvider`. Writes the current `AnswerGameState` snapshot to `session_history_index.draftState` after significant state changes.
-90	
-91	**Write triggers:**
-92	- Debounced 500ms after every `AnswerGameState` change
-93	- Flush immediately on `visibilitychange → hidden` (browser may close)
-94	- Write `null` when `phase === 'game-over'` (clear draft on completion)
-95	- Write `null` when `status === 'abandoned'` (player exits via back button)
-96	
-97	**What it writes:**
-98	```ts
-99	{
-100	  allTiles: state.allTiles,
-101	  bankTileIds: state.bankTileIds,
-102	  zones: state.zones,
-103	  activeSlotIndex: state.activeSlotIndex,
-104	  phase: state.phase,
-105	  roundIndex: state.roundIndex,
-106	  retryCount: state.retryCount,
-107	}
-108	```
-109	
-110	**Location:** `src/lib/game-engine/useAnswerGameDraftSync.ts`
-111	
-112	### 2.4 `findInProgressSession` return type extension
-113	
-114	```ts
-115	// src/lib/game-engine/session-finder.ts
-116	
-117	interface InProgressSession {
-118	  log: MoveLog;
-119	  draftState: AnswerGameDraftState | null;
-120	}
-121	
-122	export async function findInProgressSession(
-123	  profileId: string,
-124	  gameId: string,
-125	  db: BaseSkillDatabase,
-126	): Promise<InProgressSession | null>
-127	```
-128	
-129	Returns both `log` (existing) and `draftState` (new). Callers already destructure the result.
-130	
-131	### 2.5 `AnswerGameProvider` changes
-132	
-133	Accepts new optional prop `initialState?: AnswerGameDraftState`:
-134	
-135	```ts
-136	interface AnswerGameProviderProps {
-137	  config: AnswerGameConfig;
-138	  initialState?: AnswerGameDraftState; // NEW
-139	  children: ReactNode;
-140	}
-141	```
-142	
-143	When `initialState` is provided:
-144	- `useReducer` initialises from `initialState` directly (not `makeInitialState(config)`)
-145	- The `INIT_ROUND` `useEffect` is guarded — only fires if `initialState` is absent
-146	
-147	```ts
-148	// Before
-149	const [state, dispatch] = useReducer(answerGameReducer, config, makeInitialState);
-150	
-151	// After
-152	const [state, dispatch] = useReducer(
-153	  answerGameReducer,
-154	  initialState ?? makeInitialState(config),
-155	);
-156	```
-157	
-158	`useAnswerGameDraftSync(state, sessionId, db)` is mounted unconditionally inside `AnswerGameProvider`.
-159	
-160	### 2.6 Game body changes (WordSpell, NumberMatch, SortNumbers)
-161	
-162	The route loader already calls `findInProgressSession()`. The result now includes `draftState`.
-163	
-164	`GameRouteLoaderData` gains:
-165	```ts
-166	interface GameRouteLoaderData {
-167	  // existing fields...
-168	  draftState: AnswerGameDraftState | null; // NEW
-169	}
-170	```
-171	
-172	Each game body component (`WordSpellGameBody`, `NumberMatchGameBody`, `SortNumbersGameBody`) receives `draftState` as a prop and:
-173	
-174	1. Passes it to `AnswerGameProvider` as `initialState`
-175	2. Initialises `showInstructions` to `false` when `draftState !== null` (skip instructions overlay on resume)
-176	
-177	```ts
-178	const [showInstructions, setShowInstructions] = useState(
-179	  draftState === null, // true = fresh session, false = resuming
-180	);
-181	```
-182	
-183	### 2.7 Resume scenario (WordSpell "cat" example)
-184	
-185	1. User loads WordSpell for "cat" — fresh session, instructions shown
-186	2. User places `c` and `a` — `AnswerGameState` has `bankTileIds: ['t-tile-id']`, zones have `c` and `a` placed
-187	3. `useAnswerGameDraftSync` writes snapshot to `session_history_index.draftState`
-188	4. User refreshes browser
-189	5. Route loader calls `findInProgressSession()` — finds `draftState`
-190	6. `AnswerGameProvider` initialises from snapshot — same tiles, same zones
-191	7. `showInstructions = false` — user lands directly in game
-192	8. User sees `ca<slot>` with `t` tile in the bank
-193	
-194	### 2.8 Stale session handling
-195	
-196	Existing 24-hour staleness check in `findInProgressSession` applies to both `log` and `draftState`. If stale: marks `abandoned`, returns `null` for both, fresh session starts.
-197	
-198	---
-199	
-200	## 3. Service Worker & Offline Hardening
-201	
-202	### 3.1 Current gaps
-203	
-204	| Gap | Impact |
-205	|---|---|
-206	| No `navigateFallback` | SPA routes show browser offline error on refresh |
-207	| No `cleanupOutdatedCaches` | Old SW caches accumulate |
-208	| `injectRegister: 'auto'` | No hook for SW update events |
-209	| No update notification UI | Users never know a new version is available |
-210	
-211	### 3.2 Workbox configuration changes (`vite.config.ts`)
-212	
-213	```ts
-214	VitePWA({
-215	  registerType: 'prompt',          // changed from 'autoUpdate' — manual control
-216	  strategies: 'generateSW',
-217	  injectRegister: null,            // changed — register manually via useServiceWorker
-218	  workbox: {
-219	    navigateFallback: 'index.html',
-220	    navigateFallbackDenylist: [/\/api\//],
-221	    cleanupOutdatedCaches: true,
-222	    globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-223	    runtimeCaching: [
-224	      // existing Google Fonts entries unchanged
-225	    ],
-226	  },
-227	  manifest: false,                 // unchanged — manifest.json in public/
-228	})
-229	```
-230	
-231	`registerType: 'prompt'` + `injectRegister: null` gives full control over SW registration and update lifecycle from application code.
-232	
-233	### 3.3 `useServiceWorker` hook
-234	
-235	**Location:** `src/lib/service-worker/useServiceWorker.ts`
-236	
-237	```ts
-238	interface UseServiceWorkerReturn {
-239	  updateAvailable: boolean;
-240	  applyUpdate: () => void;
-241	}
-242	
-243	export const useServiceWorker = (): UseServiceWorkerReturn
-244	```
-245	
-246	Registers the SW using `workbox-window` (already installed) on first mount. Listens for the `waiting` event to set `updateAvailable = true`. `applyUpdate()` posts `SKIP_WAITING` to the waiting SW then reloads the page.
-247	
-248	**Registration is called once** from `__root.tsx` via a `useEffect`. The returned `updateAvailable` state is passed down via context or lifted to `_app.tsx`.
-249	
-250	### 3.4 `ServiceWorkerContext`
-251	
-252	**Location:** `src/lib/service-worker/ServiceWorkerContext.ts`
-253	
-254	Thin context exposing `{ updateAvailable, applyUpdate }` to the component tree. Provided at the root level (`__root.tsx`).
-255	
-256	### 3.5 `UpdateBanner` component
-257	
-258	**Location:** `src/components/UpdateBanner.tsx`
-259	
-260	Non-intrusive strip rendered inside `_app.tsx` above `<Outlet>` but below `<OfflineIndicator>`:
-261	
-262	```
-263	┌─────────────────────────────────────────────────┐
-264	│  🔄 New version available — tap to update    [✕] │
-265	└─────────────────────────────────────────────────┘
-266	```
-267	
-268	- Reads `updateAvailable` from `ServiceWorkerContext`
-269	- Renders only when `updateAvailable === true`
-270	- **Suppressed on game routes** — checks current route path, hides on `*/game/*`
-271	- Tap calls `applyUpdate()` — posts `SKIP_WAITING`, page reloads
-272	- Dismiss `[✕]` hides for current session without applying update
-273	
-274	### 3.6 Mid-game deferred update
-275	
-276	When `updateAvailable` becomes true while on a game route:
-277	- Banner is suppressed
-278	- On navigation away from the game route (back button, game-over), the pending SW activates on next page load naturally (browser handles this via `registerType: 'prompt'` lifecycle)
-279	- No code needed beyond suppressing the banner on game routes
-280	
-281	### 3.7 SW registration in `__root.tsx`
-282	
-283	```ts
-284	// src/routes/__root.tsx
-285	useEffect(() => {
-286	  if ('serviceWorker' in navigator) {
-287	    const wb = new Workbox('/base-skill/sw.js');
-288	    // set up waiting listener → updateAvailable
-289	    wb.register();
-290	  }
-291	}, []);
-292	```
-293	
-294	Wrapped in the `ServiceWorkerProvider` component.
-295	
-296	### 3.8 Offline fallback guarantee
-297	
-298	After this change, the offline behaviour is:
-299	
-300	| Scenario | Before | After |
-301	|---|---|---|
-302	| Refresh on `/en/game/word-spell` offline | Browser offline error | App loads from cache ✓ |
-303	| Open app cold offline (first visit was online) | Depends on route | App loads from cache ✓ |
-304	| First ever load offline | Not possible (cache empty) | Not possible (cache empty) |
-305	| New game assets (first play of new game) | Online required | Online required for new assets |
-306	
-307	**Constraint:** first load must always be online. This is fundamental to service worker architecture and cannot be changed.
-308	
-309	---
-310	
-311	## 4. Version Display
-312	
-313	### 4.1 Header (`Header.tsx`)
-314	
-315	Version + Beta badge added to the existing `Header` component. Always visible.
-316	
-317	```
-318	┌──────────────────────────────────────────────┐
-319	│  BaseSkill   [Beta] v0.1.0              ☰    │
-320	└──────────────────────────────────────────────┘
-321	```
-322	
-323	- Version: `import.meta.env.VITE_APP_VERSION` (already injected from `package.json`)
-324	- "Beta" badge: controlled by `IS_BETA` constant in `src/lib/version.ts`
-325	- Styling: small, muted text — not competing with game content or child-facing UI
-326	
-327	```ts
-328	// src/lib/version.ts
-329	export const APP_VERSION = import.meta.env.VITE_APP_VERSION;
-330	export const IS_BETA = true; // flip to false when exiting beta
-331	```
-332	
-333	### 4.2 Parent Settings > About
-334	
-335	New section on the existing `parent/index.tsx` page (no new route needed). Reads from `app_meta` singleton document.
-336	
-337	| Field | Source |
-338	|---|---|
-339	| App version | `APP_VERSION` constant |
-340	| Channel | `IS_BETA ? 'Beta' : 'Stable'` |
-341	| Install ID | `app_meta.installId` (UUID, already stored) |
-342	| RxDB schema version | `app_meta.rxdbSchemaVersion` (already stored) |
-343	| Last updated | SW registration timestamp (from `useServiceWorker`) |
-344	
-345	Install ID is useful for user support ("what's your install ID?") without exposing any PII.
-346	
-347	### 4.3 `UpdateBanner` placement in layout
-348	
-349	```
-350	_app.tsx
-351	  ├── <OfflineIndicator />
-352	  ├── <UpdateBanner />      ← NEW (suppressed on /game/ routes)
-353	  └── <Outlet />
-354	```
-355	
-356	---
-357	
-358	## 5. Files to Create / Modify
-359	
-360	### New files
-361	
-362	| File | Purpose |
-363	|---|---|
-364	| `src/lib/version.ts` | `APP_VERSION`, `IS_BETA` constants |
-365	| `src/lib/service-worker/useServiceWorker.ts` | SW registration + update detection hook |
-366	| `src/lib/service-worker/ServiceWorkerContext.ts` | Context for update state |
-367	| `src/lib/service-worker/ServiceWorkerProvider.tsx` | Provider wrapping root |
-368	| `src/lib/game-engine/useAnswerGameDraftSync.ts` | Draft state persistence hook |
-369	| `src/components/UpdateBanner.tsx` | SW update notification UI |
-370	
-371	### Modified files
-372	
-373	| File | Change |
-374	|---|---|
-375	| `vite.config.ts` | Add `navigateFallback`, `cleanupOutdatedCaches`, `registerType: 'prompt'`, `injectRegister: null` |
-376	| `src/db/schemas/session_history_index.ts` | Add `draftState` field, version 1 → 2 |
-377	| `src/db/migrations.ts` | Migration for `session_history_index` v1 → v2 (`draftState: null`) |
-378	| `src/lib/game-engine/session-finder.ts` | Return `draftState` alongside `MoveLog` |
-379	| `src/components/answer-game/AnswerGameProvider.tsx` | Accept `initialState` prop, guard `INIT_ROUND` effect |
-380	| `src/components/answer-game/AnswerGame/AnswerGame.tsx` | Pass `initialState` through to `AnswerGameProvider` |
-381	| `src/components/answer-game/types.ts` | Export `AnswerGameDraftState` type |
-382	| `src/routes/$locale/_app/game/$gameId.tsx` | Pass `draftState` from loader; skip instructions on resume |
-383	| `src/routes/__root.tsx` | Mount `ServiceWorkerProvider` |
-384	| `src/routes/$locale/_app.tsx` | Render `UpdateBanner` above `<Outlet>` |
-385	| `src/components/Header.tsx` | Add version + Beta badge |
-386	| `src/routes/$locale/_app/parent/index.tsx` | Add About section |
-387	
-388	---
-389	
-390	## 6. Testing Strategy
-391	
-392	### Unit (Vitest)
-393	
-394	- `useAnswerGameDraftSync`: writes to RxDB on state change; flushes on visibility hidden; writes null on game-over
-395	- `findInProgressSession`: returns `draftState` when present; returns `null` when stale
-396	- `session_history_index` migration: existing docs gain `draftState: null`
-397	- `AnswerGameProvider` with `initialState`: renders correct tiles/zones from snapshot; skips `INIT_ROUND` effect
-398	
-399	### Integration (Vitest + RTL)
-400	
-401	- `WordSpellGameBody` with `draftState`: renders mid-game state (correct tiles placed, bank tile visible), `showInstructions = false`
-402	- `UpdateBanner`: renders when `updateAvailable = true`, hidden on game routes, calls `applyUpdate` on tap
-403	
-404	### E2E (Playwright)
-405	
-406	- **Resume:** Play WordSpell, place 2 tiles → `page.reload()` → assert same tiles placed, instructions not shown
-407	- **Offline navigation:** go offline (`context.setOffline(true)`) → reload game route → assert app loads (not browser error)
-408	- **Version display:** assert `v0.1.0` and `Beta` visible in header
-409	
-410	### Manual verification
-411	
-412	- Build (`yarn build`) → serve `dist/` → go offline in DevTools → reload — app must load
-413	- Open Chrome DevTools > Application > Service Workers — confirm SW registered and caching
-414	
-415	---
-416	
-417	## 7. Constraints & Decisions
-418	
-419	| Constraint | Detail |
-420	|---|---|
-421	| First load requires internet | Fundamental SW limitation — cannot be changed |
-422	| SW only activates in production | `vite-plugin-pwa` does not register SW in dev mode by design |
-423	| `draftState` is best-effort | If the browser is killed before the 500ms debounce fires, the last tile move may not be saved — acceptable trade-off |
-424	| `IS_BETA` is a code constant | Not a feature flag or environment variable — flip it and deploy when exiting beta |
-425	| Resume skips instructions always | If a user refreshes mid-instructions, they skip to playing — acceptable, instructions are optional |
+1 # Service Worker, Workbox & Offline-First Design Spec
+2 
+3 **Date:** 2026-04-07
+4 **Status:** Approved
+5 **Branch:** feat/service-worker-workbox-offline-setup
+6 
+7 ---
+8 
+9 ## 1. Overview
+10 
+11 This spec delivers three tightly related capabilities as a single offline-first milestone:
+12 
+13 1. **Game session resume** — `AnswerGameState` (tiles, zones, round position) persisted to RxDB so a page refresh silently resumes mid-game. Uses a hybrid approach: event log (`MoveLog`) for parent replay viewer, snapshot for fast reload.
+14 2. **Service worker hardening** — completes the existing `vite-plugin-pwa` setup with `navigateFallback`, cache cleanup, SW update notification (non-intrusive banner when not in a game; deferred to natural game exit when mid-game).
+15 3. **Version + Beta display** — app version and "Beta" badge in the header (all users) and in Parent Settings > About (with install ID and schema version detail).
+16 
+17 **Out of scope:** cloud sync (M6), full parent replay viewer (M7), PWA install prompt (M8).
+18 
+19 **Design decisions:**
+20 
+21 | Decision | Choice |
+22 |---|---|
+23 | Resume UX | Silent instant resume — no prompt, skip instructions overlay |
+24 | SW update mid-game | Defer banner until natural exit (back/game-over) |
+25 | SW update elsewhere | Non-intrusive banner: "New version available — tap to update" |
+26 | Version display | Header (all users) + Parent Settings > About |
+27 | Game state storage | Snapshot on `session_history_index.draftState` (no new collection) |
+28 | Replay history | Existing `MoveLog` event sourcing (unchanged) |
+29 
+30 ---
+31 
+32 ## 2. Game Session Resume
+33 
+34 ### 2.1 Architecture
+35 
+36 Two parallel persistence layers serve different purposes:
+37 
+38 ```
+39 AnswerGameProvider dispatch
+40   │
+41   ├── answerGameReducer → new AnswerGameState
+42   │       │
+43   │       └── useAnswerGameDraftSync (debounced 500ms)
+44   │               └── RxDB session_history_index.draftState  ← fast resume
+45   │
+46   └── GameEngineProvider (existing)
+47           └── useSessionRecorder → session_history chunks    ← parent replay
+48 ```
+49 
+50 On page reload:
+51 
+52 ```
+53 Route loader
+54   ├── findInProgressSession() → MoveLog (existing, for GameEngineProvider)
+55   └── findInProgressSession() → draftState (new, for AnswerGameProvider)
+56         │
+57         ├── initialLog → GameEngineProvider (score / phase replay)
+58         └── draftState → AnswerGameProvider (tile / zone visual state)
+59 ```
+60 
+61 ### 2.2 Schema change — `session_history_index` version 1 → 2
+62 
+63 Add optional `draftState` field to the existing `session_history_index` schema.
+64 
+65 ```ts
+66 // src/db/schemas/session_history_index.ts
+67 // version bump: 1 → 2
+68 
+69 interface AnswerGameDraftState {
+70   allTiles: TileItem[];
+71   bankTileIds: string[];
+72   zones: AnswerZone[];
+73   activeSlotIndex: number;
+74   phase: 'playing' | 'round-complete'; // never 'game-over'
+75   roundIndex: number;
+76   retryCount: number;
+77 }
+78 
+79 // Added to schema:
+80 draftState: AnswerGameDraftState | null;
+81 ```
+82 
+83 `dragActiveTileId` is excluded — transient drag UI state cannot survive a refresh.
+84 
+85 Migration: existing documents get `draftState: null` (no data loss, optional field).
+86 
+87 ### 2.3 `useAnswerGameDraftSync` hook
+88 
+89 New hook mounted inside `AnswerGameProvider`. Writes the current `AnswerGameState` snapshot to `session_history_index.draftState` after significant state changes.
+90 
+91 **Write triggers:**
+92 - Debounced 500ms after every `AnswerGameState` change
+93 - Flush immediately on `visibilitychange → hidden` (browser may close)
+94 - Write `null` when `phase === 'game-over'` (clear draft on completion)
+95 - Write `null` when `status === 'abandoned'` (player exits via back button)
+96 
+97 **What it writes:**
+98 ```ts
+99 {
+100   allTiles: state.allTiles,
+101   bankTileIds: state.bankTileIds,
+102   zones: state.zones,
+103   activeSlotIndex: state.activeSlotIndex,
+104   phase: state.phase,
+105   roundIndex: state.roundIndex,
+106   retryCount: state.retryCount,
+107 }
+108 ```
+109 
+110 **Location:** `src/lib/game-engine/useAnswerGameDraftSync.ts`
+111 
+112 ### 2.4 `findInProgressSession` return type extension
+113 
+114 ```ts
+115 // src/lib/game-engine/session-finder.ts
+116 
+117 interface InProgressSession {
+118   log: MoveLog;
+119   draftState: AnswerGameDraftState | null;
+120 }
+121 
+122 export async function findInProgressSession(
+123   profileId: string,
+124   gameId: string,
+125   db: BaseSkillDatabase,
+126 ): Promise<InProgressSession | null>
+127 ```
+128 
+129 Returns both `log` (existing) and `draftState` (new). Callers already destructure the result.
+130 
+131 ### 2.5 `AnswerGameProvider` changes
+132 
+133 Accepts new optional prop `initialState?: AnswerGameDraftState`:
+134 
+135 ```ts
+136 interface AnswerGameProviderProps {
+137   config: AnswerGameConfig;
+138   initialState?: AnswerGameDraftState; // NEW
+139   children: ReactNode;
+140 }
+141 ```
+142 
+143 When `initialState` is provided:
+144 - `useReducer` initialises from `initialState` directly (not `makeInitialState(config)`)
+145 - The `INIT_ROUND` `useEffect` is guarded — only fires if `initialState` is absent
+146 
+147 ```ts
+148 // Before
+149 const [state, dispatch] = useReducer(answerGameReducer, config, makeInitialState);
+150 
+151 // After
+152 const [state, dispatch] = useReducer(
+153   answerGameReducer,
+154   initialState ?? makeInitialState(config),
+155 );
+156 ```
+157 
+158 `useAnswerGameDraftSync(state, sessionId, db)` is mounted unconditionally inside `AnswerGameProvider`.
+159 
+160 ### 2.6 Game body changes (WordSpell, NumberMatch, SortNumbers)
+161 
+162 The route loader already calls `findInProgressSession()`. The result now includes `draftState`.
+163 
+164 `GameRouteLoaderData` gains:
+165 ```ts
+166 interface GameRouteLoaderData {
+167   // existing fields...
+168   draftState: AnswerGameDraftState | null; // NEW
+169 }
+170 ```
+171 
+172 Each game body component (`WordSpellGameBody`, `NumberMatchGameBody`, `SortNumbersGameBody`) receives `draftState` as a prop and:
+173 
+174 1. Passes it to `AnswerGameProvider` as `initialState`
+175 2. Initialises `showInstructions` to `false` when `draftState !== null` (skip instructions overlay on resume)
+176 
+177 ```ts
+178 const [showInstructions, setShowInstructions] = useState(
+179   draftState === null, // true = fresh session, false = resuming
+180 );
+181 ```
+182 
+183 ### 2.7 Resume scenario (WordSpell "cat" example)
+184 
+185 1. User loads WordSpell for "cat" — fresh session, instructions shown
+186 2. User places `c` and `a` — `AnswerGameState` has `bankTileIds: ['t-tile-id']`, zones have `c` and `a` placed
+187 3. `useAnswerGameDraftSync` writes snapshot to `session_history_index.draftState`
+188 4. User refreshes browser
+189 5. Route loader calls `findInProgressSession()` — finds `draftState`
+190 6. `AnswerGameProvider` initialises from snapshot — same tiles, same zones
+191 7. `showInstructions = false` — user lands directly in game
+192 8. User sees `ca<slot>` with `t` tile in the bank
+193 
+194 ### 2.8 Stale session handling
+195 
+196 Existing 24-hour staleness check in `findInProgressSession` applies to both `log` and `draftState`. If stale: marks `abandoned`, returns `null` for both, fresh session starts.
+197 
+198 ---
+199 
+200 ## 3. Service Worker & Offline Hardening
+201 
+202 ### 3.1 Current gaps
+203 
+204 | Gap | Impact |
+205 |---|---|
+206 | No `navigateFallback` | SPA routes show browser offline error on refresh |
+207 | No `cleanupOutdatedCaches` | Old SW caches accumulate |
+208 | `injectRegister: 'auto'` | No hook for SW update events |
+209 | No update notification UI | Users never know a new version is available |
+210 
+211 ### 3.2 Workbox configuration changes (`vite.config.ts`)
+212 
+213 ```ts
+214 VitePWA({
+215   registerType: 'prompt',          // changed from 'autoUpdate' — manual control
+216   strategies: 'generateSW',
+217   injectRegister: null,            // changed — register manually via useServiceWorker
+218   workbox: {
+219     navigateFallback: 'index.html',
+220     navigateFallbackDenylist: [/\/api\//],
+221     cleanupOutdatedCaches: true,
+222     globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+223     runtimeCaching: [
+224       // existing Google Fonts entries unchanged
+225     ],
+226   },
+227   manifest: false,                 // unchanged — manifest.json in public/
+228 })
+229 ```
+230 
+231 `registerType: 'prompt'` + `injectRegister: null` gives full control over SW registration and update lifecycle from application code.
+232 
+233 ### 3.3 `useServiceWorker` hook
+234 
+235 **Location:** `src/lib/service-worker/useServiceWorker.ts`
+236 
+237 ```ts
+238 interface UseServiceWorkerReturn {
+239   updateAvailable: boolean;
+240   applyUpdate: () => void;
+241 }
+242 
+243 export const useServiceWorker = (): UseServiceWorkerReturn
+244 ```
+245 
+246 Registers the SW using `workbox-window` (already installed) on first mount. Listens for the `waiting` event to set `updateAvailable = true`. `applyUpdate()` posts `SKIP_WAITING` to the waiting SW then reloads the page.
+247 
+248 **Registration is called once** from `__root.tsx` via a `useEffect`. The returned `updateAvailable` state is passed down via context or lifted to `_app.tsx`.
+249 
+250 ### 3.4 `ServiceWorkerContext`
+251 
+252 **Location:** `src/lib/service-worker/ServiceWorkerContext.ts`
+253 
+254 Thin context exposing `{ updateAvailable, applyUpdate }` to the component tree. Provided at the root level (`__root.tsx`).
+255 
+256 ### 3.5 `UpdateBanner` component
+257 
+258 **Location:** `src/components/UpdateBanner.tsx`
+259 
+260 Non-intrusive strip rendered inside `_app.tsx` above `<Outlet>` but below `<OfflineIndicator>`:
+261 
+262 ```
+263 ┌─────────────────────────────────────────────────┐
+264 │  🔄 New version available — tap to update    [✕] │
+265 └─────────────────────────────────────────────────┘
+266 ```
+267 
+268 - Reads `updateAvailable` from `ServiceWorkerContext`
+269 - Renders only when `updateAvailable === true`
+270 - **Suppressed on game routes** — checks current route path, hides on `*/game/*`
+271 - Tap calls `applyUpdate()` — posts `SKIP_WAITING`, page reloads
+272 - Dismiss `[✕]` hides for current session without applying update
+273 
+274 ### 3.6 Mid-game deferred update
+275 
+276 When `updateAvailable` becomes true while on a game route:
+277 - Banner is suppressed
+278 - On navigation away from the game route (back button, game-over), the pending SW activates on next page load naturally (browser handles this via `registerType: 'prompt'` lifecycle)
+279 - No code needed beyond suppressing the banner on game routes
+280 
+281 ### 3.7 SW registration in `__root.tsx`
+282 
+283 ```ts
+284 // src/routes/__root.tsx
+285 useEffect(() => {
+286   if ('serviceWorker' in navigator) {
+287     const wb = new Workbox('/base-skill/sw.js');
+288     // set up waiting listener → updateAvailable
+289     wb.register();
+290   }
+291 }, []);
+292 ```
+293 
+294 Wrapped in the `ServiceWorkerProvider` component.
+295 
+296 ### 3.8 Offline fallback guarantee
+297 
+298 After this change, the offline behaviour is:
+299 
+300 | Scenario | Before | After |
+301 |---|---|---|
+302 | Refresh on `/en/game/word-spell` offline | Browser offline error | App loads from cache ✓ |
+303 | Open app cold offline (first visit was online) | Depends on route | App loads from cache ✓ |
+304 | First ever load offline | Not possible (cache empty) | Not possible (cache empty) |
+305 | New game assets (first play of new game) | Online required | Online required for new assets |
+306 
+307 **Constraint:** first load must always be online. This is fundamental to service worker architecture and cannot be changed.
+308 
+309 ---
+310 
+311 ## 4. Version Display
+312 
+313 ### 4.1 Header (`Header.tsx`)
+314 
+315 Version + Beta badge added to the existing `Header` component. Always visible.
+316 
+317 ```
+318 ┌──────────────────────────────────────────────┐
+319 │  BaseSkill   [Beta] v0.1.0              ☰    │
+320 └──────────────────────────────────────────────┘
+321 ```
+322 
+323 - Version: `import.meta.env.VITE_APP_VERSION` (already injected from `package.json`)
+324 - "Beta" badge: controlled by `IS_BETA` constant in `src/lib/version.ts`
+325 - Styling: small, muted text — not competing with game content or child-facing UI
+326 
+327 ```ts
+328 // src/lib/version.ts
+329 export const APP_VERSION = import.meta.env.VITE_APP_VERSION;
+330 export const IS_BETA = true; // flip to false when exiting beta
+331 ```
+332 
+333 ### 4.2 Parent Settings > About
+334 
+335 New section on the existing `parent/index.tsx` page (no new route needed). Reads from `app_meta` singleton document.
+336 
+337 | Field | Source |
+338 |---|---|
+339 | App version | `APP_VERSION` constant |
+340 | Channel | `IS_BETA ? 'Beta' : 'Stable'` |
+341 | Install ID | `app_meta.installId` (UUID, already stored) |
+342 | RxDB schema version | `app_meta.rxdbSchemaVersion` (already stored) |
+343 | Last updated | SW registration timestamp (from `useServiceWorker`) |
+344 
+345 Install ID is useful for user support ("what's your install ID?") without exposing any PII.
+346 
+347 ### 4.3 `UpdateBanner` placement in layout
+348 
+349 ```
+350 _app.tsx
+351   ├── <OfflineIndicator />
+352   ├── <UpdateBanner />      ← NEW (suppressed on /game/ routes)
+353   └── <Outlet />
+354 ```
+355 
+356 ---
+357 
+358 ## 5. Files to Create / Modify
+359 
+360 ### New files
+361 
+362 | File | Purpose |
+363 |---|---|
+364 | `src/lib/version.ts` | `APP_VERSION`, `IS_BETA` constants |
+365 | `src/lib/service-worker/useServiceWorker.ts` | SW registration + update detection hook |
+366 | `src/lib/service-worker/ServiceWorkerContext.ts` | Context for update state |
+367 | `src/lib/service-worker/ServiceWorkerProvider.tsx` | Provider wrapping root |
+368 | `src/lib/game-engine/useAnswerGameDraftSync.ts` | Draft state persistence hook |
+369 | `src/components/UpdateBanner.tsx` | SW update notification UI |
+370 
+371 ### Modified files
+372 
+373 | File | Change |
+374 |---|---|
+375 | `vite.config.ts` | Add `navigateFallback`, `cleanupOutdatedCaches`, `registerType: 'prompt'`, `injectRegister: null` |
+376 | `src/db/schemas/session_history_index.ts` | Add `draftState` field, version 1 → 2 |
+377 | `src/db/migrations.ts` | Migration for `session_history_index` v1 → v2 (`draftState: null`) |
+378 | `src/lib/game-engine/session-finder.ts` | Return `draftState` alongside `MoveLog` |
+379 | `src/components/answer-game/AnswerGameProvider.tsx` | Accept `initialState` prop, guard `INIT_ROUND` effect |
+380 | `src/components/answer-game/AnswerGame/AnswerGame.tsx` | Pass `initialState` through to `AnswerGameProvider` |
+381 | `src/components/answer-game/types.ts` | Export `AnswerGameDraftState` type |
+382 | `src/routes/$locale/_app/game/$gameId.tsx` | Pass `draftState` from loader; skip instructions on resume |
+383 | `src/routes/__root.tsx` | Mount `ServiceWorkerProvider` |
+384 | `src/routes/$locale/_app.tsx` | Render `UpdateBanner` above `<Outlet>` |
+385 | `src/components/Header.tsx` | Add version + Beta badge |
+386 | `src/routes/$locale/_app/parent/index.tsx` | Add About section |
+387 
+388 ---
+389 
+390 ## 6. Testing Strategy
+391 
+392 ### Unit (Vitest)
+393 
+394 - `useAnswerGameDraftSync`: writes to RxDB on state change; flushes on visibility hidden; writes null on game-over
+395 - `findInProgressSession`: returns `draftState` when present; returns `null` when stale
+396 - `session_history_index` migration: existing docs gain `draftState: null`
+397 - `AnswerGameProvider` with `initialState`: renders correct tiles/zones from snapshot; skips `INIT_ROUND` effect
+398 
+399 ### Integration (Vitest + RTL)
+400 
+401 - `WordSpellGameBody` with `draftState`: renders mid-game state (correct tiles placed, bank tile visible), `showInstructions = false`
+402 - `UpdateBanner`: renders when `updateAvailable = true`, hidden on game routes, calls `applyUpdate` on tap
+403 
+404 ### E2E (Playwright)
+405 
+406 - **Resume:** Play WordSpell, place 2 tiles → `page.reload()` → assert same tiles placed, instructions not shown
+407 - **Offline navigation:** go offline (`context.setOffline(true)`) → reload game route → assert app loads (not browser error)
+408 - **Version display:** assert `v0.1.0` and `Beta` visible in header
+409 
+410 ### Manual verification
+411 
+412 - Build (`yarn build`) → serve `dist/` → go offline in DevTools → reload — app must load
+413 - Open Chrome DevTools > Application > Service Workers — confirm SW registered and caching
+414 
+415 ---
+416 
+417 ## 7. Constraints & Decisions
+418 
+419 | Constraint | Detail |
+420 |---|---|
+421 | First load requires internet | Fundamental SW limitation — cannot be changed |
+422 | SW only activates in production | `vite-plugin-pwa` does not register SW in dev mode by design |
+423 | `draftState` is best-effort | If the browser is killed before the 500ms debounce fires, the last tile move may not be saved — acceptable trade-off |
+424 | `IS_BETA` is a code constant | Not a feature flag or environment variable — flip it and deploy when exiting beta |
+425 | Resume skips instructions always | If a user refreshes mid-instructions, they skip to playing — acceptable, instructions are optional |
 426
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:27Z)**_
@@ -902,76 +915,77 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:29Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/lib/game-engine/session-finder.ts`
 
 ```text
-1	// src/lib/game-engine/session-finder.ts
-2	import type {
-3	  GameEngineState,
-4	  Move,
-5	  MoveLog,
-6	  MoveType,
-7	  ResolvedContent,
-8	} from './types';
-9	import type { BaseSkillDatabase } from '@/db/types';
-10	
-11	const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
-12	
-13	export async function findInProgressSession(
-14	  profileId: string,
-15	  gameId: string,
-16	  db: BaseSkillDatabase,
-17	): Promise<MoveLog | null> {
-18	  const index = await db.session_history_index
-19	    .findOne({
-20	      selector: { profileId, gameId, status: 'in-progress' },
-21	    })
-22	    .exec();
-23	
-24	  if (!index) return null;
-25	
-26	  // Check staleness
-27	  const ageMs = Date.now() - new Date(index.startedAt).getTime();
-28	  if (ageMs > STALE_THRESHOLD_MS) {
-29	    await index.incrementalPatch({ status: 'abandoned' });
-30	    return null;
-31	  }
-32	
-33	  // Load all chunks sorted by chunkIndex
-34	  const chunks = await db.session_history
-35	    .find({ selector: { sessionId: index.sessionId } })
-36	    .exec();
-37	
-38	  const allEvents = chunks
-39	    .toSorted((a, b) => a.chunkIndex - b.chunkIndex)
-40	    .flatMap(
-41	      (c) =>
-42	        c.events as Array<{
-43	          timestamp: string;
-44	          action: string;
-45	          payload: Record<string, string | number | boolean> | null;
-46	          result: null;
-47	        }>,
-48	    );
-49	
-50	  const moves: Move[] = allEvents.map((e) => ({
-51	    type: e.action as MoveType,
-52	    args: (e.payload ?? {}) as unknown as Record<
-53	      string,
-54	      string | number | boolean
-55	    >,
-56	    timestamp: new Date(e.timestamp).getTime(),
-57	  }));
-58	
-59	  return {
-60	    gameId: index.gameId,
-61	    sessionId: index.sessionId,
-62	    profileId: index.profileId,
-63	    seed: index.seed,
-64	    initialContent: index.initialContent as unknown as ResolvedContent,
-65	    initialState: index.initialState as unknown as GameEngineState,
-66	    moves,
-67	  };
-68	}
+1 // src/lib/game-engine/session-finder.ts
+2 import type {
+3   GameEngineState,
+4   Move,
+5   MoveLog,
+6   MoveType,
+7   ResolvedContent,
+8 } from './types';
+9 import type { BaseSkillDatabase } from '@/db/types';
+10 
+11 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000; // 24 hours
+12 
+13 export async function findInProgressSession(
+14   profileId: string,
+15   gameId: string,
+16   db: BaseSkillDatabase,
+17 ): Promise<MoveLog | null> {
+18   const index = await db.session_history_index
+19     .findOne({
+20       selector: { profileId, gameId, status: 'in-progress' },
+21     })
+22     .exec();
+23 
+24   if (!index) return null;
+25 
+26   // Check staleness
+27   const ageMs = Date.now() - new Date(index.startedAt).getTime();
+28   if (ageMs > STALE_THRESHOLD_MS) {
+29     await index.incrementalPatch({ status: 'abandoned' });
+30     return null;
+31   }
+32 
+33   // Load all chunks sorted by chunkIndex
+34   const chunks = await db.session_history
+35     .find({ selector: { sessionId: index.sessionId } })
+36     .exec();
+37 
+38   const allEvents = chunks
+39     .toSorted((a, b) => a.chunkIndex - b.chunkIndex)
+40     .flatMap(
+41       (c) =>
+42         c.events as Array<{
+43           timestamp: string;
+44           action: string;
+45           payload: Record<string, string | number | boolean> | null;
+46           result: null;
+47         }>,
+48     );
+49 
+50   const moves: Move[] = allEvents.map((e) => ({
+51     type: e.action as MoveType,
+52     args: (e.payload ?? {}) as unknown as Record<
+53       string,
+54       string | number | boolean
+55     >,
+56     timestamp: new Date(e.timestamp).getTime(),
+57   }));
+58 
+59   return {
+60     gameId: index.gameId,
+61     sessionId: index.sessionId,
+62     profileId: index.profileId,
+63     seed: index.seed,
+64     initialContent: index.initialContent as unknown as ResolvedContent,
+65     initialState: index.initialState as unknown as GameEngineState,
+66     moves,
+67   };
+68 }
 69
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:29Z)**_
@@ -981,84 +995,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:29Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/db/schemas/session_history_index.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type SessionHistoryIndexDoc = {
-4	  sessionId: string;
-5	  profileId: string;
-6	  gameId: string;
-7	  startedAt: string;
-8	  endedAt?: string | null;
-9	  duration?: number | null;
-10	  finalScore?: number | null;
-11	  totalEvents?: number;
-12	  totalChunks?: number;
-13	  gradeBand: string;
-14	  // v1 additions
-15	  status: 'in-progress' | 'completed' | 'abandoned';
-16	  seed: string;
-17	  initialContent: Record<string, unknown>;
-18	  initialState: Record<string, unknown>;
-19	};
-20	
-21	export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
-22	  {
-23	    version: 1,
-24	    primaryKey: 'sessionId',
-25	    type: 'object',
-26	    properties: {
-27	      sessionId: { type: 'string', maxLength: 36 },
-28	      profileId: { type: 'string', maxLength: 36 },
-29	      gameId: { type: 'string', maxLength: 64 },
-30	      startedAt: { type: 'string', format: 'date-time' },
-31	      endedAt: {
-32	        oneOf: [
-33	          { type: 'string', format: 'date-time' },
-34	          { type: 'null' },
-35	        ],
-36	      },
-37	      duration: {
-38	        oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
-39	      },
-40	      finalScore: {
-41	        oneOf: [{ type: 'number' }, { type: 'null' }],
-42	      },
-43	      totalEvents: {
-44	        type: 'integer',
-45	        minimum: 0,
-46	        default: 0,
-47	        multipleOf: 1,
-48	      },
-49	      totalChunks: {
-50	        type: 'integer',
-51	        minimum: 1,
-52	        default: 1,
-53	        multipleOf: 1,
-54	      },
-55	      gradeBand: { type: 'string' },
-56	      status: {
-57	        type: 'string',
-58	        enum: ['in-progress', 'completed', 'abandoned'],
-59	      },
-60	      seed: { type: 'string' },
-61	      initialContent: { type: 'object', additionalProperties: true },
-62	      initialState: { type: 'object', additionalProperties: true },
-63	    },
-64	    required: [
-65	      'sessionId',
-66	      'profileId',
-67	      'gameId',
-68	      'startedAt',
-69	      'gradeBand',
-70	      'status',
-71	      'seed',
-72	      'initialContent',
-73	      'initialState',
-74	    ],
-75	    additionalProperties: false,
-76	  };
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type SessionHistoryIndexDoc = {
+4   sessionId: string;
+5   profileId: string;
+6   gameId: string;
+7   startedAt: string;
+8   endedAt?: string | null;
+9   duration?: number | null;
+10   finalScore?: number | null;
+11   totalEvents?: number;
+12   totalChunks?: number;
+13   gradeBand: string;
+14   // v1 additions
+15   status: 'in-progress' | 'completed' | 'abandoned';
+16   seed: string;
+17   initialContent: Record<string, unknown>;
+18   initialState: Record<string, unknown>;
+19 };
+20 
+21 export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
+22   {
+23     version: 1,
+24     primaryKey: 'sessionId',
+25     type: 'object',
+26     properties: {
+27       sessionId: { type: 'string', maxLength: 36 },
+28       profileId: { type: 'string', maxLength: 36 },
+29       gameId: { type: 'string', maxLength: 64 },
+30       startedAt: { type: 'string', format: 'date-time' },
+31       endedAt: {
+32         oneOf: [
+33           { type: 'string', format: 'date-time' },
+34           { type: 'null' },
+35         ],
+36       },
+37       duration: {
+38         oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
+39       },
+40       finalScore: {
+41         oneOf: [{ type: 'number' }, { type: 'null' }],
+42       },
+43       totalEvents: {
+44         type: 'integer',
+45         minimum: 0,
+46         default: 0,
+47         multipleOf: 1,
+48       },
+49       totalChunks: {
+50         type: 'integer',
+51         minimum: 1,
+52         default: 1,
+53         multipleOf: 1,
+54       },
+55       gradeBand: { type: 'string' },
+56       status: {
+57         type: 'string',
+58         enum: ['in-progress', 'completed', 'abandoned'],
+59       },
+60       seed: { type: 'string' },
+61       initialContent: { type: 'object', additionalProperties: true },
+62       initialState: { type: 'object', additionalProperties: true },
+63     },
+64     required: [
+65       'sessionId',
+66       'profileId',
+67       'gameId',
+68       'startedAt',
+69       'gradeBand',
+70       'status',
+71       'seed',
+72       'initialContent',
+73       'initialState',
+74     ],
+75     additionalProperties: false,
+76   };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:30Z)**_
@@ -1068,82 +1083,83 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:30Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/types.ts`
 
 ```text
-1	export interface AnswerGameConfig {
-2	  gameId: string;
-3	  /** @default 'drag' */
-4	  inputMethod: 'drag' | 'type' | 'both';
-5	  /** @default 'lock-auto-eject' */
-6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-7	  tileBankMode: 'exact' | 'distractors';
-8	  distractorCount?: number;
-9	  /** Total number of rounds in this session */
-10	  totalRounds: number;
-11	  /**
-12	   * When `true`, rounds follow the order of `rounds` in config.
-13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
-14	   */
-15	  roundsInOrder?: boolean;
-16	  /** Whether TTS is enabled for this profile */
-17	  ttsEnabled: boolean;
-18	  /**
-19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
-20	   * @default 'text'
-21	   */
-22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-23	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
-24	  initialTiles?: TileItem[];
-25	  initialZones?: AnswerZone[];
-26	}
-27	
-28	export interface TileItem {
-29	  id: string;
-30	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
-31	  label: string;
-32	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
-33	  value: string;
-34	}
-35	
-36	export interface AnswerZone {
-37	  id: string;
-38	  index: number;
-39	  /** Correct tile value for this slot; matched against `TileItem.value` */
-40	  expectedValue: string;
-41	  placedTileId: string | null;
-42	  isWrong: boolean;
-43	  isLocked: boolean;
-44	}
-45	
-46	export type AnswerGamePhase =
-47	  | 'playing'
-48	  | 'round-complete'
-49	  | 'game-over';
-50	
-51	export interface AnswerGameState {
-52	  config: AnswerGameConfig;
-53	  /** Full tile list for the current round — never mutated mid-round */
-54	  allTiles: TileItem[];
-55	  /** IDs of tiles currently visible in the choice bank */
-56	  bankTileIds: string[];
-57	  zones: AnswerZone[];
-58	  /** Index of next slot to fill in auto-next-slot mode */
-59	  activeSlotIndex: number;
-60	  dragActiveTileId: string | null;
-61	  phase: AnswerGamePhase;
-62	  roundIndex: number;
-63	  retryCount: number;
-64	}
-65	
-66	export type AnswerGameAction =
-67	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-68	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-69	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-70	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-71	  | { type: 'EJECT_TILE'; zoneIndex: number }
-72	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-73	  | { type: 'COMPLETE_GAME' }
-74	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+1 export interface AnswerGameConfig {
+2   gameId: string;
+3   /** @default 'drag' */
+4   inputMethod: 'drag' | 'type' | 'both';
+5   /** @default 'lock-auto-eject' */
+6   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7   tileBankMode: 'exact' | 'distractors';
+8   distractorCount?: number;
+9   /** Total number of rounds in this session */
+10   totalRounds: number;
+11   /**
+12    * When `true`, rounds follow the order of `rounds` in config.
+13    * When `false` or omitted, order is shuffled once per session (again after Play again).
+14    */
+15   roundsInOrder?: boolean;
+16   /** Whether TTS is enabled for this profile */
+17   ttsEnabled: boolean;
+18   /**
+19    * Controls the OS keyboard type shown on touch devices in type/both mode.
+20    * @default 'text'
+21    */
+22   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+24   initialTiles?: TileItem[];
+25   initialZones?: AnswerZone[];
+26 }
+27 
+28 export interface TileItem {
+29   id: string;
+30   /** Display label shown on the tile (e.g. "A", "cat", "3") */
+31   label: string;
+32   /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+33   value: string;
+34 }
+35 
+36 export interface AnswerZone {
+37   id: string;
+38   index: number;
+39   /** Correct tile value for this slot; matched against `TileItem.value` */
+40   expectedValue: string;
+41   placedTileId: string | null;
+42   isWrong: boolean;
+43   isLocked: boolean;
+44 }
+45 
+46 export type AnswerGamePhase =
+47   | 'playing'
+48   | 'round-complete'
+49   | 'game-over';
+50 
+51 export interface AnswerGameState {
+52   config: AnswerGameConfig;
+53   /** Full tile list for the current round — never mutated mid-round */
+54   allTiles: TileItem[];
+55   /** IDs of tiles currently visible in the choice bank */
+56   bankTileIds: string[];
+57   zones: AnswerZone[];
+58   /** Index of next slot to fill in auto-next-slot mode */
+59   activeSlotIndex: number;
+60   dragActiveTileId: string | null;
+61   phase: AnswerGamePhase;
+62   roundIndex: number;
+63   retryCount: number;
+64 }
+65 
+66 export type AnswerGameAction =
+67   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+68   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+69   | { type: 'REMOVE_TILE'; zoneIndex: number }
+70   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+71   | { type: 'EJECT_TILE'; zoneIndex: number }
+72   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+73   | { type: 'COMPLETE_GAME' }
+74   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:33Z)**_
@@ -1153,52 +1169,53 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:33Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/db/migrations.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { MAX_SCHEMA_VERSION } from './schemas';
-3	import type { BaseSkillDatabase } from './types';
-4	
-5	function getAppVersion(): string {
-6	  const v: string = import.meta.env.VITE_APP_VERSION;
-7	  if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
-8	    return v;
-9	  }
-10	  return '0.1.0';
-11	}
-12	
-13	export async function ensureAppMetaSingleton(
-14	  db: BaseSkillDatabase,
-15	): Promise<void> {
-16	  const existing = await db.app_meta.findOne('singleton').exec();
-17	  if (existing) {
-18	    return;
-19	  }
-20	  await db.app_meta.insert({
-21	    id: 'singleton',
-22	    appVersion: getAppVersion(),
-23	    rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-24	    lastMigrationAt: null,
-25	    installId: `dev_${nanoid()}`,
-26	  });
-27	}
-28	
-29	export async function checkVersionAndMigrate(
-30	  db: BaseSkillDatabase,
-31	): Promise<void> {
-32	  await ensureAppMetaSingleton(db);
-33	  const meta = await db.app_meta.findOne('singleton').exec();
-34	  if (!meta) {
-35	    return;
-36	  }
-37	  if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
-38	    await meta.incrementalPatch({
-39	      rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-40	      lastMigrationAt: new Date().toISOString(),
-41	      appVersion: getAppVersion(),
-42	    });
-43	  }
-44	}
+1 import { nanoid } from 'nanoid';
+2 import { MAX_SCHEMA_VERSION } from './schemas';
+3 import type { BaseSkillDatabase } from './types';
+4 
+5 function getAppVersion(): string {
+6   const v: string = import.meta.env.VITE_APP_VERSION;
+7   if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
+8     return v;
+9   }
+10   return '0.1.0';
+11 }
+12 
+13 export async function ensureAppMetaSingleton(
+14   db: BaseSkillDatabase,
+15 ): Promise<void> {
+16   const existing = await db.app_meta.findOne('singleton').exec();
+17   if (existing) {
+18     return;
+19   }
+20   await db.app_meta.insert({
+21     id: 'singleton',
+22     appVersion: getAppVersion(),
+23     rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+24     lastMigrationAt: null,
+25     installId: `dev_${nanoid()}`,
+26   });
+27 }
+28 
+29 export async function checkVersionAndMigrate(
+30   db: BaseSkillDatabase,
+31 ): Promise<void> {
+32   await ensureAppMetaSingleton(db);
+33   const meta = await db.app_meta.findOne('singleton').exec();
+34   if (!meta) {
+35     return;
+36   }
+37   if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
+38     await meta.incrementalPatch({
+39       rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+40       lastMigrationAt: new Date().toISOString(),
+41       appVersion: getAppVersion(),
+42     });
+43   }
+44 }
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:34Z)**_
@@ -1208,630 +1225,631 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:34Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import type {
-6	  NumberMatchConfig,
-7	  NumberMatchRound,
-8	} from '@/games/number-match/types';
-9	import type { SortNumbersConfig } from '@/games/sort-numbers/types';
-10	import type {
-11	  WordSpellConfig,
-12	  WordSpellRound,
-13	} from '@/games/word-spell/types';
-14	import type { BookmarkColorKey } from '@/lib/bookmark-colors';
-15	import type {
-16	  GameEngineState,
-17	  MoveLog,
-18	  ResolvedContent,
-19	  ResolvedGameConfig,
-20	  SessionMeta,
-21	} from '@/lib/game-engine/types';
-22	import type { JSX } from 'react';
-23	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-24	import { GameShell } from '@/components/game/GameShell';
-25	import { getOrCreateDatabase } from '@/db/create-database';
-26	import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
-27	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-28	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-29	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-30	import { numberMatchConfigFields } from '@/games/number-match/types';
-31	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-32	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-33	import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
-34	import { wordSpellConfigFields } from '@/games/word-spell/types';
-35	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-36	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-37	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-38	
-39	const STUB_CONTENT: ResolvedContent = {
-40	  rounds: [
-41	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-42	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-43	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-44	  ],
-45	};
-46	
-47	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-48	  gameId,
-49	  title: { en: gameId },
-50	  gradeBand: 'year1-2',
-51	  maxRounds: 3,
-52	  maxRetries: 1,
-53	  maxUndoDepth: 3,
-54	  timerVisible: false,
-55	  timerDurationSeconds: null,
-56	  difficulty: 'medium',
-57	});
-58	
-59	interface GameRouteLoaderData {
-60	  config: ResolvedGameConfig;
-61	  initialLog: MoveLog | null;
-62	  sessionId: string;
-63	  meta: SessionMeta;
-64	  gameSpecificConfig: Record<string, unknown> | null;
-65	  bookmarkId: string | null;
-66	  bookmarkName: string | null;
-67	  bookmarkColor: string | null;
-68	}
-69	
-70	const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
-71	  { word: 'cat', emoji: '🐱' },
-72	  { word: 'dog', emoji: '🐶' },
-73	  { word: 'sun', emoji: '☀️' },
-74	  { word: 'pin', emoji: '📌' },
-75	  { word: 'sad', emoji: '☹️' },
-76	  { word: 'ant', emoji: '🐜' },
-77	  { word: 'can', emoji: '🥫' },
-78	  { word: 'mum', emoji: '🤱' },
-79	];
-80	
-81	const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
-82	  const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
-83	  return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
-84	};
-85	
-86	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-87	  gameId: 'word-spell',
-88	  component: 'WordSpell',
-89	  inputMethod: 'drag',
-90	  wrongTileBehavior: 'lock-auto-eject',
-91	  tileBankMode: 'exact',
-92	  totalRounds: 8,
-93	  roundsInOrder: false,
-94	  ttsEnabled: true,
-95	  mode: 'picture',
-96	  tileUnit: 'letter',
-97	  rounds: sliceWordSpellRounds(8),
-98	};
-99	
-100	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-101	  gameId: 'number-match',
-102	  component: 'NumberMatch',
-103	  inputMethod: 'drag',
-104	  wrongTileBehavior: 'lock-auto-eject',
-105	  tileBankMode: 'distractors',
-106	  distractorCount: 2,
-107	  totalRounds: 3,
-108	  roundsInOrder: false,
-109	  ttsEnabled: true,
-110	  mode: 'numeral-to-group',
-111	  tileStyle: 'dots',
-112	  range: { min: 1, max: 12 },
-113	  rounds: Array.from({ length: 3 }, () => ({
-114	    value: Math.floor(Math.random() * 12) + 1,
-115	  })),
-116	});
-117	
-118	const resizeNumberMatchRounds = (
-119	  prev: NumberMatchRound[],
-120	  count: number,
-121	  range: { min: number; max: number },
-122	): NumberMatchRound[] => {
-123	  const n = Math.max(1, Math.min(count, 50));
-124	  const span = Math.max(1, range.max - range.min + 1);
-125	  const next = prev.slice(0, n).map((r) => {
-126	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-127	    return { value: range.min + Math.floor(Math.random() * span) };
-128	  });
-129	  while (next.length < n) {
-130	    next.push({
-131	      value: range.min + Math.floor(Math.random() * span),
-132	    });
-133	  }
-134	  return next;
-135	};
-136	
-137	const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
-138	  gameId: 'sort-numbers',
-139	  component: 'SortNumbers',
-140	  inputMethod: 'drag',
-141	  wrongTileBehavior: 'lock-manual',
-142	  tileBankMode: 'exact',
-143	  totalRounds: 8,
-144	  roundsInOrder: false,
-145	  ttsEnabled: true,
-146	  direction: 'ascending',
-147	  range: { min: 11, max: 99 },
-148	  quantity: 6,
-149	  allowSkips: true,
-150	  rounds: generateSortRounds({
-151	    range: { min: 11, max: 99 },
-152	    quantity: 6,
-153	    allowSkips: true,
-154	    totalRounds: 8,
-155	  }),
-156	});
-157	
-158	const resolveWordSpellConfig = (
-159	  saved: Record<string, unknown> | null,
-160	): WordSpellConfig => {
-161	  const base: WordSpellConfig = {
-162	    ...DEFAULT_WORD_SPELL_CONFIG,
-163	    rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
-164	  };
-165	  if (!saved || saved.component !== 'WordSpell') return base;
-166	  const merged: WordSpellConfig = {
-167	    ...base,
-168	    ...(saved as Partial<WordSpellConfig>),
-169	    gameId: 'word-spell',
-170	    component: 'WordSpell',
-171	  };
-172	  const targetTotal = Math.max(
-173	    1,
-174	    Math.min(
-175	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-176	      WORD_SPELL_ROUND_POOL.length,
-177	    ),
-178	  );
-179	  if (
-180	    !Array.isArray(merged.rounds) ||
-181	    merged.rounds.length === 0 ||
-182	    merged.rounds.length !== targetTotal
-183	  ) {
-184	    merged.rounds = sliceWordSpellRounds(targetTotal);
-185	  }
-186	  merged.totalRounds = merged.rounds.length;
-187	  return merged;
-188	};
-189	
-190	const resolveNumberMatchConfig = (
-191	  saved: Record<string, unknown> | null,
-192	): NumberMatchConfig => {
-193	  const base = makeDefaultNumberMatchConfig();
-194	  if (!saved || saved.component !== 'NumberMatch') return base;
-195	  const merged: NumberMatchConfig = {
-196	    ...base,
-197	    ...(saved as Partial<NumberMatchConfig>),
-198	    gameId: 'number-match',
-199	    component: 'NumberMatch',
-200	  };
-201	  const targetLen =
-202	    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
-203	  merged.rounds = resizeNumberMatchRounds(
-204	    Array.isArray(merged.rounds) ? merged.rounds : [],
-205	    targetLen,
-206	    merged.range,
-207	  );
-208	  return merged;
-209	};
-210	
-211	const resolveSortNumbersConfig = (
-212	  saved: Record<string, unknown> | null,
-213	): SortNumbersConfig => {
-214	  const base = makeDefaultSortNumbersConfig();
-215	  if (!saved || saved.component !== 'SortNumbers') return base;
-216	  const merged: SortNumbersConfig = {
-217	    ...base,
-218	    ...(saved as Partial<SortNumbersConfig>),
-219	    gameId: 'sort-numbers',
-220	    component: 'SortNumbers',
-221	  };
-222	  const tr = Math.max(1, merged.totalRounds);
-223	  merged.totalRounds = tr;
-224	  const roundsStale =
-225	    Array.isArray(merged.rounds) &&
-226	    merged.rounds.some(
-227	      (r) =>
-228	        r.sequence.length !== merged.quantity ||
-229	        r.sequence.some(
-230	          (v) => v < merged.range.min || v > merged.range.max,
-231	        ),
-232	    );
-233	  if (
-234	    !Array.isArray(merged.rounds) ||
-235	    merged.rounds.length === 0 ||
-236	    merged.rounds.length !== tr ||
-237	    roundsStale
-238	  ) {
-239	    merged.rounds = generateSortRounds({
-240	      range: merged.range,
-241	      quantity: merged.quantity,
-242	      allowSkips: merged.allowSkips,
-243	      totalRounds: tr,
-244	    });
-245	  }
-246	  return merged;
-247	};
-248	
-249	const WordSpellGameBody = ({
-250	  gameId,
-251	  gameSpecificConfig,
-252	  bookmarkId,
-253	  bookmarkName,
-254	  bookmarkColor,
-255	}: {
-256	  gameId: string;
-257	  gameSpecificConfig: Record<string, unknown> | null;
-258	  bookmarkId: string | null;
-259	  bookmarkName: string | null;
-260	  bookmarkColor: string | null;
-261	}): JSX.Element => {
-262	  const { t } = useTranslation('games');
-263	  const { save, updateConfig } = useSavedConfigs();
-264	  const initial = useMemo(
-265	    () => resolveWordSpellConfig(gameSpecificConfig),
-266	    [gameSpecificConfig],
-267	  );
-268	  const [cfg, setCfg] = useState(initial);
-269	  const [showInstructions, setShowInstructions] = useState(true);
-270	  useEffect(() => {
-271	    setCfg(initial);
-272	  }, [initial]);
-273	  usePersistLastGameConfig(
-274	    gameId,
-275	    cfg as unknown as Record<string, unknown>,
-276	  );
-277	
-278	  if (showInstructions) {
-279	    return (
-280	      <InstructionsOverlay
-281	        text={t('instructions.word-spell')}
-282	        onStart={() => setShowInstructions(false)}
-283	        ttsEnabled={cfg.ttsEnabled}
-284	        gameTitle={t('word-spell')}
-285	        bookmarkName={bookmarkName ?? undefined}
-286	        bookmarkColor={
-287	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-288	        }
-289	        subject="reading"
-290	        config={cfg as unknown as Record<string, unknown>}
-291	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-292	        onSaveBookmark={async (name, color) => {
-293	          await save({
-294	            gameId,
-295	            name,
-296	            color,
-297	            config: cfg as unknown as Record<string, unknown>,
-298	          });
-299	        }}
-300	        onUpdateBookmark={
-301	          bookmarkId
-302	            ? async (name, config) => {
-303	                await updateConfig(bookmarkId, config, name);
-304	              }
-305	            : undefined
-306	        }
-307	        configFields={wordSpellConfigFields}
-308	      />
-309	    );
-310	  }
-311	
-312	  return <WordSpell key={cfg.inputMethod} config={cfg} />;
-313	};
-314	
-315	const NumberMatchGameBody = ({
-316	  gameId,
-317	  gameSpecificConfig,
-318	  bookmarkId,
-319	  bookmarkName,
-320	  bookmarkColor,
-321	}: {
-322	  gameId: string;
-323	  gameSpecificConfig: Record<string, unknown> | null;
-324	  bookmarkId: string | null;
-325	  bookmarkName: string | null;
-326	  bookmarkColor: string | null;
-327	}): JSX.Element => {
-328	  const { t } = useTranslation('games');
-329	  const { save, updateConfig } = useSavedConfigs();
-330	  const initial = useMemo(
-331	    () => resolveNumberMatchConfig(gameSpecificConfig),
-332	    [gameSpecificConfig],
-333	  );
-334	  const [cfg, setCfg] = useState(initial);
-335	  const [showInstructions, setShowInstructions] = useState(true);
-336	  useEffect(() => {
-337	    setCfg(initial);
-338	  }, [initial]);
-339	  usePersistLastGameConfig(
-340	    gameId,
-341	    cfg as unknown as Record<string, unknown>,
-342	  );
-343	
-344	  if (showInstructions) {
-345	    return (
-346	      <InstructionsOverlay
-347	        text={t('instructions.number-match')}
-348	        onStart={() => setShowInstructions(false)}
-349	        ttsEnabled={cfg.ttsEnabled}
-350	        gameTitle={t('number-match')}
-351	        bookmarkName={bookmarkName ?? undefined}
-352	        bookmarkColor={
-353	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-354	        }
-355	        subject="math"
-356	        config={cfg as unknown as Record<string, unknown>}
-357	        onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
-358	        onSaveBookmark={async (name, color) => {
-359	          await save({
-360	            gameId,
-361	            name,
-362	            color,
-363	            config: cfg as unknown as Record<string, unknown>,
-364	          });
-365	        }}
-366	        onUpdateBookmark={
-367	          bookmarkId
-368	            ? async (name, config) => {
-369	                await updateConfig(bookmarkId, config, name);
-370	              }
-371	            : undefined
-372	        }
-373	        configFields={numberMatchConfigFields}
-374	      />
-375	    );
-376	  }
-377	
-378	  return <NumberMatch key={cfg.inputMethod} config={cfg} />;
-379	};
-380	
-381	const SortNumbersGameBody = ({
-382	  gameId,
-383	  gameSpecificConfig,
-384	  bookmarkId,
-385	  bookmarkName,
-386	  bookmarkColor,
-387	}: {
-388	  gameId: string;
-389	  gameSpecificConfig: Record<string, unknown> | null;
-390	  bookmarkId: string | null;
-391	  bookmarkName: string | null;
-392	  bookmarkColor: string | null;
-393	}): JSX.Element => {
-394	  const { t } = useTranslation('games');
-395	  const { save, updateConfig } = useSavedConfigs();
-396	  const initial = useMemo(
-397	    () => resolveSortNumbersConfig(gameSpecificConfig),
-398	    [gameSpecificConfig],
-399	  );
-400	  const [cfg, setCfg] = useState(initial);
-401	  const [showInstructions, setShowInstructions] = useState(true);
-402	  useEffect(() => {
-403	    setCfg(initial);
-404	  }, [initial]);
-405	  usePersistLastGameConfig(
-406	    gameId,
-407	    cfg as unknown as Record<string, unknown>,
-408	  );
-409	
-410	  if (showInstructions) {
-411	    return (
-412	      <InstructionsOverlay
-413	        text={t('instructions.sort-numbers')}
-414	        onStart={() => setShowInstructions(false)}
-415	        ttsEnabled={cfg.ttsEnabled}
-416	        gameTitle={t('sort-numbers')}
-417	        bookmarkName={bookmarkName ?? undefined}
-418	        bookmarkColor={
-419	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-420	        }
-421	        subject="math"
-422	        config={cfg as unknown as Record<string, unknown>}
-423	        onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
-424	        onSaveBookmark={async (name, color) => {
-425	          await save({
-426	            gameId,
-427	            name,
-428	            color,
-429	            config: cfg as unknown as Record<string, unknown>,
-430	          });
-431	        }}
-432	        onUpdateBookmark={
-433	          bookmarkId
-434	            ? async (name, config) => {
-435	                await updateConfig(bookmarkId, config, name);
-436	              }
-437	            : undefined
-438	        }
-439	        configFields={sortNumbersConfigFields}
-440	      />
-441	    );
-442	  }
-443	
-444	  return <SortNumbers key={cfg.inputMethod} config={cfg} />;
-445	};
-446	
-447	const GameBody = ({
-448	  gameId,
-449	  gameSpecificConfig,
-450	  bookmarkId,
-451	  bookmarkName,
-452	  bookmarkColor,
-453	}: {
-454	  gameId: string;
-455	  gameSpecificConfig: Record<string, unknown> | null;
-456	  bookmarkId: string | null;
-457	  bookmarkName: string | null;
-458	  bookmarkColor: string | null;
-459	}): JSX.Element => {
-460	  if (gameId === 'sort-numbers') {
-461	    return (
-462	      <SortNumbersGameBody
-463	        gameId={gameId}
-464	        gameSpecificConfig={gameSpecificConfig}
-465	        bookmarkId={bookmarkId}
-466	        bookmarkName={bookmarkName}
-467	        bookmarkColor={bookmarkColor}
-468	      />
-469	    );
-470	  }
-471	
-472	  if (gameId === 'word-spell') {
-473	    return (
-474	      <WordSpellGameBody
-475	        gameId={gameId}
-476	        gameSpecificConfig={gameSpecificConfig}
-477	        bookmarkId={bookmarkId}
-478	        bookmarkName={bookmarkName}
-479	        bookmarkColor={bookmarkColor}
-480	      />
-481	    );
-482	  }
-483	
-484	  if (gameId === 'number-match') {
-485	    return (
-486	      <NumberMatchGameBody
-487	        gameId={gameId}
-488	        gameSpecificConfig={gameSpecificConfig}
-489	        bookmarkId={bookmarkId}
-490	        bookmarkName={bookmarkName}
-491	        bookmarkColor={bookmarkColor}
-492	      />
-493	    );
-494	  }
-495	
-496	  return (
-497	    <div className="flex h-full items-center justify-center text-muted-foreground">
-498	      <p>Game not found</p>
-499	    </div>
-500	  );
-501	};
-502	
-503	export const GameRoute = ({
-504	  config,
-505	  initialLog,
-506	  sessionId,
-507	  meta,
-508	  gameSpecificConfig,
-509	  bookmarkId,
-510	  bookmarkName,
-511	  bookmarkColor,
-512	}: GameRouteLoaderData): JSX.Element => (
-513	  <GameShell
-514	    config={config}
-515	    moves={{}}
-516	    initialState={meta.initialState}
-517	    sessionId={sessionId}
-518	    meta={meta}
-519	    initialLog={initialLog ?? undefined}
-520	  >
-521	    <GameBody
-522	      gameId={config.gameId}
-523	      gameSpecificConfig={gameSpecificConfig}
-524	      bookmarkId={bookmarkId}
-525	      bookmarkName={bookmarkName}
-526	      bookmarkColor={bookmarkColor}
-527	    />
-528	  </GameShell>
-529	);
-530	
-531	const RouteComponent = (): JSX.Element => {
-532	  const data = Route.useLoaderData();
-533	  return <GameRoute {...data} />;
-534	};
-535	
-536	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-537	  validateSearch: (search: Record<string, unknown>) => ({
-538	    configId:
-539	      typeof search.configId === 'string' ? search.configId : undefined,
-540	  }),
-541	  loaderDeps: ({ search }) => ({ configId: search.configId }),
-542	  loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
-543	    const { gameId } = params;
-544	    const profileId = 'default';
-545	
-546	    const db = await getOrCreateDatabase();
-547	    const defaultConfig = makeDefaultConfig(gameId);
-548	    const config = await loadGameConfig(
-549	      gameId,
-550	      profileId,
-551	      defaultConfig.gradeBand,
-552	      db,
-553	      defaultConfig,
-554	    );
-555	
-556	    const initialLog = await findInProgressSession(
-557	      profileId,
-558	      gameId,
-559	      db,
-560	    );
-561	
-562	    let gameSpecificConfig: Record<string, unknown> | null = null;
-563	    let bookmarkId: string | null = null;
-564	    let bookmarkName: string | null = null;
-565	    let bookmarkColor: string | null = null;
-566	
-567	    if (deps.configId) {
-568	      const savedDoc = await db.saved_game_configs
-569	        .findOne(deps.configId)
-570	        .exec();
-571	      if (savedDoc) {
-572	        gameSpecificConfig = savedDoc.config;
-573	        bookmarkId = savedDoc.id;
-574	        bookmarkName = savedDoc.name;
-575	        bookmarkColor = savedDoc.color;
-576	      }
-577	    } else {
-578	      const lastDoc = await db.saved_game_configs
-579	        .findOne(lastSessionSavedConfigId(gameId))
-580	        .exec();
-581	      if (lastDoc) gameSpecificConfig = lastDoc.config;
-582	    }
-583	
-584	    const sessionId = initialLog?.sessionId ?? nanoid();
-585	    const seed = initialLog?.seed ?? nanoid();
-586	    const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
-587	    const initialState: GameEngineState = initialLog?.initialState ?? {
-588	      phase: 'instructions',
-589	      roundIndex: 0,
-590	      score: 0,
-591	      streak: 0,
-592	      retryCount: 0,
-593	      content: initialContent,
-594	      currentRound: {
-595	        roundId: initialContent.rounds[0]?.id ?? '',
-596	        answer: null,
-597	        hintsUsed: 0,
-598	      },
-599	    };
-600	
-601	    const meta: SessionMeta = {
-602	      profileId,
-603	      gameId,
-604	      gradeBand: config.gradeBand,
-605	      seed,
-606	      initialContent,
-607	      initialState,
-608	    };
-609	
-610	    return {
-611	      config,
-612	      initialLog,
-613	      sessionId,
-614	      meta,
-615	      gameSpecificConfig,
-616	      bookmarkId,
-617	      bookmarkName,
-618	      bookmarkColor,
-619	    };
-620	  },
-621	  component: RouteComponent,
-622	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import type {
+6   NumberMatchConfig,
+7   NumberMatchRound,
+8 } from '@/games/number-match/types';
+9 import type { SortNumbersConfig } from '@/games/sort-numbers/types';
+10 import type {
+11   WordSpellConfig,
+12   WordSpellRound,
+13 } from '@/games/word-spell/types';
+14 import type { BookmarkColorKey } from '@/lib/bookmark-colors';
+15 import type {
+16   GameEngineState,
+17   MoveLog,
+18   ResolvedContent,
+19   ResolvedGameConfig,
+20   SessionMeta,
+21 } from '@/lib/game-engine/types';
+22 import type { JSX } from 'react';
+23 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+24 import { GameShell } from '@/components/game/GameShell';
+25 import { getOrCreateDatabase } from '@/db/create-database';
+26 import { usePersistLastGameConfig } from '@/db/hooks/usePersistLastGameConfig';
+27 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+28 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+29 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+30 import { numberMatchConfigFields } from '@/games/number-match/types';
+31 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+32 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+33 import { sortNumbersConfigFields } from '@/games/sort-numbers/types';
+34 import { wordSpellConfigFields } from '@/games/word-spell/types';
+35 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+36 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+37 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+38 
+39 const STUB_CONTENT: ResolvedContent = {
+40   rounds: [
+41     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+42     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+43     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+44   ],
+45 };
+46 
+47 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+48   gameId,
+49   title: { en: gameId },
+50   gradeBand: 'year1-2',
+51   maxRounds: 3,
+52   maxRetries: 1,
+53   maxUndoDepth: 3,
+54   timerVisible: false,
+55   timerDurationSeconds: null,
+56   difficulty: 'medium',
+57 });
+58 
+59 interface GameRouteLoaderData {
+60   config: ResolvedGameConfig;
+61   initialLog: MoveLog | null;
+62   sessionId: string;
+63   meta: SessionMeta;
+64   gameSpecificConfig: Record<string, unknown> | null;
+65   bookmarkId: string | null;
+66   bookmarkName: string | null;
+67   bookmarkColor: string | null;
+68 }
+69 
+70 const WORD_SPELL_ROUND_POOL: WordSpellRound[] = [
+71   { word: 'cat', emoji: '🐱' },
+72   { word: 'dog', emoji: '🐶' },
+73   { word: 'sun', emoji: '☀️' },
+74   { word: 'pin', emoji: '📌' },
+75   { word: 'sad', emoji: '☹️' },
+76   { word: 'ant', emoji: '🐜' },
+77   { word: 'can', emoji: '🥫' },
+78   { word: 'mum', emoji: '🤱' },
+79 ];
+80 
+81 const sliceWordSpellRounds = (count: number): WordSpellRound[] => {
+82   const n = Math.max(1, Math.min(count, WORD_SPELL_ROUND_POOL.length));
+83   return WORD_SPELL_ROUND_POOL.slice(0, n).map((r) => ({ ...r }));
+84 };
+85 
+86 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+87   gameId: 'word-spell',
+88   component: 'WordSpell',
+89   inputMethod: 'drag',
+90   wrongTileBehavior: 'lock-auto-eject',
+91   tileBankMode: 'exact',
+92   totalRounds: 8,
+93   roundsInOrder: false,
+94   ttsEnabled: true,
+95   mode: 'picture',
+96   tileUnit: 'letter',
+97   rounds: sliceWordSpellRounds(8),
+98 };
+99 
+100 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+101   gameId: 'number-match',
+102   component: 'NumberMatch',
+103   inputMethod: 'drag',
+104   wrongTileBehavior: 'lock-auto-eject',
+105   tileBankMode: 'distractors',
+106   distractorCount: 2,
+107   totalRounds: 3,
+108   roundsInOrder: false,
+109   ttsEnabled: true,
+110   mode: 'numeral-to-group',
+111   tileStyle: 'dots',
+112   range: { min: 1, max: 12 },
+113   rounds: Array.from({ length: 3 }, () => ({
+114     value: Math.floor(Math.random() * 12) + 1,
+115   })),
+116 });
+117 
+118 const resizeNumberMatchRounds = (
+119   prev: NumberMatchRound[],
+120   count: number,
+121   range: { min: number; max: number },
+122 ): NumberMatchRound[] => {
+123   const n = Math.max(1, Math.min(count, 50));
+124   const span = Math.max(1, range.max - range.min + 1);
+125   const next = prev.slice(0, n).map((r) => {
+126     if (r.value >= range.min && r.value <= range.max) return { ...r };
+127     return { value: range.min + Math.floor(Math.random() * span) };
+128   });
+129   while (next.length < n) {
+130     next.push({
+131       value: range.min + Math.floor(Math.random() * span),
+132     });
+133   }
+134   return next;
+135 };
+136 
+137 const makeDefaultSortNumbersConfig = (): SortNumbersConfig => ({
+138   gameId: 'sort-numbers',
+139   component: 'SortNumbers',
+140   inputMethod: 'drag',
+141   wrongTileBehavior: 'lock-manual',
+142   tileBankMode: 'exact',
+143   totalRounds: 8,
+144   roundsInOrder: false,
+145   ttsEnabled: true,
+146   direction: 'ascending',
+147   range: { min: 11, max: 99 },
+148   quantity: 6,
+149   allowSkips: true,
+150   rounds: generateSortRounds({
+151     range: { min: 11, max: 99 },
+152     quantity: 6,
+153     allowSkips: true,
+154     totalRounds: 8,
+155   }),
+156 });
+157 
+158 const resolveWordSpellConfig = (
+159   saved: Record<string, unknown> | null,
+160 ): WordSpellConfig => {
+161   const base: WordSpellConfig = {
+162     ...DEFAULT_WORD_SPELL_CONFIG,
+163     rounds: DEFAULT_WORD_SPELL_CONFIG.rounds.map((r) => ({ ...r })),
+164   };
+165   if (!saved || saved.component !== 'WordSpell') return base;
+166   const merged: WordSpellConfig = {
+167     ...base,
+168     ...(saved as Partial<WordSpellConfig>),
+169     gameId: 'word-spell',
+170     component: 'WordSpell',
+171   };
+172   const targetTotal = Math.max(
+173     1,
+174     Math.min(
+175       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+176       WORD_SPELL_ROUND_POOL.length,
+177     ),
+178   );
+179   if (
+180     !Array.isArray(merged.rounds) ||
+181     merged.rounds.length === 0 ||
+182     merged.rounds.length !== targetTotal
+183   ) {
+184     merged.rounds = sliceWordSpellRounds(targetTotal);
+185   }
+186   merged.totalRounds = merged.rounds.length;
+187   return merged;
+188 };
+189 
+190 const resolveNumberMatchConfig = (
+191   saved: Record<string, unknown> | null,
+192 ): NumberMatchConfig => {
+193   const base = makeDefaultNumberMatchConfig();
+194   if (!saved || saved.component !== 'NumberMatch') return base;
+195   const merged: NumberMatchConfig = {
+196     ...base,
+197     ...(saved as Partial<NumberMatchConfig>),
+198     gameId: 'number-match',
+199     component: 'NumberMatch',
+200   };
+201   const targetLen =
+202     merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+203   merged.rounds = resizeNumberMatchRounds(
+204     Array.isArray(merged.rounds) ? merged.rounds : [],
+205     targetLen,
+206     merged.range,
+207   );
+208   return merged;
+209 };
+210 
+211 const resolveSortNumbersConfig = (
+212   saved: Record<string, unknown> | null,
+213 ): SortNumbersConfig => {
+214   const base = makeDefaultSortNumbersConfig();
+215   if (!saved || saved.component !== 'SortNumbers') return base;
+216   const merged: SortNumbersConfig = {
+217     ...base,
+218     ...(saved as Partial<SortNumbersConfig>),
+219     gameId: 'sort-numbers',
+220     component: 'SortNumbers',
+221   };
+222   const tr = Math.max(1, merged.totalRounds);
+223   merged.totalRounds = tr;
+224   const roundsStale =
+225     Array.isArray(merged.rounds) &&
+226     merged.rounds.some(
+227       (r) =>
+228         r.sequence.length !== merged.quantity ||
+229         r.sequence.some(
+230           (v) => v < merged.range.min || v > merged.range.max,
+231         ),
+232     );
+233   if (
+234     !Array.isArray(merged.rounds) ||
+235     merged.rounds.length === 0 ||
+236     merged.rounds.length !== tr ||
+237     roundsStale
+238   ) {
+239     merged.rounds = generateSortRounds({
+240       range: merged.range,
+241       quantity: merged.quantity,
+242       allowSkips: merged.allowSkips,
+243       totalRounds: tr,
+244     });
+245   }
+246   return merged;
+247 };
+248 
+249 const WordSpellGameBody = ({
+250   gameId,
+251   gameSpecificConfig,
+252   bookmarkId,
+253   bookmarkName,
+254   bookmarkColor,
+255 }: {
+256   gameId: string;
+257   gameSpecificConfig: Record<string, unknown> | null;
+258   bookmarkId: string | null;
+259   bookmarkName: string | null;
+260   bookmarkColor: string | null;
+261 }): JSX.Element => {
+262   const { t } = useTranslation('games');
+263   const { save, updateConfig } = useSavedConfigs();
+264   const initial = useMemo(
+265     () => resolveWordSpellConfig(gameSpecificConfig),
+266     [gameSpecificConfig],
+267   );
+268   const [cfg, setCfg] = useState(initial);
+269   const [showInstructions, setShowInstructions] = useState(true);
+270   useEffect(() => {
+271     setCfg(initial);
+272   }, [initial]);
+273   usePersistLastGameConfig(
+274     gameId,
+275     cfg as unknown as Record<string, unknown>,
+276   );
+277 
+278   if (showInstructions) {
+279     return (
+280       <InstructionsOverlay
+281         text={t('instructions.word-spell')}
+282         onStart={() => setShowInstructions(false)}
+283         ttsEnabled={cfg.ttsEnabled}
+284         gameTitle={t('word-spell')}
+285         bookmarkName={bookmarkName ?? undefined}
+286         bookmarkColor={
+287           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+288         }
+289         subject="reading"
+290         config={cfg as unknown as Record<string, unknown>}
+291         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+292         onSaveBookmark={async (name, color) => {
+293           await save({
+294             gameId,
+295             name,
+296             color,
+297             config: cfg as unknown as Record<string, unknown>,
+298           });
+299         }}
+300         onUpdateBookmark={
+301           bookmarkId
+302             ? async (name, config) => {
+303                 await updateConfig(bookmarkId, config, name);
+304               }
+305             : undefined
+306         }
+307         configFields={wordSpellConfigFields}
+308       />
+309     );
+310   }
+311 
+312   return <WordSpell key={cfg.inputMethod} config={cfg} />;
+313 };
+314 
+315 const NumberMatchGameBody = ({
+316   gameId,
+317   gameSpecificConfig,
+318   bookmarkId,
+319   bookmarkName,
+320   bookmarkColor,
+321 }: {
+322   gameId: string;
+323   gameSpecificConfig: Record<string, unknown> | null;
+324   bookmarkId: string | null;
+325   bookmarkName: string | null;
+326   bookmarkColor: string | null;
+327 }): JSX.Element => {
+328   const { t } = useTranslation('games');
+329   const { save, updateConfig } = useSavedConfigs();
+330   const initial = useMemo(
+331     () => resolveNumberMatchConfig(gameSpecificConfig),
+332     [gameSpecificConfig],
+333   );
+334   const [cfg, setCfg] = useState(initial);
+335   const [showInstructions, setShowInstructions] = useState(true);
+336   useEffect(() => {
+337     setCfg(initial);
+338   }, [initial]);
+339   usePersistLastGameConfig(
+340     gameId,
+341     cfg as unknown as Record<string, unknown>,
+342   );
+343 
+344   if (showInstructions) {
+345     return (
+346       <InstructionsOverlay
+347         text={t('instructions.number-match')}
+348         onStart={() => setShowInstructions(false)}
+349         ttsEnabled={cfg.ttsEnabled}
+350         gameTitle={t('number-match')}
+351         bookmarkName={bookmarkName ?? undefined}
+352         bookmarkColor={
+353           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+354         }
+355         subject="math"
+356         config={cfg as unknown as Record<string, unknown>}
+357         onConfigChange={(c) => setCfg(resolveNumberMatchConfig(c))}
+358         onSaveBookmark={async (name, color) => {
+359           await save({
+360             gameId,
+361             name,
+362             color,
+363             config: cfg as unknown as Record<string, unknown>,
+364           });
+365         }}
+366         onUpdateBookmark={
+367           bookmarkId
+368             ? async (name, config) => {
+369                 await updateConfig(bookmarkId, config, name);
+370               }
+371             : undefined
+372         }
+373         configFields={numberMatchConfigFields}
+374       />
+375     );
+376   }
+377 
+378   return <NumberMatch key={cfg.inputMethod} config={cfg} />;
+379 };
+380 
+381 const SortNumbersGameBody = ({
+382   gameId,
+383   gameSpecificConfig,
+384   bookmarkId,
+385   bookmarkName,
+386   bookmarkColor,
+387 }: {
+388   gameId: string;
+389   gameSpecificConfig: Record<string, unknown> | null;
+390   bookmarkId: string | null;
+391   bookmarkName: string | null;
+392   bookmarkColor: string | null;
+393 }): JSX.Element => {
+394   const { t } = useTranslation('games');
+395   const { save, updateConfig } = useSavedConfigs();
+396   const initial = useMemo(
+397     () => resolveSortNumbersConfig(gameSpecificConfig),
+398     [gameSpecificConfig],
+399   );
+400   const [cfg, setCfg] = useState(initial);
+401   const [showInstructions, setShowInstructions] = useState(true);
+402   useEffect(() => {
+403     setCfg(initial);
+404   }, [initial]);
+405   usePersistLastGameConfig(
+406     gameId,
+407     cfg as unknown as Record<string, unknown>,
+408   );
+409 
+410   if (showInstructions) {
+411     return (
+412       <InstructionsOverlay
+413         text={t('instructions.sort-numbers')}
+414         onStart={() => setShowInstructions(false)}
+415         ttsEnabled={cfg.ttsEnabled}
+416         gameTitle={t('sort-numbers')}
+417         bookmarkName={bookmarkName ?? undefined}
+418         bookmarkColor={
+419           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+420         }
+421         subject="math"
+422         config={cfg as unknown as Record<string, unknown>}
+423         onConfigChange={(c) => setCfg(resolveSortNumbersConfig(c))}
+424         onSaveBookmark={async (name, color) => {
+425           await save({
+426             gameId,
+427             name,
+428             color,
+429             config: cfg as unknown as Record<string, unknown>,
+430           });
+431         }}
+432         onUpdateBookmark={
+433           bookmarkId
+434             ? async (name, config) => {
+435                 await updateConfig(bookmarkId, config, name);
+436               }
+437             : undefined
+438         }
+439         configFields={sortNumbersConfigFields}
+440       />
+441     );
+442   }
+443 
+444   return <SortNumbers key={cfg.inputMethod} config={cfg} />;
+445 };
+446 
+447 const GameBody = ({
+448   gameId,
+449   gameSpecificConfig,
+450   bookmarkId,
+451   bookmarkName,
+452   bookmarkColor,
+453 }: {
+454   gameId: string;
+455   gameSpecificConfig: Record<string, unknown> | null;
+456   bookmarkId: string | null;
+457   bookmarkName: string | null;
+458   bookmarkColor: string | null;
+459 }): JSX.Element => {
+460   if (gameId === 'sort-numbers') {
+461     return (
+462       <SortNumbersGameBody
+463         gameId={gameId}
+464         gameSpecificConfig={gameSpecificConfig}
+465         bookmarkId={bookmarkId}
+466         bookmarkName={bookmarkName}
+467         bookmarkColor={bookmarkColor}
+468       />
+469     );
+470   }
+471 
+472   if (gameId === 'word-spell') {
+473     return (
+474       <WordSpellGameBody
+475         gameId={gameId}
+476         gameSpecificConfig={gameSpecificConfig}
+477         bookmarkId={bookmarkId}
+478         bookmarkName={bookmarkName}
+479         bookmarkColor={bookmarkColor}
+480       />
+481     );
+482   }
+483 
+484   if (gameId === 'number-match') {
+485     return (
+486       <NumberMatchGameBody
+487         gameId={gameId}
+488         gameSpecificConfig={gameSpecificConfig}
+489         bookmarkId={bookmarkId}
+490         bookmarkName={bookmarkName}
+491         bookmarkColor={bookmarkColor}
+492       />
+493     );
+494   }
+495 
+496   return (
+497     <div className="flex h-full items-center justify-center text-muted-foreground">
+498       <p>Game not found</p>
+499     </div>
+500   );
+501 };
+502 
+503 export const GameRoute = ({
+504   config,
+505   initialLog,
+506   sessionId,
+507   meta,
+508   gameSpecificConfig,
+509   bookmarkId,
+510   bookmarkName,
+511   bookmarkColor,
+512 }: GameRouteLoaderData): JSX.Element => (
+513   <GameShell
+514     config={config}
+515     moves={{}}
+516     initialState={meta.initialState}
+517     sessionId={sessionId}
+518     meta={meta}
+519     initialLog={initialLog ?? undefined}
+520   >
+521     <GameBody
+522       gameId={config.gameId}
+523       gameSpecificConfig={gameSpecificConfig}
+524       bookmarkId={bookmarkId}
+525       bookmarkName={bookmarkName}
+526       bookmarkColor={bookmarkColor}
+527     />
+528   </GameShell>
+529 );
+530 
+531 const RouteComponent = (): JSX.Element => {
+532   const data = Route.useLoaderData();
+533   return <GameRoute {...data} />;
+534 };
+535 
+536 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+537   validateSearch: (search: Record<string, unknown>) => ({
+538     configId:
+539       typeof search.configId === 'string' ? search.configId : undefined,
+540   }),
+541   loaderDeps: ({ search }) => ({ configId: search.configId }),
+542   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
+543     const { gameId } = params;
+544     const profileId = 'default';
+545 
+546     const db = await getOrCreateDatabase();
+547     const defaultConfig = makeDefaultConfig(gameId);
+548     const config = await loadGameConfig(
+549       gameId,
+550       profileId,
+551       defaultConfig.gradeBand,
+552       db,
+553       defaultConfig,
+554     );
+555 
+556     const initialLog = await findInProgressSession(
+557       profileId,
+558       gameId,
+559       db,
+560     );
+561 
+562     let gameSpecificConfig: Record<string, unknown> | null = null;
+563     let bookmarkId: string | null = null;
+564     let bookmarkName: string | null = null;
+565     let bookmarkColor: string | null = null;
+566 
+567     if (deps.configId) {
+568       const savedDoc = await db.saved_game_configs
+569         .findOne(deps.configId)
+570         .exec();
+571       if (savedDoc) {
+572         gameSpecificConfig = savedDoc.config;
+573         bookmarkId = savedDoc.id;
+574         bookmarkName = savedDoc.name;
+575         bookmarkColor = savedDoc.color;
+576       }
+577     } else {
+578       const lastDoc = await db.saved_game_configs
+579         .findOne(lastSessionSavedConfigId(gameId))
+580         .exec();
+581       if (lastDoc) gameSpecificConfig = lastDoc.config;
+582     }
+583 
+584     const sessionId = initialLog?.sessionId ?? nanoid();
+585     const seed = initialLog?.seed ?? nanoid();
+586     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
+587     const initialState: GameEngineState = initialLog?.initialState ?? {
+588       phase: 'instructions',
+589       roundIndex: 0,
+590       score: 0,
+591       streak: 0,
+592       retryCount: 0,
+593       content: initialContent,
+594       currentRound: {
+595         roundId: initialContent.rounds[0]?.id ?? '',
+596         answer: null,
+597         hintsUsed: 0,
+598       },
+599     };
+600 
+601     const meta: SessionMeta = {
+602       profileId,
+603       gameId,
+604       gradeBand: config.gradeBand,
+605       seed,
+606       initialContent,
+607       initialState,
+608     };
+609 
+610     return {
+611       config,
+612       initialLog,
+613       sessionId,
+614       meta,
+615       gameSpecificConfig,
+616       bookmarkId,
+617       bookmarkName,
+618       bookmarkColor,
+619     };
+620   },
+621   component: RouteComponent,
+622 });
 623
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:38Z)**_
@@ -1841,58 +1859,59 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:38Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/routes/__root.tsx`
 
 ```text
-1	import { TanStackDevtools } from '@tanstack/react-devtools';
-2	import {
-3	  HeadContent,
-4	  Scripts,
-5	  createRootRoute,
-6	} from '@tanstack/react-router';
-7	import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-8	
-9	import appCss from '../styles.css?url';
-10	
-11	/** First paint only: class + color-scheme from system preference (no localStorage). */
-12	const THEME_INIT_SCRIPT =
-13	  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-14	
-15	const RootDocument = ({ children }: { children: React.ReactNode }) => (
-16	  <html lang="en" suppressHydrationWarning>
-17	    <head>
-18	      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-19	      <HeadContent />
-20	    </head>
-21	    <body className="font-sans antialiased">
-22	      {children}
-23	      <TanStackDevtools
-24	        config={{ position: 'bottom-right' }}
-25	        plugins={[
-26	          {
-27	            name: 'Tanstack Router',
-28	            render: <TanStackRouterDevtoolsPanel />,
-29	          },
-30	        ]}
-31	      />
-32	      <Scripts />
-33	    </body>
-34	  </html>
-35	);
-36	
-37	export const Route = createRootRoute({
-38	  head: () => ({
-39	    meta: [
-40	      { charSet: 'utf8' },
-41	      {
-42	        name: 'viewport',
-43	        content: 'width=device-width, initial-scale=1',
-44	      },
-45	      { title: 'BaseSkill' },
-46	    ],
-47	    links: [{ rel: 'stylesheet', href: appCss }],
-48	  }),
-49	  shellComponent: RootDocument,
-50	});
+1 import { TanStackDevtools } from '@tanstack/react-devtools';
+2 import {
+3   HeadContent,
+4   Scripts,
+5   createRootRoute,
+6 } from '@tanstack/react-router';
+7 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+8 
+9 import appCss from '../styles.css?url';
+10 
+11 /** First paint only: class + color-scheme from system preference (no localStorage). */
+12 const THEME_INIT_SCRIPT =
+13   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
+14 
+15 const RootDocument = ({ children }: { children: React.ReactNode }) => (
+16   <html lang="en" suppressHydrationWarning>
+17     <head>
+18       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+19       <HeadContent />
+20     </head>
+21     <body className="font-sans antialiased">
+22       {children}
+23       <TanStackDevtools
+24         config={{ position: 'bottom-right' }}
+25         plugins={[
+26           {
+27             name: 'Tanstack Router',
+28             render: <TanStackRouterDevtoolsPanel />,
+29           },
+30         ]}
+31       />
+32       <Scripts />
+33     </body>
+34   </html>
+35 );
+36 
+37 export const Route = createRootRoute({
+38   head: () => ({
+39     meta: [
+40       { charSet: 'utf8' },
+41       {
+42         name: 'viewport',
+43         content: 'width=device-width, initial-scale=1',
+44       },
+45       { title: 'BaseSkill' },
+46     ],
+47     links: [{ rel: 'stylesheet', href: appCss }],
+48   }),
+49   shellComponent: RootDocument,
+50 });
 51
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:39Z)**_
@@ -1902,38 +1921,39 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:39Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/routes/$locale/_app.tsx`
 
 ```text
-1	import { Outlet, createFileRoute } from '@tanstack/react-router';
-2	import { I18nextProvider } from 'react-i18next';
-3	import { Footer } from '@/components/Footer';
-4	import { Header } from '@/components/Header';
-5	import { OfflineIndicator } from '@/components/OfflineIndicator';
-6	import { seedThemesOnce } from '@/db/seed-themes';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	import { DbProvider } from '@/providers/DbProvider';
-9	import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
-10	
-11	const AppLayout = () => (
-12	  <DbProvider onDatabaseReady={seedThemesOnce}>
-13	    <I18nextProvider i18n={i18n}>
-14	      <ThemeRuntimeProvider>
-15	        <div className="flex min-h-screen flex-col">
-16	          <Header />
-17	          <OfflineIndicator />
-18	          <main className="flex-1">
-19	            <Outlet />
-20	          </main>
-21	          <Footer />
-22	        </div>
-23	      </ThemeRuntimeProvider>
-24	    </I18nextProvider>
-25	  </DbProvider>
-26	);
-27	
-28	export const Route = createFileRoute('/$locale/_app')({
-29	  component: AppLayout,
-30	});
+1 import { Outlet, createFileRoute } from '@tanstack/react-router';
+2 import { I18nextProvider } from 'react-i18next';
+3 import { Footer } from '@/components/Footer';
+4 import { Header } from '@/components/Header';
+5 import { OfflineIndicator } from '@/components/OfflineIndicator';
+6 import { seedThemesOnce } from '@/db/seed-themes';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 import { DbProvider } from '@/providers/DbProvider';
+9 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+10 
+11 const AppLayout = () => (
+12   <DbProvider onDatabaseReady={seedThemesOnce}>
+13     <I18nextProvider i18n={i18n}>
+14       <ThemeRuntimeProvider>
+15         <div className="flex min-h-screen flex-col">
+16           <Header />
+17           <OfflineIndicator />
+18           <main className="flex-1">
+19             <Outlet />
+20           </main>
+21           <Footer />
+22         </div>
+23       </ThemeRuntimeProvider>
+24     </I18nextProvider>
+25   </DbProvider>
+26 );
+27 
+28 export const Route = createFileRoute('/$locale/_app')({
+29   component: AppLayout,
+30 });
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:42Z)**_
@@ -1943,318 +1963,319 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:42Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/components/Header.tsx`
 
 ```text
-1	import {
-2	  Link,
-3	  useLocation,
-4	  useNavigate,
-5	  useParams,
-6	} from '@tanstack/react-router';
-7	import {
-8	  MenuIcon,
-9	  SearchIcon,
-10	  SlidersHorizontalIcon,
-11	} from 'lucide-react';
-12	import { useEffect, useMemo, useRef, useState } from 'react';
-13	import { useTranslation } from 'react-i18next';
-14	import { EMPTY } from 'rxjs';
-15	import type { ThemeDoc } from '@/db/schemas/themes';
-16	import { ThemeToggle } from '@/components/ThemeToggle';
-17	import { Button } from '@/components/ui/button';
-18	import {
-19	  DropdownMenu,
-20	  DropdownMenuContent,
-21	  DropdownMenuTrigger,
-22	} from '@/components/ui/dropdown-menu';
-23	import { Input } from '@/components/ui/input';
-24	import { Label } from '@/components/ui/label';
-25	import {
-26	  Select,
-27	  SelectContent,
-28	  SelectItem,
-29	  SelectTrigger,
-30	  SelectValue,
-31	} from '@/components/ui/select';
-32	import {
-33	  Sheet,
-34	  SheetContent,
-35	  SheetHeader,
-36	  SheetTitle,
-37	  SheetTrigger,
-38	} from '@/components/ui/sheet';
-39	import { Slider } from '@/components/ui/slider';
-40	import { useRxDB } from '@/db/hooks/useRxDB';
-41	import { useRxQuery } from '@/db/hooks/useRxQuery';
-42	import { useSettings } from '@/db/hooks/useSettings';
-43	
-44	const LOCALES = [
-45	  { code: 'en', label: '🇬🇧 English' },
-46	  { code: 'pt-BR', label: '🇧🇷 Português' },
-47	] as const;
-48	
-49	type HeaderLocale = (typeof LOCALES)[number]['code'];
-50	
-51	const HeaderMenuPanel = ({
-52	  appName,
-53	  locale,
-54	  onLocaleChange,
-55	}: {
-56	  appName: string;
-57	  locale: string;
-58	  onLocaleChange: (locale: HeaderLocale) => void;
-59	}) => {
-60	  const { t } = useTranslation('settings');
-61	  const { settings, update } = useSettings();
-62	  const { db } = useRxDB();
-63	  const volume = settings.volume ?? 0.8;
-64	  const speechRate = settings.speechRate ?? 1;
-65	  const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
-66	  const preferredVoice = settings.preferredVoiceURI ?? '';
-67	  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-68	
-69	  useEffect(() => {
-70	    const synth = (
-71	      globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-72	    ).speechSynthesis;
-73	    if (!synth) return;
-74	    const load = () => setVoices(synth.getVoices());
-75	    load();
-76	    synth.addEventListener('voiceschanged', load);
-77	    return () => synth.removeEventListener('voiceschanged', load);
-78	  }, []);
-79	
-80	  const themes$ = useMemo(
-81	    () => (db ? db.themes.find().$ : EMPTY),
-82	    [db],
-83	  );
-84	  const themeDocs = useRxQuery<{ toJSON: () => ThemeDoc }[]>(
-85	    themes$,
-86	    [],
-87	  );
-88	  const themes = themeDocs.map((d) => d.toJSON());
-89	
-90	  return (
-91	    <SheetContent side="right">
-92	      <SheetHeader>
-93	        <SheetTitle>{appName}</SheetTitle>
-94	      </SheetHeader>
-95	      <div className="flex flex-col gap-6 p-4">
-96	        <div className="flex flex-col gap-2">
-97	          <Label htmlFor="drawer-volume">
-98	            {t('volume', { percent: Math.round(volume * 100) })}
-99	          </Label>
-100	          <Slider
-101	            id="drawer-volume"
-102	            min={0}
-103	            max={1}
-104	            step={0.05}
-105	            value={[volume]}
-106	            onValueChange={([v]) => {
-107	              void update({ volume: v });
-108	            }}
-109	          />
-110	        </div>
-111	
-112	        <div className="flex flex-col gap-2">
-113	          <Label htmlFor="drawer-speechRate">
-114	            {t('speechRate', { rate: speechRate })}
-115	          </Label>
-116	          <Slider
-117	            id="drawer-speechRate"
-118	            min={0.5}
-119	            max={2}
-120	            step={0.1}
-121	            value={[speechRate]}
-122	            onValueChange={([v]) => {
-123	              void update({ speechRate: v });
-124	            }}
-125	          />
-126	        </div>
-127	
-128	        {voices.length > 0 && (
-129	          <div className="flex flex-col gap-2">
-130	            <Label htmlFor="drawer-voice">{t('voice')}</Label>
-131	            <Select
-132	              value={preferredVoice}
-133	              onValueChange={(v) =>
-134	                void update({ preferredVoiceURI: v })
-135	              }
-136	            >
-137	              <SelectTrigger id="drawer-voice">
-138	                <SelectValue />
-139	              </SelectTrigger>
-140	              <SelectContent>
-141	                {voices.map((v) => (
-142	                  <SelectItem key={v.name} value={v.name}>
-143	                    {v.name}
-144	                  </SelectItem>
-145	                ))}
-146	              </SelectContent>
-147	            </Select>
-148	          </div>
-149	        )}
-150	
-151	        <div className="flex flex-col gap-2">
-152	          <Label htmlFor="drawer-language">{t('language')}</Label>
-153	          <Select
-154	            value={locale}
-155	            onValueChange={(v) => onLocaleChange(v as HeaderLocale)}
-156	          >
-157	            <SelectTrigger id="drawer-language">
-158	              <SelectValue />
-159	            </SelectTrigger>
-160	            <SelectContent>
-161	              {LOCALES.map(({ code, label }) => (
-162	                <SelectItem key={code} value={code}>
-163	                  {label}
-164	                </SelectItem>
-165	              ))}
-166	            </SelectContent>
-167	          </Select>
-168	        </div>
-169	
-170	        {themes.length > 0 && (
-171	          <div className="flex flex-col gap-2">
-172	            <Label htmlFor="drawer-theme">{t('theme')}</Label>
-173	            <Select
-174	              value={activeThemeId}
-175	              onValueChange={(v) => void update({ themeId: v })}
-176	            >
-177	              <SelectTrigger id="drawer-theme">
-178	                <SelectValue />
-179	              </SelectTrigger>
-180	              <SelectContent>
-181	                {themes.map(({ id, name, isPreset }) => (
-182	                  <SelectItem key={id} value={id}>
-183	                    {isPreset
-184	                      ? t(`themes.${id}`, { defaultValue: name })
-185	                      : name}
-186	                  </SelectItem>
-187	                ))}
-188	              </SelectContent>
-189	            </Select>
-190	          </div>
-191	        )}
-192	      </div>
-193	    </SheetContent>
-194	  );
-195	};
-196	
-197	const FiltersDropdown = ({
-198	  filtersLabel,
-199	  subjectsAll,
-200	}: {
-201	  filtersLabel: string;
-202	  subjectsAll: string;
-203	}) => (
-204	  <DropdownMenu>
-205	    <DropdownMenuTrigger asChild>
-206	      <Button variant="outline" size="sm" aria-label={filtersLabel}>
-207	        <SlidersHorizontalIcon size={16} />
-208	        <span className="hidden sm:inline">{filtersLabel}</span>
-209	      </Button>
-210	    </DropdownMenuTrigger>
-211	    <DropdownMenuContent align="end" className="w-56">
-212	      <div className="text-muted-foreground px-2 py-1.5 text-sm">
-213	        {subjectsAll}
-214	      </div>
-215	    </DropdownMenuContent>
-216	  </DropdownMenu>
-217	);
-218	
-219	const MenuSheetTrigger = () => (
-220	  <SheetTrigger asChild>
-221	    <Button variant="ghost" size="icon" aria-label="Menu">
-222	      <MenuIcon size={20} />
-223	    </Button>
-224	  </SheetTrigger>
-225	);
-226	
-227	export const Header = () => {
-228	  const { t } = useTranslation('common');
-229	  const { locale } = useParams({ from: '/$locale' });
-230	  const navigate = useNavigate();
-231	  const location = useLocation();
-232	  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(
-233	    null,
-234	  );
-235	
-236	  // The search input is uncontrolled — it navigates to the home route on change.
-237	  // It does not read the current search param (avoiding router hook complexity in a layout component).
-238	  const handleSearchChange = (value: string) => {
-239	    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-240	    searchTimeout.current = setTimeout(() => {
-241	      void navigate({
-242	        to: '/$locale',
-243	        params: { locale },
-244	        search: { search: value, level: '', subject: '', page: 1 },
-245	      });
-246	    }, 300);
-247	  };
-248	
-249	  const switchLocale = (newLocale: HeaderLocale) => {
-250	    const newPath = location.pathname.replace(
-251	      /^\/(en|pt-BR)/,
-252	      `/${newLocale}`,
-253	    );
-254	    void navigate({ to: newPath });
-255	  };
-256	
-257	  return (
-258	    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-lg">
-259	      <div className="flex items-center gap-3 px-4 py-3">
-260	        <Link
-261	          to="/$locale"
-262	          params={{ locale }}
-263	          className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
-264	        >
-265	          {t('appName')}
-266	        </Link>
-267	
-268	        <a
-269	          href="/base-skill/docs/"
-270	          className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
-271	          target="_blank"
-272	          rel="noreferrer"
-273	        >
-274	          Docs
-275	        </a>
-276	
-277	        <div className="flex flex-1 items-center gap-2">
-278	          <div className="relative flex-1">
-279	            <SearchIcon
-280	              size={16}
-281	              className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-282	            />
-283	            <Input
-284	              className="pl-9"
-285	              placeholder={t('search.placeholder')}
-286	              onChange={(e) => handleSearchChange(e.target.value)}
-287	              aria-label={t('search.placeholder')}
-288	            />
-289	          </div>
-290	
-291	          <FiltersDropdown
-292	            filtersLabel={t('search.filters')}
-293	            subjectsAll={t('subjects.all')}
-294	          />
-295	        </div>
-296	
-297	        <ThemeToggle />
-298	
-299	        <Sheet>
-300	          <MenuSheetTrigger />
-301	          <HeaderMenuPanel
-302	            appName={t('appName')}
-303	            locale={locale}
-304	            onLocaleChange={switchLocale}
-305	          />
-306	        </Sheet>
-307	      </div>
-308	    </header>
-309	  );
-310	};
+1 import {
+2   Link,
+3   useLocation,
+4   useNavigate,
+5   useParams,
+6 } from '@tanstack/react-router';
+7 import {
+8   MenuIcon,
+9   SearchIcon,
+10   SlidersHorizontalIcon,
+11 } from 'lucide-react';
+12 import { useEffect, useMemo, useRef, useState } from 'react';
+13 import { useTranslation } from 'react-i18next';
+14 import { EMPTY } from 'rxjs';
+15 import type { ThemeDoc } from '@/db/schemas/themes';
+16 import { ThemeToggle } from '@/components/ThemeToggle';
+17 import { Button } from '@/components/ui/button';
+18 import {
+19   DropdownMenu,
+20   DropdownMenuContent,
+21   DropdownMenuTrigger,
+22 } from '@/components/ui/dropdown-menu';
+23 import { Input } from '@/components/ui/input';
+24 import { Label } from '@/components/ui/label';
+25 import {
+26   Select,
+27   SelectContent,
+28   SelectItem,
+29   SelectTrigger,
+30   SelectValue,
+31 } from '@/components/ui/select';
+32 import {
+33   Sheet,
+34   SheetContent,
+35   SheetHeader,
+36   SheetTitle,
+37   SheetTrigger,
+38 } from '@/components/ui/sheet';
+39 import { Slider } from '@/components/ui/slider';
+40 import { useRxDB } from '@/db/hooks/useRxDB';
+41 import { useRxQuery } from '@/db/hooks/useRxQuery';
+42 import { useSettings } from '@/db/hooks/useSettings';
+43 
+44 const LOCALES = [
+45   { code: 'en', label: '🇬🇧 English' },
+46   { code: 'pt-BR', label: '🇧🇷 Português' },
+47 ] as const;
+48 
+49 type HeaderLocale = (typeof LOCALES)[number]['code'];
+50 
+51 const HeaderMenuPanel = ({
+52   appName,
+53   locale,
+54   onLocaleChange,
+55 }: {
+56   appName: string;
+57   locale: string;
+58   onLocaleChange: (locale: HeaderLocale) => void;
+59 }) => {
+60   const { t } = useTranslation('settings');
+61   const { settings, update } = useSettings();
+62   const { db } = useRxDB();
+63   const volume = settings.volume ?? 0.8;
+64   const speechRate = settings.speechRate ?? 1;
+65   const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
+66   const preferredVoice = settings.preferredVoiceURI ?? '';
+67   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+68 
+69   useEffect(() => {
+70     const synth = (
+71       globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+72     ).speechSynthesis;
+73     if (!synth) return;
+74     const load = () => setVoices(synth.getVoices());
+75     load();
+76     synth.addEventListener('voiceschanged', load);
+77     return () => synth.removeEventListener('voiceschanged', load);
+78   }, []);
+79 
+80   const themes$ = useMemo(
+81     () => (db ? db.themes.find().$ : EMPTY),
+82     [db],
+83   );
+84   const themeDocs = useRxQuery<{ toJSON: () => ThemeDoc }[]>(
+85     themes$,
+86     [],
+87   );
+88   const themes = themeDocs.map((d) => d.toJSON());
+89 
+90   return (
+91     <SheetContent side="right">
+92       <SheetHeader>
+93         <SheetTitle>{appName}</SheetTitle>
+94       </SheetHeader>
+95       <div className="flex flex-col gap-6 p-4">
+96         <div className="flex flex-col gap-2">
+97           <Label htmlFor="drawer-volume">
+98             {t('volume', { percent: Math.round(volume * 100) })}
+99           </Label>
+100           <Slider
+101             id="drawer-volume"
+102             min={0}
+103             max={1}
+104             step={0.05}
+105             value={[volume]}
+106             onValueChange={([v]) => {
+107               void update({ volume: v });
+108             }}
+109           />
+110         </div>
+111 
+112         <div className="flex flex-col gap-2">
+113           <Label htmlFor="drawer-speechRate">
+114             {t('speechRate', { rate: speechRate })}
+115           </Label>
+116           <Slider
+117             id="drawer-speechRate"
+118             min={0.5}
+119             max={2}
+120             step={0.1}
+121             value={[speechRate]}
+122             onValueChange={([v]) => {
+123               void update({ speechRate: v });
+124             }}
+125           />
+126         </div>
+127 
+128         {voices.length > 0 && (
+129           <div className="flex flex-col gap-2">
+130             <Label htmlFor="drawer-voice">{t('voice')}</Label>
+131             <Select
+132               value={preferredVoice}
+133               onValueChange={(v) =>
+134                 void update({ preferredVoiceURI: v })
+135               }
+136             >
+137               <SelectTrigger id="drawer-voice">
+138                 <SelectValue />
+139               </SelectTrigger>
+140               <SelectContent>
+141                 {voices.map((v) => (
+142                   <SelectItem key={v.name} value={v.name}>
+143                     {v.name}
+144                   </SelectItem>
+145                 ))}
+146               </SelectContent>
+147             </Select>
+148           </div>
+149         )}
+150 
+151         <div className="flex flex-col gap-2">
+152           <Label htmlFor="drawer-language">{t('language')}</Label>
+153           <Select
+154             value={locale}
+155             onValueChange={(v) => onLocaleChange(v as HeaderLocale)}
+156           >
+157             <SelectTrigger id="drawer-language">
+158               <SelectValue />
+159             </SelectTrigger>
+160             <SelectContent>
+161               {LOCALES.map(({ code, label }) => (
+162                 <SelectItem key={code} value={code}>
+163                   {label}
+164                 </SelectItem>
+165               ))}
+166             </SelectContent>
+167           </Select>
+168         </div>
+169 
+170         {themes.length > 0 && (
+171           <div className="flex flex-col gap-2">
+172             <Label htmlFor="drawer-theme">{t('theme')}</Label>
+173             <Select
+174               value={activeThemeId}
+175               onValueChange={(v) => void update({ themeId: v })}
+176             >
+177               <SelectTrigger id="drawer-theme">
+178                 <SelectValue />
+179               </SelectTrigger>
+180               <SelectContent>
+181                 {themes.map(({ id, name, isPreset }) => (
+182                   <SelectItem key={id} value={id}>
+183                     {isPreset
+184                       ? t(`themes.${id}`, { defaultValue: name })
+185                       : name}
+186                   </SelectItem>
+187                 ))}
+188               </SelectContent>
+189             </Select>
+190           </div>
+191         )}
+192       </div>
+193     </SheetContent>
+194   );
+195 };
+196 
+197 const FiltersDropdown = ({
+198   filtersLabel,
+199   subjectsAll,
+200 }: {
+201   filtersLabel: string;
+202   subjectsAll: string;
+203 }) => (
+204   <DropdownMenu>
+205     <DropdownMenuTrigger asChild>
+206       <Button variant="outline" size="sm" aria-label={filtersLabel}>
+207         <SlidersHorizontalIcon size={16} />
+208         <span className="hidden sm:inline">{filtersLabel}</span>
+209       </Button>
+210     </DropdownMenuTrigger>
+211     <DropdownMenuContent align="end" className="w-56">
+212       <div className="text-muted-foreground px-2 py-1.5 text-sm">
+213         {subjectsAll}
+214       </div>
+215     </DropdownMenuContent>
+216   </DropdownMenu>
+217 );
+218 
+219 const MenuSheetTrigger = () => (
+220   <SheetTrigger asChild>
+221     <Button variant="ghost" size="icon" aria-label="Menu">
+222       <MenuIcon size={20} />
+223     </Button>
+224   </SheetTrigger>
+225 );
+226 
+227 export const Header = () => {
+228   const { t } = useTranslation('common');
+229   const { locale } = useParams({ from: '/$locale' });
+230   const navigate = useNavigate();
+231   const location = useLocation();
+232   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+233     null,
+234   );
+235 
+236   // The search input is uncontrolled — it navigates to the home route on change.
+237   // It does not read the current search param (avoiding router hook complexity in a layout component).
+238   const handleSearchChange = (value: string) => {
+239     if (searchTimeout.current) clearTimeout(searchTimeout.current);
+240     searchTimeout.current = setTimeout(() => {
+241       void navigate({
+242         to: '/$locale',
+243         params: { locale },
+244         search: { search: value, level: '', subject: '', page: 1 },
+245       });
+246     }, 300);
+247   };
+248 
+249   const switchLocale = (newLocale: HeaderLocale) => {
+250     const newPath = location.pathname.replace(
+251       /^\/(en|pt-BR)/,
+252       `/${newLocale}`,
+253     );
+254     void navigate({ to: newPath });
+255   };
+256 
+257   return (
+258     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] backdrop-blur-lg">
+259       <div className="flex items-center gap-3 px-4 py-3">
+260         <Link
+261           to="/$locale"
+262           params={{ locale }}
+263           className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+264         >
+265           {t('appName')}
+266         </Link>
+267 
+268         <a
+269           href="/base-skill/docs/"
+270           className="flex-shrink-0 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+271           target="_blank"
+272           rel="noreferrer"
+273         >
+274           Docs
+275         </a>
+276 
+277         <div className="flex flex-1 items-center gap-2">
+278           <div className="relative flex-1">
+279             <SearchIcon
+280               size={16}
+281               className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+282             />
+283             <Input
+284               className="pl-9"
+285               placeholder={t('search.placeholder')}
+286               onChange={(e) => handleSearchChange(e.target.value)}
+287               aria-label={t('search.placeholder')}
+288             />
+289           </div>
+290 
+291           <FiltersDropdown
+292             filtersLabel={t('search.filters')}
+293             subjectsAll={t('subjects.all')}
+294           />
+295         </div>
+296 
+297         <ThemeToggle />
+298 
+299         <Sheet>
+300           <MenuSheetTrigger />
+301           <HeaderMenuPanel
+302             appName={t('appName')}
+303             locale={locale}
+304             onLocaleChange={switchLocale}
+305           />
+306         </Sheet>
+307       </div>
+308     </header>
+309   );
+310 };
 311
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:42Z)**_
@@ -2264,89 +2285,90 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:42Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/vite.config.ts`
 
 ```text
-1	import { createRequire } from 'node:module';
-2	
-3	import tailwindcss from '@tailwindcss/vite';
-4	import { devtools } from '@tanstack/devtools-vite';
-5	
-6	import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-7	
-8	import viteReact from '@vitejs/plugin-react';
-9	import { defineConfig } from 'vite';
-10	import { VitePWA } from 'vite-plugin-pwa';
-11	import tsconfigPaths from 'vite-tsconfig-paths';
-12	import { version } from './package.json';
-13	
-14	const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
-15	
-16	const require = createRequire(import.meta.url);
-17	const pragmaticElementAdapter =
-18	  require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
-19	
-20	const config = defineConfig({
-21	  base,
-22	  resolve: {
-23	    alias: {
-24	      '@atlaskit/pragmatic-drag-and-drop/element/adapter':
-25	        pragmaticElementAdapter,
-26	    },
-27	  },
-28	  define: {
-29	    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
-30	  },
-31	  plugins: [
-32	    devtools(),
-33	    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-34	    tailwindcss(),
-35	    tanstackStart({
-36	      spa: { enabled: true },
-37	      router: {
-38	        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
-39	        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
-40	      },
-41	    }),
-42	    viteReact(),
-43	    VitePWA({
-44	      registerType: 'autoUpdate',
-45	      strategies: 'generateSW',
-46	      injectRegister: 'auto',
-47	      workbox: {
-48	        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-49	        runtimeCaching: [
-50	          {
-51	            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-52	            handler: 'StaleWhileRevalidate',
-53	            options: {
-54	              cacheName: 'google-fonts-cache',
-55	              expiration: {
-56	                maxEntries: 10,
-57	                maxAgeSeconds: 60 * 60 * 24 * 365,
-58	              },
-59	              cacheableResponse: { statuses: [0, 200] },
-60	            },
-61	          },
-62	          {
-63	            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-64	            handler: 'CacheFirst',
-65	            options: {
-66	              cacheName: 'gstatic-fonts-cache',
-67	              expiration: {
-68	                maxEntries: 10,
-69	                maxAgeSeconds: 60 * 60 * 24 * 365,
-70	              },
-71	              cacheableResponse: { statuses: [0, 200] },
-72	            },
-73	          },
-74	        ],
-75	      },
-76	      manifest: false,
-77	    }),
-78	  ],
-79	});
-80	
-81	export default config;
+1 import { createRequire } from 'node:module';
+2 
+3 import tailwindcss from '@tailwindcss/vite';
+4 import { devtools } from '@tanstack/devtools-vite';
+5 
+6 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+7 
+8 import viteReact from '@vitejs/plugin-react';
+9 import { defineConfig } from 'vite';
+10 import { VitePWA } from 'vite-plugin-pwa';
+11 import tsconfigPaths from 'vite-tsconfig-paths';
+12 import { version } from './package.json';
+13 
+14 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
+15 
+16 const require = createRequire(import.meta.url);
+17 const pragmaticElementAdapter =
+18   require.resolve('@atlaskit/pragmatic-drag-and-drop/dist/esm/entry-point/element/adapter.js');
+19 
+20 const config = defineConfig({
+21   base,
+22   resolve: {
+23     alias: {
+24       '@atlaskit/pragmatic-drag-and-drop/element/adapter':
+25         pragmaticElementAdapter,
+26     },
+27   },
+28   define: {
+29     'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+30   },
+31   plugins: [
+32     devtools(),
+33     tsconfigPaths({ projects: ['./tsconfig.json'] }),
+34     tailwindcss(),
+35     tanstackStart({
+36       spa: { enabled: true },
+37       router: {
+38         // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
+39         routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
+40       },
+41     }),
+42     viteReact(),
+43     VitePWA({
+44       registerType: 'autoUpdate',
+45       strategies: 'generateSW',
+46       injectRegister: 'auto',
+47       workbox: {
+48         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+49         runtimeCaching: [
+50           {
+51             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+52             handler: 'StaleWhileRevalidate',
+53             options: {
+54               cacheName: 'google-fonts-cache',
+55               expiration: {
+56                 maxEntries: 10,
+57                 maxAgeSeconds: 60 * 60 * 24 * 365,
+58               },
+59               cacheableResponse: { statuses: [0, 200] },
+60             },
+61           },
+62           {
+63             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+64             handler: 'CacheFirst',
+65             options: {
+66               cacheName: 'gstatic-fonts-cache',
+67               expiration: {
+68                 maxEntries: 10,
+69                 maxAgeSeconds: 60 * 60 * 24 * 365,
+70               },
+71               cacheableResponse: { statuses: [0, 200] },
+72             },
+73           },
+74         ],
+75       },
+76       manifest: false,
+77     }),
+78   ],
+79 });
+80 
+81 export default config;
 82
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:45Z)**_
@@ -2366,22 +2388,23 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:46Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/routes/$locale/_app/parent/index.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const ParentHome = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Parent Settings</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Manage learner profiles and app configuration.
-8	    </p>
-9	  </div>
-10	);
-11	
-12	export const Route = createFileRoute('/$locale/_app/parent/')({
-13	  component: ParentHome,
-14	});
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const ParentHome = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Parent Settings</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Manage learner profiles and app configuration.
+8     </p>
+9   </div>
+10 );
+11 
+12 export const Route = createFileRoute('/$locale/_app/parent/')({
+13   component: ParentHome,
+14 });
 15
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:47Z)**_
@@ -2391,52 +2414,53 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:47Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/db/schemas/index.ts`
 
 ```text
-1	import { appMetaSchema } from './app-meta';
-2	import { gameConfigOverridesSchema } from './game_config_overrides';
-3	import { profilesSchema } from './profiles';
-4	import { progressSchema } from './progress';
-5	import { savedGameConfigsSchema } from './saved_game_configs';
-6	import { sessionHistorySchema } from './session_history';
-7	import { sessionHistoryIndexSchema } from './session_history_index';
-8	import { settingsSchema } from './settings';
-9	import { syncMetaSchema } from './sync_meta';
-10	import { themesSchema } from './themes';
-11	
-12	export { appMetaSchema } from './app-meta';
-13	export type { AppMetaDoc } from './app-meta';
-14	export { gameConfigOverridesSchema } from './game_config_overrides';
-15	export type { GameConfigOverridesDoc } from './game_config_overrides';
-16	export { profilesSchema } from './profiles';
-17	export type { ProfileDoc } from './profiles';
-18	export { progressSchema } from './progress';
-19	export type { ProgressDoc } from './progress';
-20	export { savedGameConfigsSchema } from './saved_game_configs';
-21	export type { SavedGameConfigDoc } from './saved_game_configs';
-22	export { sessionHistoryIndexSchema } from './session_history_index';
-23	export type { SessionHistoryIndexDoc } from './session_history_index';
-24	export { sessionHistorySchema } from './session_history';
-25	export type { SessionHistoryDoc } from './session_history';
-26	export { settingsSchema } from './settings';
-27	export type { SettingsDoc } from './settings';
-28	export { syncMetaSchema } from './sync_meta';
-29	export type { SyncMetaDoc } from './sync_meta';
-30	export { themesSchema } from './themes';
-31	export type { ThemeDoc } from './themes';
-32	
-33	export const MAX_SCHEMA_VERSION = Math.max(
-34	  appMetaSchema.version,
-35	  gameConfigOverridesSchema.version,
-36	  profilesSchema.version,
-37	  progressSchema.version,
-38	  savedGameConfigsSchema.version,
-39	  sessionHistoryIndexSchema.version,
-40	  sessionHistorySchema.version,
-41	  settingsSchema.version,
-42	  syncMetaSchema.version,
-43	  themesSchema.version,
-44	);
+1 import { appMetaSchema } from './app-meta';
+2 import { gameConfigOverridesSchema } from './game_config_overrides';
+3 import { profilesSchema } from './profiles';
+4 import { progressSchema } from './progress';
+5 import { savedGameConfigsSchema } from './saved_game_configs';
+6 import { sessionHistorySchema } from './session_history';
+7 import { sessionHistoryIndexSchema } from './session_history_index';
+8 import { settingsSchema } from './settings';
+9 import { syncMetaSchema } from './sync_meta';
+10 import { themesSchema } from './themes';
+11 
+12 export { appMetaSchema } from './app-meta';
+13 export type { AppMetaDoc } from './app-meta';
+14 export { gameConfigOverridesSchema } from './game_config_overrides';
+15 export type { GameConfigOverridesDoc } from './game_config_overrides';
+16 export { profilesSchema } from './profiles';
+17 export type { ProfileDoc } from './profiles';
+18 export { progressSchema } from './progress';
+19 export type { ProgressDoc } from './progress';
+20 export { savedGameConfigsSchema } from './saved_game_configs';
+21 export type { SavedGameConfigDoc } from './saved_game_configs';
+22 export { sessionHistoryIndexSchema } from './session_history_index';
+23 export type { SessionHistoryIndexDoc } from './session_history_index';
+24 export { sessionHistorySchema } from './session_history';
+25 export type { SessionHistoryDoc } from './session_history';
+26 export { settingsSchema } from './settings';
+27 export type { SettingsDoc } from './settings';
+28 export { syncMetaSchema } from './sync_meta';
+29 export type { SyncMetaDoc } from './sync_meta';
+30 export { themesSchema } from './themes';
+31 export type { ThemeDoc } from './themes';
+32 
+33 export const MAX_SCHEMA_VERSION = Math.max(
+34   appMetaSchema.version,
+35   gameConfigOverridesSchema.version,
+36   profilesSchema.version,
+37   progressSchema.version,
+38   savedGameConfigsSchema.version,
+39   sessionHistoryIndexSchema.version,
+40   sessionHistorySchema.version,
+41   settingsSchema.version,
+42   syncMetaSchema.version,
+43   themesSchema.version,
+44 );
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:46:49Z)**_
@@ -2446,130 +2470,131 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:46:49Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/db/create-database.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { addRxPlugin, createRxDatabase } from 'rxdb';
-3	import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
-4	import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-5	import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
-6	import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
-7	import { checkVersionAndMigrate } from './migrations';
-8	import {
-9	  appMetaSchema,
-10	  gameConfigOverridesSchema,
-11	  profilesSchema,
-12	  progressSchema,
-13	  savedGameConfigsSchema,
-14	  sessionHistoryIndexSchema,
-15	  sessionHistorySchema,
-16	  settingsSchema,
-17	  syncMetaSchema,
-18	  themesSchema,
-19	} from './schemas';
-20	import type { BaseSkillCollections, BaseSkillDatabase } from './types';
-21	import type { RxDatabase } from 'rxdb';
-22	
-23	addRxPlugin(RxDBMigrationSchemaPlugin);
-24	
-25	const DB_NAME = 'baseskill-data-test';
-26	const PRODUCTION_DB_NAME = 'baseskill-data';
-27	
-28	const COLLECTIONS = {
-29	  app_meta: { schema: appMetaSchema },
-30	  profiles: { schema: profilesSchema },
-31	  progress: { schema: progressSchema },
-32	  settings: { schema: settingsSchema },
-33	  game_config_overrides: { schema: gameConfigOverridesSchema },
-34	  saved_game_configs: {
-35	    schema: savedGameConfigsSchema,
-36	    migrationStrategies: {
-37	      1: (oldDoc: Record<string, unknown>) => ({
-38	        ...oldDoc,
-39	        color: 'indigo',
-40	      }),
-41	    },
-42	  },
-43	  themes: { schema: themesSchema },
-44	  session_history: { schema: sessionHistorySchema },
-45	  session_history_index: {
-46	    schema: sessionHistoryIndexSchema,
-47	    migrationStrategies: {
-48	      1: (oldDoc: Record<string, unknown>) => ({
-49	        ...oldDoc,
-50	        status: 'completed',
-51	        seed: '',
-52	        initialContent: { rounds: [] },
-53	        initialState: {},
-54	      }),
-55	    },
-56	  },
-57	  sync_meta: { schema: syncMetaSchema },
-58	} as const;
-59	
-60	async function addBaseSkillCollections(
-61	  db: RxDatabase<BaseSkillCollections>,
-62	): Promise<BaseSkillDatabase> {
-63	  await db.addCollections(COLLECTIONS);
-64	  return db as BaseSkillDatabase;
-65	}
-66	
-67	/** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
-68	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-69	  const db = await createRxDatabase<BaseSkillDatabase>({
-70	    name: `${DB_NAME}-${nanoid()}`,
-71	    storage: wrappedValidateAjvStorage({
-72	      storage: getRxStorageMemory(),
-73	    }),
-74	    multiInstance: false,
-75	  });
-76	  return addBaseSkillCollections(db);
-77	}
-78	
-79	const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
-80	
-81	/**
-82	 * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
-83	 * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
-84	 */
-85	export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
-86	  const db = await createRxDatabase<BaseSkillDatabase>({
-87	    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
-88	    storage: getRxStorageMemory(),
-89	    multiInstance: false,
-90	  });
-91	  const withCols = await addBaseSkillCollections(db);
-92	  await checkVersionAndMigrate(withCols);
-93	  return withCols;
-94	}
-95	
-96	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-97	
-98	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-99	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-100	  if (typeof indexedDB === 'undefined') {
-101	    throw new TypeError(
-102	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-103	    );
-104	  }
-105	  productionDbPromise ??= (async () => {
-106	    const db = await createRxDatabase<BaseSkillDatabase>({
-107	      name: PRODUCTION_DB_NAME,
-108	      storage: getRxStorageDexie(),
-109	      multiInstance: false,
-110	    });
-111	    const withCols = await addBaseSkillCollections(db);
-112	    await checkVersionAndMigrate(withCols);
-113	    return withCols;
-114	  })();
-115	  return productionDbPromise;
-116	}
-117	
-118	export async function destroyTestDatabase(
-119	  db?: BaseSkillDatabase,
-120	): Promise<void> {
-121	  if (db) await db.remove();
-122	}
+1 import { nanoid } from 'nanoid';
+2 import { addRxPlugin, createRxDatabase } from 'rxdb';
+3 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
+4 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+5 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+6 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+7 import { checkVersionAndMigrate } from './migrations';
+8 import {
+9   appMetaSchema,
+10   gameConfigOverridesSchema,
+11   profilesSchema,
+12   progressSchema,
+13   savedGameConfigsSchema,
+14   sessionHistoryIndexSchema,
+15   sessionHistorySchema,
+16   settingsSchema,
+17   syncMetaSchema,
+18   themesSchema,
+19 } from './schemas';
+20 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
+21 import type { RxDatabase } from 'rxdb';
+22 
+23 addRxPlugin(RxDBMigrationSchemaPlugin);
+24 
+25 const DB_NAME = 'baseskill-data-test';
+26 const PRODUCTION_DB_NAME = 'baseskill-data';
+27 
+28 const COLLECTIONS = {
+29   app_meta: { schema: appMetaSchema },
+30   profiles: { schema: profilesSchema },
+31   progress: { schema: progressSchema },
+32   settings: { schema: settingsSchema },
+33   game_config_overrides: { schema: gameConfigOverridesSchema },
+34   saved_game_configs: {
+35     schema: savedGameConfigsSchema,
+36     migrationStrategies: {
+37       1: (oldDoc: Record<string, unknown>) => ({
+38         ...oldDoc,
+39         color: 'indigo',
+40       }),
+41     },
+42   },
+43   themes: { schema: themesSchema },
+44   session_history: { schema: sessionHistorySchema },
+45   session_history_index: {
+46     schema: sessionHistoryIndexSchema,
+47     migrationStrategies: {
+48       1: (oldDoc: Record<string, unknown>) => ({
+49         ...oldDoc,
+50         status: 'completed',
+51         seed: '',
+52         initialContent: { rounds: [] },
+53         initialState: {},
+54       }),
+55     },
+56   },
+57   sync_meta: { schema: syncMetaSchema },
+58 } as const;
+59 
+60 async function addBaseSkillCollections(
+61   db: RxDatabase<BaseSkillCollections>,
+62 ): Promise<BaseSkillDatabase> {
+63   await db.addCollections(COLLECTIONS);
+64   return db as BaseSkillDatabase;
+65 }
+66 
+67 /** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
+68 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+69   const db = await createRxDatabase<BaseSkillDatabase>({
+70     name: `${DB_NAME}-${nanoid()}`,
+71     storage: wrappedValidateAjvStorage({
+72       storage: getRxStorageMemory(),
+73     }),
+74     multiInstance: false,
+75   });
+76   return addBaseSkillCollections(db);
+77 }
+78 
+79 const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+80 
+81 /**
+82  * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+83  * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+84  */
+85 export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+86   const db = await createRxDatabase<BaseSkillDatabase>({
+87     name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+88     storage: getRxStorageMemory(),
+89     multiInstance: false,
+90   });
+91   const withCols = await addBaseSkillCollections(db);
+92   await checkVersionAndMigrate(withCols);
+93   return withCols;
+94 }
+95 
+96 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+97 
+98 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+99 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+100   if (typeof indexedDB === 'undefined') {
+101     throw new TypeError(
+102       'getOrCreateDatabase is only available in a browser with IndexedDB',
+103     );
+104   }
+105   productionDbPromise ??= (async () => {
+106     const db = await createRxDatabase<BaseSkillDatabase>({
+107       name: PRODUCTION_DB_NAME,
+108       storage: getRxStorageDexie(),
+109       multiInstance: false,
+110     });
+111     const withCols = await addBaseSkillCollections(db);
+112     await checkVersionAndMigrate(withCols);
+113     return withCols;
+114   })();
+115   return productionDbPromise;
+116 }
+117 
+118 export async function destroyTestDatabase(
+119   db?: BaseSkillDatabase,
+120 ): Promise<void> {
+121   if (db) await db.remove();
+122 }
 123
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:07Z)**_
@@ -2578,10 +2603,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:07Z)**_
 Now I have enough context to write a thorough implementation plan. Let me organize the tasks based on the spec and codebase review.
 
 Key things I've noted:
+
 1. The spec is well-defined - three subsystems: session resume, service worker hardening, and version display
 2. The worktree already exists at `./worktrees/feat/service-worker-workbox-offline-setup`
 3. The schema migration pattern is clear from `create-database.ts` and the existing `saved_game_configs` and `session_history_index` migrations
-
 
 4. The `session_history_index` migration is already at version 1, but I need to update `findInProgressSession` to return both the move log and draft state, then wire that into the game route loader and `AnswerGameProvider`
 5. I should also verify that `workbox-window` is already in the dependencies before proceeding with the service worker implementation.
@@ -2609,6 +2634,7 @@ Check workbox-window and vite-plugin-pwa in package.json
     "vite-plugin-pwa": "^1.2.0",
     "workbox-window": "^7.4.0"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:08Z)**_
@@ -2618,104 +2644,105 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:08Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/AnswerGameProvider.test.tsx`
 
 ```text
-1	import { render, screen } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { describe, expect, it } from 'vitest';
-4	import { AnswerGameProvider } from './AnswerGameProvider';
-5	import { useTouchKeyboard } from './TouchKeyboardContext';
-6	import { useAnswerGameContext } from './useAnswerGameContext';
-7	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-8	import type { AnswerGameConfig } from './types';
-9	
-10	const gameConfig: AnswerGameConfig = {
-11	  gameId: 'test',
-12	  inputMethod: 'drag',
-13	  wrongTileBehavior: 'lock-auto-eject',
-14	  tileBankMode: 'exact',
-15	  totalRounds: 1,
-16	  ttsEnabled: true,
-17	};
-18	
-19	const StateReader = () => {
-20	  const state = useAnswerGameContext();
-21	  return <div data-testid="phase">{state.phase}</div>;
-22	};
-23	
-24	const Dispatcher = () => {
-25	  const dispatch = useAnswerGameDispatch();
-26	  return (
-27	    <button
-28	      type="button"
-29	      onClick={() => dispatch({ type: 'COMPLETE_GAME' })}
-30	    >
-31	      end
-32	    </button>
-33	  );
-34	};
-35	
-36	describe('AnswerGameProvider', () => {
-37	  it('provides initial state to children', () => {
-38	    render(
-39	      <AnswerGameProvider config={gameConfig}>
-40	        <StateReader />
-41	      </AnswerGameProvider>,
-42	    );
-43	    expect(screen.getByTestId('phase')).toHaveTextContent('playing');
-44	  });
-45	
-46	  it('dispatch updates state', async () => {
-47	    const user = userEvent.setup();
-48	    render(
-49	      <AnswerGameProvider config={gameConfig}>
-50	        <StateReader />
-51	        <Dispatcher />
-52	      </AnswerGameProvider>,
-53	    );
-54	    await user.click(screen.getByRole('button', { name: 'end' }));
-55	    expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
-56	  });
-57	
-58	  it('useAnswerGameContext throws outside provider', () => {
-59	    const consoleError = console.error;
-60	    console.error = () => {};
-61	    expect(() => render(<StateReader />)).toThrow(
-62	      'useAnswerGameContext must be used inside AnswerGameProvider',
-63	    );
-64	    console.error = consoleError;
-65	  });
-66	
-67	  it('useAnswerGameDispatch throws outside provider', () => {
-68	    const consoleError = console.error;
-69	    console.error = () => {};
-70	    expect(() => render(<Dispatcher />)).toThrow(
-71	      'useAnswerGameDispatch must be used inside AnswerGameProvider',
-72	    );
-73	    console.error = consoleError;
-74	  });
-75	
-76	  it('provides null TouchKeyboardContext on non-touch devices', () => {
-77	    const FocusReader = () => {
-78	      const focusKeyboard = useTouchKeyboard();
-79	      return (
-80	        <div data-testid="has-focus">
-81	          {focusKeyboard === null ? 'null' : 'fn'}
-82	        </div>
-83	      );
-84	    };
-85	
-86	    render(
-87	      <AnswerGameProvider
-88	        config={{ ...gameConfig, inputMethod: 'type' }}
-89	      >
-90	        <FocusReader />
-91	      </AnswerGameProvider>,
-92	    );
-93	
-94	    expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
-95	  });
-96	});
+1 import { render, screen } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { describe, expect, it } from 'vitest';
+4 import { AnswerGameProvider } from './AnswerGameProvider';
+5 import { useTouchKeyboard } from './TouchKeyboardContext';
+6 import { useAnswerGameContext } from './useAnswerGameContext';
+7 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+8 import type { AnswerGameConfig } from './types';
+9 
+10 const gameConfig: AnswerGameConfig = {
+11   gameId: 'test',
+12   inputMethod: 'drag',
+13   wrongTileBehavior: 'lock-auto-eject',
+14   tileBankMode: 'exact',
+15   totalRounds: 1,
+16   ttsEnabled: true,
+17 };
+18 
+19 const StateReader = () => {
+20   const state = useAnswerGameContext();
+21   return <div data-testid="phase">{state.phase}</div>;
+22 };
+23 
+24 const Dispatcher = () => {
+25   const dispatch = useAnswerGameDispatch();
+26   return (
+27     <button
+28       type="button"
+29       onClick={() => dispatch({ type: 'COMPLETE_GAME' })}
+30     >
+31       end
+32     </button>
+33   );
+34 };
+35 
+36 describe('AnswerGameProvider', () => {
+37   it('provides initial state to children', () => {
+38     render(
+39       <AnswerGameProvider config={gameConfig}>
+40         <StateReader />
+41       </AnswerGameProvider>,
+42     );
+43     expect(screen.getByTestId('phase')).toHaveTextContent('playing');
+44   });
+45 
+46   it('dispatch updates state', async () => {
+47     const user = userEvent.setup();
+48     render(
+49       <AnswerGameProvider config={gameConfig}>
+50         <StateReader />
+51         <Dispatcher />
+52       </AnswerGameProvider>,
+53     );
+54     await user.click(screen.getByRole('button', { name: 'end' }));
+55     expect(screen.getByTestId('phase')).toHaveTextContent('game-over');
+56   });
+57 
+58   it('useAnswerGameContext throws outside provider', () => {
+59     const consoleError = console.error;
+60     console.error = () => {};
+61     expect(() => render(<StateReader />)).toThrow(
+62       'useAnswerGameContext must be used inside AnswerGameProvider',
+63     );
+64     console.error = consoleError;
+65   });
+66 
+67   it('useAnswerGameDispatch throws outside provider', () => {
+68     const consoleError = console.error;
+69     console.error = () => {};
+70     expect(() => render(<Dispatcher />)).toThrow(
+71       'useAnswerGameDispatch must be used inside AnswerGameProvider',
+72     );
+73     console.error = consoleError;
+74   });
+75 
+76   it('provides null TouchKeyboardContext on non-touch devices', () => {
+77     const FocusReader = () => {
+78       const focusKeyboard = useTouchKeyboard();
+79       return (
+80         <div data-testid="has-focus">
+81           {focusKeyboard === null ? 'null' : 'fn'}
+82         </div>
+83       );
+84     };
+85 
+86     render(
+87       <AnswerGameProvider
+88         config={{ ...gameConfig, inputMethod: 'type' }}
+89       >
+90         <FocusReader />
+91       </AnswerGameProvider>,
+92     );
+93 
+94     expect(screen.getByTestId('has-focus')).toHaveTextContent('null');
+95   });
+96 });
 97
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:13Z)**_
@@ -2727,6 +2754,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:13Z)**_
 ```text
 Wasted call — file unchanged since your last Read. Refer to that earlier tool_result instead.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:13Z)**_
@@ -2755,6 +2783,7 @@ session-recorder.test.tsx
 session-recorder.ts
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:17Z)**_
@@ -2764,197 +2793,198 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:17Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/lib/game-engine/session-finder.test.ts`
 
 ```text
-1	// src/lib/game-engine/session-finder.test.ts
-2	import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-3	import { findInProgressSession } from './session-finder';
-4	import type { BaseSkillDatabase } from '@/db/types';
-5	import {
-6	  createTestDatabase,
-7	  destroyTestDatabase,
-8	} from '@/db/create-database';
-9	
-10	let db: BaseSkillDatabase;
-11	
-12	const baseIndex = {
-13	  sessionId: 'sess-finder-001',
-14	  profileId: 'prof-finder',
-15	  gameId: 'word-builder',
-16	  gradeBand: 'year1-2',
-17	  seed: 'seed-xyz',
-18	  initialContent: {
-19	    rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
-20	  },
-21	  initialState: {
-22	    phase: 'playing',
-23	    roundIndex: 0,
-24	    score: 0,
-25	    streak: 0,
-26	    retryCount: 0,
-27	  },
-28	};
-29	
-30	beforeEach(async () => {
-31	  db = await createTestDatabase();
-32	});
-33	
-34	afterEach(async () => {
-35	  await destroyTestDatabase(db);
-36	});
-37	
-38	describe('findInProgressSession', () => {
-39	  it('returns null when no in-progress session exists', async () => {
-40	    const result = await findInProgressSession(
-41	      'prof-finder',
-42	      'word-builder',
-43	      db,
-44	    );
-45	    expect(result).toBeNull();
-46	  });
-47	
-48	  it('returns null for a completed session', async () => {
-49	    await db.session_history_index.insert({
-50	      ...baseIndex,
-51	      startedAt: new Date().toISOString(),
-52	      status: 'completed',
-53	    });
-54	    const result = await findInProgressSession(
-55	      'prof-finder',
-56	      'word-builder',
-57	      db,
-58	    );
-59	    expect(result).toBeNull();
-60	  });
-61	
-62	  it('returns a hydrated MoveLog for an in-progress session with chunks', async () => {
-63	    const startedAt = new Date().toISOString();
-64	    await db.session_history_index.insert({
-65	      ...baseIndex,
-66	      startedAt,
-67	      status: 'in-progress',
-68	    });
-69	    await db.session_history.insert({
-70	      id: 'sess-finder-001-chunk-0',
-71	      sessionId: 'sess-finder-001',
-72	      profileId: 'prof-finder',
-73	      gameId: 'word-builder',
-74	      chunkIndex: 0,
-75	      events: [
-76	        {
-77	          timestamp: new Date().toISOString(),
-78	          action: 'SUBMIT_ANSWER',
-79	          payload: { answer: 'A' },
-80	          result: null,
-81	        },
-82	      ],
-83	      createdAt: startedAt,
-84	    });
-85	
-86	    const result = await findInProgressSession(
-87	      'prof-finder',
-88	      'word-builder',
-89	      db,
-90	    );
-91	
-92	    expect(result).not.toBeNull();
-93	    expect(result?.sessionId).toBe('sess-finder-001');
-94	    expect(result?.seed).toBe('seed-xyz');
-95	    expect(result?.moves).toHaveLength(1);
-96	    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
-97	    expect(result?.moves[0]?.args).toEqual({ answer: 'A' });
-98	  });
-99	
-100	  it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
-101	    const staleDate = new Date(
-102	      Date.now() - 25 * 60 * 60 * 1000,
-103	    ).toISOString();
-104	    await db.session_history_index.insert({
-105	      ...baseIndex,
-106	      sessionId: 'sess-stale',
-107	      startedAt: staleDate,
-108	      status: 'in-progress',
-109	    });
-110	
-111	    const result = await findInProgressSession(
-112	      'prof-finder',
-113	      'word-builder',
-114	      db,
-115	    );
-116	    expect(result).toBeNull();
-117	
-118	    const doc = await db.session_history_index
-119	      .findOne('sess-stale')
-120	      .exec();
-121	    expect(doc?.status).toBe('abandoned');
-122	  });
-123	
-124	  it('returns null for a different profileId', async () => {
-125	    await db.session_history_index.insert({
-126	      ...baseIndex,
-127	      startedAt: new Date().toISOString(),
-128	      status: 'in-progress',
-129	    });
-130	    const result = await findInProgressSession(
-131	      'other-prof',
-132	      'word-builder',
-133	      db,
-134	    );
-135	    expect(result).toBeNull();
-136	  });
-137	
-138	  it('merges events from multiple chunks in chunkIndex order', async () => {
-139	    const startedAt = new Date().toISOString();
-140	    await db.session_history_index.insert({
-141	      ...baseIndex,
-142	      sessionId: 'sess-chunks',
-143	      startedAt,
-144	      status: 'in-progress',
-145	    });
-146	    await db.session_history.bulkInsert([
-147	      {
-148	        id: 'sess-chunks-chunk-1',
-149	        sessionId: 'sess-chunks',
-150	        profileId: 'prof-finder',
-151	        gameId: 'word-builder',
-152	        chunkIndex: 1,
-153	        events: [
-154	          {
-155	            timestamp: new Date().toISOString(),
-156	            action: 'NEXT_ROUND',
-157	            payload: {},
-158	            result: null,
-159	          },
-160	        ],
-161	        createdAt: startedAt,
-162	      },
-163	      {
-164	        id: 'sess-chunks-chunk-0',
-165	        sessionId: 'sess-chunks',
-166	        profileId: 'prof-finder',
-167	        gameId: 'word-builder',
-168	        chunkIndex: 0,
-169	        events: [
-170	          {
-171	            timestamp: new Date().toISOString(),
-172	            action: 'SUBMIT_ANSWER',
-173	            payload: { answer: 'A' },
-174	            result: null,
-175	          },
-176	        ],
-177	        createdAt: startedAt,
-178	      },
-179	    ]);
-180	
-181	    const result = await findInProgressSession(
-182	      'prof-finder',
-183	      'word-builder',
-184	      db,
-185	    );
-186	    expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
-187	    expect(result?.moves[1]?.type).toBe('NEXT_ROUND');
-188	  });
-189	});
+1 // src/lib/game-engine/session-finder.test.ts
+2 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+3 import { findInProgressSession } from './session-finder';
+4 import type { BaseSkillDatabase } from '@/db/types';
+5 import {
+6   createTestDatabase,
+7   destroyTestDatabase,
+8 } from '@/db/create-database';
+9 
+10 let db: BaseSkillDatabase;
+11 
+12 const baseIndex = {
+13   sessionId: 'sess-finder-001',
+14   profileId: 'prof-finder',
+15   gameId: 'word-builder',
+16   gradeBand: 'year1-2',
+17   seed: 'seed-xyz',
+18   initialContent: {
+19     rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
+20   },
+21   initialState: {
+22     phase: 'playing',
+23     roundIndex: 0,
+24     score: 0,
+25     streak: 0,
+26     retryCount: 0,
+27   },
+28 };
+29 
+30 beforeEach(async () => {
+31   db = await createTestDatabase();
+32 });
+33 
+34 afterEach(async () => {
+35   await destroyTestDatabase(db);
+36 });
+37 
+38 describe('findInProgressSession', () => {
+39   it('returns null when no in-progress session exists', async () => {
+40     const result = await findInProgressSession(
+41       'prof-finder',
+42       'word-builder',
+43       db,
+44     );
+45     expect(result).toBeNull();
+46   });
+47 
+48   it('returns null for a completed session', async () => {
+49     await db.session_history_index.insert({
+50       ...baseIndex,
+51       startedAt: new Date().toISOString(),
+52       status: 'completed',
+53     });
+54     const result = await findInProgressSession(
+55       'prof-finder',
+56       'word-builder',
+57       db,
+58     );
+59     expect(result).toBeNull();
+60   });
+61 
+62   it('returns a hydrated MoveLog for an in-progress session with chunks', async () => {
+63     const startedAt = new Date().toISOString();
+64     await db.session_history_index.insert({
+65       ...baseIndex,
+66       startedAt,
+67       status: 'in-progress',
+68     });
+69     await db.session_history.insert({
+70       id: 'sess-finder-001-chunk-0',
+71       sessionId: 'sess-finder-001',
+72       profileId: 'prof-finder',
+73       gameId: 'word-builder',
+74       chunkIndex: 0,
+75       events: [
+76         {
+77           timestamp: new Date().toISOString(),
+78           action: 'SUBMIT_ANSWER',
+79           payload: { answer: 'A' },
+80           result: null,
+81         },
+82       ],
+83       createdAt: startedAt,
+84     });
+85 
+86     const result = await findInProgressSession(
+87       'prof-finder',
+88       'word-builder',
+89       db,
+90     );
+91 
+92     expect(result).not.toBeNull();
+93     expect(result?.sessionId).toBe('sess-finder-001');
+94     expect(result?.seed).toBe('seed-xyz');
+95     expect(result?.moves).toHaveLength(1);
+96     expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
+97     expect(result?.moves[0]?.args).toEqual({ answer: 'A' });
+98   });
+99 
+100   it('returns null and marks session abandoned if startedAt is older than 24h', async () => {
+101     const staleDate = new Date(
+102       Date.now() - 25 * 60 * 60 * 1000,
+103     ).toISOString();
+104     await db.session_history_index.insert({
+105       ...baseIndex,
+106       sessionId: 'sess-stale',
+107       startedAt: staleDate,
+108       status: 'in-progress',
+109     });
+110 
+111     const result = await findInProgressSession(
+112       'prof-finder',
+113       'word-builder',
+114       db,
+115     );
+116     expect(result).toBeNull();
+117 
+118     const doc = await db.session_history_index
+119       .findOne('sess-stale')
+120       .exec();
+121     expect(doc?.status).toBe('abandoned');
+122   });
+123 
+124   it('returns null for a different profileId', async () => {
+125     await db.session_history_index.insert({
+126       ...baseIndex,
+127       startedAt: new Date().toISOString(),
+128       status: 'in-progress',
+129     });
+130     const result = await findInProgressSession(
+131       'other-prof',
+132       'word-builder',
+133       db,
+134     );
+135     expect(result).toBeNull();
+136   });
+137 
+138   it('merges events from multiple chunks in chunkIndex order', async () => {
+139     const startedAt = new Date().toISOString();
+140     await db.session_history_index.insert({
+141       ...baseIndex,
+142       sessionId: 'sess-chunks',
+143       startedAt,
+144       status: 'in-progress',
+145     });
+146     await db.session_history.bulkInsert([
+147       {
+148         id: 'sess-chunks-chunk-1',
+149         sessionId: 'sess-chunks',
+150         profileId: 'prof-finder',
+151         gameId: 'word-builder',
+152         chunkIndex: 1,
+153         events: [
+154           {
+155             timestamp: new Date().toISOString(),
+156             action: 'NEXT_ROUND',
+157             payload: {},
+158             result: null,
+159           },
+160         ],
+161         createdAt: startedAt,
+162       },
+163       {
+164         id: 'sess-chunks-chunk-0',
+165         sessionId: 'sess-chunks',
+166         profileId: 'prof-finder',
+167         gameId: 'word-builder',
+168         chunkIndex: 0,
+169         events: [
+170           {
+171             timestamp: new Date().toISOString(),
+172             action: 'SUBMIT_ANSWER',
+173             payload: { answer: 'A' },
+174             result: null,
+175           },
+176         ],
+177         createdAt: startedAt,
+178       },
+179     ]);
+180 
+181     const result = await findInProgressSession(
+182       'prof-finder',
+183       'word-builder',
+184       db,
+185     );
+186     expect(result?.moves[0]?.type).toBe('SUBMIT_ANSWER');
+187     expect(result?.moves[1]?.type).toBe('NEXT_ROUND');
+188   });
+189 });
 190
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:36Z)**_
@@ -2971,7 +3001,6 @@ Now I have a comprehensive picture of the codebase. Let me write the implementat
 7. SW infrastructure: context + hook + provider
 8. `UpdateBanner` component
 9. Wire SW in root + app layout
-
 
 10. Version constants + Header
 11. Parent About section
@@ -3032,6 +3061,7 @@ Find all files using AnswerGameProvider
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.test.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/games/word-spell/OrderedLetterSlots/OrderedLetterSlots.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:37Z)**_
@@ -3047,6 +3077,7 @@ Find AnswerGame directory files
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/AnswerGame/AnswerGame.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:40Z)**_
@@ -3056,48 +3087,49 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:40Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:42Z)**_
@@ -3132,6 +3164,7 @@ Check WordSpell component structure
 247:    <AnswerGame config={answerGameConfig}>
 255:    </AnswerGame>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:44Z)**_
@@ -3147,6 +3180,7 @@ WordSpell.stories.tsx
 WordSpell.test.tsx
 WordSpell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:47:46Z)**_
@@ -3156,74 +3190,75 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:47:46Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-200	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-201	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-202	
-203	  const firstConfigIndex = roundOrder[0];
-204	  const round0 =
-205	    firstConfigIndex === undefined
-206	      ? undefined
-207	      : config.rounds[firstConfigIndex];
-208	  const roundWord = round0?.word.trim() ? round0.word : '';
-209	
-210	  const { tiles, zones } = useMemo(() => {
-211	    if (!roundWord)
-212	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-213	    return buildTilesAndZones(roundWord, config.tileUnit);
-214	  }, [roundWord, config.tileUnit]);
-215	
-216	  const answerGameConfig = useMemo(
-217	    (): AnswerGameConfig => ({
-218	      gameId: config.gameId,
-219	      inputMethod: config.inputMethod,
-220	      wrongTileBehavior: config.wrongTileBehavior,
-221	      tileBankMode: config.tileBankMode,
-222	      distractorCount: config.distractorCount,
-223	      totalRounds: config.rounds.length,
-224	      roundsInOrder: config.roundsInOrder,
-225	      ttsEnabled: config.ttsEnabled,
-226	      touchKeyboardInputMode: 'text',
-227	      initialTiles: tiles,
-228	      initialZones: zones,
-229	    }),
-230	    [
-231	      config.gameId,
-232	      config.inputMethod,
-233	      config.wrongTileBehavior,
-234	      config.tileBankMode,
-235	      config.distractorCount,
-236	      config.rounds.length,
-237	      config.roundsInOrder,
-238	      config.ttsEnabled,
-239	      tiles,
-240	      zones,
-241	    ],
-242	  );
-243	
-244	  if (!round0) return null;
-245	
-246	  return (
-247	    <AnswerGame config={answerGameConfig}>
-248	      <WordSpellSession
-249	        wordSpellConfig={config}
-250	        roundOrder={roundOrder}
-251	        onRestartSession={() => {
-252	          setSessionEpoch((e) => e + 1);
-253	        }}
-254	      />
-255	    </AnswerGame>
-256	  );
-257	};
+200     return buildRoundOrder(config.rounds.length, roundsInOrder);
+201   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+202 
+203   const firstConfigIndex = roundOrder[0];
+204   const round0 =
+205     firstConfigIndex === undefined
+206       ? undefined
+207       : config.rounds[firstConfigIndex];
+208   const roundWord = round0?.word.trim() ? round0.word : '';
+209 
+210   const { tiles, zones } = useMemo(() => {
+211     if (!roundWord)
+212       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+213     return buildTilesAndZones(roundWord, config.tileUnit);
+214   }, [roundWord, config.tileUnit]);
+215 
+216   const answerGameConfig = useMemo(
+217     (): AnswerGameConfig => ({
+218       gameId: config.gameId,
+219       inputMethod: config.inputMethod,
+220       wrongTileBehavior: config.wrongTileBehavior,
+221       tileBankMode: config.tileBankMode,
+222       distractorCount: config.distractorCount,
+223       totalRounds: config.rounds.length,
+224       roundsInOrder: config.roundsInOrder,
+225       ttsEnabled: config.ttsEnabled,
+226       touchKeyboardInputMode: 'text',
+227       initialTiles: tiles,
+228       initialZones: zones,
+229     }),
+230     [
+231       config.gameId,
+232       config.inputMethod,
+233       config.wrongTileBehavior,
+234       config.tileBankMode,
+235       config.distractorCount,
+236       config.rounds.length,
+237       config.roundsInOrder,
+238       config.ttsEnabled,
+239       tiles,
+240       zones,
+241     ],
+242   );
+243 
+244   if (!round0) return null;
+245 
+246   return (
+247     <AnswerGame config={answerGameConfig}>
+248       <WordSpellSession
+249         wordSpellConfig={config}
+250         roundOrder={roundOrder}
+251         onRestartSession={() => {
+252           setSessionEpoch((e) => e + 1);
+253         }}
+254       />
+255     </AnswerGame>
+256   );
+257 };
 258
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:48:10Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I understand the full architecture. The `WordSpell` component renders `<AnswerGame config={answerGameConfig}>` which internally renders `<AnswerGameProvider config={config}>`. So the `initialState` prop needs to flow from the game route through:
-- `WordSpellGameBody` → `<WordSpell draftState={draftState} ...>` → `<AnswerGame config={...} initialState={draftState}>` → `<AnswerGameProvider config={...} initialState={draftState}>`
 
+- `WordSpellGameBody` → `<WordSpell draftState={draftState} ...>` → `<AnswerGame config={...} initialState={draftState}>` → `<AnswerGameProvider config={...} initialState={draftState}>`
 
 - `AnswerGame.tsx` needs to accept and forward the `initialState` prop to `AnswerGameProvider`
 - Each game component (`WordSpell`, `NumberMatch`, `SortNumbers`) needs to accept `initialState` and pass it through to `<AnswerGame>`
@@ -3231,7 +3266,7 @@ Now I understand the full architecture. The `WordSpell` component renders `<Answ
 
 I should also check how `useAnswerGameDraftSync` integrates with this flow.
 
-Looking at the spec, `useAnswerGameDraftSync` is mounted inside `AnswerGameProvider` and needs `sessionId` and `db` as parameters. Since it's mounted unconditionally in the provider, I need to figure out how `AnswerGameProvider` gets access to those values—either as props or through context. ). But the spec doesn't mention adding `sessionId` or `db` props to `AnswerGameProvider` explicitly... 
+Looking at the spec, `useAnswerGameDraftSync` is mounted inside `AnswerGameProvider` and needs `sessionId` and `db` as parameters. Since it's mounted unconditionally in the provider, I need to figure out how `AnswerGameProvider` gets access to those values—either as props or through context. ). But the spec doesn't mention adding `sessionId` or `db` props to `AnswerGameProvider` explicitly...
 
 Wait, looking at the spec section 2.5:
 > `useAnswerGameDraftSync(state, sessionId, db)` is mounted unconditionally inside `AnswerGameProvider`.
@@ -3250,19 +3285,20 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:48:11Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/db/hooks/useRxDB.ts`
 
 ```text
-1	import { useContext } from 'react';
-2	import type { DbContextValue } from '@/providers/DbProvider';
-3	import { DbContext } from '@/providers/DbProvider';
-4	
-5	export function useRxDB(): DbContextValue {
-6	  const ctx = useContext(DbContext);
-7	  if (!ctx) {
-8	    throw new Error('useRxDB must be used within DbProvider');
-9	  }
-10	  return ctx;
-11	}
+1 import { useContext } from 'react';
+2 import type { DbContextValue } from '@/providers/DbProvider';
+3 import { DbContext } from '@/providers/DbProvider';
+4 
+5 export function useRxDB(): DbContextValue {
+6   const ctx = useContext(DbContext);
+7   if (!ctx) {
+8     throw new Error('useRxDB must be used within DbProvider');
+9   }
+10   return ctx;
+11 }
 12
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:48:29Z)**_
@@ -3270,11 +3306,12 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:48:29Z)**_
 <think><details><summary>Thought Process</summary>
 So `useRxDB()` gets the DB from `DbContext`. This hook is used inside components that are within a `DbProvider`. Since `AnswerGameProvider` is ultimately inside `_app.tsx` which is inside `DbProvider`, using `useRxDB()` would work.
 
-But for unit tests of `useAnswerGameDraftSync`, I should pass `db` explicitly. 
+But for unit tests of `useAnswerGameDraftSync`, I should pass `db` explicitly.
 
 Looking at how the spec describes it: `useAnswerGameDraftSync(state, sessionId, db)` - so `db` is a parameter. This means `AnswerGameProvider` needs to pass `db` to the hook.
- 
+
 For `AnswerGameProvider` to get `db`, it could either call `useRxDB()` internally or receive it as a prop. The simpler approach is having `AnswerGameProvider` use the hook directly, though that creates a dependency on being nested inside `DbProvider`. Given that the spec explicitly includes `db` as a parameter to `useAnswerGameDraftSync`, I should have `AnswerGameProvider` obtain the database and pass it through. Since `AnswerGameProvider` needs `sessionId` and `db` for the hook, and the spec lists `AnswerGameProvider` changes (section 2.5), but doesn't add these props explicitly... I think the intent is:
+
 - `sessionId` becomes a new prop on `AnswerGameProvider`
 - `db` is obtained via `useRxDB()` inside `AnswerGameProvider` (or passed as a prop)
 
@@ -3290,92 +3327,93 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:48:29Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/providers/DbProvider.tsx`
 
 ```text
-1	import {
-2	  createContext,
-3	  useCallback,
-4	  useEffect,
-5	  useMemo,
-6	  useState,
-7	} from 'react';
-8	import type { BaseSkillDatabase } from '@/db/types';
-9	import type { ReactNode } from 'react';
-10	import { getOrCreateDatabase } from '@/db';
-11	
-12	export type DbContextValue = {
-13	  db: BaseSkillDatabase | undefined;
-14	  error: Error | undefined;
-15	  isReady: boolean;
-16	};
-17	
-18	export const DbContext = createContext<DbContextValue | null>(null);
-19	
-20	type DbProviderProps = {
-21	  children: ReactNode;
-22	  /** Tests can inject a factory instead of opening IndexedDB */
-23	  openDatabase?: () => Promise<BaseSkillDatabase>;
-24	  /** Optional hook after DB is ready (e.g. theme seed) */
-25	  onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>;
-26	};
-27	
-28	export const DbProvider = ({
-29	  children,
-30	  openDatabase = getOrCreateDatabase,
-31	  onDatabaseReady,
-32	}: DbProviderProps) => {
-33	  const [db, setDb] = useState<BaseSkillDatabase | undefined>();
-34	  const [error, setError] = useState<Error | undefined>();
-35	  const [isReady, setIsReady] = useState(false);
-36	
-37	  const runReady = useCallback(
-38	    async (instance: BaseSkillDatabase) => {
-39	      if (onDatabaseReady) {
-40	        await onDatabaseReady(instance);
-41	      }
-42	    },
-43	    [onDatabaseReady],
-44	  );
-45	
-46	  useEffect(() => {
-47	    let cancelled = false;
-48	    openDatabase()
-49	      .then(async (instance) => {
-50	        if (cancelled) {
-51	          return;
-52	        }
-53	        setDb(instance);
-54	        await runReady(instance);
-55	        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- cleanup can run during await
-56	        if (cancelled) {
-57	          return;
-58	        }
-59	        setIsReady(true);
-60	      })
-61	      .catch((error_: unknown) => {
-62	        if (!cancelled) {
-63	          setError(
-64	            error_ instanceof Error
-65	              ? error_
-66	              : new Error(String(error_)),
-67	          );
-68	          setIsReady(true);
-69	        }
-70	      });
-71	    return () => {
-72	      cancelled = true;
-73	    };
-74	  }, [openDatabase, runReady]);
-75	
-76	  const value = useMemo(
-77	    () => ({ db, error, isReady }),
-78	    [db, error, isReady],
-79	  );
-80	
-81	  return (
-82	    <DbContext.Provider value={value}>{children}</DbContext.Provider>
-83	  );
-84	};
+1 import {
+2   createContext,
+3   useCallback,
+4   useEffect,
+5   useMemo,
+6   useState,
+7 } from 'react';
+8 import type { BaseSkillDatabase } from '@/db/types';
+9 import type { ReactNode } from 'react';
+10 import { getOrCreateDatabase } from '@/db';
+11 
+12 export type DbContextValue = {
+13   db: BaseSkillDatabase | undefined;
+14   error: Error | undefined;
+15   isReady: boolean;
+16 };
+17 
+18 export const DbContext = createContext<DbContextValue | null>(null);
+19 
+20 type DbProviderProps = {
+21   children: ReactNode;
+22   /** Tests can inject a factory instead of opening IndexedDB */
+23   openDatabase?: () => Promise<BaseSkillDatabase>;
+24   /** Optional hook after DB is ready (e.g. theme seed) */
+25   onDatabaseReady?: (db: BaseSkillDatabase) => void | Promise<void>;
+26 };
+27 
+28 export const DbProvider = ({
+29   children,
+30   openDatabase = getOrCreateDatabase,
+31   onDatabaseReady,
+32 }: DbProviderProps) => {
+33   const [db, setDb] = useState<BaseSkillDatabase | undefined>();
+34   const [error, setError] = useState<Error | undefined>();
+35   const [isReady, setIsReady] = useState(false);
+36 
+37   const runReady = useCallback(
+38     async (instance: BaseSkillDatabase) => {
+39       if (onDatabaseReady) {
+40         await onDatabaseReady(instance);
+41       }
+42     },
+43     [onDatabaseReady],
+44   );
+45 
+46   useEffect(() => {
+47     let cancelled = false;
+48     openDatabase()
+49       .then(async (instance) => {
+50         if (cancelled) {
+51           return;
+52         }
+53         setDb(instance);
+54         await runReady(instance);
+55         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- cleanup can run during await
+56         if (cancelled) {
+57           return;
+58         }
+59         setIsReady(true);
+60       })
+61       .catch((error_: unknown) => {
+62         if (!cancelled) {
+63           setError(
+64             error_ instanceof Error
+65               ? error_
+66               : new Error(String(error_)),
+67           );
+68           setIsReady(true);
+69         }
+70       });
+71     return () => {
+72       cancelled = true;
+73     };
+74   }, [openDatabase, runReady]);
+75 
+76   const value = useMemo(
+77     () => ({ db, error, isReady }),
+78     [db, error, isReady],
+79   );
+80 
+81   return (
+82     <DbContext.Provider value={value}>{children}</DbContext.Provider>
+83   );
+84 };
 85
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:50:21Z)**_
@@ -3384,10 +3422,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:50:21Z)**_
 Now I have a clear picture. `useRxDB` throws if not in context. `DbContextValue` has `db: BaseSkillDatabase | undefined`.
 
 The cleanest approach for `useAnswerGameDraftSync` that doesn't break existing tests:
+
 - Add an optional `sessionId?: string` prop to `AnswerGameProvider`
 - Have `AnswerGameProvider` use `useContext(DbContext)` directly (not `useRxDB`) to get `db | null` without throwing
 - Pass both `state`, `sessionId` (or null), and `db` (or null) to `useAnswerGameDraftSync`
-
 
 - The hook becomes a no-op when either `sessionId` or `db` is null, so existing tests don't need `DbProvider` and the hook silently does nothing
 
@@ -3418,6 +3456,7 @@ However in tests that insert documents directly (like in `session-finder.test.ts
 Actually, `additionalProperties: false` means the DOCUMENT can't have properties not in the schema. It doesn't mean all properties must be present - that's what `required` is for. So if `draftState` is not in `required`, documents without `draftState` are VALID (the property is simply absent). But RxDB might or might not handle this correctly.
 
 Looking at the existing schema:
+
 - `endedAt`, `duration`, `finalScore` are not in `required` - they're optional
 - So `draftState` being optional (not in required) should work fine
 
@@ -3467,6 +3506,7 @@ Check NumberMatch component
 209:    <AnswerGame config={answerGameConfig}>
 217:    </AnswerGame>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:50:22Z)**_
@@ -3496,6 +3536,7 @@ Check SortNumbers component
 189:    <AnswerGame config={answerGameConfig}>
 197:    </AnswerGame>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:50:26Z)**_
@@ -3512,6 +3553,7 @@ Check component export signatures
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/games/sort-numbers/SortNumbers/SortNumbers.tsx:22:interface SortNumbersProps {
 /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/src/games/sort-numbers/SortNumbers/SortNumbers.tsx:138:export const SortNumbers = ({ config }: SortNumbersProps) => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:50:26Z)**_
@@ -3521,63 +3563,64 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:50:26Z)**_
  `./worktrees/feat/service-worker-workbox-offline-setup/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-165	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-166	    }
-167	    return buildNumeralRound(roundValue, {
-168	      tileBankMode: config.tileBankMode,
-169	      distractorCount: config.distractorCount,
-170	      range: config.range,
-171	    });
-172	  }, [
-173	    roundValue,
-174	    config.tileBankMode,
-175	    config.distractorCount,
-176	    config.range,
-177	  ]);
-178	
-179	  const answerGameConfig = useMemo(
-180	    (): AnswerGameConfig => ({
-181	      gameId: config.gameId,
-182	      inputMethod: config.inputMethod,
-183	      wrongTileBehavior: config.wrongTileBehavior,
-184	      tileBankMode: config.tileBankMode,
-185	      distractorCount: config.distractorCount,
-186	      totalRounds: config.rounds.length,
-187	      roundsInOrder: config.roundsInOrder,
-188	      ttsEnabled: config.ttsEnabled,
-189	      initialTiles: tiles,
-190	      initialZones: zones,
-191	    }),
-192	    [
-193	      config.gameId,
-194	      config.inputMethod,
-195	      config.wrongTileBehavior,
-196	      config.tileBankMode,
-197	      config.distractorCount,
-198	      config.rounds.length,
-199	      config.roundsInOrder,
-200	      config.ttsEnabled,
-201	      tiles,
-202	      zones,
-203	    ],
-204	  );
-205	
-206	  if (!round0) return null;
-207	
-208	  return (
-209	    <AnswerGame config={answerGameConfig}>
-210	      <NumberMatchSession
-211	        numberMatchConfig={config}
-212	        roundOrder={roundOrder}
-213	        onRestartSession={() => {
-214	          setSessionEpoch((e) => e + 1);
-215	        }}
-216	      />
-217	    </AnswerGame>
-218	  );
-219	};
+165       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+166     }
+167     return buildNumeralRound(roundValue, {
+168       tileBankMode: config.tileBankMode,
+169       distractorCount: config.distractorCount,
+170       range: config.range,
+171     });
+172   }, [
+173     roundValue,
+174     config.tileBankMode,
+175     config.distractorCount,
+176     config.range,
+177   ]);
+178 
+179   const answerGameConfig = useMemo(
+180     (): AnswerGameConfig => ({
+181       gameId: config.gameId,
+182       inputMethod: config.inputMethod,
+183       wrongTileBehavior: config.wrongTileBehavior,
+184       tileBankMode: config.tileBankMode,
+185       distractorCount: config.distractorCount,
+186       totalRounds: config.rounds.length,
+187       roundsInOrder: config.roundsInOrder,
+188       ttsEnabled: config.ttsEnabled,
+189       initialTiles: tiles,
+190       initialZones: zones,
+191     }),
+192     [
+193       config.gameId,
+194       config.inputMethod,
+195       config.wrongTileBehavior,
+196       config.tileBankMode,
+197       config.distractorCount,
+198       config.rounds.length,
+199       config.roundsInOrder,
+200       config.ttsEnabled,
+201       tiles,
+202       zones,
+203     ],
+204   );
+205 
+206   if (!round0) return null;
+207 
+208   return (
+209     <AnswerGame config={answerGameConfig}>
+210       <NumberMatchSession
+211         numberMatchConfig={config}
+212         roundOrder={roundOrder}
+213         onRestartSession={() => {
+214           setSessionEpoch((e) => e + 1);
+215         }}
+216       />
+217     </AnswerGame>
+218   );
+219 };
 220
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:51:08Z)**_
@@ -3586,11 +3629,11 @@ _**Agent (claude-sonnet-4-6 2026-04-07 09:51:08Z)**_
 Good. I now have enough to write the complete plan. Let me compile everything I know and write the plan.
 
 Key architectural decisions for the plan:
+
 1. `AnswerGameDraftState` goes in `types.ts` as an exported interface
 2. `session_history_index` schema bumped to v2, `draftState` field added as `oneOf: [object, null]`
 3. Migration v2 in `create-database.ts` adds `draftState: null`
 4. `useAnswerGameDraftSync(state, sessionId, db)` - takes `sessionId: string | null` and `db: BaseSkillDatabase | null`, is a no-op when either is null
-
 
 5. `findInProgressSession` needs to return both the move log and any saved draft state
 6. `AnswerGameProvider` will accept optional session and initial state props, pulling the database from context without throwing if it's unavailable
@@ -3644,6 +3687,7 @@ Check if plans directory exists
 2026-04-06-touch-keyboard-type-mode.md
 2026-04-07-dark-mode-a11y-vr.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:56:55Z)**_
@@ -5910,6 +5954,7 @@ interrupting play.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat/service-worker-workbox-offline-setup/docs/superpowers/plans/2026-04-07-service-worker-workbox-offline-plan.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:57:01Z)**_
@@ -5927,6 +5972,7 @@ $ markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#d
 error Command failed with exit code 127.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:57:06Z)**_
@@ -5945,6 +5991,7 @@ Summary: 0 error(s)
 docs/superpowers/plans/2026-04-07-service-worker-workbox-offline-plan.md 142ms
 [This command modified 1 file you've previously read: docs/superpowers/plans/2026-04-07-service-worker-workbox-offline-plan.md. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:57:09Z)**_
@@ -5970,6 +6017,7 @@ Commit the plan file
  1 file changed, 2288 insertions(+)
  create mode 100644 docs/superpowers/plans/2026-04-07-service-worker-workbox-offline-plan.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 09:57:23Z)**_
@@ -6065,6 +6113,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:07:42Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user typed "md" which is very short. This could mean several things:
+
 1. They want to see the markdown of the prompt I just wrote
 2. They're asking about markdown
 3. It's an incomplete message

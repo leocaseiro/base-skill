@@ -196,7 +196,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:36:51Z)**_
@@ -220,6 +219,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:36:51Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:36:54Z)**_
@@ -353,6 +353,7 @@ node_modules/goober/global/package.json
 .worktrees/milestone-2-data-layer/node_modules/goober/should-forward-prop/package.json
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:02Z)**_
@@ -464,6 +465,7 @@ node_modules/eslint/node_modules/json-schema-traverse/spec/.eslintrc.yml
 .worktrees/milestone-1-scaffolding/node_modules/eslint/node_modules/json-schema-traverse/spec/.eslintrc.yml
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:15Z)**_
@@ -496,6 +498,7 @@ vite.config.ts
 vitest.config.ts
 yarn.lock
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
@@ -505,90 +508,91 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
  `./package.json`
 
 ```text
-1	{
-2	  "name": "base-skill",
-3	  "version": "0.1.0",
-4	  "private": true,
-5	  "type": "module",
-6	  "imports": {
-7	    "#/*": "./src/*"
-8	  },
-9	  "scripts": {
-10	    "start": "yarn dev",
-11	    "dev": "vite dev --port 3000",
-12	    "build": "vite build",
-13	    "preview": "vite preview",
-14	    "test": "vitest run",
-15	    "test:coverage": "vitest run --coverage",
-16	    "test:e2e": "playwright test",
-17	    "test:e2e:a11y": "playwright test --grep @a11y",
-18	    "typecheck": "tsc --noEmit",
-19	    "lint": "eslint . --max-warnings 0",
-20	    "format": "prettier --check .",
-21	    "fix": "prettier --write . && eslint --fix",
-22	    "prepare": "husky"
-23	  },
-24	  "dependencies": {
-25	    "@fontsource-variable/geist": "^5.2.8",
-26	    "@tailwindcss/vite": "^4.1.18",
-27	    "@tanstack/react-devtools": "latest",
-28	    "@tanstack/react-router": "latest",
-29	    "@tanstack/react-router-devtools": "latest",
-30	    "@tanstack/react-router-ssr-query": "latest",
-31	    "@tanstack/react-start": "latest",
-32	    "@tanstack/router-plugin": "^1.132.0",
-33	    "class-variance-authority": "^0.7.1",
-34	    "clsx": "^2.1.1",
-35	    "dexie": "^4.4.2",
-36	    "i18next": "^26.0.3",
-37	    "lucide-react": "^0.545.0",
-38	    "nanoid": "^5.1.7",
-39	    "next-themes": "^0.4.6",
-40	    "radix-ui": "^1.4.3",
-41	    "react": "^19.2.0",
-42	    "react-dom": "^19.2.0",
-43	    "react-i18next": "^17.0.2",
-44	    "rxdb": "^17.0.0",
-45	    "rxjs": "^7.8.2",
-46	    "shadcn": "^4.1.1",
-47	    "sonner": "^2.0.7",
-48	    "tailwind-merge": "^3.5.0",
-49	    "tailwindcss": "^4.1.18",
-50	    "tw-animate-css": "^1.4.0"
-51	  },
-52	  "devDependencies": {
-53	    "@axe-core/playwright": "^4.11.1",
-54	    "@playwright/test": "^1.58.2",
-55	    "@tailwindcss/typography": "^0.5.16",
-56	    "@tanstack/devtools-vite": "latest",
-57	    "@tanstack/eslint-config": "latest",
-58	    "@testing-library/dom": "^10.4.1",
-59	    "@testing-library/jest-dom": "^6.9.1",
-60	    "@testing-library/react": "^16.3.0",
-61	    "@types/node": "^22.10.2",
-62	    "@types/react": "^19.2.0",
-63	    "@types/react-dom": "^19.2.0",
-64	    "@vitejs/plugin-react": "^5.1.4",
-65	    "@vitest/coverage-v8": "3.2.4",
-66	    "eslint": "^10.1.0",
-67	    "fake-indexeddb": "^6.2.5",
-68	    "husky": "^9.1.7",
-69	    "jsdom": "^28.1.0",
-70	    "prettier": "^3.8.1",
-71	    "typescript": "^5.7.2",
-72	    "vite": "^7.3.1",
-73	    "vite-plugin-pwa": "^1.2.0",
-74	    "vite-tsconfig-paths": "^5.1.4",
-75	    "vitest": "^3.0.5",
-76	    "workbox-build": "^7.4.0",
-77	    "workbox-window": "^7.4.0"
-78	  },
-79	  "engines": {
-80	    "node": ">=22.12.0"
-81	  }
-82	}
+1 {
+2   "name": "base-skill",
+3   "version": "0.1.0",
+4   "private": true,
+5   "type": "module",
+6   "imports": {
+7     "#/*": "./src/*"
+8   },
+9   "scripts": {
+10     "start": "yarn dev",
+11     "dev": "vite dev --port 3000",
+12     "build": "vite build",
+13     "preview": "vite preview",
+14     "test": "vitest run",
+15     "test:coverage": "vitest run --coverage",
+16     "test:e2e": "playwright test",
+17     "test:e2e:a11y": "playwright test --grep @a11y",
+18     "typecheck": "tsc --noEmit",
+19     "lint": "eslint . --max-warnings 0",
+20     "format": "prettier --check .",
+21     "fix": "prettier --write . && eslint --fix",
+22     "prepare": "husky"
+23   },
+24   "dependencies": {
+25     "@fontsource-variable/geist": "^5.2.8",
+26     "@tailwindcss/vite": "^4.1.18",
+27     "@tanstack/react-devtools": "latest",
+28     "@tanstack/react-router": "latest",
+29     "@tanstack/react-router-devtools": "latest",
+30     "@tanstack/react-router-ssr-query": "latest",
+31     "@tanstack/react-start": "latest",
+32     "@tanstack/router-plugin": "^1.132.0",
+33     "class-variance-authority": "^0.7.1",
+34     "clsx": "^2.1.1",
+35     "dexie": "^4.4.2",
+36     "i18next": "^26.0.3",
+37     "lucide-react": "^0.545.0",
+38     "nanoid": "^5.1.7",
+39     "next-themes": "^0.4.6",
+40     "radix-ui": "^1.4.3",
+41     "react": "^19.2.0",
+42     "react-dom": "^19.2.0",
+43     "react-i18next": "^17.0.2",
+44     "rxdb": "^17.0.0",
+45     "rxjs": "^7.8.2",
+46     "shadcn": "^4.1.1",
+47     "sonner": "^2.0.7",
+48     "tailwind-merge": "^3.5.0",
+49     "tailwindcss": "^4.1.18",
+50     "tw-animate-css": "^1.4.0"
+51   },
+52   "devDependencies": {
+53     "@axe-core/playwright": "^4.11.1",
+54     "@playwright/test": "^1.58.2",
+55     "@tailwindcss/typography": "^0.5.16",
+56     "@tanstack/devtools-vite": "latest",
+57     "@tanstack/eslint-config": "latest",
+58     "@testing-library/dom": "^10.4.1",
+59     "@testing-library/jest-dom": "^6.9.1",
+60     "@testing-library/react": "^16.3.0",
+61     "@types/node": "^22.10.2",
+62     "@types/react": "^19.2.0",
+63     "@types/react-dom": "^19.2.0",
+64     "@vitejs/plugin-react": "^5.1.4",
+65     "@vitest/coverage-v8": "3.2.4",
+66     "eslint": "^10.1.0",
+67     "fake-indexeddb": "^6.2.5",
+68     "husky": "^9.1.7",
+69     "jsdom": "^28.1.0",
+70     "prettier": "^3.8.1",
+71     "typescript": "^5.7.2",
+72     "vite": "^7.3.1",
+73     "vite-plugin-pwa": "^1.2.0",
+74     "vite-tsconfig-paths": "^5.1.4",
+75     "vitest": "^3.0.5",
+76     "workbox-build": "^7.4.0",
+77     "workbox-window": "^7.4.0"
+78   },
+79   "engines": {
+80     "node": ">=22.12.0"
+81   }
+82 }
 83
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
@@ -598,30 +602,31 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
  `./eslint.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	import { tanstackConfig } from '@tanstack/eslint-config'
-4	
-5	export default [
-6	  ...tanstackConfig,
-7	  {
-8	    rules: {
-9	      'import/no-cycle': 'off',
-10	      'import/order': 'off',
-11	      'sort-imports': 'off',
-12	      '@typescript-eslint/array-type': 'off',
-13	      '@typescript-eslint/require-await': 'off',
-14	      'pnpm/json-enforce-catalog': 'off',
-15	      '@typescript-eslint/no-explicit-any': 'error',
-16	      '@typescript-eslint/no-unsafe-assignment': 'error',
-17	    },
-18	  },
-19	  {
-20	    ignores: ['eslint.config.js', 'prettier.config.js'],
-21	  },
-22	]
+1 //  @ts-check
+2 
+3 import { tanstackConfig } from '@tanstack/eslint-config'
+4 
+5 export default [
+6   ...tanstackConfig,
+7   {
+8     rules: {
+9       'import/no-cycle': 'off',
+10       'import/order': 'off',
+11       'sort-imports': 'off',
+12       '@typescript-eslint/array-type': 'off',
+13       '@typescript-eslint/require-await': 'off',
+14       'pnpm/json-enforce-catalog': 'off',
+15       '@typescript-eslint/no-explicit-any': 'error',
+16       '@typescript-eslint/no-unsafe-assignment': 'error',
+17     },
+18   },
+19   {
+20     ignores: ['eslint.config.js', 'prettier.config.js'],
+21   },
+22 ]
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
@@ -631,18 +636,19 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:18Z)**_
  `./prettier.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	/** @type {import('prettier').Config} */
-4	const config = {
-5	  semi: false,
-6	  singleQuote: true,
-7	  trailingComma: 'all',
-8	}
-9	
-10	export default config
+1 //  @ts-check
+2 
+3 /** @type {import('prettier').Config} */
+4 const config = {
+5   semi: false,
+6   singleQuote: true,
+7   trailingComma: 'all',
+8 }
+9 
+10 export default config
 11
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:21Z)**_
@@ -671,6 +677,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:21Z)**_
 .husky/_/pre-auto-gc
 .husky/_/husky.sh
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:22Z)**_
@@ -685,6 +692,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:22Z)**_
 .github/workflows/visual-regression.yml
 .github/workflows/deploy.yml
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:24Z)**_
@@ -694,10 +702,11 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:24Z)**_
  `./.husky/pre-commit`
 
 ```text
-1	yarn fix
-2	yarn test
+1 yarn fix
+2 yarn test
 3
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:25Z)**_
@@ -707,107 +716,108 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:25Z)**_
  `./.github/workflows/ci.yml`
 
 ```text
-1	# .github/workflows/ci.yml
-2	name: CI
-3	
-4	on:
-5	  push:
-6	    branches: ['**']
-7	  pull_request:
-8	    branches: [master]
-9	
-10	concurrency:
-11	  group: ci-${{ github.ref }}
-12	  cancel-in-progress: true
-13	
-14	jobs:
-15	  lint:
-16	    name: Lint
-17	    runs-on: ubuntu-latest
-18	    steps:
-19	      - uses: actions/checkout@v4
-20	
-21	      - uses: actions/setup-node@v4
-22	        with:
-23	          node-version-file: '.nvmrc'
-24	          cache: yarn
-25	
-26	      - name: Install dependencies
-27	        run: yarn install --frozen-lockfile
-28	
-29	      - name: ESLint
-30	        run: npx eslint . --max-warnings 0
-31	
-32	      - name: Prettier
-33	        run: npx prettier --check .
-34	
-35	  typecheck:
-36	    name: Type Check
-37	    runs-on: ubuntu-latest
-38	    steps:
-39	      - uses: actions/checkout@v4
-40	
-41	      - uses: actions/setup-node@v4
-42	        with:
-43	          node-version-file: '.nvmrc'
-44	          cache: yarn
-45	
-46	      - name: Install dependencies
-47	        run: yarn install --frozen-lockfile
-48	
-49	      - name: TypeScript
-50	        run: npx tsc --noEmit
-51	
-52	  unit-test:
-53	    name: Unit Tests
-54	    runs-on: ubuntu-latest
-55	    steps:
-56	      - uses: actions/checkout@v4
-57	
-58	      - uses: actions/setup-node@v4
-59	        with:
-60	          node-version-file: '.nvmrc'
-61	          cache: yarn
-62	
-63	      - name: Install dependencies
-64	        run: yarn install --frozen-lockfile
-65	
-66	      - name: Vitest with coverage
-67	        run: npx vitest run --coverage
-68	
-69	      - name: Upload coverage report
-70	        if: always()
-71	        uses: actions/upload-artifact@v4
-72	        with:
-73	          name: coverage-report
-74	          path: coverage/
-75	          retention-days: 7
-76	
-77	  build:
-78	    name: Build
-79	    runs-on: ubuntu-latest
-80	    steps:
-81	      - uses: actions/checkout@v4
-82	
-83	      - uses: actions/setup-node@v4
-84	        with:
-85	          node-version-file: '.nvmrc'
-86	          cache: yarn
-87	
-88	      - name: Install dependencies
-89	        run: yarn install --frozen-lockfile
-90	
-91	      - name: Build
-92	        run: yarn build
-93	
-94	      - name: Upload build artifact
-95	        uses: actions/upload-artifact@v4
-96	        with:
-97	          name: dist-ci
-98	          path: dist/
-99	          retention-days: 1
+1 # .github/workflows/ci.yml
+2 name: CI
+3 
+4 on:
+5   push:
+6     branches: ['**']
+7   pull_request:
+8     branches: [master]
+9 
+10 concurrency:
+11   group: ci-${{ github.ref }}
+12   cancel-in-progress: true
+13 
+14 jobs:
+15   lint:
+16     name: Lint
+17     runs-on: ubuntu-latest
+18     steps:
+19       - uses: actions/checkout@v4
+20 
+21       - uses: actions/setup-node@v4
+22         with:
+23           node-version-file: '.nvmrc'
+24           cache: yarn
+25 
+26       - name: Install dependencies
+27         run: yarn install --frozen-lockfile
+28 
+29       - name: ESLint
+30         run: npx eslint . --max-warnings 0
+31 
+32       - name: Prettier
+33         run: npx prettier --check .
+34 
+35   typecheck:
+36     name: Type Check
+37     runs-on: ubuntu-latest
+38     steps:
+39       - uses: actions/checkout@v4
+40 
+41       - uses: actions/setup-node@v4
+42         with:
+43           node-version-file: '.nvmrc'
+44           cache: yarn
+45 
+46       - name: Install dependencies
+47         run: yarn install --frozen-lockfile
+48 
+49       - name: TypeScript
+50         run: npx tsc --noEmit
+51 
+52   unit-test:
+53     name: Unit Tests
+54     runs-on: ubuntu-latest
+55     steps:
+56       - uses: actions/checkout@v4
+57 
+58       - uses: actions/setup-node@v4
+59         with:
+60           node-version-file: '.nvmrc'
+61           cache: yarn
+62 
+63       - name: Install dependencies
+64         run: yarn install --frozen-lockfile
+65 
+66       - name: Vitest with coverage
+67         run: npx vitest run --coverage
+68 
+69       - name: Upload coverage report
+70         if: always()
+71         uses: actions/upload-artifact@v4
+72         with:
+73           name: coverage-report
+74           path: coverage/
+75           retention-days: 7
+76 
+77   build:
+78     name: Build
+79     runs-on: ubuntu-latest
+80     steps:
+81       - uses: actions/checkout@v4
+82 
+83       - uses: actions/setup-node@v4
+84         with:
+85           node-version-file: '.nvmrc'
+86           cache: yarn
+87 
+88       - name: Install dependencies
+89         run: yarn install --frozen-lockfile
+90 
+91       - name: Build
+92         run: yarn build
+93 
+94       - name: Upload build artifact
+95         uses: actions/upload-artifact@v4
+96         with:
+97           name: dist-ci
+98           path: dist/
+99           retention-days: 1
 100
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:41Z)**_
@@ -816,10 +826,10 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:41Z)**_
 Now I have a good understanding of the project. Let me summarize what I found:
 
 **Current linting setup:**
+
 - **ESLint**: `eslint.config.js` using `@tanstack/eslint-config` - covers TypeScript, React
 - **Prettier**: `prettier.config.js` - covers formatting for JS/TS/JSON/CSS/Markdown (Prettier covers all these)
 - **Husky**: pre-commit hook running `yarn fix` (prettier --write + eslint --fix) and `yarn test`
-
 
 - **CI**: `.github/workflows/ci.yml` runs ESLint and Prettier checks
 
@@ -837,6 +847,7 @@ Check for .nvmrc file
 ```text
 -rw-r--r--@ 1 leocaseiro  staff  3 Mar 31 22:53 /Users/leocaseiro/Sites/base-skill/.nvmrc
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:41Z)**_
@@ -850,6 +861,7 @@ Check for .prettierignore in root
 ```text
 -rw-r--r--@ 1 leocaseiro  staff  148 Apr  1 12:59 /Users/leocaseiro/Sites/base-skill/.prettierignore
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:44Z)**_
@@ -859,17 +871,18 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:37:44Z)**_
  `./.prettierignore`
 
 ```text
-1	package-lock.json
-2	pnpm-lock.yaml
-3	yarn.lock
-4	
-5	# Cursor session exports — formatting churn should not block CI
-6	.specstory/
-7	.cursor/
-8	.husky/
-9	.vscode/
+1 package-lock.json
+2 pnpm-lock.yaml
+3 yarn.lock
+4 
+5 # Cursor session exports — formatting churn should not block CI
+6 .specstory/
+7 .cursor/
+8 .husky/
+9 .vscode/
 10
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:45Z)**_
@@ -894,6 +907,7 @@ test-setup.ts
 types
 vite-env.d.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:48Z)**_
@@ -932,6 +946,7 @@ Check CSS file content
   --palm: #2f6a4a;
   --sand: #e7f0e8;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:37:49Z)**_
@@ -945,6 +960,7 @@ Check for lint-staged, markdownlint, stylelint in package.json
 ```text
 none
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:38:08Z)**_
@@ -953,19 +969,21 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:38:08Z)**_
 Now I have a complete picture. Here's the summary:
 
 **What's already in place:**
+
 - ESLint with `@tanstack/eslint-config` (covers TS, React, JSX)
 - Prettier (covers TS, JS, JSON, CSS, Markdown formatting)
 - Husky pre-commit running `yarn fix` (prettier write + eslint fix) + `yarn test`
 - CI: ESLint, Prettier, TypeScript typecheck, unit tests, build
 
 **What's MISSING:**
-1. **`lint-staged`** - Critical! Pre-commit runs `yarn fix` on the entire codebase, not just staged files. 
+
+1. **`lint-staged`** - Critical! Pre-commit runs `yarn fix` on the entire codebase, not just staged files.
 
 With lint-staged, I'd only target staged files, making the pre-commit hook much faster and less disruptive to the workflow.
 
-2. **`markdownlint`** - Prettier handles formatting but doesn't validate markdown structure like heading hierarchy, link syntax, or list formatting rules.
+1. **`markdownlint`** - Prettier handles formatting but doesn't validate markdown structure like heading hierarchy, link syntax, or list formatting rules.
 
-3. **`stylelint`** - Prettier formats CSS but doesn't enforce CSS-specific rules around invalid properties or Tailwind conventions, which could be useful given their Tailwind v4 setup.
+2. **`stylelint`** - Prettier formats CSS but doesn't enforce CSS-specific rules around invalid properties or Tailwind conventions, which could be useful given their Tailwind v4 setup.
 
 Both markdownlint and stylelint are also missing from the CI pipeline, leaving those validation gaps in automated checks.
 
@@ -995,12 +1013,14 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:38:16Z)**_
 Here's what I found in the project:
 
 **Already in place:**
+
 - ESLint (`@tanstack/eslint-config`) — covers TS, React, JSX
 - Prettier — formats TS, JS, JSON, CSS, Markdown
 - Husky pre-commit: runs `yarn fix` (prettier write + eslint fix) on **all files** + `yarn test`
 - CI: ESLint, Prettier check, TypeScript typecheck, unit tests, build
 
 **Gaps I can see:**
+
 - No `lint-staged` — pre-commit runs `yarn fix` on the entire codebase, not just staged files (slow, can introduce noisy diffs)
 - No `markdownlint` — Prettier only formats Markdown, doesn't lint it (heading structure, broken links, consistent list style, etc.)
 - No `stylelint` — Prettier only formats CSS, doesn't lint it (invalid properties, ordering, Tailwind-specific rules)
@@ -1027,6 +1047,7 @@ Good. The user confirms they want stylelint too. Now I have enough info to propo
 Let me move on to proposing 2-3 approaches.
 
 **Summary of what's needed:**
+
 1. `lint-staged` - run linters only on staged files (fast pre-commit)
 2. `markdownlint-cli2` - markdown linting
 3. `stylelint` - CSS linting (with Tailwind v4 support)
@@ -1034,7 +1055,6 @@ Let me move on to proposing 2-3 approaches.
 5. Update pre-commit to use lint-staged
 
 **Approach A (Recommended): lint-staged + markdownlint-cli2 + stylelint**
-
 
 I'd replace the current `yarn fix` pre-commit hook with lint-staged, which runs targeted fixers only on staged files for speed. This means adding markdownlint-cli2 with auto-fix for markdown files and stylelint with the standard config plus Tailwind plugin for CSS, then including both in the CI lint job.
 
@@ -1072,6 +1092,7 @@ Good — both confirmed. Here are 3 approaches:
 **Approach A (Recommended): lint-staged + markdownlint-cli2 + stylelint**
 
 Replace the current `yarn fix` pre-commit hook with `lint-staged`, which runs fixers only on staged files. Each file type gets its own fixer:
+
 - `.ts/.tsx` → `eslint --fix` + `prettier --write`
 - `.css` → `stylelint --fix` + `prettier --write`
 - `.md` → `markdownlint-cli2 --fix`
@@ -1188,7 +1209,7 @@ The user is asking whether lint-staged uses Prettier. Yes, it does - lint-staged
 
 But actually, the user might be asking whether there's a risk of running Prettier twice (once via ESLint's prettier plugin, and once directly). Let me think about this...
 
-Looking at the ESLint config, it uses `@tanstack/eslint-config` which likely includes `eslint-config-prettier` to disable formatting rules, but may or may not include `eslint-plugin-prettier`. 
+Looking at the ESLint config, it uses `@tanstack/eslint-config` which likely includes `eslint-config-prettier` to disable formatting rules, but may or may not include `eslint-plugin-prettier`.
 
 If it does include the plugin, running both ESLint and Prettier would be redundant but harmless. The modern best practice is to keep them separate - ESLint for code quality, Prettier for formatting - and avoid the plugin since it adds unnecessary overhead. In lint-staged, you'd typically run Prettier on your staged files regardless of whether ESLint runs first, and that's the standard approach. The real question might be whether lint-staged automatically includes Prettier or requires explicit configuration, and the answer is you have to set it up yourself, which is what I demonstrated.
 
@@ -1200,6 +1221,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:41:41Z)**_
 Yes — lint-staged doesn't auto-include Prettier, you configure it explicitly. That's what the `prettier --write` entries in the config do.
 
 For `*.{ts,tsx}` we run both because they do different things:
+
 - `eslint --fix` — fixes logic/import/React rule violations
 - `prettier --write` — fixes formatting (spacing, quotes, trailing commas)
 
@@ -1223,6 +1245,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:42:08Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants to proceed. But I need to follow the brainstorming skill flow - I need to:
+
 1. Present the full design and get approval for all sections
 2. Write the design doc
 3. Spec self-review
@@ -1230,7 +1253,6 @@ The user wants to proceed. But I need to follow the brainstorming skill flow - I
 5. Transition to writing-plans skill
 
 Wait, actually the user said "use git worktree and subagents when necessary to get it all done" - this sounds like they want to go straight to implementation. But the brainstorming skill has a HARD-GATE: "Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it."
-
 
 I've only covered the tools and pre-commit hook so far, so I need to finish presenting the remaining design sections—CI/CD changes, new config files, and packages—then write up the spec doc and get approval before moving to the writing-plans skill for implementation.
 </details></think>
@@ -1334,6 +1356,7 @@ Inspect @tanstack/eslint-config contents
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:09Z)**_
@@ -1351,6 +1374,7 @@ node_modules
 package.json
 src
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:12Z)**_
@@ -1369,6 +1393,7 @@ node.ts
 stylistic.ts
 typescript.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:15Z)**_
@@ -1464,6 +1489,7 @@ export const tanstackConfig: Array<Linter.Config> = [
   },
 ]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:15Z)**_
@@ -1509,6 +1535,7 @@ export const importRules: Linter.RulesRecord = {
   ],
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:20Z)**_
@@ -1595,6 +1622,7 @@ export const typescriptRules: Linter.RulesRecord = {
   '@typescript-eslint/triple-slash-reference': 'error',
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:21Z)**_
@@ -1665,6 +1693,7 @@ export const javascriptRules: Linter.RulesRecord = {
   'valid-typeof': 'error',
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:44:44Z)**_
@@ -1673,12 +1702,12 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:44:44Z)**_
 Now I have a clear picture of what `@tanstack/eslint-config` already includes:
 
 **Already included:**
+
 - `typescript-eslint` rules (many `@typescript-eslint/*` rules)
 - `eslint-plugin-import-x` with import ordering rules (`import/order` with groups)
 - Basic JavaScript recommended-style rules (many `eslint:recommended` equivalents, not using the spread)
 - `@stylistic/eslint-plugin` for stylistic rules
 - `eslint-plugin-n` for Node.js rules
-
 
 - React, React hooks, and accessibility plugins are not included, nor is Tailwind class sorting
 
@@ -1698,12 +1727,14 @@ Good question — let me check what `@tanstack/eslint-config` already covers so 
 Here's what I found:
 
 **Already included via `@tanstack/eslint-config`:**
+
 - TypeScript rules (`@typescript-eslint/*`) — comprehensive, hand-picked set
 - JavaScript correctness rules (covers most of `eslint:recommended`)
 - `eslint-plugin-import-x` with `import/order` groups — **but it's currently disabled** in your `eslint.config.js` (`'import/order': 'off'`, `'sort-imports': 'off'`)
 - `@stylistic` for code style
 
 **Missing (not in tanstack config):**
+
 - `eslint-plugin-react` — React-specific rules
 - `eslint-plugin-react-hooks` — Rules of Hooks enforcement
 - `eslint-plugin-jsx-a11y` — accessibility in JSX
@@ -1720,6 +1751,7 @@ Remove the `'import/order': 'off'` and `'sort-imports': 'off'` overrides in `esl
 ```
 
 So the ESLint changes are:
+
 1. Add 4 new plugins + their recommended configs
 2. Fix import ordering (re-enable with alphabetize)
 
@@ -1766,6 +1798,7 @@ Create specs directory
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:45:37Z)**_
@@ -1957,6 +1990,7 @@ The existing `lint` and `fix` scripts remain as the all-in-one entrypoints.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-01-comprehensive-linting-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:45:51Z)**_
@@ -1992,6 +2026,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:45:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-01-comprehensive-linting-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:46:04Z)**_
@@ -2020,10 +2055,10 @@ _**User (2026-04-01 02:50:30Z)**_
 
 ## Core Configuration & Plugins
 
-*   **`eslint:recommended`** and **`plugin:@typescript-eslint/recommended`**: Foundational rules for general JavaScript/TypeScript correctness.
-*   **`plugin:react/recommended`** and **`plugin:react-hooks/recommended`**: Essential for React-specific rules and enforcing the [Rules of Hooks](https://blog.logrocket.com/12-essential-eslint-rules-react/).
-*   **`plugin:jsx-a11y/recommended`**: For accessibility best practices in JSX.
-*   **`plugin:tailwindcss/recommended`**: Provides linting for [Tailwind CSS](https://github.com/dustinspecker/awesome-eslint) usage, including sorting classes and preventing unknown utility classes.
+- **`eslint:recommended`** and **`plugin:@typescript-eslint/recommended`**: Foundational rules for general JavaScript/TypeScript correctness.
+- **`plugin:react/recommended`** and **`plugin:react-hooks/recommended`**: Essential for React-specific rules and enforcing the [Rules of Hooks](https://blog.logrocket.com/12-essential-eslint-rules-react/).
+- **`plugin:jsx-a11y/recommended`**: For accessibility best practices in JSX.
+- **`plugin:tailwindcss/recommended`**: Provides linting for [Tailwind CSS](https://github.com/dustinspecker/awesome-eslint) usage, including sorting classes and preventing unknown utility classes.
 
 ## Recommended Opinionated Rules
 
@@ -2031,24 +2066,24 @@ Here are some specific rules to enable or configure for a stricter, opinionated 
 
 ### React & JSX
 
-*   **`react/function-component-definition`**: Standardize the way functional components are defined (e.g., as arrow functions or function declarations).
-*   **`react/jsx-max-depth`**: Enforce a maximum nesting depth for JSX, encouraging you to break down large components.
-*   **`react/no-unstable-nested-components`**: Prevents defining components inside other components, which causes performance issues due to state loss on re-renders.
-*   **`react/no-array-index-key`**: Highly recommended to avoid using array indexes as keys in lists to prevent bugs and performance issues.
-*   **`react/jsx-props-no-spreading`**: Discourage prop spreading to ensure you explicitly pass only necessary props, improving readability and maintainability (though some teams allow exceptions for wrapper components).
-*   **`react/no-unknown-property`**: Catches common errors like using `class` instead of `className`. 
+- **`react/function-component-definition`**: Standardize the way functional components are defined (e.g., as arrow functions or function declarations).
+- **`react/jsx-max-depth`**: Enforce a maximum nesting depth for JSX, encouraging you to break down large components.
+- **`react/no-unstable-nested-components`**: Prevents defining components inside other components, which causes performance issues due to state loss on re-renders.
+- **`react/no-array-index-key`**: Highly recommended to avoid using array indexes as keys in lists to prevent bugs and performance issues.
+- **`react/jsx-props-no-spreading`**: Discourage prop spreading to ensure you explicitly pass only necessary props, improving readability and maintainability (though some teams allow exceptions for wrapper components).
+- **`react/no-unknown-property`**: Catches common errors like using `class` instead of `className`.
 
 ### TypeScript
 
-*   **`@typescript-eslint/explicit-module-boundary-types`**: Requires function return types and argument types on exported functions/components, ensuring a clear public API.
-*   **`@typescript-eslint/no-unused-vars`**: Use the TypeScript-aware unused variable check instead of the base ESLint one. 
+- **`@typescript-eslint/explicit-module-boundary-types`**: Requires function return types and argument types on exported functions/components, ensuring a clear public API.
+- **`@typescript-eslint/no-unused-vars`**: Use the TypeScript-aware unused variable check instead of the base ESLint one.
 
 ### TanStack Query
 
-TanStack Query does not have an official ESLint plugin, but general React/TypeScript best practices apply. 
+TanStack Query does not have an official ESLint plugin, but general React/TypeScript best practices apply.
 
-*   **`react-hooks/exhaustive-deps`**: This rule is crucial when working with query hooks (`useQuery`, `useMutation`, etc.) and effects (`useEffect`), as it ensures all dependencies are correctly listed, preventing stale closures and bugs.
-*   Avoid adding unnecessary `useCallback` for simple selectors, as it might add overhead. It's fine for simple object picks to run on every render.
+- **`react-hooks/exhaustive-deps`**: This rule is crucial when working with query hooks (`useQuery`, `useMutation`, etc.) and effects (`useEffect`), as it ensures all dependencies are correctly listed, preventing stale closures and bugs.
+- Avoid adding unnecessary `useCallback` for simple selectors, as it might add overhead. It's fine for simple object picks to run on every render.
 
 ---
 
@@ -2067,185 +2102,186 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:50:34Z)**_
  `./docs/superpowers/specs/2026-04-01-comprehensive-linting-design.md`
 
 ```text
-1	# Comprehensive Linting Setup — Design Spec
-2	
-3	**Date:** 2026-04-01  
-4	**Status:** Approved
-5	
-6	---
-7	
-8	## Overview
-9	
-10	Add missing linters (markdownlint, stylelint, React/a11y/Tailwind ESLint plugins), introduce `lint-staged` so pre-commit only touches staged files, fix import ordering, and wire everything into CI.
-11	
-12	---
-13	
-14	## 1. New Packages (devDependencies)
-15	
-16	### lint-staged
-17	- `lint-staged` — runs linters only on git-staged files
-18	
-19	### ESLint plugins
-20	- `eslint-plugin-react` — React-specific rules
-21	- `eslint-plugin-react-hooks` — Rules of Hooks enforcement
-22	- `eslint-plugin-jsx-a11y` — accessibility rules in JSX
-23	- `eslint-plugin-tailwindcss` — Tailwind class linting in JSX (partial v4 support; if rules produce false positives on v4 syntax, disable per-rule in `eslint.config.js`)
-24	
-25	### Stylelint
-26	- `stylelint`
-27	- `stylelint-config-standard`
-28	- `@csstools/stylelint-plugin-tailwind-v4` — allows `@theme`, `@plugin`, `@custom-variant`, `@apply`
-29	
-30	### Markdownlint
-31	- `markdownlint-cli2` — Markdown linting with auto-fix support
-32	
-33	---
-34	
-35	## 2. ESLint Changes (`eslint.config.js`)
-36	
-37	### Add plugins and recommended configs
-38	
-39	Extend the existing `tanstackConfig` spread with:
-40	
-41	1. `eslint-plugin-react` — `react/recommended` + `react/jsx-runtime` (React 17+ JSX transform, no need to import React)
-42	2. `eslint-plugin-react-hooks` — recommended hooks rules
-43	3. `eslint-plugin-jsx-a11y` — recommended accessibility rules
-44	4. `eslint-plugin-tailwindcss` — recommended rules for class name validation and sorting in JSX
-45	
-46	### Fix import ordering
-47	
-48	Remove the overrides that disable import ordering:
-49	
-50	```js
-51	// REMOVE these from eslint.config.js:
-52	'import/order': 'off',
-53	'sort-imports': 'off',
-54	```
-55	
-56	Replace with an explicit `import/order` rule that re-enables grouping and adds alphabetical sorting:
-57	
-58	```js
-59	'import/order': ['error', {
-60	  groups: [
-61	    'builtin',
-62	    'external',
-63	    'internal',
-64	    'parent',
-65	    'sibling',
-66	    'index',
-67	    'object',
-68	    'type',
-69	  ],
-70	  alphabetize: { order: 'asc', caseInsensitive: true },
-71	}],
-72	```
-73	
-74	Keep `sort-imports` with `ignoreDeclarationSort: true` (already set in tanstack config) — this handles named import member sorting within a single import statement, complementing `import/order`.
-75	
-76	---
-77	
-78	## 3. New Config Files
-79	
-80	### `.stylelintrc.yaml`
-81	
-82	```yaml
-83	extends:
-84	  - stylelint-config-standard
-85	plugins:
-86	  - "@csstools/stylelint-plugin-tailwind-v4"
-87	rules:
-88	  at-rule-no-unknown: null
-89	  csstools/at-rule-no-unknown: true
-90	```
-91	
-92	`at-rule-no-unknown` is disabled at the standard level and replaced by the Tailwind-aware version to allow `@theme`, `@plugin`, `@custom-variant`, and `@apply` without false positives.
-93	
-94	### `.markdownlint.yaml`
-95	
-96	```yaml
-97	default: true
-98	MD013: false   # no line-length limit
-99	MD033: false   # allow inline HTML
-100	```
-101	
-102	Permissive enough to not block docs, specs, and the in-source `.md` files (e.g. `src/lib/game-event-bus.md`).
-103	
-104	---
-105	
-106	## 4. Pre-commit Hook
-107	
-108	### Replace `.husky/pre-commit`
-109	
-110	Current:
-111	```sh
-112	yarn fix
-113	yarn test
-114	```
-115	
-116	New:
-117	```sh
-118	npx lint-staged
-119	yarn test
-120	```
-121	
-122	`yarn fix` (prettier + eslint on all files) is replaced by `lint-staged`, which runs per-type fixers only on staged files.
-123	
-124	### `lint-staged` config (in `package.json`)
-125	
-126	```json
-127	"lint-staged": {
-128	  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-129	  "*.css":      ["stylelint --fix", "prettier --write"],
-130	  "*.md":       ["markdownlint-cli2 --fix", "prettier --write"],
-131	  "*.json":     ["prettier --write"]
-132	}
-133	```
-134	
-135	Order matters for `*.{ts,tsx}`: ESLint fixes logic first, then Prettier formats the result. They don't conflict because `@tanstack/eslint-config` already includes `eslint-config-prettier`.
-136	
-137	---
-138	
-139	## 5. CI Changes (`.github/workflows/ci.yml`)
-140	
-141	Add two steps to the existing `lint` job, after the Prettier check:
-142	
-143	```yaml
-144	- name: Stylelint
-145	  run: npx stylelint "**/*.css" --ignore-path .prettierignore
-146	
-147	- name: Markdownlint
-148	  run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor"
-149	```
-150	
-151	Markdownlint ignores `node_modules`, `.specstory`, and `.cursor` (already noisy/auto-generated directories).
-152	
-153	The existing `ESLint` and `Prettier` steps remain unchanged.
-154	
-155	---
-156	
-157	## 6. Scripts (`package.json`)
-158	
-159	Add dedicated lint/fix scripts for the new tools:
-160	
-161	```json
-162	"lint:css":  "stylelint '**/*.css'",
-163	"lint:md":   "markdownlint-cli2 '**/*.md'",
-164	"fix:css":   "stylelint --fix '**/*.css' && prettier --write '**/*.css'",
-165	"fix:md":    "markdownlint-cli2 --fix '**/*.md'",
-166	```
-167	
-168	The existing `lint` and `fix` scripts remain as the all-in-one entrypoints.
-169	
-170	---
-171	
-172	## 7. Out of Scope
-173	
-174	- `commitlint` — not requested
-175	- CSS Modules linting — not used in this project
-176	- Biome — not replacing ESLint/Prettier
-177	- `eslint-plugin-testing-library` — separate concern, can be added later
+1 # Comprehensive Linting Setup — Design Spec
+2 
+3 **Date:** 2026-04-01  
+4 **Status:** Approved
+5 
+6 ---
+7 
+8 ## Overview
+9 
+10 Add missing linters (markdownlint, stylelint, React/a11y/Tailwind ESLint plugins), introduce `lint-staged` so pre-commit only touches staged files, fix import ordering, and wire everything into CI.
+11 
+12 ---
+13 
+14 ## 1. New Packages (devDependencies)
+15 
+16 ### lint-staged
+17 - `lint-staged` — runs linters only on git-staged files
+18 
+19 ### ESLint plugins
+20 - `eslint-plugin-react` — React-specific rules
+21 - `eslint-plugin-react-hooks` — Rules of Hooks enforcement
+22 - `eslint-plugin-jsx-a11y` — accessibility rules in JSX
+23 - `eslint-plugin-tailwindcss` — Tailwind class linting in JSX (partial v4 support; if rules produce false positives on v4 syntax, disable per-rule in `eslint.config.js`)
+24 
+25 ### Stylelint
+26 - `stylelint`
+27 - `stylelint-config-standard`
+28 - `@csstools/stylelint-plugin-tailwind-v4` — allows `@theme`, `@plugin`, `@custom-variant`, `@apply`
+29 
+30 ### Markdownlint
+31 - `markdownlint-cli2` — Markdown linting with auto-fix support
+32 
+33 ---
+34 
+35 ## 2. ESLint Changes (`eslint.config.js`)
+36 
+37 ### Add plugins and recommended configs
+38 
+39 Extend the existing `tanstackConfig` spread with:
+40 
+41 1. `eslint-plugin-react` — `react/recommended` + `react/jsx-runtime` (React 17+ JSX transform, no need to import React)
+42 2. `eslint-plugin-react-hooks` — recommended hooks rules
+43 3. `eslint-plugin-jsx-a11y` — recommended accessibility rules
+44 4. `eslint-plugin-tailwindcss` — recommended rules for class name validation and sorting in JSX
+45 
+46 ### Fix import ordering
+47 
+48 Remove the overrides that disable import ordering:
+49 
+50 ```js
+51 // REMOVE these from eslint.config.js:
+52 'import/order': 'off',
+53 'sort-imports': 'off',
+54 ```
+55 
+56 Replace with an explicit `import/order` rule that re-enables grouping and adds alphabetical sorting:
+57 
+58 ```js
+59 'import/order': ['error', {
+60   groups: [
+61     'builtin',
+62     'external',
+63     'internal',
+64     'parent',
+65     'sibling',
+66     'index',
+67     'object',
+68     'type',
+69   ],
+70   alphabetize: { order: 'asc', caseInsensitive: true },
+71 }],
+72 ```
+73 
+74 Keep `sort-imports` with `ignoreDeclarationSort: true` (already set in tanstack config) — this handles named import member sorting within a single import statement, complementing `import/order`.
+75 
+76 ---
+77 
+78 ## 3. New Config Files
+79 
+80 ### `.stylelintrc.yaml`
+81 
+82 ```yaml
+83 extends:
+84   - stylelint-config-standard
+85 plugins:
+86   - "@csstools/stylelint-plugin-tailwind-v4"
+87 rules:
+88   at-rule-no-unknown: null
+89   csstools/at-rule-no-unknown: true
+90 ```
+91 
+92 `at-rule-no-unknown` is disabled at the standard level and replaced by the Tailwind-aware version to allow `@theme`, `@plugin`, `@custom-variant`, and `@apply` without false positives.
+93 
+94 ### `.markdownlint.yaml`
+95 
+96 ```yaml
+97 default: true
+98 MD013: false   # no line-length limit
+99 MD033: false   # allow inline HTML
+100 ```
+101 
+102 Permissive enough to not block docs, specs, and the in-source `.md` files (e.g. `src/lib/game-event-bus.md`).
+103 
+104 ---
+105 
+106 ## 4. Pre-commit Hook
+107 
+108 ### Replace `.husky/pre-commit`
+109 
+110 Current:
+111 ```sh
+112 yarn fix
+113 yarn test
+114 ```
+115 
+116 New:
+117 ```sh
+118 npx lint-staged
+119 yarn test
+120 ```
+121 
+122 `yarn fix` (prettier + eslint on all files) is replaced by `lint-staged`, which runs per-type fixers only on staged files.
+123 
+124 ### `lint-staged` config (in `package.json`)
+125 
+126 ```json
+127 "lint-staged": {
+128   "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+129   "*.css":      ["stylelint --fix", "prettier --write"],
+130   "*.md":       ["markdownlint-cli2 --fix", "prettier --write"],
+131   "*.json":     ["prettier --write"]
+132 }
+133 ```
+134 
+135 Order matters for `*.{ts,tsx}`: ESLint fixes logic first, then Prettier formats the result. They don't conflict because `@tanstack/eslint-config` already includes `eslint-config-prettier`.
+136 
+137 ---
+138 
+139 ## 5. CI Changes (`.github/workflows/ci.yml`)
+140 
+141 Add two steps to the existing `lint` job, after the Prettier check:
+142 
+143 ```yaml
+144 - name: Stylelint
+145   run: npx stylelint "**/*.css" --ignore-path .prettierignore
+146 
+147 - name: Markdownlint
+148   run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor"
+149 ```
+150 
+151 Markdownlint ignores `node_modules`, `.specstory`, and `.cursor` (already noisy/auto-generated directories).
+152 
+153 The existing `ESLint` and `Prettier` steps remain unchanged.
+154 
+155 ---
+156 
+157 ## 6. Scripts (`package.json`)
+158 
+159 Add dedicated lint/fix scripts for the new tools:
+160 
+161 ```json
+162 "lint:css":  "stylelint '**/*.css'",
+163 "lint:md":   "markdownlint-cli2 '**/*.md'",
+164 "fix:css":   "stylelint --fix '**/*.css' && prettier --write '**/*.css'",
+165 "fix:md":    "markdownlint-cli2 --fix '**/*.md'",
+166 ```
+167 
+168 The existing `lint` and `fix` scripts remain as the all-in-one entrypoints.
+169 
+170 ---
+171 
+172 ## 7. Out of Scope
+173 
+174 - `commitlint` — not requested
+175 - CSS Modules linting — not used in this project
+176 - Biome — not replacing ESLint/Prettier
+177 - `eslint-plugin-testing-library` — separate concern, can be added later
 178
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:50:52Z)**_
@@ -2260,7 +2296,6 @@ Now let me update the spec to incorporate the user's additional ESLint rules. I 
 Let me think about each rule:
 
 **`eslint:recommended`** - `@tanstack/eslint-config` covers most of these manually in `javascript.ts`. We don't need to add this separately, but we can note it.
-
 
 **`plugin:@typescript-eslint/recommended`** - Since `@tanstack/eslint-config` already has its own TypeScript rules, adding the full recommended preset could create conflicts, so I'll note that tanstack covers the essentials and we're just filling in the gaps.
 
@@ -2283,6 +2318,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 02:51:05Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-01-comprehensive-linting-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 02:51:13Z)**_
@@ -2309,7 +2345,6 @@ _**User (2026-04-01 03:06:48Z)**_
 _**User (2026-04-01 03:06:48Z)**_
 
 Tell your human partner that this command is deprecated and will be removed in the next major release. They should ask you to use the "superpowers executing-plans" skill instead.
-
 
 ---
 
@@ -2361,6 +2396,7 @@ digraph when_to_use {
 ```
 
 **vs. Executing Plans (parallel session):**
+
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
 - Two-stage review after each task: spec compliance first, then code quality
@@ -2424,6 +2460,7 @@ Use the least powerful model that can handle each role to conserve cost and incr
 **Architecture, design, and review tasks**: use the most capable available model.
 
 **Task complexity signals:**
+
 - Touches 1-2 files with a complete spec → cheap model
 - Touches multiple files with integration concerns → standard model
 - Requires design judgment or broad codebase understanding → most capable model
@@ -2439,6 +2476,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
+
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
@@ -2531,23 +2569,27 @@ Done!
 ## Advantages
 
 **vs. Manual execution:**
+
 - Subagents follow TDD naturally
 - Fresh context per task (no confusion)
 - Parallel-safe (subagents don't interfere)
 - Subagent can ask questions (before AND during work)
 
 **vs. Executing Plans:**
+
 - Same session (no handoff)
 - Continuous progress (no waiting)
 - Review checkpoints automatic
 
 **Efficiency gains:**
+
 - No file reading overhead (controller provides full text)
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
 
 **Quality gates:**
+
 - Self-review catches issues before handoff
 - Two-stage review: spec compliance, then code quality
 - Review loops ensure fixes actually work
@@ -2555,6 +2597,7 @@ Done!
 - Code quality ensures implementation is well-built
 
 **Cost:**
+
 - More subagent invocations (implementer + 2 reviewers per task)
 - Controller does more prep work (extracting all tasks upfront)
 - Review loops add iterations
@@ -2563,6 +2606,7 @@ Done!
 ## Red Flags
 
 **Never:**
+
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
@@ -2577,34 +2621,39 @@ Done!
 - Move to next task while either review has open issues
 
 **If subagent asks questions:**
+
 - Answer clearly and completely
 - Provide additional context if needed
 - Don't rush them into implementation
 
 **If reviewer finds issues:**
+
 - Implementer (same subagent) fixes them
 - Reviewer reviews again
 - Repeat until approved
 - Don't skip the re-review
 
 **If subagent fails task:**
+
 - Dispatch fix subagent with specific instructions
 - Don't try to fix manually (context pollution)
 
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for reviewer subagents
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
+
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
+- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
 ---
 
@@ -2619,7 +2668,6 @@ The user invoked the subagent-driven-development skill. This skill says I need t
 Wait, looking at the skill flow — it says "Have implementation plan?" as the first step. We don't have one yet. I need to write the plan first using `writing-plans`, then execute with subagent-driven-development.
 
 But wait - the user invoked subagent-driven-development directly. Looking at the skill:
-
 
 The decision tree shows I need an implementation plan before proceeding, and the required workflow skills list both `writing-plans` and `using-git-worktrees` as prerequisites. Since we only have a spec doc but no actual implementation plan, I should invoke `writing-plans` first to generate that plan, then set up the git worktree, and finally execute the subagent-driven-development workflow.
 </details></think>
@@ -2636,6 +2684,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 03:07:43Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -2657,6 +2706,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -2677,6 +2727,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -2747,6 +2798,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -2755,6 +2807,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -2785,13 +2838,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -2803,11 +2857,11 @@ I'm using the writing-plans skill to create the implementation plan. Let me anno
 First, let me review the spec one more time to extract all the requirements.
 
 From the spec:
+
 1. New packages to install
 2. ESLint changes to `eslint.config.js`
 3. New config files (`.stylelintrc.yaml`, `.markdownlint.yaml`)
 4. Pre-commit hook changes (`.husky/pre-commit` + `lint-staged` in `package.json`)
-
 
 5. CI changes (`.github/workflows/ci.yml`)
 6. New scripts in `package.json`
@@ -2899,6 +2953,7 @@ Header.tsx
 ThemeToggle.tsx
 ui
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:09:27Z)**_
@@ -2921,6 +2976,7 @@ Find TSX files using function declarations (not arrow functions)
 /Users/leocaseiro/Sites/base-skill/src/components/ThemeToggle.tsx
 /Users/leocaseiro/Sites/base-skill/src/components/Header.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:09:31Z)**_
@@ -2953,6 +3009,7 @@ Find function declaration components that need converting to arrow functions
 /Users/leocaseiro/Sites/base-skill/src/components/ui/card.tsx:59:function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
 /Users/leocaseiro/Sites/base-skill/src/components/ui/card.tsx:72:function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:09:31Z)**_
@@ -3035,6 +3092,7 @@ export default function Header() {
   )
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:09:54Z)**_
@@ -3045,9 +3103,9 @@ Now I have a clear picture. The codebase has many function declaration component
 However, I should note: the `src/components/ui/` directory contains shadcn-generated components. Converting these to arrow functions would be a significant change that could be overwritten when shadcn updates. I should think about this...
 
 Options:
+
 1. Apply the rule to all files including ui/
 2. Exclude `src/components/ui/` from the rule since they're generated
-
 
 3. Set it to `warn` instead of `error`
 
@@ -3074,7 +3132,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 03:09:55Z)**_
 <summary>Tool use: **Bash**</summary>
 Count UI components and list routes
 
-`ls /Users/leocaseiro/Sites/base-skill/src/components/ui/ | wc -l && ls /Users/leocaseiro/Sites/base-skill/src/routes/ `
+`ls /Users/leocaseiro/Sites/base-skill/src/components/ui/ | wc -l && ls /Users/leocaseiro/Sites/base-skill/src/routes/`
 
 ```text
        5
@@ -3083,6 +3141,7 @@ __root.test.tsx
 __root.tsx
 index.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:09:56Z)**_
@@ -3098,6 +3157,7 @@ Sample current import ordering in a couple files
 /Users/leocaseiro/Sites/base-skill/src/components/Header.tsx:2:import ThemeToggle from './ThemeToggle'
 /Users/leocaseiro/Sites/base-skill/src/routes/index.tsx:1:import { createFileRoute, redirect } from '@tanstack/react-router'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:10:00Z)**_
@@ -3671,6 +3731,7 @@ Once all tasks are complete and verified, use `superpowers:finishing-a-developme
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-comprehensive-linting.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:21:48Z)**_
@@ -3679,9 +3740,9 @@ _**Agent (claude-sonnet-4-6 2026-04-01 03:21:48Z)**_
 The user is asking about codemods for the `react/function-component-definition` rule (converting function declarations to arrow functions). They're linking to `eps1lon/types-react-codemod` which is a codemod for React 18 type changes, not exactly what we need.
 
 For converting function declaration components to arrow functions, there are a few options:
+
 1. ESLint's `--fix` flag handles this automatically for the `react/function-component-definition` rule - it can auto-fix function declarations to arrow functions
 2. `jscodeshift` with a custom transform
-
 
 3. The `types-react-codemod` from eps1lon is actually for React type changes like `React.FC` and `children` prop modifications, not function-to-arrow conversions
 
@@ -3748,7 +3809,6 @@ Let me give them the commands in order based on the plan. They need to:
 8. Update CI
 
 But they said "commands to run fix in order" - so they probably want:
-
 
 The complete sequence of commands they can run themselves, including file creation and code updates. I'll organize this as a clean ordered list of bash commands and file modifications they can execute step by step. I'm going to organize this as a practical sequence of commands and file edits that they can execute step by step, keeping it concise and actionable.
 </details></think>
@@ -4025,9 +4085,10 @@ _**Agent (claude-sonnet-4-6 2026-04-01 03:44:54Z)**_
  `./docs/superpowers/plans/2026-04-01-comprehensive-linting-v2.md`
 
 ```text
-1	<!-- Save here the markdown -->
+1 <!-- Save here the markdown -->
 2
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:45:14Z)**_
@@ -4292,6 +4353,7 @@ All must exit 0.
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-01-comprehensive-linting-v2.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 03:45:20Z)**_

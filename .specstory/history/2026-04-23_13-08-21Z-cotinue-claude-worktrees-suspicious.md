@@ -68,6 +68,7 @@ drwxr-xr-x@ 43 leocaseiro  staff   1376 22 Apr 14:06 priceless-faraday-54ad0d
 drwxr-xr-x@ 45 leocaseiro  staff   1440 14 Apr 23:54 stupefied-satoshi
 drwxr-xr-x@ 43 leocaseiro  staff   1376 23 Apr 22:08 suspicious-shaw-27a961
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:09:00Z)**_
@@ -143,6 +144,7 @@ and have 1 and 8 different commits each, respectively.
 
 nothing to commit, working tree clean
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:09:03Z)**_
@@ -154,520 +156,521 @@ _**Agent (claude-opus-4-7 2026-04-23 13:09:05Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/docs/superpowers/specs/2026-04-23-word-authoring-design.md`
 
 ```text
-1	# Word Authoring (Make Up New Words) — Design
-2	
-3	> **Status:** Draft v1 · **Owner:** @leocaseiro · **Region focus:** AUS only (v1) · **Builds on:** [2026-04-11-phonics-word-library-design.md](./2026-04-11-phonics-word-library-design.md) (P2 evolution)
-4	> **Scope:** Curator-only authoring of new words via the in-app `WordLibraryExplorer`. Drafts persist to IndexedDB so authoring works on the deployed GitHub Pages build, on mobile, or in dev. A separate `yarn words:import` CLI merges exports into the canonical curriculum JSON files for PR review.
-5	
-6	## 1. Goal
-7	
-8	Today the `WordLibraryExplorer` is read-only. Searching for a word that isn't in the seeded corpus (~650 AUS words) silently returns no results. The curator (currently the project owner) can't add the missing word from inside the app — they'd have to hand-edit two JSON files, compute IPA + grapheme alignment manually, and pick the right level file by hand.
-9	
-10	This spec adds a **"Make up word"** flow inside the explorer that:
-11	
-12	1. Auto-generates an IPA + syllables + grapheme→phoneme breakdown for any typed word, using RitaJS for phonemes/syllables and a greedy aligner that learns from the existing curriculum.
-13	2. Lets the curator review/edit the breakdown in a focused authoring UI.
-14	3. Saves the result as a draft in IndexedDB, viewable alongside shipped words in the explorer.
-15	4. Exports drafts as a portable JSON file the curator can carry to their dev machine.
-16	5. Provides a Node CLI (`yarn words:import`) that merges exported drafts into the canonical `core/levelN.json` and `curriculum/aus/levelN.json` files for PR review.
-17	
-18	The corpus grows from real authoring sessions (including impromptu ones during demos), without forcing the curator back to a code editor for every entry.
-19	
-20	## 2. Project context
-21	
-22	This is the **P2 evolution** of the original phonics word library design. The earlier P2 sketch ("Storybook form + Vite middleware") is superseded by this spec. Key shifts from the original sketch:
-23	
-24	| Original P2 sketch                 | This spec                                                |
-25	| ---------------------------------- | -------------------------------------------------------- |
-26	| Storybook-only authoring form      | In-app authoring inside `WordLibraryExplorer`            |
-27	| Vite middleware writes JSON in dev | IndexedDB drafts + portable export + offline CLI import  |
-28	| Dev-machine only                   | Works in GH Pages prod, on mobile, anywhere the app runs |
-29	| Manual breakdown entry             | Auto-generated breakdown via RitaJS + greedy aligner     |
-30	
-31	**P3 (user word bags for parents/teachers)** remains a separate, deferred spec. It will reuse this spec's `engine.ts`, `aligner.ts`, and `draftStore.ts` modules — they are designed with that reuse in mind.
-32	
-33	## 3. User flow
-34	
-35	### 3.1 Trigger points
-36	
-37	Two ways to enter the authoring flow:
-38	
-39	1. **Empty-state CTA** — when search returns 0 hits, the empty state shows _"No matches for **`<word>`**. ✨ Make up this word?"_ Clicking opens the authoring modal pre-filled with the typed word.
-40	2. **Always-visible button** — a `+ New word` button next to the search bar opens the authoring modal with an empty word field.
-41	
-42	### 3.2 Authoring modal
-43	
-44	Presentation: centered modal with backdrop on desktop; full-screen on mobile (no visible backdrop, feels like a page). ESC / system back closes after a confirm-discard prompt if the form is dirty.
-45	
-46	Top-to-bottom layout:
-47	
-48	1. **Word field** — pre-filled if entered via empty-state CTA; editing it re-runs the engine (debounced 400 ms).
-49	2. **Unknown-word banner** — appears iff `RiTa.isKnownWord(word) === false`:
-50	   _"RitaJS doesn't know **`<word>`**. Look it up → [Open in dictionary.com](https://www.dictionary.com/browse/<word>)"_ (opens in a new tab). When this banner shows, IPA and graphemes are **not pre-filled** — curator types IPA manually, then the aligner runs on the manual phonemes.
-51	3. **IPA field** — text input, free-edit. Pre-filled from RitaJS when known.
-52	4. **Syllable chips** — `[put][·][ting]` with drag-to-move split markers.
-53	5. **Level selector** — dropdown 1–8. Auto-suggested from highest grapheme level present in the alignment (using existing `GRAPHEMES_BY_LEVEL`). Label shows _"(suggested L3 — highest grapheme used: sh)"_. Curator can override.
-54	6. **Grapheme breakdown row** — horizontal chips, each showing `g` over `p`. Tap a chip to open an inline editor with:
-55	   - Letter-range adjusters (extend/shrink the grapheme).
-56	   - Phoneme picker (dropdown sourced from existing `PHONEME_CODE_TO_IPA` inventory).
-57	   - Low-confidence chips (greedy aligner couldn't find a strong corpus match) get an amber border.
-58	7. **Variants** — optional comma-separated input.
-59	8. **Save draft** / **Cancel** buttons. `Save draft` is disabled (with an inline hint) if the typed word already exists in shipped data — see §5.2.
-60	
-61	### 3.3 Save → draft visible in explorer
-62	
-63	`Save draft` writes to IndexedDB. The modal closes; a toast confirms _"Draft saved: `<word>`"_. The word now appears in subsequent search results, sorted naturally and badged `✏️ draft (unsynced)` distinct from shipped words' `📚 shipped` badge.
-64	
-65	### 3.4 Drafts management
-66	
-67	A `Drafts (N)` link in the explorer header opens a drafts panel listing all unsynced drafts (word · level · last edited time · `[Edit]` · `[Delete]`). At the top of the panel: an **`Export drafts (N)`** button that downloads `wordlib-export-<ISO timestamp>.json` via `URL.createObjectURL`.
-68	
-69	### 3.5 Sync: bringing drafts into the canonical corpus
-70	
-71	The export → import loop is intentionally manual and explicit:
-72	
-73	1. Curator clicks **Export drafts** (in any environment — prod, mobile, dev). Browser downloads a JSON file.
-74	2. Curator transfers the file to their dev machine (AirDrop, email-to-self, iCloud Drive, etc.).
-75	3. On their dev machine inside the project repo:
-76	
-77	   ```bash
-78	   yarn words:import ~/Downloads/wordlib-export-2026-04-23T22-14-00Z.json
-79	   ```
-80	
-81	4. The CLI merges entries into the right `core/levelN.json` + `curriculum/aus/levelN.json` files, preserving sort order and indentation.
-82	5. `git diff` shows the changes; curator commits + opens PR by hand.
-83	
-84	No auto-commit, no auto-push, no GitHub API calls — the curator stays in control of the PR boundary.
-85	
-86	## 4. Architecture
-87	
-88	Five new modules. Four ship in the browser bundle; one is Node-only.
-89	
-90	| Module                         | Location                    | Bundle  | Responsibility                                                                                                |
-91	| ------------------------------ | --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-92	| `authoring/engine.ts`          | `src/data/words/authoring/` | Browser | Wraps RitaJS: `generateBreakdown(word) → {ipa, syllables, phonemes, ritaKnown}`. Lazy-imports `rita`. Pure.   |
-93	| `authoring/aligner.ts`         | `src/data/words/authoring/` | Browser | Greedy letter-to-phoneme aligner. Loads g→p frequencies from shipped curriculum at module init. Pure.         |
-94	| `authoring/draftStore.ts`      | `src/data/words/authoring/` | Browser | IndexedDB wrapper (via `idb`). CRUD + export.                                                                 |
-95	| `authoring/AuthoringPanel.tsx` | `src/data/words/authoring/` | Browser | The modal/full-screen review UI. Storybook + VR coverage.                                                     |
-96	| `scripts/words-import.ts`      | `scripts/`                  | Node    | CLI: validates export JSON; merges into `core/*.json` + `curriculum/aus/*.json`; preserves sort + formatting. |
-97	
-98	Existing modules touched (minimal):
-99	
-100	- `WordLibraryExplorer.tsx` — adds the two entry points (empty-state CTA + `+ New word` button); renders the modal; surfaces `Drafts (N)` link.
-101	- `filter.ts` — read-path merges shipped + drafts; results carry `provenance` + optional `draftId`.
-102	- `types.ts` — adds `DraftEntry`, `Provenance`; extends `WordHit` with `provenance` and `draftId?`.
-103	
-104	### 4.1 Lazy-loading RitaJS
-105	
-106	RitaJS is ~150 KB gzipped. It is **dynamically imported** inside `engine.ts` on first call to `generateBreakdown`. The authoring panel triggers this on open (or earlier on hover, as a perf improvement we may add later). Users who never open the authoring panel never download the RitaJS chunk.
-107	
-108	### 4.2 Dependency policy
-109	
-110	| Dependency | Where          | Notes                                                                                 |
-111	| ---------- | -------------- | ------------------------------------------------------------------------------------- |
-112	| `rita`     | Browser, lazy  | Phoneme + syllable generation. Bundled in a separate Vite chunk via `import('rita')`. |
-113	| `idb`      | Browser, eager | ~3 KB, promise-based IndexedDB wrapper. Used by `draftStore.ts`.                      |
-114	| `zod`      | Node + Browser | Schema validation for export JSON (already in devDeps).                               |
-115	| `uuid`     | Browser        | Draft IDs. Lightweight; if already present in deps reuse, else add `uuid` v7.         |
-116	
-117	## 5. Data model
-118	
-119	### 5.1 New types (`src/data/words/types.ts`)
-120	
-121	```ts
-122	export type Provenance = 'shipped' | 'draft';
-123	
-124	export interface DraftEntry {
-125	  /** UUID v7 string. IndexedDB keyPath. */
-126	  id: string;
-127	  word: string;
-128	  region: 'aus'; // v1 locked; future-extensible
-129	  level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-130	  ipa: string;
-131	  /** Syllable splits, e.g. ['put', 'ting']. join('') === word. */
-132	  syllables: string[];
-133	  syllableCount: number;
-134	  graphemes: Grapheme[]; // existing { g, p, span? } shape
-135	  variants?: string[];
-136	  /** True if RitaJS knew the word at authoring time. False → unknown-word banner persists across edits. */
-137	  ritaKnown: boolean;
-138	  createdAt: string; // ISO timestamp
-139	  updatedAt: string; // ISO timestamp
-140	}
-141	
-142	// WordHit gains:
-143	export interface WordHit {
-144	  // …existing fields…
-145	  provenance: Provenance;
-146	  draftId?: string; // present iff provenance === 'draft'
-147	}
-148	```
-149	
-150	### 5.2 Conflict policy
-151	
-152	A draft can only exist for a word **not** already in shipped data. The "+ New word" flow checks shipped first; if the word exists, the panel opens that shipped entry in a read-only preview (revising shipped words is out of scope for v1 — see §10).
-153	
-154	This rule is enforced in three places:
-155	
-156	1. The authoring panel's word field — typing a shipped word disables `Save draft` with a hint.
-157	2. `draftStore.saveDraft` — rejects if `[region, word]` collides with a shipped entry (lookup against the in-memory shipped index).
-158	3. The CLI import (`yarn words:import`) — rejects entries that collide with shipped data, with a clear skip message.
-159	
-160	### 5.3 IndexedDB schema (`authoring/draftStore.ts`)
-161	
-162	- Database name: `basekill-word-drafts`
-163	- Version: `1`
-164	- Object store: `drafts`, `keyPath: 'id'`
-165	- Indexes:
-166	  - `byRegionWord` on `[region, word]` — `unique: true`
-167	  - `byRegionLevel` on `[region, level]` — non-unique
-168	- Migration policy: explicit `onupgradeneeded` handler keyed off version; v1 creates the store + indexes from scratch.
-169	
-170	### 5.4 Export file shape
-171	
-172	```json
-173	{
-174	  "version": 1,
-175	  "exportedAt": "2026-04-23T22:14:00.000Z",
-176	  "drafts": [
-177	    {
-178	      "word": "putting",
-179	      "region": "aus",
-180	      "level": 3,
-181	      "ipa": "ˈpʊtɪŋ",
-182	      "syllables": ["put", "ting"],
-183	      "syllableCount": 2,
-184	      "graphemes": [
-185	        { "g": "p", "p": "p" },
-186	        { "g": "u", "p": "ʊ" },
-187	        { "g": "tt", "p": "t" },
-188	        { "g": "ing", "p": "ɪŋ" }
-189	      ],
-190	      "ritaKnown": true,
-191	      "createdAt": "2026-04-23T21:55:00.000Z",
-192	      "updatedAt": "2026-04-23T22:13:42.000Z"
-193	    }
-194	  ]
-195	}
-196	```
-197	
-198	The `id` field is intentionally **omitted** from exports — the receiving environment may have unrelated drafts with the same UUID. Identity is keyed on `[region, word]` for import purposes.
-199	
-200	### 5.5 Read-path merge
-201	
-202	`filter.ts`'s `filterWords()` becomes async-merging:
-203	
-204	1. Load shipped chunks (existing path).
-205	2. Call `draftStore.listDrafts({ region })` in parallel.
-206	3. Apply the same filter predicates (`level`, `syllableCount`, grapheme filters, prefix match) to drafts.
-207	4. Tag each result with `provenance` + optional `draftId`.
-208	5. Sort the unified result set by the same sort key shipped results use.
-209	
-210	Drafts respect every existing filter so the user experience is uniform — searching "put" returns the shipped word "put" and the draft "putting" together if both match.
-211	
-212	## 6. Auto-alignment engine
-213	
-214	### 6.1 RitaJS adapter (`authoring/engine.ts`)
-215	
-216	```ts
-217	export interface Breakdown {
-218	  word: string;
-219	  ipa: string; // e.g., 'pʊtɪŋ'
-220	  syllables: string[]; // e.g., ['put', 'ting']
-221	  phonemes: string[]; // ordered, e.g., ['p', 'ʊ', 't', 'ɪ', 'ŋ']
-222	  ritaKnown: boolean;
-223	}
-224	
-225	export async function generateBreakdown(
-226	  word: string,
-227	): Promise<Breakdown>;
-228	```
-229	
-230	Implementation outline:
-231	
-232	1. Lazy-import RitaJS: `const { RiTa } = await import('rita');`
-233	2. `ritaKnown = RiTa.isKnownWord(word)`
-234	3. If `ritaKnown`:
-235	   - `RiTa.phones(word, { silent: true })` → ARPABET string e.g. `"p-uh1 t-ih-ng"`
-236	   - `RiTa.syllables(word, { silent: true })` → e.g. `"p-uh/t-ih-ng"`
-237	   - Convert ARPABET → IPA via static map (~40 entries: `AH→ʌ, UH→ʊ, IH→ɪ, NG→ŋ, …`).
-238	   - Strip stress markers; produce `phonemes[]` and `ipa` (concatenated phonemes).
-239	   - Derive `syllables[]` from the slash-separated syllable string by mapping phonemes back to letters via the aligner (or, simpler v1: rely on a separate syllable-letter heuristic — see §6.3).
-240	4. If `!ritaKnown`:
-241	   - Return `{ word, ipa: '', syllables: [], phonemes: [], ritaKnown: false }`. The UI handles unknown-word UX (dictionary.com link, manual IPA entry).
-242	
-243	### 6.2 Greedy aligner (`authoring/aligner.ts`)
-244	
-245	```ts
-246	export interface AlignedGrapheme extends Grapheme {
-247	  /** 0–1; lower = aligner less confident. UI flags <0.5 in amber. */
-248	  confidence: number;
-249	}
-250	
-251	export function align(
-252	  word: string,
-253	  phonemes: string[],
-254	): AlignedGrapheme[];
-255	```
-256	
-257	Implementation outline:
-258	
-259	1. **At module init**, scan every shipped `curriculum/aus/levelN.json` and build:
-260	
-261	   ```ts
-262	   const gpFreq = new Map<
-263	     string /* grapheme */,
-264	     Map<string /* phoneme */, number /* count */>
-265	   >();
-266	   const knownMultiLetter = new Set<string>(); // 'sh', 'ch', 'th', 'ng', 'oo', 'ee', 'ai', 'oa', 'ck', 'tt', 'ing', 'igh', …
-267	   const splitDigraphs = ['a_e', 'i_e', 'o_e', 'u_e', 'e_e'];
-268	   ```
-269	
-270	   Walk every existing entry's `graphemes[]`; tally each `(g, p)` pair into `gpFreq`; collect any `g.length > 1` into `knownMultiLetter`.
-271	
-272	2. **Greedy match left-to-right** over the word's letters:
-273	
-274	   ```text
-275	   letterIdx = 0
-276	   phonemeIdx = 0
-277	   while letterIdx < word.length:
-278	     candidates = pick longest-match graphemes starting at letterIdx (max length 4)
-279	                  + always include single-letter grapheme as fallback
-280	                  + add split-digraph candidates if pattern matches downstream letters
-281	     pick the candidate where (candidate.g, phonemes[phonemeIdx]) has highest gpFreq
-282	     if no known mapping: pick longest candidate, mark confidence ≈ 0.2
-283	     emit { g, p: phonemes[phonemeIdx], span?: <if split-digraph>, confidence }
-284	     letterIdx += candidate.g.length (or jump for split digraph)
-285	     phonemeIdx += 1
-286	   ```
-287	
-288	3. **Silent letters** absorb into the preceding grapheme. After a successful pair, if `letterIdx < word.length` but `phonemeIdx === phonemes.length`, append the remaining letters onto the last emitted grapheme (matches existing `{g:'ld', p:'d'}` pattern in "should").
-289	
-290	4. **Confidence score** per pair:
-291	   - Top-frequency grapheme for that phoneme: `1.0`
-292	   - Otherwise: `count / max_count_for_phoneme`
-293	   - Unseen mapping: `0.2`
-294	
-295	This is intentionally simple. It will misalign on unfamiliar digraphs and on words with non-standard spelling; the chip-edit UI exists precisely for those corrections. A more accurate DP aligner with corpus-learned costs is tracked as a follow-up GH issue (see §10).
-296	
-297	### 6.3 Syllable-to-letter mapping
-298	
-299	RitaJS gives syllable splits in _phoneme_ space (`"p-uh/t-ih-ng"`); the data model needs `syllables[]` in _letter_ space (`["put", "ting"]`). Strategy for v1:
-300	
-301	1. Run the aligner to get `graphemes[]`.
-302	2. Walk graphemes and phonemes in parallel; whenever a phoneme crosses a syllable boundary in RitaJS's output, place the boundary between the corresponding graphemes in letter space.
-303	
-304	If this proves brittle, fallback: ask the curator to confirm/edit syllable boundaries via the syllable chip UI (already in the design).
-305	
-306	## 7. CLI: `yarn words:import`
-307	
-308	### 7.1 Invocation
-309	
-310	```bash
-311	yarn words:import <path-to-export.json>
-312	```
-313	
-314	Exits non-zero if any entries fail validation. Idempotent: re-running with an already-imported file surfaces skip warnings, doesn't double-write.
-315	
-316	### 7.2 Algorithm (per draft entry)
-317	
-318	1. **Validate** against a Zod schema:
-319	   - `word` non-empty, lowercase letters only (no whitespace, no proper-noun caps).
-320	   - `region` exactly `'aus'` (until other regions are seeded).
-321	   - `level` in `1..8`.
-322	   - `ipa` non-empty.
-323	   - `syllables[].join('') === word`.
-324	   - `graphemes[]` non-empty; concatenating `g` values (after expanding split-digraph spans) equals `word`.
-325	   - All `p` values are present in the project's phoneme inventory (`PHONEME_CODE_TO_IPA` values).
-326	2. **Check shipped duplicates** — load the relevant `core/level<level>.json` (and adjacent levels if level seems wrong) and reject if `word` already exists. Reject reason printed.
-327	3. **Upsert into `core/level<level>.json`:**
-328	   - Build a `WordCore` from the draft (`{ word, syllableCount, syllables }`; copy `variants` if present).
-329	   - Append, re-sort alphabetically by `word`, write back with 2-space indent + trailing newline.
-330	4. **Upsert into `curriculum/aus/level<level>.json`:**
-331	   - Build a `CurriculumEntry` (`{ word, level, ipa, graphemes }`).
-332	   - Append, re-sort alphabetically, write back same formatting.
-333	5. **Summary output:**
-334	
-335	   ```text
-336	   ✓ putting → core/level3.json, curriculum/aus/level3.json
-337	   ✓ should  → core/level4.json, curriculum/aus/level4.json
-338	   ⚠ qxz     → skipped: word already exists in core/level5.json
-339	
-340	   Imported 2 of 3 entries. Review with `git diff` before committing.
-341	   ```
-342	
-343	6. Returns exit code `0` on full success, `1` if any entry failed validation, `2` if file I/O failed.
-344	
-345	### 7.3 Safety properties
-346	
-347	- **No git operations** — script writes JSON files only. Curator owns the commit.
-348	- **No network** — pure local file I/O.
-349	- **Formatting preserved** — script reads file, mutates the parsed array, writes back with `JSON.stringify(arr, null, 2) + '\n'` to match existing chunk style. Run `yarn fix:md` is not needed (these are JSON, not markdown).
-350	- **Atomic per file** — collect all writes for a level file in memory, write once. If validation fails partway through a batch, files written so far stay; future entries don't write. Summary clarifies which entries succeeded.
-351	
-352	## 8. UI affordances summary
-353	
-354	| Surface                 | Component                                | New / Modified | Notes                                                                |
-355	| ----------------------- | ---------------------------------------- | -------------- | -------------------------------------------------------------------- |
-356	| Empty-state CTA         | `WordLibraryExplorer.tsx`                | Modified       | Replaces silent "no results" with the CTA shown in §3.1.             |
-357	| `+ New word` button     | `WordLibraryExplorer.tsx`                | Modified       | Sits next to the search bar. Always visible.                         |
-358	| `Drafts (N)` link       | `WordLibraryExplorer.tsx`                | Modified       | Header link. Hidden when `N === 0`.                                  |
-359	| Authoring modal         | `authoring/AuthoringPanel.tsx`           | New            | Modal on desktop, full-screen on mobile.                             |
-360	| Grapheme chip editor    | `authoring/AuthoringPanel.tsx` (sub)     | New            | Inline expansion of a chip; letter-range adjusters + phoneme picker. |
-361	| Drafts panel            | `authoring/DraftsPanel.tsx`              | New            | List + edit/delete + export button.                                  |
-362	| Result card draft badge | `WordLibraryExplorer.tsx` (`ResultCard`) | Modified       | `📚 shipped` vs `✏️ draft (unsynced)`.                               |
-363	
-364	Modal accessibility:
-365	
-366	- Focus trap when open; focus returns to trigger element on close.
-367	- ESC closes after dirty-form confirm.
-368	- ARIA: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing to the modal title.
-369	- Mobile full-screen presentation uses `<dialog>` element for native semantics where supported.
-370	
-371	## 9. Testing strategy
-372	
-373	Per CLAUDE.md, every module follows red-green-refactor TDD.
-374	
-375	**`authoring/engine.ts`** (`engine.test.ts`):
-376	
-377	- Known word → IPA + syllables + phonemes shape correct.
-378	- Unknown word → `ritaKnown: false`, empty fields.
-379	- ARPABET→IPA map covers all 40 ARPABET symbols.
-380	- RitaJS mocked at module boundary.
-381	
-382	**`authoring/aligner.ts`** (`aligner.test.ts`):
-383	
-384	- Golden fixtures of ~20 shipped words — alignment must reproduce the curated `graphemes[]`.
-385	- Tricky-word table: `should`, `putting`, `cake`, `laugh`, `knight`, `church`, `mouse`.
-386	
-387	**`authoring/draftStore.ts`** (`draftStore.test.ts`):
-388	
-389	- CRUD against `fake-indexeddb`.
-390	- Unique `[region, word]` index enforced.
-391	- `exportDrafts` round-trips through validation.
-392	- Quota-exceeded handled gracefully.
-393	
-394	**`filter.ts`** (extended `filter.test.ts`):
-395	
-396	- Drafts flow through every existing filter.
-397	- Provenance tagged on every result.
-398	- Mixed shipped + draft results sort consistently.
-399	
-400	**`authoring/AuthoringPanel.tsx`** (`AuthoringPanel.test.tsx` + Storybook):
-401	
-402	- Typing → debounced engine call → render.
-403	- Chip edit updates state.
-404	- Save calls `draftStore.saveDraft`.
-405	- Cancel discards (with dirty-confirm).
-406	- Duplicate-of-shipped disables Save.
-407	
-408	**`scripts/words-import.ts`** (`words-import.test.ts`):
-409	
-410	- Tmpdir fixtures: valid import merges + sorts + preserves formatting.
-411	- Duplicate rejection.
-412	- Bad schema rejection.
-413	- Partial failure summary.
-414	- Idempotency on re-run.
-415	
-416	### 9.1 Storybook
-417	
-418	- `AuthoringPanel/Default` — happy path with "putting" pre-filled.
-419	- `AuthoringPanel/UnknownWord` — Rita-unknown banner + dictionary.com link.
-420	- `AuthoringPanel/LowConfidenceChips` — amber chips on a tricky word.
-421	- `AuthoringPanel/DuplicateOfShipped` — Save disabled with hint.
-422	- `DraftsPanel/Empty` and `DraftsPanel/WithDrafts`.
-423	- `WordLibraryExplorer/EmptyStateCTA` — search returns 0, CTA visible.
-424	- `WordLibraryExplorer/WithDraftBadge` — shipped + draft side by side.
-425	
-426	### 9.2 Visual regression
-427	
-428	Two viewports per relevant story (mobile + desktop):
-429	
-430	- `AuthoringPanel/Default`
-431	- `AuthoringPanel/UnknownWord`
-432	- `WordLibraryExplorer/WithDraftBadge`
-433	
-434	### 9.3 Out of testing scope
-435	
-436	- RitaJS itself (third-party dependency).
-437	- IndexedDB browser implementation (`fake-indexeddb` covers behaviour we care about).
-438	- Cross-browser file-download UX (mature browser API).
-439	
-440	## 10. Out of scope (deferred)
-441	
-442	| Feature                                   | Why deferred                                                                                               |
-443	| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-444	| **User word bags (Spec C / P3)**          | Parents/teachers feature. Reuses `engine.ts`, `aligner.ts`, `draftStore.ts` from this spec.                |
-445	| **Editing / revising shipped words**      | Requires conflict-resolution UX and a "promote draft over shipped" policy. New-words-only for v1.          |
-446	| **Multi-region authoring (UK / US / BR)** | None of those curricula are seeded yet. Region locked to `'aus'`. Unlock per region once it has seed data. |
-447	| **GitHub-PR one-click from export**       | Requires PAT auth, secure token storage, security review. Stretch goal after v1 lands.                     |
-448	| **DP aligner with corpus-learned costs**  | Greedy v1 first. GH issue tracks the upgrade based on real-world misalignment data.                        |
-449	| **Bulk import from dictionary / CSV**     | v1 is one-word-at-a-time authoring. Bulk authoring is a separate workflow.                                 |
-450	| **Audio playback of authored draft**      | Already works "for free" — `PhonemeBlender` consumes any entry with `graphemes[]`, which drafts have.      |
-451	
-452	## 11. Open risks
-453	
-454	| Risk                                  | Mitigation                                                                                              |
-455	| ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-456	| Greedy aligner accuracy on rare words | Chip-edit UI; low-confidence amber highlight; GH issue for DP upgrade tracks accuracy data.             |
-457	| RitaJS bundle size (~150 KB gzipped)  | Dynamic import (lazy-loaded only when authoring panel opens). Users who never author never download it. |
-458	| RitaJS US-leaning IPA on AUS words    | Curator can edit IPA freely. Common AUS-specific corrections (`dance`, `bath`, `castle`) noted in PR.   |
-459	| IndexedDB quota                       | Drafts <1 KB each; `QuotaExceededError` surfaces a friendly toast and disables Save until cleared.      |
-460	| Cross-device draft transfer friction  | Acceptable for v1. Auto-PR feature solves it later.                                                     |
-461	| Schema drift (draft vs shipped data)  | Zod validation in CLI catches mismatches; field changes require draft-store version bump.               |
-462	
-463	## 12. Naming + file layout
-464	
-465	```text
-466	src/data/words/
-467	├── authoring/
-468	│   ├── engine.ts                  // RitaJS adapter
-469	│   ├── engine.test.ts
-470	│   ├── aligner.ts                 // greedy g→p aligner
-471	│   ├── aligner.test.ts
-472	│   ├── draftStore.ts              // IndexedDB wrapper
-473	│   ├── draftStore.test.ts
-474	│   ├── AuthoringPanel.tsx         // modal / full-screen UI
-475	│   ├── AuthoringPanel.test.tsx
-476	│   ├── AuthoringPanel.stories.tsx
-477	│   ├── DraftsPanel.tsx
-478	│   ├── DraftsPanel.stories.tsx
-479	│   └── arpabet-to-ipa.ts          // static conversion map
-480	├── filter.ts                      // extended for draft merge
-481	├── types.ts                       // extended with DraftEntry, Provenance
-482	└── WordLibraryExplorer.tsx        // entry points + drafts link
-483	
-484	scripts/
-485	├── words-import.ts                // CLI
-486	└── words-import.test.ts
-487	```
-488	
-489	## 13. Acceptance criteria
-490	
-491	The spec is satisfied when all of the following are true:
-492	
-493	1. Searching for a missing word in `WordLibraryExplorer` shows the empty-state CTA.
-494	2. Clicking the CTA (or `+ New word`) opens the authoring modal.
-495	3. For a Rita-known word ("putting"), the modal pre-fills IPA, syllables, level suggestion, and grapheme chips.
-496	4. For a Rita-unknown word, the modal shows the dictionary.com link banner, and Save remains disabled until IPA is filled.
-497	5. Saving a draft persists it to IndexedDB and shows it in subsequent search results with the draft badge.
-498	6. The `Drafts (N)` link opens a panel listing drafts with edit / delete / export controls.
-499	7. Exporting drafts downloads a JSON file matching the §5.4 shape.
-500	8. `yarn words:import <file>` merges entries into the right `core/levelN.json` + `curriculum/aus/levelN.json` files, preserves alphabetical sort, preserves indentation, and rejects duplicates.
-501	9. All new modules have tests written first (TDD).
-502	10. Storybook stories listed in §9.1 exist and render.
-503	11. VR baselines for §9.2 stories are committed.
-504	12. Existing `WordLibraryExplorer` stories and tests still pass.
-505	13. `yarn lint`, `yarn typecheck`, `yarn test`, `yarn build`, `yarn lint:md`, `yarn test:vr` all pass on the PR.
-506	
-507	## 14. References
-508	
-509	- [2026-04-11-phonics-word-library-design.md](./2026-04-11-phonics-word-library-design.md) — original library design (P1 shipped; this spec supersedes the original P2 sketch)
-510	- [RitaJS phones reference](https://www.rednoise.org/rita/reference/phones.html)
-511	- [RitaJS syllables reference](https://www.rednoise.org/rita/reference/RiTa/syllables/index.html)
-512	- [`idb` library](https://github.com/jakearchibald/idb)
+1 # Word Authoring (Make Up New Words) — Design
+2 
+3 > **Status:** Draft v1 · **Owner:** @leocaseiro · **Region focus:** AUS only (v1) · **Builds on:** [2026-04-11-phonics-word-library-design.md](./2026-04-11-phonics-word-library-design.md) (P2 evolution)
+4 > **Scope:** Curator-only authoring of new words via the in-app `WordLibraryExplorer`. Drafts persist to IndexedDB so authoring works on the deployed GitHub Pages build, on mobile, or in dev. A separate `yarn words:import` CLI merges exports into the canonical curriculum JSON files for PR review.
+5 
+6 ## 1. Goal
+7 
+8 Today the `WordLibraryExplorer` is read-only. Searching for a word that isn't in the seeded corpus (~650 AUS words) silently returns no results. The curator (currently the project owner) can't add the missing word from inside the app — they'd have to hand-edit two JSON files, compute IPA + grapheme alignment manually, and pick the right level file by hand.
+9 
+10 This spec adds a **"Make up word"** flow inside the explorer that:
+11 
+12 1. Auto-generates an IPA + syllables + grapheme→phoneme breakdown for any typed word, using RitaJS for phonemes/syllables and a greedy aligner that learns from the existing curriculum.
+13 2. Lets the curator review/edit the breakdown in a focused authoring UI.
+14 3. Saves the result as a draft in IndexedDB, viewable alongside shipped words in the explorer.
+15 4. Exports drafts as a portable JSON file the curator can carry to their dev machine.
+16 5. Provides a Node CLI (`yarn words:import`) that merges exported drafts into the canonical `core/levelN.json` and `curriculum/aus/levelN.json` files for PR review.
+17 
+18 The corpus grows from real authoring sessions (including impromptu ones during demos), without forcing the curator back to a code editor for every entry.
+19 
+20 ## 2. Project context
+21 
+22 This is the **P2 evolution** of the original phonics word library design. The earlier P2 sketch ("Storybook form + Vite middleware") is superseded by this spec. Key shifts from the original sketch:
+23 
+24 | Original P2 sketch                 | This spec                                                |
+25 | ---------------------------------- | -------------------------------------------------------- |
+26 | Storybook-only authoring form      | In-app authoring inside `WordLibraryExplorer`            |
+27 | Vite middleware writes JSON in dev | IndexedDB drafts + portable export + offline CLI import  |
+28 | Dev-machine only                   | Works in GH Pages prod, on mobile, anywhere the app runs |
+29 | Manual breakdown entry             | Auto-generated breakdown via RitaJS + greedy aligner     |
+30 
+31 **P3 (user word bags for parents/teachers)** remains a separate, deferred spec. It will reuse this spec's `engine.ts`, `aligner.ts`, and `draftStore.ts` modules — they are designed with that reuse in mind.
+32 
+33 ## 3. User flow
+34 
+35 ### 3.1 Trigger points
+36 
+37 Two ways to enter the authoring flow:
+38 
+39 1. **Empty-state CTA** — when search returns 0 hits, the empty state shows _"No matches for **`<word>`**. ✨ Make up this word?"_ Clicking opens the authoring modal pre-filled with the typed word.
+40 2. **Always-visible button** — a `+ New word` button next to the search bar opens the authoring modal with an empty word field.
+41 
+42 ### 3.2 Authoring modal
+43 
+44 Presentation: centered modal with backdrop on desktop; full-screen on mobile (no visible backdrop, feels like a page). ESC / system back closes after a confirm-discard prompt if the form is dirty.
+45 
+46 Top-to-bottom layout:
+47 
+48 1. **Word field** — pre-filled if entered via empty-state CTA; editing it re-runs the engine (debounced 400 ms).
+49 2. **Unknown-word banner** — appears iff `RiTa.isKnownWord(word) === false`:
+50    _"RitaJS doesn't know **`<word>`**. Look it up → [Open in dictionary.com](https://www.dictionary.com/browse/<word>)"_ (opens in a new tab). When this banner shows, IPA and graphemes are **not pre-filled** — curator types IPA manually, then the aligner runs on the manual phonemes.
+51 3. **IPA field** — text input, free-edit. Pre-filled from RitaJS when known.
+52 4. **Syllable chips** — `[put][·][ting]` with drag-to-move split markers.
+53 5. **Level selector** — dropdown 1–8. Auto-suggested from highest grapheme level present in the alignment (using existing `GRAPHEMES_BY_LEVEL`). Label shows _"(suggested L3 — highest grapheme used: sh)"_. Curator can override.
+54 6. **Grapheme breakdown row** — horizontal chips, each showing `g` over `p`. Tap a chip to open an inline editor with:
+55    - Letter-range adjusters (extend/shrink the grapheme).
+56    - Phoneme picker (dropdown sourced from existing `PHONEME_CODE_TO_IPA` inventory).
+57    - Low-confidence chips (greedy aligner couldn't find a strong corpus match) get an amber border.
+58 7. **Variants** — optional comma-separated input.
+59 8. **Save draft** / **Cancel** buttons. `Save draft` is disabled (with an inline hint) if the typed word already exists in shipped data — see §5.2.
+60 
+61 ### 3.3 Save → draft visible in explorer
+62 
+63 `Save draft` writes to IndexedDB. The modal closes; a toast confirms _"Draft saved: `<word>`"_. The word now appears in subsequent search results, sorted naturally and badged `✏️ draft (unsynced)` distinct from shipped words' `📚 shipped` badge.
+64 
+65 ### 3.4 Drafts management
+66 
+67 A `Drafts (N)` link in the explorer header opens a drafts panel listing all unsynced drafts (word · level · last edited time · `[Edit]` · `[Delete]`). At the top of the panel: an **`Export drafts (N)`** button that downloads `wordlib-export-<ISO timestamp>.json` via `URL.createObjectURL`.
+68 
+69 ### 3.5 Sync: bringing drafts into the canonical corpus
+70 
+71 The export → import loop is intentionally manual and explicit:
+72 
+73 1. Curator clicks **Export drafts** (in any environment — prod, mobile, dev). Browser downloads a JSON file.
+74 2. Curator transfers the file to their dev machine (AirDrop, email-to-self, iCloud Drive, etc.).
+75 3. On their dev machine inside the project repo:
+76 
+77    ```bash
+78    yarn words:import ~/Downloads/wordlib-export-2026-04-23T22-14-00Z.json
+79    ```
+80 
+81 4. The CLI merges entries into the right `core/levelN.json` + `curriculum/aus/levelN.json` files, preserving sort order and indentation.
+82 5. `git diff` shows the changes; curator commits + opens PR by hand.
+83 
+84 No auto-commit, no auto-push, no GitHub API calls — the curator stays in control of the PR boundary.
+85 
+86 ## 4. Architecture
+87 
+88 Five new modules. Four ship in the browser bundle; one is Node-only.
+89 
+90 | Module                         | Location                    | Bundle  | Responsibility                                                                                                |
+91 | ------------------------------ | --------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+92 | `authoring/engine.ts`          | `src/data/words/authoring/` | Browser | Wraps RitaJS: `generateBreakdown(word) → {ipa, syllables, phonemes, ritaKnown}`. Lazy-imports `rita`. Pure.   |
+93 | `authoring/aligner.ts`         | `src/data/words/authoring/` | Browser | Greedy letter-to-phoneme aligner. Loads g→p frequencies from shipped curriculum at module init. Pure.         |
+94 | `authoring/draftStore.ts`      | `src/data/words/authoring/` | Browser | IndexedDB wrapper (via `idb`). CRUD + export.                                                                 |
+95 | `authoring/AuthoringPanel.tsx` | `src/data/words/authoring/` | Browser | The modal/full-screen review UI. Storybook + VR coverage.                                                     |
+96 | `scripts/words-import.ts`      | `scripts/`                  | Node    | CLI: validates export JSON; merges into `core/*.json` + `curriculum/aus/*.json`; preserves sort + formatting. |
+97 
+98 Existing modules touched (minimal):
+99 
+100 - `WordLibraryExplorer.tsx` — adds the two entry points (empty-state CTA + `+ New word` button); renders the modal; surfaces `Drafts (N)` link.
+101 - `filter.ts` — read-path merges shipped + drafts; results carry `provenance` + optional `draftId`.
+102 - `types.ts` — adds `DraftEntry`, `Provenance`; extends `WordHit` with `provenance` and `draftId?`.
+103 
+104 ### 4.1 Lazy-loading RitaJS
+105 
+106 RitaJS is ~150 KB gzipped. It is **dynamically imported** inside `engine.ts` on first call to `generateBreakdown`. The authoring panel triggers this on open (or earlier on hover, as a perf improvement we may add later). Users who never open the authoring panel never download the RitaJS chunk.
+107 
+108 ### 4.2 Dependency policy
+109 
+110 | Dependency | Where          | Notes                                                                                 |
+111 | ---------- | -------------- | ------------------------------------------------------------------------------------- |
+112 | `rita`     | Browser, lazy  | Phoneme + syllable generation. Bundled in a separate Vite chunk via `import('rita')`. |
+113 | `idb`      | Browser, eager | ~3 KB, promise-based IndexedDB wrapper. Used by `draftStore.ts`.                      |
+114 | `zod`      | Node + Browser | Schema validation for export JSON (already in devDeps).                               |
+115 | `uuid`     | Browser        | Draft IDs. Lightweight; if already present in deps reuse, else add `uuid` v7.         |
+116 
+117 ## 5. Data model
+118 
+119 ### 5.1 New types (`src/data/words/types.ts`)
+120 
+121 ```ts
+122 export type Provenance = 'shipped' | 'draft';
+123 
+124 export interface DraftEntry {
+125   /** UUID v7 string. IndexedDB keyPath. */
+126   id: string;
+127   word: string;
+128   region: 'aus'; // v1 locked; future-extensible
+129   level: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+130   ipa: string;
+131   /** Syllable splits, e.g. ['put', 'ting']. join('') === word. */
+132   syllables: string[];
+133   syllableCount: number;
+134   graphemes: Grapheme[]; // existing { g, p, span? } shape
+135   variants?: string[];
+136   /** True if RitaJS knew the word at authoring time. False → unknown-word banner persists across edits. */
+137   ritaKnown: boolean;
+138   createdAt: string; // ISO timestamp
+139   updatedAt: string; // ISO timestamp
+140 }
+141 
+142 // WordHit gains:
+143 export interface WordHit {
+144   // …existing fields…
+145   provenance: Provenance;
+146   draftId?: string; // present iff provenance === 'draft'
+147 }
+148 ```
+149 
+150 ### 5.2 Conflict policy
+151 
+152 A draft can only exist for a word **not** already in shipped data. The "+ New word" flow checks shipped first; if the word exists, the panel opens that shipped entry in a read-only preview (revising shipped words is out of scope for v1 — see §10).
+153 
+154 This rule is enforced in three places:
+155 
+156 1. The authoring panel's word field — typing a shipped word disables `Save draft` with a hint.
+157 2. `draftStore.saveDraft` — rejects if `[region, word]` collides with a shipped entry (lookup against the in-memory shipped index).
+158 3. The CLI import (`yarn words:import`) — rejects entries that collide with shipped data, with a clear skip message.
+159 
+160 ### 5.3 IndexedDB schema (`authoring/draftStore.ts`)
+161 
+162 - Database name: `basekill-word-drafts`
+163 - Version: `1`
+164 - Object store: `drafts`, `keyPath: 'id'`
+165 - Indexes:
+166   - `byRegionWord` on `[region, word]` — `unique: true`
+167   - `byRegionLevel` on `[region, level]` — non-unique
+168 - Migration policy: explicit `onupgradeneeded` handler keyed off version; v1 creates the store + indexes from scratch.
+169 
+170 ### 5.4 Export file shape
+171 
+172 ```json
+173 {
+174   "version": 1,
+175   "exportedAt": "2026-04-23T22:14:00.000Z",
+176   "drafts": [
+177     {
+178       "word": "putting",
+179       "region": "aus",
+180       "level": 3,
+181       "ipa": "ˈpʊtɪŋ",
+182       "syllables": ["put", "ting"],
+183       "syllableCount": 2,
+184       "graphemes": [
+185         { "g": "p", "p": "p" },
+186         { "g": "u", "p": "ʊ" },
+187         { "g": "tt", "p": "t" },
+188         { "g": "ing", "p": "ɪŋ" }
+189       ],
+190       "ritaKnown": true,
+191       "createdAt": "2026-04-23T21:55:00.000Z",
+192       "updatedAt": "2026-04-23T22:13:42.000Z"
+193     }
+194   ]
+195 }
+196 ```
+197 
+198 The `id` field is intentionally **omitted** from exports — the receiving environment may have unrelated drafts with the same UUID. Identity is keyed on `[region, word]` for import purposes.
+199 
+200 ### 5.5 Read-path merge
+201 
+202 `filter.ts`'s `filterWords()` becomes async-merging:
+203 
+204 1. Load shipped chunks (existing path).
+205 2. Call `draftStore.listDrafts({ region })` in parallel.
+206 3. Apply the same filter predicates (`level`, `syllableCount`, grapheme filters, prefix match) to drafts.
+207 4. Tag each result with `provenance` + optional `draftId`.
+208 5. Sort the unified result set by the same sort key shipped results use.
+209 
+210 Drafts respect every existing filter so the user experience is uniform — searching "put" returns the shipped word "put" and the draft "putting" together if both match.
+211 
+212 ## 6. Auto-alignment engine
+213 
+214 ### 6.1 RitaJS adapter (`authoring/engine.ts`)
+215 
+216 ```ts
+217 export interface Breakdown {
+218   word: string;
+219   ipa: string; // e.g., 'pʊtɪŋ'
+220   syllables: string[]; // e.g., ['put', 'ting']
+221   phonemes: string[]; // ordered, e.g., ['p', 'ʊ', 't', 'ɪ', 'ŋ']
+222   ritaKnown: boolean;
+223 }
+224 
+225 export async function generateBreakdown(
+226   word: string,
+227 ): Promise<Breakdown>;
+228 ```
+229 
+230 Implementation outline:
+231 
+232 1. Lazy-import RitaJS: `const { RiTa } = await import('rita');`
+233 2. `ritaKnown = RiTa.isKnownWord(word)`
+234 3. If `ritaKnown`:
+235    - `RiTa.phones(word, { silent: true })` → ARPABET string e.g. `"p-uh1 t-ih-ng"`
+236    - `RiTa.syllables(word, { silent: true })` → e.g. `"p-uh/t-ih-ng"`
+237    - Convert ARPABET → IPA via static map (~40 entries: `AH→ʌ, UH→ʊ, IH→ɪ, NG→ŋ, …`).
+238    - Strip stress markers; produce `phonemes[]` and `ipa` (concatenated phonemes).
+239    - Derive `syllables[]` from the slash-separated syllable string by mapping phonemes back to letters via the aligner (or, simpler v1: rely on a separate syllable-letter heuristic — see §6.3).
+240 4. If `!ritaKnown`:
+241    - Return `{ word, ipa: '', syllables: [], phonemes: [], ritaKnown: false }`. The UI handles unknown-word UX (dictionary.com link, manual IPA entry).
+242 
+243 ### 6.2 Greedy aligner (`authoring/aligner.ts`)
+244 
+245 ```ts
+246 export interface AlignedGrapheme extends Grapheme {
+247   /** 0–1; lower = aligner less confident. UI flags <0.5 in amber. */
+248   confidence: number;
+249 }
+250 
+251 export function align(
+252   word: string,
+253   phonemes: string[],
+254 ): AlignedGrapheme[];
+255 ```
+256 
+257 Implementation outline:
+258 
+259 1. **At module init**, scan every shipped `curriculum/aus/levelN.json` and build:
+260 
+261    ```ts
+262    const gpFreq = new Map<
+263      string /* grapheme */,
+264      Map<string /* phoneme */, number /* count */>
+265    >();
+266    const knownMultiLetter = new Set<string>(); // 'sh', 'ch', 'th', 'ng', 'oo', 'ee', 'ai', 'oa', 'ck', 'tt', 'ing', 'igh', …
+267    const splitDigraphs = ['a_e', 'i_e', 'o_e', 'u_e', 'e_e'];
+268    ```
+269 
+270    Walk every existing entry's `graphemes[]`; tally each `(g, p)` pair into `gpFreq`; collect any `g.length > 1` into `knownMultiLetter`.
+271 
+272 2. **Greedy match left-to-right** over the word's letters:
+273 
+274    ```text
+275    letterIdx = 0
+276    phonemeIdx = 0
+277    while letterIdx < word.length:
+278      candidates = pick longest-match graphemes starting at letterIdx (max length 4)
+279                   + always include single-letter grapheme as fallback
+280                   + add split-digraph candidates if pattern matches downstream letters
+281      pick the candidate where (candidate.g, phonemes[phonemeIdx]) has highest gpFreq
+282      if no known mapping: pick longest candidate, mark confidence ≈ 0.2
+283      emit { g, p: phonemes[phonemeIdx], span?: <if split-digraph>, confidence }
+284      letterIdx += candidate.g.length (or jump for split digraph)
+285      phonemeIdx += 1
+286    ```
+287 
+288 3. **Silent letters** absorb into the preceding grapheme. After a successful pair, if `letterIdx < word.length` but `phonemeIdx === phonemes.length`, append the remaining letters onto the last emitted grapheme (matches existing `{g:'ld', p:'d'}` pattern in "should").
+289 
+290 4. **Confidence score** per pair:
+291    - Top-frequency grapheme for that phoneme: `1.0`
+292    - Otherwise: `count / max_count_for_phoneme`
+293    - Unseen mapping: `0.2`
+294 
+295 This is intentionally simple. It will misalign on unfamiliar digraphs and on words with non-standard spelling; the chip-edit UI exists precisely for those corrections. A more accurate DP aligner with corpus-learned costs is tracked as a follow-up GH issue (see §10).
+296 
+297 ### 6.3 Syllable-to-letter mapping
+298 
+299 RitaJS gives syllable splits in _phoneme_ space (`"p-uh/t-ih-ng"`); the data model needs `syllables[]` in _letter_ space (`["put", "ting"]`). Strategy for v1:
+300 
+301 1. Run the aligner to get `graphemes[]`.
+302 2. Walk graphemes and phonemes in parallel; whenever a phoneme crosses a syllable boundary in RitaJS's output, place the boundary between the corresponding graphemes in letter space.
+303 
+304 If this proves brittle, fallback: ask the curator to confirm/edit syllable boundaries via the syllable chip UI (already in the design).
+305 
+306 ## 7. CLI: `yarn words:import`
+307 
+308 ### 7.1 Invocation
+309 
+310 ```bash
+311 yarn words:import <path-to-export.json>
+312 ```
+313 
+314 Exits non-zero if any entries fail validation. Idempotent: re-running with an already-imported file surfaces skip warnings, doesn't double-write.
+315 
+316 ### 7.2 Algorithm (per draft entry)
+317 
+318 1. **Validate** against a Zod schema:
+319    - `word` non-empty, lowercase letters only (no whitespace, no proper-noun caps).
+320    - `region` exactly `'aus'` (until other regions are seeded).
+321    - `level` in `1..8`.
+322    - `ipa` non-empty.
+323    - `syllables[].join('') === word`.
+324    - `graphemes[]` non-empty; concatenating `g` values (after expanding split-digraph spans) equals `word`.
+325    - All `p` values are present in the project's phoneme inventory (`PHONEME_CODE_TO_IPA` values).
+326 2. **Check shipped duplicates** — load the relevant `core/level<level>.json` (and adjacent levels if level seems wrong) and reject if `word` already exists. Reject reason printed.
+327 3. **Upsert into `core/level<level>.json`:**
+328    - Build a `WordCore` from the draft (`{ word, syllableCount, syllables }`; copy `variants` if present).
+329    - Append, re-sort alphabetically by `word`, write back with 2-space indent + trailing newline.
+330 4. **Upsert into `curriculum/aus/level<level>.json`:**
+331    - Build a `CurriculumEntry` (`{ word, level, ipa, graphemes }`).
+332    - Append, re-sort alphabetically, write back same formatting.
+333 5. **Summary output:**
+334 
+335    ```text
+336    ✓ putting → core/level3.json, curriculum/aus/level3.json
+337    ✓ should  → core/level4.json, curriculum/aus/level4.json
+338    ⚠ qxz     → skipped: word already exists in core/level5.json
+339 
+340    Imported 2 of 3 entries. Review with `git diff` before committing.
+341    ```
+342 
+343 6. Returns exit code `0` on full success, `1` if any entry failed validation, `2` if file I/O failed.
+344 
+345 ### 7.3 Safety properties
+346 
+347 - **No git operations** — script writes JSON files only. Curator owns the commit.
+348 - **No network** — pure local file I/O.
+349 - **Formatting preserved** — script reads file, mutates the parsed array, writes back with `JSON.stringify(arr, null, 2) + '\n'` to match existing chunk style. Run `yarn fix:md` is not needed (these are JSON, not markdown).
+350 - **Atomic per file** — collect all writes for a level file in memory, write once. If validation fails partway through a batch, files written so far stay; future entries don't write. Summary clarifies which entries succeeded.
+351 
+352 ## 8. UI affordances summary
+353 
+354 | Surface                 | Component                                | New / Modified | Notes                                                                |
+355 | ----------------------- | ---------------------------------------- | -------------- | -------------------------------------------------------------------- |
+356 | Empty-state CTA         | `WordLibraryExplorer.tsx`                | Modified       | Replaces silent "no results" with the CTA shown in §3.1.             |
+357 | `+ New word` button     | `WordLibraryExplorer.tsx`                | Modified       | Sits next to the search bar. Always visible.                         |
+358 | `Drafts (N)` link       | `WordLibraryExplorer.tsx`                | Modified       | Header link. Hidden when `N === 0`.                                  |
+359 | Authoring modal         | `authoring/AuthoringPanel.tsx`           | New            | Modal on desktop, full-screen on mobile.                             |
+360 | Grapheme chip editor    | `authoring/AuthoringPanel.tsx` (sub)     | New            | Inline expansion of a chip; letter-range adjusters + phoneme picker. |
+361 | Drafts panel            | `authoring/DraftsPanel.tsx`              | New            | List + edit/delete + export button.                                  |
+362 | Result card draft badge | `WordLibraryExplorer.tsx` (`ResultCard`) | Modified       | `📚 shipped` vs `✏️ draft (unsynced)`.                               |
+363 
+364 Modal accessibility:
+365 
+366 - Focus trap when open; focus returns to trigger element on close.
+367 - ESC closes after dirty-form confirm.
+368 - ARIA: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing to the modal title.
+369 - Mobile full-screen presentation uses `<dialog>` element for native semantics where supported.
+370 
+371 ## 9. Testing strategy
+372 
+373 Per CLAUDE.md, every module follows red-green-refactor TDD.
+374 
+375 **`authoring/engine.ts`** (`engine.test.ts`):
+376 
+377 - Known word → IPA + syllables + phonemes shape correct.
+378 - Unknown word → `ritaKnown: false`, empty fields.
+379 - ARPABET→IPA map covers all 40 ARPABET symbols.
+380 - RitaJS mocked at module boundary.
+381 
+382 **`authoring/aligner.ts`** (`aligner.test.ts`):
+383 
+384 - Golden fixtures of ~20 shipped words — alignment must reproduce the curated `graphemes[]`.
+385 - Tricky-word table: `should`, `putting`, `cake`, `laugh`, `knight`, `church`, `mouse`.
+386 
+387 **`authoring/draftStore.ts`** (`draftStore.test.ts`):
+388 
+389 - CRUD against `fake-indexeddb`.
+390 - Unique `[region, word]` index enforced.
+391 - `exportDrafts` round-trips through validation.
+392 - Quota-exceeded handled gracefully.
+393 
+394 **`filter.ts`** (extended `filter.test.ts`):
+395 
+396 - Drafts flow through every existing filter.
+397 - Provenance tagged on every result.
+398 - Mixed shipped + draft results sort consistently.
+399 
+400 **`authoring/AuthoringPanel.tsx`** (`AuthoringPanel.test.tsx` + Storybook):
+401 
+402 - Typing → debounced engine call → render.
+403 - Chip edit updates state.
+404 - Save calls `draftStore.saveDraft`.
+405 - Cancel discards (with dirty-confirm).
+406 - Duplicate-of-shipped disables Save.
+407 
+408 **`scripts/words-import.ts`** (`words-import.test.ts`):
+409 
+410 - Tmpdir fixtures: valid import merges + sorts + preserves formatting.
+411 - Duplicate rejection.
+412 - Bad schema rejection.
+413 - Partial failure summary.
+414 - Idempotency on re-run.
+415 
+416 ### 9.1 Storybook
+417 
+418 - `AuthoringPanel/Default` — happy path with "putting" pre-filled.
+419 - `AuthoringPanel/UnknownWord` — Rita-unknown banner + dictionary.com link.
+420 - `AuthoringPanel/LowConfidenceChips` — amber chips on a tricky word.
+421 - `AuthoringPanel/DuplicateOfShipped` — Save disabled with hint.
+422 - `DraftsPanel/Empty` and `DraftsPanel/WithDrafts`.
+423 - `WordLibraryExplorer/EmptyStateCTA` — search returns 0, CTA visible.
+424 - `WordLibraryExplorer/WithDraftBadge` — shipped + draft side by side.
+425 
+426 ### 9.2 Visual regression
+427 
+428 Two viewports per relevant story (mobile + desktop):
+429 
+430 - `AuthoringPanel/Default`
+431 - `AuthoringPanel/UnknownWord`
+432 - `WordLibraryExplorer/WithDraftBadge`
+433 
+434 ### 9.3 Out of testing scope
+435 
+436 - RitaJS itself (third-party dependency).
+437 - IndexedDB browser implementation (`fake-indexeddb` covers behaviour we care about).
+438 - Cross-browser file-download UX (mature browser API).
+439 
+440 ## 10. Out of scope (deferred)
+441 
+442 | Feature                                   | Why deferred                                                                                               |
+443 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+444 | **User word bags (Spec C / P3)**          | Parents/teachers feature. Reuses `engine.ts`, `aligner.ts`, `draftStore.ts` from this spec.                |
+445 | **Editing / revising shipped words**      | Requires conflict-resolution UX and a "promote draft over shipped" policy. New-words-only for v1.          |
+446 | **Multi-region authoring (UK / US / BR)** | None of those curricula are seeded yet. Region locked to `'aus'`. Unlock per region once it has seed data. |
+447 | **GitHub-PR one-click from export**       | Requires PAT auth, secure token storage, security review. Stretch goal after v1 lands.                     |
+448 | **DP aligner with corpus-learned costs**  | Greedy v1 first. GH issue tracks the upgrade based on real-world misalignment data.                        |
+449 | **Bulk import from dictionary / CSV**     | v1 is one-word-at-a-time authoring. Bulk authoring is a separate workflow.                                 |
+450 | **Audio playback of authored draft**      | Already works "for free" — `PhonemeBlender` consumes any entry with `graphemes[]`, which drafts have.      |
+451 
+452 ## 11. Open risks
+453 
+454 | Risk                                  | Mitigation                                                                                              |
+455 | ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+456 | Greedy aligner accuracy on rare words | Chip-edit UI; low-confidence amber highlight; GH issue for DP upgrade tracks accuracy data.             |
+457 | RitaJS bundle size (~150 KB gzipped)  | Dynamic import (lazy-loaded only when authoring panel opens). Users who never author never download it. |
+458 | RitaJS US-leaning IPA on AUS words    | Curator can edit IPA freely. Common AUS-specific corrections (`dance`, `bath`, `castle`) noted in PR.   |
+459 | IndexedDB quota                       | Drafts <1 KB each; `QuotaExceededError` surfaces a friendly toast and disables Save until cleared.      |
+460 | Cross-device draft transfer friction  | Acceptable for v1. Auto-PR feature solves it later.                                                     |
+461 | Schema drift (draft vs shipped data)  | Zod validation in CLI catches mismatches; field changes require draft-store version bump.               |
+462 
+463 ## 12. Naming + file layout
+464 
+465 ```text
+466 src/data/words/
+467 ├── authoring/
+468 │   ├── engine.ts                  // RitaJS adapter
+469 │   ├── engine.test.ts
+470 │   ├── aligner.ts                 // greedy g→p aligner
+471 │   ├── aligner.test.ts
+472 │   ├── draftStore.ts              // IndexedDB wrapper
+473 │   ├── draftStore.test.ts
+474 │   ├── AuthoringPanel.tsx         // modal / full-screen UI
+475 │   ├── AuthoringPanel.test.tsx
+476 │   ├── AuthoringPanel.stories.tsx
+477 │   ├── DraftsPanel.tsx
+478 │   ├── DraftsPanel.stories.tsx
+479 │   └── arpabet-to-ipa.ts          // static conversion map
+480 ├── filter.ts                      // extended for draft merge
+481 ├── types.ts                       // extended with DraftEntry, Provenance
+482 └── WordLibraryExplorer.tsx        // entry points + drafts link
+483 
+484 scripts/
+485 ├── words-import.ts                // CLI
+486 └── words-import.test.ts
+487 ```
+488 
+489 ## 13. Acceptance criteria
+490 
+491 The spec is satisfied when all of the following are true:
+492 
+493 1. Searching for a missing word in `WordLibraryExplorer` shows the empty-state CTA.
+494 2. Clicking the CTA (or `+ New word`) opens the authoring modal.
+495 3. For a Rita-known word ("putting"), the modal pre-fills IPA, syllables, level suggestion, and grapheme chips.
+496 4. For a Rita-unknown word, the modal shows the dictionary.com link banner, and Save remains disabled until IPA is filled.
+497 5. Saving a draft persists it to IndexedDB and shows it in subsequent search results with the draft badge.
+498 6. The `Drafts (N)` link opens a panel listing drafts with edit / delete / export controls.
+499 7. Exporting drafts downloads a JSON file matching the §5.4 shape.
+500 8. `yarn words:import <file>` merges entries into the right `core/levelN.json` + `curriculum/aus/levelN.json` files, preserves alphabetical sort, preserves indentation, and rejects duplicates.
+501 9. All new modules have tests written first (TDD).
+502 10. Storybook stories listed in §9.1 exist and render.
+503 11. VR baselines for §9.2 stories are committed.
+504 12. Existing `WordLibraryExplorer` stories and tests still pass.
+505 13. `yarn lint`, `yarn typecheck`, `yarn test`, `yarn build`, `yarn lint:md`, `yarn test:vr` all pass on the PR.
+506 
+507 ## 14. References
+508 
+509 - [2026-04-11-phonics-word-library-design.md](./2026-04-11-phonics-word-library-design.md) — original library design (P1 shipped; this spec supersedes the original P2 sketch)
+510 - [RitaJS phones reference](https://www.rednoise.org/rita/reference/phones.html)
+511 - [RitaJS syllables reference](https://www.rednoise.org/rita/reference/RiTa/syllables/index.html)
+512 - [`idb` library](https://github.com/jakearchibald/idb)
 513
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:09:35Z)**_
@@ -720,6 +723,7 @@ d9feb71e fix(phoneme-blender): disable loops + unstick iOS drag
 a64797bf fix(phoneme-blender): stop iOS Safari selecting grapheme letters
 c79da4c5 fix(phoneme-blender): suppress Android long-press context menu
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:10:45Z)**_
@@ -731,8 +735,10 @@ Rebase feat/word-authoring onto origin/master
 `git rebase origin/master`
 
 ```text
-Rebasing (1/1)Successfully rebased and updated refs/heads/feat/word-authoring.
+Rebasing (1/1)
+Successfully rebased and updated refs/heads/feat/word-authoring.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:10:47Z)**_
@@ -769,6 +775,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -789,6 +796,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -859,6 +867,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -867,6 +876,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -897,13 +907,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -983,6 +994,7 @@ words.test.ts
 writer.test.ts
 writer.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:10:55Z)**_
@@ -992,79 +1004,80 @@ _**Agent (claude-opus-4-7 2026-04-23 13:10:55Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/src/data/words/types.ts`
 
 ```text
-1	// src/data/words/types.ts
-2	
-3	export type Region = 'aus' | 'uk' | 'us' | 'br';
-4	
-5	export interface WordCore {
-6	  word: string;
-7	  syllableCount: number;
-8	  syllables?: string[];
-9	  variants?: string[];
-10	}
-11	
-12	export interface Grapheme {
-13	  g: string;
-14	  p: string;
-15	  span?: [number, number];
-16	}
-17	
-18	export interface CurriculumEntry {
-19	  word: string;
-20	  level: number;
-21	  ipa: string;
-22	  graphemes: Grapheme[];
-23	}
-24	
-25	export interface WordHit {
-26	  word: string;
-27	  region: Region;
-28	  level: number;
-29	  syllableCount: number;
-30	  syllables?: string[];
-31	  variants?: string[];
-32	  ipa?: string;
-33	  graphemes?: Grapheme[];
-34	}
-35	
-36	export interface WordFilter {
-37	  region: Region;
-38	  level?: number;
-39	  levels?: number[];
-40	  levelRange?: [number, number];
-41	  syllableCountEq?: number;
-42	  syllableCountRange?: [number, number];
-43	  graphemesAllowed?: string[];
-44	  graphemesRequired?: string[];
-45	  phonemesAllowed?: string[];
-46	  phonemesRequired?: string[];
-47	  fallbackToAus?: boolean;
-48	}
-49	
-50	export interface FilterResult {
-51	  hits: WordHit[];
-52	  usedFallback?: { from: Region; to: 'aus' };
-53	}
-54	
-55	export type WordSpellSource = {
-56	  type: 'word-library';
-57	  filter: WordFilter;
-58	  limit?: number;
-59	};
-60	
-61	export type ValidationErrorField =
-62	  | 'word'
-63	  | 'syllables'
-64	  | 'graphemes'
-65	  | 'ipa'
-66	  | 'level';
-67	
-68	export interface ValidationError {
-69	  field: ValidationErrorField;
-70	  message: string;
-71	}
+1 // src/data/words/types.ts
+2 
+3 export type Region = 'aus' | 'uk' | 'us' | 'br';
+4 
+5 export interface WordCore {
+6   word: string;
+7   syllableCount: number;
+8   syllables?: string[];
+9   variants?: string[];
+10 }
+11 
+12 export interface Grapheme {
+13   g: string;
+14   p: string;
+15   span?: [number, number];
+16 }
+17 
+18 export interface CurriculumEntry {
+19   word: string;
+20   level: number;
+21   ipa: string;
+22   graphemes: Grapheme[];
+23 }
+24 
+25 export interface WordHit {
+26   word: string;
+27   region: Region;
+28   level: number;
+29   syllableCount: number;
+30   syllables?: string[];
+31   variants?: string[];
+32   ipa?: string;
+33   graphemes?: Grapheme[];
+34 }
+35 
+36 export interface WordFilter {
+37   region: Region;
+38   level?: number;
+39   levels?: number[];
+40   levelRange?: [number, number];
+41   syllableCountEq?: number;
+42   syllableCountRange?: [number, number];
+43   graphemesAllowed?: string[];
+44   graphemesRequired?: string[];
+45   phonemesAllowed?: string[];
+46   phonemesRequired?: string[];
+47   fallbackToAus?: boolean;
+48 }
+49 
+50 export interface FilterResult {
+51   hits: WordHit[];
+52   usedFallback?: { from: Region; to: 'aus' };
+53 }
+54 
+55 export type WordSpellSource = {
+56   type: 'word-library';
+57   filter: WordFilter;
+58   limit?: number;
+59 };
+60 
+61 export type ValidationErrorField =
+62   | 'word'
+63   | 'syllables'
+64   | 'graphemes'
+65   | 'ipa'
+66   | 'level';
+67 
+68 export interface ValidationError {
+69   field: ValidationErrorField;
+70   message: string;
+71 }
 72
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:10:59Z)**_
@@ -1074,57 +1087,58 @@ _**Agent (claude-opus-4-7 2026-04-23 13:10:59Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/src/data/words/filter.ts`
 
 ```text
-1	import { ALL_REGIONS } from './levels';
-2	import type {
-3	  CurriculumEntry,
-4	  FilterResult,
-5	  Region,
-6	  WordCore,
-7	  WordFilter,
-8	  WordHit,
-9	} from './types';
-10	
-11	const inRange = (
-12	  n: number,
-13	  [min, max]: readonly [number, number],
-14	): boolean => n >= min && n <= max;
-15	
-16	export const entryMatches = (
-17	  hit: WordHit,
-18	  filter: WordFilter,
-19	): boolean => {
-20	  if (hit.region !== filter.region) return false;
-21	
-22	  if (filter.level !== undefined && hit.level !== filter.level)
-23	    return false;
-24	  if (filter.levels && !filter.levels.includes(hit.level)) return false;
-25	  if (filter.levelRange && !inRange(hit.level, filter.levelRange))
-26	    return false;
-27	
-28	  if (
-29	    filter.syllableCountEq !== undefined &&
-30	    hit.syllableCount !== filter.syllableCountEq
-31	  )
-32	    return false;
-33	  if (
-34	    filter.syllableCountRange &&
-35	    !inRange(hit.syllableCount, filter.syllableCountRange)
-36	  )
-37	    return false;
-38	
-39	  const hasGraphemeFilter =
-40	    filter.graphemesAllowed !== undefined ||
-41	    filter.graphemesRequired !== undefined ||
-42	    filter.phonemesAllowed !== undefined ||
-43	    filter.phonemesRequired !== undefined;
-44	
-45	  if (!hasGraphemeFilter) return true;
-46	  if (!hit.graphemes) return false;
-47	
-48	  if (filter.graphemesAllowed) {
-49	    const allowed = new Set(filter.graphemesAllowed);
-50	    if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
+1 import { ALL_REGIONS } from './levels';
+2 import type {
+3   CurriculumEntry,
+4   FilterResult,
+5   Region,
+6   WordCore,
+7   WordFilter,
+8   WordHit,
+9 } from './types';
+10 
+11 const inRange = (
+12   n: number,
+13   [min, max]: readonly [number, number],
+14 ): boolean => n >= min && n <= max;
+15 
+16 export const entryMatches = (
+17   hit: WordHit,
+18   filter: WordFilter,
+19 ): boolean => {
+20   if (hit.region !== filter.region) return false;
+21 
+22   if (filter.level !== undefined && hit.level !== filter.level)
+23     return false;
+24   if (filter.levels && !filter.levels.includes(hit.level)) return false;
+25   if (filter.levelRange && !inRange(hit.level, filter.levelRange))
+26     return false;
+27 
+28   if (
+29     filter.syllableCountEq !== undefined &&
+30     hit.syllableCount !== filter.syllableCountEq
+31   )
+32     return false;
+33   if (
+34     filter.syllableCountRange &&
+35     !inRange(hit.syllableCount, filter.syllableCountRange)
+36   )
+37     return false;
+38 
+39   const hasGraphemeFilter =
+40     filter.graphemesAllowed !== undefined ||
+41     filter.graphemesRequired !== undefined ||
+42     filter.phonemesAllowed !== undefined ||
+43     filter.phonemesRequired !== undefined;
+44 
+45   if (!hasGraphemeFilter) return true;
+46   if (!hit.graphemes) return false;
+47 
+48   if (filter.graphemesAllowed) {
+49     const allowed = new Set(filter.graphemesAllowed);
+50     if (!hit.graphemes.every((g) => allowed.has(g.g))) return false;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:03Z)**_
@@ -1141,6 +1155,7 @@ Get file size and exports
 106:export const __resetChunkCacheForTests = (): void => {
 158:export const filterWords = async (
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:06Z)**_
@@ -1150,92 +1165,93 @@ _**Agent (claude-opus-4-7 2026-04-23 13:11:06Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/src/data/words/filter.ts`
 
 ```text
-100	  }
-101	};
-102	
-103	let coreCache: Map<string, WordCore> | null = null;
-104	const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
-105	
-106	export const __resetChunkCacheForTests = (): void => {
-107	  coreCache = null;
-108	  for (const r of ALL_REGIONS) delete curriculumCache[r];
-109	};
-110	
-111	const loadCore = async (): Promise<Map<string, WordCore>> => {
-112	  if (coreCache) return coreCache;
-113	  const map = new Map<string, WordCore>();
-114	  const chunks = await Promise.all(
-115	    Object.values(coreLoaders).map((load) => load()),
-116	  );
-117	  for (const chunk of chunks) {
-118	    for (const entry of chunk.default) map.set(entry.word, entry);
-119	  }
-120	  coreCache = map;
-121	  return map;
-122	};
-123	
-124	const loadCurriculum = async (
-125	  region: Region,
-126	): Promise<CurriculumEntry[]> => {
-127	  if (curriculumCache[region]) return curriculumCache[region];
-128	  const chunks = await Promise.all(
-129	    Object.values(loadersForRegion(region)).map((load) => load()),
-130	  );
-131	  const flat = chunks.flatMap((c) => c.default);
-132	  curriculumCache[region] = flat;
-133	  return flat;
-134	};
-135	
-136	const joinHits = (
-137	  curriculum: CurriculumEntry[],
-138	  core: Map<string, WordCore>,
-139	  region: Region,
-140	): WordHit[] =>
-141	  curriculum.flatMap((entry) => {
-142	    const c = core.get(entry.word);
-143	    if (!c) return [];
-144	    return [
-145	      {
-146	        word: entry.word,
-147	        region,
-148	        level: entry.level,
-149	        syllableCount: c.syllableCount,
-150	        syllables: c.syllables,
-151	        variants: c.variants,
-152	        ipa: entry.ipa || undefined,
-153	        graphemes: entry.graphemes,
-154	      } as WordHit,
-155	    ];
-156	  });
-157	
-158	export const filterWords = async (
-159	  filter: WordFilter,
-160	): Promise<FilterResult> => {
-161	  const core = await loadCore();
-162	  const curriculum = await loadCurriculum(filter.region);
-163	  const hits = joinHits(curriculum, core, filter.region).filter((h) =>
-164	    entryMatches(h, filter),
-165	  );
-166	
-167	  if (
-168	    hits.length > 0 ||
-169	    filter.region === 'aus' ||
-170	    filter.fallbackToAus === false
-171	  ) {
-172	    return { hits };
-173	  }
-174	
-175	  const ausCurriculum = await loadCurriculum('aus');
-176	  const ausHits = joinHits(ausCurriculum, core, 'aus').filter((h) =>
-177	    entryMatches(h, { ...filter, region: 'aus' }),
-178	  );
-179	  return {
-180	    hits: ausHits,
-181	    usedFallback: { from: filter.region, to: 'aus' },
-182	  };
-183	};
+100   }
+101 };
+102 
+103 let coreCache: Map<string, WordCore> | null = null;
+104 const curriculumCache: Partial<Record<Region, CurriculumEntry[]>> = {};
+105 
+106 export const __resetChunkCacheForTests = (): void => {
+107   coreCache = null;
+108   for (const r of ALL_REGIONS) delete curriculumCache[r];
+109 };
+110 
+111 const loadCore = async (): Promise<Map<string, WordCore>> => {
+112   if (coreCache) return coreCache;
+113   const map = new Map<string, WordCore>();
+114   const chunks = await Promise.all(
+115     Object.values(coreLoaders).map((load) => load()),
+116   );
+117   for (const chunk of chunks) {
+118     for (const entry of chunk.default) map.set(entry.word, entry);
+119   }
+120   coreCache = map;
+121   return map;
+122 };
+123 
+124 const loadCurriculum = async (
+125   region: Region,
+126 ): Promise<CurriculumEntry[]> => {
+127   if (curriculumCache[region]) return curriculumCache[region];
+128   const chunks = await Promise.all(
+129     Object.values(loadersForRegion(region)).map((load) => load()),
+130   );
+131   const flat = chunks.flatMap((c) => c.default);
+132   curriculumCache[region] = flat;
+133   return flat;
+134 };
+135 
+136 const joinHits = (
+137   curriculum: CurriculumEntry[],
+138   core: Map<string, WordCore>,
+139   region: Region,
+140 ): WordHit[] =>
+141   curriculum.flatMap((entry) => {
+142     const c = core.get(entry.word);
+143     if (!c) return [];
+144     return [
+145       {
+146         word: entry.word,
+147         region,
+148         level: entry.level,
+149         syllableCount: c.syllableCount,
+150         syllables: c.syllables,
+151         variants: c.variants,
+152         ipa: entry.ipa || undefined,
+153         graphemes: entry.graphemes,
+154       } as WordHit,
+155     ];
+156   });
+157 
+158 export const filterWords = async (
+159   filter: WordFilter,
+160 ): Promise<FilterResult> => {
+161   const core = await loadCore();
+162   const curriculum = await loadCurriculum(filter.region);
+163   const hits = joinHits(curriculum, core, filter.region).filter((h) =>
+164     entryMatches(h, filter),
+165   );
+166 
+167   if (
+168     hits.length > 0 ||
+169     filter.region === 'aus' ||
+170     filter.fallbackToAus === false
+171   ) {
+172     return { hits };
+173   }
+174 
+175   const ausCurriculum = await loadCurriculum('aus');
+176   const ausHits = joinHits(ausCurriculum, core, 'aus').filter((h) =>
+177     entryMatches(h, { ...filter, region: 'aus' }),
+178   );
+179   return {
+180     hits: ausHits,
+181     usedFallback: { from: filter.region, to: 'aus' },
+182   };
+183 };
 184
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:10Z)**_
@@ -1290,6 +1306,7 @@ level6.json
 level7.json
 level8.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:14Z)**_
@@ -1353,6 +1370,7 @@ Sample core + curriculum JSON shape
       },
       {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:17Z)**_
@@ -1370,6 +1388,7 @@ src/data/words/levels.ts:136:    for (const unit of GRAPHEMES_BY_LEVEL[l] ?? [])
 src/data/words/index.ts:16:  GRAPHEMES_BY_LEVEL,
 src/data/words/tier2-aus-report.md:37:All phonemes come from the `GRAPHEMES_BY_LEVEL` inventory in `levels.ts`. No
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:21Z)**_
@@ -1379,57 +1398,58 @@ _**Agent (claude-opus-4-7 2026-04-23 13:11:21Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/src/data/words/levels.ts`
 
 ```text
-30	 * progression. Source:
-31	 * docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
-32	 * Cumulative sets use `cumulativeGraphemes(level)` below.
-33	 */
-34	export const GRAPHEMES_BY_LEVEL: Record<
-35	  number,
-36	  readonly LevelGraphemeUnit[]
-37	> = {
-38	  1: [
-39	    { g: 's', p: 's' },
-40	    { g: 'a', p: 'æ' },
-41	    { g: 't', p: 't' },
-42	    { g: 'p', p: 'p' },
-43	    { g: 'i', p: 'ɪ' },
-44	    { g: 'n', p: 'n' },
-45	  ],
-46	  2: [
-47	    { g: 'm', p: 'm' },
-48	    { g: 'd', p: 'd' },
-49	    { g: 'g', p: 'g' },
-50	    { g: 'o', p: 'ɒ' },
-51	    { g: 'c', p: 'k' },
-52	    { g: 'k', p: 'k' },
-53	    { g: 'ck', p: 'k' },
-54	    { g: 'e', p: 'e' },
-55	    { g: 'u', p: 'ʌ' },
-56	    { g: 'r', p: 'r' },
-57	  ],
-58	  3: [
-59	    { g: 'b', p: 'b' },
-60	    { g: 'h', p: 'h' },
-61	    { g: 'f', p: 'f' },
-62	    { g: 'l', p: 'l' },
-63	    { g: 'j', p: 'dʒ' },
-64	    { g: 'v', p: 'v' },
-65	    { g: 'w', p: 'w' },
-66	    { g: 'x', p: 'ks' },
-67	    { g: 'y', p: 'j' },
-68	    { g: 'z', p: 'z' },
-69	  ],
-70	  4: [
-71	    { g: 'sh', p: 'ʃ' },
-72	    { g: 'ch', p: 'tʃ' },
-73	    { g: 'th', p: 'θ', name: 'th voiceless' },
-74	    { g: 'th', p: 'ð', name: 'th voiced' },
-75	    { g: 'qu', p: 'kw' },
-76	    { g: 'ng', p: 'ŋ' },
-77	    { g: 'wh', p: 'w' },
-78	    { g: 'ph', p: 'f' },
-79	    { g: 'g', p: 'dʒ', name: 'soft g' },
+30  * progression. Source:
+31  * docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md
+32  * Cumulative sets use `cumulativeGraphemes(level)` below.
+33  */
+34 export const GRAPHEMES_BY_LEVEL: Record<
+35   number,
+36   readonly LevelGraphemeUnit[]
+37 > = {
+38   1: [
+39     { g: 's', p: 's' },
+40     { g: 'a', p: 'æ' },
+41     { g: 't', p: 't' },
+42     { g: 'p', p: 'p' },
+43     { g: 'i', p: 'ɪ' },
+44     { g: 'n', p: 'n' },
+45   ],
+46   2: [
+47     { g: 'm', p: 'm' },
+48     { g: 'd', p: 'd' },
+49     { g: 'g', p: 'g' },
+50     { g: 'o', p: 'ɒ' },
+51     { g: 'c', p: 'k' },
+52     { g: 'k', p: 'k' },
+53     { g: 'ck', p: 'k' },
+54     { g: 'e', p: 'e' },
+55     { g: 'u', p: 'ʌ' },
+56     { g: 'r', p: 'r' },
+57   ],
+58   3: [
+59     { g: 'b', p: 'b' },
+60     { g: 'h', p: 'h' },
+61     { g: 'f', p: 'f' },
+62     { g: 'l', p: 'l' },
+63     { g: 'j', p: 'dʒ' },
+64     { g: 'v', p: 'v' },
+65     { g: 'w', p: 'w' },
+66     { g: 'x', p: 'ks' },
+67     { g: 'y', p: 'j' },
+68     { g: 'z', p: 'z' },
+69   ],
+70   4: [
+71     { g: 'sh', p: 'ʃ' },
+72     { g: 'ch', p: 'tʃ' },
+73     { g: 'th', p: 'θ', name: 'th voiceless' },
+74     { g: 'th', p: 'ð', name: 'th voiced' },
+75     { g: 'qu', p: 'kw' },
+76     { g: 'ng', p: 'ŋ' },
+77     { g: 'wh', p: 'w' },
+78     { g: 'ph', p: 'f' },
+79     { g: 'g', p: 'dʒ', name: 'soft g' },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:24Z)**_
@@ -1474,6 +1494,7 @@ Check existing deps and scripts
 37:    "preinstall": "node scripts/check-node-version.mjs",
 38-    "prepare": "husky"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:29Z)**_
@@ -1489,6 +1510,7 @@ Check specific deps
 ```text
     "tsx": "4.21.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:34Z)**_
@@ -1498,87 +1520,88 @@ _**Agent (claude-opus-4-7 2026-04-23 13:11:34Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/src/data/words/WordLibraryExplorer.tsx`
 
 ```text
-1	import { useEffect, useId, useMemo, useState } from 'react';
-2	import { deriveActiveFilterPills } from './active-filter-pills';
-3	import { filterWords } from './filter';
-4	import { ALL_REGIONS, LEVEL_LABELS } from './levels';
-5	import { playPhoneme } from './phoneme-audio';
-6	import { useChipsVisibleDefault } from './useChipsVisibleDefault';
-7	import type {
-8	  FilterResult,
-9	  Grapheme,
-10	  Region,
-11	  WordFilter,
-12	  WordHit,
-13	} from './types';
-14	import { PhonemeBlender } from '#/components/phoneme-blender/PhonemeBlender';
-15	import { Button } from '#/components/ui/button';
-16	import {
-17	  Card,
-18	  CardContent,
-19	  CardHeader,
-20	  CardTitle,
-21	} from '#/components/ui/card';
-22	import { Input } from '#/components/ui/input';
-23	import { Label } from '#/components/ui/label';
-24	import {
-25	  Select,
-26	  SelectContent,
-27	  SelectItem,
-28	  SelectTrigger,
-29	  SelectValue,
-30	} from '#/components/ui/select';
-31	import {
-32	  Sheet,
-33	  SheetContent,
-34	  SheetHeader,
-35	  SheetTitle,
-36	  SheetTrigger,
-37	} from '#/components/ui/sheet';
-38	import { speak } from '#/lib/speech/SpeechOutput';
-39	import { cn } from '#/lib/utils';
-40	
-41	const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-42	const PAGE_SIZES = [25, 50, 100] as const;
-43	const DEFAULT_PAGE_SIZE = 50;
-44	
-45	type PageSize = (typeof PAGE_SIZES)[number];
-46	
-47	export const matchesWordPrefix = (
-48	  hit: WordHit,
-49	  prefix: string,
-50	): boolean => {
-51	  const q = prefix.trim().toLowerCase();
-52	  if (q === '') return true;
-53	  return hit.word.toLowerCase().startsWith(q);
-54	};
-55	
-56	export const paginate = <T,>(
-57	  items: readonly T[],
-58	  page: number,
-59	  pageSize: number,
-60	): T[] => {
-61	  if (pageSize <= 0) return [];
-62	  const start = Math.max(0, (page - 1) * pageSize);
-63	  return items.slice(start, start + pageSize);
-64	};
-65	
-66	export type PageToken = number | 'ellipsis-left' | 'ellipsis-right';
-67	
-68	export const pageRange = (
-69	  current: number,
-70	  total: number,
-71	): PageToken[] => {
-72	  if (total <= 1) return [1];
-73	  if (total <= 7) {
-74	    return Array.from({ length: total }, (_, i) => i + 1);
-75	  }
-76	  const windowStart = Math.max(2, current - 1);
-77	  const windowEnd = Math.min(total - 1, current + 1);
-78	  const tokens: PageToken[] = [1];
-79	  if (windowStart > 2) tokens.push('ellipsis-left');
-80	  for (let p = windowStart; p <= windowEnd; p += 1) tokens.push(p);
+1 import { useEffect, useId, useMemo, useState } from 'react';
+2 import { deriveActiveFilterPills } from './active-filter-pills';
+3 import { filterWords } from './filter';
+4 import { ALL_REGIONS, LEVEL_LABELS } from './levels';
+5 import { playPhoneme } from './phoneme-audio';
+6 import { useChipsVisibleDefault } from './useChipsVisibleDefault';
+7 import type {
+8   FilterResult,
+9   Grapheme,
+10   Region,
+11   WordFilter,
+12   WordHit,
+13 } from './types';
+14 import { PhonemeBlender } from '#/components/phoneme-blender/PhonemeBlender';
+15 import { Button } from '#/components/ui/button';
+16 import {
+17   Card,
+18   CardContent,
+19   CardHeader,
+20   CardTitle,
+21 } from '#/components/ui/card';
+22 import { Input } from '#/components/ui/input';
+23 import { Label } from '#/components/ui/label';
+24 import {
+25   Select,
+26   SelectContent,
+27   SelectItem,
+28   SelectTrigger,
+29   SelectValue,
+30 } from '#/components/ui/select';
+31 import {
+32   Sheet,
+33   SheetContent,
+34   SheetHeader,
+35   SheetTitle,
+36   SheetTrigger,
+37 } from '#/components/ui/sheet';
+38 import { speak } from '#/lib/speech/SpeechOutput';
+39 import { cn } from '#/lib/utils';
+40 
+41 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+42 const PAGE_SIZES = [25, 50, 100] as const;
+43 const DEFAULT_PAGE_SIZE = 50;
+44 
+45 type PageSize = (typeof PAGE_SIZES)[number];
+46 
+47 export const matchesWordPrefix = (
+48   hit: WordHit,
+49   prefix: string,
+50 ): boolean => {
+51   const q = prefix.trim().toLowerCase();
+52   if (q === '') return true;
+53   return hit.word.toLowerCase().startsWith(q);
+54 };
+55 
+56 export const paginate = <T,>(
+57   items: readonly T[],
+58   page: number,
+59   pageSize: number,
+60 ): T[] => {
+61   if (pageSize <= 0) return [];
+62   const start = Math.max(0, (page - 1) * pageSize);
+63   return items.slice(start, start + pageSize);
+64 };
+65 
+66 export type PageToken = number | 'ellipsis-left' | 'ellipsis-right';
+67 
+68 export const pageRange = (
+69   current: number,
+70   total: number,
+71 ): PageToken[] => {
+72   if (total <= 1) return [1];
+73   if (total <= 7) {
+74     return Array.from({ length: total }, (_, i) => i + 1);
+75   }
+76   const windowStart = Math.max(2, current - 1);
+77   const windowEnd = Math.min(total - 1, current + 1);
+78   const tokens: PageToken[] = [1];
+79   if (windowStart > 2) tokens.push('ellipsis-left');
+80   for (let p = windowStart; p <= windowEnd; p += 1) tokens.push(p);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:37Z)**_
@@ -1593,6 +1616,7 @@ Find empty state in explorer
     1209 src/data/words/WordLibraryExplorer.tsx
 600:  // slice instead of an empty grid.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:41Z)**_
@@ -1606,6 +1630,7 @@ Find empty state rendering
 ```text
 600:  // slice instead of an empty grid.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:11:44Z)**_
@@ -1638,6 +1663,7 @@ Find search input wiring
 278:      {query.trim() !== '' && matches.length > 0 ? (
 279:        <ul className="max-h-40 overflow-auto rounded-lg border border-input bg-popover text-sm">
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:12Z)**_
@@ -1697,6 +1723,7 @@ export default defineConfig({
   },
 });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:17Z)**_
@@ -1720,6 +1747,7 @@ scripts/vr-docker.mjs
 scripts/detect-buckets.test.mjs
 scripts/detect-buckets.mjs
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:23Z)**_
@@ -1729,47 +1757,48 @@ _**Agent (claude-opus-4-7 2026-04-23 13:12:23Z)**_
  `./.claude/worktrees/suspicious-shaw-27a961/scripts/seed-word-library.ts`
 
 ```text
-1	// scripts/seed-word-library.ts
-2	import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-3	import path from 'node:path';
-4	import { fileURLToPath } from 'node:url';
-5	import english from 'hyphenation.en-us';
-6	import Hypher from 'hypher';
-7	import {
-8	  acceptHyphenation,
-9	  makeCurriculumEntry,
-10	  makeWordCore,
-11	  validateEntry,
-12	} from '../src/data/words/builders';
-13	import { graphemePool } from '../src/data/words/levels';
-14	import type {
-15	  CurriculumEntry,
-16	  Grapheme,
-17	  WordCore,
-18	} from '../src/data/words/types';
-19	
-20	// Looser than hypher's default (leftmin 2 / rightmin 3) so two-syllable
-21	// words like `bunny` and `happy` actually split. Stricter than 1/1 to
-22	// avoid orphan-letter tails like `elephant → ele-phan-t`.
-23	const hypher = new Hypher({ ...english, leftmin: 2, rightmin: 2 });
-24	
-25	const hyphenate = (word: string): string[] | undefined =>
-26	  acceptHyphenation(hypher.hyphenate(word));
-27	
-28	const __dirname = path.dirname(fileURLToPath(import.meta.url));
-29	const repoRoot = path.join(__dirname, '..');
-30	const sourceFile = path.join(
-31	  repoRoot,
-32	  'docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md',
-33	);
-34	const wordsDir = path.join(repoRoot, 'src/data/words');
-35	const tier2File = path.join(wordsDir, 'tier2-aus.json');
-36	const reviewFile = path.join(
-37	  repoRoot,
-38	  'docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md',
-39	);
+1 // scripts/seed-word-library.ts
+2 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+3 import path from 'node:path';
+4 import { fileURLToPath } from 'node:url';
+5 import english from 'hyphenation.en-us';
+6 import Hypher from 'hypher';
+7 import {
+8   acceptHyphenation,
+9   makeCurriculumEntry,
+10   makeWordCore,
+11   validateEntry,
+12 } from '../src/data/words/builders';
+13 import { graphemePool } from '../src/data/words/levels';
+14 import type {
+15   CurriculumEntry,
+16   Grapheme,
+17   WordCore,
+18 } from '../src/data/words/types';
+19 
+20 // Looser than hypher's default (leftmin 2 / rightmin 3) so two-syllable
+21 // words like `bunny` and `happy` actually split. Stricter than 1/1 to
+22 // avoid orphan-letter tails like `elephant → ele-phan-t`.
+23 const hypher = new Hypher({ ...english, leftmin: 2, rightmin: 2 });
+24 
+25 const hyphenate = (word: string): string[] | undefined =>
+26   acceptHyphenation(hypher.hyphenate(word));
+27 
+28 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+29 const repoRoot = path.join(__dirname, '..');
+30 const sourceFile = path.join(
+31   repoRoot,
+32   'docs/superpowers/plans/2026-04-11-phonic-word-library_words-list.md',
+33 );
+34 const wordsDir = path.join(repoRoot, 'src/data/words');
+35 const tier2File = path.join(wordsDir, 'tier2-aus.json');
+36 const reviewFile = path.join(
+37   repoRoot,
+38   'docs/superpowers/plans/2026-04-11-phonics-word-library_codegen-review.md',
+39 );
 40
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:26Z)**_
@@ -1785,6 +1814,7 @@ src/test-setup.ts:1:import 'fake-indexeddb/auto';
 src/db/bookmarks-migration.test.ts:68:      // jsdom lacks structuredClone in older Node; fake-indexeddb relies on it.
 src/db/create-database.ts:118: * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:29Z)**_
@@ -1837,6 +1867,7 @@ const COLLECTIONS = {
       1: (oldDoc: Record<string, unknown>) => oldDoc,
     },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:12:36Z)**_
@@ -5414,6 +5445,7 @@ Which approach?
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/.claude/worktrees/suspicious-shaw-27a961/docs/superpowers/plans/2026-04-23-word-authoring.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:19:11Z)**_
@@ -5446,6 +5478,7 @@ src/data/words/tier2-aus-report.md 8ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 4.12s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:19:17Z)**_
@@ -5465,6 +5498,7 @@ Linting: 120 file(s)
 Summary: 0 error(s)
 Done in 1.18s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:19:33Z)**_
@@ -5527,6 +5561,7 @@ Warning: useRouter must be used inside a <RouterProvider> component!
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:19:37Z)**_
@@ -5547,6 +5582,7 @@ Your branch is ahead of 'origin/master' by 2 commits.
 
 nothing to commit, working tree clean
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-23 13:19:49Z)**_

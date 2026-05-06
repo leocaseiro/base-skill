@@ -2,15 +2,19 @@
   {
     "word": "angel",
     "level": 7,
-    "ipa": "æŋel",
+    "ipa": "eɪndʒel",
     "graphemes": [
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
-        "g": "ng",
-        "p": "ŋ"
+        "g": "n",
+        "p": "n"
+      },
+      {
+        "g": "g",
+        "p": "dʒ"
       },
       {
         "g": "e",
@@ -48,11 +52,11 @@
   {
     "word": "apron",
     "level": 7,
-    "ipa": "æprɒn",
+    "ipa": "eɪprɒn",
     "graphemes": [
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "p",
@@ -102,7 +106,7 @@
   {
     "word": "baby",
     "level": 7,
-    "ipa": "bæbiː",
+    "ipa": "beɪbiː",
     "graphemes": [
       {
         "g": "b",
@@ -110,7 +114,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "b",
@@ -125,7 +129,7 @@
   {
     "word": "bacon",
     "level": 7,
-    "ipa": "bækɒn",
+    "ipa": "beɪkɒn",
     "graphemes": [
       {
         "g": "b",
@@ -133,7 +137,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "c",
@@ -171,7 +175,7 @@
   {
     "word": "banjo",
     "level": 7,
-    "ipa": "bændʒɒ",
+    "ipa": "bændʒoʊ",
     "graphemes": [
       {
         "g": "b",
@@ -191,14 +195,14 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       }
     ]
   },
   {
     "word": "basic",
     "level": 7,
-    "ipa": "bæsɪk",
+    "ipa": "beɪsɪk",
     "graphemes": [
       {
         "g": "b",
@@ -206,7 +210,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "s",
@@ -225,7 +229,7 @@
   {
     "word": "be",
     "level": 7,
-    "ipa": "be",
+    "ipa": "biː",
     "graphemes": [
       {
         "g": "b",
@@ -233,7 +237,7 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       }
     ]
   },
@@ -278,7 +282,7 @@
   {
     "word": "blind",
     "level": 7,
-    "ipa": "blɪnd",
+    "ipa": "blaɪnd",
     "graphemes": [
       {
         "g": "b",
@@ -290,7 +294,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "n",
@@ -450,7 +454,7 @@
   {
     "word": "child",
     "level": 7,
-    "ipa": "tʃɪld",
+    "ipa": "tʃaɪld",
     "graphemes": [
       {
         "g": "ch",
@@ -458,7 +462,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "l",
@@ -788,7 +792,7 @@
   {
     "word": "donut",
     "level": 7,
-    "ipa": "dɒnʌt",
+    "ipa": "doʊnʌt",
     "graphemes": [
       {
         "g": "d",
@@ -796,7 +800,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "n",
@@ -849,11 +853,11 @@
   {
     "word": "even",
     "level": 7,
-    "ipa": "even",
+    "ipa": "iːven",
     "graphemes": [
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       },
       {
         "g": "v",
@@ -872,11 +876,11 @@
   {
     "word": "evil",
     "level": 7,
-    "ipa": "evɪl",
+    "ipa": "iːvɪl",
     "graphemes": [
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       },
       {
         "g": "v",
@@ -926,7 +930,7 @@
   {
     "word": "final",
     "level": 7,
-    "ipa": "fɪnæl",
+    "ipa": "faɪnæl",
     "graphemes": [
       {
         "g": "f",
@@ -934,7 +938,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "n",
@@ -953,7 +957,7 @@
   {
     "word": "find",
     "level": 7,
-    "ipa": "fɪnd",
+    "ipa": "faɪnd",
     "graphemes": [
       {
         "g": "f",
@@ -961,7 +965,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "n",
@@ -1041,7 +1045,7 @@
   {
     "word": "focus",
     "level": 7,
-    "ipa": "fɒkʌs",
+    "ipa": "foʊkʌs",
     "graphemes": [
       {
         "g": "f",
@@ -1049,7 +1053,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "c",
@@ -1190,7 +1194,7 @@
   {
     "word": "go",
     "level": 7,
-    "ipa": "gɒ",
+    "ipa": "goʊ",
     "graphemes": [
       {
         "g": "g",
@@ -1198,7 +1202,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       }
     ]
   },
@@ -1228,7 +1232,7 @@
   {
     "word": "he",
     "level": 7,
-    "ipa": "he",
+    "ipa": "hiː",
     "graphemes": [
       {
         "g": "h",
@@ -1236,7 +1240,7 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       }
     ]
   },
@@ -1300,7 +1304,7 @@
   {
     "word": "hotel",
     "level": 7,
-    "ipa": "hɒtel",
+    "ipa": "hoʊtel",
     "graphemes": [
       {
         "g": "h",
@@ -1308,7 +1312,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "t",
@@ -1327,11 +1331,11 @@
   {
     "word": "item",
     "level": 7,
-    "ipa": "ɪtem",
+    "ipa": "aɪtem",
     "graphemes": [
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "t",
@@ -1373,7 +1377,7 @@
   {
     "word": "kind",
     "level": 7,
-    "ipa": "kɪnd",
+    "ipa": "kaɪnd",
     "graphemes": [
       {
         "g": "k",
@@ -1381,7 +1385,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "n",
@@ -1396,7 +1400,7 @@
   {
     "word": "label",
     "level": 7,
-    "ipa": "læbel",
+    "ipa": "leɪbel",
     "graphemes": [
       {
         "g": "l",
@@ -1404,7 +1408,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "b",
@@ -1423,7 +1427,7 @@
   {
     "word": "lady",
     "level": 7,
-    "ipa": "lædiː",
+    "ipa": "leɪdiː",
     "graphemes": [
       {
         "g": "l",
@@ -1431,7 +1435,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "d",
@@ -1465,7 +1469,7 @@
   {
     "word": "later",
     "level": 7,
-    "ipa": "lætɜː",
+    "ipa": "leɪtɜː",
     "graphemes": [
       {
         "g": "l",
@@ -1473,7 +1477,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "t",
@@ -1526,7 +1530,7 @@
   {
     "word": "local",
     "level": 7,
-    "ipa": "lɒkæl",
+    "ipa": "loʊkæl",
     "graphemes": [
       {
         "g": "l",
@@ -1534,7 +1538,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "c",
@@ -1553,7 +1557,7 @@
   {
     "word": "locate",
     "level": 7,
-    "ipa": "lɒkeɪt",
+    "ipa": "loʊkeɪt",
     "graphemes": [
       {
         "g": "l",
@@ -1561,7 +1565,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "c",
@@ -1622,7 +1626,7 @@
   {
     "word": "me",
     "level": 7,
-    "ipa": "me",
+    "ipa": "miː",
     "graphemes": [
       {
         "g": "m",
@@ -1630,14 +1634,14 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       }
     ]
   },
   {
     "word": "mind",
     "level": 7,
-    "ipa": "mɪnd",
+    "ipa": "maɪnd",
     "graphemes": [
       {
         "g": "m",
@@ -1645,7 +1649,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "n",
@@ -1660,7 +1664,7 @@
   {
     "word": "moment",
     "level": 7,
-    "ipa": "mɒment",
+    "ipa": "moʊment",
     "graphemes": [
       {
         "g": "m",
@@ -1668,7 +1672,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "m",
@@ -1725,7 +1729,7 @@
   {
     "word": "naked",
     "level": 7,
-    "ipa": "næked",
+    "ipa": "neɪked",
     "graphemes": [
       {
         "g": "n",
@@ -1733,7 +1737,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "k",
@@ -1771,7 +1775,7 @@
   {
     "word": "no",
     "level": 7,
-    "ipa": "nɒ",
+    "ipa": "noʊ",
     "graphemes": [
       {
         "g": "n",
@@ -1779,14 +1783,14 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       }
     ]
   },
   {
     "word": "pilot",
     "level": 7,
-    "ipa": "pɪlɒt",
+    "ipa": "paɪlɒt",
     "graphemes": [
       {
         "g": "p",
@@ -1794,7 +1798,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "l",
@@ -1855,7 +1859,7 @@
   {
     "word": "poem",
     "level": 7,
-    "ipa": "pɒem",
+    "ipa": "poʊem",
     "graphemes": [
       {
         "g": "p",
@@ -1863,7 +1867,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "e",
@@ -1897,7 +1901,7 @@
   {
     "word": "potato",
     "level": 7,
-    "ipa": "pɒtætɒ",
+    "ipa": "pɒteɪtoʊ",
     "graphemes": [
       {
         "g": "p",
@@ -1913,7 +1917,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "t",
@@ -1921,7 +1925,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       }
     ]
   },
@@ -1970,15 +1974,19 @@
   {
     "word": "quiet",
     "level": 7,
-    "ipa": "kwaɪt",
+    "ipa": "kwaɪet",
     "graphemes": [
       {
         "g": "qu",
         "p": "kw"
       },
       {
-        "g": "ie",
+        "g": "i",
         "p": "aɪ"
+      },
+      {
+        "g": "e",
+        "p": "e"
       },
       {
         "g": "t",
@@ -1989,7 +1997,7 @@
   {
     "word": "raven",
     "level": 7,
-    "ipa": "ræven",
+    "ipa": "reɪven",
     "graphemes": [
       {
         "g": "r",
@@ -1997,7 +2005,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "v",
@@ -2016,7 +2024,7 @@
   {
     "word": "razor",
     "level": 7,
-    "ipa": "ræzɔː",
+    "ipa": "reɪzɔː",
     "graphemes": [
       {
         "g": "r",
@@ -2024,7 +2032,7 @@
       },
       {
         "g": "a",
-        "p": "æ"
+        "p": "eɪ"
       },
       {
         "g": "z",
@@ -2039,7 +2047,7 @@
   {
     "word": "recess",
     "level": 7,
-    "ipa": "reses",
+    "ipa": "riːses",
     "graphemes": [
       {
         "g": "r",
@@ -2047,7 +2055,7 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       },
       {
         "g": "c",
@@ -2066,7 +2074,7 @@
   {
     "word": "robot",
     "level": 7,
-    "ipa": "rɒbɒt",
+    "ipa": "roʊbɒt",
     "graphemes": [
       {
         "g": "r",
@@ -2074,7 +2082,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "b",
@@ -2177,7 +2185,7 @@
   {
     "word": "she",
     "level": 7,
-    "ipa": "ʃe",
+    "ipa": "ʃiː",
     "graphemes": [
       {
         "g": "sh",
@@ -2185,14 +2193,14 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       }
     ]
   },
   {
     "word": "silent",
     "level": 7,
-    "ipa": "sɪlent",
+    "ipa": "saɪlent",
     "graphemes": [
       {
         "g": "s",
@@ -2200,7 +2208,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "l",
@@ -2372,7 +2380,7 @@
   {
     "word": "so",
     "level": 7,
-    "ipa": "sɒ",
+    "ipa": "soʊ",
     "graphemes": [
       {
         "g": "s",
@@ -2380,14 +2388,14 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       }
     ]
   },
   {
     "word": "spider",
     "level": 7,
-    "ipa": "spɪdɜː",
+    "ipa": "spaɪdɜː",
     "graphemes": [
       {
         "g": "s",
@@ -2399,7 +2407,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "d",
@@ -2578,7 +2586,7 @@
   {
     "word": "total",
     "level": 7,
-    "ipa": "tɒtæl",
+    "ipa": "toʊtæl",
     "graphemes": [
       {
         "g": "t",
@@ -2586,7 +2594,7 @@
       },
       {
         "g": "o",
-        "p": "ɒ"
+        "p": "oʊ"
       },
       {
         "g": "t",
@@ -2689,7 +2697,7 @@
   {
     "word": "vegan",
     "level": 7,
-    "ipa": "vegæn",
+    "ipa": "viːgæn",
     "graphemes": [
       {
         "g": "v",
@@ -2697,7 +2705,7 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       },
       {
         "g": "g",
@@ -2716,7 +2724,7 @@
   {
     "word": "we",
     "level": 7,
-    "ipa": "we",
+    "ipa": "wiː",
     "graphemes": [
       {
         "g": "w",
@@ -2724,7 +2732,7 @@
       },
       {
         "g": "e",
-        "p": "e"
+        "p": "iː"
       }
     ]
   },
@@ -2765,7 +2773,7 @@
   {
     "word": "wild",
     "level": 7,
-    "ipa": "wɪld",
+    "ipa": "waɪld",
     "graphemes": [
       {
         "g": "w",
@@ -2773,7 +2781,7 @@
       },
       {
         "g": "i",
-        "p": "ɪ"
+        "p": "aɪ"
       },
       {
         "g": "l",

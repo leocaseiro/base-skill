@@ -15,6 +15,7 @@ This file is for **any** coding agent (Cursor, Claude Code, Copilot, etc.). Pref
   ```
 
 - Never commit to `master`. Branch → PR → merge.
+- **Full paths in output:** When referencing files in messages, always print the **full path including the worktree directory** (e.g. `worktrees/my-branch/docs/plans/foo.md`), not just the repo-relative path. Relative paths are ambiguous across worktrees.
 - Project rules also live in `.cursor/rules/` (see `git-workflow.mdc`); this file and those rules should agree.
 
 ## Before writing a plan

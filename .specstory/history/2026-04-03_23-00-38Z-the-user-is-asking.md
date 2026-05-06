@@ -18,6 +18,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 21:59:26Z)**_
 The user is asking about sound overlap issues when tapping multiple tiles in sequence. Let me analyze the current implementation to understand how sounds are managed.
 
 Looking at `AudioFeedback.ts`:
+
 ```ts
 let currentAudio: HTMLAudioElement | null = null;
 
@@ -67,6 +68,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 21:59:37Z)**_
 Let me trace the exact overlap sequence to understand what's happening:
 
 **When the last correct tile is placed:**
+
 1. `useTileEvaluation.placeTile` → `playSound('correct')` fires immediately
 2. reducer sets `phase = 'round-complete'` synchronously
 3. React re-renders → `useGameSounds` effect runs → `playSound('round-complete')` fires — **this cancels the 'correct' sound immediately**
@@ -90,11 +92,14 @@ The current `currentAudio` singleton handles same-category overlap, but not acro
 ## Options
 
 ### Option A — Hardcoded delays (simplest, brittle)
+
 Add delays: skip `correct` when round ends, wait 2s before TTS fires.
+
 - Pro: Zero architecture change
 - Con: Timing breaks if sound files change, feels clunky
 
 ### Option B — `playSound` returns a Promise (recommended)
+
 Make `AudioFeedback.playSound` return a `Promise<void>` that resolves when the sound ends. Both `useGameSounds` and `useRoundTTS` can sequence off it.
 
 ```ts
@@ -104,13 +109,16 @@ export const whenSoundEnds = (): Promise<void> => { ... }
 ```
 
 Then:
+
 - `useGameSounds` does: await current sound → play `round-complete`
 - `useRoundTTS` does: await sound queue → speak
 - Pro: Accurate timing, sequences correctly, small API surface change
 - Con: `useEffect` can't be async — needs `void effect()` pattern or a `useRef` cancellation guard
 
 ### Option C — Centralized `AudioQueue` service (cleanest long-term)
+
 A single service manages a priority queue of both MP3 and TTS requests, plays them sequentially.
+
 - Pro: No overlap anywhere, prioritization possible
 - Con: Significant refactor of both `AudioFeedback` and `SpeechOutput`
 
@@ -159,6 +167,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:00:43Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -188,6 +197,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -196,6 +206,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -203,6 +214,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -238,6 +250,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -251,6 +264,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -379,6 +393,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -398,6 +413,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -448,17 +464,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -485,6 +502,7 @@ src/components/questions/AudioButton/AudioButton.stories.tsx
 src/components/questions/AudioButton/AudioButton.test.tsx
 src/components/questions/AudioButton/AudioButton.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:49Z)**_
@@ -496,6 +514,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:00:49Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:49Z)**_
@@ -513,6 +532,7 @@ src/lib/speech/SpeechOutput.mdx
 src/lib/speech/SpeechOutput.test.ts
 src/lib/speech/SpeechOutput.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:53Z)**_
@@ -599,6 +619,7 @@ src/lib/theme/css-vars.ts
 src/routeTree.gen.ts
 src/lib/theme/default-tokens.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:53Z)**_
@@ -616,6 +637,7 @@ public/sounds/wrong.mp3
 public/sounds/round-complete.mp3
 public/sounds/.DS_Store
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:56Z)**_
@@ -627,6 +649,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:00:56Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:55Z)**_
@@ -636,37 +659,38 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:00:55Z)**_
  `./src/components/answer-game/useGameTTS.ts`
 
 ```text
-1	import { useCallback } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	export interface GameTTS {
-6	  speakTile: (label: string) => void;
-7	  speakPrompt: (text: string) => void;
-8	}
-9	
-10	export function useGameTTS(): GameTTS {
-11	  const { config } = useAnswerGameContext();
-12	  const { ttsEnabled } = config;
-13	
-14	  const speakTile = useCallback(
-15	    (label: string) => {
-16	      if (ttsEnabled) speak(label);
-17	    },
-18	    [ttsEnabled],
-19	  );
-20	
-21	  const speakPrompt = useCallback(
-22	    (text: string) => {
-23	      if (ttsEnabled) speak(text);
-24	    },
-25	    [ttsEnabled],
-26	  );
-27	
-28	  return { speakTile, speakPrompt };
-29	}
+1 import { useCallback } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 export interface GameTTS {
+6   speakTile: (label: string) => void;
+7   speakPrompt: (text: string) => void;
+8 }
+9 
+10 export function useGameTTS(): GameTTS {
+11   const { config } = useAnswerGameContext();
+12   const { ttsEnabled } = config;
+13 
+14   const speakTile = useCallback(
+15     (label: string) => {
+16       if (ttsEnabled) speak(label);
+17     },
+18     [ttsEnabled],
+19   );
+20 
+21   const speakPrompt = useCallback(
+22     (text: string) => {
+23       if (ttsEnabled) speak(text);
+24     },
+25     [ttsEnabled],
+26   );
+27 
+28   return { speakTile, speakPrompt };
+29 }
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:00:59Z)**_
@@ -684,6 +708,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:01Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:01Z)**_
@@ -697,6 +722,7 @@ worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts
 worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts
 worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:04Z)**_
@@ -706,38 +732,39 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:04Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts`
 
 ```text
-1	type SoundKey =
-2	  | 'correct'
-3	  | 'wrong'
-4	  | 'round-complete'
-5	  | 'game-complete';
-6	
-7	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-8	
-9	const SOUND_PATHS: Record<SoundKey, string> = {
-10	  correct: `${base}/sounds/correct.mp3`,
-11	  wrong: `${base}/sounds/wrong.mp3`,
-12	  'round-complete': `${base}/sounds/round-complete.mp3`,
-13	  'game-complete': `${base}/sounds/game-complete.mp3`,
-14	};
-15	
-16	let currentAudio: HTMLAudioElement | null = null;
-17	
-18	export function playSound(key: SoundKey, volume = 0.8): void {
-19	  if (currentAudio) {
-20	    currentAudio.pause();
-21	    currentAudio = null;
-22	  }
-23	  const audio = new Audio(SOUND_PATHS[key]);
-24	  audio.volume = volume;
-25	  currentAudio = audio;
-26	  void audio.play().catch(() => {
-27	    console.error(`Failed to play sound ${key}`);
-28	    // Ignore autoplay policy errors — sound is best-effort
-29	  });
-30	}
+1 type SoundKey =
+2   | 'correct'
+3   | 'wrong'
+4   | 'round-complete'
+5   | 'game-complete';
+6 
+7 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+8 
+9 const SOUND_PATHS: Record<SoundKey, string> = {
+10   correct: `${base}/sounds/correct.mp3`,
+11   wrong: `${base}/sounds/wrong.mp3`,
+12   'round-complete': `${base}/sounds/round-complete.mp3`,
+13   'game-complete': `${base}/sounds/game-complete.mp3`,
+14 };
+15 
+16 let currentAudio: HTMLAudioElement | null = null;
+17 
+18 export function playSound(key: SoundKey, volume = 0.8): void {
+19   if (currentAudio) {
+20     currentAudio.pause();
+21     currentAudio = null;
+22   }
+23   const audio = new Audio(SOUND_PATHS[key]);
+24   audio.volume = volume;
+25   currentAudio = audio;
+26   void audio.play().catch(() => {
+27     console.error(`Failed to play sound ${key}`);
+28     // Ignore autoplay policy errors — sound is best-effort
+29   });
+30 }
 31
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:04Z)**_
@@ -747,186 +774,187 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:04Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
-6	 * Prototype to hear audio overlap scenarios without playing a full game.
-7	 *
-8	 * Each button fires events at the same timing as the real game:
-9	 * - Tile clicks: ~80 ms apart (rapid tapping)
-10	 * - correct → round-complete: ~50 ms (React render + effect flush)
-11	 * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
-12	 */
-13	
-14	const ScenarioButton = ({
-15	  label,
-16	  description,
-17	  onClick,
-18	}: {
-19	  label: string;
-20	  description: string;
-21	  onClick: () => void;
-22	}) => (
-23	  <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
-24	    <p className="text-sm text-muted-foreground">{description}</p>
-25	    <button
-26	      type="button"
-27	      onClick={onClick}
-28	      className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
-29	    >
-30	      {label}
-31	    </button>
-32	  </div>
-33	);
-34	
-35	/**
-36	 * Scenario 1 — 3 tile clicks in a row (speech in sequence)
-37	 * Simulates a user rapidly clicking 3 letter/number tiles.
-38	 * Each speak() call fires 80 ms after the previous one.
-39	 */
-40	const runScenario1 = () => {
-41	  const words = ['Cat', 'Dog', 'Bird'];
-42	  let delay = 0;
-43	  for (const word of words) {
-44	    setTimeout(() => speak(word), delay);
-45	    delay += 80;
-46	  }
-47	};
-48	
-49	/**
-50	 * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
-51	 * Simulates clicking 2 tiles then immediately dropping the wrong tile.
-52	 * The wrong.mp3 fires 80 ms after the second speak().
-53	 */
-54	const runScenario2 = () => {
-55	  setTimeout(() => speak('Cat'), 0);
-56	  setTimeout(() => speak('Dog'), 80);
-57	  setTimeout(() => playSound('wrong'), 160);
-58	};
-59	
-60	/**
-61	 * Scenario 3 — 1 correct answer + round complete (mp3 + mp3)
-62	 * Simulates placing the last correct tile.
-63	 * correct.mp3 fires immediately; round-complete.mp3 fires ~50 ms later
-64	 * (the React render + useGameSounds effect flush).
-65	 */
-66	const runScenario3 = () => {
-67	  playSound('correct');
-68	  setTimeout(() => playSound('round-complete'), 50);
-69	};
-70	
-71	const AudioPrototype = () => (
-72	  <div className="flex flex-col gap-6 p-6">
-73	    <div>
-74	      <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
-75	      <p className="mt-1 text-sm text-muted-foreground">
-76	        Each scenario fires audio events at the same timing as the real game.
-77	        Press a button to hear the current (overlapping) behaviour.
-78	      </p>
-79	    </div>
-80	
-81	    <div>
-82	      <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
-83	    </div>
-84	    <div>
-85	      <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
-86	    </div>
-87	    <div>
-88	      <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
-89	    </div>
-90	    <div>
-91	      <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
-92	    </div>
-93	
-94	
-95	
-96	    <ScenarioButton
-97	      label="▶ Run Scenario 1"
-98	      description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
-99	      onClick={runScenario1}
-100	    />
-101	
-102	    <ScenarioButton
-103	      label="▶ Run Scenario 2"
-104	      description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
-105	      onClick={runScenario2}
-106	    />
-107	
-108	    <ScenarioButton
-109	      label="▶ Run Scenario 3"
-110	      description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
-111	      onClick={runScenario3}
-112	    />
-113	  </div>
-114	);
-115	
-116	const meta: Meta<typeof AudioPrototype> = {
-117	  component: AudioPrototype,
-118	  title: 'Audio/AudioFeedback Prototype',
-119	  tags: ['autodocs'],
-120	};
-121	export default meta;
-122	
-123	type Story = StoryObj<typeof AudioPrototype>;
-124	
-125	export const Default: Story = {};
-126	
-127	export const CorrectSound: Story = {
-128	  name: 'Correct Sound Effect',
-129	  render: () => (<button onClick={() => playSound('correct')}>correct</button>)
-130	};
-131	export const WrongSound: Story = {
-132	  name: 'Wrong Sound Effect',
-133	  render: () => (<button onClick={() => playSound('wrong')}>wrong</button>)
-134	};
-135	
-136	export const RoundCompleteSound: Story = {
-137	  name: 'Round Complete Sound Effect',
-138	  render: () => (<button onClick={() => playSound('round-complete')}>round complete</button>)
-139	};
-140	
-141	export const GameCompleteSound: Story = {
-142	  name: 'Game complete Sound Effect',
-143	  render: () => (<button onClick={() => playSound('game-complete')}>game complete</button>)
-144	};
-145	
-146	
-147	export const Scenario1TileClicks: Story = {
-148	  name: 'Scenario 1 — 3 tile clicks (speech)',
-149	  render: () => (
-150	    <ScenarioButton
-151	      label="▶ Speak Cat → Dog → Bird"
-152	      description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
-153	      onClick={runScenario1}
-154	    />
-155	  ),
-156	};
-157	
-158	export const Scenario2SpeechAndWrong: Story = {
-159	  name: 'Scenario 2 — Speech + wrong.mp3',
-160	  render: () => (
-161	    <ScenarioButton
-162	      label="▶ Speak Cat → Dog → wrong.mp3"
-163	      description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
-164	      onClick={runScenario2}
-165	    />
-166	  ),
-167	};
-168	
-169	export const Scenario3CorrectAndRoundComplete: Story = {
-170	  name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
-171	  render: () => (
-172	    <ScenarioButton
-173	      label="▶ correct.mp3 → round-complete.mp3"
-174	      description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
-175	      onClick={runScenario3}
-176	    />
-177	  ),
-178	};
+1 import { playSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
+6  * Prototype to hear audio overlap scenarios without playing a full game.
+7  *
+8  * Each button fires events at the same timing as the real game:
+9  * - Tile clicks: ~80 ms apart (rapid tapping)
+10  * - correct → round-complete: ~50 ms (React render + effect flush)
+11  * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
+12  */
+13 
+14 const ScenarioButton = ({
+15   label,
+16   description,
+17   onClick,
+18 }: {
+19   label: string;
+20   description: string;
+21   onClick: () => void;
+22 }) => (
+23   <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
+24     <p className="text-sm text-muted-foreground">{description}</p>
+25     <button
+26       type="button"
+27       onClick={onClick}
+28       className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
+29     >
+30       {label}
+31     </button>
+32   </div>
+33 );
+34 
+35 /**
+36  * Scenario 1 — 3 tile clicks in a row (speech in sequence)
+37  * Simulates a user rapidly clicking 3 letter/number tiles.
+38  * Each speak() call fires 80 ms after the previous one.
+39  */
+40 const runScenario1 = () => {
+41   const words = ['Cat', 'Dog', 'Bird'];
+42   let delay = 0;
+43   for (const word of words) {
+44     setTimeout(() => speak(word), delay);
+45     delay += 80;
+46   }
+47 };
+48 
+49 /**
+50  * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
+51  * Simulates clicking 2 tiles then immediately dropping the wrong tile.
+52  * The wrong.mp3 fires 80 ms after the second speak().
+53  */
+54 const runScenario2 = () => {
+55   setTimeout(() => speak('Cat'), 0);
+56   setTimeout(() => speak('Dog'), 80);
+57   setTimeout(() => playSound('wrong'), 160);
+58 };
+59 
+60 /**
+61  * Scenario 3 — 1 correct answer + round complete (mp3 + mp3)
+62  * Simulates placing the last correct tile.
+63  * correct.mp3 fires immediately; round-complete.mp3 fires ~50 ms later
+64  * (the React render + useGameSounds effect flush).
+65  */
+66 const runScenario3 = () => {
+67   playSound('correct');
+68   setTimeout(() => playSound('round-complete'), 50);
+69 };
+70 
+71 const AudioPrototype = () => (
+72   <div className="flex flex-col gap-6 p-6">
+73     <div>
+74       <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
+75       <p className="mt-1 text-sm text-muted-foreground">
+76         Each scenario fires audio events at the same timing as the real game.
+77         Press a button to hear the current (overlapping) behaviour.
+78       </p>
+79     </div>
+80 
+81     <div>
+82       <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
+83     </div>
+84     <div>
+85       <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
+86     </div>
+87     <div>
+88       <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
+89     </div>
+90     <div>
+91       <button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
+92     </div>
+93 
+94 
+95 
+96     <ScenarioButton
+97       label="▶ Run Scenario 1"
+98       description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
+99       onClick={runScenario1}
+100     />
+101 
+102     <ScenarioButton
+103       label="▶ Run Scenario 2"
+104       description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
+105       onClick={runScenario2}
+106     />
+107 
+108     <ScenarioButton
+109       label="▶ Run Scenario 3"
+110       description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
+111       onClick={runScenario3}
+112     />
+113   </div>
+114 );
+115 
+116 const meta: Meta<typeof AudioPrototype> = {
+117   component: AudioPrototype,
+118   title: 'Audio/AudioFeedback Prototype',
+119   tags: ['autodocs'],
+120 };
+121 export default meta;
+122 
+123 type Story = StoryObj<typeof AudioPrototype>;
+124 
+125 export const Default: Story = {};
+126 
+127 export const CorrectSound: Story = {
+128   name: 'Correct Sound Effect',
+129   render: () => (<button onClick={() => playSound('correct')}>correct</button>)
+130 };
+131 export const WrongSound: Story = {
+132   name: 'Wrong Sound Effect',
+133   render: () => (<button onClick={() => playSound('wrong')}>wrong</button>)
+134 };
+135 
+136 export const RoundCompleteSound: Story = {
+137   name: 'Round Complete Sound Effect',
+138   render: () => (<button onClick={() => playSound('round-complete')}>round complete</button>)
+139 };
+140 
+141 export const GameCompleteSound: Story = {
+142   name: 'Game complete Sound Effect',
+143   render: () => (<button onClick={() => playSound('game-complete')}>game complete</button>)
+144 };
+145 
+146 
+147 export const Scenario1TileClicks: Story = {
+148   name: 'Scenario 1 — 3 tile clicks (speech)',
+149   render: () => (
+150     <ScenarioButton
+151       label="▶ Speak Cat → Dog → Bird"
+152       description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
+153       onClick={runScenario1}
+154     />
+155   ),
+156 };
+157 
+158 export const Scenario2SpeechAndWrong: Story = {
+159   name: 'Scenario 2 — Speech + wrong.mp3',
+160   render: () => (
+161     <ScenarioButton
+162       label="▶ Speak Cat → Dog → wrong.mp3"
+163       description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
+164       onClick={runScenario2}
+165     />
+166   ),
+167 };
+168 
+169 export const Scenario3CorrectAndRoundComplete: Story = {
+170   name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
+171   render: () => (
+172     <ScenarioButton
+173       label="▶ correct.mp3 → round-complete.mp3"
+174       description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
+175       onClick={runScenario3}
+176     />
+177   ),
+178 };
 179
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:07Z)**_
@@ -946,81 +974,82 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:08Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts`
 
 ```text
-1	import {
-2	  afterEach,
-3	  beforeEach,
-4	  describe,
-5	  expect,
-6	  it,
-7	  vi,
-8	} from 'vitest';
-9	
-10	const mockPlay = () => Promise.resolve();
-11	
-12	describe('AudioFeedback', () => {
-13	  beforeEach(() => {
-14	    vi.resetModules();
-15	  });
-16	
-17	  afterEach(() => {
-18	    vi.restoreAllMocks();
-19	  });
-20	
-21	  it('creates an Audio element with the correct src for "correct"', async () => {
-22	    const playSpy = vi.fn().mockImplementation(mockPlay);
-23	    const AudioMock = vi.fn().mockImplementation((src: string) => ({
-24	      src,
-25	      volume: 1,
-26	      play: playSpy,
-27	      pause: vi.fn(),
-28	    }));
-29	    vi.stubGlobal('Audio', AudioMock);
-30	
-31	    const { playSound } = await import('./AudioFeedback');
-32	    playSound('correct');
-33	
-34	    expect(AudioMock).toHaveBeenCalledWith('/sounds/correct.mp3');
-35	    expect(playSpy).toHaveBeenCalled();
-36	  });
-37	
-38	  it('creates an Audio element for "wrong"', async () => {
-39	    const playSpy = vi.fn().mockImplementation(mockPlay);
-40	    const AudioMock = vi.fn().mockImplementation((src: string) => ({
-41	      src,
-42	      volume: 1,
-43	      play: playSpy,
-44	      pause: vi.fn(),
-45	    }));
-46	    vi.stubGlobal('Audio', AudioMock);
-47	
-48	    const { playSound } = await import('./AudioFeedback');
-49	    playSound('wrong');
-50	
-51	    expect(AudioMock).toHaveBeenCalledWith('/sounds/wrong.mp3');
-52	  });
-53	
-54	  it('sets volume on the audio element', async () => {
-55	    let capturedVolume = 1;
-56	    const AudioMock = vi.fn().mockImplementation(() => ({
-57	      set volume(v: number) {
-58	        capturedVolume = v;
-59	      },
-60	      get volume() {
-61	        return capturedVolume;
-62	      },
-63	      play: vi.fn().mockImplementation(mockPlay),
-64	      pause: vi.fn(),
-65	    }));
-66	    vi.stubGlobal('Audio', AudioMock);
-67	
-68	    const { playSound } = await import('./AudioFeedback');
-69	    playSound('correct', 0.5);
-70	
-71	    expect(capturedVolume).toBe(0.5);
-72	  });
-73	});
+1 import {
+2   afterEach,
+3   beforeEach,
+4   describe,
+5   expect,
+6   it,
+7   vi,
+8 } from 'vitest';
+9 
+10 const mockPlay = () => Promise.resolve();
+11 
+12 describe('AudioFeedback', () => {
+13   beforeEach(() => {
+14     vi.resetModules();
+15   });
+16 
+17   afterEach(() => {
+18     vi.restoreAllMocks();
+19   });
+20 
+21   it('creates an Audio element with the correct src for "correct"', async () => {
+22     const playSpy = vi.fn().mockImplementation(mockPlay);
+23     const AudioMock = vi.fn().mockImplementation((src: string) => ({
+24       src,
+25       volume: 1,
+26       play: playSpy,
+27       pause: vi.fn(),
+28     }));
+29     vi.stubGlobal('Audio', AudioMock);
+30 
+31     const { playSound } = await import('./AudioFeedback');
+32     playSound('correct');
+33 
+34     expect(AudioMock).toHaveBeenCalledWith('/sounds/correct.mp3');
+35     expect(playSpy).toHaveBeenCalled();
+36   });
+37 
+38   it('creates an Audio element for "wrong"', async () => {
+39     const playSpy = vi.fn().mockImplementation(mockPlay);
+40     const AudioMock = vi.fn().mockImplementation((src: string) => ({
+41       src,
+42       volume: 1,
+43       play: playSpy,
+44       pause: vi.fn(),
+45     }));
+46     vi.stubGlobal('Audio', AudioMock);
+47 
+48     const { playSound } = await import('./AudioFeedback');
+49     playSound('wrong');
+50 
+51     expect(AudioMock).toHaveBeenCalledWith('/sounds/wrong.mp3');
+52   });
+53 
+54   it('sets volume on the audio element', async () => {
+55     let capturedVolume = 1;
+56     const AudioMock = vi.fn().mockImplementation(() => ({
+57       set volume(v: number) {
+58         capturedVolume = v;
+59       },
+60       get volume() {
+61         return capturedVolume;
+62       },
+63       play: vi.fn().mockImplementation(mockPlay),
+64       pause: vi.fn(),
+65     }));
+66     vi.stubGlobal('Audio', AudioMock);
+67 
+68     const { playSound } = await import('./AudioFeedback');
+69     playSound('correct', 0.5);
+70 
+71     expect(capturedVolume).toBe(0.5);
+72   });
+73 });
 74
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:09Z)**_
@@ -1030,91 +1059,92 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:09Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/speech/SpeechOutput.ts`
 
 ```text
-1	export interface SpeakOptions {
-2	  rate?: number;
-3	  volume?: number;
-4	  voiceName?: string;
-5	  lang?: string;
-6	}
-7	
-8	let pendingVoicesChangedHandler: (() => void) | null = null;
-9	
-10	function getSynth(): SpeechSynthesis | undefined {
-11	  return (
-12	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-13	  ).speechSynthesis;
-14	}
-15	
-16	function buildUtterance(
-17	  text: string,
-18	  options: SpeakOptions,
-19	  voices: SpeechSynthesisVoice[],
-20	): SpeechSynthesisUtterance {
-21	  const u = new SpeechSynthesisUtterance(text);
-22	  if (options.rate !== undefined) u.rate = options.rate;
-23	  if (options.volume !== undefined) u.volume = options.volume;
-24	  if (options.lang !== undefined) u.lang = options.lang;
-25	  const voiceName = options.voiceName ?? 'Daniel';
-26	  const voice = voices.find((v) => v.name === voiceName);
-27	  if (voice) u.voice = voice;
-28	  return u;
-29	}
-30	
-31	export function speak(
-32	  text: string,
-33	  options: SpeakOptions | string = {},
-34	): void {
-35	  const synth = getSynth();
-36	  if (!synth) return;
-37	
-38	  // Normalise: legacy callers may pass a voiceName string
-39	  const opts: SpeakOptions =
-40	    typeof options === 'string' ? { voiceName: options } : options;
-41	
-42	  synth.cancel();
-43	
-44	  const voices = synth.getVoices();
-45	
-46	  if (voices.length > 0) {
-47	    synth.speak(buildUtterance(text, opts, voices));
-48	    return;
-49	  }
-50	
-51	  // Voices not loaded yet — defer until voiceschanged fires
-52	  if (pendingVoicesChangedHandler) {
-53	    synth.removeEventListener(
-54	      'voiceschanged',
-55	      pendingVoicesChangedHandler,
-56	    );
-57	  }
-58	  const handler = () => {
-59	    pendingVoicesChangedHandler = null;
-60	    synth.removeEventListener('voiceschanged', handler);
-61	    const loadedVoices = synth.getVoices();
-62	    synth.speak(buildUtterance(text, opts, loadedVoices));
-63	  };
-64	  pendingVoicesChangedHandler = handler;
-65	  synth.addEventListener('voiceschanged', handler);
-66	}
-67	
-68	export function cancelSpeech(): void {
-69	  const synth = getSynth();
-70	  if (!synth) return;
-71	  if (pendingVoicesChangedHandler) {
-72	    synth.removeEventListener(
-73	      'voiceschanged',
-74	      pendingVoicesChangedHandler,
-75	    );
-76	    pendingVoicesChangedHandler = null;
-77	  }
-78	  synth.cancel();
-79	}
-80	
-81	export function isSpeechOutputAvailable(): boolean {
-82	  return !!getSynth();
-83	}
+1 export interface SpeakOptions {
+2   rate?: number;
+3   volume?: number;
+4   voiceName?: string;
+5   lang?: string;
+6 }
+7 
+8 let pendingVoicesChangedHandler: (() => void) | null = null;
+9 
+10 function getSynth(): SpeechSynthesis | undefined {
+11   return (
+12     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+13   ).speechSynthesis;
+14 }
+15 
+16 function buildUtterance(
+17   text: string,
+18   options: SpeakOptions,
+19   voices: SpeechSynthesisVoice[],
+20 ): SpeechSynthesisUtterance {
+21   const u = new SpeechSynthesisUtterance(text);
+22   if (options.rate !== undefined) u.rate = options.rate;
+23   if (options.volume !== undefined) u.volume = options.volume;
+24   if (options.lang !== undefined) u.lang = options.lang;
+25   const voiceName = options.voiceName ?? 'Daniel';
+26   const voice = voices.find((v) => v.name === voiceName);
+27   if (voice) u.voice = voice;
+28   return u;
+29 }
+30 
+31 export function speak(
+32   text: string,
+33   options: SpeakOptions | string = {},
+34 ): void {
+35   const synth = getSynth();
+36   if (!synth) return;
+37 
+38   // Normalise: legacy callers may pass a voiceName string
+39   const opts: SpeakOptions =
+40     typeof options === 'string' ? { voiceName: options } : options;
+41 
+42   synth.cancel();
+43 
+44   const voices = synth.getVoices();
+45 
+46   if (voices.length > 0) {
+47     synth.speak(buildUtterance(text, opts, voices));
+48     return;
+49   }
+50 
+51   // Voices not loaded yet — defer until voiceschanged fires
+52   if (pendingVoicesChangedHandler) {
+53     synth.removeEventListener(
+54       'voiceschanged',
+55       pendingVoicesChangedHandler,
+56     );
+57   }
+58   const handler = () => {
+59     pendingVoicesChangedHandler = null;
+60     synth.removeEventListener('voiceschanged', handler);
+61     const loadedVoices = synth.getVoices();
+62     synth.speak(buildUtterance(text, opts, loadedVoices));
+63   };
+64   pendingVoicesChangedHandler = handler;
+65   synth.addEventListener('voiceschanged', handler);
+66 }
+67 
+68 export function cancelSpeech(): void {
+69   const synth = getSynth();
+70   if (!synth) return;
+71   if (pendingVoicesChangedHandler) {
+72     synth.removeEventListener(
+73       'voiceschanged',
+74       pendingVoicesChangedHandler,
+75     );
+76     pendingVoicesChangedHandler = null;
+77   }
+78   synth.cancel();
+79 }
+80 
+81 export function isSpeechOutputAvailable(): boolean {
+82   return !!getSynth();
+83 }
 84
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:11Z)**_
@@ -1152,6 +1182,7 @@ worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluat
 worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx
 worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:17Z)**_
@@ -1161,30 +1192,31 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:17Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts`
 
 ```text
-1	import { useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import type { AnswerGamePhase } from './types';
-4	import { playSound } from '@/lib/audio/AudioFeedback';
-5	
-6	export const useGameSounds = (): void => {
-7	  const { phase } = useAnswerGameContext();
-8	  const prevPhaseRef = useRef<AnswerGamePhase>(phase);
-9	
-10	  useEffect(() => {
-11	    const prev = prevPhaseRef.current;
-12	    prevPhaseRef.current = phase;
-13	
-14	    if (phase === prev) return;
-15	
-16	    if (phase === 'round-complete') {
-17	      playSound('round-complete');
-18	    } else if (phase === 'game-over') {
-19	      playSound('game-complete');
-20	    }
-21	  }, [phase]);
-22	};
+1 import { useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import type { AnswerGamePhase } from './types';
+4 import { playSound } from '@/lib/audio/AudioFeedback';
+5 
+6 export const useGameSounds = (): void => {
+7   const { phase } = useAnswerGameContext();
+8   const prevPhaseRef = useRef<AnswerGamePhase>(phase);
+9 
+10   useEffect(() => {
+11     const prev = prevPhaseRef.current;
+12     prevPhaseRef.current = phase;
+13 
+14     if (phase === prev) return;
+15 
+16     if (phase === 'round-complete') {
+17       playSound('round-complete');
+18     } else if (phase === 'game-over') {
+19       playSound('game-complete');
+20     }
+21   }, [phase]);
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:18Z)**_
@@ -1194,23 +1226,24 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:18Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.ts`
 
 ```text
-1	import { useEffect } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useGameTTS } from './useGameTTS';
-4	
-5	export const useRoundTTS = (prompt: string): void => {
-6	  const { roundIndex, config } = useAnswerGameContext();
-7	  const { speakPrompt } = useGameTTS();
-8	
-9	  useEffect(() => {
-10	    if (!config.ttsEnabled) return;
-11	    if (!prompt) return;
-12	    speakPrompt(prompt);
-13	    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit speakPrompt and prompt to only re-speak on round change
-14	  }, [roundIndex, config.ttsEnabled]);
-15	};
+1 import { useEffect } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useGameTTS } from './useGameTTS';
+4 
+5 export const useRoundTTS = (prompt: string): void => {
+6   const { roundIndex, config } = useAnswerGameContext();
+7   const { speakPrompt } = useGameTTS();
+8 
+9   useEffect(() => {
+10     if (!config.ttsEnabled) return;
+11     if (!prompt) return;
+12     speakPrompt(prompt);
+13     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit speakPrompt and prompt to only re-speak on round change
+14   }, [roundIndex, config.ttsEnabled]);
+15 };
 16
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:01:18Z)**_
@@ -1220,75 +1253,76 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:01:18Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { playSound } from '@/lib/audio/AudioFeedback';
-5	import { getGameEventBus } from '@/lib/game-event-bus';
-6	
-7	const AUTO_EJECT_DELAY_MS = 1000;
-8	
-9	export interface TileEvaluation {
-10	  placeTile: (tileId: string, zoneIndex: number) => void;
-11	}
-12	
-13	export function useTileEvaluation(): TileEvaluation {
-14	  const state = useAnswerGameContext();
-15	  const dispatch = useAnswerGameDispatch();
-16	  const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-17	    null,
-18	  );
-19	
-20	  const clearEjectionTimer = useCallback(() => {
-21	    if (ejectionTimerRef.current !== null) {
-22	      clearTimeout(ejectionTimerRef.current);
-23	      ejectionTimerRef.current = null;
-24	    }
-25	  }, []);
-26	
-27	  useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
-28	
-29	  const placeTile = useCallback(
-30	    (tileId: string, zoneIndex: number) => {
-31	      clearEjectionTimer();
-32	
-33	      const tile = state.allTiles.find((t) => t.id === tileId);
-34	      const zone = state.zones[zoneIndex];
-35	      if (!tile || !zone) return;
-36	
-37	      const correct = tile.value === zone.expectedValue;
-38	      playSound(correct ? 'correct' : 'wrong', 0.8);
-39	      dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
-40	
-41	      getGameEventBus().emit({
-42	        type: 'game:evaluate',
-43	        gameId: state.config.gameId,
-44	        sessionId: '',
-45	        profileId: '',
-46	        timestamp: Date.now(),
-47	        roundIndex: state.roundIndex,
-48	        answer: tileId,
-49	        correct,
-50	        nearMiss: false,
-51	      });
-52	
-53	      if (
-54	        !correct &&
-55	        state.config.wrongTileBehavior === 'lock-auto-eject'
-56	      ) {
-57	        ejectionTimerRef.current = setTimeout(() => {
-58	          dispatch({ type: 'EJECT_TILE', zoneIndex });
-59	          ejectionTimerRef.current = null;
-60	        }, AUTO_EJECT_DELAY_MS);
-61	      }
-62	    },
-63	    [state, dispatch, clearEjectionTimer],
-64	  );
-65	
-66	  return { placeTile };
-67	}
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { playSound } from '@/lib/audio/AudioFeedback';
+5 import { getGameEventBus } from '@/lib/game-event-bus';
+6 
+7 const AUTO_EJECT_DELAY_MS = 1000;
+8 
+9 export interface TileEvaluation {
+10   placeTile: (tileId: string, zoneIndex: number) => void;
+11 }
+12 
+13 export function useTileEvaluation(): TileEvaluation {
+14   const state = useAnswerGameContext();
+15   const dispatch = useAnswerGameDispatch();
+16   const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+17     null,
+18   );
+19 
+20   const clearEjectionTimer = useCallback(() => {
+21     if (ejectionTimerRef.current !== null) {
+22       clearTimeout(ejectionTimerRef.current);
+23       ejectionTimerRef.current = null;
+24     }
+25   }, []);
+26 
+27   useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
+28 
+29   const placeTile = useCallback(
+30     (tileId: string, zoneIndex: number) => {
+31       clearEjectionTimer();
+32 
+33       const tile = state.allTiles.find((t) => t.id === tileId);
+34       const zone = state.zones[zoneIndex];
+35       if (!tile || !zone) return;
+36 
+37       const correct = tile.value === zone.expectedValue;
+38       playSound(correct ? 'correct' : 'wrong', 0.8);
+39       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
+40 
+41       getGameEventBus().emit({
+42         type: 'game:evaluate',
+43         gameId: state.config.gameId,
+44         sessionId: '',
+45         profileId: '',
+46         timestamp: Date.now(),
+47         roundIndex: state.roundIndex,
+48         answer: tileId,
+49         correct,
+50         nearMiss: false,
+51       });
+52 
+53       if (
+54         !correct &&
+55         state.config.wrongTileBehavior === 'lock-auto-eject'
+56       ) {
+57         ejectionTimerRef.current = setTimeout(() => {
+58           dispatch({ type: 'EJECT_TILE', zoneIndex });
+59           ejectionTimerRef.current = null;
+60         }, AUTO_EJECT_DELAY_MS);
+61       }
+62     },
+63     [state, dispatch, clearEjectionTimer],
+64   );
+65 
+66   return { placeTile };
+67 }
 68
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:03:17Z)**_
@@ -1316,13 +1350,16 @@ Now I have the full picture. Let me trace the exact overlap issue:
 The solution is Option B — making `playSound` return a `Promise<void>` and using `whenSoundEnds()` to properly sequence the audio events. I need to modify `AudioFeedback.ts` to add an `onended` callback that tracks when audio finishes...
 
 Still implementing audio sequencing... a `whenSoundEnds()` function that returns a Promise resolving when the current audio ends (or immediately if nothing playing)
+
 - Make `playSound` return a `Promise<void>` that resolves when the sound ends
 
 **`useGameSounds.ts` changes:**
+
 - After `phase === 'round-complete'`, wait for any currently playing sound to finish, then play `round-complete`
 - Since useEffect can't be async, use `void whenSoundEnds().then(() => playSound(...))`
 
 **`useRoundTTS.ts` changes:**
+
 - Wait for the audio to finish before speaking
 - `void whenSoundEnds().then(() => speakPrompt(prompt))`
 
@@ -1382,240 +1419,241 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:03:18Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildNumeralRound } from '../build-numeral-round';
-5	import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
-6	import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
-7	import type { NumberMatchConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
-23	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	interface NumberMatchProps {
-27	  config: NumberMatchConfig;
-28	}
-29	
-30	const NumberMatchSession = ({
-31	  numberMatchConfig,
-32	  roundOrder,
-33	  onRestartSession,
-34	}: {
-35	  numberMatchConfig: NumberMatchConfig;
-36	  roundOrder: readonly number[];
-37	  onRestartSession: () => void;
-38	}) => {
-39	  const { t } = useTranslation('games');
-40	  const [showInstructions, setShowInstructions] = useState(true);
-41	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-42	  const dispatch = useAnswerGameDispatch();
-43	  useGameSounds();
-44	  const navigate = useNavigate();
-45	  const { locale } = useParams({ from: '/$locale' });
-46	  const completionToken = useRef(0);
-47	
-48	  const configRoundIndex = roundOrder[roundIndex];
-49	  const round =
-50	    configRoundIndex === undefined
-51	      ? undefined
-52	      : numberMatchConfig.rounds[configRoundIndex];
-53	
-54	  useRoundTTS(String(round?.value ?? ''));
-55	
-56	  const handleHome = () => {
-57	    void navigate({ to: '/$locale', params: { locale } });
-58	  };
-59	
-60	  const handlePlayAgain = () => {
-61	    onRestartSession();
-62	  };
-63	
-64	  useEffect(() => {
-65	    if (phase !== 'round-complete') return;
-66	
-67	    const token = ++completionToken.current;
-68	    const delayMs = 750;
-69	    const timer = globalThis.setTimeout(() => {
-70	      if (completionToken.current !== token) return;
-71	
-72	      const isLastRound = roundIndex >= roundOrder.length - 1;
-73	      if (isLastRound) {
-74	        dispatch({ type: 'COMPLETE_GAME' });
-75	        return;
-76	      }
-77	
-78	      const nextConfigIndex = roundOrder[roundIndex + 1];
-79	      const nextRound =
-80	        nextConfigIndex === undefined
-81	          ? undefined
-82	          : numberMatchConfig.rounds[nextConfigIndex];
-83	      const value = nextRound?.value;
-84	      if (value === undefined) {
-85	        dispatch({ type: 'COMPLETE_GAME' });
-86	        return;
-87	      }
-88	      const { tiles, zones } = buildNumeralRound(value, {
-89	        tileBankMode: numberMatchConfig.tileBankMode,
-90	        distractorCount: numberMatchConfig.distractorCount,
-91	        range: numberMatchConfig.range,
-92	      });
-93	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-94	    }, delayMs);
-95	
-96	    return () => {
-97	      globalThis.clearTimeout(timer);
-98	    };
-99	  }, [
-100	    phase,
-101	    roundIndex,
-102	    dispatch,
-103	    roundOrder,
-104	    numberMatchConfig.rounds,
-105	    numberMatchConfig.tileBankMode,
-106	    numberMatchConfig.distractorCount,
-107	    numberMatchConfig.range,
-108	  ]);
-109	
-110	  if (showInstructions) {
-111	    return (
-112	      <InstructionsOverlay
-113	        text={t('instructions.number-match')}
-114	        onStart={() => setShowInstructions(false)}
-115	        ttsEnabled={numberMatchConfig.ttsEnabled}
-116	      />
-117	    );
-118	  }
-119	
-120	  if (!round) return null;
-121	
-122	  const showTextQuestion =
-123	    numberMatchConfig.mode === 'numeral-to-group' ||
-124	    numberMatchConfig.mode === 'numeral-to-word' ||
-125	    numberMatchConfig.mode === 'word-to-numeral';
-126	
-127	  return (
-128	    <>
-129	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-130	        <AnswerGame.Question>
-131	          {showTextQuestion ? (
-132	            <TextQuestion text={String(round.value)} />
-133	          ) : (
-134	            <DotGroupQuestion
-135	              count={round.value}
-136	              prompt={String(round.value)}
-137	            />
-138	          )}
-139	          <AudioButton prompt={String(round.value)} />
-140	        </AnswerGame.Question>
-141	        <AnswerGame.Answer>
-142	          <MatchingPairZones />
-143	        </AnswerGame.Answer>
-144	        <AnswerGame.Choices>
-145	          <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
-146	        </AnswerGame.Choices>
-147	      </div>
-148	      <ScoreAnimation visible={phase === 'round-complete'} />
-149	      {phase === 'game-over' ? (
-150	        <GameOverOverlay
-151	          retryCount={retryCount}
-152	          onPlayAgain={handlePlayAgain}
-153	          onHome={handleHome}
-154	        />
-155	      ) : null}
-156	    </>
-157	  );
-158	};
-159	
-160	export const NumberMatch = ({ config }: NumberMatchProps) => {
-161	  const roundsInOrder = config.roundsInOrder === true;
-162	  const [sessionEpoch, setSessionEpoch] = useState(0);
-163	
-164	  const roundOrder = useMemo(() => {
-165	    void sessionEpoch;
-166	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-167	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-168	
-169	  const firstConfigIndex = roundOrder[0];
-170	  const round0 =
-171	    firstConfigIndex === undefined
-172	      ? undefined
-173	      : config.rounds[firstConfigIndex];
-174	  const roundValue = round0?.value;
-175	
-176	  const { tiles, zones } = useMemo(() => {
-177	    if (roundValue === undefined) {
-178	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-179	    }
-180	    return buildNumeralRound(roundValue, {
-181	      tileBankMode: config.tileBankMode,
-182	      distractorCount: config.distractorCount,
-183	      range: config.range,
-184	    });
-185	  }, [
-186	    roundValue,
-187	    config.tileBankMode,
-188	    config.distractorCount,
-189	    config.range,
-190	  ]);
-191	
-192	  const answerGameConfig = useMemo(
-193	    (): AnswerGameConfig => ({
-194	      gameId: config.gameId,
-195	      inputMethod: config.inputMethod,
-196	      wrongTileBehavior: config.wrongTileBehavior,
-197	      tileBankMode: config.tileBankMode,
-198	      distractorCount: config.distractorCount,
-199	      totalRounds: config.rounds.length,
-200	      roundsInOrder: config.roundsInOrder,
-201	      ttsEnabled: config.ttsEnabled,
-202	      initialTiles: tiles,
-203	      initialZones: zones,
-204	    }),
-205	    [
-206	      config.gameId,
-207	      config.inputMethod,
-208	      config.wrongTileBehavior,
-209	      config.tileBankMode,
-210	      config.distractorCount,
-211	      config.rounds.length,
-212	      config.roundsInOrder,
-213	      config.ttsEnabled,
-214	      tiles,
-215	      zones,
-216	    ],
-217	  );
-218	
-219	  if (!round0) return null;
-220	
-221	  return (
-222	    <AnswerGame config={answerGameConfig}>
-223	      <NumberMatchSession
-224	        numberMatchConfig={config}
-225	        roundOrder={roundOrder}
-226	        onRestartSession={() => {
-227	          setSessionEpoch((e) => e + 1);
-228	        }}
-229	      />
-230	    </AnswerGame>
-231	  );
-232	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildNumeralRound } from '../build-numeral-round';
+5 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
+6 import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
+7 import type { NumberMatchConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
+23 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 interface NumberMatchProps {
+27   config: NumberMatchConfig;
+28 }
+29 
+30 const NumberMatchSession = ({
+31   numberMatchConfig,
+32   roundOrder,
+33   onRestartSession,
+34 }: {
+35   numberMatchConfig: NumberMatchConfig;
+36   roundOrder: readonly number[];
+37   onRestartSession: () => void;
+38 }) => {
+39   const { t } = useTranslation('games');
+40   const [showInstructions, setShowInstructions] = useState(true);
+41   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+42   const dispatch = useAnswerGameDispatch();
+43   useGameSounds();
+44   const navigate = useNavigate();
+45   const { locale } = useParams({ from: '/$locale' });
+46   const completionToken = useRef(0);
+47 
+48   const configRoundIndex = roundOrder[roundIndex];
+49   const round =
+50     configRoundIndex === undefined
+51       ? undefined
+52       : numberMatchConfig.rounds[configRoundIndex];
+53 
+54   useRoundTTS(String(round?.value ?? ''));
+55 
+56   const handleHome = () => {
+57     void navigate({ to: '/$locale', params: { locale } });
+58   };
+59 
+60   const handlePlayAgain = () => {
+61     onRestartSession();
+62   };
+63 
+64   useEffect(() => {
+65     if (phase !== 'round-complete') return;
+66 
+67     const token = ++completionToken.current;
+68     const delayMs = 750;
+69     const timer = globalThis.setTimeout(() => {
+70       if (completionToken.current !== token) return;
+71 
+72       const isLastRound = roundIndex >= roundOrder.length - 1;
+73       if (isLastRound) {
+74         dispatch({ type: 'COMPLETE_GAME' });
+75         return;
+76       }
+77 
+78       const nextConfigIndex = roundOrder[roundIndex + 1];
+79       const nextRound =
+80         nextConfigIndex === undefined
+81           ? undefined
+82           : numberMatchConfig.rounds[nextConfigIndex];
+83       const value = nextRound?.value;
+84       if (value === undefined) {
+85         dispatch({ type: 'COMPLETE_GAME' });
+86         return;
+87       }
+88       const { tiles, zones } = buildNumeralRound(value, {
+89         tileBankMode: numberMatchConfig.tileBankMode,
+90         distractorCount: numberMatchConfig.distractorCount,
+91         range: numberMatchConfig.range,
+92       });
+93       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+94     }, delayMs);
+95 
+96     return () => {
+97       globalThis.clearTimeout(timer);
+98     };
+99   }, [
+100     phase,
+101     roundIndex,
+102     dispatch,
+103     roundOrder,
+104     numberMatchConfig.rounds,
+105     numberMatchConfig.tileBankMode,
+106     numberMatchConfig.distractorCount,
+107     numberMatchConfig.range,
+108   ]);
+109 
+110   if (showInstructions) {
+111     return (
+112       <InstructionsOverlay
+113         text={t('instructions.number-match')}
+114         onStart={() => setShowInstructions(false)}
+115         ttsEnabled={numberMatchConfig.ttsEnabled}
+116       />
+117     );
+118   }
+119 
+120   if (!round) return null;
+121 
+122   const showTextQuestion =
+123     numberMatchConfig.mode === 'numeral-to-group' ||
+124     numberMatchConfig.mode === 'numeral-to-word' ||
+125     numberMatchConfig.mode === 'word-to-numeral';
+126 
+127   return (
+128     <>
+129       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+130         <AnswerGame.Question>
+131           {showTextQuestion ? (
+132             <TextQuestion text={String(round.value)} />
+133           ) : (
+134             <DotGroupQuestion
+135               count={round.value}
+136               prompt={String(round.value)}
+137             />
+138           )}
+139           <AudioButton prompt={String(round.value)} />
+140         </AnswerGame.Question>
+141         <AnswerGame.Answer>
+142           <MatchingPairZones />
+143         </AnswerGame.Answer>
+144         <AnswerGame.Choices>
+145           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
+146         </AnswerGame.Choices>
+147       </div>
+148       <ScoreAnimation visible={phase === 'round-complete'} />
+149       {phase === 'game-over' ? (
+150         <GameOverOverlay
+151           retryCount={retryCount}
+152           onPlayAgain={handlePlayAgain}
+153           onHome={handleHome}
+154         />
+155       ) : null}
+156     </>
+157   );
+158 };
+159 
+160 export const NumberMatch = ({ config }: NumberMatchProps) => {
+161   const roundsInOrder = config.roundsInOrder === true;
+162   const [sessionEpoch, setSessionEpoch] = useState(0);
+163 
+164   const roundOrder = useMemo(() => {
+165     void sessionEpoch;
+166     return buildRoundOrder(config.rounds.length, roundsInOrder);
+167   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+168 
+169   const firstConfigIndex = roundOrder[0];
+170   const round0 =
+171     firstConfigIndex === undefined
+172       ? undefined
+173       : config.rounds[firstConfigIndex];
+174   const roundValue = round0?.value;
+175 
+176   const { tiles, zones } = useMemo(() => {
+177     if (roundValue === undefined) {
+178       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+179     }
+180     return buildNumeralRound(roundValue, {
+181       tileBankMode: config.tileBankMode,
+182       distractorCount: config.distractorCount,
+183       range: config.range,
+184     });
+185   }, [
+186     roundValue,
+187     config.tileBankMode,
+188     config.distractorCount,
+189     config.range,
+190   ]);
+191 
+192   const answerGameConfig = useMemo(
+193     (): AnswerGameConfig => ({
+194       gameId: config.gameId,
+195       inputMethod: config.inputMethod,
+196       wrongTileBehavior: config.wrongTileBehavior,
+197       tileBankMode: config.tileBankMode,
+198       distractorCount: config.distractorCount,
+199       totalRounds: config.rounds.length,
+200       roundsInOrder: config.roundsInOrder,
+201       ttsEnabled: config.ttsEnabled,
+202       initialTiles: tiles,
+203       initialZones: zones,
+204     }),
+205     [
+206       config.gameId,
+207       config.inputMethod,
+208       config.wrongTileBehavior,
+209       config.tileBankMode,
+210       config.distractorCount,
+211       config.rounds.length,
+212       config.roundsInOrder,
+213       config.ttsEnabled,
+214       tiles,
+215       zones,
+216     ],
+217   );
+218 
+219   if (!round0) return null;
+220 
+221   return (
+222     <AnswerGame config={answerGameConfig}>
+223       <NumberMatchSession
+224         numberMatchConfig={config}
+225         roundOrder={roundOrder}
+226         onRestartSession={() => {
+227           setSessionEpoch((e) => e + 1);
+228         }}
+229       />
+230     </AnswerGame>
+231   );
+232 };
 233
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:03:18Z)**_
@@ -1625,277 +1663,278 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:03:18Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { useTranslation } from 'react-i18next';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
-7	import type { WordSpellConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-23	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	function segmentsForWord(
-27	  word: string,
-28	  tileUnit: WordSpellConfig['tileUnit'],
-29	): string[] {
-30	  const trimmed = word.trim();
-31	  if (tileUnit === 'word') return [trimmed];
-32	  if (tileUnit === 'syllable') {
-33	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-34	    return parts.length > 0 ? parts : [trimmed];
-35	  }
-36	  return [...trimmed.toLowerCase()];
-37	}
-38	
-39	function buildTilesAndZones(
-40	  word: string,
-41	  tileUnit: WordSpellConfig['tileUnit'],
-42	): {
-43	  tiles: TileItem[];
-44	  zones: AnswerZone[];
-45	} {
-46	  const segments = segmentsForWord(word, tileUnit);
-47	  const values = segments.map((s) =>
-48	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-49	  );
-50	  const zones: AnswerZone[] = values.map((value, i) => ({
-51	    id: `z${i}`,
-52	    index: i,
-53	    expectedValue: value,
-54	    placedTileId: null,
-55	    isWrong: false,
-56	    isLocked: false,
-57	  }));
-58	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-59	  const tiles: TileItem[] = shuffled.map((value) => ({
-60	    id: nanoid(),
-61	    label: value,
-62	    value,
-63	  }));
-64	  return { tiles, zones };
-65	}
-66	
-67	interface WordSpellProps {
-68	  config: WordSpellConfig;
-69	}
-70	
-71	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-72	const WordSpellSession = ({
-73	  wordSpellConfig,
-74	  roundOrder,
-75	  onRestartSession,
-76	}: {
-77	  wordSpellConfig: WordSpellConfig;
-78	  roundOrder: readonly number[];
-79	  onRestartSession: () => void;
-80	}) => {
-81	  const { t } = useTranslation('games');
-82	  const [showInstructions, setShowInstructions] = useState(true);
-83	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete') return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      const { tiles, zones } = buildTilesAndZones(
-133	        word,
-134	        wordSpellConfig.tileUnit,
-135	      );
-136	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-137	    }, delayMs);
-138	
-139	    return () => {
-140	      globalThis.clearTimeout(timer);
-141	    };
-142	  }, [
-143	    phase,
-144	    roundIndex,
-145	    dispatch,
-146	    roundOrder,
-147	    wordSpellConfig.rounds,
-148	    wordSpellConfig.tileUnit,
-149	  ]);
-150	
-151	  if (showInstructions) {
-152	    return (
-153	      <InstructionsOverlay
-154	        text={t('instructions.word-spell')}
-155	        onStart={() => setShowInstructions(false)}
-156	        ttsEnabled={wordSpellConfig.ttsEnabled}
-157	      />
-158	    );
-159	  }
-160	
-161	  if (!round) return null;
-162	
-163	  const hasEmoji =
-164	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-165	  const imageSrc = round.sceneImage ?? round.image;
-166	  const hasImageUrl =
-167	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-168	
-169	  return (
-170	    <>
-171	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-172	        <AnswerGame.Question>
-173	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-174	            <p className="max-w-md text-center text-lg text-foreground">
-175	              {round.sentence}
-176	            </p>
-177	          ) : null}
-178	          {hasEmoji ? (
-179	            <EmojiQuestion
-180	              emoji={round.emoji!.trim()}
-181	              prompt={round.word}
-182	            />
-183	          ) : hasImageUrl ? (
-184	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-185	          ) : null}
-186	          <AudioButton prompt={round.word} />
-187	        </AnswerGame.Question>
-188	        <AnswerGame.Answer>
-189	          <OrderedLetterSlots />
-190	        </AnswerGame.Answer>
-191	        <AnswerGame.Choices>
-192	          <LetterTileBank />
-193	        </AnswerGame.Choices>
-194	      </div>
-195	      <ScoreAnimation visible={phase === 'round-complete'} />
-196	      {phase === 'game-over' ? (
-197	        <GameOverOverlay
-198	          retryCount={retryCount}
-199	          onPlayAgain={handlePlayAgain}
-200	          onHome={handleHome}
-201	        />
-202	      ) : null}
-203	    </>
-204	  );
-205	};
-206	
-207	export const WordSpell = ({ config }: WordSpellProps) => {
-208	  const roundsInOrder = config.roundsInOrder === true;
-209	  const [sessionEpoch, setSessionEpoch] = useState(0);
-210	
-211	  const roundOrder = useMemo(() => {
-212	    void sessionEpoch;
-213	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-214	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-215	
-216	  const firstConfigIndex = roundOrder[0];
-217	  const round0 =
-218	    firstConfigIndex === undefined
-219	      ? undefined
-220	      : config.rounds[firstConfigIndex];
-221	  const roundWord = round0?.word.trim() ? round0.word : '';
-222	
-223	  const { tiles, zones } = useMemo(() => {
-224	    if (!roundWord)
-225	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-226	    return buildTilesAndZones(roundWord, config.tileUnit);
-227	  }, [roundWord, config.tileUnit]);
-228	
-229	  const answerGameConfig = useMemo(
-230	    (): AnswerGameConfig => ({
-231	      gameId: config.gameId,
-232	      inputMethod: config.inputMethod,
-233	      wrongTileBehavior: config.wrongTileBehavior,
-234	      tileBankMode: config.tileBankMode,
-235	      distractorCount: config.distractorCount,
-236	      totalRounds: config.rounds.length,
-237	      roundsInOrder: config.roundsInOrder,
-238	      ttsEnabled: config.ttsEnabled,
-239	      initialTiles: tiles,
-240	      initialZones: zones,
-241	    }),
-242	    [
-243	      config.gameId,
-244	      config.inputMethod,
-245	      config.wrongTileBehavior,
-246	      config.tileBankMode,
-247	      config.distractorCount,
-248	      config.rounds.length,
-249	      config.roundsInOrder,
-250	      config.ttsEnabled,
-251	      tiles,
-252	      zones,
-253	    ],
-254	  );
-255	
-256	  if (!round0) return null;
-257	
-258	  return (
-259	    <AnswerGame config={answerGameConfig}>
-260	      <WordSpellSession
-261	        wordSpellConfig={config}
-262	        roundOrder={roundOrder}
-263	        onRestartSession={() => {
-264	          setSessionEpoch((e) => e + 1);
-265	        }}
-266	      />
-267	    </AnswerGame>
-268	  );
-269	};
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { useTranslation } from 'react-i18next';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import { OrderedLetterSlots } from '../OrderedLetterSlots/OrderedLetterSlots';
+7 import type { WordSpellConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+23 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 function segmentsForWord(
+27   word: string,
+28   tileUnit: WordSpellConfig['tileUnit'],
+29 ): string[] {
+30   const trimmed = word.trim();
+31   if (tileUnit === 'word') return [trimmed];
+32   if (tileUnit === 'syllable') {
+33     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+34     return parts.length > 0 ? parts : [trimmed];
+35   }
+36   return [...trimmed.toLowerCase()];
+37 }
+38 
+39 function buildTilesAndZones(
+40   word: string,
+41   tileUnit: WordSpellConfig['tileUnit'],
+42 ): {
+43   tiles: TileItem[];
+44   zones: AnswerZone[];
+45 } {
+46   const segments = segmentsForWord(word, tileUnit);
+47   const values = segments.map((s) =>
+48     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+49   );
+50   const zones: AnswerZone[] = values.map((value, i) => ({
+51     id: `z${i}`,
+52     index: i,
+53     expectedValue: value,
+54     placedTileId: null,
+55     isWrong: false,
+56     isLocked: false,
+57   }));
+58   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+59   const tiles: TileItem[] = shuffled.map((value) => ({
+60     id: nanoid(),
+61     label: value,
+62     value,
+63   }));
+64   return { tiles, zones };
+65 }
+66 
+67 interface WordSpellProps {
+68   config: WordSpellConfig;
+69 }
+70 
+71 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+72 const WordSpellSession = ({
+73   wordSpellConfig,
+74   roundOrder,
+75   onRestartSession,
+76 }: {
+77   wordSpellConfig: WordSpellConfig;
+78   roundOrder: readonly number[];
+79   onRestartSession: () => void;
+80 }) => {
+81   const { t } = useTranslation('games');
+82   const [showInstructions, setShowInstructions] = useState(true);
+83   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete') return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       const { tiles, zones } = buildTilesAndZones(
+133         word,
+134         wordSpellConfig.tileUnit,
+135       );
+136       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+137     }, delayMs);
+138 
+139     return () => {
+140       globalThis.clearTimeout(timer);
+141     };
+142   }, [
+143     phase,
+144     roundIndex,
+145     dispatch,
+146     roundOrder,
+147     wordSpellConfig.rounds,
+148     wordSpellConfig.tileUnit,
+149   ]);
+150 
+151   if (showInstructions) {
+152     return (
+153       <InstructionsOverlay
+154         text={t('instructions.word-spell')}
+155         onStart={() => setShowInstructions(false)}
+156         ttsEnabled={wordSpellConfig.ttsEnabled}
+157       />
+158     );
+159   }
+160 
+161   if (!round) return null;
+162 
+163   const hasEmoji =
+164     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+165   const imageSrc = round.sceneImage ?? round.image;
+166   const hasImageUrl =
+167     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+168 
+169   return (
+170     <>
+171       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+172         <AnswerGame.Question>
+173           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+174             <p className="max-w-md text-center text-lg text-foreground">
+175               {round.sentence}
+176             </p>
+177           ) : null}
+178           {hasEmoji ? (
+179             <EmojiQuestion
+180               emoji={round.emoji!.trim()}
+181               prompt={round.word}
+182             />
+183           ) : hasImageUrl ? (
+184             <ImageQuestion src={imageSrc!} prompt={round.word} />
+185           ) : null}
+186           <AudioButton prompt={round.word} />
+187         </AnswerGame.Question>
+188         <AnswerGame.Answer>
+189           <OrderedLetterSlots />
+190         </AnswerGame.Answer>
+191         <AnswerGame.Choices>
+192           <LetterTileBank />
+193         </AnswerGame.Choices>
+194       </div>
+195       <ScoreAnimation visible={phase === 'round-complete'} />
+196       {phase === 'game-over' ? (
+197         <GameOverOverlay
+198           retryCount={retryCount}
+199           onPlayAgain={handlePlayAgain}
+200           onHome={handleHome}
+201         />
+202       ) : null}
+203     </>
+204   );
+205 };
+206 
+207 export const WordSpell = ({ config }: WordSpellProps) => {
+208   const roundsInOrder = config.roundsInOrder === true;
+209   const [sessionEpoch, setSessionEpoch] = useState(0);
+210 
+211   const roundOrder = useMemo(() => {
+212     void sessionEpoch;
+213     return buildRoundOrder(config.rounds.length, roundsInOrder);
+214   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+215 
+216   const firstConfigIndex = roundOrder[0];
+217   const round0 =
+218     firstConfigIndex === undefined
+219       ? undefined
+220       : config.rounds[firstConfigIndex];
+221   const roundWord = round0?.word.trim() ? round0.word : '';
+222 
+223   const { tiles, zones } = useMemo(() => {
+224     if (!roundWord)
+225       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+226     return buildTilesAndZones(roundWord, config.tileUnit);
+227   }, [roundWord, config.tileUnit]);
+228 
+229   const answerGameConfig = useMemo(
+230     (): AnswerGameConfig => ({
+231       gameId: config.gameId,
+232       inputMethod: config.inputMethod,
+233       wrongTileBehavior: config.wrongTileBehavior,
+234       tileBankMode: config.tileBankMode,
+235       distractorCount: config.distractorCount,
+236       totalRounds: config.rounds.length,
+237       roundsInOrder: config.roundsInOrder,
+238       ttsEnabled: config.ttsEnabled,
+239       initialTiles: tiles,
+240       initialZones: zones,
+241     }),
+242     [
+243       config.gameId,
+244       config.inputMethod,
+245       config.wrongTileBehavior,
+246       config.tileBankMode,
+247       config.distractorCount,
+248       config.rounds.length,
+249       config.roundsInOrder,
+250       config.ttsEnabled,
+251       tiles,
+252       zones,
+253     ],
+254   );
+255 
+256   if (!round0) return null;
+257 
+258   return (
+259     <AnswerGame config={answerGameConfig}>
+260       <WordSpellSession
+261         wordSpellConfig={config}
+262         roundOrder={roundOrder}
+263         onRestartSession={() => {
+264           setSessionEpoch((e) => e + 1);
+265         }}
+266       />
+267     </AnswerGame>
+268   );
+269 };
 270
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:05:28Z)**_
@@ -1906,14 +1945,15 @@ Now I have the full picture. Let me now understand exactly what the three overla
 **Root Cause Summary:**
 
 **Problem 1: `correct` cut off by `round-complete`**
+
 - `useTileEvaluation.placeTile` → `playSound('correct')` fires at t=0
 - `dispatch(PLACE_TILE)` runs → reducer detects round complete → `phase = 'round-complete'`
 - React re-renders → `useGameSounds` fires → `playSound('round-complete')` fires at ~t=5-20ms
 
-
 - `playSound` cancels `correct` immediately → correct sound heard for barely any time
 
 **Problem 2: TTS overlaps with `round-complete`**
+
 - `round-complete.mp3` starts playing
 - 750ms timer fires → `dispatch(ADVANCE_ROUND)` → `roundIndex++`
 - `useRoundTTS` fires → `speakPrompt(prompt)` → TTS starts
@@ -1921,6 +1961,7 @@ Now I have the full picture. Let me now understand exactly what the three overla
 - TTS uses Web Speech API, MP3 uses HTMLAudioElement — completely separate audio channels
 
 **Problem 3: TTS tile labels overlap with wrong/correct MP3**
+
 - User places a tile and triggers either the wrong or correct sound, but the TTS for that tile's label starts speaking at the same time, creating audio chaos on separate channels
 
 Looking at the actual code, I notice `speakTile` exists in `useGameTTS` but I can't find where it's actually being called from the game components or `useTileEvaluation`. The tile evaluation only calls `playSound`, not `speakTile`. Checking the Storybook scenarios shows multiple speech calls happening in sequence, which suggests the TTS system is designed to handle overlapping speech somehow, but I'm not seeing that wired up in the current implementation. I need to find where `speakTile` is being called to understand the full picture of when TTS fires. The real issue is that the user wants no audio overlap at all, so I should focus on a solution that queues or cancels audio appropriately. My approach would be to track audio state in `AudioFeedback.ts` with a promise-based system, then have `useGameSounds.ts` cancel any ongoing speech when an MP3 sound starts, giving priority to sound effects.
@@ -1958,6 +1999,7 @@ Now I'm working through the actual timing. The correct sound is probably 500-800
 Analyzing the happy path where correct is 600ms and round-complete is 1.5s: correct starts at t=0, then useGameSounds queues up round-complete to play after. By t=600ms correct ends and round-complete begins. When the 750ms timer fires at t=750ms, round-complete is already playing, so the TTS waits for it to finish at t=2100ms before speaking. This works because the correct sound finishes before the timer fires.
 
 But there's a problem case when correct is longer than 750ms—the timer fires while correct is still playing, which breaks the assumption. t=~5ms: `useGameSounds` queues: wait for `correct` → play `round-complete`
+
 - t=750ms: `useRoundTTS` fires → `whenSoundEnds()` → `correct` is STILL playing → waits for it
 - t=900ms: `correct` ends → BOTH `.then()` callbacks fire → `round-complete` starts AND TTS speaks
 
@@ -2012,6 +2054,7 @@ worktrees/feat-word-spell-number-match/src/components/questions/DotGroupQuestion
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:05:32Z)**_
@@ -2117,6 +2160,7 @@ worktrees/feat-word-spell-number-match/src/components/answer-game/useDraggableTi
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useDraggableTile.test.tsx-64-    const { result } = renderHook(() => useDraggableTile(tile));
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useDraggableTile.test.tsx-65-    act(() => result.current.handleClick());
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:06:31Z)**_
@@ -2127,7 +2171,7 @@ Now I have a complete picture. Let me trace the exact overlap problem:
 1. **`correct` cut off by `round-complete`**: `useTileEvaluation.placeTile` calls `playSound('correct')` → immediately, reducer sets `phase = 'round-complete'` → `useGameSounds` calls `playSound('round-complete')` which cancels `correct`.
 
 2. **TTS prompt overlapping with `round-complete`**: `round-complete.mp3` plays → 750ms later timer fires → `useRoundTTS` fires `speakPrompt(prompt)` → TTS starts while `round-complete.mp3` may still be playing.
-   
+
 3. **TTS tile label overlapping with feedback sounds**: When a user clicks a tile, `speakTile` triggers the Web Speech API while `placeInNextSlot` auto-places it, which immediately fires `playSound('correct'/'wrong')` from the HTMLAudioElement — these are separate audio channels so they collide.
 
 My approach to fix this: I'll refactor `AudioFeedback.ts` to queue sounds instead of playing them immediately, adding `queueSound()` and `whenSoundEnds()` exports that chain onto a queue tail promise. When `playSound` is called, it cancels any ongoing TTS. Then I'll update `useGameSounds.ts` to use `queueSound` for the round-complete sound, and modify `useRoundTTS.ts` to wait for the sound queue to finish before speaking the prompt.
@@ -2164,107 +2208,108 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:06:32Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useGameSounds } from './useGameSounds';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	import { playSound } from '@/lib/audio/AudioFeedback';
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	}));
-14	
-15	vi.mock('@/lib/game-event-bus', () => ({
-16	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-17	}));
-18	
-19	const baseConfig: AnswerGameConfig = {
-20	  gameId: 'test',
-21	  inputMethod: 'drag',
-22	  wrongTileBehavior: 'lock-auto-eject',
-23	  tileBankMode: 'exact',
-24	  totalRounds: 1,
-25	  ttsEnabled: false,
-26	};
-27	
-28	const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
-29	const zones: AnswerZone[] = [
-30	  {
-31	    id: 'z0',
-32	    index: 0,
-33	    expectedValue: 'A',
-34	    placedTileId: null,
-35	    isWrong: false,
-36	    isLocked: false,
-37	  },
-38	];
-39	
-40	function createWrapper(config: AnswerGameConfig) {
-41	  const Wrapper = ({ children }: { children: ReactNode }) => (
-42	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-43	  );
-44	  Wrapper.displayName = 'TestWrapper';
-45	  return Wrapper;
-46	}
-47	
-48	describe('useGameSounds', () => {
-49	  beforeEach(() => vi.clearAllMocks());
-50	
-51	  it('does not play a sound on initial render', () => {
-52	    renderHook(() => useGameSounds(), {
-53	      wrapper: createWrapper(baseConfig),
-54	    });
-55	    expect(playSound).not.toHaveBeenCalled();
-56	  });
-57	
-58	  it('plays "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
-59	    const { result } = renderHook(
-60	      () => {
-61	        const dispatch = useAnswerGameDispatch();
-62	        useGameSounds();
-63	        return dispatch;
-64	      },
-65	      { wrapper: createWrapper(baseConfig) },
-66	    );
-67	    act(() => {
-68	      result.current({ type: 'INIT_ROUND', tiles, zones });
-69	    });
-70	    vi.clearAllMocks();
-71	    act(() => {
-72	      result.current({ type: 'COMPLETE_GAME' });
-73	    });
-74	    expect(playSound).toHaveBeenCalledWith('game-complete');
-75	  });
-76	
-77	  it('plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
-78	    const { result } = renderHook(
-79	      () => {
-80	        const dispatch = useAnswerGameDispatch();
-81	        useGameSounds();
-82	        return dispatch;
-83	      },
-84	      { wrapper: createWrapper(baseConfig) },
-85	    );
-86	    act(() => {
-87	      result.current({ type: 'INIT_ROUND', tiles, zones });
-88	    });
-89	    vi.clearAllMocks();
-90	    act(() => {
-91	      result.current({
-92	        type: 'PLACE_TILE',
-93	        tileId: 't1',
-94	        zoneIndex: 0,
-95	      });
-96	    });
-97	    expect(playSound).toHaveBeenCalledWith('round-complete');
-98	  });
-99	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useGameSounds } from './useGameSounds';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 import { playSound } from '@/lib/audio/AudioFeedback';
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13 }));
+14 
+15 vi.mock('@/lib/game-event-bus', () => ({
+16   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+17 }));
+18 
+19 const baseConfig: AnswerGameConfig = {
+20   gameId: 'test',
+21   inputMethod: 'drag',
+22   wrongTileBehavior: 'lock-auto-eject',
+23   tileBankMode: 'exact',
+24   totalRounds: 1,
+25   ttsEnabled: false,
+26 };
+27 
+28 const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
+29 const zones: AnswerZone[] = [
+30   {
+31     id: 'z0',
+32     index: 0,
+33     expectedValue: 'A',
+34     placedTileId: null,
+35     isWrong: false,
+36     isLocked: false,
+37   },
+38 ];
+39 
+40 function createWrapper(config: AnswerGameConfig) {
+41   const Wrapper = ({ children }: { children: ReactNode }) => (
+42     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+43   );
+44   Wrapper.displayName = 'TestWrapper';
+45   return Wrapper;
+46 }
+47 
+48 describe('useGameSounds', () => {
+49   beforeEach(() => vi.clearAllMocks());
+50 
+51   it('does not play a sound on initial render', () => {
+52     renderHook(() => useGameSounds(), {
+53       wrapper: createWrapper(baseConfig),
+54     });
+55     expect(playSound).not.toHaveBeenCalled();
+56   });
+57 
+58   it('plays "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+59     const { result } = renderHook(
+60       () => {
+61         const dispatch = useAnswerGameDispatch();
+62         useGameSounds();
+63         return dispatch;
+64       },
+65       { wrapper: createWrapper(baseConfig) },
+66     );
+67     act(() => {
+68       result.current({ type: 'INIT_ROUND', tiles, zones });
+69     });
+70     vi.clearAllMocks();
+71     act(() => {
+72       result.current({ type: 'COMPLETE_GAME' });
+73     });
+74     expect(playSound).toHaveBeenCalledWith('game-complete');
+75   });
+76 
+77   it('plays "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+78     const { result } = renderHook(
+79       () => {
+80         const dispatch = useAnswerGameDispatch();
+81         useGameSounds();
+82         return dispatch;
+83       },
+84       { wrapper: createWrapper(baseConfig) },
+85     );
+86     act(() => {
+87       result.current({ type: 'INIT_ROUND', tiles, zones });
+88     });
+89     vi.clearAllMocks();
+90     act(() => {
+91       result.current({
+92         type: 'PLACE_TILE',
+93         tileId: 't1',
+94         zoneIndex: 0,
+95       });
+96     });
+97     expect(playSound).toHaveBeenCalledWith('round-complete');
+98   });
+99 });
 100
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:06:32Z)**_
@@ -2274,108 +2319,109 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:06:32Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useRoundTTS } from './useRoundTTS';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	const mockSpeakPrompt = vi.fn();
-10	
-11	vi.mock('./useGameTTS', () => ({
-12	  useGameTTS: () => ({
-13	    speakTile: vi.fn(),
-14	    speakPrompt: mockSpeakPrompt,
-15	  }),
-16	}));
-17	
-18	vi.mock('@/lib/game-event-bus', () => ({
-19	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-20	}));
-21	
-22	vi.mock('@/lib/audio/AudioFeedback', () => ({
-23	  playSound: vi.fn(),
-24	}));
-25	
-26	const ttsConfig: AnswerGameConfig = {
-27	  gameId: 'test',
-28	  inputMethod: 'drag',
-29	  wrongTileBehavior: 'lock-auto-eject',
-30	  tileBankMode: 'exact',
-31	  totalRounds: 2,
-32	  ttsEnabled: true,
-33	};
-34	
-35	const noTtsConfig: AnswerGameConfig = {
-36	  ...ttsConfig,
-37	  ttsEnabled: false,
-38	};
-39	
-40	const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
-41	const zones: AnswerZone[] = [
-42	  {
-43	    id: 'z0',
-44	    index: 0,
-45	    expectedValue: 'A',
-46	    placedTileId: null,
-47	    isWrong: false,
-48	    isLocked: false,
-49	  },
-50	];
-51	
-52	function createWrapper(config: AnswerGameConfig) {
-53	  const Wrapper = ({ children }: { children: ReactNode }) => (
-54	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-55	  );
-56	  Wrapper.displayName = 'TestWrapper';
-57	  return Wrapper;
-58	}
-59	
-60	describe('useRoundTTS', () => {
-61	  beforeEach(() => {
-62	    vi.clearAllMocks();
-63	  });
-64	
-65	  it('calls speakPrompt on mount with the prompt', () => {
-66	    renderHook(() => useRoundTTS('cat'), {
-67	      wrapper: createWrapper(ttsConfig),
-68	    });
-69	    expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
-70	  });
-71	
-72	  it('does NOT call speakPrompt when ttsEnabled is false', () => {
-73	    renderHook(() => useRoundTTS('cat'), {
-74	      wrapper: createWrapper(noTtsConfig),
-75	    });
-76	    expect(mockSpeakPrompt).not.toHaveBeenCalled();
-77	  });
-78	
-79	  it('calls speakPrompt again when roundIndex changes (ADVANCE_ROUND)', () => {
-80	    const { result } = renderHook(
-81	      () => {
-82	        const dispatch = useAnswerGameDispatch();
-83	        useRoundTTS('cat');
-84	        return dispatch;
-85	      },
-86	      { wrapper: createWrapper(ttsConfig) },
-87	    );
-88	    // First call on mount
-89	    expect(mockSpeakPrompt).toHaveBeenCalledTimes(1);
-90	    vi.clearAllMocks();
-91	
-92	    act(() => {
-93	      result.current({ type: 'INIT_ROUND', tiles, zones });
-94	    });
-95	    act(() => {
-96	      result.current({ type: 'ADVANCE_ROUND', tiles, zones });
-97	    });
-98	    expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
-99	  });
-100	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useRoundTTS } from './useRoundTTS';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 const mockSpeakPrompt = vi.fn();
+10 
+11 vi.mock('./useGameTTS', () => ({
+12   useGameTTS: () => ({
+13     speakTile: vi.fn(),
+14     speakPrompt: mockSpeakPrompt,
+15   }),
+16 }));
+17 
+18 vi.mock('@/lib/game-event-bus', () => ({
+19   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+20 }));
+21 
+22 vi.mock('@/lib/audio/AudioFeedback', () => ({
+23   playSound: vi.fn(),
+24 }));
+25 
+26 const ttsConfig: AnswerGameConfig = {
+27   gameId: 'test',
+28   inputMethod: 'drag',
+29   wrongTileBehavior: 'lock-auto-eject',
+30   tileBankMode: 'exact',
+31   totalRounds: 2,
+32   ttsEnabled: true,
+33 };
+34 
+35 const noTtsConfig: AnswerGameConfig = {
+36   ...ttsConfig,
+37   ttsEnabled: false,
+38 };
+39 
+40 const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
+41 const zones: AnswerZone[] = [
+42   {
+43     id: 'z0',
+44     index: 0,
+45     expectedValue: 'A',
+46     placedTileId: null,
+47     isWrong: false,
+48     isLocked: false,
+49   },
+50 ];
+51 
+52 function createWrapper(config: AnswerGameConfig) {
+53   const Wrapper = ({ children }: { children: ReactNode }) => (
+54     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+55   );
+56   Wrapper.displayName = 'TestWrapper';
+57   return Wrapper;
+58 }
+59 
+60 describe('useRoundTTS', () => {
+61   beforeEach(() => {
+62     vi.clearAllMocks();
+63   });
+64 
+65   it('calls speakPrompt on mount with the prompt', () => {
+66     renderHook(() => useRoundTTS('cat'), {
+67       wrapper: createWrapper(ttsConfig),
+68     });
+69     expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+70   });
+71 
+72   it('does NOT call speakPrompt when ttsEnabled is false', () => {
+73     renderHook(() => useRoundTTS('cat'), {
+74       wrapper: createWrapper(noTtsConfig),
+75     });
+76     expect(mockSpeakPrompt).not.toHaveBeenCalled();
+77   });
+78 
+79   it('calls speakPrompt again when roundIndex changes (ADVANCE_ROUND)', () => {
+80     const { result } = renderHook(
+81       () => {
+82         const dispatch = useAnswerGameDispatch();
+83         useRoundTTS('cat');
+84         return dispatch;
+85       },
+86       { wrapper: createWrapper(ttsConfig) },
+87     );
+88     // First call on mount
+89     expect(mockSpeakPrompt).toHaveBeenCalledTimes(1);
+90     vi.clearAllMocks();
+91 
+92     act(() => {
+93       result.current({ type: 'INIT_ROUND', tiles, zones });
+94     });
+95     act(() => {
+96       result.current({ type: 'ADVANCE_ROUND', tiles, zones });
+97     });
+98     expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+99   });
+100 });
 101
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:07:18Z)**_
@@ -2384,6 +2430,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:07:18Z)**_
 Now I have everything I need. Let me plan the implementation:
 
 **Root Cause confirmed:**
+
 1. `playSound('round-complete')` immediately cancels `playSound('correct')` since they both go through the same `currentAudio` singleton
 2. `speakPrompt` fires at t=750ms but `round-complete.mp3` might still be playing
 3. `speakTile` (Web Speech API) overlaps with `playSound` (HTMLAudioElement) since they're on different channels
@@ -2392,13 +2439,14 @@ Now I have everything I need. Let me plan the implementation:
 
 ### 1. `AudioFeedback.ts`
 
-
 I'll refactor the audio system to use a promise-based queue where `playSound` immediately cancels and resets everything, while `queueSound` chains sounds sequentially after the current one finishes, and `whenSoundEnds` lets other modules wait for the entire queue to complete.
 
 ### 2. `useGameSounds.ts`
+
 I need to switch from `playSound` to `queueSound` for the round and game completion sounds, and update the test mocks accordingly.
 
 ### 3. `useRoundTTS.ts`
+
 Refactoring to await...
 
 Writing implementation... Writing the audio playback logic... I'm setting up a custom hook that listens to game phase changes and triggers sound effects when the round completes or the game ends. Then I'm building another hook that coordinates text-to-speech playback with the audio feedback system...
@@ -2427,67 +2475,68 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:07:19Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import {
-3	  afterEach,
-4	  beforeEach,
-5	  describe,
-6	  expect,
-7	  it,
-8	  vi,
-9	} from 'vitest';
-10	import { AnswerGameProvider } from './AnswerGameProvider';
-11	import { useAnswerGameContext } from './useAnswerGameContext';
-12	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-13	import { useTileEvaluation } from './useTileEvaluation';
-14	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-15	import type { ReactNode } from 'react';
-16	import { playSound } from '@/lib/audio/AudioFeedback';
-17	
-18	vi.mock('@/lib/game-event-bus', () => ({
-19	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-20	}));
-21	
-22	vi.mock('@/lib/audio/AudioFeedback', () => ({
-23	  playSound: vi.fn(),
-24	}));
-25	
-26	const baseConfig: AnswerGameConfig = {
-27	  gameId: 'test',
-28	  inputMethod: 'drag',
-29	  wrongTileBehavior: 'lock-auto-eject',
-30	  tileBankMode: 'exact',
-31	  totalRounds: 1,
-32	  ttsEnabled: false,
-33	};
-34	
-35	const tiles: TileItem[] = [
-36	  { id: 't1', label: 'C', value: 'C' },
-37	  { id: 't2', label: 'X', value: 'X' },
-38	];
-39	
-40	const zones: AnswerZone[] = [
-41	  {
-42	    id: 'z0',
-43	    index: 0,
-44	    expectedValue: 'C',
-45	    placedTileId: null,
-46	    isWrong: false,
-47	    isLocked: false,
-48	  },
-49	];
-50	
-51	function createWrapper(config: AnswerGameConfig) {
-52	  const Wrapper = ({ children }: { children: ReactNode }) => (
-53	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-54	  );
-55	  Wrapper.displayName = 'AnswerGameTestWrapper';
-56	  return Wrapper;
-57	}
-58	
-59	function useTileEvaluationHarness() {
-60	  const dispatch = useAnswerGameDispatch();
+1 import { act, renderHook } from '@testing-library/react';
+2 import {
+3   afterEach,
+4   beforeEach,
+5   describe,
+6   expect,
+7   it,
+8   vi,
+9 } from 'vitest';
+10 import { AnswerGameProvider } from './AnswerGameProvider';
+11 import { useAnswerGameContext } from './useAnswerGameContext';
+12 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+13 import { useTileEvaluation } from './useTileEvaluation';
+14 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+15 import type { ReactNode } from 'react';
+16 import { playSound } from '@/lib/audio/AudioFeedback';
+17 
+18 vi.mock('@/lib/game-event-bus', () => ({
+19   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+20 }));
+21 
+22 vi.mock('@/lib/audio/AudioFeedback', () => ({
+23   playSound: vi.fn(),
+24 }));
+25 
+26 const baseConfig: AnswerGameConfig = {
+27   gameId: 'test',
+28   inputMethod: 'drag',
+29   wrongTileBehavior: 'lock-auto-eject',
+30   tileBankMode: 'exact',
+31   totalRounds: 1,
+32   ttsEnabled: false,
+33 };
+34 
+35 const tiles: TileItem[] = [
+36   { id: 't1', label: 'C', value: 'C' },
+37   { id: 't2', label: 'X', value: 'X' },
+38 ];
+39 
+40 const zones: AnswerZone[] = [
+41   {
+42     id: 'z0',
+43     index: 0,
+44     expectedValue: 'C',
+45     placedTileId: null,
+46     isWrong: false,
+47     isLocked: false,
+48   },
+49 ];
+50 
+51 function createWrapper(config: AnswerGameConfig) {
+52   const Wrapper = ({ children }: { children: ReactNode }) => (
+53     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+54   );
+55   Wrapper.displayName = 'AnswerGameTestWrapper';
+56   return Wrapper;
+57 }
+58 
+59 function useTileEvaluationHarness() {
+60   const dispatch = useAnswerGameDispatch();
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:08:52Z)**_
@@ -2496,10 +2545,10 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:08:52Z)**_
 I have enough context. Let me now implement the fix. Here's my plan:
 
 **Root Cause confirmed:**
+
 1. `playSound('round-complete')` immediately cancels `playSound('correct')` — because both go through the same `currentAudio` singleton, which gets paused when a new sound starts
 2. `speakPrompt` fires at t=750ms but `round-complete.mp3` may still be playing (different audio channels)
 3. `speakTile` (Web Speech API) and `playSound` (HTMLAudioElement) overlap because they're different channels
-
 
 4. I need to add sound queueing to `AudioFeedback.ts` so that `round-complete` waits for `correct` to finish, then update `useGameSounds` to use the queue and `useRoundTTS` to wait for all audio before speaking, while `useTileEvaluation` cancels any tile speech before playing its sound
 
@@ -2550,6 +2599,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:08:53Z)**_
 Now I have the complete picture. Let me implement the fix.
 
 **Root cause confirmed:**
+
 1. `playSound('round-complete')` immediately cancels `correct` — both use the same `currentAudio` singleton
 2. TTS prompt fires at t=750ms while `round-complete.mp3` is still playing on a separate audio channel
 3. `speakTile` (Web Speech API) and `playSound` (HTMLAudioElement) play simultaneously — different channels
@@ -2569,6 +2619,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:08:53Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:09:11Z)**_
@@ -2671,6 +2722,7 @@ export function whenSoundEnds(): Promise<void> {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:11:34Z)**_
@@ -2724,6 +2776,7 @@ export const useGameSounds = (): void => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:12:19Z)**_
@@ -2777,6 +2830,7 @@ export const useRoundTTS = (prompt: string): void => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:12:37Z)**_
@@ -2804,6 +2858,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:12:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:13:06Z)**_
@@ -2820,6 +2875,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:13:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:13:19Z)**_
@@ -2995,6 +3051,7 @@ describe('AudioFeedback', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:15:07Z)**_
@@ -3006,22 +3063,25 @@ There are several issues with the test file. Let me analyze them:
 2. Line 116: `mockResolvedValue(undefined)` - do not use useless `undefined`
 3. Lines 103, 131, 135: `endedCallback?.()` - type 'never' has no call signatures. This is because the type of `endedCallback` is inferred as `null` since it starts as `null` and the `addEventListener` mock sets it.
 
-The issue at lines 103, 131, 135 is that TypeScript infers `endedCallback` type as `null` because it's declared with `let endedCallback: (() => void) | null = null` but the `addEventListener` mock uses `vi.fn().mockImplementation()` which might not be properly typed. 
+The issue at lines 103, 131, 135 is that TypeScript infers `endedCallback` type as `null` because it's declared with `let endedCallback: (() => void) | null = null` but the `addEventListener` mock uses `vi.fn().mockImplementation()` which might not be properly typed.
 
-The real problem is that `endedCallback` is scoped inside the `it` block and reassigned inside a nested function, so TypeScript's control flow analysis sees it as `null` after the assignment happens within the mock implementation. the closure. 
+The real problem is that `endedCallback` is scoped inside the `it` block and reassigned inside a nested function, so TypeScript's control flow analysis sees it as `null` after the assignment happens within the mock implementation. the closure.
 
 The issue is the TypeScript strict mode narrowing. When you do:
+
 ```ts
 let endedCallback: (() => void) | null = null;
 ```
+
 And then inside an `addEventListener` mock:
+
 ```ts
 if (event === 'ended') endedCallback = cb;
 ```
 
 The `cb` parameter type in the mock implementation might be `() => void` but TypeScript might not see it.
 
-Actually, the error "Type 'never' has no call signatures" for `endedCallback?.()` is likely because TypeScript's control flow analysis is somehow inferring `endedCallback` as `null` (or `never`). 
+Actually, the error "Type 'never' has no call signatures" for `endedCallback?.()` is likely because TypeScript's control flow analysis is somehow inferring `endedCallback` as `null` (or `never`).
 
 The fix would be to use a different approach to store the callback. Or use a type assertion.
 
@@ -3174,6 +3234,7 @@ describe('AudioFeedback', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:15:39Z)**_
@@ -3306,6 +3367,7 @@ describe('useGameSounds', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:16:28Z)**_
@@ -3445,6 +3507,7 @@ describe('useRoundTTS', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:16:52Z)**_
@@ -3458,108 +3521,109 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:16:53Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx`
 
 ```text
-58	
-59	function useTileEvaluationHarness() {
-60	  const dispatch = useAnswerGameDispatch();
-61	  const state = useAnswerGameContext();
-62	  if (state.zones.length === 0) {
-63	    dispatch({ type: 'INIT_ROUND', tiles, zones });
-64	  }
-65	  const { placeTile } = useTileEvaluation();
-66	  return { state, placeTile };
-67	}
-68	
-69	function useInitialisedEvaluation(_config: AnswerGameConfig) {
-70	  const dispatch = useAnswerGameDispatch();
-71	  const { zones: stateZones } = useAnswerGameContext();
-72	  if (stateZones.length === 0) {
-73	    dispatch({ type: 'INIT_ROUND', tiles, zones });
-74	  }
-75	  return useTileEvaluation();
-76	}
-77	
-78	describe('useTileEvaluation', () => {
-79	  beforeEach(() => {
-80	    vi.useFakeTimers();
-81	    vi.clearAllMocks();
-82	  });
-83	  afterEach(() => vi.useRealTimers());
-84	
-85	  it('plays "correct" sound on correct tile placement', () => {
-86	    const { result } = renderHook(
-87	      () => useInitialisedEvaluation(baseConfig),
-88	      { wrapper: createWrapper(baseConfig) },
-89	    );
-90	    act(() => result.current.placeTile('t1', 0));
-91	    expect(playSound).toHaveBeenCalledWith('correct', 0.8);
-92	  });
-93	
-94	  it('plays "wrong" sound on incorrect tile placement', () => {
-95	    const { result } = renderHook(() => useTileEvaluationHarness(), {
-96	      wrapper: createWrapper(baseConfig),
-97	    });
-98	    act(() => result.current.placeTile('t2', 0));
-99	    expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
-100	  });
-101	
-102	  it('correct placement: zone not marked wrong', () => {
-103	    const { result } = renderHook(
-104	      () => useInitialisedEvaluation(baseConfig),
-105	      {
-106	        wrapper: createWrapper(baseConfig),
-107	      },
-108	    );
-109	    act(() => result.current.placeTile('t1', 0));
-110	    expect(result.current.placeTile).toBeDefined();
-111	  });
-112	
-113	  it('lock-auto-eject: EJECT_TILE fires after 1000ms for wrong tile', () => {
-114	    const { result } = renderHook(() => useTileEvaluationHarness(), {
-115	      wrapper: createWrapper(baseConfig),
-116	    });
-117	
-118	    act(() => result.current.placeTile('t2', 0));
-119	    expect(result.current.state.zones[0]?.isWrong).toBe(true);
-120	
-121	    act(() => vi.advanceTimersByTime(1000));
-122	    expect(result.current.state.zones[0]?.placedTileId).toBeNull();
-123	    expect(result.current.state.zones[0]?.isWrong).toBe(false);
-124	  });
-125	
-126	  it('reject: no zone placement, only retryCount incremented', () => {
-127	    const rejectConfig: AnswerGameConfig = {
-128	      ...baseConfig,
-129	      wrongTileBehavior: 'reject',
-130	    };
-131	
-132	    const { result } = renderHook(() => useTileEvaluationHarness(), {
-133	      wrapper: createWrapper(rejectConfig),
-134	    });
-135	
-136	    act(() => result.current.placeTile('t2', 0));
-137	    expect(result.current.state.zones[0]?.placedTileId).toBeNull();
-138	    expect(result.current.state.retryCount).toBe(1);
-139	  });
-140	
-141	  it('lock-manual: wrong tile stays until manually removed', () => {
-142	    const manualConfig: AnswerGameConfig = {
-143	      ...baseConfig,
-144	      wrongTileBehavior: 'lock-manual',
-145	    };
-146	
-147	    const { result } = renderHook(() => useTileEvaluationHarness(), {
-148	      wrapper: createWrapper(manualConfig),
-149	    });
-150	
-151	    act(() => result.current.placeTile('t2', 0));
-152	    expect(result.current.state.zones[0]?.isWrong).toBe(true);
-153	
-154	    act(() => vi.advanceTimersByTime(2000));
-155	    expect(result.current.state.zones[0]?.placedTileId).toBe('t2');
-156	  });
-157	});
+58 
+59 function useTileEvaluationHarness() {
+60   const dispatch = useAnswerGameDispatch();
+61   const state = useAnswerGameContext();
+62   if (state.zones.length === 0) {
+63     dispatch({ type: 'INIT_ROUND', tiles, zones });
+64   }
+65   const { placeTile } = useTileEvaluation();
+66   return { state, placeTile };
+67 }
+68 
+69 function useInitialisedEvaluation(_config: AnswerGameConfig) {
+70   const dispatch = useAnswerGameDispatch();
+71   const { zones: stateZones } = useAnswerGameContext();
+72   if (stateZones.length === 0) {
+73     dispatch({ type: 'INIT_ROUND', tiles, zones });
+74   }
+75   return useTileEvaluation();
+76 }
+77 
+78 describe('useTileEvaluation', () => {
+79   beforeEach(() => {
+80     vi.useFakeTimers();
+81     vi.clearAllMocks();
+82   });
+83   afterEach(() => vi.useRealTimers());
+84 
+85   it('plays "correct" sound on correct tile placement', () => {
+86     const { result } = renderHook(
+87       () => useInitialisedEvaluation(baseConfig),
+88       { wrapper: createWrapper(baseConfig) },
+89     );
+90     act(() => result.current.placeTile('t1', 0));
+91     expect(playSound).toHaveBeenCalledWith('correct', 0.8);
+92   });
+93 
+94   it('plays "wrong" sound on incorrect tile placement', () => {
+95     const { result } = renderHook(() => useTileEvaluationHarness(), {
+96       wrapper: createWrapper(baseConfig),
+97     });
+98     act(() => result.current.placeTile('t2', 0));
+99     expect(playSound).toHaveBeenCalledWith('wrong', 0.8);
+100   });
+101 
+102   it('correct placement: zone not marked wrong', () => {
+103     const { result } = renderHook(
+104       () => useInitialisedEvaluation(baseConfig),
+105       {
+106         wrapper: createWrapper(baseConfig),
+107       },
+108     );
+109     act(() => result.current.placeTile('t1', 0));
+110     expect(result.current.placeTile).toBeDefined();
+111   });
+112 
+113   it('lock-auto-eject: EJECT_TILE fires after 1000ms for wrong tile', () => {
+114     const { result } = renderHook(() => useTileEvaluationHarness(), {
+115       wrapper: createWrapper(baseConfig),
+116     });
+117 
+118     act(() => result.current.placeTile('t2', 0));
+119     expect(result.current.state.zones[0]?.isWrong).toBe(true);
+120 
+121     act(() => vi.advanceTimersByTime(1000));
+122     expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+123     expect(result.current.state.zones[0]?.isWrong).toBe(false);
+124   });
+125 
+126   it('reject: no zone placement, only retryCount incremented', () => {
+127     const rejectConfig: AnswerGameConfig = {
+128       ...baseConfig,
+129       wrongTileBehavior: 'reject',
+130     };
+131 
+132     const { result } = renderHook(() => useTileEvaluationHarness(), {
+133       wrapper: createWrapper(rejectConfig),
+134     });
+135 
+136     act(() => result.current.placeTile('t2', 0));
+137     expect(result.current.state.zones[0]?.placedTileId).toBeNull();
+138     expect(result.current.state.retryCount).toBe(1);
+139   });
+140 
+141   it('lock-manual: wrong tile stays until manually removed', () => {
+142     const manualConfig: AnswerGameConfig = {
+143       ...baseConfig,
+144       wrongTileBehavior: 'lock-manual',
+145     };
+146 
+147     const { result } = renderHook(() => useTileEvaluationHarness(), {
+148       wrapper: createWrapper(manualConfig),
+149     });
+150 
+151     act(() => result.current.placeTile('t2', 0));
+152     expect(result.current.state.zones[0]?.isWrong).toBe(true);
+153 
+154     act(() => vi.advanceTimersByTime(2000));
+155     expect(result.current.state.zones[0]?.placedTileId).toBe('t2');
+156   });
+157 });
 158
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:17:01Z)**_
@@ -3587,6 +3651,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:17:08Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:17:12Z)**_
@@ -3601,6 +3666,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:17:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:17:25Z)**_
@@ -3813,6 +3879,7 @@ export const Scenario3CorrectAndRoundComplete: Story = {
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:17:57Z)**_
@@ -3822,12 +3889,13 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:17:57Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
+1 import { playSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:17:59Z)**_
@@ -3838,6 +3906,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:17:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:18:03Z)**_
@@ -3893,6 +3962,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:18:06Z)**_
 178-  ),
 179-};
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:18:11Z)**_
@@ -3903,6 +3973,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:18:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:18:15Z)**_
@@ -3917,6 +3988,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:18:17Z)**_
 ```text
 File content has changed since it was last read. This commonly happens when a linter or formatter run via Bash rewrites the file. Call Read on this file to refresh, then retry the edit.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:18:21Z)**_
@@ -3926,189 +3998,190 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:18:21Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound, queueSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
-6	 * Prototype to hear audio overlap scenarios without playing a full game.
-7	 *
-8	 * Each button fires events at the same timing as the real game:
-9	 * - Tile clicks: ~80 ms apart (rapid tapping)
-10	 * - correct → round-complete: ~50 ms (React render + effect flush)
-11	 * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
-12	 */
-13	
-14	const ScenarioButton = ({
-15	  label,
-16	  description,
-17	  onClick,
-18	}: {
-19	  label: string;
-20	  description: string;
-21	  onClick: () => void;
-22	}) => (
-23	  <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
-24	    <p className="text-sm text-muted-foreground">{description}</p>
-25	    <button
-26	      type="button"
-27	      onClick={onClick}
-28	      className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
-29	    >
-30	      {label}
-31	    </button>
-32	  </div>
-33	);
-34	
-35	const CorrectSoundButton = () => (
-36	
-37	/**
-38	 * Scenario 1 — 3 tile clicks in a row (speech in sequence)
-39	 * Simulates a user rapidly clicking 3 letter/number tiles.
-40	 * Each speak() call fires 80 ms after the previous one.
-41	 */
-42	const runScenario1 = () => {
-43	  const words = ['Cat', 'Dog', 'Bird'];
-44	  let delay = 0;
-45	  for (const word of words) {
-46	    setTimeout(() => speak(word), delay);
-47	    delay += 80;
-48	  }
-49	};
-50	
-51	/**
-52	 * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
-53	 * Simulates clicking 2 tiles then immediately dropping the wrong tile.
-54	 * The wrong.mp3 fires 80 ms after the second speak().
-55	 */
-56	const runScenario2 = () => {
-57	  setTimeout(() => speak('Cat'), 0);
-58	  setTimeout(() => speak('Dog'), 80);
-59	  setTimeout(() => playSound('wrong'), 160);
-60	};
-61	
-62	/**
-63	 * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
-64	 * Simulates placing the last correct tile.
-65	 * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
-66	 * so it waits for correct to finish before playing.
-67	 */
-68	const runScenario3 = () => {
-69	  playSound('correct');
-70	  setTimeout(() => queueSound('round-complete'), 50);
-71	};
-72	
-73	const AudioPrototype = () => (
-74	  <div className="flex flex-col gap-6 p-6">
-75	    <div>
-76	      <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
-77	      <p className="mt-1 text-sm text-muted-foreground">
-78	        Each scenario fires audio events at the same timing as the real game.
-79	        Press a button to hear the current (overlapping) behaviour.
-80	      </p>
-81	    </div>
-82	
-83	    {/* hover color should just be opaque of button color */}
-84	    <div>
-85	      <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
-86	    </div>
-87	    <div>
-88	      <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
-89	    </div>
-90	    <div>
-91	      <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
-92	    </div>
-93	    <div>
-94	      <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
-95	    </div>
-96	
-97	
-98	
-99	    <ScenarioButton
-100	      label="▶ Run Scenario 1"
-101	      description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
-102	      onClick={runScenario1}
-103	    />
-104	
-105	    <ScenarioButton
-106	      label="▶ Run Scenario 2"
-107	      description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
-108	      onClick={runScenario2}
-109	    />
-110	
-111	    <ScenarioButton
-112	      label="▶ Run Scenario 3"
-113	      description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
-114	      onClick={runScenario3}
-115	    />
-116	  </div>
-117	);
-118	
-119	const meta: Meta<typeof AudioPrototype> = {
-120	  component: AudioPrototype,
-121	  title: 'Audio/AudioFeedback Prototype',
-122	  tags: ['autodocs'],
-123	};
-124	export default meta;
-125	
-126	type Story = StoryObj<typeof AudioPrototype>;
-127	
-128	export const Default: Story = {};
-129	
-130	export const CorrectSound: Story = {
-131	  name: 'Correct Sound Effect',
-132	  render: () => (<button onClick={() => playSound('correct')}>correct</button>)
-133	};
-134	export const WrongSound: Story = {
-135	  name: 'Wrong Sound Effect',
-136	  render: () => (<button onClick={() => playSound('wrong')}>wrong</button>)
-137	};
-138	
-139	export const RoundCompleteSound: Story = {
-140	  name: 'Round Complete Sound Effect',
-141	  render: () => (<button onClick={() => playSound('round-complete')}>round complete</button>)
-142	};
-143	
-144	export const GameCompleteSound: Story = {
-145	  name: 'Game complete Sound Effect',
-146	  render: () => (<button onClick={() => playSound('game-complete')}>game complete</button>)
-147	};
-148	
-149	
-150	export const Scenario1TileClicks: Story = {
-151	  name: 'Scenario 1 — 3 tile clicks (speech)',
-152	  render: () => (
-153	    <ScenarioButton
-154	      label="▶ Speak Cat → Dog → Bird"
-155	      description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
-156	      onClick={runScenario1}
-157	    />
-158	  ),
-159	};
-160	
-161	export const Scenario2SpeechAndWrong: Story = {
-162	  name: 'Scenario 2 — Speech + wrong.mp3',
-163	  render: () => (
-164	    <ScenarioButton
-165	      label="▶ Speak Cat → Dog → wrong.mp3"
-166	      description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
-167	      onClick={runScenario2}
-168	    />
-169	  ),
-170	};
-171	
-172	export const Scenario3CorrectAndRoundComplete: Story = {
-173	  name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
-174	  render: () => (
-175	    <ScenarioButton
-176	      label="▶ correct.mp3 → round-complete.mp3"
-177	      description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
-178	      onClick={runScenario3}
-179	    />
-180	  ),
-181	};
+1 import { playSound, queueSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
+6  * Prototype to hear audio overlap scenarios without playing a full game.
+7  *
+8  * Each button fires events at the same timing as the real game:
+9  * - Tile clicks: ~80 ms apart (rapid tapping)
+10  * - correct → round-complete: ~50 ms (React render + effect flush)
+11  * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
+12  */
+13 
+14 const ScenarioButton = ({
+15   label,
+16   description,
+17   onClick,
+18 }: {
+19   label: string;
+20   description: string;
+21   onClick: () => void;
+22 }) => (
+23   <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
+24     <p className="text-sm text-muted-foreground">{description}</p>
+25     <button
+26       type="button"
+27       onClick={onClick}
+28       className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
+29     >
+30       {label}
+31     </button>
+32   </div>
+33 );
+34 
+35 const CorrectSoundButton = () => (
+36 
+37 /**
+38  * Scenario 1 — 3 tile clicks in a row (speech in sequence)
+39  * Simulates a user rapidly clicking 3 letter/number tiles.
+40  * Each speak() call fires 80 ms after the previous one.
+41  */
+42 const runScenario1 = () => {
+43   const words = ['Cat', 'Dog', 'Bird'];
+44   let delay = 0;
+45   for (const word of words) {
+46     setTimeout(() => speak(word), delay);
+47     delay += 80;
+48   }
+49 };
+50 
+51 /**
+52  * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
+53  * Simulates clicking 2 tiles then immediately dropping the wrong tile.
+54  * The wrong.mp3 fires 80 ms after the second speak().
+55  */
+56 const runScenario2 = () => {
+57   setTimeout(() => speak('Cat'), 0);
+58   setTimeout(() => speak('Dog'), 80);
+59   setTimeout(() => playSound('wrong'), 160);
+60 };
+61 
+62 /**
+63  * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
+64  * Simulates placing the last correct tile.
+65  * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
+66  * so it waits for correct to finish before playing.
+67  */
+68 const runScenario3 = () => {
+69   playSound('correct');
+70   setTimeout(() => queueSound('round-complete'), 50);
+71 };
+72 
+73 const AudioPrototype = () => (
+74   <div className="flex flex-col gap-6 p-6">
+75     <div>
+76       <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
+77       <p className="mt-1 text-sm text-muted-foreground">
+78         Each scenario fires audio events at the same timing as the real game.
+79         Press a button to hear the current (overlapping) behaviour.
+80       </p>
+81     </div>
+82 
+83     {/* hover color should just be opaque of button color */}
+84     <div>
+85       <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
+86     </div>
+87     <div>
+88       <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
+89     </div>
+90     <div>
+91       <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
+92     </div>
+93     <div>
+94       <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
+95     </div>
+96 
+97 
+98 
+99     <ScenarioButton
+100       label="▶ Run Scenario 1"
+101       description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
+102       onClick={runScenario1}
+103     />
+104 
+105     <ScenarioButton
+106       label="▶ Run Scenario 2"
+107       description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
+108       onClick={runScenario2}
+109     />
+110 
+111     <ScenarioButton
+112       label="▶ Run Scenario 3"
+113       description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
+114       onClick={runScenario3}
+115     />
+116   </div>
+117 );
+118 
+119 const meta: Meta<typeof AudioPrototype> = {
+120   component: AudioPrototype,
+121   title: 'Audio/AudioFeedback Prototype',
+122   tags: ['autodocs'],
+123 };
+124 export default meta;
+125 
+126 type Story = StoryObj<typeof AudioPrototype>;
+127 
+128 export const Default: Story = {};
+129 
+130 export const CorrectSound: Story = {
+131   name: 'Correct Sound Effect',
+132   render: () => (<button onClick={() => playSound('correct')}>correct</button>)
+133 };
+134 export const WrongSound: Story = {
+135   name: 'Wrong Sound Effect',
+136   render: () => (<button onClick={() => playSound('wrong')}>wrong</button>)
+137 };
+138 
+139 export const RoundCompleteSound: Story = {
+140   name: 'Round Complete Sound Effect',
+141   render: () => (<button onClick={() => playSound('round-complete')}>round complete</button>)
+142 };
+143 
+144 export const GameCompleteSound: Story = {
+145   name: 'Game complete Sound Effect',
+146   render: () => (<button onClick={() => playSound('game-complete')}>game complete</button>)
+147 };
+148 
+149 
+150 export const Scenario1TileClicks: Story = {
+151   name: 'Scenario 1 — 3 tile clicks (speech)',
+152   render: () => (
+153     <ScenarioButton
+154       label="▶ Speak Cat → Dog → Bird"
+155       description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
+156       onClick={runScenario1}
+157     />
+158   ),
+159 };
+160 
+161 export const Scenario2SpeechAndWrong: Story = {
+162   name: 'Scenario 2 — Speech + wrong.mp3',
+163   render: () => (
+164     <ScenarioButton
+165       label="▶ Speak Cat → Dog → wrong.mp3"
+166       description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
+167       onClick={runScenario2}
+168     />
+169   ),
+170 };
+171 
+172 export const Scenario3CorrectAndRoundComplete: Story = {
+173   name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
+174   render: () => (
+175     <ScenarioButton
+176       label="▶ correct.mp3 → round-complete.mp3"
+177       description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
+178       onClick={runScenario3}
+179     />
+180   ),
+181 };
 182
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:18:29Z)**_
@@ -4117,9 +4190,9 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:18:29Z)**_
 There's an issue on line 35-36. There's an incomplete `const CorrectSoundButton = () => (` followed by a JSDoc comment and a `const` statement, which is invalid JSX/TypeScript. This was likely introduced by the linter. Let me fix this by removing the incomplete component declaration and updating the description text.
 
 Also, the stories file has:
+
 - Line 35: `const CorrectSoundButton = () => (` — this is an incomplete declaration that will cause a syntax error. This looks like it was added by the linter or something
 - Line 112-114: Still has old description "Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later" which should be updated to reflect the fixed behavior
-
 
 - Lines 172-181: Scenario3 story still has the old name and description that needs updating
 
@@ -4321,6 +4394,7 @@ export const Scenario3CorrectAndRoundComplete: Story = {
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:00Z)**_
@@ -4330,12 +4404,13 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:00Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound, queueSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
+1 import { playSound, queueSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:04Z)**_
@@ -4345,193 +4420,194 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:04Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound, queueSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
-6	 * Prototype to hear audio overlap scenarios without playing a full game.
-7	 *
-8	 * Each button fires events at the same timing as the real game:
-9	 * - Tile clicks: ~80 ms apart (rapid tapping)
-10	 * - correct → round-complete: ~50 ms (React render + effect flush)
-11	 * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
-12	 */
-13	
-14	const ScenarioButton = ({
-15	  label,
-16	  description,
-17	  onClick,
-18	}: {
-19	  label: string;
-20	  description: string;
-21	  onClick: () => void;
-22	}) => (
-23	  <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
-24	    <p className="text-sm text-muted-foreground">{description}</p>
-25	    <button
-26	      type="button"
-27	      onClick={onClick}
-28	      className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
-29	    >
-30	      {label}
-31	    </button>
-32	  </div>
-33	);
-34	
-35	const CorrectSoundButton = () => (
-36	  <div>
-37	    <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
-38	);
-39	
-40	const WrongSoundButton = () => (
-41	  <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
-42	);
-43	
-44	const RoundCompleteSoundButton = () => (
-45	  <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
-46	);
-47	
-48	const GameCompleteSoundButton = () => (
-49	  <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
-50	);
-51	
-52	/**
-53	 * Scenario 1 — 3 tile clicks in a row (speech in sequence)
-54	 * Simulates a user rapidly clicking 3 letter/number tiles.
-55	 * Each speak() call fires 80 ms after the previous one.
-56	 */
-57	const runScenario1 = () => {
-58	  const words = ['Cat', 'Dog', 'Bird'];
-59	  let delay = 0;
-60	  for (const word of words) {
-61	    setTimeout(() => speak(word), delay);
-62	    delay += 80;
-63	  }
-64	};
-65	
-66	/**
-67	 * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
-68	 * Simulates clicking 2 tiles then immediately dropping the wrong tile.
-69	 * The wrong.mp3 fires 80 ms after the second speak().
-70	 */
-71	const runScenario2 = () => {
-72	  setTimeout(() => speak('Cat'), 0);
-73	  setTimeout(() => speak('Dog'), 80);
-74	  setTimeout(() => playSound('wrong'), 160);
-75	};
-76	
-77	/**
-78	 * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
-79	 * Simulates placing the last correct tile.
-80	 * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
-81	 * so it waits for correct to finish before playing.
-82	 */
-83	const runScenario3 = () => {
-84	  playSound('correct');
-85	  setTimeout(() => queueSound('round-complete'), 50);
-86	};
-87	
-88	const AudioPrototype = () => (
-89	  <div className="flex flex-col gap-6 p-6">
-90	    <div>
-91	      <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
-92	      <p className="mt-1 text-sm text-muted-foreground">
-93	        Each scenario fires audio events at the same timing as the real game.
-94	        Press a button to hear the current (overlapping) behaviour.
-95	      </p>
-96	    </div>
-97	
-98	    <CorrectSoundButton />
-99	    <WrongSoundButton />
-100	    <RoundCompleteSoundButton />
-101	    <GameCompleteSoundButton />
-102	
-103	    <ScenarioButton
-104	      label="▶ Run Scenario 1"
-105	      description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
-106	      onClick={runScenario1}
-107	    />
-108	
-109	    <ScenarioButton
-110	      label="▶ Run Scenario 2"
-111	      description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
-112	      onClick={runScenario2}
-113	    />
-114	
-115	    <ScenarioButton
-116	      label="▶ Run Scenario 3"
-117	      description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
-118	      onClick={runScenario3}
-119	    />
-120	  </div>
-121	);
-122	
-123	const meta: Meta<typeof AudioPrototype> = {
-124	  component: AudioPrototype,
-125	  title: 'Audio/AudioFeedback Prototype',
-126	  tags: ['autodocs'],
-127	};
-128	export default meta;
-129	
-130	type Story = StoryObj<typeof AudioPrototype>;
-131	
-132	export const Default: Story = {};
-133	
-134	export const CorrectSound: Story = {
-135	  name: 'Correct Sound Effect',
-136	  render: () => (<CorrectSoundButton />)
-137	};
-138	export const WrongSound: Story = {
-139	  name: 'Wrong Sound Effect',
-140	  render: () => (<WrongSoundButton />)
-141	};
-142	
-143	export const RoundCompleteSound: Story = {
-144	  name: 'Round Complete Sound Effect',
-145	  render: () => (<RoundCompleteSoundButton />)
-146	};
-147	
-148	export const GameCompleteSound: Story = {
-149	  name: 'Game complete Sound Effect',
-150	  render: () => (<GameCompleteSoundButton />)
-151	};
-152	
-153	
-154	export const Scenario1TileClicks: Story = {
-155	  name: 'Scenario 1 — 3 tile clicks (speech)',
-156	  render: () => (
-157	    <ScenarioButton
-158	      label="▶ Speak Cat → Dog → Bird"
-159	      description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
-160	      onClick={runScenario1}
-161	    />
-162	  ),
-163	};
-164	
-165	export const Scenario2SpeechAndWrong: Story = {
-166	  name: 'Scenario 2 — Speech + wrong.mp3',
-167	  render: () => (
-168	    <ScenarioButton
-169	      label="▶ Speak Cat → Dog → wrong.mp3"
-170	      description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
-171	      onClick={runScenario2}
-172	    />
-173	  ),
-174	};
-175	
-176	export const Scenario3CorrectAndRoundComplete: Story = {
-177	  name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
-178	  render: () => (
-179	    <ScenarioButton
-180	      label="▶ correct.mp3 → round-complete.mp3"
-181	      description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
-182	      onClick={runScenario3}
-183	    />
-184	  ),
-185	};
+1 import { playSound, queueSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
+6  * Prototype to hear audio overlap scenarios without playing a full game.
+7  *
+8  * Each button fires events at the same timing as the real game:
+9  * - Tile clicks: ~80 ms apart (rapid tapping)
+10  * - correct → round-complete: ~50 ms (React render + effect flush)
+11  * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
+12  */
+13 
+14 const ScenarioButton = ({
+15   label,
+16   description,
+17   onClick,
+18 }: {
+19   label: string;
+20   description: string;
+21   onClick: () => void;
+22 }) => (
+23   <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
+24     <p className="text-sm text-muted-foreground">{description}</p>
+25     <button
+26       type="button"
+27       onClick={onClick}
+28       className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
+29     >
+30       {label}
+31     </button>
+32   </div>
+33 );
+34 
+35 const CorrectSoundButton = () => (
+36   <div>
+37     <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
+38 );
+39 
+40 const WrongSoundButton = () => (
+41   <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
+42 );
+43 
+44 const RoundCompleteSoundButton = () => (
+45   <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
+46 );
+47 
+48 const GameCompleteSoundButton = () => (
+49   <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
+50 );
+51 
+52 /**
+53  * Scenario 1 — 3 tile clicks in a row (speech in sequence)
+54  * Simulates a user rapidly clicking 3 letter/number tiles.
+55  * Each speak() call fires 80 ms after the previous one.
+56  */
+57 const runScenario1 = () => {
+58   const words = ['Cat', 'Dog', 'Bird'];
+59   let delay = 0;
+60   for (const word of words) {
+61     setTimeout(() => speak(word), delay);
+62     delay += 80;
+63   }
+64 };
+65 
+66 /**
+67  * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
+68  * Simulates clicking 2 tiles then immediately dropping the wrong tile.
+69  * The wrong.mp3 fires 80 ms after the second speak().
+70  */
+71 const runScenario2 = () => {
+72   setTimeout(() => speak('Cat'), 0);
+73   setTimeout(() => speak('Dog'), 80);
+74   setTimeout(() => playSound('wrong'), 160);
+75 };
+76 
+77 /**
+78  * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
+79  * Simulates placing the last correct tile.
+80  * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
+81  * so it waits for correct to finish before playing.
+82  */
+83 const runScenario3 = () => {
+84   playSound('correct');
+85   setTimeout(() => queueSound('round-complete'), 50);
+86 };
+87 
+88 const AudioPrototype = () => (
+89   <div className="flex flex-col gap-6 p-6">
+90     <div>
+91       <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
+92       <p className="mt-1 text-sm text-muted-foreground">
+93         Each scenario fires audio events at the same timing as the real game.
+94         Press a button to hear the current (overlapping) behaviour.
+95       </p>
+96     </div>
+97 
+98     <CorrectSoundButton />
+99     <WrongSoundButton />
+100     <RoundCompleteSoundButton />
+101     <GameCompleteSoundButton />
+102 
+103     <ScenarioButton
+104       label="▶ Run Scenario 1"
+105       description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
+106       onClick={runScenario1}
+107     />
+108 
+109     <ScenarioButton
+110       label="▶ Run Scenario 2"
+111       description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
+112       onClick={runScenario2}
+113     />
+114 
+115     <ScenarioButton
+116       label="▶ Run Scenario 3"
+117       description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
+118       onClick={runScenario3}
+119     />
+120   </div>
+121 );
+122 
+123 const meta: Meta<typeof AudioPrototype> = {
+124   component: AudioPrototype,
+125   title: 'Audio/AudioFeedback Prototype',
+126   tags: ['autodocs'],
+127 };
+128 export default meta;
+129 
+130 type Story = StoryObj<typeof AudioPrototype>;
+131 
+132 export const Default: Story = {};
+133 
+134 export const CorrectSound: Story = {
+135   name: 'Correct Sound Effect',
+136   render: () => (<CorrectSoundButton />)
+137 };
+138 export const WrongSound: Story = {
+139   name: 'Wrong Sound Effect',
+140   render: () => (<WrongSoundButton />)
+141 };
+142 
+143 export const RoundCompleteSound: Story = {
+144   name: 'Round Complete Sound Effect',
+145   render: () => (<RoundCompleteSoundButton />)
+146 };
+147 
+148 export const GameCompleteSound: Story = {
+149   name: 'Game complete Sound Effect',
+150   render: () => (<GameCompleteSoundButton />)
+151 };
+152 
+153 
+154 export const Scenario1TileClicks: Story = {
+155   name: 'Scenario 1 — 3 tile clicks (speech)',
+156   render: () => (
+157     <ScenarioButton
+158       label="▶ Speak Cat → Dog → Bird"
+159       description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
+160       onClick={runScenario1}
+161     />
+162   ),
+163 };
+164 
+165 export const Scenario2SpeechAndWrong: Story = {
+166   name: 'Scenario 2 — Speech + wrong.mp3',
+167   render: () => (
+168     <ScenarioButton
+169       label="▶ Speak Cat → Dog → wrong.mp3"
+170       description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
+171       onClick={runScenario2}
+172     />
+173   ),
+174 };
+175 
+176 export const Scenario3CorrectAndRoundComplete: Story = {
+177   name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
+178   render: () => (
+179     <ScenarioButton
+180       label="▶ correct.mp3 → round-complete.mp3"
+181       description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
+182       onClick={runScenario3}
+183     />
+184   ),
+185 };
 186
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:16Z)**_
@@ -4544,6 +4620,7 @@ The linter has refactored the file significantly - it created separate component
 3. The file already has `queueSound` being used in `runScenario3`
 
 Let me look at line 35-38 more carefully:
+
 ```
 
 
@@ -4572,6 +4649,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:19Z)**_
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:22Z)**_
@@ -4581,200 +4659,201 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:22Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx`
 
 ```text
-1	import { playSound, queueSound } from './AudioFeedback';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	import { speak } from '@/lib/speech/SpeechOutput';
-4	
-5	/**
-6	 * Prototype to hear audio overlap scenarios without playing a full game.
-7	 *
-8	 * Each button fires events at the same timing as the real game:
-9	 * - Tile clicks: ~80 ms apart (rapid tapping)
-10	 * - correct → round-complete: ~50 ms (React render + effect flush)
-11	 * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
-12	 */
-13	
-14	const ScenarioButton = ({
-15	  label,
-16	  description,
-17	  onClick,
-18	}: {
-19	  label: string;
-20	  description: string;
-21	  onClick: () => void;
-22	}) => (
-23	  <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
-24	    <p className="text-sm text-muted-foreground">{description}</p>
-25	    <button
-26	      type="button"
-27	      onClick={onClick}
-28	      className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
-29	    >
-30	      {label}
-31	    </button>
-32	  </div>
-33	);
-34	
-35	const CorrectSoundButton = () => (
-36	  <div>
-37	    <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
-38	  </div>
-39	);
-40	
-41	const WrongSoundButton = () => (
-42	  <div>
-43	    <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
-44	  </div>
-45	);
-46	
-47	const RoundCompleteSoundButton = () => (
-48	  <div>
-49	    <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
-50	  </div>
-51	);
-52	
-53	const GameCompleteSoundButton = () => (
-54	  <div>
-55	    <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
-56	  </div>
-57	);
-58	
-59	/**
-60	 * Scenario 1 — 3 tile clicks in a row (speech in sequence)
-61	 * Simulates a user rapidly clicking 3 letter/number tiles.
-62	 * Each speak() call fires 80 ms after the previous one.
-63	 */
-64	const runScenario1 = () => {
-65	  const words = ['Cat', 'Dog', 'Bird'];
-66	  let delay = 0;
-67	  for (const word of words) {
-68	    setTimeout(() => speak(word), delay);
-69	    delay += 80;
-70	  }
-71	};
-72	
-73	/**
-74	 * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
-75	 * Simulates clicking 2 tiles then immediately dropping the wrong tile.
-76	 * The wrong.mp3 fires 80 ms after the second speak().
-77	 */
-78	const runScenario2 = () => {
-79	  setTimeout(() => speak('Cat'), 0);
-80	  setTimeout(() => speak('Dog'), 80);
-81	  setTimeout(() => playSound('wrong'), 160);
-82	};
-83	
-84	/**
-85	 * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
-86	 * Simulates placing the last correct tile.
-87	 * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
-88	 * so it waits for correct to finish before playing.
-89	 */
-90	const runScenario3 = () => {
-91	  playSound('correct');
-92	  setTimeout(() => queueSound('round-complete'), 50);
-93	};
-94	
-95	const AudioPrototype = () => (
-96	  <div className="flex flex-col gap-6 p-6">
-97	    <div>
-98	      <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
-99	      <p className="mt-1 text-sm text-muted-foreground">
-100	        Each scenario fires audio events at the same timing as the real game.
-101	        Press a button to hear the current (overlapping) behaviour.
-102	      </p>
-103	    </div>
-104	
-105	    <CorrectSoundButton />
-106	    <WrongSoundButton />
-107	    <RoundCompleteSoundButton />
-108	    <GameCompleteSoundButton />
-109	
-110	    <ScenarioButton
-111	      label="▶ Run Scenario 1"
-112	      description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
-113	      onClick={runScenario1}
-114	    />
-115	
-116	    <ScenarioButton
-117	      label="▶ Run Scenario 2"
-118	      description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
-119	      onClick={runScenario2}
-120	    />
-121	
-122	    <ScenarioButton
-123	      label="▶ Run Scenario 3"
-124	      description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
-125	      onClick={runScenario3}
-126	    />
-127	  </div>
-128	);
-129	
-130	const meta: Meta<typeof AudioPrototype> = {
-131	  component: AudioPrototype,
-132	  title: 'Audio/AudioFeedback Prototype',
-133	  tags: ['autodocs'],
-134	};
-135	export default meta;
-136	
-137	type Story = StoryObj<typeof AudioPrototype>;
-138	
-139	export const Default: Story = {};
-140	
-141	export const CorrectSound: Story = {
-142	  name: 'Correct Sound Effect',
-143	  render: () => (<CorrectSoundButton />)
-144	};
-145	export const WrongSound: Story = {
-146	  name: 'Wrong Sound Effect',
-147	  render: () => (<WrongSoundButton />)
-148	};
-149	
-150	export const RoundCompleteSound: Story = {
-151	  name: 'Round Complete Sound Effect',
-152	  render: () => (<RoundCompleteSoundButton />)
-153	};
-154	
-155	export const GameCompleteSound: Story = {
-156	  name: 'Game complete Sound Effect',
-157	  render: () => (<GameCompleteSoundButton />)
-158	};
-159	
-160	
-161	export const Scenario1TileClicks: Story = {
-162	  name: 'Scenario 1 — 3 tile clicks (speech)',
-163	  render: () => (
-164	    <ScenarioButton
-165	      label="▶ Speak Cat → Dog → Bird"
-166	      description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
-167	      onClick={runScenario1}
-168	    />
-169	  ),
-170	};
-171	
-172	export const Scenario2SpeechAndWrong: Story = {
-173	  name: 'Scenario 2 — Speech + wrong.mp3',
-174	  render: () => (
-175	    <ScenarioButton
-176	      label="▶ Speak Cat → Dog → wrong.mp3"
-177	      description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
-178	      onClick={runScenario2}
-179	    />
-180	  ),
-181	};
-182	
-183	export const Scenario3CorrectAndRoundComplete: Story = {
-184	  name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
-185	  render: () => (
-186	    <ScenarioButton
-187	      label="▶ correct.mp3 → round-complete.mp3"
-188	      description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
-189	      onClick={runScenario3}
-190	    />
-191	  ),
-192	};
+1 import { playSound, queueSound } from './AudioFeedback';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 import { speak } from '@/lib/speech/SpeechOutput';
+4 
+5 /**
+6  * Prototype to hear audio overlap scenarios without playing a full game.
+7  *
+8  * Each button fires events at the same timing as the real game:
+9  * - Tile clicks: ~80 ms apart (rapid tapping)
+10  * - correct → round-complete: ~50 ms (React render + effect flush)
+11  * - round advance → TTS: ~750 ms (the NumberMatch/WordSpell delay timer)
+12  */
+13 
+14 const ScenarioButton = ({
+15   label,
+16   description,
+17   onClick,
+18 }: {
+19   label: string;
+20   description: string;
+21   onClick: () => void;
+22 }) => (
+23   <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 shadow-sm">
+24     <p className="text-sm text-muted-foreground">{description}</p>
+25     <button
+26       type="button"
+27       onClick={onClick}
+28       className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 active:scale-95"
+29     >
+30       {label}
+31     </button>
+32   </div>
+33 );
+34 
+35 const CorrectSoundButton = () => (
+36   <div>
+37     <button className="rounded-md bg-green-600 hover:bg-green-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('correct')}>correct sound effect</button>
+38   </div>
+39 );
+40 
+41 const WrongSoundButton = () => (
+42   <div>
+43     <button className="rounded-md bg-red-600 hover:bg-red-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('wrong')}>wrong sound effect</button>
+44   </div>
+45 );
+46 
+47 const RoundCompleteSoundButton = () => (
+48   <div>
+49     <button className="rounded-md bg-sky-600 hover:bg-sky-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('round-complete')}>round complete sound effect</button>
+50   </div>
+51 );
+52 
+53 const GameCompleteSoundButton = () => (
+54   <div>
+55     <button className="rounded-md bg-violet-600 hover:bg-violet-600/70 px-4 py-2 text-sm font-medium text-primary-foreground active:scale-95" onClick={() => playSound('game-complete')}>game complete sound effect</button>
+56   </div>
+57 );
+58 
+59 /**
+60  * Scenario 1 — 3 tile clicks in a row (speech in sequence)
+61  * Simulates a user rapidly clicking 3 letter/number tiles.
+62  * Each speak() call fires 80 ms after the previous one.
+63  */
+64 const runScenario1 = () => {
+65   const words = ['Cat', 'Dog', 'Bird'];
+66   let delay = 0;
+67   for (const word of words) {
+68     setTimeout(() => speak(word), delay);
+69     delay += 80;
+70   }
+71 };
+72 
+73 /**
+74  * Scenario 2 — 2 tile speech + 1 wrong answer (speech + mp3)
+75  * Simulates clicking 2 tiles then immediately dropping the wrong tile.
+76  * The wrong.mp3 fires 80 ms after the second speak().
+77  */
+78 const runScenario2 = () => {
+79   setTimeout(() => speak('Cat'), 0);
+80   setTimeout(() => speak('Dog'), 80);
+81   setTimeout(() => playSound('wrong'), 160);
+82 };
+83 
+84 /**
+85  * Scenario 3 — 1 correct answer + round complete (FIXED: queued mp3s)
+86  * Simulates placing the last correct tile.
+87  * correct.mp3 fires immediately; round-complete.mp3 is queued via queueSound()
+88  * so it waits for correct to finish before playing.
+89  */
+90 const runScenario3 = () => {
+91   playSound('correct');
+92   setTimeout(() => queueSound('round-complete'), 50);
+93 };
+94 
+95 const AudioPrototype = () => (
+96   <div className="flex flex-col gap-6 p-6">
+97     <div>
+98       <h2 className="text-lg font-semibold">Audio Overlap Prototype</h2>
+99       <p className="mt-1 text-sm text-muted-foreground">
+100         Each scenario fires audio events at the same timing as the real game.
+101         Press a button to hear the current (overlapping) behaviour.
+102       </p>
+103     </div>
+104 
+105     <CorrectSoundButton />
+106     <WrongSoundButton />
+107     <RoundCompleteSoundButton />
+108     <GameCompleteSoundButton />
+109 
+110     <ScenarioButton
+111       label="▶ Run Scenario 1"
+112       description="Scenario 1 — 3 tile clicks in a row: speak('Cat') → speak('Dog') → speak('Bird') at 80 ms intervals"
+113       onClick={runScenario1}
+114     />
+115 
+116     <ScenarioButton
+117       label="▶ Run Scenario 2"
+118       description="Scenario 2 — 2 tile speech + wrong answer: speak('Cat') → speak('Dog') → playSound('wrong') at 80 ms intervals"
+119       onClick={runScenario2}
+120     />
+121 
+122     <ScenarioButton
+123       label="▶ Run Scenario 3"
+124       description="Scenario 3 — Correct answer then round complete: playSound('correct') → playSound('round-complete') 50 ms later"
+125       onClick={runScenario3}
+126     />
+127   </div>
+128 );
+129 
+130 const meta: Meta<typeof AudioPrototype> = {
+131   component: AudioPrototype,
+132   title: 'Audio/AudioFeedback Prototype',
+133   tags: ['autodocs'],
+134 };
+135 export default meta;
+136 
+137 type Story = StoryObj<typeof AudioPrototype>;
+138 
+139 export const Default: Story = {};
+140 
+141 export const CorrectSound: Story = {
+142   name: 'Correct Sound Effect',
+143   render: () => (<CorrectSoundButton />)
+144 };
+145 export const WrongSound: Story = {
+146   name: 'Wrong Sound Effect',
+147   render: () => (<WrongSoundButton />)
+148 };
+149 
+150 export const RoundCompleteSound: Story = {
+151   name: 'Round Complete Sound Effect',
+152   render: () => (<RoundCompleteSoundButton />)
+153 };
+154 
+155 export const GameCompleteSound: Story = {
+156   name: 'Game complete Sound Effect',
+157   render: () => (<GameCompleteSoundButton />)
+158 };
+159 
+160 
+161 export const Scenario1TileClicks: Story = {
+162   name: 'Scenario 1 — 3 tile clicks (speech)',
+163   render: () => (
+164     <ScenarioButton
+165       label="▶ Speak Cat → Dog → Bird"
+166       description="3 speak() calls at 80 ms intervals — simulates rapid tile tapping"
+167       onClick={runScenario1}
+168     />
+169   ),
+170 };
+171 
+172 export const Scenario2SpeechAndWrong: Story = {
+173   name: 'Scenario 2 — Speech + wrong.mp3',
+174   render: () => (
+175     <ScenarioButton
+176       label="▶ Speak Cat → Dog → wrong.mp3"
+177       description="Two speak() calls then playSound('wrong') — speech overlapping with mp3"
+178       onClick={runScenario2}
+179     />
+180   ),
+181 };
+182 
+183 export const Scenario3CorrectAndRoundComplete: Story = {
+184   name: 'Scenario 3 — correct.mp3 + round-complete.mp3',
+185   render: () => (
+186     <ScenarioButton
+187       label="▶ correct.mp3 → round-complete.mp3"
+188       description="playSound('correct') then playSound('round-complete') 50 ms later — correct gets cut off"
+189       onClick={runScenario3}
+190     />
+191   ),
+192 };
 193
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:25Z)**_
@@ -4795,6 +4874,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:36Z)**_
@@ -4805,6 +4885,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:19:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.stories.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:19:46Z)**_
@@ -4878,6 +4959,7 @@ AssertionError: expected false to be true // Object.is equality
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:20:36Z)**_
@@ -4889,7 +4971,6 @@ The `whenSoundEnds` test is failing because we need more microtask flushes. The 
 2. `queueSound('round-complete')` → queueTail = P_correct.then(() => playSoundInternal('round-complete'))
    - This means queueTail = P2 where P2 resolves when round-complete finishes
 
-
 3. `whenSoundEnds().then(() => { resolved = true; })` chains onto P2, so we're waiting for the entire chain to complete
 
 When `correct` ends, P_correct resolves and triggers the callback that starts playing round-complete, creating P3. P2 then waits for P3 to resolve. When round-complete ends, P3 resolves, which resolves P2, which finally triggers the resolved flag. The problem is that each promise chain level requires its own microtask flush with `await Promise.resolve()`, and the cleanup function fires when `endedHolder.ref?.()` is called for round-complete.
@@ -4899,6 +4980,7 @@ When that second call happens, `cleanup()` calls `resolve()` to resolve P3, whic
 I'm realizing that in a promise chain like `P.then(cb).then(cb2)`, it takes two microtask ticks for `cb2` to fire after P resolves—the first tick runs `cb` and if it returns a thenable, the second tick waits for that thenable to settle before `cb2` can run. promise resolves → `cb2` is called
 
 For our chain:
+
 - `queueTail = P_correct.then(() => playSoundInternal('round-complete'))` — this means queueTail is a derived promise
 - When P_correct resolves: Tick 1 → callback fires → `playSoundInternal('round-complete')` called → returns P3
   - The returned promise (P3) needs to "adopt" into queueTail
@@ -4910,10 +4992,12 @@ For our chain:
 When P3 resolves from the second `endedHolder.ref?.()` call, P2 gets notified and resolves after another tick. But then `whenSoundEnds()` returns P2, and we're chaining another `.then()` onto it to set `resolved = true`, which creates yet another promise in the chain. So we're looking at multiple microtask ticks stacking up before that final flag gets set. that resolves when `resolved = true` has been called.
 
 So the full chain when P3 (round-complete) resolves:
+
 - Tick 1: P2 is notified that P3 resolved → P2 resolves
 - Tick 2: P4's onFulfilled fires → `resolved = true`
 
 2 ticks after P3 resolves. Currently the test does:
+
 ```ts
 endedHolder.ref?.(); // round-complete ends (P3 resolves)
 await Promise.resolve();  // Tick 1: P2 resolves
@@ -4944,6 +5028,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:20:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:20:51Z)**_
@@ -4975,6 +5060,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
 
 Done in 2.88s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:21:24Z)**_
@@ -4992,6 +5078,7 @@ Here's a summary of what was fixed:
 | Tile-label TTS overlaps with correct/wrong MP3 | Web Speech API and HTMLAudioElement are independent channels | `useTileEvaluation.placeTile` now calls `cancelSpeech()` before `playSound()` |
 
 **API added to `AudioFeedback.ts`:**
+
 - `playSound` — unchanged semantics (immediate, resets queue)
 - `queueSound` — NEW: plays after current queue drains
 - `whenSoundEnds` — NEW: returns a Promise resolving when all queued audio finishes
@@ -5006,7 +5093,6 @@ _**User (2026-04-03 23:46:23Z)**_
 
 (give me the commit message for all your fixes)
 
-
 ok, this is good, but now I want a new prompt to a new session to sync the animation with the sound with confetti animation. they should be in sync when triggering
 
 ---
@@ -5015,6 +5101,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:46:43Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user wants two things:
+
 1. A commit message for the audio overlap fixes
 2. A new session prompt about syncing animation/confetti with sound
 
@@ -5044,6 +5131,7 @@ Show changed files summary
  src/lib/audio/AudioFeedback.ts                     |  57 ++++++++++--
  10 files changed, 180 insertions(+), 52 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:46:48Z)**_
@@ -5075,6 +5163,7 @@ Show git status
  M src/lib/audio/AudioFeedback.ts
 ?? src/lib/audio/AudioFeedback.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:46:56Z)**_
@@ -5119,6 +5208,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:46:57Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:46:58Z)**_
@@ -5130,6 +5220,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:46:58Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:47:04Z)**_
@@ -5149,6 +5240,7 @@ src/games/number-match/NumberMatch/NumberMatch.tsx
 src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 src/games/word-spell/WordSpell/WordSpell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:47:07Z)**_
@@ -5158,40 +5250,41 @@ _**Agent (claude-sonnet-4-6 2026-04-03 23:47:07Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`
 
 ```text
-1	import confetti from 'canvas-confetti';
-2	import { useEffect, useRef } from 'react';
-3	
-4	interface ScoreAnimationProps {
-5	  visible: boolean;
-6	}
-7	
-8	export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
-9	  const prevRef = useRef(false);
-10	
-11	  useEffect(() => {
-12	    if (visible && !prevRef.current) {
-13	      void confetti({
-14	        particleCount: 80,
-15	        spread: 70,
-16	        origin: { y: 0.5 },
-17	        ticks: 80,
-18	      });
-19	    }
-20	    prevRef.current = visible;
-21	  }, [visible]);
-22	
-23	  if (!visible) return null;
-24	
-25	  return (
-26	    <div
-27	      aria-live="polite"
-28	      aria-label="Round complete!"
-29	      className="pointer-events-none fixed inset-0"
-30	    />
-31	  );
-32	};
+1 import confetti from 'canvas-confetti';
+2 import { useEffect, useRef } from 'react';
+3 
+4 interface ScoreAnimationProps {
+5   visible: boolean;
+6 }
+7 
+8 export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
+9   const prevRef = useRef(false);
+10 
+11   useEffect(() => {
+12     if (visible && !prevRef.current) {
+13       void confetti({
+14         particleCount: 80,
+15         spread: 70,
+16         origin: { y: 0.5 },
+17         ticks: 80,
+18       });
+19     }
+20     prevRef.current = visible;
+21   }, [visible]);
+22 
+23   if (!visible) return null;
+24 
+25   return (
+26     <div
+27       aria-live="polite"
+28       aria-label="Round complete!"
+29       className="pointer-events-none fixed inset-0"
+30     />
+31   );
+32 };
 33
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 23:47:34Z)**_
@@ -5203,7 +5296,6 @@ The user wants confetti to be in sync with the `round-complete` sound — so con
 
 The prompt for the new session should describe:
 
-
 1. What the current state is (audio queue fix done)
 2. What `ScoreAnimation` currently does (fires immediately on phase change)
 3. What the desired behavior is (confetti fires in sync with `round-complete.mp3`)
@@ -5213,6 +5305,7 @@ The prompt for the new session should describe:
 The solution is to fire confetti when `round-complete.mp3` starts, not when the phase changes — which means I need to hook into the moment that sound begins playing rather than waiting for the previous sound to finish. not when it ends. That means after `correct.mp3` ends and `round-complete.mp3` begins.
 
 Looking at the timing:
+
 - t=0: `correct.mp3` starts
 - `correct.mp3` ends → `round-complete.mp3` starts via queueSound
 - confetti should fire AT THE SAME TIME as `round-complete.mp3` starts
@@ -5222,11 +5315,13 @@ Currently, confetti fires at `phase === 'round-complete'` (t≈0ms), before `cor
 To sync confetti with `round-complete.mp3`, I need to delay it until after `correct.mp3` ends. The key insight is that when the phase changes to `round-complete`, I can capture the promise from `whenSoundEnds()` and attach the confetti callback to it—that way, confetti fires exactly when `correct` ends and `round-complete` begins, which is the same moment `queueSound` triggers the next sound to play. then()` callbacks would fire when `correct` ends, which means confetti fires exactly when `round-complete` starts playing. That's in sync!
 
 The implementation could be:
+
 - Add a `whenCurrentSoundEnds()` or modify `ScoreAnimation` to accept an `onVisible` callback that's deferred
 - Or add a new prop `delay: Promise<void>` to `ScoreAnimation`
 - Or create a `useRoundAnimation` hook similar to `useGameSounds` that uses `whenSoundEnds().then(() => trigger confetti)`
 
 The cleanest approach:
+
 - Keep `ScoreAnimation` dumb (accepts `visible` prop)
 - Create a new hook or modify `useGameSounds` to coordinate the confetti timing
 - OR: Add a `useRoundConfetti` hook that calls `whenSoundEnds().then(() => confetti())`
@@ -5259,6 +5354,7 @@ The timing is now: `correct.mp3` plays → finishes → `round-complete.mp3` sta
 **Desired behaviour:** Confetti should start at the same moment `round-complete.mp3` starts playing — which is after `correct.mp3` finishes. The same applies to any other `round-complete` visual feedback.
 
 **Key files:**
+
 - [ScoreAnimation.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx) — fires confetti on `visible` prop change
 - [ScoreAnimation.test.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx) — existing tests
 - [ScoreAnimation.stories.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx) — Storybook stories

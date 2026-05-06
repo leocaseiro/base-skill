@@ -16,7 +16,7 @@ const voices = speechSynthesis.getVoices();
 const msg = new SpeechSynthesisUtterance("Hello, this is a different voice.");
 
 // Example: Select the first available voice
-msg.voice = voices[0]; 
+msg.voice = voices[0];
 
 // Example: Find a specific voice by name (e.g., "Daniel")
 msg.voice = voices.find(v => v.name === 'Daniel');
@@ -38,35 +38,36 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:51:40Z)**_
  `./src/lib/speech/SpeechOutput.ts`
 
 ```text
-1	export function speak(text: string): void {
-2	  const synth = (
-3	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-4	  ).speechSynthesis;
-5	  if (!synth) {
-6	    return;
-7	  }
-8	  synth.cancel();
-9	  const u = new SpeechSynthesisUtterance(text);
-10	  synth.speak(u);
-11	}
-12	
-13	export function cancelSpeech(): void {
-14	  const synth = (
-15	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-16	  ).speechSynthesis;
-17	  if (!synth) {
-18	    return;
-19	  }
-20	  synth.cancel();
-21	}
-22	
-23	export function isSpeechOutputAvailable(): boolean {
-24	  return !!(
-25	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-26	  ).speechSynthesis;
-27	}
+1 export function speak(text: string): void {
+2   const synth = (
+3     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+4   ).speechSynthesis;
+5   if (!synth) {
+6     return;
+7   }
+8   synth.cancel();
+9   const u = new SpeechSynthesisUtterance(text);
+10   synth.speak(u);
+11 }
+12 
+13 export function cancelSpeech(): void {
+14   const synth = (
+15     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+16   ).speechSynthesis;
+17   if (!synth) {
+18     return;
+19   }
+20   synth.cancel();
+21 }
+22 
+23 export function isSpeechOutputAvailable(): boolean {
+24   return !!(
+25     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+26   ).speechSynthesis;
+27 }
 28
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:51:43Z)**_
@@ -91,6 +92,7 @@ src/lib/speech/SpeechInput.mdx
 src/lib/speech/SpeechOutput.demo.tsx
 src/lib/speech/SpeechOutput.mdx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:51:48Z)**_
@@ -100,28 +102,29 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:51:48Z)**_
  `./src/lib/speech/SpeechOutput.test.ts`
 
 ```text
-1	import { afterEach, describe, expect, it, vi } from 'vitest';
-2	import { cancelSpeech, speak } from './SpeechOutput';
-3	
-4	describe('SpeechOutput', () => {
-5	  afterEach(() => {
-6	    vi.unstubAllGlobals();
-7	  });
-8	
-9	  it('speak does not throw when speechSynthesis is undefined', () => {
-10	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-11	    vi.stubGlobal('speechSynthesis', undefined);
-12	    expect(() => speak('hello')).not.toThrow();
-13	  });
-14	
-15	  it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
-16	    // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
-17	    vi.stubGlobal('speechSynthesis', undefined);
-18	    expect(() => cancelSpeech()).not.toThrow();
-19	  });
-20	});
+1 import { afterEach, describe, expect, it, vi } from 'vitest';
+2 import { cancelSpeech, speak } from './SpeechOutput';
+3 
+4 describe('SpeechOutput', () => {
+5   afterEach(() => {
+6     vi.unstubAllGlobals();
+7   });
+8 
+9   it('speak does not throw when speechSynthesis is undefined', () => {
+10     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+11     vi.stubGlobal('speechSynthesis', undefined);
+12     expect(() => speak('hello')).not.toThrow();
+13   });
+14 
+15   it('cancelSpeech does not throw when speechSynthesis is undefined', () => {
+16     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
+17     vi.stubGlobal('speechSynthesis', undefined);
+18     expect(() => cancelSpeech()).not.toThrow();
+19   });
+20 });
 21
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:51:48Z)**_
@@ -131,25 +134,26 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:51:48Z)**_
  `./src/lib/speech/voices.ts`
 
 ```text
-1	export function getVoicesForLanguage(
-2	  lang: string,
-3	): SpeechSynthesisVoice[] {
-4	  const synth = (
-5	    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-6	  ).speechSynthesis;
-7	  if (!synth) {
-8	    return [];
-9	  }
-10	  const voices = synth.getVoices();
-11	  const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
-12	  return voices.filter(
-13	    (v) =>
-14	      v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
-15	      v.lang.toLowerCase().startsWith(prefix),
-16	  );
-17	}
+1 export function getVoicesForLanguage(
+2   lang: string,
+3 ): SpeechSynthesisVoice[] {
+4   const synth = (
+5     globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+6   ).speechSynthesis;
+7   if (!synth) {
+8     return [];
+9   }
+10   const voices = synth.getVoices();
+11   const prefix = lang.split('-')[0]?.toLowerCase() ?? lang;
+12   return voices.filter(
+13     (v) =>
+14       v.lang.toLowerCase().startsWith(lang.toLowerCase()) ||
+15       v.lang.toLowerCase().startsWith(prefix),
+16   );
+17 }
 18
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:52:06Z)**_
@@ -160,7 +164,6 @@ Now I need to check if there's a worktree setup needed. Looking at the CLAUDE.md
 Actually, looking at the CLAUDE.md instructions: "Never commit directly to master. All changes must be made on a branch via a git worktree." So I need to create a worktree first.
 
 But actually the user is asking me to implement the feature - let me first check the superpowers skills to see if any apply (brainstorming, TDD, etc.) before implementing.
-
 
 I'm reviewing the available superpowers - brainstorming is required before creative work, and TDD should be used when implementing features. The request is pretty straightforward though: add a voice parameter to speak() with Daniel as the default. Given how specific the requirements are, I think I can skip the brainstorming phase and jump straight to test-driven development. I'm going back and forth on whether brainstorming is necessary here. The user has given me explicit requirements with code examples, so jumping straight to TDD implementation seems reasonable. But the skill rule says I must use brainstorming before any creative work on features, and this counts as adding functionality. I'll invoke brainstorming first to be thorough, then move into TDD for the implementation workflow.
 </details></think>
@@ -342,7 +345,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:52:19Z)**_
@@ -351,6 +353,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:52:19Z)**_
 The brainstorming skill says I need to follow the checklist. Let me start by exploring the project context and then ask clarifying questions.
 
 But wait - the user has given me a very explicit spec:
+
 1. Add voice selection to `speak()`
 2. Daniel should be the default voice
 3. They even provided the code pattern to use
@@ -358,7 +361,6 @@ But wait - the user has given me a very explicit spec:
 The brainstorming skill says I still need to go through the process, but let me assess the scope. This is a very small, well-defined change. Let me start with exploring context (I've already done that), then ask a focused clarifying question.
 
 Actually, looking at the existing code and the user's request, this is quite simple. I need to:
-
 
 - Add an optional `voice` parameter to `speak()`
 - Default to finding "Daniel" voice
@@ -384,6 +386,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:52:19Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:52:31Z)**_
@@ -392,14 +395,14 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:52:31Z)**_
 Now let me create the todos for the brainstorming checklist and start the process. I've already explored the project context (step 1). Let me create tasks and proceed.
 
 The context I've gathered:
+
 - `speak(text: string)` - no voice selection
-- `voices.ts` - has `getVoicesForLanguage()` 
+- `voices.ts` - has `getVoicesForLanguage()`
 - `SpeechOutput.test.ts` - tests for undefined speechSynthesis
 
-The request is clear: add voice selection to `speak()` with Daniel as default. 
+The request is clear: add voice selection to `speak()` with Daniel as default.
 
 This is a small, focused change. Let me quickly assess scope and then ask the key design question. The main design decision is: how should voice be specified - by name string, or by SpeechSynthesisVoice object?
-
 
 Looking at the user's code, they're working with voice names as strings when identifying voices, but the Web Speech API expects a SpeechSynthesisVoice object. The cleanest approach would be to accept a voice name string as the parameter and handle the lookup internally, so callers don't need to deal with the object directly.
 </details></think>
@@ -443,7 +446,7 @@ The user wants the voice to be saved in settings, so they want a voice name stri
 
 But wait - the user said "from the list would be the best option" - this seems to confirm they want a string name parameter, since names can be persisted in settings (you can't persist a SpeechSynthesisVoice object).
 
-Actually, re-reading: "I want to be saved in the settings" - this suggests there's a settings/preferences system where the chosen voice name would be stored. 
+Actually, re-reading: "I want to be saved in the settings" - this suggests there's a settings/preferences system where the chosen voice name would be stored.
 
 So the voice selection is a user preference that persists. I'm thinking `speak()` could either accept an optional voice name string parameter (defaulting to 'Daniel'), or it could read from a settings store internally. The user's mention of "from the list would be the best option" points toward a string parameter approach, since that lets them select from available voices. I should check if there's already a settings system in place, though I haven't spotted one yet - this might be something to clarify with the user.
 </details></think>
@@ -460,6 +463,7 @@ src/lib/i18n/locales/en/settings.json
 src/lib/i18n/locales/pt-BR/settings.json
 src/routes/$locale/_app/settings.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:54:19Z)**_
@@ -474,6 +478,7 @@ src/db/hooks/useSettings.ts
 src/db/hooks/useSettings.demo.tsx
 src/db/hooks/useSettings.mdx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:54:22Z)**_
@@ -483,49 +488,50 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:54:22Z)**_
  `./src/db/schemas/settings.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type SettingsDoc = {
-4	  id: string;
-5	  profileId: string;
-6	  volume?: number;
-7	  speechRate?: number;
-8	  activeLanguage?: string;
-9	  ttsEnabled?: boolean;
-10	  showSubtitles?: boolean;
-11	  themeId?: string;
-12	  preferredVoiceURI?: string;
-13	  preferredVoiceDeviceId?: string;
-14	  updatedAt: string;
-15	};
-16	
-17	export const settingsSchema: RxJsonSchema<SettingsDoc> = {
-18	  version: 0,
-19	  primaryKey: 'id',
-20	  type: 'object',
-21	  properties: {
-22	    id: { type: 'string', maxLength: 36 },
-23	    profileId: { type: 'string', maxLength: 36 },
-24	    volume: { type: 'number', minimum: 0, maximum: 1, default: 0.8 },
-25	    speechRate: {
-26	      type: 'number',
-27	      minimum: 0.5,
-28	      maximum: 2,
-29	      default: 1,
-30	    },
-31	    activeLanguage: { type: 'string' },
-32	    ttsEnabled: { type: 'boolean', default: true },
-33	    showSubtitles: { type: 'boolean', default: true },
-34	    themeId: { type: 'string' },
-35	    preferredVoiceURI: { type: 'string' },
-36	    preferredVoiceDeviceId: { type: 'string' },
-37	    updatedAt: { type: 'string', format: 'date-time' },
-38	  },
-39	  required: ['id', 'profileId', 'updatedAt'],
-40	  additionalProperties: false,
-41	};
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type SettingsDoc = {
+4   id: string;
+5   profileId: string;
+6   volume?: number;
+7   speechRate?: number;
+8   activeLanguage?: string;
+9   ttsEnabled?: boolean;
+10   showSubtitles?: boolean;
+11   themeId?: string;
+12   preferredVoiceURI?: string;
+13   preferredVoiceDeviceId?: string;
+14   updatedAt: string;
+15 };
+16 
+17 export const settingsSchema: RxJsonSchema<SettingsDoc> = {
+18   version: 0,
+19   primaryKey: 'id',
+20   type: 'object',
+21   properties: {
+22     id: { type: 'string', maxLength: 36 },
+23     profileId: { type: 'string', maxLength: 36 },
+24     volume: { type: 'number', minimum: 0, maximum: 1, default: 0.8 },
+25     speechRate: {
+26       type: 'number',
+27       minimum: 0.5,
+28       maximum: 2,
+29       default: 1,
+30     },
+31     activeLanguage: { type: 'string' },
+32     ttsEnabled: { type: 'boolean', default: true },
+33     showSubtitles: { type: 'boolean', default: true },
+34     themeId: { type: 'string' },
+35     preferredVoiceURI: { type: 'string' },
+36     preferredVoiceDeviceId: { type: 'string' },
+37     updatedAt: { type: 'string', format: 'date-time' },
+38   },
+39   required: ['id', 'profileId', 'updatedAt'],
+40   additionalProperties: false,
+41 };
 42
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:54:22Z)**_
@@ -535,85 +541,86 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:54:22Z)**_
  `./src/db/hooks/useSettings.ts`
 
 ```text
-1	import { useMemo } from 'react';
-2	import { EMPTY } from 'rxjs';
-3	import { useRxDB } from './useRxDB';
-4	import { useRxQuery } from './useRxQuery';
-5	import type { SettingsDoc } from '@/db/schemas/settings';
-6	
-7	const ANONYMOUS_PROFILE_ID = 'anonymous';
-8	const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
-9	
-10	const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
-11	  id: ANONYMOUS_SETTINGS_ID,
-12	  profileId: ANONYMOUS_PROFILE_ID,
-13	  volume: 0.8,
-14	  speechRate: 1,
-15	  ttsEnabled: true,
-16	  showSubtitles: true,
-17	};
-18	
-19	function plainSettingsFromQuery(
-20	  doc: SettingsDoc | null | { toJSON: () => SettingsDoc },
-21	): SettingsDoc | null {
-22	  if (doc === null) {
-23	    return null;
-24	  }
-25	  if (
-26	    typeof (doc as { toJSON?: () => SettingsDoc }).toJSON === 'function'
-27	  ) {
-28	    return (doc as { toJSON: () => SettingsDoc }).toJSON();
-29	  }
-30	  return doc as SettingsDoc;
-31	}
-32	
-33	type UseSettingsResult = {
-34	  settings: typeof DEFAULT_SETTINGS & Partial<SettingsDoc>;
-35	  update: (patch: Partial<SettingsDoc>) => Promise<void>;
-36	};
-37	
-38	export function useSettings(): UseSettingsResult {
-39	  const { db } = useRxDB();
-40	
-41	  const query$ = useMemo(
-42	    () => (db ? db.settings.findOne(ANONYMOUS_SETTINGS_ID).$ : EMPTY),
-43	    [db],
-44	  );
-45	
-46	  const rawDoc = useRxQuery<
-47	    SettingsDoc | { toJSON: () => SettingsDoc } | null
-48	  >(query$, null);
-49	
-50	  const settings = useMemo((): UseSettingsResult['settings'] => {
-51	    const doc = plainSettingsFromQuery(rawDoc);
-52	    if (doc === null) {
-53	      return { ...DEFAULT_SETTINGS };
-54	    }
-55	    return { ...DEFAULT_SETTINGS, ...doc };
-56	  }, [rawDoc]);
-57	
-58	  const update = async (patch: Partial<SettingsDoc>): Promise<void> => {
-59	    if (!db) return;
-60	    const existing = await db.settings
-61	      .findOne(ANONYMOUS_SETTINGS_ID)
-62	      .exec();
-63	    const now = new Date().toISOString();
-64	    if (existing) {
-65	      await existing.patch({ ...patch, updatedAt: now });
-66	    } else {
-67	      const newDoc: SettingsDoc = {
-68	        ...DEFAULT_SETTINGS,
-69	        ...patch,
-70	        updatedAt: now,
-71	      };
-72	      await db.settings.insert(newDoc);
-73	    }
-74	  };
-75	
-76	  return { settings, update };
-77	}
+1 import { useMemo } from 'react';
+2 import { EMPTY } from 'rxjs';
+3 import { useRxDB } from './useRxDB';
+4 import { useRxQuery } from './useRxQuery';
+5 import type { SettingsDoc } from '@/db/schemas/settings';
+6 
+7 const ANONYMOUS_PROFILE_ID = 'anonymous';
+8 const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
+9 
+10 const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
+11   id: ANONYMOUS_SETTINGS_ID,
+12   profileId: ANONYMOUS_PROFILE_ID,
+13   volume: 0.8,
+14   speechRate: 1,
+15   ttsEnabled: true,
+16   showSubtitles: true,
+17 };
+18 
+19 function plainSettingsFromQuery(
+20   doc: SettingsDoc | null | { toJSON: () => SettingsDoc },
+21 ): SettingsDoc | null {
+22   if (doc === null) {
+23     return null;
+24   }
+25   if (
+26     typeof (doc as { toJSON?: () => SettingsDoc }).toJSON === 'function'
+27   ) {
+28     return (doc as { toJSON: () => SettingsDoc }).toJSON();
+29   }
+30   return doc as SettingsDoc;
+31 }
+32 
+33 type UseSettingsResult = {
+34   settings: typeof DEFAULT_SETTINGS & Partial<SettingsDoc>;
+35   update: (patch: Partial<SettingsDoc>) => Promise<void>;
+36 };
+37 
+38 export function useSettings(): UseSettingsResult {
+39   const { db } = useRxDB();
+40 
+41   const query$ = useMemo(
+42     () => (db ? db.settings.findOne(ANONYMOUS_SETTINGS_ID).$ : EMPTY),
+43     [db],
+44   );
+45 
+46   const rawDoc = useRxQuery<
+47     SettingsDoc | { toJSON: () => SettingsDoc } | null
+48   >(query$, null);
+49 
+50   const settings = useMemo((): UseSettingsResult['settings'] => {
+51     const doc = plainSettingsFromQuery(rawDoc);
+52     if (doc === null) {
+53       return { ...DEFAULT_SETTINGS };
+54     }
+55     return { ...DEFAULT_SETTINGS, ...doc };
+56   }, [rawDoc]);
+57 
+58   const update = async (patch: Partial<SettingsDoc>): Promise<void> => {
+59     if (!db) return;
+60     const existing = await db.settings
+61       .findOne(ANONYMOUS_SETTINGS_ID)
+62       .exec();
+63     const now = new Date().toISOString();
+64     if (existing) {
+65       await existing.patch({ ...patch, updatedAt: now });
+66     } else {
+67       const newDoc: SettingsDoc = {
+68         ...DEFAULT_SETTINGS,
+69         ...patch,
+70         updatedAt: now,
+71       };
+72       await db.settings.insert(newDoc);
+73     }
+74   };
+75 
+76   return { settings, update };
+77 }
 78
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:54:27Z)**_
@@ -622,6 +629,7 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:54:27Z)**_
 The schema already has `preferredVoiceURI` in `SettingsDoc`. This is the field to use for storing the preferred voice. The `useSettings` hook already supports this field too.
 
 Now I understand the full picture:
+
 - `SettingsDoc` already has `preferredVoiceURI?: string`
 - `useSettings()` hook can read/update it
 - `speak()` should accept an optional voice name/URI parameter (defaulting to 'Daniel')
@@ -636,108 +644,109 @@ _**Agent (claude-sonnet-4-6 2026-04-03 06:54:27Z)**_
  `./src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import {
-2	  createFileRoute,
-3	  useNavigate,
-4	  useParams,
-5	} from '@tanstack/react-router';
-6	import { useTranslation } from 'react-i18next';
-7	import { Label } from '@/components/ui/label';
-8	import {
-9	  Select,
-10	  SelectContent,
-11	  SelectItem,
-12	  SelectTrigger,
-13	  SelectValue,
-14	} from '@/components/ui/select';
-15	import { Slider } from '@/components/ui/slider';
-16	import { useSettings } from '@/db/hooks/useSettings';
-17	
-18	const LOCALES = [
-19	  { code: 'en', label: '🇬🇧 English' },
-20	  { code: 'pt-BR', label: '🇧🇷 Português' },
-21	] as const;
-22	
-23	type SettingsLocale = (typeof LOCALES)[number]['code'];
-24	
-25	const SettingsScreen = () => {
-26	  const { t } = useTranslation('settings');
-27	  const { locale } = useParams({ from: '/$locale' });
-28	  const navigate = useNavigate();
-29	  const { settings, update } = useSettings();
-30	
-31	  const handleLocaleChange = (newLocale: string) => {
-32	    void navigate({
-33	      to: '/$locale/settings',
-34	      params: { locale: newLocale as SettingsLocale },
-35	    });
-36	  };
-37	
-38	  const volume = settings.volume ?? 0.8;
-39	  const speechRate = settings.speechRate ?? 1;
-40	
-41	  return (
-42	    <div className="mx-auto max-w-md px-4 py-8">
-43	      <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
-44	
-45	      <div className="flex flex-col gap-6">
-46	        <div className="flex flex-col gap-2">
-47	          <Label htmlFor="volume">
-48	            {t('volume', { percent: Math.round(volume * 100) })}
-49	          </Label>
-50	          <Slider
-51	            id="volume"
-52	            min={0}
-53	            max={1}
-54	            step={0.05}
-55	            value={[volume]}
-56	            onValueChange={([v]) => {
-57	              void update({ volume: v });
-58	            }}
-59	          />
-60	        </div>
-61	
-62	        <div className="flex flex-col gap-2">
-63	          <Label htmlFor="speechRate">
-64	            {t('speechRate', { rate: speechRate })}
-65	          </Label>
-66	          <Slider
-67	            id="speechRate"
-68	            min={0.5}
-69	            max={2}
-70	            step={0.1}
-71	            value={[speechRate]}
-72	            onValueChange={([v]) => {
-73	              void update({ speechRate: v });
-74	            }}
-75	          />
-76	        </div>
-77	
-78	        <div className="flex flex-col gap-2">
-79	          <Label htmlFor="language">{t('language')}</Label>
-80	          <Select value={locale} onValueChange={handleLocaleChange}>
-81	            <SelectTrigger id="language">
-82	              <SelectValue />
-83	            </SelectTrigger>
-84	            <SelectContent>
-85	              {LOCALES.map(({ code, label }) => (
-86	                <SelectItem key={code} value={code}>
-87	                  {label}
-88	                </SelectItem>
-89	              ))}
-90	            </SelectContent>
-91	          </Select>
-92	        </div>
-93	      </div>
-94	    </div>
-95	  );
-96	};
-97	
-98	export const Route = createFileRoute('/$locale/_app/settings')({
-99	  component: SettingsScreen,
-100	});
+1 import {
+2   createFileRoute,
+3   useNavigate,
+4   useParams,
+5 } from '@tanstack/react-router';
+6 import { useTranslation } from 'react-i18next';
+7 import { Label } from '@/components/ui/label';
+8 import {
+9   Select,
+10   SelectContent,
+11   SelectItem,
+12   SelectTrigger,
+13   SelectValue,
+14 } from '@/components/ui/select';
+15 import { Slider } from '@/components/ui/slider';
+16 import { useSettings } from '@/db/hooks/useSettings';
+17 
+18 const LOCALES = [
+19   { code: 'en', label: '🇬🇧 English' },
+20   { code: 'pt-BR', label: '🇧🇷 Português' },
+21 ] as const;
+22 
+23 type SettingsLocale = (typeof LOCALES)[number]['code'];
+24 
+25 const SettingsScreen = () => {
+26   const { t } = useTranslation('settings');
+27   const { locale } = useParams({ from: '/$locale' });
+28   const navigate = useNavigate();
+29   const { settings, update } = useSettings();
+30 
+31   const handleLocaleChange = (newLocale: string) => {
+32     void navigate({
+33       to: '/$locale/settings',
+34       params: { locale: newLocale as SettingsLocale },
+35     });
+36   };
+37 
+38   const volume = settings.volume ?? 0.8;
+39   const speechRate = settings.speechRate ?? 1;
+40 
+41   return (
+42     <div className="mx-auto max-w-md px-4 py-8">
+43       <h1 className="mb-6 text-2xl font-bold">{t('title')}</h1>
+44 
+45       <div className="flex flex-col gap-6">
+46         <div className="flex flex-col gap-2">
+47           <Label htmlFor="volume">
+48             {t('volume', { percent: Math.round(volume * 100) })}
+49           </Label>
+50           <Slider
+51             id="volume"
+52             min={0}
+53             max={1}
+54             step={0.05}
+55             value={[volume]}
+56             onValueChange={([v]) => {
+57               void update({ volume: v });
+58             }}
+59           />
+60         </div>
+61 
+62         <div className="flex flex-col gap-2">
+63           <Label htmlFor="speechRate">
+64             {t('speechRate', { rate: speechRate })}
+65           </Label>
+66           <Slider
+67             id="speechRate"
+68             min={0.5}
+69             max={2}
+70             step={0.1}
+71             value={[speechRate]}
+72             onValueChange={([v]) => {
+73               void update({ speechRate: v });
+74             }}
+75           />
+76         </div>
+77 
+78         <div className="flex flex-col gap-2">
+79           <Label htmlFor="language">{t('language')}</Label>
+80           <Select value={locale} onValueChange={handleLocaleChange}>
+81             <SelectTrigger id="language">
+82               <SelectValue />
+83             </SelectTrigger>
+84             <SelectContent>
+85               {LOCALES.map(({ code, label }) => (
+86                 <SelectItem key={code} value={code}>
+87                   {label}
+88                 </SelectItem>
+89               ))}
+90             </SelectContent>
+91           </Select>
+92         </div>
+93       </div>
+94     </div>
+95   );
+96 };
+97 
+98 export const Route = createFileRoute('/$locale/_app/settings')({
+99   component: SettingsScreen,
+100 });
 101
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 06:54:44Z)**_
@@ -751,9 +760,9 @@ Now I have a complete picture:
 4. `speak()` currently doesn't use any voice
 
 The design needs to cover:
+
 1. Update `speak(text, voiceName?)` to accept an optional voice name and resolve it to a `SpeechSynthesisVoice`, defaulting to 'Daniel'
 2. Add a voice picker to the Settings page that saves to `preferredVoiceURI`
-
 
 3. Where `speak()` is called from React context, read `preferredVoiceURI` from settings and pass it to `speak()`
 
@@ -919,6 +928,7 @@ Create specs directory
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:00:21Z)**_
@@ -993,6 +1003,7 @@ Component calls speak(text, settings.preferredVoiceURI ?? 'Daniel')
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-03-speech-voice-selection-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:00:27Z)**_
@@ -1427,6 +1438,7 @@ Done in 3.15s.
  1 file changed, 61 insertions(+)
  create mode 100644 docs/superpowers/specs/2026-04-03-speech-voice-selection-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-03 07:00:36Z)**_

@@ -9,8 +9,7 @@ _**User**_
 why it keeps failing on my CI, but not on local?
 I run `yarn test:vr` or `git push`, why is that?
 
-https://github.com/leocaseiro/base-skill/actions/runs/23947174909/job/69845839646 
-
+<https://github.com/leocaseiro/base-skill/actions/runs/23947174909/job/69845839646>
 
 Summary of all failing tests
  FAIL  src/games/number-match/NumberMatch/NumberMatch.stories.tsx (5.629 s)
@@ -76,7 +75,6 @@ Wait, looking at the error trace more carefully: the error references `src/games
 
 The actual error is: `Cannot read properties of null (reading 'stores')` - this is a common error when something tries to access `.stores` on a null value. This might be related to Zustand or some state management store.
 
-
 Let me check the current branch status and see if there's a version mismatch between what's in the repo and what was actually tested. I should look at the NumberMatch component itself to understand where this `stores` reference is coming from and why it might be null.</details></think>
 
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
@@ -135,7 +133,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -145,6 +142,7 @@ Parameters:
   "pattern": "stores"
 }
 ```
+
 Additional data:
 
 ```json
@@ -158,8 +156,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -175,7 +173,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -185,6 +182,7 @@ Parameters:
   "pattern": "stores"
 }
 ```
+
 Additional data:
 
 ```json
@@ -198,8 +196,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -215,7 +213,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -225,6 +222,7 @@ Parameters:
   "pattern": "stores"
 }
 ```
+
 Additional data:
 
 ```json
@@ -238,8 +236,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -275,7 +273,7 @@ at src/games/number-match/NumberMatch/NumberMatch.stories.tsx:96:49
 ```
 
 But line 96 in the story file I read is empty (the file only has 71 lines). The line numbers are from the compiled/bundled output, not the source. This isn't helpful for finding the exact source line.
- 
+
 The Zustand error suggests the context is null when `useAnswerGameContext` is being called, likely because the hook is being invoked outside the provider's scope in the story file.</details></think>
 
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
@@ -315,7 +313,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -325,6 +322,7 @@ Parameters:
   "pattern": "\\.stores"
 }
 ```
+
 Additional data:
 
 ```json
@@ -338,8 +336,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -422,7 +420,7 @@ The error "Cannot read properties of null (reading 'stores')" doesn't seem to be
 
 When the story is rendered without the router context, `useParams` might fail. But looking at the story, it uses `withRouter` decorator. Let me check what `withRouter` does.
 
-Wait, the error message says "Cannot read properties of null (reading 'stores')" - this is a Zustand-specific error that happens when you try to use a Zustand store hook without the store being initialized. 
+Wait, the error message says "Cannot read properties of null (reading 'stores')" - this is a Zustand-specific error that happens when you try to use a Zustand store hook without the store being initialized.
 
 The `.stores` reference is pointing directly to Zustand's internals, so something's trying to access a store that hasn't been set up. The `withRouter` decorator might not be properly initializing the router context before the component tries to call `useParams`, which could be causing the store access to fail at runtime.</details></think>
 
@@ -446,9 +444,9 @@ The `withRouter` decorator looks correct. It creates a TanStack Router with a `/
 
 Now, the error "Cannot read properties of null (reading 'stores')" - in TanStack Router v1, the `RouterContext` has a `stores` property. This error could occur if `useParams` is called outside of the router context, or if the router has not been properly initialized.
 
-Wait - let me think about why it would fail in CI but not locally. 
+Wait - let me think about why it would fail in CI but not locally.
 
-In CI, the Storybook tests are run using `@storybook/test-runner` which uses Playwright. 
+In CI, the Storybook tests are run using `@storybook/test-runner` which uses Playwright.
 
 The issue might be a race condition where the test runner starts testing before the component has fully rendered in the Storybook environment. Looking back at the story file, there are no `play` functions defined in either the `NumeralToGroup` or `GroupToNumeral` stories, so the problem isn't there.
 
@@ -574,7 +572,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
 
 <think><details><summary>Thought Process</summary>
-Now I can see a key difference: 
+Now I can see a key difference:
 
 **CI**: Builds a static Storybook (`yarn build-storybook`) and serves it as a static file
 
@@ -583,7 +581,6 @@ Now I can see a key difference:
 The CI builds Storybook statically (`build-storybook --output-dir storybook-static`) and then serves it with `http-server`. The dev server in local mode doesn't have this static build step.
 
 The important difference is that in the static build, TanStack Router needs the routes to be configured properly. But wait, the error is about `.stores` being null, which suggests the router context isn't available at all.
-
 
 I'm wondering if the `base: './'` setting in the Storybook config is causing issues with how TanStack Router initializes its memory history, or if the `withRouter` decorator's dependency array is causing the router context to become stale during the static build process.
 
@@ -613,6 +610,7 @@ cd /Users/leocaseiro/Sites/base-skill && cat package.json | grep -E '"@tanstack|
     "@tanstack/eslint-config": "^0.3.4",
 
 ```
+
 </details>
 </tool-use>
 
@@ -634,6 +632,7 @@ cd /Users/leocaseiro/Sites/base-skill && node -e "const pkg = require('./node_mo
 1.168.10
 
 ```
+
 </details>
 </tool-use>
 
@@ -650,7 +649,7 @@ Now let me look at how TanStack Router's `RouterProvider` works in v1. The `stor
 Actually, let me think about this differently. The core question is: **Why does it fail in CI (static build) but not locally (dev server)?**
 
 When you build Storybook statically (`build-storybook`), the stories are compiled with Vite in production mode. When you run the dev server (`yarn storybook`), stories are compiled in development mode.
- 
+
 The `withRouter` decorator creates a router instance with memory history for each story, but the test runner might be handling navigation or iframe rendering differently than the dev server, causing the router state to diverge between environments. I'm trying to figure out where the `stores` property comes from in TanStack Router v1.168.10 — the router has a `store` property from `@tanstack/store`, not `stores`, so I need to trace through the actual source code to understand what's being accessed and why the static build might be hitting a different code path than the dev server.
 
 Looking at how `useParams` is called in `NumberMatch.tsx` within the Storybook setup, the component is rendered through a route's component function that wraps the Story, which should work fine — but I'm wondering if there's something about how the route context is being set up or accessed during the static build that's different from the dev environment.
@@ -695,7 +694,6 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -705,6 +703,7 @@ Parameters:
   "pattern": "test:storybook"
 }
 ```
+
 Additional data:
 
 ```json
@@ -723,8 +722,8 @@ Additional data:
   "totalMatches": 1
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -772,6 +771,7 @@ cd /Users/leocaseiro/Sites/base-skill && cat package.json | grep -E 'storybook'
     "storybook": "10.3.3",
 
 ```
+
 </details>
 </tool-use>
 
@@ -813,7 +813,7 @@ Looking at the `withRouter` decorator, when Storybook's test runner loads a stor
 
 Actually, I think I've found it—React.StrictMode might be the culprit here.
 
-Wait, that doesn't make sense. Strict Mode would cause *more* problems locally, not fewer, since effects run twice on mount. Let me reconsider.
+Wait, that doesn't make sense. Strict Mode would cause _more_ problems locally, not fewer, since effects run twice on mount. Let me reconsider.
 
 The real issue is probably timing. On my local machine, everything runs fast enough that TanStack Router's async initialization completes before Storybook evaluates the component. But in CI on slower hardware, the router hasn't finished initializing by the time the component tries to render, leaving it with a null context.
 
@@ -850,6 +850,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 The `AnswerGame` component is straightforward - no portals, just normal React rendering. The `AnswerGameProvider` provides context, and `children` are rendered inside it.
 
 So the rendering chain is:
+
 ```
 RouterProvider (from withRouter decorator)
   StorybookLocaleRoute (route component)
@@ -861,7 +862,6 @@ RouterProvider (from withRouter decorator)
 ```
 
 This should work. `useParams` is called inside the `RouterProvider` tree. Why would the router context be null?
-
 
 Actually, let me look at the `withRouter` decorator implementation more closely - I'm setting up a root route with an outlet, then creating a locale route as a child that renders the story component inside it.
 
@@ -892,6 +892,7 @@ But that still doesn't explain why only the first two stories fail. Let me recon
 Let me think about this more practically. The `withRouter` decorator needs to be more robust—maybe I should use `RouterProvider`'s initialization utilities or TanStack Router's test helpers. Looking at the v1 docs, `createMemoryHistory` could help, and the issue might be that `router.load()` needs to complete before the story renders. The `RouterProvider` calls `router.load()` in a useEffect...
 
 Still writing router initialization... a `useEffect`, which runs AFTER the initial render. So during the FIRST render:
+
 - `RouterProvider` provides the router context
 - But the router's state might not be fully initialized
 - `useParams` tries to read from the router state...
@@ -899,13 +900,14 @@ Still writing router initialization... a `useEffect`, which runs AFTER the initi
 Wait, but `RouterProvider` does sync initialization too. Let me look more carefully.
 
 In TanStack Router v1, the `RouterProvider` component:
+
 1. Sets up the context synchronously
 2. Uses `router.start()` or `router.load()` in an effect
 3. During the effect, the router resolves routes and updates state
 
 But the router context includes the router INSTANCE, and the router instance has `stores` even before loading. So why would `routerContext.stores` be null?
 
-Unless `routerContext` itself is null, meaning the component is rendered outside of `RouterProvider`. 
+Unless `routerContext` itself is null, meaning the component is rendered outside of `RouterProvider`.
 
 OK so how could that happen if the decorator wraps everything in `RouterProvider`?
 
@@ -944,6 +946,7 @@ node_modules/@tanstack/react-router/dist/esm/link.js
 node_modules/@tanstack/react-router/dist/esm/ssr/renderRouterToString.js
 
 ```
+
 </details>
 </tool-use>
 
@@ -962,13 +965,14 @@ cd /Users/leocaseiro/Sites/base-skill && grep -n "\.stores" node_modules/@tansta
 ```
 
 ```
-30:	const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) =&gt; id);
-31:	const resetKey = _isServer ? router.stores.loadedAt.state : useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
-60:	if (!(isServer ?? router.isServer)) useStore(router.stores.matchRouteReactivity, (d) =&gt; d);
-87:		const matches = router.stores.activeMatchesSnapshot.state;
-90:	return useStore(router.stores.activeMatchesSnapshot, (matches) =&gt; {
+30: const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) =&gt; id);
+31: const resetKey = _isServer ? router.stores.loadedAt.state : useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
+60: if (!(isServer ?? router.isServer)) useStore(router.stores.matchRouteReactivity, (d) =&gt; d);
+87:  const matches = router.stores.activeMatchesSnapshot.state;
+90: return useStore(router.stores.activeMatchesSnapshot, (matches) =&gt; {
 
 ```
+
 </details>
 </tool-use>
 
@@ -988,12 +992,13 @@ cd /Users/leocaseiro/Sites/base-skill && grep -n "routerContext\|RouterContext\|
 
 ```
 3:import { useRouter } from "./useRouter.js";
-18:	const router = useRouter();
-28:	const router = useRouter();
-59:	const router = useRouter();
-84:	const router = useRouter();
+18: const router = useRouter();
+28: const router = useRouter();
+59: const router = useRouter();
+84: const router = useRouter();
 
 ```
+
 </details>
 </tool-use>
 
@@ -1026,17 +1031,18 @@ import * as React$1 from "react";
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/useRouterHook
 */
 function useRouter(opts) {
-	const value = React$1.useContext(routerContext);
-	if (process.env.NODE_ENV !== "production") {
-		if ((opts?.warn ?? true) &amp;&amp; !value) console.warn("Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!");
-	}
-	return value;
+ const value = React$1.useContext(routerContext);
+ if (process.env.NODE_ENV !== "production") {
+  if ((opts?.warn ?? true) &amp;&amp; !value) console.warn("Warning: useRouter must be used inside a &lt;RouterProvider&gt; component!");
+ }
+ return value;
 }
 //#endregion
 export { useRouter };
 
 //# sourceMappingURL=useRouter.js.map
 ```
+
 </details>
 </tool-use>
 
@@ -1056,7 +1062,6 @@ But this still doesn't explain WHY the component would be rendered outside the `
 
 Wait, let me re-read: in production mode, the code is `if (process.env.NODE_ENV !== "production")` - so the warning is only shown in development. In production, it just returns `value` which could be null.
 
-
 So that's it—in production mode, `router.stores` throws an error because `router` is null. The real mystery is why the component ends up outside `RouterProvider` in the first place. The `withRouter` decorator should be wrapping the story in `RouterProvider`, and the story renders `NumberMatch` inside the route component... let me look at that decorator more carefully.
 
 The decorator creates a router with a root route and a locale route, then renders the Story component inside that locale route, all wrapped in `RouterProvider`. So the Story should definitely be inside the provider.
@@ -1071,6 +1076,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill && grep -n "defaultPendingComponent\|pendingMs\|pendingMinMs\|Pending\|isLoading\|isTransitioning" node_modules/@tanstack/react-router/dist/esm/RouterProvider.js | head -30
 ```
+
 </details>
 </tool-use>
 
@@ -1111,6 +1117,7 @@ Matches.d.ts
 Matches.js
 
 ```
+
 </details>
 </tool-use>
 
@@ -1145,52 +1152,53 @@ import { useStore } from "@tanstack/react-store";
 import { isServer } from "@tanstack/router-core/isServer";
 //#region src/Match.tsx
 var Match = React$1.memo(function MatchImpl({ matchId }) {
-	const router = useRouter();
-	if (isServer ?? router.isServer) {
-		const match = router.stores.activeMatchStoresById.get(matchId)?.state;
-		if (!match) {
-			if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find match for matchId "${matchId}". Please file an issue!&#96;);
-			invariant();
-		}
-		const routeId = match.routeId;
-		const parentRouteId = router.routesById[routeId].parentRoute?.id;
-		return /* @__PURE__ */ jsx(MatchView, {
-			router,
-			matchId,
-			resetKey: router.stores.loadedAt.state,
-			matchState: {
-				routeId,
-				ssr: match.ssr,
-				_displayPending: match._displayPending,
-				parentRouteId
-			}
-		});
-	}
-	const matchStore = router.stores.activeMatchStoresById.get(matchId);
-	if (!matchStore) {
-		if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find match for matchId "${matchId}". Please file an issue!&#96;);
-		invariant();
-	}
-	const resetKey = useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
-	const match = useStore(matchStore, (value) =&gt; value);
-	return /* @__PURE__ */ jsx(MatchView, {
-		router,
-		matchId,
-		resetKey,
-		matchState: React$1.useMemo(() =&gt; {
-			const routeId = match.routeId;
-			const parentRouteId = router.routesById[routeId].parentRoute?.id;
-			return {
-				routeId,
-				ssr: match.ssr,
-				_displayPending: match._displayPending,
-				parentRouteId
-			};
-		}, [
-			match._displayPending,
-			match.routeId,
+ const router = useRouter();
+ if (isServer ?? router.isServer) {
+  const match = router.stores.activeMatchStoresById.get(matchId)?.state;
+  if (!match) {
+   if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find match for matchId "${matchId}". Please file an issue!&#96;);
+   invariant();
+  }
+  const routeId = match.routeId;
+  const parentRouteId = router.routesById[routeId].parentRoute?.id;
+  return /* @__PURE__ */ jsx(MatchView, {
+   router,
+   matchId,
+   resetKey: router.stores.loadedAt.state,
+   matchState: {
+    routeId,
+    ssr: match.ssr,
+    _displayPending: match._displayPending,
+    parentRouteId
+   }
+  });
+ }
+ const matchStore = router.stores.activeMatchStoresById.get(matchId);
+ if (!matchStore) {
+  if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find match for matchId "${matchId}". Please file an issue!&#96;);
+  invariant();
+ }
+ const resetKey = useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
+ const match = useStore(matchStore, (value) =&gt; value);
+ return /* @__PURE__ */ jsx(MatchView, {
+  router,
+  matchId,
+  resetKey,
+  matchState: React$1.useMemo(() =&gt; {
+   const routeId = match.routeId;
+   const parentRouteId = router.routesById[routeId].parentRoute?.id;
+   return {
+    routeId,
+    ssr: match.ssr,
+    _displayPending: match._displayPending,
+    parentRouteId
+   };
+  }, [
+   match._displayPending,
+   match.routeId,
 
 ```
+
 </details>
 </tool-use>
 
@@ -1202,7 +1210,7 @@ var Match = React$1.memo(function MatchImpl({ matchId }) {
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
 
 <think><details><summary>Thought Process</summary>
-OK, so `Match.js` uses `useRouter()` and then accesses `router.stores`. If `useRouter()` returns null, then `router.stores` would throw the error.But this component is rendered INSIDE `RouterProvider`, so the context should be available...UNLESS there's an issue with the `withRouter` decorator not properly providing the context.Let me re-read the Storybook test runner behavior. The test runner navigates to the story URL, then evaluates `__test__` hooks. But the story itself is rendered in an iframe.When Storybook renders the story, it applies decorators. 
+OK, so `Match.js` uses `useRouter()` and then accesses `router.stores`. If `useRouter()` returns null, then `router.stores` would throw the error.But this component is rendered INSIDE `RouterProvider`, so the context should be available...UNLESS there's an issue with the `withRouter` decorator not properly providing the context.Let me re-read the Storybook test runner behavior. The test runner navigates to the story URL, then evaluates `__test__` hooks. But the story itself is rendered in an iframe.When Storybook renders the story, it applies decorators.
 
 The `withRouter` decorator wraps everything in `RouterProvider`, so `Match.js` should have access to the router context. But I need to verify whether `createRouter()` actually initializes the `stores` property synchronously when the router instance is created.</details></think>
 
@@ -1234,6 +1242,7 @@ stores keys: [
 ]
 
 ```
+
 </details>
 </tool-use>
 
@@ -1251,8 +1260,7 @@ So the question becomes: why is `useRouter()` returning null for the `NumeralToG
 
 `useRouter()` returns `React.useContext(routerContext)`. The context value is null when the component is NOT inside a `RouterProvider`.
 
-But we have the `withRouter` decorator which wraps the story in `RouterProvider`... 
-
+But we have the `withRouter` decorator which wraps the story in `RouterProvider`...
 
 Let me trace through the decorator more carefully - I'm setting up a root route and a locale route, then wrapping the Story component inside that locale route's component, and finally creating the router with all of this.
 
@@ -1288,6 +1296,7 @@ e37aaa1 feat(home): remove unused Dashboard router
 5f3c24d fix(game-shell): single page landmark (no nested main); refresh VR
 
 ```
+
 </details>
 </tool-use>
 
@@ -1328,6 +1337,7 @@ Date:   Sat Apr 4 00:04:58 2026 +1100
     **EmojiQuestion**).
 
 ```
+
 </details>
 </tool-use>
 
@@ -1351,6 +1361,7 @@ cd /Users/leocaseiro/Sites/base-skill && git log --oneline master..HEAD
 a83b90a fix(e2e): include withRouter decorator
 
 ```
+
 </details>
 </tool-use>
 
@@ -1362,12 +1373,11 @@ a83b90a fix(e2e): include withRouter decorator
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
 
 <think><details><summary>Thought Process</summary>
-So the current branch `fix/storybok-tests-ci` has 3 commits ahead of master. These are related to E2E and A11Y fixes, not Storybook test fixes. 
+So the current branch `fix/storybok-tests-ci` has 3 commits ahead of master. These are related to E2E and A11Y fixes, not Storybook test fixes.
 
 The failing CI test is on commit `88a25b8` which is on `master`. Let me look at what tests are failing on master now.
 
 Wait, actually the user says "why it keeps failing on my CI" - so it's failing on the current master or on their current PR? Looking at the GitHub URL: `https://github.com/leocaseiro/base-skill/actions/runs/23947174909/job/69845839646` - this is linked to `feat(games): Word Spell and Number Match on AnswerGame (#15)` which is commit `88a25b8`.
-
 
 The CI failure was introduced when PR #15 got merged, and that's what the `fix/storybok-tests-ci` branch is trying to address. Now I need to figure out why only 2 of the 6 stories are failing - `NumeralToGroup` and `GroupToNumeral` - while the others pass. Let me examine what's different about these two stories and what changed in PR #15 that might have broken them. I'm wondering if the other stories are actually failing too but just not being reported, or if they genuinely pass. The user's summary only shows 2 failing stories, so it seems like just those two are the problem. Looking at the mode configurations, `NumeralToGroup` uses the default 'numeral-to-group' mode while `GroupToNumeral` overrides it to 'group-to-numeral', and the `showTextQuestion` logic appears to be checking against specific mode values that might not be matching correctly for these two cases. I'm noticing that `tileStyle: 'fingers'` might be rendering different tiles than the default. But wait—both `NumeralToGroup` and `DotsStyle` use `tileStyle: 'dots'`, yet one fails and one passes, so that can't be the issue. I'm wondering if there's state pollution happening, maybe the test runner is executing stories alphabetically and something from an earlier test is affecting the later ones.
 
@@ -1576,6 +1586,7 @@ else
 fi
 
 ```
+
 </details>
 </tool-use>
 
@@ -1594,9 +1605,9 @@ Now I see an important difference:
 **CI**: Builds Storybook STATICALLY (`yarn build-storybook`) and serves with `http-server`.
 
 The key difference:
+
 - **Local dev server**: TanStack Router dev code path (with `process.env.NODE_ENV === 'development'`)
 - **CI static build + production**: TanStack Router production code path (with `process.env.NODE_ENV === 'production'`)
-
 
 - **Development mode**: The router hook warns when context is missing but still returns null, while the Match component throws an error
 - **Production mode**: Both silently return null without warnings or errors
@@ -1621,6 +1632,7 @@ cjs
 esm
 
 ```
+
 </details>
 </tool-use>
 
@@ -1650,6 +1662,7 @@ useMatch.js
 useMatch.js.map
 
 ```
+
 </details>
 </tool-use>
 
@@ -1685,33 +1698,33 @@ import { isServer } from "@tanstack/router-core/isServer";
 * suspense, error, and not-found boundaries. Rendered by &#96;RouterProvider&#96;.
 */
 function Matches() {
-	const router = useRouter();
-	const PendingComponent = router.routesById[rootRouteId].options.pendingComponent ?? router.options.defaultPendingComponent;
-	const pendingElement = PendingComponent ? /* @__PURE__ */ jsx(PendingComponent, {}) : null;
-	const inner = /* @__PURE__ */ jsxs((isServer ?? router.isServer) || typeof document !== "undefined" &amp;&amp; router.ssr ? SafeFragment : React$1.Suspense, {
-		fallback: pendingElement,
-		children: [!(isServer ?? router.isServer) &amp;&amp; /* @__PURE__ */ jsx(Transitioner, {}), /* @__PURE__ */ jsx(MatchesInner, {})]
-	});
-	return router.options.InnerWrap ? /* @__PURE__ */ jsx(router.options.InnerWrap, { children: inner }) : inner;
+ const router = useRouter();
+ const PendingComponent = router.routesById[rootRouteId].options.pendingComponent ?? router.options.defaultPendingComponent;
+ const pendingElement = PendingComponent ? /* @__PURE__ */ jsx(PendingComponent, {}) : null;
+ const inner = /* @__PURE__ */ jsxs((isServer ?? router.isServer) || typeof document !== "undefined" &amp;&amp; router.ssr ? SafeFragment : React$1.Suspense, {
+  fallback: pendingElement,
+  children: [!(isServer ?? router.isServer) &amp;&amp; /* @__PURE__ */ jsx(Transitioner, {}), /* @__PURE__ */ jsx(MatchesInner, {})]
+ });
+ return router.options.InnerWrap ? /* @__PURE__ */ jsx(router.options.InnerWrap, { children: inner }) : inner;
 }
 function MatchesInner() {
-	const router = useRouter();
-	const _isServer = isServer ?? router.isServer;
-	const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) =&gt; id);
-	const resetKey = _isServer ? router.stores.loadedAt.state : useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
-	const matchComponent = matchId ? /* @__PURE__ */ jsx(Match, { matchId }) : null;
-	return /* @__PURE__ */ jsx(matchContext.Provider, {
-		value: matchId,
-		children: router.options.disableGlobalCatchBoundary ? matchComponent : /* @__PURE__ */ jsx(CatchBoundary, {
-			getResetKey: () =&gt; resetKey,
-			errorComponent: ErrorComponent,
-			onCatch: process.env.NODE_ENV !== "production" ? (error) =&gt; {
-				console.warn(&#96;Warning: The following error wasn't caught by any route! At the very least, consider setting an 'errorComponent' in your RootRoute!&#96;);
-				console.warn(&#96;Warning: ${error.message || error.toString()}&#96;);
-			} : void 0,
-			children: matchComponent
-		})
-	});
+ const router = useRouter();
+ const _isServer = isServer ?? router.isServer;
+ const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) =&gt; id);
+ const resetKey = _isServer ? router.stores.loadedAt.state : useStore(router.stores.loadedAt, (loadedAt) =&gt; loadedAt);
+ const matchComponent = matchId ? /* @__PURE__ */ jsx(Match, { matchId }) : null;
+ return /* @__PURE__ */ jsx(matchContext.Provider, {
+  value: matchId,
+  children: router.options.disableGlobalCatchBoundary ? matchComponent : /* @__PURE__ */ jsx(CatchBoundary, {
+   getResetKey: () =&gt; resetKey,
+   errorComponent: ErrorComponent,
+   onCatch: process.env.NODE_ENV !== "production" ? (error) =&gt; {
+    console.warn(&#96;Warning: The following error wasn't caught by any route! At the very least, consider setting an 'errorComponent' in your RootRoute!&#96;);
+    console.warn(&#96;Warning: ${error.message || error.toString()}&#96;);
+   } : void 0,
+   children: matchComponent
+  })
+ });
 }
 /**
 * Create a matcher function for testing locations against route definitions.
@@ -1726,17 +1739,17 @@ function MatchesInner() {
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchRouteHook
 */
 function useMatchRoute() {
-	const router = useRouter();
-	if (!(isServer ?? router.isServer)) useStore(router.stores.matchRouteReactivity, (d) =&gt; d);
-	return React$1.useCallback((opts) =&gt; {
-		const { pending, caseSensitive, fuzzy, includeSearch, ...rest } = opts;
-		return router.matchRoute(rest, {
-			pending,
-			caseSensitive,
-			fuzzy,
-			includeSearch
-		});
-	}, [router]);
+ const router = useRouter();
+ if (!(isServer ?? router.isServer)) useStore(router.stores.matchRouteReactivity, (d) =&gt; d);
+ return React$1.useCallback((opts) =&gt; {
+  const { pending, caseSensitive, fuzzy, includeSearch, ...rest } = opts;
+  return router.matchRoute(rest, {
+   pending,
+   caseSensitive,
+   fuzzy,
+   includeSearch
+  });
+ }, [router]);
 }
 /**
 * Component that conditionally renders its children based on whether a route
@@ -1746,30 +1759,31 @@ function useMatchRoute() {
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/matchRouteComponent
 */
 function MatchRoute(props) {
-	const params = useMatchRoute()(props);
-	if (typeof props.children === "function") return props.children(params);
-	return params ? props.children : null;
+ const params = useMatchRoute()(props);
+ if (typeof props.children === "function") return props.children(params);
+ return params ? props.children : null;
 }
 function useMatches(opts) {
-	const router = useRouter();
-	const previousResult = React$1.useRef(void 0);
-	if (isServer ?? router.isServer) {
-		const matches = router.stores.activeMatchesSnapshot.state;
-		return opts?.select ? opts.select(matches) : matches;
-	}
-	return useStore(router.stores.activeMatchesSnapshot, (matches) =&gt; {
-		const selected = opts?.select ? opts.select(matches) : matches;
-		if (opts?.structuralSharing ?? router.options.defaultStructuralSharing) {
-			const shared = replaceEqualDeep(previousResult.current, selected);
-			previousResult.current = shared;
-			return shared;
-		}
-		return selected;
-	});
+ const router = useRouter();
+ const previousResult = React$1.useRef(void 0);
+ if (isServer ?? router.isServer) {
+  const matches = router.stores.activeMatchesSnapshot.state;
+  return opts?.select ? opts.select(matches) : matches;
+ }
+ return useStore(router.stores.activeMatchesSnapshot, (matches) =&gt; {
+  const selected = opts?.select ? opts.select(matches) : matches;
+  if (opts?.structuralSharing ?? router.options.defaultStructuralSharing) {
+   const shared = replaceEqualDeep(previousResult.current, selected);
+   previousResult.current = shared;
+   return shared;
+  }
+  return selected;
+ });
 }
 /**
 
 ```
+
 </details>
 </tool-use>
 
@@ -1784,17 +1798,17 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 Now I see the issue clearly!
 
 In `MatchesInner()`:
+
 ```js
 function MatchesInner() {
-	const router = useRouter();
-	const _isServer = isServer ?? router.isServer;
-	const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) => id);
+ const router = useRouter();
+ const _isServer = isServer ?? router.isServer;
+ const matchId = _isServer ? router.stores.firstMatchId.state : useStore(router.stores.firstMatchId, (id) => id);
 ```
 
 `router = useRouter()` - if this returns null in production (when outside RouterProvider), then `router.stores` throws "Cannot read properties of null (reading 'stores')".
 
 But `MatchesInner` is rendered INSIDE `RouterProvider`, so why would `useRouter()` return null?
-
 
 Let me check the RouterProvider implementation to see if there's something wrong with how it's setting up the context.</details></think>
 
@@ -1818,20 +1832,20 @@ import { jsx } from "react/jsx-runtime";
 * updates router options from props. Most apps should use &#96;RouterProvider&#96;.
 */
 function RouterContextProvider({ router, children, ...rest }) {
-	if (Object.keys(rest).length &gt; 0) router.update({
-		...router.options,
-		...rest,
-		context: {
-			...router.options.context,
-			...rest.context
-		}
-	});
-	const provider = /* @__PURE__ */ jsx(routerContext.Provider, {
-		value: router,
-		children
-	});
-	if (router.options.Wrap) return /* @__PURE__ */ jsx(router.options.Wrap, { children: provider });
-	return provider;
+ if (Object.keys(rest).length &gt; 0) router.update({
+  ...router.options,
+  ...rest,
+  context: {
+   ...router.options.context,
+   ...rest.context
+  }
+ });
+ const provider = /* @__PURE__ */ jsx(routerContext.Provider, {
+  value: router,
+  children
+ });
+ if (router.options.Wrap) return /* @__PURE__ */ jsx(router.options.Wrap, { children: provider });
+ return provider;
 }
 /**
 * Top-level component that renders the active route matches and provides the
@@ -1843,17 +1857,18 @@ function RouterContextProvider({ router, children, ...rest }) {
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/createRouterFunction
 */
 function RouterProvider({ router, ...rest }) {
-	return /* @__PURE__ */ jsx(RouterContextProvider, {
-		router,
-		...rest,
-		children: /* @__PURE__ */ jsx(Matches, {})
-	});
+ return /* @__PURE__ */ jsx(RouterContextProvider, {
+  router,
+  ...rest,
+  children: /* @__PURE__ */ jsx(Matches, {})
+ });
 }
 //#endregion
 export { RouterContextProvider, RouterProvider };
 
 //# sourceMappingURL=RouterProvider.js.map
 ```
+
 </details>
 </tool-use>
 
@@ -1878,7 +1893,7 @@ So `Matches` → `MatchesInner` → `useRouter()` → should return the router f
 
 But wait - `RouterProvider` renders `Matches` as a child of `RouterContextProvider`. So `Matches` and `MatchesInner` ARE inside the context. They should have access to the router.
 
-The `withRouter` decorator renders `RouterProvider` and passes the router. The router is set as the context value. 
+The `withRouter` decorator renders `RouterProvider` and passes the router. The router is set as the context value.
 
 `Matches` is rendered inside this context, and it then renders the matched route components like `MatchView` → `StorybookLocaleRoute` → `Story` → `NumberMatch`. All of these are nested within the `RouterContextProvider`, so they should all have access to the router context. So if `useRouter()` is returning null for `NumberMatchSession`, something's off with how the context is being set up or accessed. Let me trace through the `Matches` component to see what's actually happening.
 
@@ -1901,104 +1916,105 @@ import * as React$1 from "react";
 import { batch, useStore } from "@tanstack/react-store";
 //#region src/Transitioner.tsx
 function Transitioner() {
-	const router = useRouter();
-	const mountLoadForRouter = React$1.useRef({
-		router,
-		mounted: false
-	});
-	const [isTransitioning, setIsTransitioning] = React$1.useState(false);
-	const isLoading = useStore(router.stores.isLoading, (value) =&gt; value);
-	const hasPendingMatches = useStore(router.stores.hasPendingMatches, (value) =&gt; value);
-	const previousIsLoading = usePrevious(isLoading);
-	const isAnyPending = isLoading || isTransitioning || hasPendingMatches;
-	const previousIsAnyPending = usePrevious(isAnyPending);
-	const isPagePending = isLoading || hasPendingMatches;
-	const previousIsPagePending = usePrevious(isPagePending);
-	router.startTransition = (fn) =&gt; {
-		setIsTransitioning(true);
-		React$1.startTransition(() =&gt; {
-			fn();
-			setIsTransitioning(false);
-		});
-	};
-	React$1.useEffect(() =&gt; {
-		const unsub = router.history.subscribe(router.load);
-		const nextLocation = router.buildLocation({
-			to: router.latestLocation.pathname,
-			search: true,
-			params: true,
-			hash: true,
-			state: true,
-			_includeValidateSearch: true
-		});
-		if (trimPathRight(router.latestLocation.publicHref) !== trimPathRight(nextLocation.publicHref)) router.commitLocation({
-			...nextLocation,
-			replace: true
-		});
-		return () =&gt; {
-			unsub();
-		};
-	}, [router, router.history]);
-	useLayoutEffect(() =&gt; {
-		if (typeof window !== "undefined" &amp;&amp; router.ssr || mountLoadForRouter.current.router === router &amp;&amp; mountLoadForRouter.current.mounted) return;
-		mountLoadForRouter.current = {
-			router,
-			mounted: true
-		};
-		const tryLoad = async () =&gt; {
-			try {
-				await router.load();
-			} catch (err) {
-				console.error(err);
-			}
-		};
-		tryLoad();
-	}, [router]);
-	useLayoutEffect(() =&gt; {
-		if (previousIsLoading &amp;&amp; !isLoading) router.emit({
-			type: "onLoad",
-			...getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state)
-		});
-	}, [
-		previousIsLoading,
-		router,
-		isLoading
-	]);
-	useLayoutEffect(() =&gt; {
-		if (previousIsPagePending &amp;&amp; !isPagePending) router.emit({
-			type: "onBeforeRouteMount",
-			...getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state)
-		});
-	}, [
-		isPagePending,
-		previousIsPagePending,
-		router
-	]);
-	useLayoutEffect(() =&gt; {
-		if (previousIsAnyPending &amp;&amp; !isAnyPending) {
-			const changeInfo = getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state);
-			router.emit({
-				type: "onResolved",
-				...changeInfo
-			});
-			batch(() =&gt; {
-				router.stores.status.setState(() =&gt; "idle");
-				router.stores.resolvedLocation.setState(() =&gt; router.stores.location.state);
-			});
-			if (changeInfo.hrefChanged) handleHashScroll(router);
-		}
-	}, [
-		isAnyPending,
-		previousIsAnyPending,
-		router
-	]);
-	return null;
+ const router = useRouter();
+ const mountLoadForRouter = React$1.useRef({
+  router,
+  mounted: false
+ });
+ const [isTransitioning, setIsTransitioning] = React$1.useState(false);
+ const isLoading = useStore(router.stores.isLoading, (value) =&gt; value);
+ const hasPendingMatches = useStore(router.stores.hasPendingMatches, (value) =&gt; value);
+ const previousIsLoading = usePrevious(isLoading);
+ const isAnyPending = isLoading || isTransitioning || hasPendingMatches;
+ const previousIsAnyPending = usePrevious(isAnyPending);
+ const isPagePending = isLoading || hasPendingMatches;
+ const previousIsPagePending = usePrevious(isPagePending);
+ router.startTransition = (fn) =&gt; {
+  setIsTransitioning(true);
+  React$1.startTransition(() =&gt; {
+   fn();
+   setIsTransitioning(false);
+  });
+ };
+ React$1.useEffect(() =&gt; {
+  const unsub = router.history.subscribe(router.load);
+  const nextLocation = router.buildLocation({
+   to: router.latestLocation.pathname,
+   search: true,
+   params: true,
+   hash: true,
+   state: true,
+   _includeValidateSearch: true
+  });
+  if (trimPathRight(router.latestLocation.publicHref) !== trimPathRight(nextLocation.publicHref)) router.commitLocation({
+   ...nextLocation,
+   replace: true
+  });
+  return () =&gt; {
+   unsub();
+  };
+ }, [router, router.history]);
+ useLayoutEffect(() =&gt; {
+  if (typeof window !== "undefined" &amp;&amp; router.ssr || mountLoadForRouter.current.router === router &amp;&amp; mountLoadForRouter.current.mounted) return;
+  mountLoadForRouter.current = {
+   router,
+   mounted: true
+  };
+  const tryLoad = async () =&gt; {
+   try {
+    await router.load();
+   } catch (err) {
+    console.error(err);
+   }
+  };
+  tryLoad();
+ }, [router]);
+ useLayoutEffect(() =&gt; {
+  if (previousIsLoading &amp;&amp; !isLoading) router.emit({
+   type: "onLoad",
+   ...getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state)
+  });
+ }, [
+  previousIsLoading,
+  router,
+  isLoading
+ ]);
+ useLayoutEffect(() =&gt; {
+  if (previousIsPagePending &amp;&amp; !isPagePending) router.emit({
+   type: "onBeforeRouteMount",
+   ...getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state)
+  });
+ }, [
+  isPagePending,
+  previousIsPagePending,
+  router
+ ]);
+ useLayoutEffect(() =&gt; {
+  if (previousIsAnyPending &amp;&amp; !isAnyPending) {
+   const changeInfo = getLocationChangeInfo(router.stores.location.state, router.stores.resolvedLocation.state);
+   router.emit({
+    type: "onResolved",
+    ...changeInfo
+   });
+   batch(() =&gt; {
+    router.stores.status.setState(() =&gt; "idle");
+    router.stores.resolvedLocation.setState(() =&gt; router.stores.location.state);
+   });
+   if (changeInfo.hrefChanged) handleHashScroll(router);
+  }
+ }, [
+  isAnyPending,
+  previousIsAnyPending,
+  router
+ ]);
+ return null;
 }
 //#endregion
 export { Transitioner };
 
 //# sourceMappingURL=Transitioner.js.map
 ```
+
 </details>
 </tool-use>
 
@@ -2013,6 +2029,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 Now I found the smoking gun!
 
 In `Transitioner.js`:
+
 ```js
 useLayoutEffect(() => {
     if (typeof window !== "undefined" && router.ssr || mountLoadForRouter.current.router === router && mountLoadForRouter.current.mounted) return;
@@ -2031,7 +2048,7 @@ useLayoutEffect(() => {
 }, [router]);
 ```
 
-The `Transitioner` component is responsible for calling `router.load()` in a `useLayoutEffect`. 
+The `Transitioner` component is responsible for calling `router.load()` in a `useLayoutEffect`.
 
 So `router.load()` is what actually resolves the routes. Before it completes, `MatchesInner` has no `matchId` and the story component doesn't render. Once the router finishes loading, the matched route gets rendered with the story. That's the expected flow, so `useRouter()` should work fine by the time the story mounts. Let me look at that error message again...
 
@@ -2096,6 +2113,7 @@ command: "cd /Users/leocaseiro/Sites/base-skill &amp;&amp; (lsof -ti :3000 | xar
 started_at: 2026-04-03T13:51:05.208Z
 
 ```
+
 </details>
 </tool-use>
 
@@ -2159,22 +2177,23 @@ import { useMatch } from "./useMatch.js";
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/useParamsHook
 */
 function useParams(opts) {
-	return useMatch({
-		from: opts.from,
-		shouldThrow: opts.shouldThrow,
-		structuralSharing: opts.structuralSharing,
-		strict: opts.strict,
-		select: (match) =&gt; {
-			const params = opts.strict === false ? match.params : match._strictParams;
-			return opts.select ? opts.select(params) : params;
-		}
-	});
+ return useMatch({
+  from: opts.from,
+  shouldThrow: opts.shouldThrow,
+  structuralSharing: opts.structuralSharing,
+  strict: opts.strict,
+  select: (match) =&gt; {
+   const params = opts.strict === false ? match.params : match._strictParams;
+   return opts.select ? opts.select(params) : params;
+  }
+ });
 }
 //#endregion
 export { useParams };
 
 //# sourceMappingURL=useParams.js.map
 ```
+
 </details>
 </tool-use>
 
@@ -2201,49 +2220,50 @@ import { useStore } from "@tanstack/react-store";
 import { isServer } from "@tanstack/router-core/isServer";
 //#region src/useMatch.tsx
 var dummyStore = {
-	state: void 0,
-	get: () =&gt; void 0,
-	subscribe: () =&gt; () =&gt; {}
+ state: void 0,
+ get: () =&gt; void 0,
+ subscribe: () =&gt; () =&gt; {}
 };
 /**
 * Read and select the nearest or targeted route match.
 * @link https://tanstack.com/router/latest/docs/framework/react/api/router/useMatchHook
 */
 function useMatch(opts) {
-	const router = useRouter();
-	const nearestMatchId = React$1.useContext(opts.from ? dummyMatchContext : matchContext);
-	const key = opts.from ?? nearestMatchId;
-	const matchStore = key ? opts.from ? router.stores.getMatchStoreByRouteId(key) : router.stores.activeMatchStoresById.get(key) : void 0;
-	if (isServer ?? router.isServer) {
-		const match = matchStore?.state;
-		if ((opts.shouldThrow ?? true) &amp;&amp; !match) {
-			if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find ${opts.from ? &#96;an active match from "${opts.from}"&#96; : "a nearest match!"}&#96;);
-			invariant();
-		}
-		if (match === void 0) return;
-		return opts.select ? opts.select(match) : match;
-	}
-	const previousResult = React$1.useRef(void 0);
-	return useStore(matchStore ?? dummyStore, (match) =&gt; {
-		if ((opts.shouldThrow ?? true) &amp;&amp; !match) {
-			if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find ${opts.from ? &#96;an active match from "${opts.from}"&#96; : "a nearest match!"}&#96;);
-			invariant();
-		}
-		if (match === void 0) return;
-		const selected = opts.select ? opts.select(match) : match;
-		if (opts.structuralSharing ?? router.options.defaultStructuralSharing) {
-			const shared = replaceEqualDeep(previousResult.current, selected);
-			previousResult.current = shared;
-			return shared;
-		}
-		return selected;
-	});
+ const router = useRouter();
+ const nearestMatchId = React$1.useContext(opts.from ? dummyMatchContext : matchContext);
+ const key = opts.from ?? nearestMatchId;
+ const matchStore = key ? opts.from ? router.stores.getMatchStoreByRouteId(key) : router.stores.activeMatchStoresById.get(key) : void 0;
+ if (isServer ?? router.isServer) {
+  const match = matchStore?.state;
+  if ((opts.shouldThrow ?? true) &amp;&amp; !match) {
+   if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find ${opts.from ? &#96;an active match from "${opts.from}"&#96; : "a nearest match!"}&#96;);
+   invariant();
+  }
+  if (match === void 0) return;
+  return opts.select ? opts.select(match) : match;
+ }
+ const previousResult = React$1.useRef(void 0);
+ return useStore(matchStore ?? dummyStore, (match) =&gt; {
+  if ((opts.shouldThrow ?? true) &amp;&amp; !match) {
+   if (process.env.NODE_ENV !== "production") throw new Error(&#96;Invariant failed: Could not find ${opts.from ? &#96;an active match from "${opts.from}"&#96; : "a nearest match!"}&#96;);
+   invariant();
+  }
+  if (match === void 0) return;
+  const selected = opts.select ? opts.select(match) : match;
+  if (opts.structuralSharing ?? router.options.defaultStructuralSharing) {
+   const shared = replaceEqualDeep(previousResult.current, selected);
+   previousResult.current = shared;
+   return shared;
+  }
+  return selected;
+ });
 }
 //#endregion
 export { useMatch };
 
 //# sourceMappingURL=useMatch.js.map
 ```
+
 </details>
 </tool-use>
 
@@ -2256,10 +2276,11 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 
 <think><details><summary>Thought Process</summary>
 Now I see the EXACT issue!In `useMatch`:```jsfunction useMatch(opts) {
-	const router = useRouter();
-	const nearestMatchId = React$1.useContext(opts.from ? dummyMatchContext : matchContext);
-	const key = opts.from ?? nearestMatchId;
-	const matchStore = key ? opts.from ? router.stores.getMatchStoreByRouteId(key) : ...
+ const router = useRouter();
+ const nearestMatchId = React$1.useContext(opts.from ? dummyMatchContext : matchContext);
+ const key = opts.from ?? nearestMatchId;
+ const matchStore = key ? opts.from ? router.stores.getMatchStoreByRouteId(key) : ...
+
 ```
 
 If `router` is `null` (returned by `useRouter()` when outside `RouterProvider` in production mode), then `router.stores` would throw "Cannot read properties of null (reading 'stores')".
@@ -2285,6 +2306,7 @@ cd /Users/leocaseiro/Sites/base-skill && cat node_modules/@tanstack/react-router
         "default": "./dist/esm/index.js"
 
 ```
+
 </details>
 </tool-use>
 
@@ -2320,6 +2342,7 @@ node_modules/@tanstack/react-router/dist/esm/HeadContent.dev.js
 node_modules/@tanstack/react-router/dist/esm/index.dev.js
 
 ```
+
 </details>
 </tool-use>
 
@@ -2336,6 +2359,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill && grep -n "stores\|useRouter\|RouterContext\|null" node_modules/@tanstack/react-router/dist/esm/index.dev.js | grep "stores" | head -20
 ```
+
 </details>
 </tool-use>
 
@@ -2361,6 +2385,7 @@ import { useRouter } from "./useRouter.js";
 import { useMatch } from "./useMatch.js";
 
 ```
+
 </details>
 </tool-use>
 
@@ -2377,7 +2402,7 @@ So the `index.dev.js` just re-exports from the same modules. The underlying `use
 So the behavior of TanStack Router hooks should be the same in dev and prod modes...
 
 Unless Vite itself handles imports differently. In dev mode, Vite serves modules as ES modules directly. In production mode, Vite bundles them together. If bundling affects the behavior of TanStack Router...
- 
+
 Ah, but `process.env.NODE_ENV` gets replaced during production builds, which means dead code elimination kicks in. So development-only error checks might get stripped away. In `useMatch.js`, there's a conditional that throws an error in development but only calls `invariant()` in production when a match isn't found. I need to figure out what `invariant()` actually does in that scenario.</details></think>
 
 _**Agent (claude-4.6-sonnet-medium-thinking)**_
@@ -2388,6 +2413,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill && grep -n "export.*invariant\|function invariant" node_modules/@tanstack/router-core/dist/esm/utils.js 2>/dev/null | head -5
 ```
+
 </details>
 </tool-use>
 
@@ -2412,6 +2438,7 @@ node_modules/@tanstack/router-core/dist/cjs/invariant.d.cts:1:export declare fun
 node_modules/@tanstack/router-core/dist/cjs/invariant.cjs.map:1:{"version":3,"file":"invariant.cjs","names":[],"sources":["../../src/invariant.ts"],"sourcesContent":["export function invariant(): never {\n  throw new Error('Invariant failed')\n}\n"],"mappings":";AAAA,SAAgB,YAAmB;AACjC,OAAM,IAAI,MAAM,mBAAmB"}
 
 ```
+
 </details>
 </tool-use>
 
@@ -2429,15 +2456,16 @@ So the `.stores` error is NOT coming from `useMatch`'s "match not found" check. 
     const router = useRouter();
     const nearestMatchId = React$1.useContext(opts.from ? dummyMatchContext : matchContext);
 
-
 ```
 
 Looking at where the error actually occurs, if `router` is null, then accessing `router.stores` would immediately throw "Cannot read properties of null (reading 'stores')". This means `useRouter()` is returning null, which happens when `routerContext` is null — the component isn't wrapped in a `RouterProvider`. But I'm wondering if there's another scenario where `useRouter()` could return null even with a provider present.
 
 ```
+
 So the component must be rendering outside of `RouterProvider` somehow. But that shouldn't be possible since `RouterProvider` is the parent—React guarantees children access the context from ancestors. Unless there's something like React Portals creating a DOM tree outside the provider... but neither `AnswerGame` nor `NumberMatchSession` use portals.
 
 I keep circling back on this. Let me shift focus to what's actually different between CI and local environments. In CI, the Storybook build is a production Vite build with production React, which sets `process.env.NODE_ENV` to production.
+
 ```
 
 js
@@ -2510,8 +2538,8 @@ Unless `AudioButton` is being tested separately... but no, it's tested as part o
 OK let me look at this from the perspective of what's different about the STATIC BUILD.
 
 In the static build:
-- `build-storybook` creates a static HTML/JS/CSS bundle
 
+- `build-storybook` creates a static HTML/JS/CSS bundle
 
 - Vite bundles everything together with production React
 - The key difference might be how Storybook serves files with `http-server` and relative asset URLs. Since the static build uses `base: './'`, I'm wondering if TanStack Router's `createMemoryHistory` is having issues with the relative paths when the iframe loads at `http://localhost:6006/iframe.html`.
@@ -2528,9 +2556,10 @@ Unless the router load is actually failing in the CI environment—maybe the mem
 
 Actually, I'm realizing the `mountLoadForRouter` ref is initialized with the current router on first render, so the early return check should work correctly—it's comparing whether we've already mounted this specific router instance and skipping the load if we have.
 
-Examining the initialization logic... When the story changes to R2, the context updates and `Matches` re-renders with the new router, but R2 hasn't loaded its routes yet so nothing renders for it. Meanwhile, R1's route component gets unmounted—though I'm not entirely sure if that's because the context changed or because the router's internal state shifted. I need to figure out how changing the `router` prop actually triggers the unmounting. RouterProvider` affect the rendered route components? The route components are rendered by `Matches` → `MatchesInner` → `Match`. These get the new `router` (R2) from context. But R2's `activeMatchStoresById` would be EMPTY (or only contain initial matches) until `router.load()` completes.
+Examining the initialization logic... When the story changes to R2, the context updates and `Matches` re-renders with the new router, but R2 hasn't loaded its routes yet so nothing renders for it. Meanwhile, R1's route component gets unmounted—though I'm not entirely sure if that's because the context changed or because the router's internal state shifted. I need to figure out how changing the `router` prop actually triggers the unmounting. RouterProvider` affect the rendered route components? The route components are rendered by `Matches` → `MatchesInner` → `Match`. These get the new`router` (R2) from context. But R2's `activeMatchStoresById` would be EMPTY (or only contain initial matches) until `router.load()` completes.
 
 So the flow is:
+
 1. `RouterContextProvider` provides R2 as context
 2. `Matches` re-renders with R2
 3. `MatchesInner` calls `useStore(R2.stores.firstMatchId, ...)` → waits for first match
@@ -2574,6 +2603,7 @@ firstMatchId state: undefined
 activeMatchesSnapshot state: []
 
 ```
+
 </details>
 </tool-use>
 
@@ -2616,6 +2646,7 @@ After load - firstMatchId state: __root__/
 After load - matches: [{"routeId":"__root__","params":{"locale":"en"}},{"routeId":"/$locale","params":{"locale":"en"}}]
 
 ```
+
 </details>
 </tool-use>
 
@@ -2632,7 +2663,6 @@ Wait! There's something interesting here. After `router.load()`, `firstMatchId` 
 But wait, the error says `router.stores` is being accessed when `router` is null. So the issue is that `useRouter()` returns null, not that `router.stores` is broken.
 
 So why would `useRouter()` return null if `RouterProvider` is wrapping the component?Let me step back and think about this from a completely different angle.
-
 
 Actually, looking at the stack trace more carefully, the error is happening in the compiled test output, not the source. The Storybook test runner compiles story files separately for testing, so those line numbers don't map directly to my source code. Let me trace through how `test-storybook` actually handles the compilation and execution.
 
@@ -2674,6 +2704,7 @@ cd /Users/leocaseiro/Sites/base-skill && yarn build-storybook --output-dir /tmp/
 Done in 6.27s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2720,6 +2751,7 @@ Hit CTRL-C to stop the server
 Server running
 
 ```
+
 </details>
 </tool-use>
 
@@ -2815,6 +2847,7 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2885,6 +2918,7 @@ Ran all test suites.
 Done in 5.72s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2940,6 +2974,7 @@ Ran all test suites.
 Done in 5.04s.
 
 ```
+
 </details>
 </tool-use>
 
@@ -2956,8 +2991,7 @@ Interesting! ALL tests pass locally against the static build. So the problem is 
 3. The specific Playwright/Chromium version installed via `npx playwright install --with-deps chromium`
 4. The timing of the `npx wait-on http://localhost:6006 --timeout 60000` vs. the actual server being ready
 
-
-5. Or maybe the tests ran against a different version of the code than what I'm testing locally.
+1. Or maybe the tests ran against a different version of the code than what I'm testing locally.
 
 Looking at the CI workflow, it starts an HTTP server to serve the static Storybook build on port 6006, waits for it to be ready, then runs the tests against that URL—and this same setup works fine when I run it locally, so the discrepancy must be environmental.
 
@@ -2982,6 +3016,7 @@ NumberMatch.test.tsx
 NumberMatch.tsx
 
 ```
+
 </details>
 </tool-use>
 
@@ -3006,6 +3041,7 @@ diff /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-number-match/s
 &gt;   decorators: [withRouter],
 
 ```
+
 </details>
 </tool-use>
 
@@ -3026,7 +3062,7 @@ In the current master: `NumberMatch.stories.tsx` HAS `withRouter` decorator.
 So the PR was merged WITHOUT the `withRouter` decorator, and then it was ADDED as a fix commit. But the CI that ran was on the PR (before `withRouter` was added), so the stories ran WITHOUT the router decorator.
 
 Without `withRouter`, `NumberMatchSession` inside `NumberMatch` would try to call `useParams({ from: '/$locale' })` but there would be NO `RouterProvider` in the component tree. This is why `useRouter()` returns null (no context), and `router.stores` throws the error.
- 
+
 So the real issue was that the PR got merged without the decorator, which caused the CI failure. Now that master has the decorator added, I need to check if the current CI is still failing or if it's been resolved.
 
 Looking at the branch `fix/storybok-tests-ci`, I can see the commit history shows that `a83b90a` specifically added the `withRouter` decorator to fix the e2e tests.
@@ -3064,6 +3100,7 @@ d672838 feat(type-mode): hide LetterTileBank and show keyboard hint in type mode
 6ede3be feat(type-mode): add useKeyboardInput hook for keyboard tile placement
 
 ```
+
 </details>
 </tool-use>
 
@@ -3114,6 +3151,7 @@ export const NumeralToGroup: Story = {};
 
 
 ```
+
 </details>
 </tool-use>
 
@@ -3130,10 +3168,10 @@ Now it's completely clear!
 The current master's `NumberMatch.stories.tsx` does NOT have the `withRouter` decorator. But the current branch `fix/storybok-tests-ci` (which has the fix) has the `withRouter` decorator.
 
 So:
+
 1. Master has `NumberMatch.stories.tsx` WITHOUT `withRouter` decorator
 2. Current branch `fix/storybok-tests-ci` has `withRouter` decorator (added in commit `a83b90a`)
 3. The CI failure is because WITHOUT `withRouter`, `NumberMatchSession` tries to call `useParams({ from: '/$locale' })` but there's no `RouterProvider` in the component tree
-
 
 4. On the current branch with the decorator already in place, running the tests locally would pass, which explains why the user doesn't see failures locally—the CI failure was from an earlier run on master before the fix was applied.
 
@@ -3178,6 +3216,7 @@ Date:   Sat Apr 4 00:34:18 2026 +1100
  2 files changed, 4 insertions(+)
 
 ```
+
 </details>
 </tool-use>
 
@@ -3194,6 +3233,7 @@ _**Agent (claude-4.6-sonnet-medium-thinking)**_
 ```bash
 cd /Users/leocaseiro/Sites/base-skill && git show master:src/games/word-spell/WordSpell/WordSpell.stories.tsx 2>/dev/null | grep -E "withRouter|decorator" | head -5
 ```
+
 </details>
 </tool-use>
 
@@ -3225,6 +3265,7 @@ src/games/number-match/NumberMatch/NumberMatch.stories.tsx:1:import { withRouter
 src/games/number-match/NumberMatch/NumberMatch.stories.tsx:24:  decorators: [withRouter],
 
 ```
+
 </details>
 </tool-use>
 
@@ -3250,6 +3291,7 @@ kill $(lsof -ti:6007) 2>/dev/null; echo "Cleaned up port 6007"
 Cleaned up port 6007
 
 ```
+
 </details>
 </tool-use>
 
@@ -3300,6 +3342,7 @@ const meta: Meta<typeof NumberMatch> = {
 Both `NumberMatch.stories.tsx` and `WordSpell.stories.tsx` now have `withRouter` added (commit `a83b90a`). The CI will pass once this branch is merged to master.
 
 To verify locally right now, you can run:
+
 ```bash
 START_STORYBOOK=1 yarn test:storybook
 ```

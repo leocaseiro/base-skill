@@ -17,16 +17,16 @@ Missing Context/Providers: You can use decorators to supply specific contexts or
 Misconfigured Webpack or Vite: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring Webpack or Vite with Storybook.
 Missing Environment Variables: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the Environment Variables documentation.
 ReferenceError: question is not defined
-    at PlayableScene (http://localhost:6778/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx?t=1776755899840:51:165)
-    at Object.react_stack_bottom_frame (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:18509:20)
-    at renderWithHooks (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:5654:24)
-    at updateFunctionComponent (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:7475:21)
-    at beginWork (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:8525:20)
-    at runWithFiberInDEV (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:997:72)
-    at performUnitOfWork (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12561:98)
-    at workLoopSync (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12424:43)
-    at renderRootSync (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12408:13)
-    at performWorkOnRoot (http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:11827:37)
+    at PlayableScene (<http://localhost:6778/src/components/answer-game/AnswerGame/AnswerGame.stories.tsx?t=1776755899840:51:165>)
+    at Object.react_stack_bottom_frame (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:18509:20>)
+    at renderWithHooks (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:5654:24>)
+    at updateFunctionComponent (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:7475:21>)
+    at beginWork (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:8525:20>)
+    at runWithFiberInDEV (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:997:72>)
+    at performUnitOfWork (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12561:98>)
+    at workLoopSync (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12424:43>)
+    at renderRootSync (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:12408:13>)
+    at performWorkOnRoot (<http://localhost:6778/node_modules/.cache/storybook/10.3.3/1c3385a5d25e538d10b518b310c74d3ca2690b6aaffeadccd74da79736171f86/sb-vite/deps/chunk-2U5R5MRD.js?v=2ac990ba:11827:37>)
 
 ---
 
@@ -38,8 +38,6 @@ The user is experiencing issues with the AnswerGame Storybook.</details></think>
 _**Agent (composer-2)**_
 
 Reading the Storybook stories file and the write-storybook skill to fix the `question is not defined` error.
-
-
 
 _**Agent (composer-2)**_
 
@@ -89,8 +87,6 @@ _**Agent (composer-2)**_
 
 `PlayableScene` references `question`, but it's not in scope — `question` is a story arg and isn't passed into `PlayableScene`. Passing `question` as a prop and adding it to the render destructuring and default `args`/`argTypes`.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2">
@@ -107,8 +103,6 @@ _**Agent (composer-2)**_
 _**Agent (composer-2)**_
 
 Fixing the worktree stories file: `PlayableScene` references `question`, which isn't in scope. Passing `question` from the story `render` into `PlayableScene` and adding default args plus a text control.
-
-
 
 _**Agent (composer-2)**_
 
@@ -176,7 +170,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **read_lints**</summary>
 
-
 Parameters:
 
 ```json
@@ -186,6 +179,7 @@ Parameters:
   ]
 }
 ```
+
 Result:
 
 ```json
@@ -197,8 +191,8 @@ Result:
   ]
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -242,14 +236,11 @@ _**Agent (composer-2)**_
 
 Tracing how distractor mode is configured in the answer-game system so we can add a Storybook control for distractor count.
 
-
-
 _**Agent (composer-2)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -260,6 +251,7 @@ Parameters:
   "pattern": "distractor"
 }
 ```
+
 Additional data:
 
 ```json
@@ -273,8 +265,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -303,7 +295,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -314,6 +305,7 @@ Parameters:
   "pattern": "distractor"
 }
 ```
+
 Additional data:
 
 ```json
@@ -327,8 +319,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -357,7 +349,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -367,6 +358,7 @@ Parameters:
   "pattern": "distractorCount"
 }
 ```
+
 Additional data:
 
 ```json
@@ -380,8 +372,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -397,7 +389,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
 
-
 Parameters:
 
 ```json
@@ -407,6 +398,7 @@ Parameters:
   "pattern": "distractorCount"
 }
 ```
+
 Additional data:
 
 ```json
@@ -420,8 +412,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -436,7 +428,6 @@ _**Agent (composer-2)**_
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
 <details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-
 
 Parameters:
 
@@ -447,6 +438,7 @@ Parameters:
   "pattern": "distractor"
 }
 ```
+
 Additional data:
 
 ```json
@@ -460,8 +452,8 @@ Additional data:
   "totalMatches": 0
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>
@@ -477,7 +469,6 @@ _**Agent (composer-2)**_
 <details>
 <summary>Tool use: **semantic_search_full**</summary>
 
-
 Parameters:
 
 ```json
@@ -488,8 +479,8 @@ Parameters:
   "topK": 10
 }
 ```
-Status: **completed**
 
+Status: **completed**
 
 </details>
 </tool-use>

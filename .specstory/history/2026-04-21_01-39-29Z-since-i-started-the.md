@@ -8,10 +8,9 @@ _**User (2026-04-21 02:02:16Z)**_
 
 Since I started the migration from gameConfig to custom games, and bookmarks, old users of the app aren't able to play anymore.
 
-PR #1 https://github.com/leocaseiro/base-skill/pull/113
-PR #2 https://github.com/leocaseiro/base-skill/pull/115
-PR #3 https://github.com/leocaseiro/base-skill/pull/117
-
+PR #1 <https://github.com/leocaseiro/base-skill/pull/113>
+PR #2 <https://github.com/leocaseiro/base-skill/pull/115>
+PR #3 <https://github.com/leocaseiro/base-skill/pull/117>
 
 This is the error that I am getting in one of the devices:
 
@@ -35,16 +34,16 @@ Want me to start fetching the three PRs in parallel while you grab the error tex
 
 _**User (2026-04-21 02:04:05Z)**_
 
-The error message accessing the https://leocaseiro.github.io/base-skill/en/game/word-spell is this one:
+The error message accessing the <https://leocaseiro.github.io/base-skill/en/game/word-spell> is this one:
 
-RxError (DM4): 
+RxError (DM4):
 
         RxDB Error-Code: DM4.
         Hint: Error messages are not included in RxDB core to reduce build size.
         To show the full error messages and to ensure that you do not make any mistakes when using RxDB,
         use the dev-mode plugin when you are in development mode: https://rxdb.info/dev-mode.html?console=error
         
-Find out more about this error here: https://rxdb.info/errors.html?console=errors#DM4 
+Find out more about this error here: <https://rxdb.info/errors.html?console=errors#DM4>
 
 --------------------
 Parameters:
@@ -57,7 +56,7 @@ error: {
   "extensions": null,
   "code": null,
   "url": null,
-  "stack": "Error: RxStorageInstanceDexie is closed baseskill-data-bookmarks \n     at gs (https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:92:2884) \n     at t.changeStream (https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:92:1752) \n     at Mq (https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:114973) \n     at t.migrateStorage (https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:137865) \n     at async t.startMigration (https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:136039)"
+  "stack": "Error: RxStorageInstanceDexie is closed baseskill-data-bookmarks \n     at gs (<https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:92:2884>) \n     at t.changeStream (<https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:92:1752>) \n     at Mq (<https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:114973>) \n     at t.migrateStorage (<https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:137865>) \n     at async t.startMigration (<https://leocaseiro.github.io/base-skill/assets/main-BSm_bTTo.js:89:136039>)"
 }
 
     at Fe (main-BSm_bTTo.js:82:27)
@@ -81,6 +80,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:04:09Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -110,6 +110,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -118,6 +119,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -125,6 +127,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -160,6 +163,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -173,6 +177,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -301,6 +306,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -320,6 +326,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -370,17 +377,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -388,7 +396,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:04:30Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:32Z)**_
 
-Let me start Phase 1 — root cause investigation. The stack shows the failure is during `addCollections` → `startMigration` → `migrateStorage` → `changeStream` on a *closed* Dexie storage instance for `baseskill-data-bookmarks`. Old devices have an older schema version of `bookmarks`; new ones don't, which is why only old users break.
+Let me start Phase 1 — root cause investigation. The stack shows the failure is during `addCollections` → `startMigration` → `migrateStorage` → `changeStream` on a _closed_ Dexie storage instance for `baseskill-data-bookmarks`. Old devices have an older schema version of `bookmarks`; new ones don't, which is why only old users break.
 
 I'll explore in parallel: RxDB setup, bookmarks schema/migrations, and what the three PRs changed.
 
@@ -501,6 +509,7 @@ worktrees/fix-bookmarks-db6-migration/node_modules/rxdb/dist/cjs/plugins/utils/u
 worktrees/fix-bookmarks-db6-migration/node_modules/rxdb/dist/cjs/plugins/utils/utils-rxdb-version.template.js.map
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:40Z)**_
@@ -612,6 +621,7 @@ worktrees/feat-word-syllables/node_modules/lucide-react/dist/esm/icons/bookmark.
 worktrees/feat-word-syllables/node_modules/lucide-react/dist/esm/icons/bookmark-check.js.map
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:33Z)**_
@@ -657,6 +667,7 @@ docs/superpowers/plans/2026-04-02-milestone-4-game-engine.md
 .specstory/history/2026-04-01_01-40-40Z-claude-plugin-install-superpowers.md
 .specstory/history/2026-03-31_12-46-38Z-subagent-driven-development-milestone-plans.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:45Z)**_
@@ -672,161 +683,162 @@ _**Agent (claude-opus-4-7 2026-04-21 02:04:46Z)**_
  `./src/db/create-database.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { addRxPlugin, createRxDatabase } from 'rxdb';
-3	import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
-4	import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-5	import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
-6	import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
-7	import { checkVersionAndMigrate } from './migrations';
-8	import {
-9	  appMetaSchema,
-10	  bookmarksSchema,
-11	  customGamesSchema,
-12	  gameConfigOverridesSchema,
-13	  profilesSchema,
-14	  progressSchema,
-15	  savedGameConfigsSchema,
-16	  sessionHistoryIndexSchema,
-17	  sessionHistorySchema,
-18	  settingsSchema,
-19	  syncMetaSchema,
-20	  themesSchema,
-21	  wordSpellSeenWordsSchema,
-22	} from './schemas';
-23	import type { BaseSkillCollections, BaseSkillDatabase } from './types';
-24	import type { RxDatabase } from 'rxdb';
-25	
-26	addRxPlugin(RxDBMigrationSchemaPlugin);
-27	
-28	const DB_NAME = 'baseskill-data-test';
-29	const PRODUCTION_DB_NAME = 'baseskill-data';
-30	
-31	const COLLECTIONS = {
-32	  app_meta: {
-33	    schema: appMetaSchema,
-34	    migrationStrategies: {
-35	      1: (oldDoc: Record<string, unknown>) => oldDoc,
-36	    },
-37	  },
-38	  bookmarks: {
-39	    schema: bookmarksSchema,
-40	    migrationStrategies: {
-41	      1: (oldDoc: Record<string, unknown>) => {
-42	        const profileId = oldDoc.profileId as string;
-43	        const gameId = oldDoc.gameId as string;
-44	        return {
-45	          id: `${profileId}:game:${gameId}`,
-46	          profileId,
-47	          targetType: 'game',
-48	          targetId: gameId,
-49	          createdAt: oldDoc.createdAt,
-50	        };
-51	      },
-52	    },
-53	  },
-54	  custom_games: { schema: customGamesSchema },
-55	  profiles: { schema: profilesSchema },
-56	  progress: { schema: progressSchema },
-57	  settings: { schema: settingsSchema },
-58	  game_config_overrides: { schema: gameConfigOverridesSchema },
-59	  saved_game_configs: {
-60	    schema: savedGameConfigsSchema,
-61	    migrationStrategies: {
-62	      1: (oldDoc: Record<string, unknown>) => ({
-63	        ...oldDoc,
-64	        color: 'indigo',
-65	      }),
-66	      2: (oldDoc: Record<string, unknown>) => oldDoc,
-67	    },
-68	  },
-69	  themes: { schema: themesSchema },
-70	  session_history: { schema: sessionHistorySchema },
-71	  session_history_index: {
-72	    schema: sessionHistoryIndexSchema,
-73	    migrationStrategies: {
-74	      1: (oldDoc: Record<string, unknown>) => ({
-75	        ...oldDoc,
-76	        status: 'completed',
-77	        seed: '',
-78	        initialContent: { rounds: [] },
-79	        initialState: {},
-80	      }),
-81	      2: (oldDoc: Record<string, unknown>) => ({
-82	        ...oldDoc,
-83	        draftState: null,
-84	      }),
-85	    },
-86	  },
-87	  sync_meta: { schema: syncMetaSchema },
-88	  word_spell_seen_words: { schema: wordSpellSeenWordsSchema },
-89	} as const;
-90	
-91	async function addBaseSkillCollections(
-92	  db: RxDatabase<BaseSkillCollections>,
-93	): Promise<BaseSkillDatabase> {
-94	  await db.addCollections(COLLECTIONS);
-95	  return db as BaseSkillDatabase;
-96	}
-97	
-98	/** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
-99	export async function createTestDatabase(): Promise<BaseSkillDatabase> {
-100	  const db = await createRxDatabase<BaseSkillDatabase>({
-101	    name: `${DB_NAME}-${nanoid()}`,
-102	    storage: wrappedValidateAjvStorage({
-103	      storage: getRxStorageMemory(),
-104	    }),
-105	    multiInstance: false,
-106	  });
-107	  return addBaseSkillCollections(db);
-108	}
-109	
-110	const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
-111	
-112	/**
-113	 * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
-114	 * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
-115	 */
-116	export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
-117	  const db = await createRxDatabase<BaseSkillDatabase>({
-118	    name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
-119	    storage: getRxStorageMemory(),
-120	    multiInstance: false,
-121	  });
-122	  const withCols = await addBaseSkillCollections(db);
-123	  await checkVersionAndMigrate(withCols);
-124	  return withCols;
-125	}
-126	
-127	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-128	
-129	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-130	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-131	  if (typeof indexedDB === 'undefined') {
-132	    throw new TypeError(
-133	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-134	    );
-135	  }
-136	  productionDbPromise ??= (async () => {
-137	    const db = await createRxDatabase<BaseSkillDatabase>({
-138	      name: PRODUCTION_DB_NAME,
-139	      storage: getRxStorageDexie(),
-140	      multiInstance: false,
-141	    });
-142	    const withCols = await addBaseSkillCollections(db);
-143	    await checkVersionAndMigrate(withCols);
-144	    return withCols;
-145	  })();
-146	  return productionDbPromise;
-147	}
-148	
-149	export async function destroyTestDatabase(
-150	  db?: BaseSkillDatabase,
-151	): Promise<void> {
-152	  if (db) await db.remove();
-153	}
+1 import { nanoid } from 'nanoid';
+2 import { addRxPlugin, createRxDatabase } from 'rxdb';
+3 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
+4 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+5 import { getRxStorageMemory } from 'rxdb/plugins/storage-memory';
+6 import { wrappedValidateAjvStorage } from 'rxdb/plugins/validate-ajv';
+7 import { checkVersionAndMigrate } from './migrations';
+8 import {
+9   appMetaSchema,
+10   bookmarksSchema,
+11   customGamesSchema,
+12   gameConfigOverridesSchema,
+13   profilesSchema,
+14   progressSchema,
+15   savedGameConfigsSchema,
+16   sessionHistoryIndexSchema,
+17   sessionHistorySchema,
+18   settingsSchema,
+19   syncMetaSchema,
+20   themesSchema,
+21   wordSpellSeenWordsSchema,
+22 } from './schemas';
+23 import type { BaseSkillCollections, BaseSkillDatabase } from './types';
+24 import type { RxDatabase } from 'rxdb';
+25 
+26 addRxPlugin(RxDBMigrationSchemaPlugin);
+27 
+28 const DB_NAME = 'baseskill-data-test';
+29 const PRODUCTION_DB_NAME = 'baseskill-data';
+30 
+31 const COLLECTIONS = {
+32   app_meta: {
+33     schema: appMetaSchema,
+34     migrationStrategies: {
+35       1: (oldDoc: Record<string, unknown>) => oldDoc,
+36     },
+37   },
+38   bookmarks: {
+39     schema: bookmarksSchema,
+40     migrationStrategies: {
+41       1: (oldDoc: Record<string, unknown>) => {
+42         const profileId = oldDoc.profileId as string;
+43         const gameId = oldDoc.gameId as string;
+44         return {
+45           id: `${profileId}:game:${gameId}`,
+46           profileId,
+47           targetType: 'game',
+48           targetId: gameId,
+49           createdAt: oldDoc.createdAt,
+50         };
+51       },
+52     },
+53   },
+54   custom_games: { schema: customGamesSchema },
+55   profiles: { schema: profilesSchema },
+56   progress: { schema: progressSchema },
+57   settings: { schema: settingsSchema },
+58   game_config_overrides: { schema: gameConfigOverridesSchema },
+59   saved_game_configs: {
+60     schema: savedGameConfigsSchema,
+61     migrationStrategies: {
+62       1: (oldDoc: Record<string, unknown>) => ({
+63         ...oldDoc,
+64         color: 'indigo',
+65       }),
+66       2: (oldDoc: Record<string, unknown>) => oldDoc,
+67     },
+68   },
+69   themes: { schema: themesSchema },
+70   session_history: { schema: sessionHistorySchema },
+71   session_history_index: {
+72     schema: sessionHistoryIndexSchema,
+73     migrationStrategies: {
+74       1: (oldDoc: Record<string, unknown>) => ({
+75         ...oldDoc,
+76         status: 'completed',
+77         seed: '',
+78         initialContent: { rounds: [] },
+79         initialState: {},
+80       }),
+81       2: (oldDoc: Record<string, unknown>) => ({
+82         ...oldDoc,
+83         draftState: null,
+84       }),
+85     },
+86   },
+87   sync_meta: { schema: syncMetaSchema },
+88   word_spell_seen_words: { schema: wordSpellSeenWordsSchema },
+89 } as const;
+90 
+91 async function addBaseSkillCollections(
+92   db: RxDatabase<BaseSkillCollections>,
+93 ): Promise<BaseSkillDatabase> {
+94   await db.addCollections(COLLECTIONS);
+95   return db as BaseSkillDatabase;
+96 }
+97 
+98 /** Memory storage for unit tests; does not run migrations (call `checkVersionAndMigrate` in tests that need `app_meta`). */
+99 export async function createTestDatabase(): Promise<BaseSkillDatabase> {
+100   const db = await createRxDatabase<BaseSkillDatabase>({
+101     name: `${DB_NAME}-${nanoid()}`,
+102     storage: wrappedValidateAjvStorage({
+103       storage: getRxStorageMemory(),
+104     }),
+105     multiInstance: false,
+106   });
+107   return addBaseSkillCollections(db);
+108 }
+109 
+110 const STORYBOOK_DB_PREFIX = 'baseskill-storybook';
+111 
+112 /**
+113  * Ephemeral in-memory DB for Storybook. Browsers do not allow replacing native
+114  * `indexedDB` with fake-indexeddb, so demos must use memory storage instead.
+115  */
+116 export async function createStorybookDatabase(): Promise<BaseSkillDatabase> {
+117   const db = await createRxDatabase<BaseSkillDatabase>({
+118     name: `${STORYBOOK_DB_PREFIX}-${nanoid()}`,
+119     storage: getRxStorageMemory(),
+120     multiInstance: false,
+121   });
+122   const withCols = await addBaseSkillCollections(db);
+123   await checkVersionAndMigrate(withCols);
+124   return withCols;
+125 }
+126 
+127 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+128 
+129 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+130 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+131   if (typeof indexedDB === 'undefined') {
+132     throw new TypeError(
+133       'getOrCreateDatabase is only available in a browser with IndexedDB',
+134     );
+135   }
+136   productionDbPromise ??= (async () => {
+137     const db = await createRxDatabase<BaseSkillDatabase>({
+138       name: PRODUCTION_DB_NAME,
+139       storage: getRxStorageDexie(),
+140       multiInstance: false,
+141     });
+142     const withCols = await addBaseSkillCollections(db);
+143     await checkVersionAndMigrate(withCols);
+144     return withCols;
+145   })();
+146   return productionDbPromise;
+147 }
+148 
+149 export async function destroyTestDatabase(
+150   db?: BaseSkillDatabase,
+151 ): Promise<void> {
+152   if (db) await db.remove();
+153 }
 154
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:49Z)**_
@@ -886,6 +898,7 @@ src/db/schemas/bookmarks.ts
 src/db/schemas/index.ts
 src/db/types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:04:50Z)**_
@@ -923,6 +936,7 @@ d9cb71c6 feat(db): add bookmarks collection + composite-key helper
 ad2ea572 docs(plan): expand Storybook coverage for bookmark states
 a3989368 docs(plan): bookmarks Phase 2 — Star toggle implementation plan
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:03Z)**_
@@ -960,6 +974,7 @@ b8b3bfc6 chore(prettier/lint): opinionated code style
 875974ef feat(db): createTestDatabase with memory storage and app_meta
 4c1a53af test(db): failing test for createTestDatabase with app_meta
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:07Z)**_
@@ -969,39 +984,40 @@ _**Agent (claude-opus-4-7 2026-04-21 02:05:07Z)**_
  `./src/db/schemas/bookmarks.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type BookmarkTargetType = 'game' | 'customGame';
-4	
-5	export type BookmarkDoc = {
-6	  /** Composite key — `${profileId}:${targetType}:${targetId}` (see `bookmark-id.ts`) */
-7	  id: string;
-8	  profileId: string;
-9	  targetType: BookmarkTargetType;
-10	  targetId: string;
-11	  createdAt: string;
-12	};
-13	
-14	export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
-15	  version: 1,
-16	  primaryKey: 'id',
-17	  type: 'object',
-18	  properties: {
-19	    id: { type: 'string', maxLength: 256 },
-20	    profileId: { type: 'string', maxLength: 36 },
-21	    targetType: {
-22	      type: 'string',
-23	      enum: ['game', 'customGame'],
-24	      maxLength: 16,
-25	    },
-26	    targetId: { type: 'string', maxLength: 64 },
-27	    createdAt: { type: 'string', format: 'date-time' },
-28	  },
-29	  required: ['id', 'profileId', 'targetType', 'targetId', 'createdAt'],
-30	  additionalProperties: false,
-31	};
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type BookmarkTargetType = 'game' | 'customGame';
+4 
+5 export type BookmarkDoc = {
+6   /** Composite key — `${profileId}:${targetType}:${targetId}` (see `bookmark-id.ts`) */
+7   id: string;
+8   profileId: string;
+9   targetType: BookmarkTargetType;
+10   targetId: string;
+11   createdAt: string;
+12 };
+13 
+14 export const bookmarksSchema: RxJsonSchema<BookmarkDoc> = {
+15   version: 1,
+16   primaryKey: 'id',
+17   type: 'object',
+18   properties: {
+19     id: { type: 'string', maxLength: 256 },
+20     profileId: { type: 'string', maxLength: 36 },
+21     targetType: {
+22       type: 'string',
+23       enum: ['game', 'customGame'],
+24       maxLength: 16,
+25     },
+26     targetId: { type: 'string', maxLength: 64 },
+27     createdAt: { type: 'string', format: 'date-time' },
+28   },
+29   required: ['id', 'profileId', 'targetType', 'targetId', 'createdAt'],
+30   additionalProperties: false,
+31 };
 32
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:07Z)**_
@@ -1011,54 +1027,55 @@ _**Agent (claude-opus-4-7 2026-04-21 02:05:07Z)**_
  `./src/db/migrations.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { migrateCustomGames } from './migrate-custom-games';
-3	import { MAX_SCHEMA_VERSION } from './schemas';
-4	import type { BaseSkillDatabase } from './types';
-5	
-6	function getAppVersion(): string {
-7	  const v: string = import.meta.env.VITE_APP_VERSION;
-8	  if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
-9	    return v;
-10	  }
-11	  return '0.1.0';
-12	}
-13	
-14	export async function ensureAppMetaSingleton(
-15	  db: BaseSkillDatabase,
-16	): Promise<void> {
-17	  const existing = await db.app_meta.findOne('singleton').exec();
-18	  if (existing) {
-19	    return;
-20	  }
-21	  await db.app_meta.insert({
-22	    id: 'singleton',
-23	    appVersion: getAppVersion(),
-24	    rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-25	    lastMigrationAt: null,
-26	    installId: `dev_${nanoid()}`,
-27	  });
-28	}
-29	
-30	export async function checkVersionAndMigrate(
-31	  db: BaseSkillDatabase,
-32	): Promise<void> {
-33	  await ensureAppMetaSingleton(db);
-34	  const meta = await db.app_meta.findOne('singleton').exec();
-35	  if (!meta) {
-36	    return;
-37	  }
-38	  if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
-39	    await meta.incrementalPatch({
-40	      rxdbSchemaVersion: MAX_SCHEMA_VERSION,
-41	      lastMigrationAt: new Date().toISOString(),
-42	      appVersion: getAppVersion(),
-43	    });
-44	  }
-45	  await migrateCustomGames(db);
-46	}
+1 import { nanoid } from 'nanoid';
+2 import { migrateCustomGames } from './migrate-custom-games';
+3 import { MAX_SCHEMA_VERSION } from './schemas';
+4 import type { BaseSkillDatabase } from './types';
+5 
+6 function getAppVersion(): string {
+7   const v: string = import.meta.env.VITE_APP_VERSION;
+8   if (typeof v === 'string' && /^\d+\.\d+\.\d+$/.test(v)) {
+9     return v;
+10   }
+11   return '0.1.0';
+12 }
+13 
+14 export async function ensureAppMetaSingleton(
+15   db: BaseSkillDatabase,
+16 ): Promise<void> {
+17   const existing = await db.app_meta.findOne('singleton').exec();
+18   if (existing) {
+19     return;
+20   }
+21   await db.app_meta.insert({
+22     id: 'singleton',
+23     appVersion: getAppVersion(),
+24     rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+25     lastMigrationAt: null,
+26     installId: `dev_${nanoid()}`,
+27   });
+28 }
+29 
+30 export async function checkVersionAndMigrate(
+31   db: BaseSkillDatabase,
+32 ): Promise<void> {
+33   await ensureAppMetaSingleton(db);
+34   const meta = await db.app_meta.findOne('singleton').exec();
+35   if (!meta) {
+36     return;
+37   }
+38   if (meta.rxdbSchemaVersion < MAX_SCHEMA_VERSION) {
+39     await meta.incrementalPatch({
+40       rxdbSchemaVersion: MAX_SCHEMA_VERSION,
+41       lastMigrationAt: new Date().toISOString(),
+42       appVersion: getAppVersion(),
+43     });
+44   }
+45   await migrateCustomGames(db);
+46 }
 47
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:13Z)**_
@@ -1108,8 +1125,9 @@ b8b3bfc6 chore(prettier/lint): opinionated code style
   remotes/origin/release/v0.10.1
   remotes/origin/release/v0.10.2
 --- PR ---
-117	fix(bookmarks): migrate legacy gameId-keyed docs to v1 composite key (DB6)	fix/bookmarks-db6-migration	MERGED	2026-04-17T06:56:05Z
+117 fix(bookmarks): migrate legacy gameId-keyed docs to v1 composite key (DB6) fix/bookmarks-db6-migration MERGED 2026-04-17T06:56:05Z
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:16Z)**_
@@ -1138,6 +1156,7 @@ Date:   Thu Apr 16 23:23:54 2026 +1000
  2 files changed, 2 insertions(+), 2 deletions(-)
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:27Z)**_
@@ -1220,6 +1239,7 @@ index fafb71c6..173720a0 100644
    type: 'object',
    properties: {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:30Z)**_
@@ -1235,6 +1255,7 @@ Exit code 1
 {"body":"## Summary\n\n- Bumps `bookmarksSchema` from v0 → v1 and adds a `migrationStrategies[1]` that translates the older Phase 1 bookmark shape (`{id, profileId, gameId, createdAt}`) into the Phase 2 composite-key shape (`{id: '${profileId}:game:${gameId}', profileId, targetType: 'game', targetId: gameId, createdAt}`).\n- Fixes `RxError DB6` seen by users whose IndexedDB still holds the pre-merge Phase 1 bookmark shape (e.g. PR-preview visitors).\n- Updates the schema test description to `'bookmarks schema v1'`.\n\n## Why\n\nThe Phase 2 PR (#115) shipped the new composite-key shape at `version: 0`. Returning users whose browsers cached the older v0 shape hit `DB6 (schema mismatch at same version)` on next load because the stored schema hash differs from the new one. Bumping to v1 with an explicit migration is the RxDB-native fix — no manual IndexedDB wipe required.\n\n## Test plan\n\n- [x] `yarn vitest run src/db/schemas/bookmarks.test.ts` — 4 passing\n- [x] `yarn vitest run src/db` — 61 passing (15 files)\n- [ ] Manual: load PR-preview with an IndexedDB that has the old shape and confirm bookmarks open without the DB6 overlay\n\nPushed with `SKIP_PREPUSH=1` — Husky 9 runs hooks via `sh`, but `.husky/pre-push` uses bash-only `mapfile` at line 78 (pre-existing on master, unrelated to this change).\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)","headRefName":"fix/bookmarks-db6-migration","mergedAt":"2026-04-17T07:02:40Z","state":"MERGED","title":"fix(bookmarks): migrate legacy gameId-keyed docs to v1 composite key (DB6)"}
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:38Z)**_
@@ -1254,6 +1275,7 @@ Commits unique to the dm4-recovery branch
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:41Z)**_
@@ -1268,6 +1290,7 @@ Check open PRs and DM4-related ones
 Exit code 1
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:46Z)**_
@@ -1281,6 +1304,7 @@ Commits on dm4-recovery branch ahead of master
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:47Z)**_
@@ -1294,6 +1318,7 @@ DM4-related PRs
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:47Z)**_
@@ -1305,9 +1330,10 @@ Open PRs
 `gh pr list --state open`
 
 ```text
-124	stories(ui): audit retrofit per new controls policy	audit/storybook-controls	OPEN	2026-04-19T02:37:36Z
-121	chore: specstory history sync (2026-04-17)	chore/specstory-sync-2026-04-17	OPEN	2026-04-17T07:39:03Z
+124 stories(ui): audit retrofit per new controls policy audit/storybook-controls OPEN 2026-04-19T02:37:36Z
+121 chore: specstory history sync (2026-04-17) chore/specstory-sync-2026-04-17 OPEN 2026-04-17T07:39:03Z
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:51Z)**_
@@ -1321,6 +1347,7 @@ Commits on dm4-recovery branch ahead of master
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:55Z)**_
@@ -1340,6 +1367,7 @@ c95b8aa8 fix(pre-push): replace mapfile + process-sub with sh-compatible POSIX s
 ccf3a502 docs(skill): fix complex object cast — use as unknown as ComponentType<StoryArgs>
 118d0cc2 docs(skill): upgrade checklist and refreshed mistakes table
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:05:59Z)**_
@@ -1355,50 +1383,51 @@ _**Agent (claude-opus-4-7 2026-04-21 02:06:02Z)**_
  `./src/db/migrate-custom-games.ts`
 
 ```text
-1	import { isLastSessionConfigId } from './last-session-game-config';
-2	import type { BaseSkillDatabase } from './types';
-3	
-4	/**
-5	 * One-shot migration: copy every non-last-session doc from
-6	 * saved_game_configs into custom_games, then delete it from the source.
-7	 *
-8	 * Idempotent — safe to call on every boot. The flag on app_meta short-
-9	 * circuits subsequent runs; upsert-then-delete makes the flag-unset case
-10	 * safe to retry after a crash.
-11	 */
-12	export async function migrateCustomGames(
-13	  db: BaseSkillDatabase,
-14	): Promise<void> {
-15	  const meta = await db.app_meta.findOne('singleton').exec();
-16	  if (!meta) return; // ensureAppMetaSingleton should have created this — skip quietly
-17	  if (meta.customGamesMigrated === true) return;
-18	
-19	  const sourceDocs = await db.saved_game_configs.find().exec();
-20	  const migratable = sourceDocs.filter(
-21	    (d) => !isLastSessionConfigId(d.id),
-22	  );
-23	
-24	  for (const source of migratable) {
-25	    await db.custom_games.upsert({
-26	      id: source.id,
-27	      profileId: source.profileId,
-28	      gameId: source.gameId,
-29	      name: source.name,
-30	      config: source.config,
-31	      createdAt: source.createdAt,
-32	      color: source.color,
-33	      ...(source.cover ? { cover: source.cover } : {}),
-34	    });
-35	  }
-36	
-37	  for (const source of migratable) {
-38	    await source.remove();
-39	  }
-40	
-41	  await meta.incrementalPatch({ customGamesMigrated: true });
-42	}
+1 import { isLastSessionConfigId } from './last-session-game-config';
+2 import type { BaseSkillDatabase } from './types';
+3 
+4 /**
+5  * One-shot migration: copy every non-last-session doc from
+6  * saved_game_configs into custom_games, then delete it from the source.
+7  *
+8  * Idempotent — safe to call on every boot. The flag on app_meta short-
+9  * circuits subsequent runs; upsert-then-delete makes the flag-unset case
+10  * safe to retry after a crash.
+11  */
+12 export async function migrateCustomGames(
+13   db: BaseSkillDatabase,
+14 ): Promise<void> {
+15   const meta = await db.app_meta.findOne('singleton').exec();
+16   if (!meta) return; // ensureAppMetaSingleton should have created this — skip quietly
+17   if (meta.customGamesMigrated === true) return;
+18 
+19   const sourceDocs = await db.saved_game_configs.find().exec();
+20   const migratable = sourceDocs.filter(
+21     (d) => !isLastSessionConfigId(d.id),
+22   );
+23 
+24   for (const source of migratable) {
+25     await db.custom_games.upsert({
+26       id: source.id,
+27       profileId: source.profileId,
+28       gameId: source.gameId,
+29       name: source.name,
+30       config: source.config,
+31       createdAt: source.createdAt,
+32       color: source.color,
+33       ...(source.cover ? { cover: source.cover } : {}),
+34     });
+35   }
+36 
+37   for (const source of migratable) {
+38     await source.remove();
+39   }
+40 
+41   await meta.incrementalPatch({ customGamesMigrated: true });
+42 }
 43
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:03Z)**_
@@ -1413,6 +1442,7 @@ Check rxdb version and app version
   "version": "0.10.3",
     "rxdb": "^17.0.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:03Z)**_
@@ -1422,64 +1452,65 @@ _**Agent (claude-opus-4-7 2026-04-21 02:06:03Z)**_
  `./src/db/schemas/index.ts`
 
 ```text
-1	import { appMetaSchema } from './app-meta';
-2	import { bookmarksSchema } from './bookmarks';
-3	import { customGamesSchema } from './custom_games';
-4	import { gameConfigOverridesSchema } from './game_config_overrides';
-5	import { profilesSchema } from './profiles';
-6	import { progressSchema } from './progress';
-7	import { savedGameConfigsSchema } from './saved_game_configs';
-8	import { sessionHistorySchema } from './session_history';
-9	import { sessionHistoryIndexSchema } from './session_history_index';
-10	import { settingsSchema } from './settings';
-11	import { syncMetaSchema } from './sync_meta';
-12	import { themesSchema } from './themes';
-13	import { wordSpellSeenWordsSchema } from './word_spell_seen_words';
-14	
-15	export { appMetaSchema } from './app-meta';
-16	export type { AppMetaDoc } from './app-meta';
-17	export { bookmarksSchema } from './bookmarks';
-18	export type { BookmarkDoc, BookmarkTargetType } from './bookmarks';
-19	export { customGamesSchema } from './custom_games';
-20	export type { CustomGameDoc } from './custom_games';
-21	export { gameConfigOverridesSchema } from './game_config_overrides';
-22	export type { GameConfigOverridesDoc } from './game_config_overrides';
-23	export { profilesSchema } from './profiles';
-24	export type { ProfileDoc } from './profiles';
-25	export { progressSchema } from './progress';
-26	export type { ProgressDoc } from './progress';
-27	export { savedGameConfigsSchema } from './saved_game_configs';
-28	export type { SavedGameConfigDoc } from './saved_game_configs';
-29	export { sessionHistoryIndexSchema } from './session_history_index';
-30	export type { SessionHistoryIndexDoc } from './session_history_index';
-31	export { sessionHistorySchema } from './session_history';
-32	export type { SessionHistoryDoc } from './session_history';
-33	export { settingsSchema } from './settings';
-34	export type { SettingsDoc } from './settings';
-35	export { syncMetaSchema } from './sync_meta';
-36	export type { SyncMetaDoc } from './sync_meta';
-37	export { themesSchema } from './themes';
-38	export type { ThemeDoc } from './themes';
-39	export { wordSpellSeenWordsSchema } from './word_spell_seen_words';
-40	export type { WordSpellSeenWordsDoc } from './word_spell_seen_words';
-41	
-42	export const MAX_SCHEMA_VERSION = Math.max(
-43	  appMetaSchema.version,
-44	  bookmarksSchema.version,
-45	  customGamesSchema.version,
-46	  gameConfigOverridesSchema.version,
-47	  profilesSchema.version,
-48	  progressSchema.version,
-49	  savedGameConfigsSchema.version,
-50	  sessionHistoryIndexSchema.version,
-51	  sessionHistorySchema.version,
-52	  settingsSchema.version,
-53	  syncMetaSchema.version,
-54	  themesSchema.version,
-55	  wordSpellSeenWordsSchema.version,
-56	);
+1 import { appMetaSchema } from './app-meta';
+2 import { bookmarksSchema } from './bookmarks';
+3 import { customGamesSchema } from './custom_games';
+4 import { gameConfigOverridesSchema } from './game_config_overrides';
+5 import { profilesSchema } from './profiles';
+6 import { progressSchema } from './progress';
+7 import { savedGameConfigsSchema } from './saved_game_configs';
+8 import { sessionHistorySchema } from './session_history';
+9 import { sessionHistoryIndexSchema } from './session_history_index';
+10 import { settingsSchema } from './settings';
+11 import { syncMetaSchema } from './sync_meta';
+12 import { themesSchema } from './themes';
+13 import { wordSpellSeenWordsSchema } from './word_spell_seen_words';
+14 
+15 export { appMetaSchema } from './app-meta';
+16 export type { AppMetaDoc } from './app-meta';
+17 export { bookmarksSchema } from './bookmarks';
+18 export type { BookmarkDoc, BookmarkTargetType } from './bookmarks';
+19 export { customGamesSchema } from './custom_games';
+20 export type { CustomGameDoc } from './custom_games';
+21 export { gameConfigOverridesSchema } from './game_config_overrides';
+22 export type { GameConfigOverridesDoc } from './game_config_overrides';
+23 export { profilesSchema } from './profiles';
+24 export type { ProfileDoc } from './profiles';
+25 export { progressSchema } from './progress';
+26 export type { ProgressDoc } from './progress';
+27 export { savedGameConfigsSchema } from './saved_game_configs';
+28 export type { SavedGameConfigDoc } from './saved_game_configs';
+29 export { sessionHistoryIndexSchema } from './session_history_index';
+30 export type { SessionHistoryIndexDoc } from './session_history_index';
+31 export { sessionHistorySchema } from './session_history';
+32 export type { SessionHistoryDoc } from './session_history';
+33 export { settingsSchema } from './settings';
+34 export type { SettingsDoc } from './settings';
+35 export { syncMetaSchema } from './sync_meta';
+36 export type { SyncMetaDoc } from './sync_meta';
+37 export { themesSchema } from './themes';
+38 export type { ThemeDoc } from './themes';
+39 export { wordSpellSeenWordsSchema } from './word_spell_seen_words';
+40 export type { WordSpellSeenWordsDoc } from './word_spell_seen_words';
+41 
+42 export const MAX_SCHEMA_VERSION = Math.max(
+43   appMetaSchema.version,
+44   bookmarksSchema.version,
+45   customGamesSchema.version,
+46   gameConfigOverridesSchema.version,
+47   profilesSchema.version,
+48   progressSchema.version,
+49   savedGameConfigsSchema.version,
+50   sessionHistoryIndexSchema.version,
+51   sessionHistorySchema.version,
+52   settingsSchema.version,
+53   syncMetaSchema.version,
+54   themesSchema.version,
+55   wordSpellSeenWordsSchema.version,
+56 );
 57
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:42Z)**_
@@ -1502,6 +1533,7 @@ node_modules/rxdb/src/plugins/migration-schema/migration-types.ts
 node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts
 node_modules/rxdb/src/plugins/migration-schema/index.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:44Z)**_
@@ -1516,6 +1548,7 @@ node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts:218:       
 node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts:366:    public async migrateStorage(
 node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts:623:            throw newRxError('DM4', {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:48Z)**_
@@ -1525,207 +1558,208 @@ _**Agent (claude-opus-4-7 2026-04-21 02:06:48Z)**_
  `./node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts`
 
 ```text
-340	
-341	
-342	                try {
-343	                    await writeSingle<RxMigrationStatusDocument>(
-344	                        this.database.internalStore,
-345	                        {
-346	                            previous,
-347	                            document: ensureNotFalsy(newDoc)
-348	                        },
-349	                        INTERNAL_CONTEXT_MIGRATION_STATUS
-350	                    );
-351	
-352	                    // write successful
-353	                    break;
-354	                } catch (err) {
-355	                    // ignore conflicts
-356	                    if (!isBulkWriteConflictError(err)) {
-357	                        throw err;
-358	                    }
-359	                }
-360	            }
-361	        });
-362	        return this.updateStatusQueue;
-363	    }
-364	
-365	
-366	    public async migrateStorage(
-367	        oldStorage: RxStorageInstance<any, any, any>,
-368	        newStorage: RxStorageInstance<any, any, any>,
-369	        batchSize: number
-370	    ) {
-371	
-372	        this.collection.onClose.push(() => this.cancel());
-373	        this.database.onClose.push(() => this.cancel());
-374	        const replicationMetaStorageInstance = await this.database.storage.createStorageInstance({
-375	            databaseName: this.database.name,
-376	            collectionName: 'rx-migration-state-meta-' + oldStorage.collectionName + '-' + oldStorage.schema.version,
-377	            databaseInstanceToken: this.database.token,
-378	            multiInstance: this.database.multiInstance,
-379	            options: {},
-380	            schema: getRxReplicationMetaInstanceSchema(oldStorage.schema, hasEncryption(oldStorage.schema)),
-381	            password: this.database.password,
-382	            devMode: overwritable.isDevMode()
-383	        });
-384	
-385	        const replicationHandlerBase = rxStorageInstanceToReplicationHandler(
-386	            newStorage,
-387	            /**
-388	             * Ignore push-conflicts.
-389	             * If this happens we drop the 'old' document state.
-390	             */
-391	            defaultConflictHandler,
-392	            this.database.token,
-393	            true
-394	        );
-395	
-396	        const replicationState = replicateRxStorageInstance({
-397	            keepMeta: true,
-398	            skipStoringPullMeta: false,
-399	            identifier: [
-400	                'rx-migration-state',
-401	                oldStorage.collectionName,
-402	                oldStorage.schema.version,
-403	                this.collection.schema.version
-404	            ].join('-'),
-405	            replicationHandler: {
-406	                masterChangesSince() {
-407	                    return Promise.resolve({
-408	                        checkpoint: null,
-409	                        documents: []
-410	                    });
-411	                },
-412	                masterWrite: async (rows) => {
-413	                    let migratedRows = await Promise.all(
-414	                        rows
-415	                            .map(async (row) => {
-416	                                let newDocData = row.newDocumentState;
-417	                                if (newStorage.schema.title === META_INSTANCE_SCHEMA_TITLE) {
-418	                                    newDocData = row.newDocumentState.docData;
-419	                                    if (row.newDocumentState.isCheckpoint === '1') {
-420	                                        return {
-421	                                            assumedMasterState: undefined,
-422	                                            newDocumentState: row.newDocumentState
-423	                                        };
-424	                                    }
-425	                                }
-426	                                const migratedDocData: RxReplicationWriteToMasterRow<any> = await migrateDocumentData(
-427	                                    this.collection,
-428	                                    oldStorage.schema.version,
-429	                                    newDocData
-430	                                );
-431	
-432	                                /**
-433	                                 * The migration strategy can return null
-434	                                 * which means the document must be deleted during migration.
-435	                                 */
-436	                                if (migratedDocData === null) {
-437	                                    return null;
-438	                                }
-439	
-440	                                const newRow: RxReplicationWriteToMasterRow<any> = {
-441	                                    // drop the assumed master state, we do not have to care about conflicts here.
-442	                                    assumedMasterState: undefined,
-443	                                    newDocumentState: newStorage.schema.title === META_INSTANCE_SCHEMA_TITLE
-444	                                        ? Object.assign({}, row.newDocumentState, { docData: migratedDocData })
-445	                                        : migratedDocData
-446	                                };
-447	
-448	                                return newRow;
-449	                            })
-450	                    );
-451	
-452	                    // filter out the documents where the migration strategy returned null
-453	                    migratedRows = migratedRows.filter(row => !!row && !!row.newDocumentState);
-454	
-455	                    const result = await replicationHandlerBase.masterWrite(migratedRows as any);
-456	                    return result;
-457	                },
-458	                masterChangeStream$: new Subject<any>().asObservable()
-459	            },
-460	            forkInstance: oldStorage,
-461	            metaInstance: replicationMetaStorageInstance,
-462	            pushBatchSize: batchSize,
-463	            pullBatchSize: 0,
-464	            conflictHandler: defaultConflictHandler,
-465	            hashFunction: this.database.hashFunction
-466	        });
-467	        this.replicationStates.add(replicationState);
-468	
-469	        let hasError: RxError | RxTypeError | false = false;
-470	        replicationState.events.error.subscribe((err: RxError | RxTypeError) => hasError = err);
-471	
-472	        // update replication status on each change
-473	        replicationState.events.processed.up.subscribe(() => {
-474	            this.updateStatus(status => {
-475	                status.count.handled = status.count.handled + 1;
-476	                return status;
-477	            });
-478	        });
-479	
-480	        await awaitRxStorageReplicationFirstInSync(replicationState);
-481	        await awaitRxStorageReplicationInSync(replicationState);
-482	
-483	        await this.updateStatusQueue;
-484	        if (hasError) {
-485	            await cancelRxStorageReplication(replicationState);
-486	            await replicationMetaStorageInstance.close();
-487	            throw hasError;
-488	        }
-489	
-490	        // cleanup old storages
-491	        await Promise.all([
-492	            oldStorage.remove(),
-493	            replicationMetaStorageInstance.remove()
-494	        ]);
-495	
-496	        await cancelRxStorageReplication(replicationState);
-497	    }
-498	
-499	    /**
-500	     * Stops the migration.
-501	     * Mostly used in tests to simulate what happens
-502	     * when the user reloads the page during a migration.
-503	     */
-504	    public async cancel() {
-505	        this.canceled = true;
-506	        await Promise.all(
-507	            Array.from(this.replicationStates.values())
-508	                .map(state => cancelRxStorageReplication(state))
-509	        );
-510	        if (this.broadcastChannel) {
-511	            await this.broadcastChannel.close();
-512	        }
-513	    }
-514	
-515	    public async countAllDocuments(
-516	        storageInstances: RxStorageInstance<any, any, any>[]
-517	    ): Promise<number> {
-518	        let ret = 0;
-519	        await Promise.all(
-520	            storageInstances.map(async (instance) => {
-521	
-522	                const preparedQuery = prepareQuery(
-523	                    instance.schema,
-524	                    normalizeMangoQuery(
-525	                        instance.schema,
-526	                        {
-527	                            selector: {}
-528	                        }
-529	                    )
-530	                );
-531	                const countResult = await instance.count(preparedQuery);
-532	                ret += countResult.count;
-533	            })
-534	        );
-535	        return ret;
-536	    }
-537	
-538	    public async getConnectedStorageInstances() {
-539	        const oldCollectionMeta = ensureNotFalsy(await this.oldCollectionMeta);
+340 
+341 
+342                 try {
+343                     await writeSingle<RxMigrationStatusDocument>(
+344                         this.database.internalStore,
+345                         {
+346                             previous,
+347                             document: ensureNotFalsy(newDoc)
+348                         },
+349                         INTERNAL_CONTEXT_MIGRATION_STATUS
+350                     );
+351 
+352                     // write successful
+353                     break;
+354                 } catch (err) {
+355                     // ignore conflicts
+356                     if (!isBulkWriteConflictError(err)) {
+357                         throw err;
+358                     }
+359                 }
+360             }
+361         });
+362         return this.updateStatusQueue;
+363     }
+364 
+365 
+366     public async migrateStorage(
+367         oldStorage: RxStorageInstance<any, any, any>,
+368         newStorage: RxStorageInstance<any, any, any>,
+369         batchSize: number
+370     ) {
+371 
+372         this.collection.onClose.push(() => this.cancel());
+373         this.database.onClose.push(() => this.cancel());
+374         const replicationMetaStorageInstance = await this.database.storage.createStorageInstance({
+375             databaseName: this.database.name,
+376             collectionName: 'rx-migration-state-meta-' + oldStorage.collectionName + '-' + oldStorage.schema.version,
+377             databaseInstanceToken: this.database.token,
+378             multiInstance: this.database.multiInstance,
+379             options: {},
+380             schema: getRxReplicationMetaInstanceSchema(oldStorage.schema, hasEncryption(oldStorage.schema)),
+381             password: this.database.password,
+382             devMode: overwritable.isDevMode()
+383         });
+384 
+385         const replicationHandlerBase = rxStorageInstanceToReplicationHandler(
+386             newStorage,
+387             /**
+388              * Ignore push-conflicts.
+389              * If this happens we drop the 'old' document state.
+390              */
+391             defaultConflictHandler,
+392             this.database.token,
+393             true
+394         );
+395 
+396         const replicationState = replicateRxStorageInstance({
+397             keepMeta: true,
+398             skipStoringPullMeta: false,
+399             identifier: [
+400                 'rx-migration-state',
+401                 oldStorage.collectionName,
+402                 oldStorage.schema.version,
+403                 this.collection.schema.version
+404             ].join('-'),
+405             replicationHandler: {
+406                 masterChangesSince() {
+407                     return Promise.resolve({
+408                         checkpoint: null,
+409                         documents: []
+410                     });
+411                 },
+412                 masterWrite: async (rows) => {
+413                     let migratedRows = await Promise.all(
+414                         rows
+415                             .map(async (row) => {
+416                                 let newDocData = row.newDocumentState;
+417                                 if (newStorage.schema.title === META_INSTANCE_SCHEMA_TITLE) {
+418                                     newDocData = row.newDocumentState.docData;
+419                                     if (row.newDocumentState.isCheckpoint === '1') {
+420                                         return {
+421                                             assumedMasterState: undefined,
+422                                             newDocumentState: row.newDocumentState
+423                                         };
+424                                     }
+425                                 }
+426                                 const migratedDocData: RxReplicationWriteToMasterRow<any> = await migrateDocumentData(
+427                                     this.collection,
+428                                     oldStorage.schema.version,
+429                                     newDocData
+430                                 );
+431 
+432                                 /**
+433                                  * The migration strategy can return null
+434                                  * which means the document must be deleted during migration.
+435                                  */
+436                                 if (migratedDocData === null) {
+437                                     return null;
+438                                 }
+439 
+440                                 const newRow: RxReplicationWriteToMasterRow<any> = {
+441                                     // drop the assumed master state, we do not have to care about conflicts here.
+442                                     assumedMasterState: undefined,
+443                                     newDocumentState: newStorage.schema.title === META_INSTANCE_SCHEMA_TITLE
+444                                         ? Object.assign({}, row.newDocumentState, { docData: migratedDocData })
+445                                         : migratedDocData
+446                                 };
+447 
+448                                 return newRow;
+449                             })
+450                     );
+451 
+452                     // filter out the documents where the migration strategy returned null
+453                     migratedRows = migratedRows.filter(row => !!row && !!row.newDocumentState);
+454 
+455                     const result = await replicationHandlerBase.masterWrite(migratedRows as any);
+456                     return result;
+457                 },
+458                 masterChangeStream$: new Subject<any>().asObservable()
+459             },
+460             forkInstance: oldStorage,
+461             metaInstance: replicationMetaStorageInstance,
+462             pushBatchSize: batchSize,
+463             pullBatchSize: 0,
+464             conflictHandler: defaultConflictHandler,
+465             hashFunction: this.database.hashFunction
+466         });
+467         this.replicationStates.add(replicationState);
+468 
+469         let hasError: RxError | RxTypeError | false = false;
+470         replicationState.events.error.subscribe((err: RxError | RxTypeError) => hasError = err);
+471 
+472         // update replication status on each change
+473         replicationState.events.processed.up.subscribe(() => {
+474             this.updateStatus(status => {
+475                 status.count.handled = status.count.handled + 1;
+476                 return status;
+477             });
+478         });
+479 
+480         await awaitRxStorageReplicationFirstInSync(replicationState);
+481         await awaitRxStorageReplicationInSync(replicationState);
+482 
+483         await this.updateStatusQueue;
+484         if (hasError) {
+485             await cancelRxStorageReplication(replicationState);
+486             await replicationMetaStorageInstance.close();
+487             throw hasError;
+488         }
+489 
+490         // cleanup old storages
+491         await Promise.all([
+492             oldStorage.remove(),
+493             replicationMetaStorageInstance.remove()
+494         ]);
+495 
+496         await cancelRxStorageReplication(replicationState);
+497     }
+498 
+499     /**
+500      * Stops the migration.
+501      * Mostly used in tests to simulate what happens
+502      * when the user reloads the page during a migration.
+503      */
+504     public async cancel() {
+505         this.canceled = true;
+506         await Promise.all(
+507             Array.from(this.replicationStates.values())
+508                 .map(state => cancelRxStorageReplication(state))
+509         );
+510         if (this.broadcastChannel) {
+511             await this.broadcastChannel.close();
+512         }
+513     }
+514 
+515     public async countAllDocuments(
+516         storageInstances: RxStorageInstance<any, any, any>[]
+517     ): Promise<number> {
+518         let ret = 0;
+519         await Promise.all(
+520             storageInstances.map(async (instance) => {
+521 
+522                 const preparedQuery = prepareQuery(
+523                     instance.schema,
+524                     normalizeMangoQuery(
+525                         instance.schema,
+526                         {
+527                             selector: {}
+528                         }
+529                     )
+530                 );
+531                 const countResult = await instance.count(preparedQuery);
+532                 ret += countResult.count;
+533             })
+534         );
+535         return ret;
+536     }
+537 
+538     public async getConnectedStorageInstances() {
+539         const oldCollectionMeta = ensureNotFalsy(await this.oldCollectionMeta);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:52Z)**_
@@ -1743,41 +1777,42 @@ _**Agent (claude-opus-4-7 2026-04-21 02:06:55Z)**_
  `./node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts`
 
 ```text
-600	                collectionName: this.collection.name,
-601	                count: {
-602	                    handled: 0,
-603	                    percent: 0,
-604	                    total: 0
-605	                }
-606	            };
-607	        }
-608	
-609	        const result = await Promise.race([
-610	            firstValueFrom(
-611	                this.$.pipe(
-612	                    filter((d: RxMigrationStatus) => d.status === 'DONE')
-613	                )
-614	            ),
-615	            firstValueFrom(
-616	                this.$.pipe(
-617	                    filter((d: RxMigrationStatus) => d.status === 'ERROR')
-618	                )
-619	            )
-620	        ]);
-621	
-622	        if (result.status === 'ERROR') {
-623	            throw newRxError('DM4', {
-624	                collection: this.collection.name,
-625	                error: result.error
-626	            });
-627	        } else {
-628	            return result;
-629	        }
-630	
-631	    }
-632	}
+600                 collectionName: this.collection.name,
+601                 count: {
+602                     handled: 0,
+603                     percent: 0,
+604                     total: 0
+605                 }
+606             };
+607         }
+608 
+609         const result = await Promise.race([
+610             firstValueFrom(
+611                 this.$.pipe(
+612                     filter((d: RxMigrationStatus) => d.status === 'DONE')
+613                 )
+614             ),
+615             firstValueFrom(
+616                 this.$.pipe(
+617                     filter((d: RxMigrationStatus) => d.status === 'ERROR')
+618                 )
+619             )
+620         ]);
+621 
+622         if (result.status === 'ERROR') {
+623             throw newRxError('DM4', {
+624                 collection: this.collection.name,
+625                 error: result.error
+626             });
+627         } else {
+628             return result;
+629         }
+630 
+631     }
+632 }
 633
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:06:56Z)**_
@@ -1787,177 +1822,178 @@ _**Agent (claude-opus-4-7 2026-04-21 02:06:56Z)**_
  `./node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts`
 
 ```text
-180	
-181	
-182	        const connectedInstances = await this.getConnectedStorageInstances();
-183	
-184	
-185	        /**
-186	         * Initially write the migration status into a meta document.
-187	         */
-188	        const totalCount = await this.countAllDocuments(
-189	            [oldStorageInstance].concat(connectedInstances.map(r => r.oldStorage))
-190	        );
-191	        await this.updateStatus(s => {
-192	            s.count.total = totalCount;
-193	            return s;
-194	        });
-195	
-196	
-197	        try {
-198	            /**
-199	             * First migrate the connected storages,
-200	             * afterwards migrate the normal collection.
-201	            */
-202	            await Promise.all(
-203	                connectedInstances.map(async (connectedInstance) => {
-204	                    await addConnectedStorageToCollection(
-205	                        this.collection,
-206	                        connectedInstance.newStorage.collectionName,
-207	                        connectedInstance.newStorage.schema
-208	                    );
-209	                    await this.migrateStorage(
-210	                        connectedInstance.oldStorage,
-211	                        connectedInstance.newStorage,
-212	                        batchSize
-213	                    );
-214	                    await connectedInstance.newStorage.close();
-215	                })
-216	            );
-217	
-218	            await this.migrateStorage(
-219	                oldStorageInstance,
-220	                /**
-221	                 * Use the originalStorageInstance here
-222	                 * so that the _meta.lwt time keeps the same
-223	                 * and our replication checkpoints still point to the
-224	                 * correct checkpoint.
-225	                */
-226	                this.collection.storageInstance.originalStorageInstance,
-227	                batchSize
-228	            );
-229	        } catch (err) {
-230	            await oldStorageInstance.close();
-231	            await this.updateStatus(s => {
-232	                s.status = 'ERROR';
-233	                s.error = errorToPlainJson(err as Error);
-234	                return s;
-235	            });
-236	            return;
-237	        }
-238	
-239	        /**
-240	         * Remove old collection meta doc with retry on conflict.
-241	         * The _rev of the meta doc may have changed since we fetched it
-242	         * at the start of migration (due to updateStatus() calls),
-243	         * so we re-fetch before each deletion attempt.
-244	         * @link https://github.com/pubkey/rxdb/issues/7791
-245	         */
-246	        while (true) {
-247	            const currentMeta = await getOldCollectionMeta(this);
-248	            if (!currentMeta) {
-249	                break;
-250	            }
-251	            try {
-252	                await writeSingle(
-253	                    this.database.internalStore,
-254	                    {
-255	                        previous: currentMeta,
-256	                        document: Object.assign(
-257	                            {},
-258	                            currentMeta,
-259	                            {
-260	                                _deleted: true
-261	                            }
-262	                        )
-263	                    },
-264	                    'rx-migration-remove-collection-meta'
-265	                );
-266	                break;
-267	            } catch (error) {
-268	                const isConflict = isBulkWriteConflictError<InternalStoreCollectionDocType>(error);
-269	                if (isConflict && !!isConflict.documentInDb._deleted) {
-270	                    break;
-271	                } else if (isConflict) {
-272	                    continue;
-273	                } else {
-274	                    throw error;
-275	                }
-276	            }
-277	        }
-278	
-279	        await this.updateStatus(s => {
-280	            s.status = 'DONE';
-281	            return s;
-282	        });
-283	        if (this.broadcastChannel) {
-284	            await this.broadcastChannel.close();
-285	        }
-286	    }
-287	
-288	    public updateStatusHandlers: MigrationStatusUpdate[] = [];
-289	    public updateStatusQueue: Promise<any> = PROMISE_RESOLVE_TRUE;
-290	    public updateStatus(
-291	        handler: MigrationStatusUpdate
-292	    ) {
-293	        this.updateStatusHandlers.push(handler);
-294	        this.updateStatusQueue = this.updateStatusQueue.then(async () => {
-295	            if (this.updateStatusHandlers.length === 0) {
-296	                return;
-297	            }
-298	            // re-run until no conflict
-299	            const useHandlers = this.updateStatusHandlers;
-300	            this.updateStatusHandlers = [];
-301	            while (true) {
-302	                const previous = await getSingleDocument<RxMigrationStatusDocument>(
-303	                    this.database.internalStore,
-304	                    this.statusDocId
-305	                );
-306	                let newDoc = clone(previous);
-307	                if (!previous) {
-308	                    newDoc = {
-309	                        id: this.statusDocId,
-310	                        key: this.statusDocKey,
-311	                        context: INTERNAL_CONTEXT_MIGRATION_STATUS,
-312	                        data: {
-313	                            collectionName: this.collection.name,
-314	                            status: 'RUNNING',
-315	                            count: {
-316	                                total: 0,
-317	                                handled: 0,
-318	                                percent: 0
-319	                            }
-320	                        },
-321	                        _deleted: false,
-322	                        _meta: getDefaultRxDocumentMeta(),
-323	                        _rev: getDefaultRevision(),
-324	                        _attachments: {}
-325	                    };
-326	                }
-327	
-328	                let status = ensureNotFalsy(newDoc).data;
-329	                for (const oneHandler of useHandlers) {
-330	                    status = oneHandler(status);
-331	                }
-332	                status.count.percent = Math.round((status.count.handled / status.count.total) * 100);
-333	
-334	                if (
-335	                    newDoc && previous &&
-336	                    deepEqual(newDoc.data, previous.data)
-337	                ) {
-338	                    break;
-339	                }
-340	
-341	
-342	                try {
-343	                    await writeSingle<RxMigrationStatusDocument>(
-344	                        this.database.internalStore,
-345	                        {
-346	                            previous,
-347	                            document: ensureNotFalsy(newDoc)
-348	                        },
-349	                        INTERNAL_CONTEXT_MIGRATION_STATUS
+180 
+181 
+182         const connectedInstances = await this.getConnectedStorageInstances();
+183 
+184 
+185         /**
+186          * Initially write the migration status into a meta document.
+187          */
+188         const totalCount = await this.countAllDocuments(
+189             [oldStorageInstance].concat(connectedInstances.map(r => r.oldStorage))
+190         );
+191         await this.updateStatus(s => {
+192             s.count.total = totalCount;
+193             return s;
+194         });
+195 
+196 
+197         try {
+198             /**
+199              * First migrate the connected storages,
+200              * afterwards migrate the normal collection.
+201             */
+202             await Promise.all(
+203                 connectedInstances.map(async (connectedInstance) => {
+204                     await addConnectedStorageToCollection(
+205                         this.collection,
+206                         connectedInstance.newStorage.collectionName,
+207                         connectedInstance.newStorage.schema
+208                     );
+209                     await this.migrateStorage(
+210                         connectedInstance.oldStorage,
+211                         connectedInstance.newStorage,
+212                         batchSize
+213                     );
+214                     await connectedInstance.newStorage.close();
+215                 })
+216             );
+217 
+218             await this.migrateStorage(
+219                 oldStorageInstance,
+220                 /**
+221                  * Use the originalStorageInstance here
+222                  * so that the _meta.lwt time keeps the same
+223                  * and our replication checkpoints still point to the
+224                  * correct checkpoint.
+225                 */
+226                 this.collection.storageInstance.originalStorageInstance,
+227                 batchSize
+228             );
+229         } catch (err) {
+230             await oldStorageInstance.close();
+231             await this.updateStatus(s => {
+232                 s.status = 'ERROR';
+233                 s.error = errorToPlainJson(err as Error);
+234                 return s;
+235             });
+236             return;
+237         }
+238 
+239         /**
+240          * Remove old collection meta doc with retry on conflict.
+241          * The _rev of the meta doc may have changed since we fetched it
+242          * at the start of migration (due to updateStatus() calls),
+243          * so we re-fetch before each deletion attempt.
+244          * @link https://github.com/pubkey/rxdb/issues/7791
+245          */
+246         while (true) {
+247             const currentMeta = await getOldCollectionMeta(this);
+248             if (!currentMeta) {
+249                 break;
+250             }
+251             try {
+252                 await writeSingle(
+253                     this.database.internalStore,
+254                     {
+255                         previous: currentMeta,
+256                         document: Object.assign(
+257                             {},
+258                             currentMeta,
+259                             {
+260                                 _deleted: true
+261                             }
+262                         )
+263                     },
+264                     'rx-migration-remove-collection-meta'
+265                 );
+266                 break;
+267             } catch (error) {
+268                 const isConflict = isBulkWriteConflictError<InternalStoreCollectionDocType>(error);
+269                 if (isConflict && !!isConflict.documentInDb._deleted) {
+270                     break;
+271                 } else if (isConflict) {
+272                     continue;
+273                 } else {
+274                     throw error;
+275                 }
+276             }
+277         }
+278 
+279         await this.updateStatus(s => {
+280             s.status = 'DONE';
+281             return s;
+282         });
+283         if (this.broadcastChannel) {
+284             await this.broadcastChannel.close();
+285         }
+286     }
+287 
+288     public updateStatusHandlers: MigrationStatusUpdate[] = [];
+289     public updateStatusQueue: Promise<any> = PROMISE_RESOLVE_TRUE;
+290     public updateStatus(
+291         handler: MigrationStatusUpdate
+292     ) {
+293         this.updateStatusHandlers.push(handler);
+294         this.updateStatusQueue = this.updateStatusQueue.then(async () => {
+295             if (this.updateStatusHandlers.length === 0) {
+296                 return;
+297             }
+298             // re-run until no conflict
+299             const useHandlers = this.updateStatusHandlers;
+300             this.updateStatusHandlers = [];
+301             while (true) {
+302                 const previous = await getSingleDocument<RxMigrationStatusDocument>(
+303                     this.database.internalStore,
+304                     this.statusDocId
+305                 );
+306                 let newDoc = clone(previous);
+307                 if (!previous) {
+308                     newDoc = {
+309                         id: this.statusDocId,
+310                         key: this.statusDocKey,
+311                         context: INTERNAL_CONTEXT_MIGRATION_STATUS,
+312                         data: {
+313                             collectionName: this.collection.name,
+314                             status: 'RUNNING',
+315                             count: {
+316                                 total: 0,
+317                                 handled: 0,
+318                                 percent: 0
+319                             }
+320                         },
+321                         _deleted: false,
+322                         _meta: getDefaultRxDocumentMeta(),
+323                         _rev: getDefaultRevision(),
+324                         _attachments: {}
+325                     };
+326                 }
+327 
+328                 let status = ensureNotFalsy(newDoc).data;
+329                 for (const oneHandler of useHandlers) {
+330                     status = oneHandler(status);
+331                 }
+332                 status.count.percent = Math.round((status.count.handled / status.count.total) * 100);
+333 
+334                 if (
+335                     newDoc && previous &&
+336                     deepEqual(newDoc.data, previous.data)
+337                 ) {
+338                     break;
+339                 }
+340 
+341 
+342                 try {
+343                     await writeSingle<RxMigrationStatusDocument>(
+344                         this.database.internalStore,
+345                         {
+346                             previous,
+347                             document: ensureNotFalsy(newDoc)
+348                         },
+349                         INTERNAL_CONTEXT_MIGRATION_STATUS
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:07:10Z)**_
@@ -1987,6 +2023,7 @@ node_modules/rxdb/src/plugins/storage-dexie/rx-storage-instance-dexie.ts:373:   
 node_modules/rxdb/src/plugins/storage-dexie/rx-storage-instance-dexie.ts:375:    if (instance.closed) {
 node_modules/rxdb/src/plugins/storage-dexie/rx-storage-instance-dexie.ts:376:        throw new Error('RxStorageInstanceDexie is closed ' + instance.databaseName + '-' + instance.collectionName);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:07:11Z)**_
@@ -2004,6 +2041,7 @@ index.ts
 rx-storage-dexie.ts
 rx-storage-instance-dexie.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:07:16Z)**_
@@ -2013,127 +2051,128 @@ _**Agent (claude-opus-4-7 2026-04-21 02:07:16Z)**_
  `./node_modules/rxdb/src/plugins/storage-dexie/rx-storage-instance-dexie.ts`
 
 ```text
-260	        } else {
-261	            const result = await dexieQuery(this, preparedQuery);
-262	            return {
-263	                count: result.documents.length,
-264	                mode: 'slow'
-265	            };
-266	        }
-267	    }
-268	
-269	    changeStream(): Observable<EventBulk<RxStorageChangeEvent<RxDocumentData<RxDocType>>, RxStorageDefaultCheckpoint>> {
-270	        ensureNotClosed(this);
-271	        return this.changes$.asObservable();
-272	    }
-273	
-274	    async cleanup(minimumDeletedTime: number): Promise<boolean> {
-275	        ensureNotClosed(this);
-276	        const state = await this.internals;
-277	        await state.dexieDb.transaction(
-278	            'rw',
-279	            state.dexieTable,
-280	            async () => {
-281	                const maxDeletionTime = now() - minimumDeletedTime;
-282	                const toRemove = await state.dexieTable
-283	                    .where('_meta.lwt')
-284	                    .below(maxDeletionTime)
-285	                    .toArray();
-286	                const removeIds: string[] = [];
-287	                toRemove.forEach((doc: any) => {
-288	                    if (doc._deleted === '1') {
-289	                        removeIds.push(doc[this.primaryPath]);
-290	                    }
-291	                });
-292	                await state.dexieTable.bulkDelete(removeIds);
-293	            }
-294	        );
-295	
-296	        return true;
-297	    }
-298	
-299	    async getAttachmentData(documentId: string, attachmentId: string, _digest: string): Promise<Blob> {
-300	        ensureNotClosed(this);
-301	        const state = await this.internals;
-302	        const id = attachmentObjectId(documentId, attachmentId);
-303	        return await state.dexieDb.transaction(
-304	            'r',
-305	            state.dexieAttachmentsTable,
-306	            async () => {
-307	
-308	                const attachment = await state.dexieAttachmentsTable.get(id);
-309	                if (attachment) {
-310	                    return attachment.data;
-311	                } else {
-312	                    throw new Error('attachment missing documentId: ' + documentId + ' attachmentId: ' + attachmentId);
-313	                }
-314	            });
-315	    }
-316	
-317	    async remove(): Promise<void> {
-318	        ensureNotClosed(this);
-319	        const state = await this.internals;
-320	        await state.dexieTable.clear()
-321	        return this.close();
-322	    }
-323	
-324	
-325	    close(): Promise<void> {
-326	        if (this.closed) {
-327	            return this.closed;
-328	        }
-329	        this.closed = (async () => {
-330	            this.changes$.complete();
-331	            await closeDexieDb(this.internals);
-332	        })();
-333	        return this.closed;
-334	    }
-335	}
-336	
-337	
-338	export async function createDexieStorageInstance<RxDocType>(
-339	    storage: RxStorageDexie,
-340	    params: RxStorageInstanceCreationParams<RxDocType, DexieSettings>,
-341	    settings: DexieSettings
-342	): Promise<RxStorageInstanceDexie<RxDocType>> {
-343	    const internals = getDexieDbWithTables(
-344	        params.databaseName,
-345	        params.collectionName,
-346	        settings,
-347	        params.schema
-348	    );
-349	
-350	    const instance = new RxStorageInstanceDexie(
-351	        storage,
-352	        params.databaseName,
-353	        params.collectionName,
-354	        params.schema,
-355	        internals,
-356	        params.options,
-357	        settings,
-358	        params.devMode
-359	    );
-360	
-361	    await addRxStorageMultiInstanceSupport(
-362	        RX_STORAGE_NAME_DEXIE,
-363	        params,
-364	        instance
-365	    );
-366	
-367	    return Promise.resolve(instance);
-368	}
-369	
-370	
-371	
-372	function ensureNotClosed(
-373	    instance: RxStorageInstanceDexie<any>
-374	) {
-375	    if (instance.closed) {
-376	        throw new Error('RxStorageInstanceDexie is closed ' + instance.databaseName + '-' + instance.collectionName);
-377	    }
-378	}
+260         } else {
+261             const result = await dexieQuery(this, preparedQuery);
+262             return {
+263                 count: result.documents.length,
+264                 mode: 'slow'
+265             };
+266         }
+267     }
+268 
+269     changeStream(): Observable<EventBulk<RxStorageChangeEvent<RxDocumentData<RxDocType>>, RxStorageDefaultCheckpoint>> {
+270         ensureNotClosed(this);
+271         return this.changes$.asObservable();
+272     }
+273 
+274     async cleanup(minimumDeletedTime: number): Promise<boolean> {
+275         ensureNotClosed(this);
+276         const state = await this.internals;
+277         await state.dexieDb.transaction(
+278             'rw',
+279             state.dexieTable,
+280             async () => {
+281                 const maxDeletionTime = now() - minimumDeletedTime;
+282                 const toRemove = await state.dexieTable
+283                     .where('_meta.lwt')
+284                     .below(maxDeletionTime)
+285                     .toArray();
+286                 const removeIds: string[] = [];
+287                 toRemove.forEach((doc: any) => {
+288                     if (doc._deleted === '1') {
+289                         removeIds.push(doc[this.primaryPath]);
+290                     }
+291                 });
+292                 await state.dexieTable.bulkDelete(removeIds);
+293             }
+294         );
+295 
+296         return true;
+297     }
+298 
+299     async getAttachmentData(documentId: string, attachmentId: string, _digest: string): Promise<Blob> {
+300         ensureNotClosed(this);
+301         const state = await this.internals;
+302         const id = attachmentObjectId(documentId, attachmentId);
+303         return await state.dexieDb.transaction(
+304             'r',
+305             state.dexieAttachmentsTable,
+306             async () => {
+307 
+308                 const attachment = await state.dexieAttachmentsTable.get(id);
+309                 if (attachment) {
+310                     return attachment.data;
+311                 } else {
+312                     throw new Error('attachment missing documentId: ' + documentId + ' attachmentId: ' + attachmentId);
+313                 }
+314             });
+315     }
+316 
+317     async remove(): Promise<void> {
+318         ensureNotClosed(this);
+319         const state = await this.internals;
+320         await state.dexieTable.clear()
+321         return this.close();
+322     }
+323 
+324 
+325     close(): Promise<void> {
+326         if (this.closed) {
+327             return this.closed;
+328         }
+329         this.closed = (async () => {
+330             this.changes$.complete();
+331             await closeDexieDb(this.internals);
+332         })();
+333         return this.closed;
+334     }
+335 }
+336 
+337 
+338 export async function createDexieStorageInstance<RxDocType>(
+339     storage: RxStorageDexie,
+340     params: RxStorageInstanceCreationParams<RxDocType, DexieSettings>,
+341     settings: DexieSettings
+342 ): Promise<RxStorageInstanceDexie<RxDocType>> {
+343     const internals = getDexieDbWithTables(
+344         params.databaseName,
+345         params.collectionName,
+346         settings,
+347         params.schema
+348     );
+349 
+350     const instance = new RxStorageInstanceDexie(
+351         storage,
+352         params.databaseName,
+353         params.collectionName,
+354         params.schema,
+355         internals,
+356         params.options,
+357         settings,
+358         params.devMode
+359     );
+360 
+361     await addRxStorageMultiInstanceSupport(
+362         RX_STORAGE_NAME_DEXIE,
+363         params,
+364         instance
+365     );
+366 
+367     return Promise.resolve(instance);
+368 }
+369 
+370 
+371 
+372 function ensureNotClosed(
+373     instance: RxStorageInstanceDexie<any>
+374 ) {
+375     if (instance.closed) {
+376         throw new Error('RxStorageInstanceDexie is closed ' + instance.databaseName + '-' + instance.collectionName);
+377     }
+378 }
 379
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:07:37Z)**_
@@ -2156,6 +2195,7 @@ node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts:247:       
 node_modules/rxdb/src/plugins/migration-schema/migration-helpers.ts:25:export async function getOldCollectionMeta(
 node_modules/rxdb/src/plugins/migration-schema/migration-helpers.ts:125:    const oldColDoc = await getOldCollectionMeta(migrationState);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:07:44Z)**_
@@ -2165,187 +2205,188 @@ _**Agent (claude-opus-4-7 2026-04-21 02:07:44Z)**_
  `./node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts`
 
 ```text
-100	            'v',
-101	            collection.schema.version
-102	        ].join('-'),
-103	    ) {
-104	        this.database = collection.database;
-105	        this.oldCollectionMeta = getOldCollectionMeta(this);
-106	        this.mustMigrate = mustMigrate(this);
-107	        this.statusDocId = getPrimaryKeyOfInternalDocument(
-108	            this.statusDocKey,
-109	            INTERNAL_CONTEXT_MIGRATION_STATUS
-110	        );
-111	        addMigrationStateToDatabase(this);
-112	
-113	        this.$ = observeSingle<RxMigrationStatusDocument>(
-114	            this.database.internalStore,
-115	            this.statusDocId
-116	        ).pipe(
-117	            filter((d: RxMigrationStatusDocument | null) => !!d),
-118	            map((d: RxMigrationStatusDocument | null) => ensureNotFalsy(d).data),
-119	            shareReplay(RXJS_SHARE_REPLAY_DEFAULTS)
-120	        );
-121	    }
-122	
-123	    getStatus() {
-124	        return firstValueFrom(this.$);
-125	    }
-126	
-127	
-128	    /**
-129	     * Starts the migration.
-130	     * Returns void so that people to not get the idea to await
-131	     * this function.
-132	     * Instead use migratePromise() if you want to await
-133	     * the migration. This ensures it works even if the migration
-134	     * is run on a different browser tab.
-135	     */
-136	    async startMigration(batchSize: number = MIGRATION_DEFAULT_BATCH_SIZE): Promise<void> {
-137	        const must = await this.mustMigrate;
-138	        if (!must) {
-139	            return;
-140	        }
-141	        if (this.started) {
-142	            throw newRxError('DM1');
-143	        }
-144	        this.started = true;
-145	
-146	
-147	        /**
-148	         * To ensure that multiple tabs do not migrate the same collection,
-149	         * we use a new broadcastChannel/leaderElector for each collection.
-150	         * This is required because collections can be added dynamically and
-151	         * not all tabs might know about this collection.
-152	         */
-153	        if (this.database.multiInstance) {
-154	            this.broadcastChannel = new BroadcastChannel([
-155	                'rx-migration-state',
-156	                this.database.name,
-157	                this.collection.name,
-158	                this.collection.schema.version
-159	            ].join('|'));
-160	            const leaderElector = createLeaderElection(this.broadcastChannel);
-161	            await leaderElector.awaitLeadership();
-162	        }
-163	
-164	        /**
-165	         * Instead of writing a custom migration protocol,
-166	         * we do a push-only replication from the old collection data to the new one.
-167	         * This also ensure that restarting the replication works without problems.
-168	         */
-169	        const oldCollectionMeta = await this.oldCollectionMeta;
-170	        const oldStorageInstance = await this.database.storage.createStorageInstance({
-171	            databaseName: this.database.name,
-172	            collectionName: this.collection.name,
-173	            databaseInstanceToken: this.database.token,
-174	            multiInstance: this.database.multiInstance,
-175	            options: {},
-176	            schema: ensureNotFalsy(oldCollectionMeta).data.schema,
-177	            password: this.database.password,
-178	            devMode: overwritable.isDevMode()
-179	        });
-180	
-181	
-182	        const connectedInstances = await this.getConnectedStorageInstances();
-183	
-184	
-185	        /**
-186	         * Initially write the migration status into a meta document.
-187	         */
-188	        const totalCount = await this.countAllDocuments(
-189	            [oldStorageInstance].concat(connectedInstances.map(r => r.oldStorage))
-190	        );
-191	        await this.updateStatus(s => {
-192	            s.count.total = totalCount;
-193	            return s;
-194	        });
-195	
-196	
-197	        try {
-198	            /**
-199	             * First migrate the connected storages,
-200	             * afterwards migrate the normal collection.
-201	            */
-202	            await Promise.all(
-203	                connectedInstances.map(async (connectedInstance) => {
-204	                    await addConnectedStorageToCollection(
-205	                        this.collection,
-206	                        connectedInstance.newStorage.collectionName,
-207	                        connectedInstance.newStorage.schema
-208	                    );
-209	                    await this.migrateStorage(
-210	                        connectedInstance.oldStorage,
-211	                        connectedInstance.newStorage,
-212	                        batchSize
-213	                    );
-214	                    await connectedInstance.newStorage.close();
-215	                })
-216	            );
-217	
-218	            await this.migrateStorage(
-219	                oldStorageInstance,
-220	                /**
-221	                 * Use the originalStorageInstance here
-222	                 * so that the _meta.lwt time keeps the same
-223	                 * and our replication checkpoints still point to the
-224	                 * correct checkpoint.
-225	                */
-226	                this.collection.storageInstance.originalStorageInstance,
-227	                batchSize
-228	            );
-229	        } catch (err) {
-230	            await oldStorageInstance.close();
-231	            await this.updateStatus(s => {
-232	                s.status = 'ERROR';
-233	                s.error = errorToPlainJson(err as Error);
-234	                return s;
-235	            });
-236	            return;
-237	        }
-238	
-239	        /**
-240	         * Remove old collection meta doc with retry on conflict.
-241	         * The _rev of the meta doc may have changed since we fetched it
-242	         * at the start of migration (due to updateStatus() calls),
-243	         * so we re-fetch before each deletion attempt.
-244	         * @link https://github.com/pubkey/rxdb/issues/7791
-245	         */
-246	        while (true) {
-247	            const currentMeta = await getOldCollectionMeta(this);
-248	            if (!currentMeta) {
-249	                break;
-250	            }
-251	            try {
-252	                await writeSingle(
-253	                    this.database.internalStore,
-254	                    {
-255	                        previous: currentMeta,
-256	                        document: Object.assign(
-257	                            {},
-258	                            currentMeta,
-259	                            {
-260	                                _deleted: true
-261	                            }
-262	                        )
-263	                    },
-264	                    'rx-migration-remove-collection-meta'
-265	                );
-266	                break;
-267	            } catch (error) {
-268	                const isConflict = isBulkWriteConflictError<InternalStoreCollectionDocType>(error);
-269	                if (isConflict && !!isConflict.documentInDb._deleted) {
-270	                    break;
-271	                } else if (isConflict) {
-272	                    continue;
-273	                } else {
-274	                    throw error;
-275	                }
-276	            }
-277	        }
-278	
-279	        await this.updateStatus(s => {
+100             'v',
+101             collection.schema.version
+102         ].join('-'),
+103     ) {
+104         this.database = collection.database;
+105         this.oldCollectionMeta = getOldCollectionMeta(this);
+106         this.mustMigrate = mustMigrate(this);
+107         this.statusDocId = getPrimaryKeyOfInternalDocument(
+108             this.statusDocKey,
+109             INTERNAL_CONTEXT_MIGRATION_STATUS
+110         );
+111         addMigrationStateToDatabase(this);
+112 
+113         this.$ = observeSingle<RxMigrationStatusDocument>(
+114             this.database.internalStore,
+115             this.statusDocId
+116         ).pipe(
+117             filter((d: RxMigrationStatusDocument | null) => !!d),
+118             map((d: RxMigrationStatusDocument | null) => ensureNotFalsy(d).data),
+119             shareReplay(RXJS_SHARE_REPLAY_DEFAULTS)
+120         );
+121     }
+122 
+123     getStatus() {
+124         return firstValueFrom(this.$);
+125     }
+126 
+127 
+128     /**
+129      * Starts the migration.
+130      * Returns void so that people to not get the idea to await
+131      * this function.
+132      * Instead use migratePromise() if you want to await
+133      * the migration. This ensures it works even if the migration
+134      * is run on a different browser tab.
+135      */
+136     async startMigration(batchSize: number = MIGRATION_DEFAULT_BATCH_SIZE): Promise<void> {
+137         const must = await this.mustMigrate;
+138         if (!must) {
+139             return;
+140         }
+141         if (this.started) {
+142             throw newRxError('DM1');
+143         }
+144         this.started = true;
+145 
+146 
+147         /**
+148          * To ensure that multiple tabs do not migrate the same collection,
+149          * we use a new broadcastChannel/leaderElector for each collection.
+150          * This is required because collections can be added dynamically and
+151          * not all tabs might know about this collection.
+152          */
+153         if (this.database.multiInstance) {
+154             this.broadcastChannel = new BroadcastChannel([
+155                 'rx-migration-state',
+156                 this.database.name,
+157                 this.collection.name,
+158                 this.collection.schema.version
+159             ].join('|'));
+160             const leaderElector = createLeaderElection(this.broadcastChannel);
+161             await leaderElector.awaitLeadership();
+162         }
+163 
+164         /**
+165          * Instead of writing a custom migration protocol,
+166          * we do a push-only replication from the old collection data to the new one.
+167          * This also ensure that restarting the replication works without problems.
+168          */
+169         const oldCollectionMeta = await this.oldCollectionMeta;
+170         const oldStorageInstance = await this.database.storage.createStorageInstance({
+171             databaseName: this.database.name,
+172             collectionName: this.collection.name,
+173             databaseInstanceToken: this.database.token,
+174             multiInstance: this.database.multiInstance,
+175             options: {},
+176             schema: ensureNotFalsy(oldCollectionMeta).data.schema,
+177             password: this.database.password,
+178             devMode: overwritable.isDevMode()
+179         });
+180 
+181 
+182         const connectedInstances = await this.getConnectedStorageInstances();
+183 
+184 
+185         /**
+186          * Initially write the migration status into a meta document.
+187          */
+188         const totalCount = await this.countAllDocuments(
+189             [oldStorageInstance].concat(connectedInstances.map(r => r.oldStorage))
+190         );
+191         await this.updateStatus(s => {
+192             s.count.total = totalCount;
+193             return s;
+194         });
+195 
+196 
+197         try {
+198             /**
+199              * First migrate the connected storages,
+200              * afterwards migrate the normal collection.
+201             */
+202             await Promise.all(
+203                 connectedInstances.map(async (connectedInstance) => {
+204                     await addConnectedStorageToCollection(
+205                         this.collection,
+206                         connectedInstance.newStorage.collectionName,
+207                         connectedInstance.newStorage.schema
+208                     );
+209                     await this.migrateStorage(
+210                         connectedInstance.oldStorage,
+211                         connectedInstance.newStorage,
+212                         batchSize
+213                     );
+214                     await connectedInstance.newStorage.close();
+215                 })
+216             );
+217 
+218             await this.migrateStorage(
+219                 oldStorageInstance,
+220                 /**
+221                  * Use the originalStorageInstance here
+222                  * so that the _meta.lwt time keeps the same
+223                  * and our replication checkpoints still point to the
+224                  * correct checkpoint.
+225                 */
+226                 this.collection.storageInstance.originalStorageInstance,
+227                 batchSize
+228             );
+229         } catch (err) {
+230             await oldStorageInstance.close();
+231             await this.updateStatus(s => {
+232                 s.status = 'ERROR';
+233                 s.error = errorToPlainJson(err as Error);
+234                 return s;
+235             });
+236             return;
+237         }
+238 
+239         /**
+240          * Remove old collection meta doc with retry on conflict.
+241          * The _rev of the meta doc may have changed since we fetched it
+242          * at the start of migration (due to updateStatus() calls),
+243          * so we re-fetch before each deletion attempt.
+244          * @link https://github.com/pubkey/rxdb/issues/7791
+245          */
+246         while (true) {
+247             const currentMeta = await getOldCollectionMeta(this);
+248             if (!currentMeta) {
+249                 break;
+250             }
+251             try {
+252                 await writeSingle(
+253                     this.database.internalStore,
+254                     {
+255                         previous: currentMeta,
+256                         document: Object.assign(
+257                             {},
+258                             currentMeta,
+259                             {
+260                                 _deleted: true
+261                             }
+262                         )
+263                     },
+264                     'rx-migration-remove-collection-meta'
+265                 );
+266                 break;
+267             } catch (error) {
+268                 const isConflict = isBulkWriteConflictError<InternalStoreCollectionDocType>(error);
+269                 if (isConflict && !!isConflict.documentInDb._deleted) {
+270                     break;
+271                 } else if (isConflict) {
+272                     continue;
+273                 } else {
+274                     throw error;
+275                 }
+276             }
+277         }
+278 
+279         await this.updateStatus(s => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:08:17Z)**_
@@ -2357,310 +2398,311 @@ _**Agent (claude-opus-4-7 2026-04-21 02:08:17Z)**_
  `./node_modules/rxdb/src/plugins/storage-dexie/dexie-helper.ts`
 
 ```text
-1	import type {
-2	    DexieStorageInternals,
-3	    RxDocumentData,
-4	    RxJsonSchema
-5	} from '../../types/index.d.ts';
-6	import { Dexie } from 'dexie';
-7	import type { DexieSettings } from '../../types/index.d.ts';
-8	import { flatClone, getFromMapOrCreate, getProperty, setProperty, toArray, uniqueArray } from '../utils/index.ts';
-9	import {
-10	    getPrimaryFieldOfPrimaryKey,
-11	    getSchemaByObjectPath
-12	} from '../../rx-schema-helper.ts';
-13	
-14	export const DEXIE_DOCS_TABLE_NAME = 'docs';
-15	export const DEXIE_CHANGES_TABLE_NAME = 'changes';
-16	export const DEXIE_ATTACHMENTS_TABLE_NAME = 'attachments';
-17	
-18	export const RX_STORAGE_NAME_DEXIE = 'dexie';
-19	
-20	const DEXIE_STATE_DB_BY_NAME: Map<string, DexieStorageInternals> = new Map();
-21	const REF_COUNT_PER_DEXIE_DB: Map<DexieStorageInternals, number> = new Map();
-22	export function getDexieDbWithTables(
-23	    databaseName: string,
-24	    collectionName: string,
-25	    settings: DexieSettings,
-26	    schema: RxJsonSchema<any>
-27	): DexieStorageInternals {
-28	    const dexieDbName = 'rxdb-dexie-' + databaseName + '--' + schema.version + '--' + collectionName;
-29	
-30	    const state = getFromMapOrCreate(
-31	        DEXIE_STATE_DB_BY_NAME,
-32	        dexieDbName,
-33	        () => {
-34	            const value = (async () => {
-35	                /**
-36	                 * IndexedDB was not designed for dynamically adding tables on the fly,
-37	                 * so we create one dexie database per RxDB storage instance.
-38	                 * @link https://github.com/dexie/Dexie.js/issues/684#issuecomment-373224696
-39	                 */
-40	                const useSettings = flatClone(settings);
-41	                useSettings.autoOpen = false;
-42	                const dexieDb = new Dexie(dexieDbName, useSettings);
-43	                if (settings.onCreate) {
-44	                    await settings.onCreate(dexieDb, dexieDbName);
-45	                }
-46	                const dexieStoresSettings = {
-47	                    [DEXIE_DOCS_TABLE_NAME]: getDexieStoreSchema(schema),
-48	                    [DEXIE_CHANGES_TABLE_NAME]: '++sequence, id',
-49	                    [DEXIE_ATTACHMENTS_TABLE_NAME]: 'id'
-50	                };
-51	
-52	                dexieDb.version(1).stores(dexieStoresSettings);
-53	                await dexieDb.open();
-54	
-55	                return {
-56	                    dexieDb,
-57	                    dexieTable: (dexieDb as any)[DEXIE_DOCS_TABLE_NAME],
-58	                    dexieAttachmentsTable: (dexieDb as any)[DEXIE_ATTACHMENTS_TABLE_NAME],
-59	                    booleanIndexes: getBooleanIndexes(schema)
-60	                };
-61	            })();
-62	            DEXIE_STATE_DB_BY_NAME.set(dexieDbName, state);
-63	            REF_COUNT_PER_DEXIE_DB.set(state, 0);
-64	            return value;
-65	        }
-66	    );
-67	    return state;
-68	}
-69	
-70	export async function closeDexieDb(statePromise: DexieStorageInternals) {
-71	    const state = await statePromise;
-72	    const prevCount = REF_COUNT_PER_DEXIE_DB.get(statePromise);
-73	    const newCount = (prevCount as any) - 1;
-74	    if (newCount === 0) {
-75	        state.dexieDb.close();
-76	        REF_COUNT_PER_DEXIE_DB.delete(statePromise);
-77	    } else {
-78	        REF_COUNT_PER_DEXIE_DB.set(statePromise, newCount);
-79	    }
-80	}
-81	
-82	
-83	
-84	/**
-85	 * It is not possible to set non-javascript-variable-syntax
-86	 * keys as IndexedDB indexes. So we have to substitute the pipe-char
-87	 * which comes from the key-compression plugin.
-88	 */
-89	export const DEXIE_PIPE_SUBSTITUTE = '__';
-90	export function dexieReplaceIfStartsWithPipe(str: string): string {
-91	    const split = str.split('.');
-92	    if (split.length > 1) {
-93	        return split.map(part => dexieReplaceIfStartsWithPipe(part)).join('.');
-94	    }
-95	
-96	    if (str.startsWith('|')) {
-97	        const withoutFirst = str.substring(1);
-98	        return DEXIE_PIPE_SUBSTITUTE + withoutFirst;
-99	    } else {
-100	        return str;
-101	    }
-102	}
-103	
-104	export function dexieReplaceIfStartsWithPipeRevert(str: string): string {
-105	    const split = str.split('.');
-106	    if (split.length > 1) {
-107	        return split.map(part => dexieReplaceIfStartsWithPipeRevert(part)).join('.');
-108	    }
-109	
-110	    if (str.startsWith(DEXIE_PIPE_SUBSTITUTE)) {
-111	        const withoutFirst = str.substring(DEXIE_PIPE_SUBSTITUTE.length);
-112	        return '|' + withoutFirst;
-113	    } else {
-114	        return str;
-115	    }
-116	}
-117	
-118	
-119	/**
-120	 * IndexedDB does not support boolean indexing.
-121	 * So we have to replace true/false with '1'/'0'
-122	 * @param d 
-123	 */
-124	export function fromStorageToDexie<RxDocType>(
-125	    booleanIndexes: string[],
-126	    inputDoc: RxDocumentData<RxDocType>
-127	): any {
-128	    if (!inputDoc) {
-129	        return inputDoc;
-130	    }
-131	    let d = flatClone(inputDoc);
-132	    d = fromStorageToDexieField(d);
-133	
-134	    booleanIndexes.forEach(idx => {
-135	        const val = getProperty(inputDoc, idx);
-136	        const newVal = val ? '1' : '0';
-137	        const useIndex = dexieReplaceIfStartsWithPipe(idx);
-138	        setProperty(d, useIndex, newVal);
-139	    });
-140	
-141	    return d;
-142	}
-143	export function fromDexieToStorage<RxDocType>(
-144	    booleanIndexes: string[],
-145	    d: any
-146	): RxDocumentData<RxDocType> {
-147	    if (!d) {
-148	        return d;
-149	    }
-150	
-151	    d = flatClone(d);
-152	    d = fromDexieToStorageField(d);
-153	
-154	    booleanIndexes.forEach(idx => {
-155	        const val = getProperty(d, idx);
-156	        const newVal = val === '1' ? true : false;
-157	        setProperty(d, idx, newVal);
-158	    });
-159	
-160	    return d;
-161	}
-162	
-163	/**
-164	 * @recursive
-165	 */
-166	export function fromStorageToDexieField(documentData: RxDocumentData<any>): any {
-167	    if (
-168	        !documentData ||
-169	        typeof documentData === 'string' ||
-170	        typeof documentData === 'number' ||
-171	        typeof documentData === 'boolean'
-172	    ) {
-173	        return documentData;
-174	    } else if (Array.isArray(documentData)) {
-175	        return documentData.map(row => fromStorageToDexieField(row));
-176	    } else if (typeof documentData === 'object') {
-177	        const ret: any = {};
-178	        Object.entries(documentData).forEach(([key, value]) => {
-179	            if (typeof value === 'object') {
-180	                value = fromStorageToDexieField(value);
-181	            }
-182	            ret[dexieReplaceIfStartsWithPipe(key)] = value;
-183	        });
-184	        return ret;
-185	    }
-186	}
-187	
-188	export function fromDexieToStorageField(documentData: any): RxDocumentData<any> {
-189	    if (!documentData || typeof documentData === 'string' || typeof documentData === 'number' || typeof documentData === 'boolean') {
-190	        return documentData;
-191	    } else if (Array.isArray(documentData)) {
-192	        return documentData.map(row => fromDexieToStorageField(row));
-193	    } else if (typeof documentData === 'object') {
-194	        const ret: any = {};
-195	        Object.entries(documentData).forEach(([key, value]) => {
-196	            if (typeof value === 'object' || Array.isArray(documentData)) {
-197	                value = fromDexieToStorageField(value);
-198	            }
-199	            ret[dexieReplaceIfStartsWithPipeRevert(key)] = value;
-200	        });
-201	        return ret;
-202	    }
-203	}
-204	
-205	
-206	/**
-207	 * Creates a string that can be used to create the dexie store.
-208	 * @link https://dexie.org/docs/API-Reference#quick-reference
-209	 */
-210	export function getDexieStoreSchema(
-211	    rxJsonSchema: RxJsonSchema<any>
-212	): string {
-213	    let parts: string[][] = [];
-214	
-215	    /**
-216	     * First part must be the primary key
-217	     * @link https://github.com/dexie/Dexie.js/issues/1307#issuecomment-846590912
-218	     */
-219	    const primaryKey = getPrimaryFieldOfPrimaryKey(rxJsonSchema.primaryKey);
-220	    parts.push([primaryKey]);
-221	    parts.push(['_deleted', primaryKey]);
-222	
-223	    // add other indexes
-224	    if (rxJsonSchema.indexes) {
-225	        rxJsonSchema.indexes.forEach(index => {
-226	            const arIndex = toArray(index);
-227	            parts.push(arIndex);
-228	        });
-229	    }
-230	
-231	    // we also need the _meta.lwt+primaryKey index for the getChangedDocumentsSince() method.
-232	    parts.push(['_meta.lwt', primaryKey]);
-233	
-234	    // and this one for the cleanup()
-235	    parts.push(['_meta.lwt']);
-236	
-237	    /**
-238	     * It is not possible to set non-javascript-variable-syntax
-239	     * keys as IndexedDB indexes. So we have to substitute the pipe-char
-240	     * which comes from the key-compression plugin.
-241	     */
-242	    parts = parts.map(part => {
-243	        return part.map(str => dexieReplaceIfStartsWithPipe(str));
-244	    });
-245	
-246	    let dexieSchemaRows = parts.map(part => {
-247	        if (part.length === 1) {
-248	            return part[0];
-249	        } else {
-250	            return '[' + part.join('+') + ']';
-251	        }
-252	    });
-253	    dexieSchemaRows = dexieSchemaRows.filter((elem: any, pos: any, arr: any) => arr.indexOf(elem) === pos); // unique;
-254	
-255	    const dexieSchema = dexieSchemaRows.join(', ');
-256	
-257	    return dexieSchema;
-258	}
-259	
-260	/**
-261	 * Returns all documents in the database.
-262	 * Non-deleted plus deleted ones.
-263	 */
-264	export async function getDocsInDb<RxDocType>(
-265	    internals: DexieStorageInternals,
-266	    docIds: string[]
-267	): Promise<RxDocumentData<RxDocType>[]> {
-268	    const state = await internals;
-269	    const docsInDb = await state.dexieTable.bulkGet(docIds);
-270	    return docsInDb.map((d: any) => fromDexieToStorage(state.booleanIndexes, d));
-271	}
-272	
-273	
-274	export function attachmentObjectId(documentId: string, attachmentId: string): string {
-275	    return documentId + '||' + attachmentId;
-276	}
-277	
-278	
-279	export function getBooleanIndexes(schema: RxJsonSchema<any>): string[] {
-280	    const checkedFields = new Set<string>();
-281	    const ret: string[] = [];
-282	    if (!schema.indexes) {
-283	        return ret;
-284	    }
-285	    schema.indexes.forEach(index => {
-286	        const fields = toArray(index);
-287	        fields.forEach(field => {
-288	            if (checkedFields.has(field)) {
-289	                return;
-290	            }
-291	            checkedFields.add(field);
-292	            const schemaObj = getSchemaByObjectPath(schema, field);
-293	            if (schemaObj.type === 'boolean') {
-294	                ret.push(field);
-295	            }
-296	        });
-297	    });
-298	    ret.push('_deleted');
-299	
-300	    return uniqueArray(ret);
-301	}
-302	
+1 import type {
+2     DexieStorageInternals,
+3     RxDocumentData,
+4     RxJsonSchema
+5 } from '../../types/index.d.ts';
+6 import { Dexie } from 'dexie';
+7 import type { DexieSettings } from '../../types/index.d.ts';
+8 import { flatClone, getFromMapOrCreate, getProperty, setProperty, toArray, uniqueArray } from '../utils/index.ts';
+9 import {
+10     getPrimaryFieldOfPrimaryKey,
+11     getSchemaByObjectPath
+12 } from '../../rx-schema-helper.ts';
+13 
+14 export const DEXIE_DOCS_TABLE_NAME = 'docs';
+15 export const DEXIE_CHANGES_TABLE_NAME = 'changes';
+16 export const DEXIE_ATTACHMENTS_TABLE_NAME = 'attachments';
+17 
+18 export const RX_STORAGE_NAME_DEXIE = 'dexie';
+19 
+20 const DEXIE_STATE_DB_BY_NAME: Map<string, DexieStorageInternals> = new Map();
+21 const REF_COUNT_PER_DEXIE_DB: Map<DexieStorageInternals, number> = new Map();
+22 export function getDexieDbWithTables(
+23     databaseName: string,
+24     collectionName: string,
+25     settings: DexieSettings,
+26     schema: RxJsonSchema<any>
+27 ): DexieStorageInternals {
+28     const dexieDbName = 'rxdb-dexie-' + databaseName + '--' + schema.version + '--' + collectionName;
+29 
+30     const state = getFromMapOrCreate(
+31         DEXIE_STATE_DB_BY_NAME,
+32         dexieDbName,
+33         () => {
+34             const value = (async () => {
+35                 /**
+36                  * IndexedDB was not designed for dynamically adding tables on the fly,
+37                  * so we create one dexie database per RxDB storage instance.
+38                  * @link https://github.com/dexie/Dexie.js/issues/684#issuecomment-373224696
+39                  */
+40                 const useSettings = flatClone(settings);
+41                 useSettings.autoOpen = false;
+42                 const dexieDb = new Dexie(dexieDbName, useSettings);
+43                 if (settings.onCreate) {
+44                     await settings.onCreate(dexieDb, dexieDbName);
+45                 }
+46                 const dexieStoresSettings = {
+47                     [DEXIE_DOCS_TABLE_NAME]: getDexieStoreSchema(schema),
+48                     [DEXIE_CHANGES_TABLE_NAME]: '++sequence, id',
+49                     [DEXIE_ATTACHMENTS_TABLE_NAME]: 'id'
+50                 };
+51 
+52                 dexieDb.version(1).stores(dexieStoresSettings);
+53                 await dexieDb.open();
+54 
+55                 return {
+56                     dexieDb,
+57                     dexieTable: (dexieDb as any)[DEXIE_DOCS_TABLE_NAME],
+58                     dexieAttachmentsTable: (dexieDb as any)[DEXIE_ATTACHMENTS_TABLE_NAME],
+59                     booleanIndexes: getBooleanIndexes(schema)
+60                 };
+61             })();
+62             DEXIE_STATE_DB_BY_NAME.set(dexieDbName, state);
+63             REF_COUNT_PER_DEXIE_DB.set(state, 0);
+64             return value;
+65         }
+66     );
+67     return state;
+68 }
+69 
+70 export async function closeDexieDb(statePromise: DexieStorageInternals) {
+71     const state = await statePromise;
+72     const prevCount = REF_COUNT_PER_DEXIE_DB.get(statePromise);
+73     const newCount = (prevCount as any) - 1;
+74     if (newCount === 0) {
+75         state.dexieDb.close();
+76         REF_COUNT_PER_DEXIE_DB.delete(statePromise);
+77     } else {
+78         REF_COUNT_PER_DEXIE_DB.set(statePromise, newCount);
+79     }
+80 }
+81 
+82 
+83 
+84 /**
+85  * It is not possible to set non-javascript-variable-syntax
+86  * keys as IndexedDB indexes. So we have to substitute the pipe-char
+87  * which comes from the key-compression plugin.
+88  */
+89 export const DEXIE_PIPE_SUBSTITUTE = '__';
+90 export function dexieReplaceIfStartsWithPipe(str: string): string {
+91     const split = str.split('.');
+92     if (split.length > 1) {
+93         return split.map(part => dexieReplaceIfStartsWithPipe(part)).join('.');
+94     }
+95 
+96     if (str.startsWith('|')) {
+97         const withoutFirst = str.substring(1);
+98         return DEXIE_PIPE_SUBSTITUTE + withoutFirst;
+99     } else {
+100         return str;
+101     }
+102 }
+103 
+104 export function dexieReplaceIfStartsWithPipeRevert(str: string): string {
+105     const split = str.split('.');
+106     if (split.length > 1) {
+107         return split.map(part => dexieReplaceIfStartsWithPipeRevert(part)).join('.');
+108     }
+109 
+110     if (str.startsWith(DEXIE_PIPE_SUBSTITUTE)) {
+111         const withoutFirst = str.substring(DEXIE_PIPE_SUBSTITUTE.length);
+112         return '|' + withoutFirst;
+113     } else {
+114         return str;
+115     }
+116 }
+117 
+118 
+119 /**
+120  * IndexedDB does not support boolean indexing.
+121  * So we have to replace true/false with '1'/'0'
+122  * @param d 
+123  */
+124 export function fromStorageToDexie<RxDocType>(
+125     booleanIndexes: string[],
+126     inputDoc: RxDocumentData<RxDocType>
+127 ): any {
+128     if (!inputDoc) {
+129         return inputDoc;
+130     }
+131     let d = flatClone(inputDoc);
+132     d = fromStorageToDexieField(d);
+133 
+134     booleanIndexes.forEach(idx => {
+135         const val = getProperty(inputDoc, idx);
+136         const newVal = val ? '1' : '0';
+137         const useIndex = dexieReplaceIfStartsWithPipe(idx);
+138         setProperty(d, useIndex, newVal);
+139     });
+140 
+141     return d;
+142 }
+143 export function fromDexieToStorage<RxDocType>(
+144     booleanIndexes: string[],
+145     d: any
+146 ): RxDocumentData<RxDocType> {
+147     if (!d) {
+148         return d;
+149     }
+150 
+151     d = flatClone(d);
+152     d = fromDexieToStorageField(d);
+153 
+154     booleanIndexes.forEach(idx => {
+155         const val = getProperty(d, idx);
+156         const newVal = val === '1' ? true : false;
+157         setProperty(d, idx, newVal);
+158     });
+159 
+160     return d;
+161 }
+162 
+163 /**
+164  * @recursive
+165  */
+166 export function fromStorageToDexieField(documentData: RxDocumentData<any>): any {
+167     if (
+168         !documentData ||
+169         typeof documentData === 'string' ||
+170         typeof documentData === 'number' ||
+171         typeof documentData === 'boolean'
+172     ) {
+173         return documentData;
+174     } else if (Array.isArray(documentData)) {
+175         return documentData.map(row => fromStorageToDexieField(row));
+176     } else if (typeof documentData === 'object') {
+177         const ret: any = {};
+178         Object.entries(documentData).forEach(([key, value]) => {
+179             if (typeof value === 'object') {
+180                 value = fromStorageToDexieField(value);
+181             }
+182             ret[dexieReplaceIfStartsWithPipe(key)] = value;
+183         });
+184         return ret;
+185     }
+186 }
+187 
+188 export function fromDexieToStorageField(documentData: any): RxDocumentData<any> {
+189     if (!documentData || typeof documentData === 'string' || typeof documentData === 'number' || typeof documentData === 'boolean') {
+190         return documentData;
+191     } else if (Array.isArray(documentData)) {
+192         return documentData.map(row => fromDexieToStorageField(row));
+193     } else if (typeof documentData === 'object') {
+194         const ret: any = {};
+195         Object.entries(documentData).forEach(([key, value]) => {
+196             if (typeof value === 'object' || Array.isArray(documentData)) {
+197                 value = fromDexieToStorageField(value);
+198             }
+199             ret[dexieReplaceIfStartsWithPipeRevert(key)] = value;
+200         });
+201         return ret;
+202     }
+203 }
+204 
+205 
+206 /**
+207  * Creates a string that can be used to create the dexie store.
+208  * @link https://dexie.org/docs/API-Reference#quick-reference
+209  */
+210 export function getDexieStoreSchema(
+211     rxJsonSchema: RxJsonSchema<any>
+212 ): string {
+213     let parts: string[][] = [];
+214 
+215     /**
+216      * First part must be the primary key
+217      * @link https://github.com/dexie/Dexie.js/issues/1307#issuecomment-846590912
+218      */
+219     const primaryKey = getPrimaryFieldOfPrimaryKey(rxJsonSchema.primaryKey);
+220     parts.push([primaryKey]);
+221     parts.push(['_deleted', primaryKey]);
+222 
+223     // add other indexes
+224     if (rxJsonSchema.indexes) {
+225         rxJsonSchema.indexes.forEach(index => {
+226             const arIndex = toArray(index);
+227             parts.push(arIndex);
+228         });
+229     }
+230 
+231     // we also need the _meta.lwt+primaryKey index for the getChangedDocumentsSince() method.
+232     parts.push(['_meta.lwt', primaryKey]);
+233 
+234     // and this one for the cleanup()
+235     parts.push(['_meta.lwt']);
+236 
+237     /**
+238      * It is not possible to set non-javascript-variable-syntax
+239      * keys as IndexedDB indexes. So we have to substitute the pipe-char
+240      * which comes from the key-compression plugin.
+241      */
+242     parts = parts.map(part => {
+243         return part.map(str => dexieReplaceIfStartsWithPipe(str));
+244     });
+245 
+246     let dexieSchemaRows = parts.map(part => {
+247         if (part.length === 1) {
+248             return part[0];
+249         } else {
+250             return '[' + part.join('+') + ']';
+251         }
+252     });
+253     dexieSchemaRows = dexieSchemaRows.filter((elem: any, pos: any, arr: any) => arr.indexOf(elem) === pos); // unique;
+254 
+255     const dexieSchema = dexieSchemaRows.join(', ');
+256 
+257     return dexieSchema;
+258 }
+259 
+260 /**
+261  * Returns all documents in the database.
+262  * Non-deleted plus deleted ones.
+263  */
+264 export async function getDocsInDb<RxDocType>(
+265     internals: DexieStorageInternals,
+266     docIds: string[]
+267 ): Promise<RxDocumentData<RxDocType>[]> {
+268     const state = await internals;
+269     const docsInDb = await state.dexieTable.bulkGet(docIds);
+270     return docsInDb.map((d: any) => fromDexieToStorage(state.booleanIndexes, d));
+271 }
+272 
+273 
+274 export function attachmentObjectId(documentId: string, attachmentId: string): string {
+275     return documentId + '||' + attachmentId;
+276 }
+277 
+278 
+279 export function getBooleanIndexes(schema: RxJsonSchema<any>): string[] {
+280     const checkedFields = new Set<string>();
+281     const ret: string[] = [];
+282     if (!schema.indexes) {
+283         return ret;
+284     }
+285     schema.indexes.forEach(index => {
+286         const fields = toArray(index);
+287         fields.forEach(field => {
+288             if (checkedFields.has(field)) {
+289                 return;
+290             }
+291             checkedFields.add(field);
+292             const schemaObj = getSchemaByObjectPath(schema, field);
+293             if (schemaObj.type === 'boolean') {
+294                 ret.push(field);
+295             }
+296         });
+297     });
+298     ret.push('_deleted');
+299 
+300     return uniqueArray(ret);
+301 }
+302 
 303
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:08:41Z)**_
@@ -2674,6 +2716,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:08:43Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:08:44Z)**_
@@ -2685,6 +2728,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:08:44Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:08:48Z)**_
@@ -2700,6 +2744,7 @@ node_modules/rxdb/src/replication-protocol/downstream.ts:239:     * It can happe
 node_modules/rxdb/src/replication-protocol/upstream.ts:49: * - For ongoing local writes, we just subscribe to the changeStream of the fork.
 node_modules/rxdb/src/replication-protocol/upstream.ts:95:    const sub = state.input.forkInstance.changeStream()
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:08:52Z)**_
@@ -2709,67 +2754,68 @@ _**Agent (claude-opus-4-7 2026-04-21 02:08:52Z)**_
  `./node_modules/rxdb/src/replication-protocol/upstream.ts`
 
 ```text
-80	
-81	    type Task = EventBulk<RxStorageChangeEvent<RxDocType>, any> | 'RESYNC';
-82	    type TaskWithTime = {
-83	        task: Task;
-84	        time: number;
-85	    };
-86	    const openTasks: TaskWithTime[] = [];
-87	    let persistenceQueue: Promise<boolean> = PROMISE_RESOLVE_FALSE;
-88	    const nonPersistedFromMaster: {
-89	        checkpoint?: CheckpointType;
-90	        docs: ById<RxDocumentData<RxDocType>>;
-91	    } = {
-92	        docs: {}
-93	    };
-94	
-95	    const sub = state.input.forkInstance.changeStream()
-96	        .subscribe((eventBulk: EventBulk<RxStorageChangeEvent<RxDocType>, any>) => {
-97	            if (state.events.paused.getValue()) {
-98	                return;
-99	            }
-100	
-101	
-102	            state.stats.up.forkChangeStreamEmit = state.stats.up.forkChangeStreamEmit + 1;
-103	            openTasks.push({
-104	                task: eventBulk,
-105	                time: timer++
-106	            });
-107	            if (!state.events.active.up.getValue()) {
-108	                state.events.active.up.next(true);
-109	            }
-110	            if (state.input.waitBeforePersist) {
-111	                return state.input.waitBeforePersist()
-112	                    .then(() => processTasks());
-113	            } else {
-114	                return processTasks();
-115	            }
-116	        });
-117	    const subResync = replicationHandler
-118	        .masterChangeStream$
-119	        .pipe(
-120	            filter((ev: any) => ev === 'RESYNC')
-121	        )
-122	        .subscribe(() => {
-123	            openTasks.push({
-124	                task: 'RESYNC',
-125	                time: timer++
-126	            });
-127	            processTasks();
-128	        });
-129	
-130	    // unsubscribe when replication is canceled
-131	    firstValueFrom(
-132	        state.events.canceled.pipe(
-133	            filter((canceled: boolean) => !!canceled)
-134	        )
-135	    ).then(() => {
-136	        sub.unsubscribe();
-137	        subResync.unsubscribe();
-138	    });
+80 
+81     type Task = EventBulk<RxStorageChangeEvent<RxDocType>, any> | 'RESYNC';
+82     type TaskWithTime = {
+83         task: Task;
+84         time: number;
+85     };
+86     const openTasks: TaskWithTime[] = [];
+87     let persistenceQueue: Promise<boolean> = PROMISE_RESOLVE_FALSE;
+88     const nonPersistedFromMaster: {
+89         checkpoint?: CheckpointType;
+90         docs: ById<RxDocumentData<RxDocType>>;
+91     } = {
+92         docs: {}
+93     };
+94 
+95     const sub = state.input.forkInstance.changeStream()
+96         .subscribe((eventBulk: EventBulk<RxStorageChangeEvent<RxDocType>, any>) => {
+97             if (state.events.paused.getValue()) {
+98                 return;
+99             }
+100 
+101 
+102             state.stats.up.forkChangeStreamEmit = state.stats.up.forkChangeStreamEmit + 1;
+103             openTasks.push({
+104                 task: eventBulk,
+105                 time: timer++
+106             });
+107             if (!state.events.active.up.getValue()) {
+108                 state.events.active.up.next(true);
+109             }
+110             if (state.input.waitBeforePersist) {
+111                 return state.input.waitBeforePersist()
+112                     .then(() => processTasks());
+113             } else {
+114                 return processTasks();
+115             }
+116         });
+117     const subResync = replicationHandler
+118         .masterChangeStream$
+119         .pipe(
+120             filter((ev: any) => ev === 'RESYNC')
+121         )
+122         .subscribe(() => {
+123             openTasks.push({
+124                 task: 'RESYNC',
+125                 time: timer++
+126             });
+127             processTasks();
+128         });
+129 
+130     // unsubscribe when replication is canceled
+131     firstValueFrom(
+132         state.events.canceled.pipe(
+133             filter((canceled: boolean) => !!canceled)
+134         )
+135     ).then(() => {
+136         sub.unsubscribe();
+137         subResync.unsubscribe();
+138     });
 139
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:09:28Z)**_
@@ -2809,6 +2855,7 @@ Date:   Thu Apr 16 22:15:58 2026 +1000
  8 files changed, 178 insertions(+)
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:09:33Z)**_
@@ -2868,6 +2915,7 @@ index 00000000..173720a0
 +  additionalProperties: false,
 +};
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:09:44Z)**_
@@ -2906,6 +2954,7 @@ index 173720a0..fafb71c6 100644
    type: 'object',
    properties: {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:09:56Z)**_
@@ -2934,6 +2983,7 @@ b8b3bfc6 chore(prettier/lint): opinionated code style
 45f69f55 feat(db): add RxJSON schemas for remaining collections
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:09:59Z)**_
@@ -2947,6 +2997,7 @@ PR #113 and #115 bodies
 ```text
 <tool_use_error>Cancelled: parallel tool call Bash(git log --all --oneline -- src/db/schema…) errored</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:10:04Z)**_
@@ -2960,6 +3011,7 @@ PR #113 details
 ```text
 {"body":"## Summary\n\n- Renames the \"bookmark\" surface to **custom game** across DB, types, hooks, components, CSS, and i18n.\n- Adds a **Delete** action (with confirmation) to \\`AdvancedConfigModal\\` for existing custom games.\n- Swaps the cover badge to a default-vs-custom **type indicator** using lucide \\`CircleDashed\\` / \\`CircleDot\\`.\n- Introduces an **idempotent boot migration** that copies non-last-session docs from \\`saved_game_configs\\` → new \\`custom_games\\` collection.\n\nPhase 2 (Star/bookmark toggle) is spec-only and remains deferred.\n\n## Test plan\n\n- [x] \\`yarn typecheck\\`\n- [x] \\`yarn lint\\` (ESLint + Knip)\n- [x] \\`yarn lint:md\\`\n- [x] \\`yarn test\\` (815 unit tests pass)\n- [x] \\`yarn test:vr\\` (Docker baselines refreshed — 25/25 green)\n- [x] E2E spec written: \\`e2e/custom-game-delete.spec.ts\\`\n- [x] \\`yarn build\\`\n\n## Notes\n\n- Pre-push hook skipped locally (SKIP_PREPUSH=1) due to a bash \\`mapfile\\` / process-substitution parse error in the worktree shell invocation — all checks verified manually above.\n- \\`saved_game_configs\\` collection intentionally retained (hosts last-session resume docs); only named custom game variations migrate to \\`custom_games\\`.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)","mergedAt":"2026-04-16T11:45:23Z","title":"feat: custom games and bookmarks — Phase 1 (rename + delete)"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:10:04Z)**_
@@ -2973,6 +3025,7 @@ PR #115 details
 ```text
 {"body":"## Summary\n\n- Adds a per-item bookmark toggle (`Star` icon) on `GameCard` (cover corner) and `InstructionsOverlay` (next to the title cog).\n- New RxDB `bookmarks` collection keyed by composite id (`${profileId}:${targetType}:${targetId}`); `targetType ∈ { 'game', 'customGame' }`.\n- `useBookmarks` hook exposes `{ bookmarks, isBookmarked, toggle, add, remove }`; `isBookmarked` is O(1) against an in-memory `Set`.\n- `useCustomGames.remove` cascade-cleans the matching bookmark row so deleting a custom game can't leave an orphan.\n- aria-labels are localized (`common.bookmark.add`/`remove`) in en + pt-BR.\n\nSpec: `docs/superpowers/specs/2026-04-16-custom-games-and-bookmarks-design.md` (Phase 2 section).\nPlan: `docs/superpowers/plans/2026-04-16-bookmarks-phase-2.md`.\n\n## Test plan\n\n- [x] `yarn typecheck`\n- [x] `yarn lint`\n- [x] `yarn lint:md`\n- [x] `yarn test` — 839/839 pass (incl. new schema, hook, cascade tests)\n- [x] `yarn test:storybook` — 185/185 pass (incl. eight new bookmark stories on `GameCard` + `InstructionsOverlay`)\n- [x] `yarn test:vr` — Docker baselines refreshed (home, game-shell, instructions-overlay × light + dark)\n- [x] `yarn test:e2e --grep \"bookmark a default game\"` — passes on chromium + firefox + webkit\n- [x] `yarn build`\n\n## Skipped checks\n\n`SKIP_PREPUSH=1` — pre-existing hook bug at `.husky/pre-push:78` (`mapfile` + process substitution `< <(...)` is bash-only, but husky 9 invokes hooks via `sh -e` which trips on the syntax). Not introduced by this branch; full pre-push gate ran manually and is captured in the test plan above.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)","mergedAt":"2026-04-16T13:51:04Z","title":"feat: bookmarks — Phase 2 (Star toggle on default + custom games)"}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:10:47Z)**_
@@ -2988,74 +3041,75 @@ _**Agent (claude-opus-4-7 2026-04-21 02:10:48Z)**_
  `./src/db/schemas/bookmarks.test.ts`
 
 ```text
-1	import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-2	import type { BaseSkillDatabase } from '@/db/types';
-3	import { bookmarkId } from '@/db/bookmark-id';
-4	import {
-5	  createTestDatabase,
-6	  destroyTestDatabase,
-7	} from '@/db/create-database';
-8	
-9	let db: BaseSkillDatabase;
-10	
-11	beforeEach(async () => {
-12	  db = await createTestDatabase();
-13	});
-14	
-15	afterEach(async () => {
-16	  await destroyTestDatabase(db);
-17	});
-18	
-19	describe('bookmarks schema v1', () => {
-20	  it('inserts a bookmark for a default game', async () => {
-21	    const id = bookmarkId('anonymous', 'game', 'word-spell');
-22	    const doc = await db.bookmarks.insert({
-23	      id,
-24	      profileId: 'anonymous',
-25	      targetType: 'game',
-26	      targetId: 'word-spell',
-27	      createdAt: new Date().toISOString(),
-28	    });
-29	    expect(doc.id).toBe(id);
-30	    expect(doc.targetType).toBe('game');
-31	  });
-32	
-33	  it('inserts a bookmark for a custom game', async () => {
-34	    const id = bookmarkId('anonymous', 'customGame', 'cg_xyz');
-35	    const doc = await db.bookmarks.insert({
-36	      id,
-37	      profileId: 'anonymous',
-38	      targetType: 'customGame',
-39	      targetId: 'cg_xyz',
-40	      createdAt: new Date().toISOString(),
-41	    });
-42	    expect(doc.targetType).toBe('customGame');
-43	  });
-44	
-45	  it('rejects an invalid targetType', async () => {
-46	    await expect(
-47	      db.bookmarks.insert({
-48	        id: 'anonymous:other:x',
-49	        profileId: 'anonymous',
-50	        targetType: 'other' as 'game',
-51	        targetId: 'x',
-52	        createdAt: new Date().toISOString(),
-53	      }),
-54	    ).rejects.toThrow();
-55	  });
-56	
-57	  it('rejects a doc missing required fields', async () => {
-58	    await expect(
-59	      db.bookmarks.insert({
-60	        id: 'bad',
-61	        profileId: 'anonymous',
-62	        // targetType, targetId, createdAt missing
-63	      } as unknown as Parameters<typeof db.bookmarks.insert>[0]),
-64	    ).rejects.toThrow();
-65	  });
-66	});
+1 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+2 import type { BaseSkillDatabase } from '@/db/types';
+3 import { bookmarkId } from '@/db/bookmark-id';
+4 import {
+5   createTestDatabase,
+6   destroyTestDatabase,
+7 } from '@/db/create-database';
+8 
+9 let db: BaseSkillDatabase;
+10 
+11 beforeEach(async () => {
+12   db = await createTestDatabase();
+13 });
+14 
+15 afterEach(async () => {
+16   await destroyTestDatabase(db);
+17 });
+18 
+19 describe('bookmarks schema v1', () => {
+20   it('inserts a bookmark for a default game', async () => {
+21     const id = bookmarkId('anonymous', 'game', 'word-spell');
+22     const doc = await db.bookmarks.insert({
+23       id,
+24       profileId: 'anonymous',
+25       targetType: 'game',
+26       targetId: 'word-spell',
+27       createdAt: new Date().toISOString(),
+28     });
+29     expect(doc.id).toBe(id);
+30     expect(doc.targetType).toBe('game');
+31   });
+32 
+33   it('inserts a bookmark for a custom game', async () => {
+34     const id = bookmarkId('anonymous', 'customGame', 'cg_xyz');
+35     const doc = await db.bookmarks.insert({
+36       id,
+37       profileId: 'anonymous',
+38       targetType: 'customGame',
+39       targetId: 'cg_xyz',
+40       createdAt: new Date().toISOString(),
+41     });
+42     expect(doc.targetType).toBe('customGame');
+43   });
+44 
+45   it('rejects an invalid targetType', async () => {
+46     await expect(
+47       db.bookmarks.insert({
+48         id: 'anonymous:other:x',
+49         profileId: 'anonymous',
+50         targetType: 'other' as 'game',
+51         targetId: 'x',
+52         createdAt: new Date().toISOString(),
+53       }),
+54     ).rejects.toThrow();
+55   });
+56 
+57   it('rejects a doc missing required fields', async () => {
+58     await expect(
+59       db.bookmarks.insert({
+60         id: 'bad',
+61         profileId: 'anonymous',
+62         // targetType, targetId, createdAt missing
+63       } as unknown as Parameters<typeof db.bookmarks.insert>[0]),
+64     ).rejects.toThrow();
+65   });
+66 });
 67
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:10:52Z)**_
@@ -3073,7 +3127,7 @@ Tracing what shipped to GitHub Pages users:
 | v0.10.0 | PR #115 (`80ba358e`) | **v0** | `{id: composite, profileId, targetType, targetId, createdAt}` |
 | v0.10.x | PR #117 (`f195a2e8`) | **v1** + `migrationStrategies[1]` | same composite shape |
 
-PR #117's strategy assumes the v0 docs look like the *intermediate PR-preview* shape (`{id, profileId, gameId, createdAt}`):
+PR #117's strategy assumes the v0 docs look like the _intermediate PR-preview_ shape (`{id, profileId, gameId, createdAt}`):
 
 ```ts
 1: (oldDoc) => {
@@ -3096,13 +3150,14 @@ Why "old users only": new installs have no v0 collection meta → no migration r
 ## Proposed fix
 
 Make `migrationStrategies[1]` handle both deployed shapes:
+
 - If `oldDoc.gameId` exists (PR-preview shape) → transform to composite key.
 - Else (the actually shipped v0.10.0 shape) → return `oldDoc` unchanged.
 
 ## Plan (asking before I act per CLAUDE.md worktree rule)
 
 1. `git worktree add ./worktrees/fix-bookmarks-dm4-old-users -b fix/bookmarks-dm4-old-users` from master.
-2. Write a failing vitest in `src/db/schemas/bookmarks.test.ts` (or a dedicated migration test) that: opens an in-memory DB at v0 with the *deployed* composite shape, inserts a doc, closes, reopens at v1 — asserts doc survives migration unchanged. This should fail today.
+2. Write a failing vitest in `src/db/schemas/bookmarks.test.ts` (or a dedicated migration test) that: opens an in-memory DB at v0 with the _deployed_ composite shape, inserts a doc, closes, reopens at v1 — asserts doc survives migration unchanged. This should fail today.
 3. Implement the dual-shape strategy, confirm test goes green plus existing 4 bookmark tests stay green.
 4. Open PR against master.
 
@@ -3130,12 +3185,13 @@ Both great instincts.
 | PR-preview during #115 dev | `{id, profileId, gameId, createdAt}` |
 | v0.10.0 deployed (post-#115) | `{id (composite), profileId, targetType, targetId, createdAt}` |
 
-The first one matters because the *collection name* `bookmarks` was reused — RxDB stores collection meta keyed by name + version, so if a user has stale `bookmarks` meta from the pre-#113 era, the migration runs against that older shape too. PR #117's strategy doesn't account for that.
+The first one matters because the _collection name_ `bookmarks` was reused — RxDB stores collection meta keyed by name + version, so if a user has stale `bookmarks` meta from the pre-#113 era, the migration runs against that older shape too. PR #117's strategy doesn't account for that.
 
 **On the IndexedDB dump — yes please.** It would let me:
+
 1. See exactly which collection meta entries you have (`_rxdb_internal` table).
 2. See the actual document shapes stored under `rxdb-dexie-baseskill-data--0--bookmarks` (and any other version suffix).
-3. Write a regression test seeded with the *real* bytes, not a guess.
+3. Write a regression test seeded with the _real_ bytes, not a guess.
 
 To grab it in Chrome:
 
@@ -3165,7 +3221,7 @@ Add migration tests in `src/db/schemas/bookmarks.test.ts` that open a v0 collect
 **2. E2E (Playwright) — closest to a real browser**
 Add an e2e spec that, in a `beforeEach`, uses `page.evaluate` to write fixture rows directly into the `rxdb-dexie-baseskill-data--0--bookmarks` IndexedDB before navigating. Then loads `/en/game/word-spell` and asserts the page doesn't show the error overlay and bookmarks still appear. Run `yarn test:e2e`.
 
-**3. Manual on your real device — the only thing that proves it for *your* data**
+**3. Manual on your real device — the only thing that proves it for _your_ data**
 Two paths, pick one:
 
 - **(a) PR preview + import your DB.** The repo already builds a PR preview per push. Once the PR is up I'll add a small `/dev/import-idb` page (only mounted when `import.meta.env.DEV` or behind a query flag) that takes a JSON file (your DevTools IndexedDB export) and writes it into the preview origin's IndexedDB. You then refresh the preview and confirm word-spell loads.
@@ -3197,6 +3253,7 @@ Create worktree for the bookmarks DM4 fix
 Preparing worktree (new branch 'fix/bookmarks-dm4-old-users')
 HEAD is now at 959d5c93 chore(release): v0.10.3 (#123)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:06Z)**_
@@ -3210,6 +3267,7 @@ Make folder for IndexedDB exports
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:07Z)**_
@@ -3223,6 +3281,7 @@ Install deps in new worktree
 ```text
 Command running in background with ID: b0y6b9dtw. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/4807012e-7d90-4a60-8b04-4b0611242f0d/tasks/b0y6b9dtw.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:08Z)**_
@@ -3259,6 +3318,7 @@ worktrees/
 .specstory/statistics.json
 .superpowers/
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:17Z)**_
@@ -3271,6 +3331,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:14:17Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:20Z)**_
@@ -3280,30 +3341,31 @@ _**Agent (claude-opus-4-7 2026-04-21 02:14:20Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/.gitignore`
 
 ```text
-1	node_modules
-2	.DS_Store
-3	dist
-4	dist-ssr
-5	*.local
-6	.env
-7	.env.local
-8	.nitro
-9	.tanstack
-10	.wrangler
-11	.output
-12	.vinxi
-13	__unconfig*
-14	todos.json
-15	coverage
-16	playwright-report
-17	test-results
-18	storybook-static
-19	.worktrees/
-20	worktrees/
-21	.specstory/statistics.json
-22	.superpowers/
+1 node_modules
+2 .DS_Store
+3 dist
+4 dist-ssr
+5 *.local
+6 .env
+7 .env.local
+8 .nitro
+9 .tanstack
+10 .wrangler
+11 .output
+12 .vinxi
+13 __unconfig*
+14 todos.json
+15 coverage
+16 playwright-report
+17 test-results
+18 storybook-static
+19 .worktrees/
+20 worktrees/
+21 .specstory/statistics.json
+22 .superpowers/
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:30Z)**_
@@ -3314,6 +3376,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:14:30Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/.gitignore has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:14:36Z)**_
@@ -3351,6 +3414,7 @@ drwxr-xr-x@ 4 leocaseiro  staff     128 21 Apr 12:14 ..
 -rw-r--r--@ 1 leocaseiro  staff  348364 21 Apr 12:15 indexeddb-2026-04-21-02-14-52-876.json
   348364 /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/.local-debug/indexeddb-exports/indexeddb-2026-04-21-02-14-52-876.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:18:47Z)**_
@@ -3388,6 +3452,7 @@ top level is list of len 26
 first item type: dict
 first item keys: ['databaseName', 'databaseVersion', 'objectStoreNames', 'stores']
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:18:53Z)**_
@@ -3415,6 +3480,7 @@ Traceback (most recent call last):
   File "<stdin>", line 7, in <module>
 AttributeError: 'list' object has no attribute 'items'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:19:00Z)**_
@@ -3495,6 +3561,7 @@ rxdb-dexie-baseskill-data--2--saved_game_configs (v10) objectStores=['attachment
 rxdb-dexie-baseskill-data--2--session_history_index (v10) objectStores=['attachments', 'changes', 'docs']
   stores: [('attachments', 0), ('changes', 0), ('docs', 0)]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:19:28Z)**_
@@ -3570,6 +3637,7 @@ stores raw: [
                 },
                 "_deleted":
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:19:39Z)**_
@@ -3611,6 +3679,7 @@ rxdb-dexie-baseskill-data--1--custom_games: {'docs': 4}
 rxdb-dexie-baseskill-data--2--saved_game_configs: {'docs': 8}
 rxdb-dexie-baseskill-data--2--session_history_index: {'docs': 30}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:19:49Z)**_
@@ -3699,6 +3768,7 @@ EOF
 }
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:20:06Z)**_
@@ -3943,6 +4013,7 @@ EOF
 }
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:21:20Z)**_
@@ -3966,6 +4037,7 @@ node_modules/rxdb/src/plugins/storage-dexie/rx-storage-instance-dexie.ts:361:   
 node_modules/rxdb/src/plugins/storage-sqlite/sqlite-storage-instance.ts:15:    addRxStorageMultiInstanceSupport,
 node_modules/rxdb/src/plugins/storage-sqlite/sqlite-storage-instance.ts:500:    await addRxStorageMultiInstanceSupport(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:21:26Z)**_
@@ -3990,6 +4062,7 @@ EOF
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:21:28Z)**_
@@ -4019,6 +4092,7 @@ id=ZaYb5_Ka gameId=math-addition _deleted=1 _rev=2-idhppmnkln
 id=tJDLrcsR gameId=math-subtraction _deleted=0 _rev=1-blcbcgzyjl
 id=zngVeBJa gameId=placeholder-game _deleted=0 _rev=1-blcbcgzyjl
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:21:33Z)**_
@@ -4030,87 +4104,88 @@ _**Agent (claude-opus-4-7 2026-04-21 02:21:34Z)**_
  `./node_modules/rxdb/src/rx-storage-multiinstance.ts`
 
 ```text
-80	}
-81	
-82	export function removeBroadcastChannelReference(
-83	    databaseInstanceToken: string,
-84	    refObject: any
-85	) {
-86	    const state = BROADCAST_CHANNEL_BY_TOKEN.get(databaseInstanceToken);
-87	    if (!state) {
-88	        return;
-89	    }
-90	    state.refs.delete(refObject);
-91	    if (state.refs.size === 0) {
-92	        BROADCAST_CHANNEL_BY_TOKEN.delete(databaseInstanceToken);
-93	        return state.bc.close();
-94	    }
-95	}
-96	
-97	
-98	export function addRxStorageMultiInstanceSupport<RxDocType>(
-99	    storageName: string,
-100	    instanceCreationParams: RxStorageInstanceCreationParams<RxDocType, any>,
-101	    instance: RxStorageInstance<RxDocType, any, any>,
-102	    /**
-103	     * If provided, that channel will be used
-104	     * instead of an own one.
-105	     */
-106	    providedBroadcastChannel?: BroadcastChannel<any>
-107	) {
-108	    if (!instanceCreationParams.multiInstance) {
-109	        return;
-110	    }
-111	
-112	    type Emit = EventBulk<RxStorageChangeEvent<RxDocType>, any>;
-113	
-114	    const broadcastChannel = providedBroadcastChannel ?
-115	        providedBroadcastChannel :
-116	        getBroadcastChannelReference(
-117	            storageName,
-118	            instanceCreationParams.databaseInstanceToken,
-119	            instance.databaseName,
-120	            instance
-121	        );
-122	
-123	    const changesFromOtherInstances$: Subject<Emit> = new Subject();
-124	
-125	
-126	    const eventListener = (msg: RxStorageMultiInstanceBroadcastType) => {
-127	        if (
-128	            msg.storageName === storageName &&
-129	            msg.databaseName === instanceCreationParams.databaseName &&
-130	            msg.collectionName === instanceCreationParams.collectionName &&
-131	            msg.version === instanceCreationParams.schema.version
-132	        ) {
-133	            changesFromOtherInstances$.next(msg.eventBulk);
-134	        }
-135	    };
-136	
-137	    broadcastChannel.addEventListener('message', eventListener);
-138	
-139	    const oldChangestream$ = instance.changeStream();
-140	
-141	    let closed = false;
-142	    const sub = oldChangestream$.subscribe((eventBulk: any) => {
-143	        if (closed) {
-144	            return;
-145	        }
-146	        broadcastChannel.postMessage({
-147	            storageName: storageName,
-148	            databaseName: instanceCreationParams.databaseName,
-149	            collectionName: instanceCreationParams.collectionName,
-150	            version: instanceCreationParams.schema.version,
-151	            eventBulk
-152	        });
-153	    });
-154	
-155	    instance.changeStream = function (): Observable<Emit> {
-156	        return changesFromOtherInstances$.asObservable().pipe(
-157	            mergeWith(oldChangestream$)
-158	        );
-159	    };
+80 }
+81 
+82 export function removeBroadcastChannelReference(
+83     databaseInstanceToken: string,
+84     refObject: any
+85 ) {
+86     const state = BROADCAST_CHANNEL_BY_TOKEN.get(databaseInstanceToken);
+87     if (!state) {
+88         return;
+89     }
+90     state.refs.delete(refObject);
+91     if (state.refs.size === 0) {
+92         BROADCAST_CHANNEL_BY_TOKEN.delete(databaseInstanceToken);
+93         return state.bc.close();
+94     }
+95 }
+96 
+97 
+98 export function addRxStorageMultiInstanceSupport<RxDocType>(
+99     storageName: string,
+100     instanceCreationParams: RxStorageInstanceCreationParams<RxDocType, any>,
+101     instance: RxStorageInstance<RxDocType, any, any>,
+102     /**
+103      * If provided, that channel will be used
+104      * instead of an own one.
+105      */
+106     providedBroadcastChannel?: BroadcastChannel<any>
+107 ) {
+108     if (!instanceCreationParams.multiInstance) {
+109         return;
+110     }
+111 
+112     type Emit = EventBulk<RxStorageChangeEvent<RxDocType>, any>;
+113 
+114     const broadcastChannel = providedBroadcastChannel ?
+115         providedBroadcastChannel :
+116         getBroadcastChannelReference(
+117             storageName,
+118             instanceCreationParams.databaseInstanceToken,
+119             instance.databaseName,
+120             instance
+121         );
+122 
+123     const changesFromOtherInstances$: Subject<Emit> = new Subject();
+124 
+125 
+126     const eventListener = (msg: RxStorageMultiInstanceBroadcastType) => {
+127         if (
+128             msg.storageName === storageName &&
+129             msg.databaseName === instanceCreationParams.databaseName &&
+130             msg.collectionName === instanceCreationParams.collectionName &&
+131             msg.version === instanceCreationParams.schema.version
+132         ) {
+133             changesFromOtherInstances$.next(msg.eventBulk);
+134         }
+135     };
+136 
+137     broadcastChannel.addEventListener('message', eventListener);
+138 
+139     const oldChangestream$ = instance.changeStream();
+140 
+141     let closed = false;
+142     const sub = oldChangestream$.subscribe((eventBulk: any) => {
+143         if (closed) {
+144             return;
+145         }
+146         broadcastChannel.postMessage({
+147             storageName: storageName,
+148             databaseName: instanceCreationParams.databaseName,
+149             collectionName: instanceCreationParams.collectionName,
+150             version: instanceCreationParams.schema.version,
+151             eventBulk
+152         });
+153     });
+154 
+155     instance.changeStream = function (): Observable<Emit> {
+156         return changesFromOtherInstances$.asObservable().pipe(
+157             mergeWith(oldChangestream$)
+158         );
+159     };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:03Z)**_
@@ -4133,6 +4208,7 @@ worktrees/fix-bookmarks-dm4-old-users/package.json:    "fake-indexeddb": "^6.2.5
 ---
 (eval):1: no matches found: worktrees/fix-bookmarks-dm4-old-users/test*
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:08Z)**_
@@ -4144,6 +4220,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:22:08Z)**_
 ```text
 <tool_use_error>Cancelled: parallel tool call Bash(grep -r "fake-indexeddb" worktrees/fix-b…) errored</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:12Z)**_
@@ -4157,6 +4234,7 @@ worktrees/fix-bookmarks-dm4-old-users/vite.config.ts:41:      const clientEnv = 
 worktrees/fix-bookmarks-dm4-old-users/vitest.config.ts:16:    environment: 'jsdom',
 worktrees/fix-bookmarks-dm4-old-users/vitest.config.ts:19:    setupFiles: ['./src/test-setup.ts'],
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:18Z)**_
@@ -4168,6 +4246,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:22:18Z)**_
 ```text
 worktrees/fix-bookmarks-dm4-old-users/src/test-setup.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:22Z)**_
@@ -4177,10 +4256,11 @@ _**Agent (claude-opus-4-7 2026-04-21 02:22:22Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/test-setup.ts`
 
 ```text
-1	import 'fake-indexeddb/auto';
-2	import '@testing-library/jest-dom';
+1 import 'fake-indexeddb/auto';
+2 import '@testing-library/jest-dom';
 3
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:22:30Z)**_
@@ -4196,65 +4276,66 @@ _**Agent (claude-opus-4-7 2026-04-21 02:22:32Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.test.ts`
 
 ```text
-1	import { afterEach, describe, expect, it } from 'vitest';
-2	import {
-3	  createStorybookDatabase,
-4	  createTestDatabase,
-5	  destroyTestDatabase,
-6	} from './create-database';
-7	
-8	describe('createTestDatabase', () => {
-9	  let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined;
-10	  afterEach(async () => {
-11	    if (db) await destroyTestDatabase(db);
-12	    db = undefined;
-13	  });
-14	
-15	  it('creates app_meta collection', async () => {
-16	    db = await createTestDatabase();
-17	    expect(db.app_meta).toBeDefined();
-18	  });
-19	
-20	  it('adds all collections', async () => {
-21	    db = await createTestDatabase();
-22	    const names = [
-23	      'app_meta',
-24	      'bookmarks',
-25	      'custom_games',
-26	      'profiles',
-27	      'progress',
-28	      'settings',
-29	      'game_config_overrides',
-30	      'saved_game_configs',
-31	      'themes',
-32	      'session_history',
-33	      'session_history_index',
-34	      'sync_meta',
-35	      'word_spell_seen_words',
-36	    ] as const;
-37	    for (const name of names) {
-38	      expect(db[name]).toBeDefined();
-39	    }
-40	  });
-41	});
-42	
-43	describe('createStorybookDatabase', () => {
-44	  let db:
-45	    | Awaited<ReturnType<typeof createStorybookDatabase>>
-46	    | undefined;
-47	  afterEach(async () => {
-48	    if (db) await destroyTestDatabase(db);
-49	    db = undefined;
-50	  });
-51	
-52	  it('uses memory storage and runs migrations', async () => {
-53	    db = await createStorybookDatabase();
-54	    const meta = await db.app_meta.findOne('singleton').exec();
-55	    expect(meta).not.toBeNull();
-56	  });
-57	});
+1 import { afterEach, describe, expect, it } from 'vitest';
+2 import {
+3   createStorybookDatabase,
+4   createTestDatabase,
+5   destroyTestDatabase,
+6 } from './create-database';
+7 
+8 describe('createTestDatabase', () => {
+9   let db: Awaited<ReturnType<typeof createTestDatabase>> | undefined;
+10   afterEach(async () => {
+11     if (db) await destroyTestDatabase(db);
+12     db = undefined;
+13   });
+14 
+15   it('creates app_meta collection', async () => {
+16     db = await createTestDatabase();
+17     expect(db.app_meta).toBeDefined();
+18   });
+19 
+20   it('adds all collections', async () => {
+21     db = await createTestDatabase();
+22     const names = [
+23       'app_meta',
+24       'bookmarks',
+25       'custom_games',
+26       'profiles',
+27       'progress',
+28       'settings',
+29       'game_config_overrides',
+30       'saved_game_configs',
+31       'themes',
+32       'session_history',
+33       'session_history_index',
+34       'sync_meta',
+35       'word_spell_seen_words',
+36     ] as const;
+37     for (const name of names) {
+38       expect(db[name]).toBeDefined();
+39     }
+40   });
+41 });
+42 
+43 describe('createStorybookDatabase', () => {
+44   let db:
+45     | Awaited<ReturnType<typeof createStorybookDatabase>>
+46     | undefined;
+47   afterEach(async () => {
+48     if (db) await destroyTestDatabase(db);
+49     db = undefined;
+50   });
+51 
+52   it('uses memory storage and runs migrations', async () => {
+53     db = await createStorybookDatabase();
+54     const meta = await db.app_meta.findOne('singleton').exec();
+55     expect(meta).not.toBeNull();
+56   });
+57 });
 58
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:05Z)**_
@@ -4383,6 +4464,7 @@ describe('bookmarks v0 (gameId shape) → v1 migration', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:25Z)**_
@@ -4453,6 +4535,7 @@ database: "bs-mig-m3hGmALoKUelvRob_eyXa"
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:29Z)**_
@@ -4469,6 +4552,7 @@ node_modules/rxdb/src/plugins/dev-mode/error-messages.ts:283:    DB9: {
 node_modules/rxdb/src/plugins/dev-mode/error-messages.ts:287:        docs: 'https://rxdb.info/rx-database.html?console=errors&code=DB9'
 node_modules/rxdb/src/plugins/dev-mode/error-messages.ts:289:    // removed in 14.0.0 - PouchDB RxStorage is removed - DB9: 'createRxDatabase(): Adapter not added. Use addPouchPlugin(require(\'pouchdb-adapter-[adaptername]\'));',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:31Z)**_
@@ -4478,37 +4562,38 @@ _**Agent (claude-opus-4-7 2026-04-21 02:23:31Z)**_
  `./node_modules/rxdb/src/rx-database.ts`
 
 ```text
-760	                        .then((instance) => instance && instance.close())
-761	                )
-762	            );
-763	        }
-764	
-765	        if (ignoreDuplicate) {
-766	            if (!overwritable.isDevMode()) {
-767	                throw newRxError('DB9', {
-768	                    database: name
-769	                });
-770	            }
-771	        } else {
-772	            // check if combination already used
-773	            throwIfDatabaseNameUsed(name, storage);
-774	        }
-775	
-776	        USED_DATABASE_NAMES.add(databaseNameKey);
-777	
-778	        const databaseInstanceToken = randomToken(10);
-779	        const storageInstance = await createRxDatabaseStorageInstance<
-780	            Internals,
-781	            InstanceCreationOptions
-782	        >(
-783	            databaseInstanceToken,
-784	            storage,
-785	            name,
-786	            instanceCreationOptions as any,
-787	            multiInstance,
-788	            password
-789	        );
+760                         .then((instance) => instance && instance.close())
+761                 )
+762             );
+763         }
+764 
+765         if (ignoreDuplicate) {
+766             if (!overwritable.isDevMode()) {
+767                 throw newRxError('DB9', {
+768                     database: name
+769                 });
+770             }
+771         } else {
+772             // check if combination already used
+773             throwIfDatabaseNameUsed(name, storage);
+774         }
+775 
+776         USED_DATABASE_NAMES.add(databaseNameKey);
+777 
+778         const databaseInstanceToken = randomToken(10);
+779         const storageInstance = await createRxDatabaseStorageInstance<
+780             Internals,
+781             InstanceCreationOptions
+782         >(
+783             databaseInstanceToken,
+784             storage,
+785             name,
+786             instanceCreationOptions as any,
+787             multiInstance,
+788             password
+789         );
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:38Z)**_
@@ -4525,6 +4610,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:23:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:43Z)**_
@@ -4535,6 +4621,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:23:43Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:44Z)**_
@@ -4549,6 +4636,7 @@ Re-run migration test
 Exit code 1
 (eval):cd:1: no such file or directory: worktrees/fix-bookmarks-dm4-old-users
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:23:50Z)**_
@@ -4583,13 +4671,14 @@ If you already purchased premium access you can disable this log by calling the 
 
 Done in 0.94s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:24:10Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 02:24:11Z)**_
 
-Test passes in vitest! So the migration *logic* is correct in isolation. The bug must be from interaction with other collections or real-browser timing. Let me reproduce closer to production by adding all collections together.
+Test passes in vitest! So the migration _logic_ is correct in isolation. The bug must be from interaction with other collections or real-browser timing. Let me reproduce closer to production by adding all collections together.
 
 _**Agent (claude-opus-4-7 2026-04-21 02:24:12Z)**_
 
@@ -4598,114 +4687,115 @@ _**Agent (claude-opus-4-7 2026-04-21 02:24:12Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import { addRxPlugin, createRxDatabase, type RxJsonSchema } from 'rxdb';
-3	import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
-4	import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-5	import { beforeAll, describe, expect, it } from 'vitest';
-6	import { bookmarksSchema } from './schemas';
-7	
-8	addRxPlugin(RxDBMigrationSchemaPlugin);
-9	
-10	type V0GameIdShape = {
-11	  id: string;
-12	  profileId: string;
-13	  gameId: string;
-14	  createdAt: string;
-15	};
-16	
-17	const bookmarksV0GameIdSchema: RxJsonSchema<V0GameIdShape> = {
-18	  version: 0,
-19	  primaryKey: 'id',
-20	  type: 'object',
-21	  properties: {
-22	    id: { type: 'string', maxLength: 36 },
-23	    profileId: { type: 'string', maxLength: 36 },
-24	    gameId: { type: 'string', maxLength: 64 },
-25	    createdAt: { type: 'string', format: 'date-time' },
-26	  },
-27	  required: ['id', 'profileId', 'gameId', 'createdAt'],
-28	  additionalProperties: false,
-29	};
-30	
-31	const migrationStrategies = {
-32	  1: (oldDoc: Record<string, unknown>) => {
-33	    const profileId = oldDoc.profileId as string;
-34	    const gameId = oldDoc.gameId as string;
-35	    return {
-36	      id: `${profileId}:game:${gameId}`,
-37	      profileId,
-38	      targetType: 'game',
-39	      targetId: gameId,
-40	      createdAt: oldDoc.createdAt,
-41	    };
-42	  },
-43	};
-44	
-45	const realWorldV0Fixtures: V0GameIdShape[] = [
-46	  {
-47	    id: 'tJDLrcsRUtvroJvbMo6AE',
-48	    profileId: 'anonymous',
-49	    gameId: 'math-subtraction',
-50	    createdAt: '2026-04-02T12:06:57.559Z',
-51	  },
-52	  {
-53	    id: 'zngVeBJa_tBjWvqdEWc3m',
-54	    profileId: 'anonymous',
-55	    gameId: 'placeholder-game',
-56	    createdAt: '2026-04-02T12:06:58.698Z',
-57	  },
-58	];
-59	
-60	describe('bookmarks v0 (gameId shape) → v1 migration', () => {
-61	  beforeAll(() => {
-62	    if (typeof structuredClone === 'undefined') {
-63	      // jsdom lacks structuredClone in older Node, fake-indexeddb relies on it
-64	      (
-65	        globalThis as unknown as { structuredClone: typeof structuredClone }
-66	      ).structuredClone = (v) => JSON.parse(JSON.stringify(v));
-67	    }
-68	  });
-69	
-70	  it('reopens a v0 DB at v1 and migrates real-world docs without DM4', async () => {
-71	    const dbName = `bs-mig-${nanoid()}`;
-72	
-73	    const db0 = await createRxDatabase({
-74	      name: dbName,
-75	      storage: getRxStorageDexie(),
-76	      multiInstance: false,
-77	    });
-78	    await db0.addCollections({
-79	      bookmarks: { schema: bookmarksV0GameIdSchema },
-80	    });
-81	    await db0.bookmarks.bulkInsert(realWorldV0Fixtures);
-82	    await db0.close();
-83	
-84	    const db1 = await createRxDatabase({
-85	      name: dbName,
-86	      storage: getRxStorageDexie(),
-87	      multiInstance: false,
-88	    });
-89	    await db1.addCollections({
-90	      bookmarks: {
-91	        schema: bookmarksSchema,
-92	        migrationStrategies,
-93	      },
-94	    });
-95	
-96	    const migrated = await db1.bookmarks.find().exec();
-97	    const ids = migrated.map((d) => d.id).sort();
-98	    expect(ids).toEqual([
-99	      'anonymous:game:math-subtraction',
-100	      'anonymous:game:placeholder-game',
-101	    ]);
-102	    expect(migrated.every((d) => d.targetType === 'game')).toBe(true);
-103	
-104	    await db1.close();
-105	  });
-106	});
+1 import { nanoid } from 'nanoid';
+2 import { addRxPlugin, createRxDatabase, type RxJsonSchema } from 'rxdb';
+3 import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
+4 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
+5 import { beforeAll, describe, expect, it } from 'vitest';
+6 import { bookmarksSchema } from './schemas';
+7 
+8 addRxPlugin(RxDBMigrationSchemaPlugin);
+9 
+10 type V0GameIdShape = {
+11   id: string;
+12   profileId: string;
+13   gameId: string;
+14   createdAt: string;
+15 };
+16 
+17 const bookmarksV0GameIdSchema: RxJsonSchema<V0GameIdShape> = {
+18   version: 0,
+19   primaryKey: 'id',
+20   type: 'object',
+21   properties: {
+22     id: { type: 'string', maxLength: 36 },
+23     profileId: { type: 'string', maxLength: 36 },
+24     gameId: { type: 'string', maxLength: 64 },
+25     createdAt: { type: 'string', format: 'date-time' },
+26   },
+27   required: ['id', 'profileId', 'gameId', 'createdAt'],
+28   additionalProperties: false,
+29 };
+30 
+31 const migrationStrategies = {
+32   1: (oldDoc: Record<string, unknown>) => {
+33     const profileId = oldDoc.profileId as string;
+34     const gameId = oldDoc.gameId as string;
+35     return {
+36       id: `${profileId}:game:${gameId}`,
+37       profileId,
+38       targetType: 'game',
+39       targetId: gameId,
+40       createdAt: oldDoc.createdAt,
+41     };
+42   },
+43 };
+44 
+45 const realWorldV0Fixtures: V0GameIdShape[] = [
+46   {
+47     id: 'tJDLrcsRUtvroJvbMo6AE',
+48     profileId: 'anonymous',
+49     gameId: 'math-subtraction',
+50     createdAt: '2026-04-02T12:06:57.559Z',
+51   },
+52   {
+53     id: 'zngVeBJa_tBjWvqdEWc3m',
+54     profileId: 'anonymous',
+55     gameId: 'placeholder-game',
+56     createdAt: '2026-04-02T12:06:58.698Z',
+57   },
+58 ];
+59 
+60 describe('bookmarks v0 (gameId shape) → v1 migration', () => {
+61   beforeAll(() => {
+62     if (typeof structuredClone === 'undefined') {
+63       // jsdom lacks structuredClone in older Node, fake-indexeddb relies on it
+64       (
+65         globalThis as unknown as { structuredClone: typeof structuredClone }
+66       ).structuredClone = (v) => JSON.parse(JSON.stringify(v));
+67     }
+68   });
+69 
+70   it('reopens a v0 DB at v1 and migrates real-world docs without DM4', async () => {
+71     const dbName = `bs-mig-${nanoid()}`;
+72 
+73     const db0 = await createRxDatabase({
+74       name: dbName,
+75       storage: getRxStorageDexie(),
+76       multiInstance: false,
+77     });
+78     await db0.addCollections({
+79       bookmarks: { schema: bookmarksV0GameIdSchema },
+80     });
+81     await db0.bookmarks.bulkInsert(realWorldV0Fixtures);
+82     await db0.close();
+83 
+84     const db1 = await createRxDatabase({
+85       name: dbName,
+86       storage: getRxStorageDexie(),
+87       multiInstance: false,
+88     });
+89     await db1.addCollections({
+90       bookmarks: {
+91         schema: bookmarksSchema,
+92         migrationStrategies,
+93       },
+94     });
+95 
+96     const migrated = await db1.bookmarks.find().exec();
+97     const ids = migrated.map((d) => d.id).sort();
+98     expect(ids).toEqual([
+99       'anonymous:game:math-subtraction',
+100       'anonymous:game:placeholder-game',
+101     ]);
+102     expect(migrated.every((d) => d.targetType === 'game')).toBe(true);
+103 
+104     await db1.close();
+105   });
+106 });
 107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:24:40Z)**_
@@ -4721,55 +4811,56 @@ _**Agent (claude-opus-4-7 2026-04-21 02:24:42Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/schemas/app-meta.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type AppMetaDoc = {
-4	  id: 'singleton';
-5	  appVersion: string;
-6	  rxdbSchemaVersion: number;
-7	  lastMigrationAt: string | null;
-8	  installId: string;
-9	  customGamesMigrated?: boolean;
-10	};
-11	
-12	export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
-13	  version: 1,
-14	  primaryKey: 'id',
-15	  type: 'object',
-16	  properties: {
-17	    id: {
-18	      type: 'string',
-19	      maxLength: 36,
-20	    },
-21	    appVersion: {
-22	      type: 'string',
-23	      // eslint-disable-next-line unicorn/prefer-string-raw -- regex is not a string
-24	      pattern: '^\\d+\\.\\d+\\.\\d+$',
-25	    },
-26	    rxdbSchemaVersion: {
-27	      type: 'integer',
-28	      minimum: 0,
-29	      multipleOf: 1,
-30	    },
-31	    lastMigrationAt: {
-32	      oneOf: [
-33	        { type: 'string', format: 'date-time' },
-34	        { type: 'null' },
-35	      ],
-36	    },
-37	    installId: {
-38	      type: 'string',
-39	      maxLength: 64,
-40	    },
-41	    customGamesMigrated: {
-42	      type: 'boolean',
-43	    },
-44	  },
-45	  required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
-46	  additionalProperties: false,
-47	};
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type AppMetaDoc = {
+4   id: 'singleton';
+5   appVersion: string;
+6   rxdbSchemaVersion: number;
+7   lastMigrationAt: string | null;
+8   installId: string;
+9   customGamesMigrated?: boolean;
+10 };
+11 
+12 export const appMetaSchema: RxJsonSchema<AppMetaDoc> = {
+13   version: 1,
+14   primaryKey: 'id',
+15   type: 'object',
+16   properties: {
+17     id: {
+18       type: 'string',
+19       maxLength: 36,
+20     },
+21     appVersion: {
+22       type: 'string',
+23       // eslint-disable-next-line unicorn/prefer-string-raw -- regex is not a string
+24       pattern: '^\\d+\\.\\d+\\.\\d+$',
+25     },
+26     rxdbSchemaVersion: {
+27       type: 'integer',
+28       minimum: 0,
+29       multipleOf: 1,
+30     },
+31     lastMigrationAt: {
+32       oneOf: [
+33         { type: 'string', format: 'date-time' },
+34         { type: 'null' },
+35       ],
+36     },
+37     installId: {
+38       type: 'string',
+39       maxLength: 64,
+40     },
+41     customGamesMigrated: {
+42       type: 'boolean',
+43     },
+44   },
+45   required: ['id', 'appVersion', 'rxdbSchemaVersion', 'installId'],
+46   additionalProperties: false,
+47 };
 48
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:24:53Z)**_
@@ -4871,6 +4962,7 @@ EOF
   "customGamesMigrated": true
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:25:11Z)**_
@@ -4928,6 +5020,7 @@ rx-migration-status|session_history_index-v-1                _rev=2-xniidrjlgp  
 rx-migration-status|session_history_index-v-2                _rev=3-vsmonviicv                   _deleted=0
 storage-token|storageToken                                   _rev=1-rsxfshggzi                   _deleted=0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:26:14Z)**_
@@ -4943,67 +5036,68 @@ _**Agent (claude-opus-4-7 2026-04-21 02:26:16Z)**_
  `./node_modules/rxdb/src/plugins/migration-schema/rx-migration-state.ts`
 
 ```text
-538	    public async getConnectedStorageInstances() {
-539	        const oldCollectionMeta = ensureNotFalsy(await this.oldCollectionMeta);
-540	        const ret: {
-541	            oldStorage: RxStorageInstance<any, any, any>;
-542	            newStorage: RxStorageInstance<any, any, any>;
-543	        }[] = [];
-544	
-545	        await Promise.all(
-546	            await Promise.all(
-547	                oldCollectionMeta
-548	                    .data
-549	                    .connectedStorages
-550	                    .map(async (connectedStorage) => {
-551	
-552	                        // atm we can only migrate replication states.
-553	                        if (connectedStorage.schema.title !== META_INSTANCE_SCHEMA_TITLE) {
-554	                            throw new Error('unknown migration handling for schema');
-555	                        }
-556	
-557	                        const newSchema = getRxReplicationMetaInstanceSchema(
-558	                            clone(this.collection.schema.jsonSchema),
-559	                            hasEncryption(connectedStorage.schema)
-560	                        );
-561	                        newSchema.version = this.collection.schema.version;
-562	                        const [oldStorage, newStorage] = await Promise.all([
-563	                            this.database.storage.createStorageInstance({
-564	                                databaseInstanceToken: this.database.token,
-565	                                databaseName: this.database.name,
-566	                                devMode: overwritable.isDevMode(),
-567	                                multiInstance: this.database.multiInstance,
-568	                                options: {},
-569	                                schema: connectedStorage.schema,
-570	                                password: this.database.password,
-571	                                collectionName: connectedStorage.collectionName
-572	                            }),
-573	                            this.database.storage.createStorageInstance({
-574	                                databaseInstanceToken: this.database.token,
-575	                                databaseName: this.database.name,
-576	                                devMode: overwritable.isDevMode(),
-577	                                multiInstance: this.database.multiInstance,
-578	                                options: {},
-579	                                schema: newSchema,
-580	                                password: this.database.password,
-581	                                collectionName: connectedStorage.collectionName
-582	                            })
-583	                        ]);
-584	                        ret.push({ oldStorage, newStorage });
-585	                    })
-586	            )
-587	        );
-588	
-589	        return ret;
-590	    }
-591	
-592	
-593	
-594	    async migratePromise(batchSize?: number): Promise<RxMigrationStatus> {
-595	        this.startMigration(batchSize).catch(() => { });
-596	        const must = await this.mustMigrate;
-597	        if (!must) {
+538     public async getConnectedStorageInstances() {
+539         const oldCollectionMeta = ensureNotFalsy(await this.oldCollectionMeta);
+540         const ret: {
+541             oldStorage: RxStorageInstance<any, any, any>;
+542             newStorage: RxStorageInstance<any, any, any>;
+543         }[] = [];
+544 
+545         await Promise.all(
+546             await Promise.all(
+547                 oldCollectionMeta
+548                     .data
+549                     .connectedStorages
+550                     .map(async (connectedStorage) => {
+551 
+552                         // atm we can only migrate replication states.
+553                         if (connectedStorage.schema.title !== META_INSTANCE_SCHEMA_TITLE) {
+554                             throw new Error('unknown migration handling for schema');
+555                         }
+556 
+557                         const newSchema = getRxReplicationMetaInstanceSchema(
+558                             clone(this.collection.schema.jsonSchema),
+559                             hasEncryption(connectedStorage.schema)
+560                         );
+561                         newSchema.version = this.collection.schema.version;
+562                         const [oldStorage, newStorage] = await Promise.all([
+563                             this.database.storage.createStorageInstance({
+564                                 databaseInstanceToken: this.database.token,
+565                                 databaseName: this.database.name,
+566                                 devMode: overwritable.isDevMode(),
+567                                 multiInstance: this.database.multiInstance,
+568                                 options: {},
+569                                 schema: connectedStorage.schema,
+570                                 password: this.database.password,
+571                                 collectionName: connectedStorage.collectionName
+572                             }),
+573                             this.database.storage.createStorageInstance({
+574                                 databaseInstanceToken: this.database.token,
+575                                 databaseName: this.database.name,
+576                                 devMode: overwritable.isDevMode(),
+577                                 multiInstance: this.database.multiInstance,
+578                                 options: {},
+579                                 schema: newSchema,
+580                                 password: this.database.password,
+581                                 collectionName: connectedStorage.collectionName
+582                             })
+583                         ]);
+584                         ret.push({ oldStorage, newStorage });
+585                     })
+586             )
+587         );
+588 
+589         return ret;
+590     }
+591 
+592 
+593 
+594     async migratePromise(batchSize?: number): Promise<RxMigrationStatus> {
+595         this.startMigration(batchSize).catch(() => { });
+596         const must = await this.mustMigrate;
+597         if (!must) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:26:39Z)**_
@@ -5025,13 +5119,13 @@ Reading `_rxdb_internal`:
 
 Bookmarks migration has failed and retried **six times**. Each load: `addCollections` → migration runs → throws → catch block sets status:ERROR but never deletes `collection|bookmarks-0` → next load tries again.
 
-The migration-meta store `--0--rx-migration-state-meta-bookmarks-0` is **empty** — meaning the failure happens *before* the first replication checkpoint, exactly matching the stack: `migrateStorage → changeStream` blows up at upstream subscription time.
+The migration-meta store `--0--rx-migration-state-meta-bookmarks-0` is **empty** — meaning the failure happens _before_ the first replication checkpoint, exactly matching the stack: `migrateStorage → changeStream` blows up at upstream subscription time.
 
 Also visible: app_meta singleton has `_rev: 8463437-rx_storage_replication_...` (8.4M revisions). That's not the cause of the bookmarks failure, but it's a separate runaway-replication smell worth noting.
 
 ## Why my vitest test passes but real Chrome fails
 
-Test passes ⇒ the migration *strategy* is logically correct. Real Chrome on this device fails ⇒ environment-specific (Chrome IDB quotas, accumulated rev history, multi-tab BroadcastChannel, or a subtle Dexie open-after-close behavior fake-indexeddb doesn't model).
+Test passes ⇒ the migration _strategy_ is logically correct. Real Chrome on this device fails ⇒ environment-specific (Chrome IDB quotas, accumulated rev history, multi-tab BroadcastChannel, or a subtle Dexie open-after-close behavior fake-indexeddb doesn't model).
 
 ## Proposed pivot: ship a **recovery path**, don't try to fix the migration race
 
@@ -5223,6 +5317,7 @@ describe('recoverBrokenBookmarksMigration', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.test.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:29:21Z)**_
@@ -5271,6 +5366,7 @@ Error: Failed to resolve import "./recover-bookmarks-migration" from "src/db/rec
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:29:25Z)**_
@@ -5365,6 +5461,7 @@ export const recoverBrokenBookmarksMigration = async (): Promise<void> => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:29:44Z)**_
@@ -5390,6 +5487,7 @@ $ /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/node_
 
 Done in 0.87s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:29:51Z)**_
@@ -5403,35 +5501,36 @@ _**Agent (claude-opus-4-7 2026-04-21 02:29:52Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts`
 
 ```text
-127	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-128	
-129	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-130	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-131	  if (typeof indexedDB === 'undefined') {
-132	    throw new TypeError(
-133	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-134	    );
-135	  }
-136	  productionDbPromise ??= (async () => {
-137	    const db = await createRxDatabase<BaseSkillDatabase>({
-138	      name: PRODUCTION_DB_NAME,
-139	      storage: getRxStorageDexie(),
-140	      multiInstance: false,
-141	    });
-142	    const withCols = await addBaseSkillCollections(db);
-143	    await checkVersionAndMigrate(withCols);
-144	    return withCols;
-145	  })();
-146	  return productionDbPromise;
-147	}
-148	
-149	export async function destroyTestDatabase(
-150	  db?: BaseSkillDatabase,
-151	): Promise<void> {
-152	  if (db) await db.remove();
-153	}
+127 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+128 
+129 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+130 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+131   if (typeof indexedDB === 'undefined') {
+132     throw new TypeError(
+133       'getOrCreateDatabase is only available in a browser with IndexedDB',
+134     );
+135   }
+136   productionDbPromise ??= (async () => {
+137     const db = await createRxDatabase<BaseSkillDatabase>({
+138       name: PRODUCTION_DB_NAME,
+139       storage: getRxStorageDexie(),
+140       multiInstance: false,
+141     });
+142     const withCols = await addBaseSkillCollections(db);
+143     await checkVersionAndMigrate(withCols);
+144     return withCols;
+145   })();
+146   return productionDbPromise;
+147 }
+148 
+149 export async function destroyTestDatabase(
+150   db?: BaseSkillDatabase,
+151 ): Promise<void> {
+152   if (db) await db.remove();
+153 }
 154
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:29:59Z)**_
@@ -5442,6 +5541,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:29:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:30:03Z)**_
@@ -5452,6 +5552,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:30:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:30:49Z)**_
@@ -5469,6 +5570,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:30:51Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:30:51Z)**_
@@ -5483,6 +5585,7 @@ List e2e folder
 Exit code 1
 ls: worktrees/fix-bookmarks-dm4-old-users/e2e/: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:30:56Z)**_
@@ -5495,6 +5598,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:30:56Z)**_
 <tool_use_error>InputValidationError: Glob failed due to the following issue:
 An unexpected parameter `head_limit` was provided</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:30:58Z)**_
@@ -5508,6 +5612,7 @@ Find e2e/playwright dirs
 ```text
 find: worktrees/fix-bookmarks-dm4-old-users: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:01Z)**_
@@ -5523,6 +5628,7 @@ Exit code 1
 /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users
 ls: worktrees/: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:07Z)**_
@@ -5539,6 +5645,7 @@ playwright.config.ts
 ---
 ./e2e
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:12Z)**_
@@ -5560,6 +5667,7 @@ smoke.spec.ts
 start-game.ts
 visual.spec.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:16Z)**_
@@ -5569,52 +5677,53 @@ _**Agent (claude-opus-4-7 2026-04-21 02:31:16Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/e2e/bookmark-toggle.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	
-4	test.beforeEach(async ({ page }) => {
-5	  await seedMathRandom(page);
-6	});
-7	
-8	test('bookmark a default game, persist across navigation, then unbookmark', async ({
-9	  page,
-10	}) => {
-11	  await page.goto('/en/');
-12	  await page.getByRole('main').waitFor({ state: 'visible' });
-13	
-14	  const addBookmark = page
-15	    .getByRole('button', { name: /add bookmark/i })
-16	    .first();
-17	  await addBookmark.click();
-18	
-19	  const removeBookmark = page
-20	    .getByRole('button', { name: /remove bookmark/i })
-21	    .first();
-22	  await expect(removeBookmark).toHaveAttribute('aria-pressed', 'true');
-23	
-24	  await page
-25	    .getByRole('button', { name: /^settings$/i })
-26	    .first()
-27	    .click();
-28	  const dialog = page.getByRole('dialog');
-29	  await dialog.waitFor({ state: 'visible' });
-30	  await page.keyboard.press('Escape');
-31	  await dialog.waitFor({ state: 'hidden' });
-32	
-33	  await expect(
-34	    page.getByRole('button', { name: /remove bookmark/i }).first(),
-35	  ).toHaveAttribute('aria-pressed', 'true');
-36	
-37	  await page
-38	    .getByRole('button', { name: /remove bookmark/i })
-39	    .first()
-40	    .click();
-41	  await expect(
-42	    page.getByRole('button', { name: /add bookmark/i }).first(),
-43	  ).toHaveAttribute('aria-pressed', 'false');
-44	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 
+4 test.beforeEach(async ({ page }) => {
+5   await seedMathRandom(page);
+6 });
+7 
+8 test('bookmark a default game, persist across navigation, then unbookmark', async ({
+9   page,
+10 }) => {
+11   await page.goto('/en/');
+12   await page.getByRole('main').waitFor({ state: 'visible' });
+13 
+14   const addBookmark = page
+15     .getByRole('button', { name: /add bookmark/i })
+16     .first();
+17   await addBookmark.click();
+18 
+19   const removeBookmark = page
+20     .getByRole('button', { name: /remove bookmark/i })
+21     .first();
+22   await expect(removeBookmark).toHaveAttribute('aria-pressed', 'true');
+23 
+24   await page
+25     .getByRole('button', { name: /^settings$/i })
+26     .first()
+27     .click();
+28   const dialog = page.getByRole('dialog');
+29   await dialog.waitFor({ state: 'visible' });
+30   await page.keyboard.press('Escape');
+31   await dialog.waitFor({ state: 'hidden' });
+32 
+33   await expect(
+34     page.getByRole('button', { name: /remove bookmark/i }).first(),
+35   ).toHaveAttribute('aria-pressed', 'true');
+36 
+37   await page
+38     .getByRole('button', { name: /remove bookmark/i })
+39     .first()
+40     .click();
+41   await expect(
+42     page.getByRole('button', { name: /add bookmark/i }).first(),
+43   ).toHaveAttribute('aria-pressed', 'false');
+44 });
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:16Z)**_
@@ -5624,55 +5733,56 @@ _**Agent (claude-opus-4-7 2026-04-21 02:31:16Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/e2e/smoke.spec.ts`
 
 ```text
-1	import { expect, test } from '@playwright/test';
-2	import { seedMathRandom } from './seed-math-random';
-3	import { startGame } from './start-game';
-4	
-5	test.beforeEach(async ({ page }) => {
-6	  await seedMathRandom(page);
-7	});
-8	
-9	/** History router: home under default locale (Playwright webServer uses APP_BASE_URL=/). */
-10	function localeHomePath(locale: string): string {
-11	  return `/${locale}/`;
-12	}
-13	
-14	test('home page loads', async ({ page }) => {
-15	  await page.goto(localeHomePath('en'));
-16	  await page.getByRole('main').waitFor({ state: 'visible' });
-17	  await expect(page).toHaveTitle(/BaseSkill/);
-18	});
-19	
-20	test('game catalog renders', async ({ page }) => {
-21	  await page.goto(localeHomePath('en'));
-22	  await page.getByRole('main').waitFor({ state: 'visible' });
-23	  await expect(
-24	    page.getByRole('button', { name: /^Play / }).first(),
-25	  ).toBeVisible();
-26	});
-27	
-28	test('WordSpell picture mode renders letter tiles', async ({
-29	  page,
-30	}) => {
-31	  await page.goto('/en/game/word-spell');
-32	  await page.getByRole('main').waitFor({ state: 'visible' });
-33	  await startGame(page);
-34	  const tiles = page.getByRole('button', { name: /^Letter /i });
-35	  await expect(tiles.first()).toBeVisible();
-36	});
-37	
-38	test('NumberMatch numeral-to-group renders numeral question', async ({
-39	  page,
-40	}) => {
-41	  await page.goto('/en/game/number-match');
-42	  await page.getByRole('main').waitFor({ state: 'visible' });
-43	  await startGame(page);
-44	  await expect(
-45	    page.getByRole('button', { name: 'Hear the question' }),
-46	  ).toBeVisible();
-47	});
+1 import { expect, test } from '@playwright/test';
+2 import { seedMathRandom } from './seed-math-random';
+3 import { startGame } from './start-game';
+4 
+5 test.beforeEach(async ({ page }) => {
+6   await seedMathRandom(page);
+7 });
+8 
+9 /** History router: home under default locale (Playwright webServer uses APP_BASE_URL=/). */
+10 function localeHomePath(locale: string): string {
+11   return `/${locale}/`;
+12 }
+13 
+14 test('home page loads', async ({ page }) => {
+15   await page.goto(localeHomePath('en'));
+16   await page.getByRole('main').waitFor({ state: 'visible' });
+17   await expect(page).toHaveTitle(/BaseSkill/);
+18 });
+19 
+20 test('game catalog renders', async ({ page }) => {
+21   await page.goto(localeHomePath('en'));
+22   await page.getByRole('main').waitFor({ state: 'visible' });
+23   await expect(
+24     page.getByRole('button', { name: /^Play / }).first(),
+25   ).toBeVisible();
+26 });
+27 
+28 test('WordSpell picture mode renders letter tiles', async ({
+29   page,
+30 }) => {
+31   await page.goto('/en/game/word-spell');
+32   await page.getByRole('main').waitFor({ state: 'visible' });
+33   await startGame(page);
+34   const tiles = page.getByRole('button', { name: /^Letter /i });
+35   await expect(tiles.first()).toBeVisible();
+36 });
+37 
+38 test('NumberMatch numeral-to-group renders numeral question', async ({
+39   page,
+40 }) => {
+41   await page.goto('/en/game/number-match');
+42   await page.getByRole('main').waitFor({ state: 'visible' });
+43   await startGame(page);
+44   await expect(
+45     page.getByRole('button', { name: 'Hear the question' }),
+46   ).toBeVisible();
+47 });
 48
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:44Z)**_
@@ -5720,6 +5830,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 2.93s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:31:53Z)**_
@@ -5902,6 +6013,7 @@ test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', asyn
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:32:26Z)**_
@@ -5954,6 +6066,7 @@ export default defineConfig({
     },
     {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:32:50Z)**_
@@ -6026,6 +6139,7 @@ Running 1 test using 1 worker
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:32:56Z)**_
@@ -6065,6 +6179,7 @@ export const startGame = async (page: Page): Promise<void> => {
   }
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:03Z)**_
@@ -6075,6 +6190,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:33:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:16Z)**_
@@ -6107,13 +6223,14 @@ Running 1 test using 1 worker
 [1A[2K  1 passed (11.6s)
 Done in 12.18s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:38Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:39Z)**_
 
-E2E passes in 11.6s — seeded broken state boots cleanly. Now let me verify the full change set, run the broader suite, then add the local seed-script for you to verify against *your* IndexedDB.
+E2E passes in 11.6s — seeded broken state boots cleanly. Now let me verify the full change set, run the broader suite, then add the local seed-script for you to verify against _your_ IndexedDB.
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:41Z)**_
 
@@ -6122,47 +6239,48 @@ _**Agent (claude-opus-4-7 2026-04-21 02:33:41Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts`
 
 ```text
-125	  });
-126	  const withCols = await addBaseSkillCollections(db);
-127	  await checkVersionAndMigrate(withCols);
-128	  return withCols;
-129	}
-130	
-131	let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
-132	
-133	/** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
-134	export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
-135	  if (typeof indexedDB === 'undefined') {
-136	    throw new TypeError(
-137	      'getOrCreateDatabase is only available in a browser with IndexedDB',
-138	    );
-139	  }
-140	  productionDbPromise ??= (async () => {
-141	    const open = async (): Promise<BaseSkillDatabase> => {
-142	      const db = await createRxDatabase<BaseSkillDatabase>({
-143	        name: PRODUCTION_DB_NAME,
-144	        storage: getRxStorageDexie(),
-145	        multiInstance: false,
-146	      });
-147	      try {
-148	        const withCols = await addBaseSkillCollections(db);
-149	        await checkVersionAndMigrate(withCols);
-150	        return withCols;
-151	      } catch (err) {
-152	        await db.close().catch(() => {});
-153	        throw err;
-154	      }
-155	    };
-156	    try {
-157	      return await open();
-158	    } catch (err) {
-159	      if (!isBookmarksMigrationFailure(err)) throw err;
-160	      await recoverBrokenBookmarksMigration();
-161	      return await open();
-162	    }
-163	  })();
-164	  return productionDbPromise;
+125   });
+126   const withCols = await addBaseSkillCollections(db);
+127   await checkVersionAndMigrate(withCols);
+128   return withCols;
+129 }
+130 
+131 let productionDbPromise: Promise<BaseSkillDatabase> | undefined;
+132 
+133 /** Browser-only: opens IndexedDB via Dexie-backed RxStorage and runs migrations. */
+134 export async function getOrCreateDatabase(): Promise<BaseSkillDatabase> {
+135   if (typeof indexedDB === 'undefined') {
+136     throw new TypeError(
+137       'getOrCreateDatabase is only available in a browser with IndexedDB',
+138     );
+139   }
+140   productionDbPromise ??= (async () => {
+141     const open = async (): Promise<BaseSkillDatabase> => {
+142       const db = await createRxDatabase<BaseSkillDatabase>({
+143         name: PRODUCTION_DB_NAME,
+144         storage: getRxStorageDexie(),
+145         multiInstance: false,
+146       });
+147       try {
+148         const withCols = await addBaseSkillCollections(db);
+149         await checkVersionAndMigrate(withCols);
+150         return withCols;
+151       } catch (err) {
+152         await db.close().catch(() => {});
+153         throw err;
+154       }
+155     };
+156     try {
+157       return await open();
+158     } catch (err) {
+159       if (!isBookmarksMigrationFailure(err)) throw err;
+160       await recoverBrokenBookmarksMigration();
+161       return await open();
+162     }
+163   })();
+164   return productionDbPromise;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:45Z)**_
@@ -6183,6 +6301,7 @@ error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:54Z)**_
@@ -6193,6 +6312,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:33:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:55Z)**_
@@ -6203,6 +6323,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:33:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:33:59Z)**_
@@ -6221,6 +6342,7 @@ src/db/bookmarks-migration.test.ts(96,28): error TS18048: 'db1.collections.bookm
 error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:06Z)**_
@@ -6232,45 +6354,46 @@ _**Agent (claude-opus-4-7 2026-04-21 02:34:07Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts`
 
 ```text
-70	  it('reopens a v0 DB at v1 and migrates real-world docs without DM4', async () => {
-71	    const dbName = `bs-mig-${nanoid()}`;
-72	
-73	    const db0 = await createRxDatabase({
-74	      name: dbName,
-75	      storage: getRxStorageDexie(),
-76	      multiInstance: false,
-77	    });
-78	    await db0.addCollections({
-79	      bookmarks: { schema: bookmarksV0GameIdSchema },
-80	    });
-81	    await db0.collections.bookmarks.bulkInsert(realWorldV0Fixtures);
-82	    await db0.close();
-83	
-84	    const db1 = await createRxDatabase({
-85	      name: dbName,
-86	      storage: getRxStorageDexie(),
-87	      multiInstance: false,
-88	    });
-89	    await db1.addCollections({
-90	      bookmarks: {
-91	        schema: bookmarksSchema,
-92	        migrationStrategies,
-93	      },
-94	    });
-95	
-96	    const migrated = await db1.collections.bookmarks.find().exec();
-97	    const ids = migrated.map((d) => d.id).sort();
-98	    expect(ids).toEqual([
-99	      'anonymous:game:math-subtraction',
-100	      'anonymous:game:placeholder-game',
-101	    ]);
-102	    expect(migrated.every((d) => d.targetType === 'game')).toBe(true);
-103	
-104	    await db1.close();
-105	  });
-106	});
+70   it('reopens a v0 DB at v1 and migrates real-world docs without DM4', async () => {
+71     const dbName = `bs-mig-${nanoid()}`;
+72 
+73     const db0 = await createRxDatabase({
+74       name: dbName,
+75       storage: getRxStorageDexie(),
+76       multiInstance: false,
+77     });
+78     await db0.addCollections({
+79       bookmarks: { schema: bookmarksV0GameIdSchema },
+80     });
+81     await db0.collections.bookmarks.bulkInsert(realWorldV0Fixtures);
+82     await db0.close();
+83 
+84     const db1 = await createRxDatabase({
+85       name: dbName,
+86       storage: getRxStorageDexie(),
+87       multiInstance: false,
+88     });
+89     await db1.addCollections({
+90       bookmarks: {
+91         schema: bookmarksSchema,
+92         migrationStrategies,
+93       },
+94     });
+95 
+96     const migrated = await db1.collections.bookmarks.find().exec();
+97     const ids = migrated.map((d) => d.id).sort();
+98     expect(ids).toEqual([
+99       'anonymous:game:math-subtraction',
+100       'anonymous:game:placeholder-game',
+101     ]);
+102     expect(migrated.every((d) => d.targetType === 'game')).toBe(true);
+103 
+104     await db1.close();
+105   });
+106 });
 107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:12Z)**_
@@ -6281,6 +6404,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:34:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:14Z)**_
@@ -6291,6 +6415,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:34:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:18Z)**_
@@ -6306,6 +6431,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.40s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:38Z)**_
@@ -6343,6 +6469,7 @@ Run lint
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:34:52Z)**_
@@ -6434,6 +6561,7 @@ export const recoverBrokenBookmarksMigration = async (): Promise<void> => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:15Z)**_
@@ -6444,6 +6572,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:35:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated. All occurrences were successfully replaced. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:17Z)**_
@@ -6454,6 +6583,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:35:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:44Z)**_
@@ -6607,6 +6737,7 @@ describe('recoverBrokenBookmarksMigration', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:55Z)**_
@@ -6617,6 +6748,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:35:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:56Z)**_
@@ -6627,6 +6759,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:35:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:35:59Z)**_
@@ -6637,6 +6770,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:35:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:36:17Z)**_
@@ -6670,6 +6804,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:36:34Z)**_
@@ -6703,6 +6838,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints --fix
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:36:41Z)**_
@@ -6725,6 +6861,7 @@ Run eslint --fix on changed files
 ✖ 4 problems (4 errors, 0 warnings)
 [This command modified 2 files you've previously read: src/db/bookmarks-migration.test.ts, e2e/bookmarks-dm4-recovery.spec.ts. Call Read before editing.]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:36:59Z)**_
@@ -6905,6 +7042,7 @@ test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', asyn
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:37:38Z)**_
@@ -6927,6 +7065,7 @@ Re-lint
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:37:44Z)**_
@@ -6937,6 +7076,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:37:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:37:49Z)**_
@@ -6947,6 +7087,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:37:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:37:51Z)**_
@@ -6957,6 +7098,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:37:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:02Z)**_
@@ -6974,6 +7116,7 @@ Re-lint final
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:18Z)**_
@@ -6997,6 +7140,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:26Z)**_
@@ -7007,6 +7151,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:38:26Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:39Z)**_
@@ -7022,6 +7167,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 12.34s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:43Z)**_
@@ -7048,6 +7194,7 @@ All db unit tests
 
 Done in 2.66s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:38:58Z)**_
@@ -7070,6 +7217,7 @@ Running 1 test using 1 worker
 [1A[2K  1 passed (10.4s)
 Done in 10.90s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:39:18Z)**_
@@ -7086,6 +7234,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:39:23Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:39:33Z)**_
@@ -7096,6 +7245,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:39:33Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:39:39Z)**_
@@ -7106,6 +7256,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:39:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:01Z)**_
@@ -7131,6 +7282,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.29s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:14Z)**_
@@ -7142,42 +7294,43 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:15Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts`
 
 ```text
-165	    d.databaseName.startsWith('rxdb-dexie-baseskill-data'),
-166	  );
-167	
-168	  await page.evaluate(async (payload) => {
-169	    const wipe = (name: string) =>
-170	      new Promise<void>((resolve, reject) => {
-171	        const request = indexedDB.deleteDatabase(name);
-172	        request.addEventListener('success', () => resolve());
-173	        request.addEventListener('error', () => reject(request.error));
-174	        request.addEventListener('blocked', () => resolve());
-175	      });
-176	    const open = (name: string, stores: string[]) =>
-177	      new Promise<IDBDatabase>((resolve, reject) => {
-178	        const request = indexedDB.open(name);
-179	        request.addEventListener('success', () => resolve(request.result));
-180	        request.addEventListener('error', () => reject(request.error));
-181	        request.addEventListener('upgradeneeded', () => {
-182	          for (const store of stores) {
-183	            if (!request.result.objectStoreNames.contains(store)) {
-184	              const keyPath = store === 'changes' ? 'sequence' : 'id';
-185	              request.result.createObjectStore(store, { keyPath });
-186	            }
-187	          }
-188	        });
-189	      });
-190	    const put = (db: IDBDatabase, store: string, value: unknown) =>
-191	      new Promise<void>((resolve, reject) => {
-192	        const tx = db.transaction(store, 'readwrite');
-193	        tx.objectStore(store).put(value);
-194	        tx.addEventListener('complete', () => resolve());
-195	        tx.addEventListener('error', () => reject(tx.error));
-196	      });
-197	
-198	    for (const dbExport of payload) await wipe(dbExport.databaseName);
+165     d.databaseName.startsWith('rxdb-dexie-baseskill-data'),
+166   );
+167 
+168   await page.evaluate(async (payload) => {
+169     const wipe = (name: string) =>
+170       new Promise<void>((resolve, reject) => {
+171         const request = indexedDB.deleteDatabase(name);
+172         request.addEventListener('success', () => resolve());
+173         request.addEventListener('error', () => reject(request.error));
+174         request.addEventListener('blocked', () => resolve());
+175       });
+176     const open = (name: string, stores: string[]) =>
+177       new Promise<IDBDatabase>((resolve, reject) => {
+178         const request = indexedDB.open(name);
+179         request.addEventListener('success', () => resolve(request.result));
+180         request.addEventListener('error', () => reject(request.error));
+181         request.addEventListener('upgradeneeded', () => {
+182           for (const store of stores) {
+183             if (!request.result.objectStoreNames.contains(store)) {
+184               const keyPath = store === 'changes' ? 'sequence' : 'id';
+185               request.result.createObjectStore(store, { keyPath });
+186             }
+187           }
+188         });
+189       });
+190     const put = (db: IDBDatabase, store: string, value: unknown) =>
+191       new Promise<void>((resolve, reject) => {
+192         const tx = db.transaction(store, 'readwrite');
+193         tx.objectStore(store).put(value);
+194         tx.addEventListener('complete', () => resolve());
+195         tx.addEventListener('error', () => reject(tx.error));
+196       });
+197 
+198     for (const dbExport of payload) await wipe(dbExport.databaseName);
 199
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:28Z)**_
@@ -7188,6 +7341,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:29Z)**_
@@ -7197,37 +7351,38 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:29Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts`
 
 ```text
-200	
-201	    for (const dbExport of payload) await wipe(dbExport.databaseName);
-202	
-203	    for (const dbExport of payload) {
-204	      const db = await open(dbExport.databaseName, dbExport.objectStoreNames);
-205	      for (const store of dbExport.stores) {
-206	        for (const row of store.data) {
-207	          await put(db, store.name, row.value);
-208	        }
-209	      }
-210	      db.close();
-211	    }
-212	  }, baseskillDbs);
-213	};
-214	
-215	test.beforeEach(async ({ page }) => {
-216	  await seedMathRandom(page);
-217	});
-218	
-219	test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', async ({
-220	  page,
-221	}) => {
-222	  // Land on the origin so subsequent IndexedDB calls run against it.
-223	  await page.goto('/en/');
-224	  await page.getByRole('main').waitFor({ state: 'visible' });
-225	
-226	  await seedBrokenV0BookmarksState(page);
-227	
-228	  await page.reload();
-229	  await page.getByRole('main').waitFor({ state: 'visible' });
+200 
+201     for (const dbExport of payload) await wipe(dbExport.databaseName);
+202 
+203     for (const dbExport of payload) {
+204       const db = await open(dbExport.databaseName, dbExport.objectStoreNames);
+205       for (const store of dbExport.stores) {
+206         for (const row of store.data) {
+207           await put(db, store.name, row.value);
+208         }
+209       }
+210       db.close();
+211     }
+212   }, baseskillDbs);
+213 };
+214 
+215 test.beforeEach(async ({ page }) => {
+216   await seedMathRandom(page);
+217 });
+218 
+219 test('app boots when v0 bookmarks (gameId shape) are present from v0.10.0', async ({
+220   page,
+221 }) => {
+222   // Land on the origin so subsequent IndexedDB calls run against it.
+223   await page.goto('/en/');
+224   await page.getByRole('main').waitFor({ state: 'visible' });
+225 
+226   await seedBrokenV0BookmarksState(page);
+227 
+228   await page.reload();
+229   await page.getByRole('main').waitFor({ state: 'visible' });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:37Z)**_
@@ -7238,6 +7393,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:37Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:49Z)**_
@@ -7258,6 +7414,7 @@ Lint check
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:55Z)**_
@@ -7268,6 +7425,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:40:57Z)**_
@@ -7278,6 +7436,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:40:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:41:10Z)**_
@@ -7293,6 +7452,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 12.77s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:41:27Z)**_
@@ -7319,6 +7479,7 @@ Run e2e seeded from your real export
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:41:37Z)**_
@@ -7373,6 +7534,7 @@ Running 1 test using 1 worker
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:42:08Z)**_
@@ -7389,6 +7551,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:42:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:42:24Z)**_
@@ -7426,6 +7589,7 @@ Re-run real-export seeded e2e
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:42:32Z)**_
@@ -7484,6 +7648,7 @@ MISSING id: db=rxdb-dexie-baseskill-data--2--session_history_index key=tlq-enjXS
 MISSING id: db=rxdb-dexie-baseskill-data--2--session_history_index key=x9wATAc4q-0NuyTc0A8tA value_keys=['sessionId', 'profileId', 'gameId', 'startedAt', 'gradeBand', 'status', 'seed', 'initialContent']
 MISSING id: db=rxdb-dexie-baseskill-data--2--session_history_index key=yNWCu1oUHTFvoFotg3Jq_ value_keys=['sessionId', 'profileId', 'gameId', 'startedAt', 'gradeBand', 'status', 'seed', 'initialContent']
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:42:42Z)**_
@@ -7499,6 +7664,7 @@ Confirm primaryKey for session_history_index
 ```text
 26:    primaryKey: 'sessionId',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:42:57Z)**_
@@ -7509,6 +7675,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:42:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:43:00Z)**_
@@ -7519,6 +7686,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:43:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:43:39Z)**_
@@ -7555,6 +7723,7 @@ Re-run real-export e2e
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:43:53Z)**_
@@ -7571,6 +7740,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:44:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:44:41Z)**_
@@ -7628,6 +7798,7 @@ Running 1 test using 1 worker
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:44:46Z)**_
@@ -7655,13 +7826,17 @@ Show error context
 # Error details
 
 ```
+
 Test timeout of 30000ms exceeded.
+
 ```
 
 ```
+
 Error: locator.waitFor: Test timeout of 30000ms exceeded.
 Call log:
-  - waiting for getByRole('main') to be visible
+
+- waiting for getByRole('main') to be visible
 
 ```
 
@@ -7742,6 +7917,7 @@ Call log:
   254 | 
   255 | test.describe('verify against a real DevTools IndexedDB export', () => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:45:13Z)**_
@@ -7758,6 +7934,7 @@ _**Agent (claude-opus-4-7 2026-04-21 02:45:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/e2e/bookmarks-dm4-recovery.spec.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:45:35Z)**_
@@ -7800,6 +7977,7 @@ Running 1 test using 1 worker
 [1A[2K  1 passed (9.8s)
 Done in 10.51s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:45:43Z)**_
@@ -7828,6 +8006,7 @@ Exit code 1
 Done in 2.62s.
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:45:48Z)**_
@@ -7841,6 +8020,7 @@ Run new + existing bookmark e2e
 ```text
 <tool_use_error>Cancelled: parallel tool call Bash(yarn vitest run src/db 2>&1 | tail -8 &&…) errored</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:45:55Z)**_
@@ -7856,6 +8036,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.01s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:46:07Z)**_
@@ -7871,6 +8052,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 12.00s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:46:18Z)**_
@@ -7891,6 +8073,7 @@ Running 3 tests using 3 workers
   2 passed (10.6s)
 Done in 11.01s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 02:46:36Z)**_
@@ -7984,14 +8167,14 @@ Recommend option **2** — it does exactly what option 3 would, but automated an
 
 _**User (2026-04-21 03:11:34Z)**_
 
-installHook.js:1 RxError (DM4): 
+installHook.js:1 RxError (DM4):
 
         RxDB Error-Code: DM4.
         Hint: Error messages are not included in RxDB core to reduce build size.
         To show the full error messages and to ensure that you do not make any mistakes when using RxDB,
         use the dev-mode plugin when you are in development mode: https://rxdb.info/dev-mode.html?console=error
         
-Find out more about this error here: https://rxdb.info/errors.html?console=errors#DM4 
+Find out more about this error here: <https://rxdb.info/errors.html?console=errors#DM4>
 
 --------------------
 Parameters:
@@ -8004,7 +8187,7 @@ error: {
   "extensions": null,
   "code": null,
   "url": null,
-  "stack": "Error: RxStorageInstanceDexie is closed baseskill-data-app_meta \n     at ensureNotClosed (http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_storage-dexie.js?v=077d9291:6510:11) \n     at RxStorageInstanceDexie2.changeStream (http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_storage-dexie.js?v=077d9291:6452:5) \n     at rxStorageInstanceToReplicationHandler (http://localhost:3000/base-skill/node_modules/.vite/deps/chunk-UWL7N5FW.js?v=077d9291:1837:35) \n     at RxMigrationState2.migrateStorage (http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_migration-schema.js?v=077d9291:327:34) \n     at async RxMigrationState2.startMigration (http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_migration-schema.js?v=077d9291:208:7)"
+  "stack": "Error: RxStorageInstanceDexie is closed baseskill-data-app_meta \n     at ensureNotClosed (<http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_storage-dexie.js?v=077d9291:6510:11>) \n     at RxStorageInstanceDexie2.changeStream (<http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_storage-dexie.js?v=077d9291:6452:5>) \n     at rxStorageInstanceToReplicationHandler (<http://localhost:3000/base-skill/node_modules/.vite/deps/chunk-UWL7N5FW.js?v=077d9291:1837:35>) \n     at RxMigrationState2.migrateStorage (<http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_migration-schema.js?v=077d9291:327:34>) \n     at async RxMigrationState2.startMigration (<http://localhost:3000/base-skill/node_modules/.vite/deps/rxdb_plugins_migration-schema.js?v=077d9291:208:7>)"
 }
 
     at async Promise.all (index 0)
@@ -8012,13 +8195,11 @@ error: {
     at async open (create-database.ts:148:26)
     at async create-database.ts:157:14
 
-
 The above error occurred in the <MatchInnerImpl> component.
 
 React will try to recreate this component tree from scratch using the error boundary you provided, CatchBoundaryImpl.
 overrideMethod    @    installHook.js:1
 (anonymous)    @    __root.tsx:54
-
 
 ---
 
@@ -8198,6 +8379,7 @@ export const __test__ = {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:13:42Z)**_
@@ -8214,6 +8396,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:13:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:13:51Z)**_
@@ -8224,6 +8407,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:13:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/create-database.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:13:56Z)**_
@@ -8401,6 +8585,7 @@ describe('recoverBrokenMigration', () => {
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:14:25Z)**_
@@ -8436,6 +8621,7 @@ If you already purchased premium access you can disable this log by calling the 
 
 Done in 1.38s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:14:33Z)**_
@@ -8455,6 +8641,7 @@ error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:14:39Z)**_
@@ -8465,6 +8652,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:14:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:14:44Z)**_
@@ -8482,6 +8670,7 @@ $ tsc --noEmit
 Done in 3.25s.
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:02Z)**_
@@ -8508,6 +8697,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:09Z)**_
@@ -8518,6 +8708,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:15:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:14Z)**_
@@ -8528,6 +8719,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:15:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:16Z)**_
@@ -8538,6 +8730,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:15:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/fix-bookmarks-dm4-old-users/src/db/recover-bookmarks-migration.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:31Z)**_
@@ -8553,6 +8746,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 14.59s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:15:44Z)**_
@@ -8586,6 +8780,7 @@ Running 1 test using 1 worker
 [1A[2K  1 passed (11.1s)
 Done in 11.75s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:16:06Z)**_
@@ -8612,6 +8807,7 @@ All db tests
 
 Done in 2.83s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:16:23Z)**_
@@ -8631,6 +8827,7 @@ Running 2 tests using 2 workers
   1 passed (11.4s)
 Done in 11.90s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:16:37Z)**_
@@ -8654,15 +8851,15 @@ The Vite dev server hot-reloads code but the broken IDB state is still in `local
 2. **Hard-reload Chrome** at `http://localhost:3000/base-skill/en/` (Cmd+Shift+R).
 3. The recovery loop will run silently, the page should render with your custom games visible.
 
-If it still fails, share the new console error — I want to see if the loop hit the 5-retry cap or a *different* error code beyond DM4.
+If it still fails, share the new console error — I want to see if the loop hit the 5-retry cap or a _different_ error code beyond DM4.
 
 ---
 
 _**User (2026-04-21 03:27:50Z)**_
 
-I can load the game fine, but I think something wrong is happening on the DB, I started a game WordSpell, and the second and current word is saying something different than the tiles. The audio that we use TTS is different that the tiles. The audio is saying "sit", but I can see the letter a,n,p,t. 
+I can load the game fine, but I think something wrong is happening on the DB, I started a game WordSpell, and the second and current word is saying something different than the tiles. The audio that we use TTS is different that the tiles. The audio is saying "sit", but I can see the letter a,n,p,t.
 
-How can I debug that in devtools? IndexedDB? Redux devtools? 
+How can I debug that in devtools? IndexedDB? Redux devtools?
 
 What is the DB version we are suppose to use, and what table?
 
@@ -8697,6 +8894,7 @@ src/db/schemas/sync_meta.ts:15:  version: 0,
 src/db/schemas/themes.ts:37:  version: 0,
 src/db/schemas/word_spell_seen_words.ts:13:    version: 0,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:28:13Z)**_
@@ -8716,6 +8914,7 @@ src/db/schemas/index.ts
 src/db/hooks/useSeenWordsStore.ts
 src/db/create-database.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:28:34Z)**_
@@ -8731,7 +8930,7 @@ _**Agent (claude-opus-4-7 2026-04-21 03:28:34Z)**_
 | **saved_game_configs** | **2** | `rxdb-dexie-baseskill-data--2--saved_game_configs` |
 | profiles, progress, settings, sync_meta, themes, session_history, game_config_overrides, **word_spell_seen_words** | 0 | `rxdb-dexie-baseskill-data--0--<name>` |
 
-Anything at `--<v>--<name>` where `v` is *less* than the table above is leftover and safe to ignore (or wipe — recovery does that).
+Anything at `--<v>--<name>` where `v` is _less_ than the table above is leftover and safe to ignore (or wipe — recovery does that).
 
 ## For your audio/tile mismatch
 
@@ -8767,6 +8966,7 @@ Install React DevTools extension → Components tab → search the tree for `Wor
 The fastest path is probably to read the WordSpell component and find where `targetWord` gets passed to TTS vs where the tiles get rendered. Want me to look? Search `src/games/word-spell/WordSpell/WordSpell.tsx` for where the spoken word and the tile letters originate.
 
 This is a separate bug from the DM4 fix. I'd suggest:
+
 - Land the DM4 PR first (it unblocks every old-user device).
 - Open the WordSpell desync as its own issue/branch — give me a fresh worktree when you want to dig in.
 
@@ -8776,7 +8976,7 @@ Want me to (a) commit + push + PR the DM4 fix now, (b) start investigating the W
 
 _**User (2026-04-21 03:30:41Z)**_
 
-mmm, 2 problems I see. 
+mmm, 2 problems I see.
 The first one, is that the tables v2 are using the savec_game_configs, which we got rid of now. IT should be custom game, righ?
  Even the React Components from React devtools is not loading. All the devtools are saying that we have no React on this page.
 
@@ -8795,92 +8995,93 @@ _**Agent (claude-opus-4-7 2026-04-21 03:31:03Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/schemas/session_history_index.ts`
 
 ```text
-1	import type { RxJsonSchema } from 'rxdb';
-2	
-3	export type SessionHistoryIndexDoc = {
-4	  sessionId: string;
-5	  profileId: string;
-6	  gameId: string;
-7	  startedAt: string;
-8	  endedAt?: string | null;
-9	  duration?: number | null;
-10	  finalScore?: number | null;
-11	  totalEvents?: number;
-12	  totalChunks?: number;
-13	  gradeBand: string;
-14	  // v1 additions
-15	  status: 'in-progress' | 'completed' | 'abandoned';
-16	  seed: string;
-17	  initialContent: Record<string, unknown>;
-18	  initialState: Record<string, unknown>;
-19	  // v2 additions
-20	  draftState?: Record<string, unknown> | null;
-21	};
-22	
-23	export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
-24	  {
-25	    version: 2,
-26	    primaryKey: 'sessionId',
-27	    type: 'object',
-28	    properties: {
-29	      sessionId: { type: 'string', maxLength: 36 },
-30	      profileId: { type: 'string', maxLength: 36 },
-31	      gameId: { type: 'string', maxLength: 64 },
-32	      startedAt: { type: 'string', format: 'date-time' },
-33	      endedAt: {
-34	        oneOf: [
-35	          { type: 'string', format: 'date-time' },
-36	          { type: 'null' },
-37	        ],
-38	      },
-39	      duration: {
-40	        oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
-41	      },
-42	      finalScore: {
-43	        oneOf: [{ type: 'number' }, { type: 'null' }],
-44	      },
-45	      totalEvents: {
-46	        type: 'integer',
-47	        minimum: 0,
-48	        default: 0,
-49	        multipleOf: 1,
-50	      },
-51	      totalChunks: {
-52	        type: 'integer',
-53	        minimum: 1,
-54	        default: 1,
-55	        multipleOf: 1,
-56	      },
-57	      gradeBand: { type: 'string' },
-58	      status: {
-59	        type: 'string',
-60	        enum: ['in-progress', 'completed', 'abandoned'],
-61	      },
-62	      seed: { type: 'string' },
-63	      initialContent: { type: 'object', additionalProperties: true },
-64	      initialState: { type: 'object', additionalProperties: true },
-65	      draftState: {
-66	        oneOf: [
-67	          { type: 'object', additionalProperties: true },
-68	          { type: 'null' },
-69	        ],
-70	      },
-71	    },
-72	    required: [
-73	      'sessionId',
-74	      'profileId',
-75	      'gameId',
-76	      'startedAt',
-77	      'gradeBand',
-78	      'status',
-79	      'seed',
-80	      'initialContent',
-81	      'initialState',
-82	    ],
-83	    additionalProperties: false,
-84	  };
+1 import type { RxJsonSchema } from 'rxdb';
+2 
+3 export type SessionHistoryIndexDoc = {
+4   sessionId: string;
+5   profileId: string;
+6   gameId: string;
+7   startedAt: string;
+8   endedAt?: string | null;
+9   duration?: number | null;
+10   finalScore?: number | null;
+11   totalEvents?: number;
+12   totalChunks?: number;
+13   gradeBand: string;
+14   // v1 additions
+15   status: 'in-progress' | 'completed' | 'abandoned';
+16   seed: string;
+17   initialContent: Record<string, unknown>;
+18   initialState: Record<string, unknown>;
+19   // v2 additions
+20   draftState?: Record<string, unknown> | null;
+21 };
+22 
+23 export const sessionHistoryIndexSchema: RxJsonSchema<SessionHistoryIndexDoc> =
+24   {
+25     version: 2,
+26     primaryKey: 'sessionId',
+27     type: 'object',
+28     properties: {
+29       sessionId: { type: 'string', maxLength: 36 },
+30       profileId: { type: 'string', maxLength: 36 },
+31       gameId: { type: 'string', maxLength: 64 },
+32       startedAt: { type: 'string', format: 'date-time' },
+33       endedAt: {
+34         oneOf: [
+35           { type: 'string', format: 'date-time' },
+36           { type: 'null' },
+37         ],
+38       },
+39       duration: {
+40         oneOf: [{ type: 'number', minimum: 0 }, { type: 'null' }],
+41       },
+42       finalScore: {
+43         oneOf: [{ type: 'number' }, { type: 'null' }],
+44       },
+45       totalEvents: {
+46         type: 'integer',
+47         minimum: 0,
+48         default: 0,
+49         multipleOf: 1,
+50       },
+51       totalChunks: {
+52         type: 'integer',
+53         minimum: 1,
+54         default: 1,
+55         multipleOf: 1,
+56       },
+57       gradeBand: { type: 'string' },
+58       status: {
+59         type: 'string',
+60         enum: ['in-progress', 'completed', 'abandoned'],
+61       },
+62       seed: { type: 'string' },
+63       initialContent: { type: 'object', additionalProperties: true },
+64       initialState: { type: 'object', additionalProperties: true },
+65       draftState: {
+66         oneOf: [
+67           { type: 'object', additionalProperties: true },
+68           { type: 'null' },
+69         ],
+70       },
+71     },
+72     required: [
+73       'sessionId',
+74       'profileId',
+75       'gameId',
+76       'startedAt',
+77       'gradeBand',
+78       'status',
+79       'seed',
+80       'initialContent',
+81       'initialState',
+82     ],
+83     additionalProperties: false,
+84   };
 85
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:31:03Z)**_
@@ -8890,77 +9091,78 @@ _**Agent (claude-opus-4-7 2026-04-21 03:31:03Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/db/schemas/saved_game_configs.ts`
 
 ```text
-1	import type { Cover } from '@/games/cover-type';
-2	import type { JsonSchema, RxJsonSchema } from 'rxdb';
-3	
-4	export type SavedGameConfigDoc = {
-5	  id: string;
-6	  profileId: string;
-7	  gameId: string;
-8	  name: string;
-9	  config: Record<string, unknown>;
-10	  createdAt: string;
-11	  color: string;
-12	  cover?: Cover;
-13	};
-14	
-15	export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
-16	  {
-17	    version: 2,
-18	    primaryKey: 'id',
-19	    type: 'object',
-20	    properties: {
-21	      id: { type: 'string', maxLength: 36 },
-22	      profileId: { type: 'string', maxLength: 36 },
-23	      gameId: { type: 'string', maxLength: 64 },
-24	      name: { type: 'string', maxLength: 128 },
-25	      config: { type: 'object' },
-26	      createdAt: { type: 'string', format: 'date-time' },
-27	      color: { type: 'string', maxLength: 32 },
-28	      cover: {
-29	        oneOf: [
-30	          {
-31	            type: 'object',
-32	            properties: {
-33	              kind: { type: 'string', const: 'emoji' } as JsonSchema,
-34	              emoji: { type: 'string', maxLength: 16 },
-35	              gradient: {
-36	                type: 'array',
-37	                items: { type: 'string' },
-38	                minItems: 2,
-39	                maxItems: 2,
-40	              },
-41	            },
-42	            required: ['kind', 'emoji'],
-43	            additionalProperties: false,
-44	          },
-45	          {
-46	            type: 'object',
-47	            properties: {
-48	              kind: { type: 'string', const: 'image' } as JsonSchema,
-49	              src: { type: 'string', maxLength: 2048 },
-50	              alt: { type: 'string', maxLength: 256 },
-51	              background: { type: 'string', maxLength: 32 },
-52	            },
-53	            required: ['kind', 'src'],
-54	            additionalProperties: false,
-55	          },
-56	        ],
-57	      },
-58	    },
-59	    required: [
-60	      'id',
-61	      'profileId',
-62	      'gameId',
-63	      'name',
-64	      'config',
-65	      'createdAt',
-66	      'color',
-67	    ],
-68	    additionalProperties: false,
-69	  };
+1 import type { Cover } from '@/games/cover-type';
+2 import type { JsonSchema, RxJsonSchema } from 'rxdb';
+3 
+4 export type SavedGameConfigDoc = {
+5   id: string;
+6   profileId: string;
+7   gameId: string;
+8   name: string;
+9   config: Record<string, unknown>;
+10   createdAt: string;
+11   color: string;
+12   cover?: Cover;
+13 };
+14 
+15 export const savedGameConfigsSchema: RxJsonSchema<SavedGameConfigDoc> =
+16   {
+17     version: 2,
+18     primaryKey: 'id',
+19     type: 'object',
+20     properties: {
+21       id: { type: 'string', maxLength: 36 },
+22       profileId: { type: 'string', maxLength: 36 },
+23       gameId: { type: 'string', maxLength: 64 },
+24       name: { type: 'string', maxLength: 128 },
+25       config: { type: 'object' },
+26       createdAt: { type: 'string', format: 'date-time' },
+27       color: { type: 'string', maxLength: 32 },
+28       cover: {
+29         oneOf: [
+30           {
+31             type: 'object',
+32             properties: {
+33               kind: { type: 'string', const: 'emoji' } as JsonSchema,
+34               emoji: { type: 'string', maxLength: 16 },
+35               gradient: {
+36                 type: 'array',
+37                 items: { type: 'string' },
+38                 minItems: 2,
+39                 maxItems: 2,
+40               },
+41             },
+42             required: ['kind', 'emoji'],
+43             additionalProperties: false,
+44           },
+45           {
+46             type: 'object',
+47             properties: {
+48               kind: { type: 'string', const: 'image' } as JsonSchema,
+49               src: { type: 'string', maxLength: 2048 },
+50               alt: { type: 'string', maxLength: 256 },
+51               background: { type: 'string', maxLength: 32 },
+52             },
+53             required: ['kind', 'src'],
+54             additionalProperties: false,
+55           },
+56         ],
+57       },
+58     },
+59     required: [
+60       'id',
+61       'profileId',
+62       'gameId',
+63       'name',
+64       'config',
+65       'createdAt',
+66       'color',
+67     ],
+68     additionalProperties: false,
+69   };
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:31:15Z)**_
@@ -8971,7 +9173,7 @@ Let me clarify both:
 
 ## `saved_game_configs` is **not** gone — and it's separate from session_history_index
 
-PR #113 added `custom_games` and migrated *named* configs into it, but kept `saved_game_configs` registered. From the PR notes:
+PR #113 added `custom_games` and migrated _named_ configs into it, but kept `saved_game_configs` registered. From the PR notes:
 
 > `saved_game_configs` collection intentionally retained (hosts last-session resume docs); only named custom game variations migrate to `custom_games`.
 
@@ -8980,7 +9182,7 @@ So today both collections exist:
 - `custom_games` (v1) — your saved/named game variations.
 - `saved_game_configs` (v2) — the implicit "resume your last unsaved tweak" snapshot per game.
 
-`session_history_index` (v2) is **unrelated** to either — it stores per-session telemetry (`sessionId`, `gameId`, `startedAt`, `seed`, `initialContent`, `initialState`, `draftState`). The `gameId` field is the game *type* (`'word-spell'`), not a saved-config id. So there's no broken link there.
+`session_history_index` (v2) is **unrelated** to either — it stores per-session telemetry (`sessionId`, `gameId`, `startedAt`, `seed`, `initialContent`, `initialState`, `draftState`). The `gameId` field is the game _type_ (`'word-spell'`), not a saved-config id. So there's no broken link there.
 
 The "v2" version number is coincidence — both happen to have had two migrations.
 
@@ -8988,12 +9190,13 @@ The "v2" version number is coincidence — both happen to have had two migration
 
 Common causes on TanStack Start / Vite SSR setups:
 
-1. **Open DevTools *before* the page finishes hydration**, then refresh — sometimes the hook misses the initial mount.
+1. **Open DevTools _before_ the page finishes hydration**, then refresh — sometimes the hook misses the initial mount.
 2. **Two React copies** (extension lists "React" but tree is empty) — usually caused by SSR/CSR bundle split. TanStack Start renders SSR HTML first; the client React mounts after. If the extension hooked the SSR pass, the tree shows empty.
 3. **React DevTools extension stale** — disable + re-enable the extension, restart Chrome.
 
 Try:
-1. Close all DevTools, reload page, wait until interactive, *then* open DevTools → Components tab.
+
+1. Close all DevTools, reload page, wait until interactive, _then_ open DevTools → Components tab.
 2. Or use the standalone DevTools: `npx react-devtools` → add `<script src="http://localhost:8097"></script>` once to `__root.tsx` for local debugging.
 
 ## Faster debug for the audio/tile mismatch
@@ -9071,67 +9274,68 @@ _**Agent (claude-opus-4-7 2026-04-21 03:39:11Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-440	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-441	        onSaveCustomGame={async ({ name, color, config, cover }) =>
-442	          save({
-443	            gameId,
-444	            name,
-445	            color,
-446	            config,
-447	            cover,
-448	          })
-449	        }
-450	        onUpdateCustomGame={
-451	          customGameId
-452	            ? async (name, config, extras) => {
-453	                await update(customGameId, config, name, extras);
-454	              }
-455	            : undefined
-456	        }
-457	        onDeleteCustomGame={
-458	          customGameId
-459	            ? async (id) => {
-460	                await remove(id);
-461	                await navigate({
-462	                  search: (prev) => ({ ...prev, configId: undefined }),
-463	                });
-464	              }
-465	            : undefined
-466	        }
-467	        existingCustomGameNames={existingCustomGameNames}
-468	        isBookmarked={isBookmarked(bookmarkTarget)}
-469	        onToggleBookmark={() => void toggle(bookmarkTarget)}
-470	      />
-471	    );
-472	  }
-473	
-474	  return (
-475	    <WordSpell
-476	      key={cfg.inputMethod}
-477	      config={cfg}
-478	      initialState={draftState ?? undefined}
-479	      sessionId={sessionId}
-480	      seed={seed}
-481	    />
-482	  );
-483	};
-484	
-485	const NumberMatchGameBody = ({
-486	  gameId,
-487	  sessionId,
-488	  seed,
-489	  draftState,
-490	  gameSpecificConfig,
-491	  customGameId,
-492	  customGameName,
-493	  customGameColor,
-494	  customGameCover,
-495	}: {
-496	  gameId: string;
-497	  sessionId: string;
-498	  seed: string;
-499	  draftState: AnswerGameDraftState | null;
+440         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+441         onSaveCustomGame={async ({ name, color, config, cover }) =>
+442           save({
+443             gameId,
+444             name,
+445             color,
+446             config,
+447             cover,
+448           })
+449         }
+450         onUpdateCustomGame={
+451           customGameId
+452             ? async (name, config, extras) => {
+453                 await update(customGameId, config, name, extras);
+454               }
+455             : undefined
+456         }
+457         onDeleteCustomGame={
+458           customGameId
+459             ? async (id) => {
+460                 await remove(id);
+461                 await navigate({
+462                   search: (prev) => ({ ...prev, configId: undefined }),
+463                 });
+464               }
+465             : undefined
+466         }
+467         existingCustomGameNames={existingCustomGameNames}
+468         isBookmarked={isBookmarked(bookmarkTarget)}
+469         onToggleBookmark={() => void toggle(bookmarkTarget)}
+470       />
+471     );
+472   }
+473 
+474   return (
+475     <WordSpell
+476       key={cfg.inputMethod}
+477       config={cfg}
+478       initialState={draftState ?? undefined}
+479       sessionId={sessionId}
+480       seed={seed}
+481     />
+482   );
+483 };
+484 
+485 const NumberMatchGameBody = ({
+486   gameId,
+487   sessionId,
+488   seed,
+489   draftState,
+490   gameSpecificConfig,
+491   customGameId,
+492   customGameName,
+493   customGameColor,
+494   customGameCover,
+495 }: {
+496   gameId: string;
+497   sessionId: string;
+498   seed: string;
+499   draftState: AnswerGameDraftState | null;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:39:12Z)**_
@@ -9141,57 +9345,58 @@ _**Agent (claude-opus-4-7 2026-04-21 03:39:12Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-220	              />
-221	            ) : (
-222	              <p className="max-w-md text-center text-lg text-foreground">
-223	                {round.sentence}
-224	              </p>
-225	            )
-226	          ) : null}
-227	          {hasEmoji ? (
-228	            <EmojiQuestion
-229	              emoji={round.emoji!.trim()}
-230	              prompt={round.word}
-231	            />
-232	          ) : hasImageUrl ? (
-233	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-234	          ) : null}
-235	          <AudioButton prompt={round.word} />
-236	        </AnswerGame.Question>
-237	        <AnswerGame.Answer>
-238	          {round.gaps && round.gaps.length > 0 ? null : (
-239	            <SlotRow className="gap-2">
-240	              {zones.map((zone, i) => (
-241	                <Slot
-242	                  key={zone.id}
-243	                  index={i}
-244	                  skin={skin}
-245	                  className="size-14 rounded-lg"
-246	                >
-247	                  {({ label }) => (
-248	                    <span className="text-2xl font-bold">{label}</span>
-249	                  )}
-250	                </Slot>
-251	              ))}
-252	            </SlotRow>
-253	          )}
-254	        </AnswerGame.Answer>
-255	        <AnswerGame.Choices>
-256	          <LetterTileBank />
-257	        </AnswerGame.Choices>
-258	      </div>
-259	      {skin.RoundCompleteEffect ? (
-260	        <skin.RoundCompleteEffect visible={confettiReady} />
-261	      ) : (
-262	        <ScoreAnimation visible={confettiReady} />
-263	      )}
-264	      {gameOverReady ? (
-265	        skin.CelebrationOverlay ? (
-266	          <skin.CelebrationOverlay
-267	            retryCount={retryCount}
-268	            onPlayAgain={handlePlayAgain}
-269	            onHome={handleHome}
+220               />
+221             ) : (
+222               <p className="max-w-md text-center text-lg text-foreground">
+223                 {round.sentence}
+224               </p>
+225             )
+226           ) : null}
+227           {hasEmoji ? (
+228             <EmojiQuestion
+229               emoji={round.emoji!.trim()}
+230               prompt={round.word}
+231             />
+232           ) : hasImageUrl ? (
+233             <ImageQuestion src={imageSrc!} prompt={round.word} />
+234           ) : null}
+235           <AudioButton prompt={round.word} />
+236         </AnswerGame.Question>
+237         <AnswerGame.Answer>
+238           {round.gaps && round.gaps.length > 0 ? null : (
+239             <SlotRow className="gap-2">
+240               {zones.map((zone, i) => (
+241                 <Slot
+242                   key={zone.id}
+243                   index={i}
+244                   skin={skin}
+245                   className="size-14 rounded-lg"
+246                 >
+247                   {({ label }) => (
+248                     <span className="text-2xl font-bold">{label}</span>
+249                   )}
+250                 </Slot>
+251               ))}
+252             </SlotRow>
+253           )}
+254         </AnswerGame.Answer>
+255         <AnswerGame.Choices>
+256           <LetterTileBank />
+257         </AnswerGame.Choices>
+258       </div>
+259       {skin.RoundCompleteEffect ? (
+260         <skin.RoundCompleteEffect visible={confettiReady} />
+261       ) : (
+262         <ScoreAnimation visible={confettiReady} />
+263       )}
+264       {gameOverReady ? (
+265         skin.CelebrationOverlay ? (
+266           <skin.CelebrationOverlay
+267             retryCount={retryCount}
+268             onPlayAgain={handlePlayAgain}
+269             onHome={handleHome}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:39:12Z)**_
@@ -9201,32 +9406,33 @@ _**Agent (claude-opus-4-7 2026-04-21 03:39:12Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-380	    <div
-381	      className={`game-container skin-${skin.id}`}
-382	      style={skin.tokens as React.CSSProperties}
-383	    >
-384	      {skin.SceneBackground ? <skin.SceneBackground /> : null}
-385	      <AnswerGame
-386	        key={sessionEpoch}
-387	        config={answerGameConfig}
-388	        initialState={sessionEpoch === 0 ? initialState : undefined}
-389	        sessionId={sessionId}
-390	        skin={skin}
-391	      >
-392	        <WordSpellSession
-393	          wordSpellConfig={resolvedConfig}
-394	          roundOrder={roundOrder}
-395	          skin={skin}
-396	          onRestartSession={() => {
-397	            setSessionEpoch((e) => e + 1);
-398	          }}
-399	        />
-400	      </AnswerGame>
-401	    </div>
-402	  );
-403	};
+380     <div
+381       className={`game-container skin-${skin.id}`}
+382       style={skin.tokens as React.CSSProperties}
+383     >
+384       {skin.SceneBackground ? <skin.SceneBackground /> : null}
+385       <AnswerGame
+386         key={sessionEpoch}
+387         config={answerGameConfig}
+388         initialState={sessionEpoch === 0 ? initialState : undefined}
+389         sessionId={sessionId}
+390         skin={skin}
+391       >
+392         <WordSpellSession
+393           wordSpellConfig={resolvedConfig}
+394           roundOrder={roundOrder}
+395           skin={skin}
+396           onRestartSession={() => {
+397             setSessionEpoch((e) => e + 1);
+398           }}
+399         />
+400       </AnswerGame>
+401     </div>
+402   );
+403 };
 404
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:39:18Z)**_
@@ -9269,6 +9475,7 @@ src/components/answer-game/answer-game-reducer.ts:145:          allTiles: newAll
 src/components/answer-game/answer-game-reducer.ts:186:      // Remove displaced virtual tile from allTiles
 src/components/answer-game/answer-game-reducer.ts:189:          ? state.allTiles.filter((t) => t.id !== previousId)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:39:31Z)**_
@@ -9305,6 +9512,7 @@ src/components/answer-game/AnswerGameProvider.tsx:56:  /** When provided, state 
 src/components/answer-game/AnswerGameProvider.tsx:90:    // Skip INIT_ROUND when resuming from a snapshot
 src/components/answer-game/AnswerGameProvider.tsx:95:      dispatch({ type: 'INIT_ROUND', tiles, zones });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:39:42Z)**_
@@ -9320,64 +9528,65 @@ _**Agent (claude-opus-4-7 2026-04-21 03:39:44Z)**_
  `./worktrees/fix-bookmarks-dm4-old-users/src/components/answer-game/AnswerGameProvider.tsx`
 
 ```text
-75	  sessionId,
-76	  children,
-77	}: AnswerGameProviderProps) => {
-78	  const [state, dispatch] = useReducer(
-79	    answerGameReducer,
-80	    initialState
-81	      ? buildStateFromDraft(config, initialState)
-82	      : makeInitialState(config),
-83	  );
-84	
-85	  // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
-86	  const dbCtx = useContext(DbContext);
-87	  useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
-88	
-89	  useEffect(() => {
-90	    // Skip INIT_ROUND when resuming from a snapshot
-91	    if (initialState) return;
-92	    const tiles = config.initialTiles;
-93	    const zones = config.initialZones;
-94	    if (tiles?.length && zones?.length) {
-95	      dispatch({ type: 'INIT_ROUND', tiles, zones });
-96	    }
-97	  }, [
-98	    config.gameId,
-99	    config.initialTiles,
-100	    config.initialZones,
-101	    initialState,
-102	  ]);
-103	
-104	  const usesTyping = config.inputMethod !== 'drag';
-105	
-106	  return (
-107	    <AnswerGameStateContext.Provider value={state}>
-108	      <AnswerGameDispatchContext.Provider value={dispatch}>
-109	        {usesTyping ? (
-110	          <TouchKeyboardAdapter
-111	            inputMode={config.touchKeyboardInputMode ?? 'text'}
-112	          >
-113	            <KeyboardInputAdapter />
-114	            {children}
-115	          </TouchKeyboardAdapter>
-116	        ) : (
-117	          <TouchKeyboardContext.Provider value={null}>
-118	            {children}
-119	          </TouchKeyboardContext.Provider>
-120	        )}
-121	      </AnswerGameDispatchContext.Provider>
-122	    </AnswerGameStateContext.Provider>
-123	  );
-124	};
+75   sessionId,
+76   children,
+77 }: AnswerGameProviderProps) => {
+78   const [state, dispatch] = useReducer(
+79     answerGameReducer,
+80     initialState
+81       ? buildStateFromDraft(config, initialState)
+82       : makeInitialState(config),
+83   );
+84 
+85   // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
+86   const dbCtx = useContext(DbContext);
+87   useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
+88 
+89   useEffect(() => {
+90     // Skip INIT_ROUND when resuming from a snapshot
+91     if (initialState) return;
+92     const tiles = config.initialTiles;
+93     const zones = config.initialZones;
+94     if (tiles?.length && zones?.length) {
+95       dispatch({ type: 'INIT_ROUND', tiles, zones });
+96     }
+97   }, [
+98     config.gameId,
+99     config.initialTiles,
+100     config.initialZones,
+101     initialState,
+102   ]);
+103 
+104   const usesTyping = config.inputMethod !== 'drag';
+105 
+106   return (
+107     <AnswerGameStateContext.Provider value={state}>
+108       <AnswerGameDispatchContext.Provider value={dispatch}>
+109         {usesTyping ? (
+110           <TouchKeyboardAdapter
+111             inputMode={config.touchKeyboardInputMode ?? 'text'}
+112           >
+113             <KeyboardInputAdapter />
+114             {children}
+115           </TouchKeyboardAdapter>
+116         ) : (
+117           <TouchKeyboardContext.Provider value={null}>
+118             {children}
+119           </TouchKeyboardContext.Provider>
+120         )}
+121       </AnswerGameDispatchContext.Provider>
+122     </AnswerGameStateContext.Provider>
+123   );
+124 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:40:00Z)**_
 
 _**Agent (claude-opus-4-7 2026-04-21 03:40:15Z)**_
 
-Confirmed bug — `AnswerGameProvider.tsx:91` early-returns when `initialState` is present, so `INIT_ROUND` never fires with fresh tiles. The route loads `draftState` from `session_history_index`, which contains **stale tiles from when the draft was last saved**, but the *prompt* re-derives from `roundOrder[currentRound]`. Hence: prompt advances to "sit", tiles stay frozen at "a,n,p,t".
+Confirmed bug — `AnswerGameProvider.tsx:91` early-returns when `initialState` is present, so `INIT_ROUND` never fires with fresh tiles. The route loads `draftState` from `session_history_index`, which contains **stale tiles from when the draft was last saved**, but the _prompt_ re-derives from `roundOrder[currentRound]`. Hence: prompt advances to "sit", tiles stay frozen at "a,n,p,t".
 
 ## Yes — share/inspect the relevant IndexedDB rows
 
@@ -9415,6 +9624,7 @@ Expect to see `draftTiles: "a,n,p,t"` while the visible round is 7 ("sit"). That
 ## Scope
 
 This is unrelated to the DM4 fix:
+
 - DM4 fix → unblocks app boot for old users
 - Tile/prompt desync → resume-from-draft bug in `AnswerGameProvider`/draft sync
 
@@ -9467,153 +9677,153 @@ _**User (2026-04-21 03:41:31Z)**_
 
 {sessionId: 'AsxSr50Y49xeon9noVSyz', profileId: 'default', gameId: 'word-spell', startedAt: '2026-04-21T03:33:48.005Z', gradeBand: 'year1-2', ���}
 draftState
-: 
+:
 activeSlotIndex
-: 
+:
 0
 allTiles
-: 
+:
 Array(4)
 0
-: 
+:
 {id: '3RL_w1VLZdFHw3VHjcGYv', label: 'a', value: 'a'}
 1
-: 
+:
 {id: 'xr_TLGUQsSZLnqM-Ftwuk', label: 'n', value: 'n'}
 2
-: 
+:
 {id: '9_UoXOilagyIeBVcswFou', label: 'p', value: 'p'}
 3
-: 
+:
 {id: 'h_gwpIdiTjxvV-fxA9QMz', label: 't', value: 't'}
 length
-: 
+:
 4
 bankTileIds
-: 
+:
 Array(4)
 0
-: 
+:
 "3RL_w1VLZdFHw3VHjcGYv"
 1
-: 
+:
 "9_UoXOilagyIeBVcswFou"
 2
-: 
+:
 "h_gwpIdiTjxvV-fxA9QMz"
 3
-: 
+:
 "xr_TLGUQsSZLnqM-Ftwuk"
 length
-: 
+:
 4
 levelIndex
-: 
+:
 0
 phase
-: 
+:
 "playing"
 retryCount
-: 
+:
 1
 roundIndex
-: 
+:
 1
 zones
-: 
+:
 (4) [{���}, {���}, {���}, {���}]
 gameId
-: 
+:
 "word-spell"
 gradeBand
-: 
+:
 "year1-2"
 initialContent
-: 
+:
 rounds
-: 
+:
 Array(3)
 0
-: 
+:
 {id: 'r1', prompt: {���}, correctAnswer: 'A'}
 1
-: 
+:
 {id: 'r2', prompt: {���}, correctAnswer: 'B'}
 2
-: 
+:
 {id: 'r3', prompt: {���}, correctAnswer: 'C'}
 length
-: 
+:
 3
 initialState
-: 
+:
 content
-: 
+:
 rounds
-: 
+:
 Array(3)
 0
-: 
+:
 {id: 'r1', prompt: {���}, correctAnswer: 'A'}
 1
-: 
+:
 {id: 'r2', prompt: {���}, correctAnswer: 'B'}
 2
-: 
+:
 {id: 'r3', prompt: {���}, correctAnswer: 'C'}
 length
-: 
+:
 3
 currentRound
-: 
+:
 {roundId: 'r1', answer: null, hintsUsed: 0}
 phase
-: 
+:
 "instructions"
 retryCount
-: 
+:
 0
 roundIndex
-: 
+:
 0
 score
-: 
+:
 0
 streak
-: 
+:
 0
 profileId
-: 
+:
 "default"
 seed
-: 
+:
 "dMse6efjqDcJ4qanftGqY"
 sessionId
-: 
+:
 "AsxSr50Y49xeon9noVSyz"
 startedAt
-: 
+:
 "2026-04-21T03:33:48.005Z"
 status
-: 
+:
 "in-progress"
 totalChunks
-: 
+:
 1
 totalEvents
-: 
+:
 0
 _attachments
-: 
+:
 {}
 _deleted
-: 
+:
 "0"
 _meta
-: 
+:
 {lwt: 1776742428608.01}
 _rev
-: 
+:
 "38-tuoftamahy"
 
 ---
@@ -9648,16 +9858,17 @@ initialContent.rounds = [
 
 Those `A/B/C` correctAnswers are generic AnswerGame test/default fixtures, not real WordSpell content. So when this session was created, `initialContent` and `initialState` were never populated with real WordSpell rounds — they were left as placeholder. WordSpell then generates its **own** `roundOrder` independently in `WordSpellSession`, and the two state machines (AnswerGame reducer vs WordSpell session) drift apart immediately.
 
-The tile/prompt mismatch is the *visible* symptom of a deeper architectural issue: AnswerGame state (which feeds the tiles via `INIT_ROUND` / `ADVANCE_ROUND`) and WordSpell's `roundOrder` (which feeds the prompt / TTS) are not the same source of truth.
+The tile/prompt mismatch is the _visible_ symptom of a deeper architectural issue: AnswerGame state (which feeds the tiles via `INIT_ROUND` / `ADVANCE_ROUND`) and WordSpell's `roundOrder` (which feeds the prompt / TTS) are not the same source of truth.
 
 ## This is out of scope for the DM4 PR
 
 The DM4 fix:
+
 - Wipes legacy v0 collections of failing migrations
 - Doesn't touch `session_history_index` (v2, current)
 - Doesn't read or modify `draftState`
 
-Your desync existed *before* my fix and would still exist *after* it. They're independent.
+Your desync existed _before_ my fix and would still exist _after_ it. They're independent.
 
 ## Recommendation
 
@@ -9855,6 +10066,7 @@ Same `seed` (`dMse6efjqDcJ4qanftGqY`), but you're seeing `roundOrder` = `[taps, 
 ## Fix is out of scope for the DM4 PR
 
 It needs:
+
 - WordSpell to write its real `roundOrder` to `initialContent` at session start.
 - Resume to use the persisted `roundOrder` instead of regenerating from seed.
 - Or, simpler: invalidate stale drafts when the source word pool changes.
@@ -9895,19 +10107,20 @@ On branch fix/bookmarks-dm4-old-users
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .gitignore
-	modified:   src/db/create-database.ts
+ modified:   .gitignore
+ modified:   src/db/create-database.ts
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	e2e/bookmarks-dm4-recovery.spec.ts
-	src/db/bookmarks-migration.test.ts
-	src/db/recover-bookmarks-migration.test.ts
-	src/db/recover-bookmarks-migration.ts
+ e2e/bookmarks-dm4-recovery.spec.ts
+ src/db/bookmarks-migration.test.ts
+ src/db/recover-bookmarks-migration.test.ts
+ src/db/recover-bookmarks-migration.ts
 
 no changes added to commit (use "git add" and/or "git commit -a")
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:45:22Z)**_
@@ -9923,6 +10136,7 @@ Diff stat vs master
  src/db/create-database.ts | 43 +++++++++++++++++++++++++++++++++++--------
  2 files changed, 36 insertions(+), 8 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:45:29Z)**_
@@ -9939,13 +10153,14 @@ Stage the 6 fix files
 On branch fix/bookmarks-dm4-old-users
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   .gitignore
-	new file:   e2e/bookmarks-dm4-recovery.spec.ts
-	new file:   src/db/bookmarks-migration.test.ts
-	modified:   src/db/create-database.ts
-	new file:   src/db/recover-bookmarks-migration.test.ts
-	new file:   src/db/recover-bookmarks-migration.ts
+ modified:   .gitignore
+ new file:   e2e/bookmarks-dm4-recovery.spec.ts
+ new file:   src/db/bookmarks-migration.test.ts
+ modified:   src/db/create-database.ts
+ new file:   src/db/recover-bookmarks-migration.test.ts
+ new file:   src/db/recover-bookmarks-migration.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:46:07Z)**_
@@ -10015,6 +10230,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:46:13Z)**_
@@ -10034,6 +10250,7 @@ fe28ddb8 fix(db): recover from broken DM4 migrations on boot
 e7a62210 fix(advanced-config): persist advanced fields after save (#122)
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:46:19Z)**_
@@ -10048,6 +10265,7 @@ git status
 On branch fix/bookmarks-dm4-old-users
 nothing to commit, working tree clean
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:46:25Z)**_
@@ -10074,6 +10292,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        fix/bookmarks-dm4-old-users -> fix/bookmarks-dm4-old-users
 branch 'fix/bookmarks-dm4-old-users' set up to track 'origin/fix/bookmarks-dm4-old-users'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:47:22Z)**_
@@ -10117,11 +10336,12 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/127
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:47:31Z)**_
 
-DM4 PR opened: **https://github.com/leocaseiro/base-skill/pull/127**
+DM4 PR opened: **<https://github.com/leocaseiro/base-skill/pull/127>**
 
 Now creating a worktree for the WordSpell desync plan.
 
@@ -10137,6 +10357,7 @@ New worktree for the plan
 Preparing worktree (new branch 'plan/wordspell-resume-desync')
 HEAD is now at 959d5c93 chore(release): v0.10.3 (#123)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:47:33Z)**_
@@ -10159,6 +10380,7 @@ List existing plans for naming convention
 2026-04-16-custom-games-and-bookmarks.md
 2026-04-16-write-storybook-skill-comprehensive.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:47:39Z)**_
@@ -10168,67 +10390,68 @@ _**Agent (claude-opus-4-7 2026-04-21 03:47:39Z)**_
  `./docs/superpowers/plans/2026-04-16-bookmarks-phase-2.md`
 
 ```text
-1	# Bookmarks (Phase 2) Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Add a per-item bookmark (favourite) toggle that works on both default catalog games and user-created custom games, surfaced as a `Star` button on `GameCard` (cover corner) and `InstructionsOverlay` (next to the title-row cog), backed by a new RxDB `bookmarks` collection keyed by composite id.
-6	
-7	**Architecture:** A new `bookmarks` collection stores a single row per `(profileId, targetType, targetId)` triple, where `targetType ∈ {'game','customGame'}`. The composite primary key (`${profileId}:${targetType}:${targetId}`) lets us upsert without a lookup, look up `isBookmarked` against an in-memory `Set` (no per-render queries), and cascade-clean a bookmark when its custom game is deleted by computing the same key. UI changes are additive: existing `GameCard` / `InstructionsOverlay` props stay untouched; bookmark wiring threads through the home route and the three game-route body components. No flag or rollout — the collection appears empty and behaves as "nothing bookmarked" until the user clicks a Star.
-8	
-9	**Tech Stack:** React + TypeScript, TanStack Router, RxDB (Dexie in browser, memory in tests), Vitest + Testing Library, Playwright (E2E + VR), `lucide-react` (`Star` icon — filled vs. outline via the `fill` prop), i18next, Tailwind CSS.
-10	
-11	**Scope note:** Search / filter by bookmark, ordering, folders, and multi-device sync semantics are spec-deferred and not implemented here. Phase 1 (rename + delete) is already merged on `master` (`41cd26b9 feat: custom games and bookmarks — Phase 1 (rename + delete) (#113)`).
-12	
-13	---
-14	
-15	## Pre-flight
-16	
-17	Before starting:
-18	
-19	- [ ] **Verify worktree.** Confirm `pwd` ends with `worktrees/feat-bookmarks-phase-2`. If not, cd into it. All work in this plan happens on the branch `feat/bookmarks-phase-2`; never edit or commit on `master`.
-20	- [ ] **Sync.** Run `git fetch origin master && git log --oneline -1 origin/master` to confirm the base is `41cd26b9` (Phase 1 merge) or later.
-21	- [ ] **Install.** Run `yarn install` if `node_modules` is missing.
-22	- [ ] **Baseline green.** Run `yarn typecheck` and `yarn test` once to confirm master is passing before changes start. Abort and debug if anything fails.
-23	
-24	---
-25	
-26	## Task 1: Add `bookmarks` collection + schema
-27	
-28	Create the new RxDB collection and a small composite-key helper. Pure scaffolding — nothing reads or writes to it yet.
-29	
-30	**Files:**
-31	
-32	- Create: `src/db/schemas/bookmarks.ts`
-33	- Create: `src/db/schemas/bookmarks.test.ts`
-34	- Create: `src/db/bookmark-id.ts`
-35	- Create: `src/db/bookmark-id.test.ts`
-36	- Modify: `src/db/schemas/index.ts` (re-export + `MAX_SCHEMA_VERSION` entry)
-37	- Modify: `src/db/types.ts` (add to `BaseSkillCollections`)
-38	- Modify: `src/db/create-database.ts` (register collection in `COLLECTIONS`)
-39	- Modify: `src/db/create-database.test.ts` (assert collection is registered)
-40	
-41	- [ ] **Step 1: Write the failing composite-id helper test.**
-42	
-43	Create `src/db/bookmark-id.test.ts`:
-44	
-45	```ts
-46	import { describe, expect, it } from 'vitest';
-47	import { bookmarkId, parseBookmarkId } from './bookmark-id';
-48	
-49	describe('bookmarkId', () => {
-50	  it('builds a composite id from profile + targetType + targetId', () => {
-51	    expect(bookmarkId('anonymous', 'game', 'word-spell')).toBe(
-52	      'anonymous:game:word-spell',
-53	    );
-54	    expect(bookmarkId('anonymous', 'customGame', 'cg_abc123')).toBe(
-55	      'anonymous:customGame:cg_abc123',
-56	    );
-57	  });
-58	});
-59	
-60	describe('parseBookmarkId', () => {
+1 # Bookmarks (Phase 2) Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Add a per-item bookmark (favourite) toggle that works on both default catalog games and user-created custom games, surfaced as a `Star` button on `GameCard` (cover corner) and `InstructionsOverlay` (next to the title-row cog), backed by a new RxDB `bookmarks` collection keyed by composite id.
+6 
+7 **Architecture:** A new `bookmarks` collection stores a single row per `(profileId, targetType, targetId)` triple, where `targetType ∈ {'game','customGame'}`. The composite primary key (`${profileId}:${targetType}:${targetId}`) lets us upsert without a lookup, look up `isBookmarked` against an in-memory `Set` (no per-render queries), and cascade-clean a bookmark when its custom game is deleted by computing the same key. UI changes are additive: existing `GameCard` / `InstructionsOverlay` props stay untouched; bookmark wiring threads through the home route and the three game-route body components. No flag or rollout — the collection appears empty and behaves as "nothing bookmarked" until the user clicks a Star.
+8 
+9 **Tech Stack:** React + TypeScript, TanStack Router, RxDB (Dexie in browser, memory in tests), Vitest + Testing Library, Playwright (E2E + VR), `lucide-react` (`Star` icon — filled vs. outline via the `fill` prop), i18next, Tailwind CSS.
+10 
+11 **Scope note:** Search / filter by bookmark, ordering, folders, and multi-device sync semantics are spec-deferred and not implemented here. Phase 1 (rename + delete) is already merged on `master` (`41cd26b9 feat: custom games and bookmarks — Phase 1 (rename + delete) (#113)`).
+12 
+13 ---
+14 
+15 ## Pre-flight
+16 
+17 Before starting:
+18 
+19 - [ ] **Verify worktree.** Confirm `pwd` ends with `worktrees/feat-bookmarks-phase-2`. If not, cd into it. All work in this plan happens on the branch `feat/bookmarks-phase-2`; never edit or commit on `master`.
+20 - [ ] **Sync.** Run `git fetch origin master && git log --oneline -1 origin/master` to confirm the base is `41cd26b9` (Phase 1 merge) or later.
+21 - [ ] **Install.** Run `yarn install` if `node_modules` is missing.
+22 - [ ] **Baseline green.** Run `yarn typecheck` and `yarn test` once to confirm master is passing before changes start. Abort and debug if anything fails.
+23 
+24 ---
+25 
+26 ## Task 1: Add `bookmarks` collection + schema
+27 
+28 Create the new RxDB collection and a small composite-key helper. Pure scaffolding — nothing reads or writes to it yet.
+29 
+30 **Files:**
+31 
+32 - Create: `src/db/schemas/bookmarks.ts`
+33 - Create: `src/db/schemas/bookmarks.test.ts`
+34 - Create: `src/db/bookmark-id.ts`
+35 - Create: `src/db/bookmark-id.test.ts`
+36 - Modify: `src/db/schemas/index.ts` (re-export + `MAX_SCHEMA_VERSION` entry)
+37 - Modify: `src/db/types.ts` (add to `BaseSkillCollections`)
+38 - Modify: `src/db/create-database.ts` (register collection in `COLLECTIONS`)
+39 - Modify: `src/db/create-database.test.ts` (assert collection is registered)
+40 
+41 - [ ] **Step 1: Write the failing composite-id helper test.**
+42 
+43 Create `src/db/bookmark-id.test.ts`:
+44 
+45 ```ts
+46 import { describe, expect, it } from 'vitest';
+47 import { bookmarkId, parseBookmarkId } from './bookmark-id';
+48 
+49 describe('bookmarkId', () => {
+50   it('builds a composite id from profile + targetType + targetId', () => {
+51     expect(bookmarkId('anonymous', 'game', 'word-spell')).toBe(
+52       'anonymous:game:word-spell',
+53     );
+54     expect(bookmarkId('anonymous', 'customGame', 'cg_abc123')).toBe(
+55       'anonymous:customGame:cg_abc123',
+56     );
+57   });
+58 });
+59 
+60 describe('parseBookmarkId', () => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:47:46Z)**_
@@ -10437,6 +10660,7 @@ Per `CLAUDE.md`: changes touching `src/components/answer-game/` or `*reducer*` f
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/plan-wordspell-resume-desync/docs/superpowers/plans/2026-04-21-wordspell-resume-desync.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:49:04Z)**_
@@ -10454,6 +10678,7 @@ $ markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#d
 error Command failed with exit code 127.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:49:12Z)**_
@@ -10473,6 +10698,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 11.16s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:49:35Z)**_
@@ -10492,6 +10718,7 @@ src/lib/game-event-bus.md 1ms (unchanged)
 Done in 4.86s.
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:49:42Z)**_
@@ -10512,6 +10739,7 @@ Linting: 1 file(s)
 Summary: 0 error(s)
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:49:52Z)**_
@@ -10532,8 +10760,9 @@ Stage plan
 On branch plan/wordspell-resume-desync
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	new file:   docs/superpowers/plans/2026-04-21-wordspell-resume-desync.md
+ new file:   docs/superpowers/plans/2026-04-21-wordspell-resume-desync.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:50:25Z)**_
@@ -10589,6 +10818,7 @@ Done in 10.48s.
  1 file changed, 208 insertions(+)
  create mode 100644 docs/superpowers/plans/2026-04-21-wordspell-resume-desync.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:50:40Z)**_
@@ -10611,6 +10841,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        plan/wordspell-resume-desync -> plan/wordspell-resume-desync
 branch 'plan/wordspell-resume-desync' set up to track 'origin/plan/wordspell-resume-desync'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:50:57Z)**_
@@ -10651,14 +10882,15 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/128
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 03:51:04Z)**_
 
 Both PRs up:
 
-- **DM4 fix**: https://github.com/leocaseiro/base-skill/pull/127
-- **WordSpell desync plan**: https://github.com/leocaseiro/base-skill/pull/128
+- **DM4 fix**: <https://github.com/leocaseiro/base-skill/pull/127>
+- **WordSpell desync plan**: <https://github.com/leocaseiro/base-skill/pull/128>
 
 When PR #128 is approved/merged, the next session can `git worktree add ./worktrees/fix-wordspell-resume-desync -b fix/wordspell-resume-desync master` and execute the plan task-by-task with `superpowers:executing-plans`.
 
@@ -10722,6 +10954,7 @@ Worktrees + bookmarks/dm4 branches
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner             a69cf440 [tools/phoneme-tuner]
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 20:19:38Z)**_
@@ -10746,12 +10979,13 @@ Your branch is behind 'origin/master' by 80 commits, and can be fast-forwarded.
 
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   src/db/create-database.ts
-	new file:   src/db/open-with-bookmarks-recovery.test.ts
-	new file:   src/db/open-with-bookmarks-recovery.ts
+ modified:   src/db/create-database.ts
+ new file:   src/db/open-with-bookmarks-recovery.test.ts
+ new file:   src/db/open-with-bookmarks-recovery.ts
 
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 20:19:54Z)**_
@@ -10776,6 +11010,7 @@ Exit code 1
  3 files changed, 167 insertions(+), 10 deletions(-)
 (eval):1: == not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 20:20:01Z)**_
@@ -10837,6 +11072,7 @@ index 00000000..ccb3b24d
 +  }
 +};
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-21 20:20:43Z)**_

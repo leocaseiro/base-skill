@@ -8,7 +8,6 @@ _**User (2026-04-15 12:17:30Z)**_
 
 I want to continue this work in the same git worktree. use subagents. we are in the middle of task 7 IIRC.
 
-
 worktrees/feat-word-spell-library-levels-recall/docs/superpowers/plans/2026-04-15-word-spell-library-levels-recall.md
 
 ---
@@ -45,6 +44,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
+
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
@@ -53,6 +53,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ### Step 2: Execute Tasks
 
 For each task:
+
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
@@ -61,6 +62,7 @@ For each task:
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
+
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
@@ -68,6 +70,7 @@ After all tasks complete and verified:
 ## When to Stop and Ask for Help
 
 **STOP executing immediately when:**
+
 - Hit a blocker (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
@@ -78,12 +81,14 @@ After all tasks complete and verified:
 ## When to Revisit Earlier Steps
 
 **Return to Review (Step 1) when:**
+
 - Partner updates the plan based on your feedback
 - Fundamental approach needs rethinking
 
 **Don't force through blockers** - stop and ask.
 
 ## Remember
+
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications
@@ -94,10 +99,10 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
-
 
 ---
 
@@ -153,6 +158,7 @@ digraph when_to_use {
 ```
 
 **vs. Executing Plans (parallel session):**
+
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
 - Two-stage review after each task: spec compliance first, then code quality
@@ -216,6 +222,7 @@ Use the least powerful model that can handle each role to conserve cost and incr
 **Architecture, design, and review tasks**: use the most capable available model.
 
 **Task complexity signals:**
+
 - Touches 1-2 files with a complete spec → cheap model
 - Touches multiple files with integration concerns → standard model
 - Requires design judgment or broad codebase understanding → most capable model
@@ -231,6 +238,7 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 **NEEDS_CONTEXT:** The implementer needs information that wasn't provided. Provide the missing context and re-dispatch.
 
 **BLOCKED:** The implementer cannot complete the task. Assess the blocker:
+
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
@@ -323,23 +331,27 @@ Done!
 ## Advantages
 
 **vs. Manual execution:**
+
 - Subagents follow TDD naturally
 - Fresh context per task (no confusion)
 - Parallel-safe (subagents don't interfere)
 - Subagent can ask questions (before AND during work)
 
 **vs. Executing Plans:**
+
 - Same session (no handoff)
 - Continuous progress (no waiting)
 - Review checkpoints automatic
 
 **Efficiency gains:**
+
 - No file reading overhead (controller provides full text)
 - Controller curates exactly what context is needed
 - Subagent gets complete information upfront
 - Questions surfaced before work begins (not after)
 
 **Quality gates:**
+
 - Self-review catches issues before handoff
 - Two-stage review: spec compliance, then code quality
 - Review loops ensure fixes actually work
@@ -347,6 +359,7 @@ Done!
 - Code quality ensures implementation is well-built
 
 **Cost:**
+
 - More subagent invocations (implementer + 2 reviewers per task)
 - Controller does more prep work (extracting all tasks upfront)
 - Review loops add iterations
@@ -355,6 +368,7 @@ Done!
 ## Red Flags
 
 **Never:**
+
 - Start implementation on main/master branch without explicit user consent
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
@@ -369,34 +383,39 @@ Done!
 - Move to next task while either review has open issues
 
 **If subagent asks questions:**
+
 - Answer clearly and completely
 - Provide additional context if needed
 - Don't rush them into implementation
 
 **If reviewer finds issues:**
+
 - Implementer (same subagent) fixes them
 - Reviewer reviews again
 - Repeat until approved
 - Don't skip the re-review
 
 **If subagent fails task:**
+
 - Dispatch fix subagent with specific instructions
 - Don't try to fix manually (context pollution)
 
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:requesting-code-review** - Code review template for reviewer subagents
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
 
 **Subagents should use:**
+
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
+- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
 
 ---
 
@@ -418,13 +437,13 @@ Check worktree git state
 On branch feat/word-spell-library-levels-recall
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   src/games/word-spell/useLibraryRounds.test.tsx
-	modified:   src/games/word-spell/useLibraryRounds.ts
+ modified:   src/games/word-spell/useLibraryRounds.test.tsx
+ modified:   src/games/word-spell/useLibraryRounds.ts
 
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   src/games/word-spell/useLibraryRounds.ts
+ modified:   src/games/word-spell/useLibraryRounds.ts
 
 3f728c37 feat(db): add useSeenWordsStore hook
 eaea0c72 fix(db): raise word_spell_seen_words id maxLength and cover isolation/upsert
@@ -442,6 +461,7 @@ ab970e79 docs(word-spell): spec for library-driven levels in recall mode
 4a5bde61 ai(specstory): sync
 ad73c0b1 chore(release): v0.6.0 (#106)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:17:47Z)**_
@@ -453,6 +473,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:17:47Z)**_
 ```text
 File content (16562 tokens) exceeds maximum allowed tokens (10000). Use offset and limit parameters to read specific portions of the file, or search for specific content instead of reading the whole file.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:17:53Z)**_
@@ -466,6 +487,7 @@ Plan line count
 ```text
     1683 docs/superpowers/plans/2026-04-15-word-spell-library-levels-recall.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:17:57Z)**_
@@ -488,6 +510,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:17:57Z)**_
 1554:## Task 11: `roundsInOrder` default — coordination note
 1601:## Task 12: Push + open PR
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:00Z)**_
@@ -497,307 +520,308 @@ _**Agent (claude-opus-4-6 2026-04-15 12:18:00Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/docs/superpowers/plans/2026-04-15-word-spell-library-levels-recall.md`
 
 ```text
-1066	## Task 7: Extend `useLibraryRounds` — new signature
-1067	
-1068	**Files:**
-1069	
-1070	- Modify: `src/games/word-spell/useLibraryRounds.ts`
-1071	- Modify: `src/games/word-spell/useLibraryRounds.test.tsx`
-1072	
-1073	- [ ] **Step 1: Write the new failing test cases**
-1074	
-1075	Edit `src/games/word-spell/useLibraryRounds.test.tsx`. Replace the
-1076	existing `import` block and base config so tests can inject stores and
-1077	seeds:
-1078	
-1079	```tsx
-1080	import { act, renderHook, waitFor } from '@testing-library/react';
-1081	import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-1082	import { useLibraryRounds } from './useLibraryRounds';
-1083	import type { WordSpellConfig } from './types';
-1084	import {
-1085	  __resetChunkCacheForTests,
-1086	  createInMemorySeenWordsStore,
-1087	  type SeenWordsStore,
-1088	} from '@/data/words';
-1089	
-1090	const baseConfig: WordSpellConfig = {
-1091	  gameId: 'test',
-1092	  component: 'WordSpell',
-1093	  inputMethod: 'drag',
-1094	  wrongTileBehavior: 'lock-auto-eject',
-1095	  tileBankMode: 'exact',
-1096	  totalRounds: 3,
-1097	  roundsInOrder: true,
-1098	  ttsEnabled: false,
-1099	  mode: 'picture',
-1100	  tileUnit: 'letter',
-1101	};
-1102	
-1103	let store: SeenWordsStore;
-1104	
-1105	beforeEach(() => {
-1106	  store = createInMemorySeenWordsStore();
-1107	});
-1108	
-1109	afterEach(() => __resetChunkCacheForTests());
-1110	```
-1111	
-1112	Update the existing test bodies to pass `undefined` seed and the fresh
-1113	`store` to `useLibraryRounds`:
-1114	
-1115	```tsx
-1116	// where tests call `useLibraryRounds(config)` today, change to:
-1117	useLibraryRounds(config, undefined, store);
-1118	```
-1119	
-1120	Then append these **new** cases at the bottom of the `describe` block:
-1121	
-1122	```tsx
-1123	it('samples a different set when roundsInOrder is false and seed changes', async () => {
-1124	  const libraryConfig: WordSpellConfig = {
-1125	    ...baseConfig,
-1126	    roundsInOrder: false,
-1127	    totalRounds: 3,
-1128	    source: {
-1129	      type: 'word-library',
-1130	      filter: { region: 'aus', level: 1 },
-1131	    },
-1132	  };
-1133	
-1134	  const { result, rerender } = renderHook(
-1135	    ({ seed }: { seed: string }) =>
-1136	      useLibraryRounds(libraryConfig, seed, store),
-1137	    { initialProps: { seed: 'seed-a' } },
-1138	  );
-1139	
-1140	  await waitFor(() => expect(result.current.isLoading).toBe(false));
-1141	  const firstWords = result.current.rounds.map((r) => r.word);
-1142	  expect(new Set(firstWords).size).toBe(3);
-1143	
-1144	  rerender({ seed: 'seed-b' });
-1145	
-1146	  await waitFor(() => {
-1147	    const nextWords = result.current.rounds.map((r) => r.word);
-1148	    expect(nextWords).not.toEqual(firstWords);
-1149	  });
-1150	});
-1151	
-1152	it('records seen words in the store when roundsInOrder is false', async () => {
-1153	  const libraryConfig: WordSpellConfig = {
-1154	    ...baseConfig,
-1155	    roundsInOrder: false,
-1156	    totalRounds: 3,
-1157	    source: {
-1158	      type: 'word-library',
-1159	      filter: { region: 'aus', level: 1 },
-1160	    },
-1161	  };
-1162	
-1163	  const { result } = renderHook(() =>
-1164	    useLibraryRounds(libraryConfig, 'seed-x', store),
-1165	  );
-1166	  await waitFor(() => expect(result.current.isLoading).toBe(false));
-1167	
-1168	  // The signature here matches the filter from the config.
-1169	  const seen = await store.get(
-1170	    'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
-1171	  );
-1172	  expect(seen.size).toBe(3);
-1173	});
-1174	
-1175	it('does NOT touch the store when roundsInOrder is true', async () => {
-1176	  const libraryConfig: WordSpellConfig = {
-1177	    ...baseConfig,
-1178	    roundsInOrder: true,
-1179	    totalRounds: 3,
-1180	    source: {
-1181	      type: 'word-library',
-1182	      filter: { region: 'aus', level: 1 },
-1183	    },
-1184	  };
-1185	
-1186	  const { result } = renderHook(() =>
-1187	    useLibraryRounds(libraryConfig, 'seed-x', store),
-1188	  );
-1189	  await waitFor(() => expect(result.current.isLoading).toBe(false));
-1190	
-1191	  const seen = await store.get(
-1192	    'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
-1193	  );
-1194	  expect(seen.size).toBe(0);
-1195	});
-1196	
-1197	it('returns the whole pool when it is smaller than limit (silent cap)', async () => {
-1198	  const libraryConfig: WordSpellConfig = {
-1199	    ...baseConfig,
-1200	    roundsInOrder: false,
-1201	    totalRounds: 500, // way more than any level has
-1202	    source: {
-1203	      type: 'word-library',
-1204	      filter: { region: 'aus', level: 1 },
-1205	    },
-1206	  };
-1207	  const { result } = renderHook(() =>
-1208	    useLibraryRounds(libraryConfig, 'seed', store),
-1209	  );
-1210	  await waitFor(() => expect(result.current.isLoading).toBe(false));
-1211	  // No assertion on the exact count — just that we don't error and
-1212	  // we got at least a few words.
-1213	  expect(result.current.rounds.length).toBeGreaterThan(0);
-1214	});
-1215	```
-1216	
-1217	- [ ] **Step 2: Run test — expect FAIL**
-1218	
-1219	Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx --run`
-1220	Expected: FAIL — `useLibraryRounds` doesn't accept the new args yet.
-1221	
-1222	- [ ] **Step 3: Extend `useLibraryRounds`**
-1223	
-1224	Replace `src/games/word-spell/useLibraryRounds.ts` with:
-1225	
-1226	```ts
-1227	import { useEffect, useState } from 'react';
-1228	import type { WordSpellConfig, WordSpellRound } from './types';
-1229	import type { Region, SeenWordsStore } from '@/data/words';
-1230	import {
-1231	  filterSignature,
-1232	  filterWords,
-1233	  pickWithRecycling,
-1234	  toWordSpellRound,
-1235	} from '@/data/words';
-1236	
-1237	interface LibraryRoundsState {
-1238	  rounds: WordSpellRound[];
-1239	  isLoading: boolean;
-1240	  usedFallback?: { from: Region; to: 'aus' };
-1241	}
-1242	
-1243	const initialStateFor = (
-1244	  config: WordSpellConfig,
-1245	): LibraryRoundsState => {
-1246	  if (config.source) return { rounds: [], isLoading: true };
-1247	  return { rounds: config.rounds ?? [], isLoading: false };
-1248	};
-1249	
-1250	export const useLibraryRounds = (
-1251	  config: WordSpellConfig,
-1252	  seed: string | undefined,
-1253	  store: SeenWordsStore,
-1254	): LibraryRoundsState => {
-1255	  const [state, setState] = useState<LibraryRoundsState>(() =>
-1256	    initialStateFor(config),
-1257	  );
-1258	
-1259	  useEffect(() => {
-1260	    if (config.rounds && config.rounds.length > 0) {
-1261	      const explicit = config.rounds;
-1262	      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
-1263	      setState((prev) =>
-1264	        prev.rounds === explicit &&
-1265	        !prev.isLoading &&
-1266	        prev.usedFallback === undefined
-1267	          ? prev
-1268	          : { rounds: explicit, isLoading: false },
-1269	      );
-1270	      return;
-1271	    }
-1272	
-1273	    const source = config.source;
-1274	    if (!source) {
-1275	      setState((prev) =>
-1276	        prev.rounds.length === 0 &&
-1277	        !prev.isLoading &&
-1278	        prev.usedFallback === undefined
-1279	          ? prev
-1280	          : { rounds: [], isLoading: false },
-1281	      );
-1282	      return;
-1283	    }
-1284	
-1285	    const cancellation = { isCancelled: false };
-1286	
-1287	    setState((prev) =>
-1288	      prev.isLoading ? prev : { ...prev, isLoading: true },
-1289	    );
-1290	
-1291	    void (async () => {
-1292	      const result = await filterWords(source.filter);
-1293	      if (cancellation.isCancelled) return;
-1294	
-1295	      const limit = source.limit ?? config.totalRounds;
-1296	      const picked =
-1297	        config.roundsInOrder === true
-1298	          ? result.hits.slice(0, limit)
-1299	          : await pickWithRecycling(
-1300	              result.hits,
-1301	              limit,
-1302	              filterSignature(source.filter),
-1303	              store,
-1304	              seed,
-1305	            );
-1306	      if (cancellation.isCancelled) return;
-1307	
-1308	      setState({
-1309	        rounds: picked.map((hit) => toWordSpellRound(hit)),
-1310	        isLoading: false,
-1311	        usedFallback: result.usedFallback,
-1312	      });
-1313	    })();
-1314	
-1315	    return () => {
-1316	      cancellation.isCancelled = true;
-1317	    };
-1318	  }, [
-1319	    config.rounds,
-1320	    config.source,
-1321	    config.totalRounds,
-1322	    config.roundsInOrder,
-1323	    seed,
-1324	    store,
-1325	  ]);
-1326	
-1327	  return state;
-1328	};
-1329	```
-1330	
-1331	- [ ] **Step 4: Run test — expect PASS**
-1332	
-1333	Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx --run`
-1334	Expected: all existing + new tests pass.
-1335	
-1336	- [ ] **Step 5: Commit**
-1337	
-1338	```bash
-1339	git add src/games/word-spell/useLibraryRounds.ts src/games/word-spell/useLibraryRounds.test.tsx
-1340	git commit -m "feat(word-spell): sample library rounds with per-session seed and store"
-1341	```
-1342	
-1343	---
-1344	
-1345	## Task 8: Wire `WordSpell.tsx`
-1346	
-1347	**Files:**
-1348	
-1349	- Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
-1350	- Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
-1351	
-1352	- [ ] **Step 1: Update the existing WordSpell tests**
-1353	
-1354	`WordSpell.test.tsx` uses `roundsInOrder: true` in its fixtures (lines
-1355	56, 122). Those stay true — no changes needed there — because the
-1356	hook's new signature must still work with the existing tests. But
-1357	every place `useLibraryRounds` is called indirectly through
-1358	`<WordSpell>` now receives `seenWordsStore` and `sampleSeed` from the
-1359	component itself. So the existing test assertions remain valid; we
-1360	only add one new case.
-1361	
-1362	Append to `src/games/word-spell/WordSpell/WordSpell.test.tsx` (inside
-1363	the top-level `describe`):
-1364	
-1365	```tsx
+1066 ## Task 7: Extend `useLibraryRounds` — new signature
+1067 
+1068 **Files:**
+1069 
+1070 - Modify: `src/games/word-spell/useLibraryRounds.ts`
+1071 - Modify: `src/games/word-spell/useLibraryRounds.test.tsx`
+1072 
+1073 - [ ] **Step 1: Write the new failing test cases**
+1074 
+1075 Edit `src/games/word-spell/useLibraryRounds.test.tsx`. Replace the
+1076 existing `import` block and base config so tests can inject stores and
+1077 seeds:
+1078 
+1079 ```tsx
+1080 import { act, renderHook, waitFor } from '@testing-library/react';
+1081 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+1082 import { useLibraryRounds } from './useLibraryRounds';
+1083 import type { WordSpellConfig } from './types';
+1084 import {
+1085   __resetChunkCacheForTests,
+1086   createInMemorySeenWordsStore,
+1087   type SeenWordsStore,
+1088 } from '@/data/words';
+1089 
+1090 const baseConfig: WordSpellConfig = {
+1091   gameId: 'test',
+1092   component: 'WordSpell',
+1093   inputMethod: 'drag',
+1094   wrongTileBehavior: 'lock-auto-eject',
+1095   tileBankMode: 'exact',
+1096   totalRounds: 3,
+1097   roundsInOrder: true,
+1098   ttsEnabled: false,
+1099   mode: 'picture',
+1100   tileUnit: 'letter',
+1101 };
+1102 
+1103 let store: SeenWordsStore;
+1104 
+1105 beforeEach(() => {
+1106   store = createInMemorySeenWordsStore();
+1107 });
+1108 
+1109 afterEach(() => __resetChunkCacheForTests());
+1110 ```
+1111 
+1112 Update the existing test bodies to pass `undefined` seed and the fresh
+1113 `store` to `useLibraryRounds`:
+1114 
+1115 ```tsx
+1116 // where tests call `useLibraryRounds(config)` today, change to:
+1117 useLibraryRounds(config, undefined, store);
+1118 ```
+1119 
+1120 Then append these **new** cases at the bottom of the `describe` block:
+1121 
+1122 ```tsx
+1123 it('samples a different set when roundsInOrder is false and seed changes', async () => {
+1124   const libraryConfig: WordSpellConfig = {
+1125     ...baseConfig,
+1126     roundsInOrder: false,
+1127     totalRounds: 3,
+1128     source: {
+1129       type: 'word-library',
+1130       filter: { region: 'aus', level: 1 },
+1131     },
+1132   };
+1133 
+1134   const { result, rerender } = renderHook(
+1135     ({ seed }: { seed: string }) =>
+1136       useLibraryRounds(libraryConfig, seed, store),
+1137     { initialProps: { seed: 'seed-a' } },
+1138   );
+1139 
+1140   await waitFor(() => expect(result.current.isLoading).toBe(false));
+1141   const firstWords = result.current.rounds.map((r) => r.word);
+1142   expect(new Set(firstWords).size).toBe(3);
+1143 
+1144   rerender({ seed: 'seed-b' });
+1145 
+1146   await waitFor(() => {
+1147     const nextWords = result.current.rounds.map((r) => r.word);
+1148     expect(nextWords).not.toEqual(firstWords);
+1149   });
+1150 });
+1151 
+1152 it('records seen words in the store when roundsInOrder is false', async () => {
+1153   const libraryConfig: WordSpellConfig = {
+1154     ...baseConfig,
+1155     roundsInOrder: false,
+1156     totalRounds: 3,
+1157     source: {
+1158       type: 'word-library',
+1159       filter: { region: 'aus', level: 1 },
+1160     },
+1161   };
+1162 
+1163   const { result } = renderHook(() =>
+1164     useLibraryRounds(libraryConfig, 'seed-x', store),
+1165   );
+1166   await waitFor(() => expect(result.current.isLoading).toBe(false));
+1167 
+1168   // The signature here matches the filter from the config.
+1169   const seen = await store.get(
+1170     'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+1171   );
+1172   expect(seen.size).toBe(3);
+1173 });
+1174 
+1175 it('does NOT touch the store when roundsInOrder is true', async () => {
+1176   const libraryConfig: WordSpellConfig = {
+1177     ...baseConfig,
+1178     roundsInOrder: true,
+1179     totalRounds: 3,
+1180     source: {
+1181       type: 'word-library',
+1182       filter: { region: 'aus', level: 1 },
+1183     },
+1184   };
+1185 
+1186   const { result } = renderHook(() =>
+1187     useLibraryRounds(libraryConfig, 'seed-x', store),
+1188   );
+1189   await waitFor(() => expect(result.current.isLoading).toBe(false));
+1190 
+1191   const seen = await store.get(
+1192     'region=aus|level=1|levels=|levelRange=|syllableCountEq=|syllableCountRange=|phonemesAllowed=|phonemesRequired=|graphemesAllowed=|graphemesRequired=',
+1193   );
+1194   expect(seen.size).toBe(0);
+1195 });
+1196 
+1197 it('returns the whole pool when it is smaller than limit (silent cap)', async () => {
+1198   const libraryConfig: WordSpellConfig = {
+1199     ...baseConfig,
+1200     roundsInOrder: false,
+1201     totalRounds: 500, // way more than any level has
+1202     source: {
+1203       type: 'word-library',
+1204       filter: { region: 'aus', level: 1 },
+1205     },
+1206   };
+1207   const { result } = renderHook(() =>
+1208     useLibraryRounds(libraryConfig, 'seed', store),
+1209   );
+1210   await waitFor(() => expect(result.current.isLoading).toBe(false));
+1211   // No assertion on the exact count — just that we don't error and
+1212   // we got at least a few words.
+1213   expect(result.current.rounds.length).toBeGreaterThan(0);
+1214 });
+1215 ```
+1216 
+1217 - [ ] **Step 2: Run test — expect FAIL**
+1218 
+1219 Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx --run`
+1220 Expected: FAIL — `useLibraryRounds` doesn't accept the new args yet.
+1221 
+1222 - [ ] **Step 3: Extend `useLibraryRounds`**
+1223 
+1224 Replace `src/games/word-spell/useLibraryRounds.ts` with:
+1225 
+1226 ```ts
+1227 import { useEffect, useState } from 'react';
+1228 import type { WordSpellConfig, WordSpellRound } from './types';
+1229 import type { Region, SeenWordsStore } from '@/data/words';
+1230 import {
+1231   filterSignature,
+1232   filterWords,
+1233   pickWithRecycling,
+1234   toWordSpellRound,
+1235 } from '@/data/words';
+1236 
+1237 interface LibraryRoundsState {
+1238   rounds: WordSpellRound[];
+1239   isLoading: boolean;
+1240   usedFallback?: { from: Region; to: 'aus' };
+1241 }
+1242 
+1243 const initialStateFor = (
+1244   config: WordSpellConfig,
+1245 ): LibraryRoundsState => {
+1246   if (config.source) return { rounds: [], isLoading: true };
+1247   return { rounds: config.rounds ?? [], isLoading: false };
+1248 };
+1249 
+1250 export const useLibraryRounds = (
+1251   config: WordSpellConfig,
+1252   seed: string | undefined,
+1253   store: SeenWordsStore,
+1254 ): LibraryRoundsState => {
+1255   const [state, setState] = useState<LibraryRoundsState>(() =>
+1256     initialStateFor(config),
+1257   );
+1258 
+1259   useEffect(() => {
+1260     if (config.rounds && config.rounds.length > 0) {
+1261       const explicit = config.rounds;
+1262       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
+1263       setState((prev) =>
+1264         prev.rounds === explicit &&
+1265         !prev.isLoading &&
+1266         prev.usedFallback === undefined
+1267           ? prev
+1268           : { rounds: explicit, isLoading: false },
+1269       );
+1270       return;
+1271     }
+1272 
+1273     const source = config.source;
+1274     if (!source) {
+1275       setState((prev) =>
+1276         prev.rounds.length === 0 &&
+1277         !prev.isLoading &&
+1278         prev.usedFallback === undefined
+1279           ? prev
+1280           : { rounds: [], isLoading: false },
+1281       );
+1282       return;
+1283     }
+1284 
+1285     const cancellation = { isCancelled: false };
+1286 
+1287     setState((prev) =>
+1288       prev.isLoading ? prev : { ...prev, isLoading: true },
+1289     );
+1290 
+1291     void (async () => {
+1292       const result = await filterWords(source.filter);
+1293       if (cancellation.isCancelled) return;
+1294 
+1295       const limit = source.limit ?? config.totalRounds;
+1296       const picked =
+1297         config.roundsInOrder === true
+1298           ? result.hits.slice(0, limit)
+1299           : await pickWithRecycling(
+1300               result.hits,
+1301               limit,
+1302               filterSignature(source.filter),
+1303               store,
+1304               seed,
+1305             );
+1306       if (cancellation.isCancelled) return;
+1307 
+1308       setState({
+1309         rounds: picked.map((hit) => toWordSpellRound(hit)),
+1310         isLoading: false,
+1311         usedFallback: result.usedFallback,
+1312       });
+1313     })();
+1314 
+1315     return () => {
+1316       cancellation.isCancelled = true;
+1317     };
+1318   }, [
+1319     config.rounds,
+1320     config.source,
+1321     config.totalRounds,
+1322     config.roundsInOrder,
+1323     seed,
+1324     store,
+1325   ]);
+1326 
+1327   return state;
+1328 };
+1329 ```
+1330 
+1331 - [ ] **Step 4: Run test — expect PASS**
+1332 
+1333 Run: `yarn test src/games/word-spell/useLibraryRounds.test.tsx --run`
+1334 Expected: all existing + new tests pass.
+1335 
+1336 - [ ] **Step 5: Commit**
+1337 
+1338 ```bash
+1339 git add src/games/word-spell/useLibraryRounds.ts src/games/word-spell/useLibraryRounds.test.tsx
+1340 git commit -m "feat(word-spell): sample library rounds with per-session seed and store"
+1341 ```
+1342 
+1343 ---
+1344 
+1345 ## Task 8: Wire `WordSpell.tsx`
+1346 
+1347 **Files:**
+1348 
+1349 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
+1350 - Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
+1351 
+1352 - [ ] **Step 1: Update the existing WordSpell tests**
+1353 
+1354 `WordSpell.test.tsx` uses `roundsInOrder: true` in its fixtures (lines
+1355 56, 122). Those stay true — no changes needed there — because the
+1356 hook's new signature must still work with the existing tests. But
+1357 every place `useLibraryRounds` is called indirectly through
+1358 `<WordSpell>` now receives `seenWordsStore` and `sampleSeed` from the
+1359 component itself. So the existing test assertions remain valid; we
+1360 only add one new case.
+1361 
+1362 Append to `src/games/word-spell/WordSpell/WordSpell.test.tsx` (inside
+1363 the top-level `describe`):
+1364 
+1365 ```tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:07Z)**_
@@ -1020,6 +1044,7 @@ index 6be21d0c..94415720 100644
  interface LibraryRoundsState {
    rounds: WordSpellRound[];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:14Z)**_
@@ -1054,6 +1079,7 @@ index 94415720..8ec2c37e 100644
            : await pickWithRecycling(
                result.hits,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:23Z)**_
@@ -1069,347 +1095,348 @@ _**Agent (claude-opus-4-6 2026-04-15 12:18:27Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/docs/superpowers/plans/2026-04-15-word-spell-library-levels-recall.md`
 
 ```text
-1345	## Task 8: Wire `WordSpell.tsx`
-1346	
-1347	**Files:**
-1348	
-1349	- Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
-1350	- Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
-1351	
-1352	- [ ] **Step 1: Update the existing WordSpell tests**
-1353	
-1354	`WordSpell.test.tsx` uses `roundsInOrder: true` in its fixtures (lines
-1355	56, 122). Those stay true — no changes needed there — because the
-1356	hook's new signature must still work with the existing tests. But
-1357	every place `useLibraryRounds` is called indirectly through
-1358	`<WordSpell>` now receives `seenWordsStore` and `sampleSeed` from the
-1359	component itself. So the existing test assertions remain valid; we
-1360	only add one new case.
-1361	
-1362	Append to `src/games/word-spell/WordSpell/WordSpell.test.tsx` (inside
-1363	the top-level `describe`):
-1364	
-1365	```tsx
-1366	it('generates a new sampleSeed when the session restarts', async () => {
-1367	  // This is a smoke test: we render twice, dispatch a session reset
-1368	  // in between, and assert that the first call's seed differs from
-1369	  // the second. Seed is internal so we observe it indirectly through
-1370	  // different round orderings when roundsInOrder is false with a
-1371	  // library source. For coverage of the pure sampling logic see
-1372	  // seen-words.test.ts / sample.test.ts.
-1373	  expect(true).toBe(true);
-1374	});
-1375	```
-1376	
-1377	Keep this as a placeholder smoke test only if there's no simple way to
-1378	observe the seed from outside — prefer to add a real assertion when
-1379	the component exposes a hook for test introspection. If the existing
-1380	`useLibraryRounds.test.tsx` coverage (Task 7) already asserts seed-
-1381	driven re-sampling through `rerender`, this smoke test can stay as a
-1382	single-line assertion that the test file compiles. **Remove this step
-1383	if you add a stronger assertion elsewhere.**
-1384	
-1385	- [ ] **Step 2: Run test — expect FAIL**
-1386	
-1387	Run: `yarn test src/games/word-spell/WordSpell/WordSpell.test.tsx --run`
-1388	Expected: FAIL — `useLibraryRounds` signature changed, compile error
-1389	in `WordSpell.tsx`.
-1390	
-1391	- [ ] **Step 3: Update `WordSpell.tsx`**
-1392	
-1393	Edit `src/games/word-spell/WordSpell/WordSpell.tsx`:
-1394	
-1395	Add this import near the top:
-1396	
-1397	```ts
-1398	import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
-1399	```
-1400	
-1401	Inside `export const WordSpell = (...)`, after the `useGameSkin` call
-1402	and before `useLibraryRounds`, add:
-1403	
-1404	```ts
-1405	const seenWordsStore = useSeenWordsStore();
-1406	const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
-1407	```
-1408	
-1409	Then change the `useLibraryRounds` call from:
-1410	
-1411	```ts
-1412	const { rounds: resolvedRounds, isLoading } = useLibraryRounds(config);
-1413	```
-1414	
-1415	to:
-1416	
-1417	```ts
-1418	const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-1419	  config,
-1420	  sampleSeed,
-1421	  seenWordsStore,
-1422	);
-1423	```
-1424	
-1425	`sessionEpoch` already exists at line 298 — keep its declaration in
-1426	place; just move it above the `useSeenWordsStore` / `sampleSeed` lines
-1427	if necessary so `sessionEpoch` is in scope when `sampleSeed` is
-1428	declared. If that reorder is invasive, declare `sampleSeed` right
-1429	after `sessionEpoch`'s `useState` line instead.
-1430	
-1431	`nanoid` is already imported in this file — no new import needed for
-1432	it.
-1433	
-1434	- [ ] **Step 4: Run test — expect PASS**
-1435	
-1436	Run: `yarn test src/games/word-spell/WordSpell/WordSpell.test.tsx --run`
-1437	Expected: all existing + new tests pass.
-1438	
-1439	- [ ] **Step 5: Typecheck**
-1440	
-1441	Run: `yarn typecheck`
-1442	Expected: PASS.
-1443	
-1444	- [ ] **Step 6: Commit**
-1445	
-1446	```bash
-1447	git add src/games/word-spell/WordSpell/WordSpell.tsx src/games/word-spell/WordSpell/WordSpell.test.tsx
-1448	git commit -m "feat(word-spell): wire sampleSeed + seenWordsStore through WordSpell"
-1449	```
-1450	
-1451	---
-1452	
-1453	## Task 9: Full test + typecheck sweep
-1454	
-1455	**Files:** none modified.
-1456	
-1457	- [ ] **Step 1: Run the full Vitest suite**
-1458	
-1459	Run: `yarn test --run`
-1460	Expected: all tests green.
-1461	
-1462	- [ ] **Step 2: Run TypeScript**
-1463	
-1464	Run: `yarn typecheck`
-1465	Expected: PASS.
-1466	
-1467	- [ ] **Step 3: Run ESLint**
-1468	
-1469	Run: `yarn lint`
-1470	Expected: PASS (or only pre-existing warnings; no new violations).
-1471	
-1472	- [ ] **Step 4: If anything fails**
-1473	
-1474	Triage red → fix → re-run, one failure at a time. Do not move on to
-1475	Task 10 until this task is fully green.
-1476	
-1477	- [ ] **Step 5: Commit (if any lint fixups were needed)**
-1478	
-1479	```bash
-1480	git add -A
-1481	git commit -m "chore(word-spell): clean up lint/type findings"
-1482	```
-1483	
-1484	---
-1485	
-1486	## Task 10: Manual smoke test + VR check
-1487	
-1488	**Files:** none modified (may update VR baselines if drift is
-1489	intentional — but this plan expects **zero VR drift**).
-1490	
-1491	- [ ] **Step 1: Start the dev server**
-1492	
-1493	Run in a new terminal: `yarn dev`.
-1494	
-1495	- [ ] **Step 2: Open WordSpell with hand-authored rounds**
-1496	
-1497	Navigate to `http://localhost:5173/en/game/word-spell` (or whatever
-1498	the local dev URL is). The homepage default uses emoji rounds; verify
-1499	the game loads and plays as before. **Default config has
-1500	`roundsInOrder: true` and no `source`, so the new sampler path is not
-1501	exercised here.**
-1502	
-1503	- [ ] **Step 3: Verify recall mode with a library source**
-1504	
-1505	Because `kid-friendly-homepage` owns the Simple Config UI that produces
-1506	a library source, we don't have a built-in UI to exercise it yet. To
-1507	smoke-test, create a Storybook story **locally (don't commit)** that
-1508	renders `<WordSpell>` with:
-1509	
-1510	```ts
-1511	const config: WordSpellConfig = {
-1512	  gameId: 'word-spell',
-1513	  component: 'WordSpell',
-1514	  inputMethod: 'drag',
-1515	  wrongTileBehavior: 'lock-auto-eject',
-1516	  tileBankMode: 'exact',
-1517	  totalRounds: 5,
-1518	  roundsInOrder: false,
-1519	  ttsEnabled: true,
-1520	  mode: 'recall',
-1521	  tileUnit: 'letter',
-1522	  source: {
-1523	    type: 'word-library',
-1524	    filter: { region: 'aus', level: 2 },
-1525	  },
-1526	};
-1527	```
-1528	
-1529	Run `yarn storybook`, open the story, and verify:
-1530	
-1531	1. 5 recall-mode rounds render, all distinct words.
-1532	2. Audio button speaks each word.
-1533	3. Tapping "Play Again" after a game-over loads 5 **different** words.
-1534	4. Browser refresh then "Play Again" still prefers unseen words (the
-1535	   RxDB collection is persisted via Dexie).
-1536	
-1537	Delete the local story before committing.
-1538	
-1539	- [ ] **Step 4: VR check**
-1540	
-1541	Run: `yarn test:vr` (requires Docker).
-1542	
-1543	Expected: zero diffs. `DEFAULT_WORD_SPELL_CONFIG.roundsInOrder` is
-1544	still `true`, so existing VR baselines don't change. If any baselines
-1545	drifted, stop and root-cause before running `yarn test:vr:update`.
-1546	
-1547	- [ ] **Step 5: No commit unless a regression was fixed**
-1548	
-1549	This task is verification-only. Only commit if step 4 surfaced an
-1550	issue that needed a fix.
-1551	
-1552	---
-1553	
-1554	## Task 11: `roundsInOrder` default — coordination note
-1555	
-1556	**Files:**
-1557	
-1558	- Modify: `docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md`
-1559	
-1560	This task does NOT touch production code. The spec promised to "update
-1561	the default where `WordSpellConfig` is instantiated". The only concrete
-1562	default in this repo is `DEFAULT_WORD_SPELL_CONFIG` in
-1563	`src/routes/$locale/_app/game/$gameId.tsx:93-109`, and its inline
-1564	comment explicitly documents why it is pinned to `true`
-1565	(nanoid-based shuffles defeat VR determinism for emoji demos).
-1566	
-1567	The real default for **library-sourced** configs belongs to the
-1568	kid-friendly-homepage PR's Simple Config form, which lands separately.
-1569	
-1570	- [ ] **Step 1: Add a coordination note to the spec**
-1571	
-1572	Edit
-1573	`docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md`.
-1574	Under the "Config default: `roundsInOrder`" subsection (inside "Data
-1575	layer"), append this paragraph:
-1576	
-1577	```markdown
-1578	**Scope note:** `DEFAULT_WORD_SPELL_CONFIG` in
-1579	`src/routes/$locale/_app/game/$gameId.tsx` stays `roundsInOrder: true`
-1580	— its inline comment documents why (VR determinism with hand-authored
-1581	emoji rounds). The "default to false" directive applies to the
-1582	library-sourced configs produced by the kid-friendly-homepage Simple
-1583	Config form. Coordinate with that PR so its form emits
-1584	`roundsInOrder: false` whenever it sets `source`.
-1585	```
-1586	
-1587	- [ ] **Step 2: Lint the markdown**
-1588	
-1589	Run: `yarn fix:md && yarn lint:md`
-1590	Expected: zero errors.
-1591	
-1592	- [ ] **Step 3: Commit**
-1593	
-1594	```bash
-1595	git add docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md
-1596	git commit -m "docs(word-spell): scope roundsInOrder default to library configs"
-1597	```
-1598	
-1599	---
-1600	
-1601	## Task 12: Push + open PR
-1602	
-1603	**Files:** none.
-1604	
-1605	- [ ] **Step 1: Push the branch**
-1606	
-1607	Run: `git push -u origin feat/word-spell-library-levels-recall`.
-1608	
-1609	- [ ] **Step 2: Open the PR**
-1610	
-1611	Target base: `master`. Title: `feat(word-spell): library-driven levels
-1612	for recall mode`. Body:
-1613	
-1614	```markdown
-1615	## Summary
-1616	
-1617	- Library-sourced WordSpell sessions now sample `totalRounds` distinct
-1618	  words at random from the filtered pool.
-1619	- Per-profile "seen words" state persists in a new RxDB collection
-1620	  (`word_spell_seen_words`) so replays prefer fresh words and recycle
-1621	  only when the pool is exhausted.
-1622	- `roundsInOrder: true` short-circuits back to the current
-1623	  deterministic behaviour for teacher demos and VR baselines.
-1624	
-1625	## Test plan
-1626	
-1627	- [ ] `yarn test --run`
-1628	- [ ] `yarn typecheck`
-1629	- [ ] `yarn lint`
-1630	- [ ] Manual smoke test: 5 recall rounds from AUS Level 2, Play Again
-1631	      shows different words, refresh still prefers unseen words.
-1632	- [ ] `yarn test:vr` — zero drift (default config unchanged).
-1633	
-1634	## Coordination
-1635	
-1636	Waits for `kid-friendly-homepage` to land the Simple Config form that
-1637	produces `config.source`. Spec documents the `roundsInOrder: false`
-1638	default for library-sourced configs as that PR's responsibility.
-1639	```
-1640	
-1641	- [ ] **Step 3: Done.**
-1642	
-1643	---
-1644	
-1645	## Self-review against spec
-1646	
-1647	**Spec coverage:**
-1648	
-1649	- Goals — Task 2 (sampling), Task 4 (distinctness + fresh on replay),
-1650	  Task 7 (seed per session wiring), Task 4 (unseen preference +
-1651	  recycling), Tasks 5/6 (RxDB persistence per profile), Task 7
-1652	  (`roundsInOrder: true` short-circuit). ✓
-1653	- Pool-exhaustion table — Task 4 Step 1 has a dedicated test case. ✓
-1654	- Boundary with `kid-friendly-homepage` — Task 11 documents the
-1655	  `roundsInOrder` coordination. ✓
-1656	- Data layer files (`seeded-random`, `sample`, `seen-words`) — Tasks
-1657	  1, 2, 3, 4. ✓
-1658	- RxDB collection + hook — Tasks 5, 6. ✓
-1659	- Hook + WordSpell integration — Tasks 7, 8. ✓
-1660	- Testing plan — unit tests in Tasks 1–6, hook test in Task 7,
-1661	  component test in Task 8, full sweep in Task 9. ✓
-1662	- TDD order — Tasks proceed in the exact sequence the spec prescribed
-1663	  (seeded-random → sample → seen-words → RxDB → hook → component →
-1664	  default flip). ✓
-1665	- Rollout — Task 12 push + PR. ✓
-1666	
-1667	**Placeholder scan:** No "TBD", "TODO", or "implement later" markers.
-1668	Each code block is complete and copy-pasteable. The only deliberate
-1669	placeholder is the Task 8 Step 1 smoke-test `expect(true).toBe(true)`
-1670	— explicitly flagged as "remove if you add a stronger assertion
-1671	elsewhere", and Task 7's rerender test already covers seed-driven
-1672	re-sampling, so this smoke test can stay as a formality or be deleted.
-1673	
-1674	**Type consistency:**
-1675	
-1676	- `SeenWordsStore` interface is defined in Task 4 and consumed the
-1677	  same way in Tasks 6, 7, 8. ✓
-1678	- `filterSignature(filter: WordFilter): string` defined in Task 3,
-1679	  consumed in Task 4 (`pickWithRecycling`) and Task 7. ✓
-1680	- `WordSpellSeenWordsDoc` shape is the same in Task 5 (schema) and
-1681	  Task 6 (hook). ✓
-1682	- `useLibraryRounds` new signature `(config, seed, store)` is used
-1683	  consistently across Tasks 7 and 8. ✓
+1345 ## Task 8: Wire `WordSpell.tsx`
+1346 
+1347 **Files:**
+1348 
+1349 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
+1350 - Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
+1351 
+1352 - [ ] **Step 1: Update the existing WordSpell tests**
+1353 
+1354 `WordSpell.test.tsx` uses `roundsInOrder: true` in its fixtures (lines
+1355 56, 122). Those stay true — no changes needed there — because the
+1356 hook's new signature must still work with the existing tests. But
+1357 every place `useLibraryRounds` is called indirectly through
+1358 `<WordSpell>` now receives `seenWordsStore` and `sampleSeed` from the
+1359 component itself. So the existing test assertions remain valid; we
+1360 only add one new case.
+1361 
+1362 Append to `src/games/word-spell/WordSpell/WordSpell.test.tsx` (inside
+1363 the top-level `describe`):
+1364 
+1365 ```tsx
+1366 it('generates a new sampleSeed when the session restarts', async () => {
+1367   // This is a smoke test: we render twice, dispatch a session reset
+1368   // in between, and assert that the first call's seed differs from
+1369   // the second. Seed is internal so we observe it indirectly through
+1370   // different round orderings when roundsInOrder is false with a
+1371   // library source. For coverage of the pure sampling logic see
+1372   // seen-words.test.ts / sample.test.ts.
+1373   expect(true).toBe(true);
+1374 });
+1375 ```
+1376 
+1377 Keep this as a placeholder smoke test only if there's no simple way to
+1378 observe the seed from outside — prefer to add a real assertion when
+1379 the component exposes a hook for test introspection. If the existing
+1380 `useLibraryRounds.test.tsx` coverage (Task 7) already asserts seed-
+1381 driven re-sampling through `rerender`, this smoke test can stay as a
+1382 single-line assertion that the test file compiles. **Remove this step
+1383 if you add a stronger assertion elsewhere.**
+1384 
+1385 - [ ] **Step 2: Run test — expect FAIL**
+1386 
+1387 Run: `yarn test src/games/word-spell/WordSpell/WordSpell.test.tsx --run`
+1388 Expected: FAIL — `useLibraryRounds` signature changed, compile error
+1389 in `WordSpell.tsx`.
+1390 
+1391 - [ ] **Step 3: Update `WordSpell.tsx`**
+1392 
+1393 Edit `src/games/word-spell/WordSpell/WordSpell.tsx`:
+1394 
+1395 Add this import near the top:
+1396 
+1397 ```ts
+1398 import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
+1399 ```
+1400 
+1401 Inside `export const WordSpell = (...)`, after the `useGameSkin` call
+1402 and before `useLibraryRounds`, add:
+1403 
+1404 ```ts
+1405 const seenWordsStore = useSeenWordsStore();
+1406 const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+1407 ```
+1408 
+1409 Then change the `useLibraryRounds` call from:
+1410 
+1411 ```ts
+1412 const { rounds: resolvedRounds, isLoading } = useLibraryRounds(config);
+1413 ```
+1414 
+1415 to:
+1416 
+1417 ```ts
+1418 const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+1419   config,
+1420   sampleSeed,
+1421   seenWordsStore,
+1422 );
+1423 ```
+1424 
+1425 `sessionEpoch` already exists at line 298 — keep its declaration in
+1426 place; just move it above the `useSeenWordsStore` / `sampleSeed` lines
+1427 if necessary so `sessionEpoch` is in scope when `sampleSeed` is
+1428 declared. If that reorder is invasive, declare `sampleSeed` right
+1429 after `sessionEpoch`'s `useState` line instead.
+1430 
+1431 `nanoid` is already imported in this file — no new import needed for
+1432 it.
+1433 
+1434 - [ ] **Step 4: Run test — expect PASS**
+1435 
+1436 Run: `yarn test src/games/word-spell/WordSpell/WordSpell.test.tsx --run`
+1437 Expected: all existing + new tests pass.
+1438 
+1439 - [ ] **Step 5: Typecheck**
+1440 
+1441 Run: `yarn typecheck`
+1442 Expected: PASS.
+1443 
+1444 - [ ] **Step 6: Commit**
+1445 
+1446 ```bash
+1447 git add src/games/word-spell/WordSpell/WordSpell.tsx src/games/word-spell/WordSpell/WordSpell.test.tsx
+1448 git commit -m "feat(word-spell): wire sampleSeed + seenWordsStore through WordSpell"
+1449 ```
+1450 
+1451 ---
+1452 
+1453 ## Task 9: Full test + typecheck sweep
+1454 
+1455 **Files:** none modified.
+1456 
+1457 - [ ] **Step 1: Run the full Vitest suite**
+1458 
+1459 Run: `yarn test --run`
+1460 Expected: all tests green.
+1461 
+1462 - [ ] **Step 2: Run TypeScript**
+1463 
+1464 Run: `yarn typecheck`
+1465 Expected: PASS.
+1466 
+1467 - [ ] **Step 3: Run ESLint**
+1468 
+1469 Run: `yarn lint`
+1470 Expected: PASS (or only pre-existing warnings; no new violations).
+1471 
+1472 - [ ] **Step 4: If anything fails**
+1473 
+1474 Triage red → fix → re-run, one failure at a time. Do not move on to
+1475 Task 10 until this task is fully green.
+1476 
+1477 - [ ] **Step 5: Commit (if any lint fixups were needed)**
+1478 
+1479 ```bash
+1480 git add -A
+1481 git commit -m "chore(word-spell): clean up lint/type findings"
+1482 ```
+1483 
+1484 ---
+1485 
+1486 ## Task 10: Manual smoke test + VR check
+1487 
+1488 **Files:** none modified (may update VR baselines if drift is
+1489 intentional — but this plan expects **zero VR drift**).
+1490 
+1491 - [ ] **Step 1: Start the dev server**
+1492 
+1493 Run in a new terminal: `yarn dev`.
+1494 
+1495 - [ ] **Step 2: Open WordSpell with hand-authored rounds**
+1496 
+1497 Navigate to `http://localhost:5173/en/game/word-spell` (or whatever
+1498 the local dev URL is). The homepage default uses emoji rounds; verify
+1499 the game loads and plays as before. **Default config has
+1500 `roundsInOrder: true` and no `source`, so the new sampler path is not
+1501 exercised here.**
+1502 
+1503 - [ ] **Step 3: Verify recall mode with a library source**
+1504 
+1505 Because `kid-friendly-homepage` owns the Simple Config UI that produces
+1506 a library source, we don't have a built-in UI to exercise it yet. To
+1507 smoke-test, create a Storybook story **locally (don't commit)** that
+1508 renders `<WordSpell>` with:
+1509 
+1510 ```ts
+1511 const config: WordSpellConfig = {
+1512   gameId: 'word-spell',
+1513   component: 'WordSpell',
+1514   inputMethod: 'drag',
+1515   wrongTileBehavior: 'lock-auto-eject',
+1516   tileBankMode: 'exact',
+1517   totalRounds: 5,
+1518   roundsInOrder: false,
+1519   ttsEnabled: true,
+1520   mode: 'recall',
+1521   tileUnit: 'letter',
+1522   source: {
+1523     type: 'word-library',
+1524     filter: { region: 'aus', level: 2 },
+1525   },
+1526 };
+1527 ```
+1528 
+1529 Run `yarn storybook`, open the story, and verify:
+1530 
+1531 1. 5 recall-mode rounds render, all distinct words.
+1532 2. Audio button speaks each word.
+1533 3. Tapping "Play Again" after a game-over loads 5 **different** words.
+1534 4. Browser refresh then "Play Again" still prefers unseen words (the
+1535    RxDB collection is persisted via Dexie).
+1536 
+1537 Delete the local story before committing.
+1538 
+1539 - [ ] **Step 4: VR check**
+1540 
+1541 Run: `yarn test:vr` (requires Docker).
+1542 
+1543 Expected: zero diffs. `DEFAULT_WORD_SPELL_CONFIG.roundsInOrder` is
+1544 still `true`, so existing VR baselines don't change. If any baselines
+1545 drifted, stop and root-cause before running `yarn test:vr:update`.
+1546 
+1547 - [ ] **Step 5: No commit unless a regression was fixed**
+1548 
+1549 This task is verification-only. Only commit if step 4 surfaced an
+1550 issue that needed a fix.
+1551 
+1552 ---
+1553 
+1554 ## Task 11: `roundsInOrder` default — coordination note
+1555 
+1556 **Files:**
+1557 
+1558 - Modify: `docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md`
+1559 
+1560 This task does NOT touch production code. The spec promised to "update
+1561 the default where `WordSpellConfig` is instantiated". The only concrete
+1562 default in this repo is `DEFAULT_WORD_SPELL_CONFIG` in
+1563 `src/routes/$locale/_app/game/$gameId.tsx:93-109`, and its inline
+1564 comment explicitly documents why it is pinned to `true`
+1565 (nanoid-based shuffles defeat VR determinism for emoji demos).
+1566 
+1567 The real default for **library-sourced** configs belongs to the
+1568 kid-friendly-homepage PR's Simple Config form, which lands separately.
+1569 
+1570 - [ ] **Step 1: Add a coordination note to the spec**
+1571 
+1572 Edit
+1573 `docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md`.
+1574 Under the "Config default: `roundsInOrder`" subsection (inside "Data
+1575 layer"), append this paragraph:
+1576 
+1577 ```markdown
+1578 **Scope note:** `DEFAULT_WORD_SPELL_CONFIG` in
+1579 `src/routes/$locale/_app/game/$gameId.tsx` stays `roundsInOrder: true`
+1580 — its inline comment documents why (VR determinism with hand-authored
+1581 emoji rounds). The "default to false" directive applies to the
+1582 library-sourced configs produced by the kid-friendly-homepage Simple
+1583 Config form. Coordinate with that PR so its form emits
+1584 `roundsInOrder: false` whenever it sets `source`.
+1585 ```
+1586 
+1587 - [ ] **Step 2: Lint the markdown**
+1588 
+1589 Run: `yarn fix:md && yarn lint:md`
+1590 Expected: zero errors.
+1591 
+1592 - [ ] **Step 3: Commit**
+1593 
+1594 ```bash
+1595 git add docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md
+1596 git commit -m "docs(word-spell): scope roundsInOrder default to library configs"
+1597 ```
+1598 
+1599 ---
+1600 
+1601 ## Task 12: Push + open PR
+1602 
+1603 **Files:** none.
+1604 
+1605 - [ ] **Step 1: Push the branch**
+1606 
+1607 Run: `git push -u origin feat/word-spell-library-levels-recall`.
+1608 
+1609 - [ ] **Step 2: Open the PR**
+1610 
+1611 Target base: `master`. Title: `feat(word-spell): library-driven levels
+1612 for recall mode`. Body:
+1613 
+1614 ```markdown
+1615 ## Summary
+1616 
+1617 - Library-sourced WordSpell sessions now sample `totalRounds` distinct
+1618   words at random from the filtered pool.
+1619 - Per-profile "seen words" state persists in a new RxDB collection
+1620   (`word_spell_seen_words`) so replays prefer fresh words and recycle
+1621   only when the pool is exhausted.
+1622 - `roundsInOrder: true` short-circuits back to the current
+1623   deterministic behaviour for teacher demos and VR baselines.
+1624 
+1625 ## Test plan
+1626 
+1627 - [ ] `yarn test --run`
+1628 - [ ] `yarn typecheck`
+1629 - [ ] `yarn lint`
+1630 - [ ] Manual smoke test: 5 recall rounds from AUS Level 2, Play Again
+1631       shows different words, refresh still prefers unseen words.
+1632 - [ ] `yarn test:vr` — zero drift (default config unchanged).
+1633 
+1634 ## Coordination
+1635 
+1636 Waits for `kid-friendly-homepage` to land the Simple Config form that
+1637 produces `config.source`. Spec documents the `roundsInOrder: false`
+1638 default for library-sourced configs as that PR's responsibility.
+1639 ```
+1640 
+1641 - [ ] **Step 3: Done.**
+1642 
+1643 ---
+1644 
+1645 ## Self-review against spec
+1646 
+1647 **Spec coverage:**
+1648 
+1649 - Goals — Task 2 (sampling), Task 4 (distinctness + fresh on replay),
+1650   Task 7 (seed per session wiring), Task 4 (unseen preference +
+1651   recycling), Tasks 5/6 (RxDB persistence per profile), Task 7
+1652   (`roundsInOrder: true` short-circuit). ✓
+1653 - Pool-exhaustion table — Task 4 Step 1 has a dedicated test case. ✓
+1654 - Boundary with `kid-friendly-homepage` — Task 11 documents the
+1655   `roundsInOrder` coordination. ✓
+1656 - Data layer files (`seeded-random`, `sample`, `seen-words`) — Tasks
+1657   1, 2, 3, 4. ✓
+1658 - RxDB collection + hook — Tasks 5, 6. ✓
+1659 - Hook + WordSpell integration — Tasks 7, 8. ✓
+1660 - Testing plan — unit tests in Tasks 1–6, hook test in Task 7,
+1661   component test in Task 8, full sweep in Task 9. ✓
+1662 - TDD order — Tasks proceed in the exact sequence the spec prescribed
+1663   (seeded-random → sample → seen-words → RxDB → hook → component →
+1664   default flip). ✓
+1665 - Rollout — Task 12 push + PR. ✓
+1666 
+1667 **Placeholder scan:** No "TBD", "TODO", or "implement later" markers.
+1668 Each code block is complete and copy-pasteable. The only deliberate
+1669 placeholder is the Task 8 Step 1 smoke-test `expect(true).toBe(true)`
+1670 — explicitly flagged as "remove if you add a stronger assertion
+1671 elsewhere", and Task 7's rerender test already covers seed-driven
+1672 re-sampling, so this smoke test can stay as a formality or be deleted.
+1673 
+1674 **Type consistency:**
+1675 
+1676 - `SeenWordsStore` interface is defined in Task 4 and consumed the
+1677   same way in Tasks 6, 7, 8. ✓
+1678 - `filterSignature(filter: WordFilter): string` defined in Task 3,
+1679   consumed in Task 4 (`pickWithRecycling`) and Task 7. ✓
+1680 - `WordSpellSeenWordsDoc` shape is the same in Task 5 (schema) and
+1681   Task 6 (hook). ✓
+1682 - `useLibraryRounds` new signature `(config, seed, store)` is used
+1683   consistently across Tasks 7 and 8. ✓
 1684
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:36Z)**_
@@ -1429,6 +1456,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:18:36Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:41Z)**_
@@ -1440,6 +1468,7 @@ Verify vitest passes, then commit useLibraryRounds.ts + useLibraryRounds.test.ts
 ```text
 Task #1 created successfully: Task 7: Finish useLibraryRounds extension
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:43Z)**_
@@ -1451,6 +1480,7 @@ Add useSeenWordsStore + sampleSeed; update useLibraryRounds call in WordSpell.ts
 ```text
 Task #2 created successfully: Task 8: Wire WordSpell.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:45Z)**_
@@ -1462,6 +1492,7 @@ yarn test --run; yarn typecheck; yarn lint. Triage failures. Commit any fixups.
 ```text
 Task #3 created successfully: Task 9: Full test + typecheck + lint sweep
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:47Z)**_
@@ -1473,6 +1504,7 @@ Run yarn test:vr (Docker) — expect zero drift since DEFAULT_WORD_SPELL_CONFIG 
 ```text
 Task #4 created successfully: Task 10: Manual smoke + VR check
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:49Z)**_
@@ -1484,6 +1516,7 @@ Append roundsInOrder scope note to design spec; yarn fix:md; yarn lint:md; commi
 ```text
 Task #5 created successfully: Task 11: Spec coordination note
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:50Z)**_
@@ -1495,6 +1528,7 @@ git push -u origin feat/word-spell-library-levels-recall; gh pr create against m
 ```text
 Task #6 created successfully: Task 12: Push + open PR
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:18:56Z)**_
@@ -1507,6 +1541,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:18:56Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:19:00Z)**_
@@ -1518,121 +1553,122 @@ _**Agent (claude-opus-4-6 2026-04-15 12:19:02Z)**_
  `/Users/leocaseiro/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/subagent-driven-development/implementer-prompt.md`
 
 ```text
-1	# Implementer Subagent Prompt Template
-2	
-3	Use this template when dispatching an implementer subagent.
-4	
-5	```
-6	Task tool (general-purpose):
-7	  description: "Implement Task N: [task name]"
-8	  prompt: |
-9	    You are implementing Task N: [task name]
-10	
-11	    ## Task Description
-12	
-13	    [FULL TEXT of task from plan - paste it here, don't make subagent read file]
-14	
-15	    ## Context
-16	
-17	    [Scene-setting: where this fits, dependencies, architectural context]
-18	
-19	    ## Before You Begin
-20	
-21	    If you have questions about:
-22	    - The requirements or acceptance criteria
-23	    - The approach or implementation strategy
-24	    - Dependencies or assumptions
-25	    - Anything unclear in the task description
-26	
-27	    **Ask them now.** Raise any concerns before starting work.
-28	
-29	    ## Your Job
-30	
-31	    Once you're clear on requirements:
-32	    1. Implement exactly what the task specifies
-33	    2. Write tests (following TDD if task says to)
-34	    3. Verify implementation works
-35	    4. Commit your work
-36	    5. Self-review (see below)
-37	    6. Report back
-38	
-39	    Work from: [directory]
-40	
-41	    **While you work:** If you encounter something unexpected or unclear, **ask questions**.
-42	    It's always OK to pause and clarify. Don't guess or make assumptions.
-43	
-44	    ## Code Organization
-45	
-46	    You reason best about code you can hold in context at once, and your edits are more
-47	    reliable when files are focused. Keep this in mind:
-48	    - Follow the file structure defined in the plan
-49	    - Each file should have one clear responsibility with a well-defined interface
-50	    - If a file you're creating is growing beyond the plan's intent, stop and report
-51	      it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
-52	    - If an existing file you're modifying is already large or tangled, work carefully
-53	      and note it as a concern in your report
-54	    - In existing codebases, follow established patterns. Improve code you're touching
-55	      the way a good developer would, but don't restructure things outside your task.
-56	
-57	    ## When You're in Over Your Head
-58	
-59	    It is always OK to stop and say "this is too hard for me." Bad work is worse than
-60	    no work. You will not be penalized for escalating.
-61	
-62	    **STOP and escalate when:**
-63	    - The task requires architectural decisions with multiple valid approaches
-64	    - You need to understand code beyond what was provided and can't find clarity
-65	    - You feel uncertain about whether your approach is correct
-66	    - The task involves restructuring existing code in ways the plan didn't anticipate
-67	    - You've been reading file after file trying to understand the system without progress
-68	
-69	    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
-70	    specifically what you're stuck on, what you've tried, and what kind of help you need.
-71	    The controller can provide more context, re-dispatch with a more capable model,
-72	    or break the task into smaller pieces.
-73	
-74	    ## Before Reporting Back: Self-Review
-75	
-76	    Review your work with fresh eyes. Ask yourself:
-77	
-78	    **Completeness:**
-79	    - Did I fully implement everything in the spec?
-80	    - Did I miss any requirements?
-81	    - Are there edge cases I didn't handle?
-82	
-83	    **Quality:**
-84	    - Is this my best work?
-85	    - Are names clear and accurate (match what things do, not how they work)?
-86	    - Is the code clean and maintainable?
-87	
-88	    **Discipline:**
-89	    - Did I avoid overbuilding (YAGNI)?
-90	    - Did I only build what was requested?
-91	    - Did I follow existing patterns in the codebase?
-92	
-93	    **Testing:**
-94	    - Do tests actually verify behavior (not just mock behavior)?
-95	    - Did I follow TDD if required?
-96	    - Are tests comprehensive?
-97	
-98	    If you find issues during self-review, fix them now before reporting.
-99	
-100	    ## Report Format
-101	
-102	    When done, report:
-103	    - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
-104	    - What you implemented (or what you attempted, if blocked)
-105	    - What you tested and test results
-106	    - Files changed
-107	    - Self-review findings (if any)
-108	    - Any issues or concerns
-109	
-110	    Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
-111	    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
-112	    information that wasn't provided. Never silently produce work you're unsure about.
-113	```
+1 # Implementer Subagent Prompt Template
+2 
+3 Use this template when dispatching an implementer subagent.
+4 
+5 ```
+6 Task tool (general-purpose):
+7   description: "Implement Task N: [task name]"
+8   prompt: |
+9     You are implementing Task N: [task name]
+10 
+11     ## Task Description
+12 
+13     [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+14 
+15     ## Context
+16 
+17     [Scene-setting: where this fits, dependencies, architectural context]
+18 
+19     ## Before You Begin
+20 
+21     If you have questions about:
+22     - The requirements or acceptance criteria
+23     - The approach or implementation strategy
+24     - Dependencies or assumptions
+25     - Anything unclear in the task description
+26 
+27     **Ask them now.** Raise any concerns before starting work.
+28 
+29     ## Your Job
+30 
+31     Once you're clear on requirements:
+32     1. Implement exactly what the task specifies
+33     2. Write tests (following TDD if task says to)
+34     3. Verify implementation works
+35     4. Commit your work
+36     5. Self-review (see below)
+37     6. Report back
+38 
+39     Work from: [directory]
+40 
+41     **While you work:** If you encounter something unexpected or unclear, **ask questions**.
+42     It's always OK to pause and clarify. Don't guess or make assumptions.
+43 
+44     ## Code Organization
+45 
+46     You reason best about code you can hold in context at once, and your edits are more
+47     reliable when files are focused. Keep this in mind:
+48     - Follow the file structure defined in the plan
+49     - Each file should have one clear responsibility with a well-defined interface
+50     - If a file you're creating is growing beyond the plan's intent, stop and report
+51       it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
+52     - If an existing file you're modifying is already large or tangled, work carefully
+53       and note it as a concern in your report
+54     - In existing codebases, follow established patterns. Improve code you're touching
+55       the way a good developer would, but don't restructure things outside your task.
+56 
+57     ## When You're in Over Your Head
+58 
+59     It is always OK to stop and say "this is too hard for me." Bad work is worse than
+60     no work. You will not be penalized for escalating.
+61 
+62     **STOP and escalate when:**
+63     - The task requires architectural decisions with multiple valid approaches
+64     - You need to understand code beyond what was provided and can't find clarity
+65     - You feel uncertain about whether your approach is correct
+66     - The task involves restructuring existing code in ways the plan didn't anticipate
+67     - You've been reading file after file trying to understand the system without progress
+68 
+69     **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
+70     specifically what you're stuck on, what you've tried, and what kind of help you need.
+71     The controller can provide more context, re-dispatch with a more capable model,
+72     or break the task into smaller pieces.
+73 
+74     ## Before Reporting Back: Self-Review
+75 
+76     Review your work with fresh eyes. Ask yourself:
+77 
+78     **Completeness:**
+79     - Did I fully implement everything in the spec?
+80     - Did I miss any requirements?
+81     - Are there edge cases I didn't handle?
+82 
+83     **Quality:**
+84     - Is this my best work?
+85     - Are names clear and accurate (match what things do, not how they work)?
+86     - Is the code clean and maintainable?
+87 
+88     **Discipline:**
+89     - Did I avoid overbuilding (YAGNI)?
+90     - Did I only build what was requested?
+91     - Did I follow existing patterns in the codebase?
+92 
+93     **Testing:**
+94     - Do tests actually verify behavior (not just mock behavior)?
+95     - Did I follow TDD if required?
+96     - Are tests comprehensive?
+97 
+98     If you find issues during self-review, fix them now before reporting.
+99 
+100     ## Report Format
+101 
+102     When done, report:
+103     - **Status:** DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT
+104     - What you implemented (or what you attempted, if blocked)
+105     - What you tested and test results
+106     - Files changed
+107     - Self-review findings (if any)
+108     - Any issues or concerns
+109 
+110     Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
+111     Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
+112     information that wasn't provided. Never silently produce work you're unsure about.
+113 ```
 114
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:20:59Z)**_
@@ -1658,6 +1694,7 @@ agentId: aaa77cdbcbf2d262d (use SendMessage with to: 'aaa77cdbcbf2d262d' to cont
 tool_uses: 12
 duration_ms: 97980</usage>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-15 12:19:21Z)**_
@@ -1673,6 +1710,7 @@ This is a git worktree on branch `feat/word-spell-library-levels-recall`. Do NOT
 ## Current state
 
 Two files have in-progress changes (some staged, some not):
+
 - `src/games/word-spell/useLibraryRounds.ts` (staged + 2 unstaged tweaks: `isCancelled: false as boolean` and `config.roundsInOrder` without `=== true`)
 - `src/games/word-spell/useLibraryRounds.test.tsx` (staged)
 
@@ -1713,7 +1751,6 @@ Pre-commit hooks will run lint-staged and typecheck; let them run. Do NOT use --
 
 Report Status: DONE or BLOCKED, the commit SHA, and test output summary.
 
-
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:24Z)**_
 
 I'll run the tests and commit if they pass.
@@ -1741,6 +1778,7 @@ $ vitest run src/games/word-spell/useLibraryRounds.test.tsx --run
 
 Done in 1.85s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:29Z)**_
@@ -1796,6 +1834,7 @@ Exit code 1
 ✖ 1 problem (1 error, 0 warnings)
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:44Z)**_
@@ -1809,27 +1848,28 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:45Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/useLibraryRounds.ts`
 
 ```text
-70	      const picked =
-71	        config.roundsInOrder
-72	          ? result.hits.slice(0, limit)
-73	          : await pickWithRecycling(
-74	              result.hits,
-75	              limit,
-76	              filterSignature(source.filter),
-77	              store,
-78	              seed,
-79	            );
-80	      if (cancellation.isCancelled) return;
-81	
-82	      setState({
-83	        rounds: picked.map((hit) => toWordSpellRound(hit)),
-84	        isLoading: false,
-85	        usedFallback: result.usedFallback,
-86	      });
-87	    })();
-88	
-89	    return () => {
+70       const picked =
+71         config.roundsInOrder
+72           ? result.hits.slice(0, limit)
+73           : await pickWithRecycling(
+74               result.hits,
+75               limit,
+76               filterSignature(source.filter),
+77               store,
+78               seed,
+79             );
+80       if (cancellation.isCancelled) return;
+81 
+82       setState({
+83         rounds: picked.map((hit) => toWordSpellRound(hit)),
+84         isLoading: false,
+85         usedFallback: result.usedFallback,
+86       });
+87     })();
+88 
+89     return () => {
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:48Z)**_
@@ -1843,110 +1883,111 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:50Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/useLibraryRounds.ts`
 
 ```text
-1	import { useEffect, useState } from 'react';
-2	import type { WordSpellConfig, WordSpellRound } from './types';
-3	import type { Region, SeenWordsStore } from '@/data/words';
-4	import {
-5	  filterSignature,
-6	  filterWords,
-7	  pickWithRecycling,
-8	  toWordSpellRound,
-9	} from '@/data/words';
-10	
-11	interface LibraryRoundsState {
-12	  rounds: WordSpellRound[];
-13	  isLoading: boolean;
-14	  usedFallback?: { from: Region; to: 'aus' };
-15	}
-16	
-17	const initialStateFor = (
-18	  config: WordSpellConfig,
-19	): LibraryRoundsState => {
-20	  if (config.source) return { rounds: [], isLoading: true };
-21	  return { rounds: config.rounds ?? [], isLoading: false };
-22	};
-23	
-24	export const useLibraryRounds = (
-25	  config: WordSpellConfig,
-26	  seed: string | undefined,
-27	  store: SeenWordsStore,
-28	): LibraryRoundsState => {
-29	  const [state, setState] = useState<LibraryRoundsState>(() =>
-30	    initialStateFor(config),
-31	  );
-32	
-33	  useEffect(() => {
-34	    if (config.rounds && config.rounds.length > 0) {
-35	      const explicit = config.rounds;
-36	      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
-37	      setState((prev) =>
-38	        prev.rounds === explicit &&
-39	        !prev.isLoading &&
-40	        prev.usedFallback === undefined
-41	          ? prev
-42	          : { rounds: explicit, isLoading: false },
-43	      );
-44	      return;
-45	    }
-46	
-47	    const source = config.source;
-48	    if (!source) {
-49	      setState((prev) =>
-50	        prev.rounds.length === 0 &&
-51	        !prev.isLoading &&
-52	        prev.usedFallback === undefined
-53	          ? prev
-54	          : { rounds: [], isLoading: false },
-55	      );
-56	      return;
-57	    }
-58	
-59	    const cancellation = { isCancelled: false as boolean };
-60	
-61	    setState((prev) =>
-62	      prev.isLoading ? prev : { ...prev, isLoading: true },
-63	    );
-64	
-65	    void (async () => {
-66	      const result = await filterWords(source.filter);
-67	      if (cancellation.isCancelled) return;
-68	
-69	      const limit = source.limit ?? config.totalRounds;
-70	      const picked =
-71	        config.roundsInOrder
-72	          ? result.hits.slice(0, limit)
-73	          : await pickWithRecycling(
-74	              result.hits,
-75	              limit,
-76	              filterSignature(source.filter),
-77	              store,
-78	              seed,
-79	            );
-80	      if (cancellation.isCancelled) return;
-81	
-82	      setState({
-83	        rounds: picked.map((hit) => toWordSpellRound(hit)),
-84	        isLoading: false,
-85	        usedFallback: result.usedFallback,
-86	      });
-87	    })();
-88	
-89	    return () => {
-90	      cancellation.isCancelled = true;
-91	    };
-92	  }, [
-93	    config.rounds,
-94	    config.source,
-95	    config.totalRounds,
-96	    config.roundsInOrder,
-97	    seed,
-98	    store,
-99	  ]);
-100	
-101	  return state;
-102	};
+1 import { useEffect, useState } from 'react';
+2 import type { WordSpellConfig, WordSpellRound } from './types';
+3 import type { Region, SeenWordsStore } from '@/data/words';
+4 import {
+5   filterSignature,
+6   filterWords,
+7   pickWithRecycling,
+8   toWordSpellRound,
+9 } from '@/data/words';
+10 
+11 interface LibraryRoundsState {
+12   rounds: WordSpellRound[];
+13   isLoading: boolean;
+14   usedFallback?: { from: Region; to: 'aus' };
+15 }
+16 
+17 const initialStateFor = (
+18   config: WordSpellConfig,
+19 ): LibraryRoundsState => {
+20   if (config.source) return { rounds: [], isLoading: true };
+21   return { rounds: config.rounds ?? [], isLoading: false };
+22 };
+23 
+24 export const useLibraryRounds = (
+25   config: WordSpellConfig,
+26   seed: string | undefined,
+27   store: SeenWordsStore,
+28 ): LibraryRoundsState => {
+29   const [state, setState] = useState<LibraryRoundsState>(() =>
+30     initialStateFor(config),
+31   );
+32 
+33   useEffect(() => {
+34     if (config.rounds && config.rounds.length > 0) {
+35       const explicit = config.rounds;
+36       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
+37       setState((prev) =>
+38         prev.rounds === explicit &&
+39         !prev.isLoading &&
+40         prev.usedFallback === undefined
+41           ? prev
+42           : { rounds: explicit, isLoading: false },
+43       );
+44       return;
+45     }
+46 
+47     const source = config.source;
+48     if (!source) {
+49       setState((prev) =>
+50         prev.rounds.length === 0 &&
+51         !prev.isLoading &&
+52         prev.usedFallback === undefined
+53           ? prev
+54           : { rounds: [], isLoading: false },
+55       );
+56       return;
+57     }
+58 
+59     const cancellation = { isCancelled: false as boolean };
+60 
+61     setState((prev) =>
+62       prev.isLoading ? prev : { ...prev, isLoading: true },
+63     );
+64 
+65     void (async () => {
+66       const result = await filterWords(source.filter);
+67       if (cancellation.isCancelled) return;
+68 
+69       const limit = source.limit ?? config.totalRounds;
+70       const picked =
+71         config.roundsInOrder
+72           ? result.hits.slice(0, limit)
+73           : await pickWithRecycling(
+74               result.hits,
+75               limit,
+76               filterSignature(source.filter),
+77               store,
+78               seed,
+79             );
+80       if (cancellation.isCancelled) return;
+81 
+82       setState({
+83         rounds: picked.map((hit) => toWordSpellRound(hit)),
+84         isLoading: false,
+85         usedFallback: result.usedFallback,
+86       });
+87     })();
+88 
+89     return () => {
+90       cancellation.isCancelled = true;
+91     };
+92   }, [
+93     config.rounds,
+94     config.source,
+95     config.totalRounds,
+96     config.roundsInOrder,
+97     seed,
+98     store,
+99   ]);
+100 
+101   return state;
+102 };
 103
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:19:58Z)**_
@@ -1968,6 +2009,7 @@ Check unstaged diff for useLibraryRounds.ts
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:01Z)**_
@@ -2060,11 +2102,12 @@ index 6be21d0c..8ec2c37e 100644
    return state;
  };
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:07Z)**_
 
-The `as boolean` cast is present in the staged file. But ESLint still flags line 80 as "value is always falsy". The issue is that TypeScript's type narrowing inside the async callback apparently still sees the type as `false` despite the cast, or more likely the `@typescript-eslint/no-unnecessary-condition` rule tracks that the condition on line 67 already checked `isCancelled`, and since it was `false` there, it assumes it's still `false` at line 80. 
+The `as boolean` cast is present in the staged file. But ESLint still flags line 80 as "value is always falsy". The issue is that TypeScript's type narrowing inside the async callback apparently still sees the type as `false` despite the cast, or more likely the `@typescript-eslint/no-unnecessary-condition` rule tracks that the condition on line 67 already checked `isCancelled`, and since it was `false` there, it assumes it's still `false` at line 80.
 
 The proper fix is to use a mutable ref object or an eslint-disable comment for that specific line, since this is a legitimate cancellation pattern. Let me check how the existing check on line 67 passes (it was there before this PR).
 
@@ -2094,6 +2137,7 @@ stash@{13}: lint-staged automatic backup
 stash@{14}: lint-staged automatic backup
 stash@{15}: WIP on master: fbf3a1b chore(cursor): simplify cursor rule to reference CLAUDE.md as source of truth
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:12Z)**_
@@ -2108,6 +2152,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/useLibraryRounds.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:25Z)**_
@@ -2133,6 +2178,7 @@ $ vitest run src/games/word-spell/useLibraryRounds.test.tsx --run
 
 Done in 6.63s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:35Z)**_
@@ -2191,6 +2237,7 @@ $ vitest run
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:50Z)**_
@@ -2200,57 +2247,58 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:50Z)**_
  `/Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/fd0b9f61-05be-493b-a699-6adddd598055/tool-results/bpc7p1arc.txt`
 
 ```text
-50	});
-51	/* assert on the output */
-52	
-53	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-54	
-55	 ✓ src/components/ConfigFormFields.test.tsx (18 tests) 337ms
-56	stderr | src/components/SaveConfigDialog.test.tsx > SaveConfigDialog > renders with suggested name pre-filled
-57	Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-58	
-59	 ✓ src/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm.test.tsx (7 tests) 291ms
-60	 ✓ src/components/SavedConfigChip.test.tsx (9 tests) 305ms
-61	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
-62	An update to DbProvider inside a test was not wrapped in act(...).
-63	
-64	When testing, code that causes React state updates should be wrapped into act(...):
-65	
-66	act(() => {
-67	  /* fire events that update state */
-68	});
-69	/* assert on the output */
-70	
-71	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-72	
-73	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
-74	An update to DbProvider inside a test was not wrapped in act(...).
-75	
-76	When testing, code that causes React state updates should be wrapped into act(...):
-77	
-78	act(() => {
-79	  /* fire events that update state */
-80	});
-81	/* assert on the output */
-82	
-83	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-84	
-85	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-86	An update to DbProvider inside a test was not wrapped in act(...).
-87	
-88	When testing, code that causes React state updates should be wrapped into act(...):
-89	
-90	act(() => {
-91	  /* fire events that update state */
-92	});
-93	/* assert on the output */
-94	
-95	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-96	
-97	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-98	An update to DbProvider inside a test was not wrapped in act(...).
+50 });
+51 /* assert on the output */
+52 
+53 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+54 
+55  ✓ src/components/ConfigFormFields.test.tsx (18 tests) 337ms
+56 stderr | src/components/SaveConfigDialog.test.tsx > SaveConfigDialog > renders with suggested name pre-filled
+57 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+58 
+59  ✓ src/games/sort-numbers/SortNumbersConfigForm/SortNumbersConfigForm.test.tsx (7 tests) 291ms
+60  ✓ src/components/SavedConfigChip.test.tsx (9 tests) 305ms
+61 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
+62 An update to DbProvider inside a test was not wrapped in act(...).
+63 
+64 When testing, code that causes React state updates should be wrapped into act(...):
+65 
+66 act(() => {
+67   /* fire events that update state */
+68 });
+69 /* assert on the output */
+70 
+71 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+72 
+73 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
+74 An update to DbProvider inside a test was not wrapped in act(...).
+75 
+76 When testing, code that causes React state updates should be wrapped into act(...):
+77 
+78 act(() => {
+79   /* fire events that update state */
+80 });
+81 /* assert on the output */
+82 
+83 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+84 
+85 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+86 An update to DbProvider inside a test was not wrapped in act(...).
+87 
+88 When testing, code that causes React state updates should be wrapped into act(...):
+89 
+90 act(() => {
+91   /* fire events that update state */
+92 });
+93 /* assert on the output */
+94 
+95 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+96 
+97 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+98 An update to DbProvider inside a test was not wrapped in act(...).
 99
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:52Z)**_
@@ -2283,6 +2331,7 @@ Done in 6.91s.
 [feat/word-spell-library-levels-recall d7a37233] feat(word-spell): sample library rounds with per-session seed and store
  2 files changed, 150 insertions(+), 15 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:20:59Z)**_
@@ -2329,6 +2378,7 @@ Date:   Wed Apr 15 22:20:36 2026 +1000
  src/games/word-spell/useLibraryRounds.ts       |  40 ++++++--
  2 files changed, 150 insertions(+), 15 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:21:12Z)**_
@@ -2339,6 +2389,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:21:12Z)**_
 ```text
 Updated task #1 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:21:13Z)**_
@@ -2349,6 +2400,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:21:13Z)**_
 ```text
 Updated task #2 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:21:17Z)**_
@@ -2384,6 +2436,7 @@ Find key lines in WordSpell.tsx
 377:        key={sessionEpoch}
 379:        initialState={sessionEpoch === 0 ? initialState : undefined}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:21:22Z)**_
@@ -2393,32 +2446,33 @@ _**Agent (claude-opus-4-6 2026-04-15 12:21:22Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-285	  sessionId,
-286	  seed,
-287	}: WordSpellProps) => {
-288	  const skin = useGameSkin('word-spell', config.skin);
-289	  const { rounds: resolvedRounds, isLoading } =
-290	    useLibraryRounds(config);
-291	
-292	  const resolvedConfig = useMemo<WordSpellConfig>(
-293	    () => ({ ...config, rounds: resolvedRounds }),
-294	    [config, resolvedRounds],
-295	  );
-296	
-297	  const roundsInOrder = resolvedConfig.roundsInOrder === true;
-298	  const [sessionEpoch, setSessionEpoch] = useState(0);
-299	
-300	  const roundOrder = useMemo(() => {
-301	    void sessionEpoch;
-302	    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
-303	  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
-304	
-305	  const firstConfigIndex = roundOrder[0];
-306	  const round0 =
-307	    firstConfigIndex === undefined
-308	      ? undefined
-309	      : resolvedRounds[firstConfigIndex];
+285   sessionId,
+286   seed,
+287 }: WordSpellProps) => {
+288   const skin = useGameSkin('word-spell', config.skin);
+289   const { rounds: resolvedRounds, isLoading } =
+290     useLibraryRounds(config);
+291 
+292   const resolvedConfig = useMemo<WordSpellConfig>(
+293     () => ({ ...config, rounds: resolvedRounds }),
+294     [config, resolvedRounds],
+295   );
+296 
+297   const roundsInOrder = resolvedConfig.roundsInOrder === true;
+298   const [sessionEpoch, setSessionEpoch] = useState(0);
+299 
+300   const roundOrder = useMemo(() => {
+301     void sessionEpoch;
+302     return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+303   }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
+304 
+305   const firstConfigIndex = roundOrder[0];
+306   const round0 =
+307     firstConfigIndex === undefined
+308       ? undefined
+309       : resolvedRounds[firstConfigIndex];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:24:16Z)**_
@@ -2450,6 +2504,7 @@ agentId: a7c2b7a7c37fe06cd (use SendMessage with to: 'a7c2b7a7c37fe06cd' to cont
 tool_uses: 34
 duration_ms: 141968</usage>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-15 12:21:54Z)**_
@@ -2463,6 +2518,7 @@ You are implementing Task 8 of an implementation plan.
 ## Task 8: Wire `WordSpell.tsx`
 
 **Files:**
+
 - Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
 - Modify: `src/games/word-spell/WordSpell/WordSpell.test.tsx`
 
@@ -2489,6 +2545,7 @@ Expected: FAIL — `useLibraryRounds` signature changed, compile error in `WordS
 ### Step 3: Update WordSpell.tsx
 
 Current state at `src/games/word-spell/WordSpell/WordSpell.tsx`:
+
 - Line 2: `import { nanoid } from 'nanoid';` (already imported)
 - Line 3: `import { useEffect, useMemo, useRef, useState } from 'react';` (useMemo already imported)
 - Line 288: `const skin = useGameSkin('word-spell', config.skin);`
@@ -2498,9 +2555,11 @@ Current state at `src/games/word-spell/WordSpell/WordSpell.tsx`:
 Changes required:
 
 1. Add import for `useSeenWordsStore`:
+
    ```ts
    import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
    ```
+
    Verify the exact export path by checking the hook file — it's at `src/db/hooks/useSeenWordsStore.ts`. Match the existing import style in this file.
 
 2. Update the `useLibraryRounds` call. Plan says to declare `seenWordsStore` and `sampleSeed` before the `useLibraryRounds` call. But `sampleSeed` depends on `sessionEpoch` which is declared at line 298 (AFTER `useLibraryRounds`). Reorder as follows:
@@ -2536,6 +2595,7 @@ Let pre-commit hooks run. Do NOT pass --no-verify.
 ## Context
 
 Tasks 1-7 are already committed on this branch:
+
 - Task 6 added `useSeenWordsStore` hook at `src/db/hooks/useSeenWordsStore.ts`.
 - Task 7 changed `useLibraryRounds` signature from `(config)` to `(config, seed, store)` where `seed: string | undefined` and `store: SeenWordsStore`.
 
@@ -2568,37 +2628,38 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:21:57Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { buildSentenceGapRound } from '../build-sentence-gap-round';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import { useLibraryRounds } from '../useLibraryRounds';
-7	import type { WordSpellConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerGameDraftState,
-11	  AnswerZone,
-12	  TileItem,
-13	} from '@/components/answer-game/types';
-14	import type { GameSkin } from '@/lib/skin';
-15	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-16	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-17	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-18	import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
-19	import { Slot } from '@/components/answer-game/Slot/Slot';
-20	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-21	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-22	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-23	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-24	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-25	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-26	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-27	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-28	import { buildRoundOrder } from '@/games/build-round-order';
-29	import { getGameEventBus } from '@/lib/game-event-bus';
-30	import { useGameSkin } from '@/lib/skin';
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { buildSentenceGapRound } from '../build-sentence-gap-round';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import { useLibraryRounds } from '../useLibraryRounds';
+7 import type { WordSpellConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerGameDraftState,
+11   AnswerZone,
+12   TileItem,
+13 } from '@/components/answer-game/types';
+14 import type { GameSkin } from '@/lib/skin';
+15 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+16 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+17 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+18 import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
+19 import { Slot } from '@/components/answer-game/Slot/Slot';
+20 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+21 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+22 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+23 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+24 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+25 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+26 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+27 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+28 import { buildRoundOrder } from '@/games/build-round-order';
+29 import { getGameEventBus } from '@/lib/game-event-bus';
+30 import { useGameSkin } from '@/lib/skin';
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:21:57Z)**_
@@ -2608,175 +2669,176 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:21:57Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.test.tsx`
 
 ```text
-1	import { act, render, screen, within } from '@testing-library/react';
-2	import userEvent from '@testing-library/user-event';
-3	import { describe, expect, it, vi } from 'vitest';
-4	import { WordSpell } from './WordSpell';
-5	import type { WordSpellConfig } from '../types';
-6	
-7	const navigateStub = vi.hoisted(() => vi.fn());
-8	
-9	vi.mock('@tanstack/react-router', () => ({
-10	  useNavigate: () => navigateStub,
-11	}));
-12	
-13	vi.mock('@/lib/speech/SpeechOutput', () => ({
-14	  speak: vi.fn(),
-15	  cancelSpeech: vi.fn(),
-16	  isSpeechActive: vi.fn().mockReturnValue(false),
-17	}));
-18	const noopUnsubscribe = () => {};
-19	vi.mock('@/lib/game-event-bus', () => ({
-20	  getGameEventBus: () => ({
-21	    emit: vi.fn(),
-22	    subscribe: vi.fn(() => noopUnsubscribe),
-23	  }),
-24	}));
-25	vi.mock('@/db/hooks/useSettings', () => ({
-26	  useSettings: () => ({
-27	    settings: {
-28	      speechRate: 1,
-29	      volume: 0.8,
-30	      preferredVoiceURI: undefined,
-31	    },
-32	    update: vi.fn(),
-33	  }),
-34	}));
-35	
-36	vi.mock('@/lib/audio/AudioFeedback', () => ({
-37	  playSound: vi.fn(),
-38	  queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
-39	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-40	}));
-41	
-42	vi.mock('canvas-confetti', () => ({
-43	  default: Object.assign(
-44	    vi.fn().mockImplementation(() => Promise.resolve()),
-45	    { reset: vi.fn() },
-46	  ),
-47	}));
-48	
-49	const config: WordSpellConfig = {
-50	  gameId: 'word-spell-test',
-51	  component: 'WordSpell',
-52	  inputMethod: 'drag',
-53	  wrongTileBehavior: 'lock-auto-eject',
-54	  tileBankMode: 'exact',
-55	  totalRounds: 2,
-56	  roundsInOrder: true,
-57	  ttsEnabled: true,
-58	  mode: 'picture',
-59	  tileUnit: 'letter',
-60	  rounds: [
-61	    { word: 'cat', image: 'https://placehold.co/160' },
-62	    { word: 'dog', image: 'https://placehold.co/160' },
-63	  ],
-64	};
-65	
-66	describe('WordSpell', () => {
-67	  it('renders the game with letter tiles for the first round word', () => {
-68	    render(<WordSpell config={config} />);
-69	    expect(
-70	      screen.getByRole('button', { name: 'Letter c' }),
-71	    ).toBeInTheDocument();
-72	    expect(
-73	      screen.getByRole('button', { name: 'Letter a' }),
-74	    ).toBeInTheDocument();
-75	    expect(
-76	      screen.getByRole('button', { name: 'Letter t' }),
-77	    ).toBeInTheDocument();
-78	  });
-79	
-80	  it('renders three answer slots for "cat"', () => {
-81	    const { container } = render(<WordSpell config={config} />);
-82	    const answerZone = container.querySelector<HTMLElement>(
-83	      '.game-answer-zone',
-84	    )!;
-85	    expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
-86	  });
-87	
-88	  it('does not render image in recall mode', () => {
-89	    const recallConfig: WordSpellConfig = {
-90	      ...config,
-91	      mode: 'recall',
-92	      rounds: [{ word: 'cat' }],
-93	    };
-94	    render(<WordSpell config={recallConfig} />);
-95	    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-96	  });
-97	
-98	  it('renders native emoji when round.emoji is set (no img)', () => {
-99	    const emojiConfig: WordSpellConfig = {
-100	      ...config,
-101	      rounds: [{ word: 'cat', emoji: '🐱' }],
-102	    };
-103	    render(<WordSpell config={emojiConfig} />);
-104	    expect(screen.queryByRole('img')).not.toBeInTheDocument();
-105	    expect(
-106	      screen.getByRole('button', { name: /cat — tap to hear/i }),
-107	    ).toBeInTheDocument();
-108	  });
-109	});
-110	
-111	describe('WordSpell Play again', () => {
-112	  it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
-113	    const user = userEvent.setup();
-114	
-115	    const oneRoundConfig: WordSpellConfig = {
-116	      gameId: 'word-spell-test',
-117	      component: 'WordSpell',
-118	      inputMethod: 'type',
-119	      wrongTileBehavior: 'lock-auto-eject',
-120	      tileBankMode: 'exact',
-121	      totalRounds: 1,
-122	      roundsInOrder: true,
-123	      ttsEnabled: false,
-124	      mode: 'picture',
-125	      tileUnit: 'letter',
-126	      rounds: [{ word: 'a' }],
-127	    };
-128	
-129	    const { container } = render(<WordSpell config={oneRoundConfig} />);
-130	
-131	    // Game starts in playing phase — 1 answer slot visible, no game-over dialog
-132	    const answerZone = () =>
-133	      container.querySelector<HTMLElement>('.game-answer-zone')!;
-134	    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
-135	      1,
-136	    );
-137	    expect(
-138	      screen.queryByRole('dialog', { name: 'Game complete' }),
-139	    ).not.toBeInTheDocument();
-140	
-141	    // Type 'a' to correctly fill the only slot → phase transitions to game-over
-142	    act(() => {
-143	      globalThis.dispatchEvent(
-144	        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
-145	      );
-146	    });
-147	
-148	    // Game-over overlay appears
-149	    await screen.findByRole('button', { name: 'Play again' });
-150	    expect(
-151	      screen.getByRole('dialog', { name: 'Game complete' }),
-152	    ).toBeInTheDocument();
-153	
-154	    // Click "Play again"
-155	    await user.click(
-156	      screen.getByRole('button', { name: 'Play again' }),
-157	    );
-158	
-159	    // Overlay is gone and game has restarted at round 1
-160	    expect(
-161	      screen.queryByRole('dialog', { name: 'Game complete' }),
-162	    ).not.toBeInTheDocument();
-163	    expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
-164	      1,
-165	    );
-166	  });
-167	});
+1 import { act, render, screen, within } from '@testing-library/react';
+2 import userEvent from '@testing-library/user-event';
+3 import { describe, expect, it, vi } from 'vitest';
+4 import { WordSpell } from './WordSpell';
+5 import type { WordSpellConfig } from '../types';
+6 
+7 const navigateStub = vi.hoisted(() => vi.fn());
+8 
+9 vi.mock('@tanstack/react-router', () => ({
+10   useNavigate: () => navigateStub,
+11 }));
+12 
+13 vi.mock('@/lib/speech/SpeechOutput', () => ({
+14   speak: vi.fn(),
+15   cancelSpeech: vi.fn(),
+16   isSpeechActive: vi.fn().mockReturnValue(false),
+17 }));
+18 const noopUnsubscribe = () => {};
+19 vi.mock('@/lib/game-event-bus', () => ({
+20   getGameEventBus: () => ({
+21     emit: vi.fn(),
+22     subscribe: vi.fn(() => noopUnsubscribe),
+23   }),
+24 }));
+25 vi.mock('@/db/hooks/useSettings', () => ({
+26   useSettings: () => ({
+27     settings: {
+28       speechRate: 1,
+29       volume: 0.8,
+30       preferredVoiceURI: undefined,
+31     },
+32     update: vi.fn(),
+33   }),
+34 }));
+35 
+36 vi.mock('@/lib/audio/AudioFeedback', () => ({
+37   playSound: vi.fn(),
+38   queueSound: vi.fn().mockImplementation(() => Promise.resolve()),
+39   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+40 }));
+41 
+42 vi.mock('canvas-confetti', () => ({
+43   default: Object.assign(
+44     vi.fn().mockImplementation(() => Promise.resolve()),
+45     { reset: vi.fn() },
+46   ),
+47 }));
+48 
+49 const config: WordSpellConfig = {
+50   gameId: 'word-spell-test',
+51   component: 'WordSpell',
+52   inputMethod: 'drag',
+53   wrongTileBehavior: 'lock-auto-eject',
+54   tileBankMode: 'exact',
+55   totalRounds: 2,
+56   roundsInOrder: true,
+57   ttsEnabled: true,
+58   mode: 'picture',
+59   tileUnit: 'letter',
+60   rounds: [
+61     { word: 'cat', image: 'https://placehold.co/160' },
+62     { word: 'dog', image: 'https://placehold.co/160' },
+63   ],
+64 };
+65 
+66 describe('WordSpell', () => {
+67   it('renders the game with letter tiles for the first round word', () => {
+68     render(<WordSpell config={config} />);
+69     expect(
+70       screen.getByRole('button', { name: 'Letter c' }),
+71     ).toBeInTheDocument();
+72     expect(
+73       screen.getByRole('button', { name: 'Letter a' }),
+74     ).toBeInTheDocument();
+75     expect(
+76       screen.getByRole('button', { name: 'Letter t' }),
+77     ).toBeInTheDocument();
+78   });
+79 
+80   it('renders three answer slots for "cat"', () => {
+81     const { container } = render(<WordSpell config={config} />);
+82     const answerZone = container.querySelector<HTMLElement>(
+83       '.game-answer-zone',
+84     )!;
+85     expect(within(answerZone).getAllByRole('listitem')).toHaveLength(3);
+86   });
+87 
+88   it('does not render image in recall mode', () => {
+89     const recallConfig: WordSpellConfig = {
+90       ...config,
+91       mode: 'recall',
+92       rounds: [{ word: 'cat' }],
+93     };
+94     render(<WordSpell config={recallConfig} />);
+95     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+96   });
+97 
+98   it('renders native emoji when round.emoji is set (no img)', () => {
+99     const emojiConfig: WordSpellConfig = {
+100       ...config,
+101       rounds: [{ word: 'cat', emoji: '🐱' }],
+102     };
+103     render(<WordSpell config={emojiConfig} />);
+104     expect(screen.queryByRole('img')).not.toBeInTheDocument();
+105     expect(
+106       screen.getByRole('button', { name: /cat — tap to hear/i }),
+107     ).toBeInTheDocument();
+108   });
+109 });
+110 
+111 describe('WordSpell Play again', () => {
+112   it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
+113     const user = userEvent.setup();
+114 
+115     const oneRoundConfig: WordSpellConfig = {
+116       gameId: 'word-spell-test',
+117       component: 'WordSpell',
+118       inputMethod: 'type',
+119       wrongTileBehavior: 'lock-auto-eject',
+120       tileBankMode: 'exact',
+121       totalRounds: 1,
+122       roundsInOrder: true,
+123       ttsEnabled: false,
+124       mode: 'picture',
+125       tileUnit: 'letter',
+126       rounds: [{ word: 'a' }],
+127     };
+128 
+129     const { container } = render(<WordSpell config={oneRoundConfig} />);
+130 
+131     // Game starts in playing phase — 1 answer slot visible, no game-over dialog
+132     const answerZone = () =>
+133       container.querySelector<HTMLElement>('.game-answer-zone')!;
+134     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+135       1,
+136     );
+137     expect(
+138       screen.queryByRole('dialog', { name: 'Game complete' }),
+139     ).not.toBeInTheDocument();
+140 
+141     // Type 'a' to correctly fill the only slot → phase transitions to game-over
+142     act(() => {
+143       globalThis.dispatchEvent(
+144         new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+145       );
+146     });
+147 
+148     // Game-over overlay appears
+149     await screen.findByRole('button', { name: 'Play again' });
+150     expect(
+151       screen.getByRole('dialog', { name: 'Game complete' }),
+152     ).toBeInTheDocument();
+153 
+154     // Click "Play again"
+155     await user.click(
+156       screen.getByRole('button', { name: 'Play again' }),
+157     );
+158 
+159     // Overlay is gone and game has restarted at round 1
+160     expect(
+161       screen.queryByRole('dialog', { name: 'Game complete' }),
+162     ).not.toBeInTheDocument();
+163     expect(within(answerZone()).getAllByRole('listitem')).toHaveLength(
+164       1,
+165     );
+166   });
+167 });
 168
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:21:59Z)**_
@@ -2790,57 +2852,58 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:01Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-280	};
-281	
-282	export const WordSpell = ({
-283	  config,
-284	  initialState,
-285	  sessionId,
-286	  seed,
-287	}: WordSpellProps) => {
-288	  const skin = useGameSkin('word-spell', config.skin);
-289	  const { rounds: resolvedRounds, isLoading } =
-290	    useLibraryRounds(config);
-291	
-292	  const resolvedConfig = useMemo<WordSpellConfig>(
-293	    () => ({ ...config, rounds: resolvedRounds }),
-294	    [config, resolvedRounds],
-295	  );
-296	
-297	  const roundsInOrder = resolvedConfig.roundsInOrder === true;
-298	  const [sessionEpoch, setSessionEpoch] = useState(0);
-299	
-300	  const roundOrder = useMemo(() => {
-301	    void sessionEpoch;
-302	    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
-303	  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
-304	
-305	  const firstConfigIndex = roundOrder[0];
-306	  const round0 =
-307	    firstConfigIndex === undefined
-308	      ? undefined
-309	      : resolvedRounds[firstConfigIndex];
-310	  const roundWord = round0?.word.trim() ? round0.word : '';
-311	
-312	  const { tiles, zones } = useMemo(() => {
-313	    if (!roundWord)
-314	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-315	
-316	    if (round0?.gaps && round0.gaps.length > 0) {
-317	      return buildSentenceGapRound(round0.gaps);
-318	    }
-319	
-320	    return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
-321	  }, [roundWord, resolvedConfig.tileUnit, round0]);
-322	
-323	  const answerGameConfig = useMemo(
-324	    (): AnswerGameConfig => ({
-325	      gameId: resolvedConfig.gameId,
-326	      inputMethod: resolvedConfig.inputMethod,
-327	      wrongTileBehavior: resolvedConfig.wrongTileBehavior,
-328	      tileBankMode: resolvedConfig.tileBankMode,
-329	      distractorCount: resolvedConfig.distractorCount,
+280 };
+281 
+282 export const WordSpell = ({
+283   config,
+284   initialState,
+285   sessionId,
+286   seed,
+287 }: WordSpellProps) => {
+288   const skin = useGameSkin('word-spell', config.skin);
+289   const { rounds: resolvedRounds, isLoading } =
+290     useLibraryRounds(config);
+291 
+292   const resolvedConfig = useMemo<WordSpellConfig>(
+293     () => ({ ...config, rounds: resolvedRounds }),
+294     [config, resolvedRounds],
+295   );
+296 
+297   const roundsInOrder = resolvedConfig.roundsInOrder === true;
+298   const [sessionEpoch, setSessionEpoch] = useState(0);
+299 
+300   const roundOrder = useMemo(() => {
+301     void sessionEpoch;
+302     return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+303   }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
+304 
+305   const firstConfigIndex = roundOrder[0];
+306   const round0 =
+307     firstConfigIndex === undefined
+308       ? undefined
+309       : resolvedRounds[firstConfigIndex];
+310   const roundWord = round0?.word.trim() ? round0.word : '';
+311 
+312   const { tiles, zones } = useMemo(() => {
+313     if (!roundWord)
+314       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+315 
+316     if (round0?.gaps && round0.gaps.length > 0) {
+317       return buildSentenceGapRound(round0.gaps);
+318     }
+319 
+320     return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
+321   }, [roundWord, resolvedConfig.tileUnit, round0]);
+322 
+323   const answerGameConfig = useMemo(
+324     (): AnswerGameConfig => ({
+325       gameId: resolvedConfig.gameId,
+326       inputMethod: resolvedConfig.inputMethod,
+327       wrongTileBehavior: resolvedConfig.wrongTileBehavior,
+328       tileBankMode: resolvedConfig.tileBankMode,
+329       distractorCount: resolvedConfig.distractorCount,
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:01Z)**_
@@ -2850,80 +2913,81 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:01Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/db/hooks/useSeenWordsStore.ts`
 
 ```text
-1	import { useMemo } from 'react';
-2	import { useRxDB } from './useRxDB';
-3	import type { SeenWordsStore } from '@/data/words';
-4	import { createInMemorySeenWordsStore } from '@/data/words';
-5	import { ANONYMOUS_PROFILE_ID } from '@/db/last-session-game-config';
-6	
-7	/**
-8	 * Per-profile seen-words store backed by RxDB. When the database isn't
-9	 * ready yet, returns an in-memory store so the first session plays
-10	 * correctly; subsequent sessions pick up persisted state once the db
-11	 * hydrates.
-12	 */
-13	export const useSeenWordsStore = (): SeenWordsStore => {
-14	  const { db } = useRxDB();
-15	  const profileId = ANONYMOUS_PROFILE_ID;
-16	
-17	  const fallback = useMemo(() => createInMemorySeenWordsStore(), []);
-18	
-19	  return useMemo<SeenWordsStore>(() => {
-20	    if (!db) return fallback;
-21	
-22	    const docId = (signature: string): string =>
-23	      `${profileId}__${signature}`;
-24	
-25	    return {
-26	      get: async (signature) => {
-27	        const doc = await db.word_spell_seen_words
-28	          .findOne(docId(signature))
-29	          .exec();
-30	        return new Set(doc?.words);
-31	      },
-32	      addSeen: async (signature, words) => {
-33	        const id = docId(signature);
-34	        const existing = await db.word_spell_seen_words
-35	          .findOne(id)
-36	          .exec();
-37	        const merged = [
-38	          ...new Set([...(existing?.words ?? []), ...words]),
-39	        ];
-40	        const now = new Date().toISOString();
-41	        await (existing
-42	          ? existing.incrementalPatch({
-43	              words: merged,
-44	              updatedAt: now,
-45	            })
-46	          : db.word_spell_seen_words.insert({
-47	              id,
-48	              profileId,
-49	              signature,
-50	              words: merged,
-51	              updatedAt: now,
-52	            }));
-53	      },
-54	      resetSeen: async (signature, words) => {
-55	        const id = docId(signature);
-56	        const existing = await db.word_spell_seen_words
-57	          .findOne(id)
-58	          .exec();
-59	        const now = new Date().toISOString();
-60	        await (existing
-61	          ? existing.incrementalPatch({ words, updatedAt: now })
-62	          : db.word_spell_seen_words.insert({
-63	              id,
-64	              profileId,
-65	              signature,
-66	              words,
-67	              updatedAt: now,
-68	            }));
-69	      },
-70	    };
-71	  }, [db, fallback, profileId]);
-72	};
+1 import { useMemo } from 'react';
+2 import { useRxDB } from './useRxDB';
+3 import type { SeenWordsStore } from '@/data/words';
+4 import { createInMemorySeenWordsStore } from '@/data/words';
+5 import { ANONYMOUS_PROFILE_ID } from '@/db/last-session-game-config';
+6 
+7 /**
+8  * Per-profile seen-words store backed by RxDB. When the database isn't
+9  * ready yet, returns an in-memory store so the first session plays
+10  * correctly; subsequent sessions pick up persisted state once the db
+11  * hydrates.
+12  */
+13 export const useSeenWordsStore = (): SeenWordsStore => {
+14   const { db } = useRxDB();
+15   const profileId = ANONYMOUS_PROFILE_ID;
+16 
+17   const fallback = useMemo(() => createInMemorySeenWordsStore(), []);
+18 
+19   return useMemo<SeenWordsStore>(() => {
+20     if (!db) return fallback;
+21 
+22     const docId = (signature: string): string =>
+23       `${profileId}__${signature}`;
+24 
+25     return {
+26       get: async (signature) => {
+27         const doc = await db.word_spell_seen_words
+28           .findOne(docId(signature))
+29           .exec();
+30         return new Set(doc?.words);
+31       },
+32       addSeen: async (signature, words) => {
+33         const id = docId(signature);
+34         const existing = await db.word_spell_seen_words
+35           .findOne(id)
+36           .exec();
+37         const merged = [
+38           ...new Set([...(existing?.words ?? []), ...words]),
+39         ];
+40         const now = new Date().toISOString();
+41         await (existing
+42           ? existing.incrementalPatch({
+43               words: merged,
+44               updatedAt: now,
+45             })
+46           : db.word_spell_seen_words.insert({
+47               id,
+48               profileId,
+49               signature,
+50               words: merged,
+51               updatedAt: now,
+52             }));
+53       },
+54       resetSeen: async (signature, words) => {
+55         const id = docId(signature);
+56         const existing = await db.word_spell_seen_words
+57           .findOne(id)
+58           .exec();
+59         const now = new Date().toISOString();
+60         await (existing
+61           ? existing.incrementalPatch({ words, updatedAt: now })
+62           : db.word_spell_seen_words.insert({
+63               id,
+64               profileId,
+65               signature,
+66               words,
+67               updatedAt: now,
+68             }));
+69       },
+70     };
+71   }, [db, fallback, profileId]);
+72 };
 73
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:04Z)**_
@@ -2937,37 +3001,38 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:04Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-30	import { useGameSkin } from '@/lib/skin';
-31	
-32	function segmentsForWord(
-33	  word: string,
-34	  tileUnit: WordSpellConfig['tileUnit'],
-35	): string[] {
-36	  const trimmed = word.trim();
-37	  if (tileUnit === 'word') return [trimmed];
-38	  if (tileUnit === 'syllable') {
-39	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-40	    return parts.length > 0 ? parts : [trimmed];
-41	  }
-42	  return [...trimmed.toLowerCase()];
-43	}
-44	
-45	function buildTilesAndZones(
-46	  word: string,
-47	  tileUnit: WordSpellConfig['tileUnit'],
-48	): {
-49	  tiles: TileItem[];
-50	  zones: AnswerZone[];
-51	} {
-52	  const segments = segmentsForWord(word, tileUnit);
-53	  const values = segments.map((s) =>
-54	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-55	  );
-56	  const zones: AnswerZone[] = values.map((value, i) => ({
-57	    id: `z${i}`,
-58	    index: i,
-59	    expectedValue: value,
+30 import { useGameSkin } from '@/lib/skin';
+31 
+32 function segmentsForWord(
+33   word: string,
+34   tileUnit: WordSpellConfig['tileUnit'],
+35 ): string[] {
+36   const trimmed = word.trim();
+37   if (tileUnit === 'word') return [trimmed];
+38   if (tileUnit === 'syllable') {
+39     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+40     return parts.length > 0 ? parts : [trimmed];
+41   }
+42   return [...trimmed.toLowerCase()];
+43 }
+44 
+45 function buildTilesAndZones(
+46   word: string,
+47   tileUnit: WordSpellConfig['tileUnit'],
+48 ): {
+49   tiles: TileItem[];
+50   zones: AnswerZone[];
+51 } {
+52   const segments = segmentsForWord(word, tileUnit);
+53   const values = segments.map((s) =>
+54     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+55   );
+56   const zones: AnswerZone[] = values.map((value, i) => ({
+57     id: `z${i}`,
+58     index: i,
+59     expectedValue: value,
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:08Z)**_
@@ -2983,6 +3048,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:09Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:09Z)**_
@@ -2994,6 +3060,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:09Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:12Z)**_
@@ -3009,6 +3076,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:12Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:13Z)**_
@@ -3018,110 +3086,111 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:13Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/useLibraryRounds.ts`
 
 ```text
-1	import { useEffect, useState } from 'react';
-2	import type { WordSpellConfig, WordSpellRound } from './types';
-3	import type { Region, SeenWordsStore } from '@/data/words';
-4	import {
-5	  filterSignature,
-6	  filterWords,
-7	  pickWithRecycling,
-8	  toWordSpellRound,
-9	} from '@/data/words';
-10	
-11	interface LibraryRoundsState {
-12	  rounds: WordSpellRound[];
-13	  isLoading: boolean;
-14	  usedFallback?: { from: Region; to: 'aus' };
-15	}
-16	
-17	const initialStateFor = (
-18	  config: WordSpellConfig,
-19	): LibraryRoundsState => {
-20	  if (config.source) return { rounds: [], isLoading: true };
-21	  return { rounds: config.rounds ?? [], isLoading: false };
-22	};
-23	
-24	export const useLibraryRounds = (
-25	  config: WordSpellConfig,
-26	  seed: string | undefined,
-27	  store: SeenWordsStore,
-28	): LibraryRoundsState => {
-29	  const [state, setState] = useState<LibraryRoundsState>(() =>
-30	    initialStateFor(config),
-31	  );
-32	
-33	  useEffect(() => {
-34	    if (config.rounds && config.rounds.length > 0) {
-35	      const explicit = config.rounds;
-36	      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
-37	      setState((prev) =>
-38	        prev.rounds === explicit &&
-39	        !prev.isLoading &&
-40	        prev.usedFallback === undefined
-41	          ? prev
-42	          : { rounds: explicit, isLoading: false },
-43	      );
-44	      return;
-45	    }
-46	
-47	    const source = config.source;
-48	    if (!source) {
-49	      setState((prev) =>
-50	        prev.rounds.length === 0 &&
-51	        !prev.isLoading &&
-52	        prev.usedFallback === undefined
-53	          ? prev
-54	          : { rounds: [], isLoading: false },
-55	      );
-56	      return;
-57	    }
-58	
-59	    const cancellation = { isCancelled: false as boolean };
-60	
-61	    setState((prev) =>
-62	      prev.isLoading ? prev : { ...prev, isLoading: true },
-63	    );
-64	
-65	    void (async () => {
-66	      const result = await filterWords(source.filter);
-67	      if (cancellation.isCancelled) return;
-68	
-69	      const limit = source.limit ?? config.totalRounds;
-70	      const picked = config.roundsInOrder
-71	        ? result.hits.slice(0, limit)
-72	        : await pickWithRecycling(
-73	            result.hits,
-74	            limit,
-75	            filterSignature(source.filter),
-76	            store,
-77	            seed,
-78	          );
-79	      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
-80	      if (cancellation.isCancelled) return;
-81	
-82	      setState({
-83	        rounds: picked.map((hit) => toWordSpellRound(hit)),
-84	        isLoading: false,
-85	        usedFallback: result.usedFallback,
-86	      });
-87	    })();
-88	
-89	    return () => {
-90	      cancellation.isCancelled = true;
-91	    };
-92	  }, [
-93	    config.rounds,
-94	    config.source,
-95	    config.totalRounds,
-96	    config.roundsInOrder,
-97	    seed,
-98	    store,
-99	  ]);
-100	
-101	  return state;
-102	};
+1 import { useEffect, useState } from 'react';
+2 import type { WordSpellConfig, WordSpellRound } from './types';
+3 import type { Region, SeenWordsStore } from '@/data/words';
+4 import {
+5   filterSignature,
+6   filterWords,
+7   pickWithRecycling,
+8   toWordSpellRound,
+9 } from '@/data/words';
+10 
+11 interface LibraryRoundsState {
+12   rounds: WordSpellRound[];
+13   isLoading: boolean;
+14   usedFallback?: { from: Region; to: 'aus' };
+15 }
+16 
+17 const initialStateFor = (
+18   config: WordSpellConfig,
+19 ): LibraryRoundsState => {
+20   if (config.source) return { rounds: [], isLoading: true };
+21   return { rounds: config.rounds ?? [], isLoading: false };
+22 };
+23 
+24 export const useLibraryRounds = (
+25   config: WordSpellConfig,
+26   seed: string | undefined,
+27   store: SeenWordsStore,
+28 ): LibraryRoundsState => {
+29   const [state, setState] = useState<LibraryRoundsState>(() =>
+30     initialStateFor(config),
+31   );
+32 
+33   useEffect(() => {
+34     if (config.rounds && config.rounds.length > 0) {
+35       const explicit = config.rounds;
+36       // eslint-disable-next-line react-hooks/set-state-in-effect -- sync state when config transitions to explicit rounds; bail-out updater is a no-op when already in sync
+37       setState((prev) =>
+38         prev.rounds === explicit &&
+39         !prev.isLoading &&
+40         prev.usedFallback === undefined
+41           ? prev
+42           : { rounds: explicit, isLoading: false },
+43       );
+44       return;
+45     }
+46 
+47     const source = config.source;
+48     if (!source) {
+49       setState((prev) =>
+50         prev.rounds.length === 0 &&
+51         !prev.isLoading &&
+52         prev.usedFallback === undefined
+53           ? prev
+54           : { rounds: [], isLoading: false },
+55       );
+56       return;
+57     }
+58 
+59     const cancellation = { isCancelled: false as boolean };
+60 
+61     setState((prev) =>
+62       prev.isLoading ? prev : { ...prev, isLoading: true },
+63     );
+64 
+65     void (async () => {
+66       const result = await filterWords(source.filter);
+67       if (cancellation.isCancelled) return;
+68 
+69       const limit = source.limit ?? config.totalRounds;
+70       const picked = config.roundsInOrder
+71         ? result.hits.slice(0, limit)
+72         : await pickWithRecycling(
+73             result.hits,
+74             limit,
+75             filterSignature(source.filter),
+76             store,
+77             seed,
+78           );
+79       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
+80       if (cancellation.isCancelled) return;
+81 
+82       setState({
+83         rounds: picked.map((hit) => toWordSpellRound(hit)),
+84         isLoading: false,
+85         usedFallback: result.usedFallback,
+86       });
+87     })();
+88 
+89     return () => {
+90       cancellation.isCancelled = true;
+91     };
+92   }, [
+93     config.rounds,
+94     config.source,
+95     config.totalRounds,
+96     config.roundsInOrder,
+97     seed,
+98     store,
+99   ]);
+100 
+101   return state;
+102 };
 103
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:16Z)**_
@@ -3138,6 +3207,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:21Z)**_
@@ -3169,6 +3239,7 @@ react-i18next:: useTranslation: You will need to pass in an i18next instance by 
 
 Done in 1.46s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:29Z)**_
@@ -3178,6 +3249,7 @@ The tests passed — which means the existing call to `useLibraryRounds(config)`
 **Step 3: Update `WordSpell.tsx`**
 
 Now I'll make the changes:
+
 1. Add the `useSeenWordsStore` import
 2. Move `sessionEpoch` declaration before `useLibraryRounds`
 3. Add `seenWordsStore` and `sampleSeed` declarations
@@ -3191,6 +3263,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:30Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:35Z)**_
@@ -3216,6 +3289,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:38Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:41Z)**_
@@ -3229,42 +3303,43 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:41Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-285	  initialState,
-286	  sessionId,
-287	  seed,
-288	}: WordSpellProps) => {
-289	  const skin = useGameSkin('word-spell', config.skin);
-290	  const [sessionEpoch, setSessionEpoch] = useState(0);
-291	  const seenWordsStore = useSeenWordsStore();
-292	  const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
-293	  const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-294	    config,
-295	    sampleSeed,
-296	    seenWordsStore,
-297	  );
-298	
-299	  const resolvedConfig = useMemo<WordSpellConfig>(
-300	    () => ({ ...config, rounds: resolvedRounds }),
-301	    [config, resolvedRounds],
-302	  );
-303	
-304	  const roundsInOrder = resolvedConfig.roundsInOrder === true;
-305	
-306	  const roundOrder = useMemo(() => {
-307	    void sessionEpoch;
-308	    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
-309	  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
-310	
-311	  const firstConfigIndex = roundOrder[0];
-312	  const round0 =
-313	    firstConfigIndex === undefined
-314	      ? undefined
-315	      : resolvedRounds[firstConfigIndex];
-316	  const roundWord = round0?.word.trim() ? round0.word : '';
-317	
-318	  const { tiles, zones } = useMemo(() => {
-319	    if (!roundWord)
+285   initialState,
+286   sessionId,
+287   seed,
+288 }: WordSpellProps) => {
+289   const skin = useGameSkin('word-spell', config.skin);
+290   const [sessionEpoch, setSessionEpoch] = useState(0);
+291   const seenWordsStore = useSeenWordsStore();
+292   const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+293   const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+294     config,
+295     sampleSeed,
+296     seenWordsStore,
+297   );
+298 
+299   const resolvedConfig = useMemo<WordSpellConfig>(
+300     () => ({ ...config, rounds: resolvedRounds }),
+301     [config, resolvedRounds],
+302   );
+303 
+304   const roundsInOrder = resolvedConfig.roundsInOrder === true;
+305 
+306   const roundOrder = useMemo(() => {
+307     void sessionEpoch;
+308     return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+309   }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
+310 
+311   const firstConfigIndex = roundOrder[0];
+312   const round0 =
+313     firstConfigIndex === undefined
+314       ? undefined
+315       : resolvedRounds[firstConfigIndex];
+316   const roundWord = round0?.word.trim() ? round0.word : '';
+317 
+318   const { tiles, zones } = useMemo(() => {
+319     if (!roundWord)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:46Z)**_
@@ -3284,6 +3359,7 @@ src/providers/DbProvider.test.tsx
 src/db/hooks/useSettings.test.tsx
 src/db/hooks/useSavedConfigs.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:51Z)**_
@@ -3295,6 +3371,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:51Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:54Z)**_
@@ -3313,6 +3390,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:54Z)**_
 74:    const { result } = renderHook(() => useSeenWordsStore(), {
 81:    const { result } = renderHook(() => useSeenWordsStore(), {
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:56Z)**_
@@ -3329,6 +3407,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:22:56Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:00Z)**_
@@ -3340,6 +3419,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:00Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:01Z)**_
@@ -3352,6 +3432,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:01Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:04Z)**_
@@ -3363,6 +3444,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:04Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:06Z)**_
@@ -3375,6 +3457,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:06Z)**_
 ```text
 19:    setupFiles: ['./src/test-setup.ts'],
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:11Z)**_
@@ -3387,6 +3470,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:11Z)**_
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:15Z)**_
@@ -3458,6 +3542,7 @@ Error: useRxDB must be used within DbProvider
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:21Z)**_
@@ -3473,19 +3558,20 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:21Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/db/hooks/useRxDB.ts`
 
 ```text
-1	import { useContext } from 'react';
-2	import type { DbContextValue } from '@/providers/DbProvider';
-3	import { DbContext } from '@/providers/DbProvider';
-4	
-5	export function useRxDB(): DbContextValue {
-6	  const ctx = useContext(DbContext);
-7	  if (!ctx) {
-8	    throw new Error('useRxDB must be used within DbProvider');
-9	  }
-10	  return ctx;
-11	}
+1 import { useContext } from 'react';
+2 import type { DbContextValue } from '@/providers/DbProvider';
+3 import { DbContext } from '@/providers/DbProvider';
+4 
+5 export function useRxDB(): DbContextValue {
+6   const ctx = useContext(DbContext);
+7   if (!ctx) {
+8     throw new Error('useRxDB must be used within DbProvider');
+9   }
+10   return ctx;
+11 }
 12
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:23Z)**_
@@ -3506,6 +3592,7 @@ src/data/words/seen-words.test.ts
 src/data/words/seen-words.ts
 src/data/words/index.ts
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:26Z)**_
@@ -3519,37 +3606,38 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:27Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/useLibraryRounds.test.tsx`
 
 ```text
-1	import { renderHook, waitFor } from '@testing-library/react';
-2	import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-3	import { useLibraryRounds } from './useLibraryRounds';
-4	import type { WordSpellConfig } from './types';
-5	import type { SeenWordsStore } from '@/data/words';
-6	import {
-7	  __resetChunkCacheForTests,
-8	  createInMemorySeenWordsStore,
-9	} from '@/data/words';
-10	
-11	const baseConfig: WordSpellConfig = {
-12	  gameId: 'test',
-13	  component: 'WordSpell',
-14	  inputMethod: 'drag',
-15	  wrongTileBehavior: 'lock-auto-eject',
-16	  tileBankMode: 'exact',
-17	  totalRounds: 3,
-18	  roundsInOrder: true,
-19	  ttsEnabled: false,
-20	  mode: 'picture',
-21	  tileUnit: 'letter',
-22	};
-23	
-24	let store: SeenWordsStore;
-25	
-26	beforeEach(() => {
-27	  store = createInMemorySeenWordsStore();
-28	});
-29	
-30	afterEach(() => __resetChunkCacheForTests());
+1 import { renderHook, waitFor } from '@testing-library/react';
+2 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+3 import { useLibraryRounds } from './useLibraryRounds';
+4 import type { WordSpellConfig } from './types';
+5 import type { SeenWordsStore } from '@/data/words';
+6 import {
+7   __resetChunkCacheForTests,
+8   createInMemorySeenWordsStore,
+9 } from '@/data/words';
+10 
+11 const baseConfig: WordSpellConfig = {
+12   gameId: 'test',
+13   component: 'WordSpell',
+14   inputMethod: 'drag',
+15   wrongTileBehavior: 'lock-auto-eject',
+16   tileBankMode: 'exact',
+17   totalRounds: 3,
+18   roundsInOrder: true,
+19   ttsEnabled: false,
+20   mode: 'picture',
+21   tileUnit: 'letter',
+22 };
+23 
+24 let store: SeenWordsStore;
+25 
+26 beforeEach(() => {
+27   store = createInMemorySeenWordsStore();
+28 });
+29 
+30 afterEach(() => __resetChunkCacheForTests());
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:30Z)**_
@@ -3564,6 +3652,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:36Z)**_
@@ -3591,6 +3680,7 @@ react-i18next:: useTranslation: You will need to pass in an i18next instance by 
 
 Done in 1.30s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:38Z)**_
@@ -3609,6 +3699,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.51s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:43Z)**_
@@ -3665,6 +3756,7 @@ $ vitest run
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:57Z)**_
@@ -3679,6 +3771,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:57Z)**_
 d7a37233 feat(word-spell): sample library rounds with per-session seed and store
 3f728c37 feat(db): add useSeenWordsStore hook
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:23:59Z)**_
@@ -3692,47 +3785,48 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:24:00Z)**_
  `/Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/fd0b9f61-05be-493b-a699-6adddd598055/tool-results/bp79qmwcc.txt`
 
 ```text
-60	  /* fire events that update state */
-61	});
-62	/* assert on the output */
-63	
-64	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-65	
-66	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
-67	An update to DbProvider inside a test was not wrapped in act(...).
-68	
-69	When testing, code that causes React state updates should be wrapped into act(...):
-70	
-71	act(() => {
-72	  /* fire events that update state */
-73	});
-74	/* assert on the output */
-75	
-76	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-77	
-78	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-79	An update to DbProvider inside a test was not wrapped in act(...).
-80	
-81	When testing, code that causes React state updates should be wrapped into act(...):
-82	
-83	act(() => {
-84	  /* fire events that update state */
-85	});
-86	/* assert on the output */
-87	
-88	This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
-89	
-90	stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
-91	An update to DbProvider inside a test was not wrapped in act(...).
-92	
-93	When testing, code that causes React state updates should be wrapped into act(...):
-94	
-95	act(() => {
-96	  /* fire events that update state */
-97	});
-98	/* assert on the output */
+60   /* fire events that update state */
+61 });
+62 /* assert on the output */
+63 
+64 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+65 
+66 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > provides stable dispatch via useGameDispatch
+67 An update to DbProvider inside a test was not wrapped in act(...).
+68 
+69 When testing, code that causes React state updates should be wrapped into act(...):
+70 
+71 act(() => {
+72   /* fire events that update state */
+73 });
+74 /* assert on the output */
+75 
+76 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+77 
+78 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+79 An update to DbProvider inside a test was not wrapped in act(...).
+80 
+81 When testing, code that causes React state updates should be wrapped into act(...):
+82 
+83 act(() => {
+84   /* fire events that update state */
+85 });
+86 /* assert on the output */
+87 
+88 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+89 
+90 stderr | src/lib/game-engine/game-engine-provider.test.tsx > GameEngineProvider > SKIP_INSTRUCTIONS transitions to playing
+91 An update to DbProvider inside a test was not wrapped in act(...).
+92 
+93 When testing, code that causes React state updates should be wrapped into act(...):
+94 
+95 act(() => {
+96   /* fire events that update state */
+97 });
+98 /* assert on the output */
 99
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:24:07Z)**_
@@ -3774,6 +3868,7 @@ Done in 6.83s.
 [feat/word-spell-library-levels-recall 883a04dd] feat(word-spell): wire sampleSeed + seenWordsStore through WordSpell
  2 files changed, 23 insertions(+), 3 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:24:16Z)**_
@@ -3791,6 +3886,7 @@ All 781 tests passed. The commit succeeded cleanly.
 **Typecheck:** PASS.
 
 **Files changed (2):**
+
 - `src/games/word-spell/WordSpell/WordSpell.tsx` — added `useSeenWordsStore` import, moved `sessionEpoch` declaration before `useLibraryRounds`, added `seenWordsStore` and `sampleSeed` declarations, updated `useLibraryRounds(config)` → `useLibraryRounds(config, sampleSeed, seenWordsStore)`.
 - `src/games/word-spell/WordSpell/WordSpell.test.tsx` — added smoke test for new hook signature, added `vi.mock('@/db/hooks/useSeenWordsStore')` returning an in-memory store (needed because `useRxDB` throws outside `DbProvider`).
 
@@ -3865,6 +3961,7 @@ index e5063b4a..85c62c2f 100644
    const roundOrder = useMemo(() => {
      void sessionEpoch;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:24:24Z)**_
@@ -3877,6 +3974,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:24:25Z)**_
 ```text
 Updated task #2 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:24:25Z)**_
@@ -3887,6 +3985,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:24:25Z)**_
 ```text
 Updated task #3 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:26:15Z)**_
@@ -3910,6 +4009,7 @@ agentId: a3aa79de0287d4d58 (use SendMessage with to: 'a3aa79de0287d4d58' to cont
 tool_uses: 12
 duration_ms: 92671</usage>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-15 12:24:42Z)**_
@@ -3931,11 +4031,13 @@ Run these three commands in sequence (stop and report on first failure):
 If all three pass, there is NOTHING to commit (this task is verification-only unless there were lint fixups).
 
 If any step fails:
+
 - Triage one failure at a time.
 - If it's a small fix clearly caused by this branch's work (tasks 1-8), fix it, then re-run all three commands.
 - If it's ambiguous, report BLOCKED with the failure output.
 
 If lint fixups were made:
+
 ```
 git add -A
 git commit -m "chore(word-spell): clean up lint/type findings
@@ -3946,6 +4048,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ## Context
 
 Branch state: Tasks 1-8 committed. Recent commits:
+
 - `883a04dd feat(word-spell): wire sampleSeed + seenWordsStore through WordSpell`
 - `d7a37233 feat(word-spell): sample library rounds with per-session seed and store`
 - ... (plus prior data-layer commits)
@@ -4022,6 +4125,7 @@ An update to DbProvider inside a test was not wrapped in act(...).
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:24:56Z)**_
@@ -4038,73 +4142,74 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:00Z)**_
  `/Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/fd0b9f61-05be-493b-a699-6adddd598055/tool-results/beu4r10sb.txt`
 
 ```text
-550	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak leaves utterance.voice unset when the named voice is not found
-551	[TTS] speak("hello") — speaking: false, pending: false → queued
-552	
-553	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defaults to Daniel voice
-554	[TTS] speak("hello") — speaking: false, pending: false → queued
-555	
-556	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak applies rate and volume from SpeakOptions
-557	[TTS] speak("hello") — speaking: false, pending: false → queued
-558	
-559	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak does not call synth.cancel()
-560	[TTS] speak("hello") — speaking: false, pending: false → queued
-561	
-562	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech calls synth.cancel() when synth.speaking is true
-563	[TTS] cancelSpeech() — speaking: true, pending: false → cancelled
-564	
-565	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech calls synth.cancel() when synth.pending is true
-566	[TTS] cancelSpeech() — speaking: false, pending: true → cancelled
-567	
-568	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech does not call synth.cancel() when nothing is speaking or pending
-569	[TTS] cancelSpeech() — idle, skipped
-570	
-571	stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defers via voiceschanged when getVoices() returns empty
-572	[TTS] speak("hello") — voices not ready, waiting for voiceschanged
-573	
-574	 ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 6ms
-575	 ✓ src/data/words/phoneme-audio.test.ts (11 tests) 5ms
-576	 ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 9ms
-577	 ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 4ms
-578	 ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 6ms
-579	 ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 4ms
-580	 ✓ src/data/words/builders.test.ts (29 tests) 4ms
-581	 ✓ src/data/words/seen-words.test.ts (15 tests) 13ms
-582	 ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 10ms
-583	 ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 3ms
-584	 ✓ src/games/number-match/number-words.test.ts (60 tests) 13ms
-585	 ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
-586	 ✓ src/data/words/sample.test.ts (7 tests) 3ms
-587	 ✓ src/games/catalog-utils.test.ts (15 tests) 4ms
-588	 ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
-589	 ✓ src/games/registry.test.ts (3 tests) 2ms
-590	 ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
-591	 ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 2ms
-592	 ✓ src/lib/skin/registry.test.ts (8 tests) 5ms
-593	 ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
-594	 ✓ src/games/build-round-order.test.ts (7 tests) 2ms
-595	 ✓ src/lib/config-tags.test.ts (6 tests) 2ms
-596	 ✓ src/lib/i18n/i18n.test.ts (1 test) 4ms
-597	 ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
-598	 ✓ src/lib/speech/voices.test.ts (3 tests) 3ms
-599	 ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
-600	 ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
-601	 ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
-602	 ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
-603	 ✓ src/data/words/adapters.test.ts (2 tests) 1ms
-604	 ✓ src/db/setup-validation.test.ts (1 test) 1ms
-605	 ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
-606	 ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
-607	 ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 2ms
-608	
-609	 Test Files  107 passed (107)
-610	      Tests  781 passed (781)
-611	   Start at  22:24:46
-612	   Duration  6.54s (transform 2.00s, setup 7.38s, collect 22.52s, tests 12.59s, environment 44.54s, prepare 4.87s)
-613	
-614	Done in 7.38s.
+550 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak leaves utterance.voice unset when the named voice is not found
+551 [TTS] speak("hello") — speaking: false, pending: false → queued
+552 
+553 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defaults to Daniel voice
+554 [TTS] speak("hello") — speaking: false, pending: false → queued
+555 
+556 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak applies rate and volume from SpeakOptions
+557 [TTS] speak("hello") — speaking: false, pending: false → queued
+558 
+559 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak does not call synth.cancel()
+560 [TTS] speak("hello") — speaking: false, pending: false → queued
+561 
+562 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech calls synth.cancel() when synth.speaking is true
+563 [TTS] cancelSpeech() — speaking: true, pending: false → cancelled
+564 
+565 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech calls synth.cancel() when synth.pending is true
+566 [TTS] cancelSpeech() — speaking: false, pending: true → cancelled
+567 
+568 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > cancelSpeech does not call synth.cancel() when nothing is speaking or pending
+569 [TTS] cancelSpeech() — idle, skipped
+570 
+571 stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak defers via voiceschanged when getVoices() returns empty
+572 [TTS] speak("hello") — voices not ready, waiting for voiceschanged
+573 
+574  ✓ src/lib/speech/SpeechOutput.test.ts (12 tests) 6ms
+575  ✓ src/data/words/phoneme-audio.test.ts (11 tests) 5ms
+576  ✓ src/data/words/WordLibraryExplorer.test.ts (4 tests) 9ms
+577  ✓ src/games/word-spell/build-sentence-gap-round.test.ts (6 tests) 4ms
+578  ✓ src/components/answer-game/answer-game-reducer.test.ts (30 tests) 6ms
+579  ✓ src/games/sort-numbers/resolve-simple-config.test.ts (15 tests) 4ms
+580  ✓ src/data/words/builders.test.ts (29 tests) 4ms
+581  ✓ src/data/words/seen-words.test.ts (15 tests) 13ms
+582  ✓ src/games/number-match/build-numeral-round.test.ts (5 tests) 10ms
+583  ✓ src/components/answer-game/Slot/parse-sentence-template.test.ts (6 tests) 3ms
+584  ✓ src/games/number-match/number-words.test.ts (60 tests) 13ms
+585  ✓ src/games/sort-numbers/sort-numbers-level-generator.test.ts (6 tests) 3ms
+586  ✓ src/data/words/sample.test.ts (7 tests) 3ms
+587  ✓ src/games/catalog-utils.test.ts (15 tests) 4ms
+588  ✓ src/components/answer-game/tile-font.test.ts (18 tests) 2ms
+589  ✓ src/games/registry.test.ts (3 tests) 2ms
+590  ✓ src/lib/theme/css-vars.test.ts (1 test) 3ms
+591  ✓ src/lib/speech/safe-get-voices.test.ts (6 tests) 2ms
+592  ✓ src/lib/skin/registry.test.ts (8 tests) 5ms
+593  ✓ src/components/answer-game/ProgressHUD/resolve-hud-flags.test.ts (6 tests) 2ms
+594  ✓ src/games/build-round-order.test.ts (7 tests) 2ms
+595  ✓ src/lib/config-tags.test.ts (6 tests) 2ms
+596  ✓ src/lib/i18n/i18n.test.ts (1 test) 4ms
+597  ✓ src/components/answer-game/magnetic-snap.test.ts (7 tests) 2ms
+598  ✓ src/lib/speech/voices.test.ts (3 tests) 3ms
+599  ✓ src/lib/skin/resolve-timing.test.ts (4 tests) 2ms
+600  ✓ src/lib/game-event-bus.test.ts (3 tests) 2ms
+601  ✓ src/lib/game-engine/replay.test.ts (6 tests) 2ms
+602  ✓ src/games/sort-numbers/is-rounds-stale.test.ts (8 tests) 2ms
+603  ✓ src/data/words/adapters.test.ts (2 tests) 1ms
+604  ✓ src/db/setup-validation.test.ts (1 test) 1ms
+605  ✓ src/components/answer-game/styles.test.ts (1 test) 1ms
+606  ✓ src/routes/$locale/_app/index.test.tsx (1 test) 1ms
+607  ✓ src/routes/$locale/_app/game/resize-number-match-rounds.test.ts (8 tests) 2ms
+608 
+609  Test Files  107 passed (107)
+610       Tests  781 passed (781)
+611    Start at  22:24:46
+612    Duration  6.54s (transform 2.00s, setup 7.38s, collect 22.52s, tests 12.59s, environment 44.54s, prepare 4.87s)
+613 
+614 Done in 7.38s.
 615
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:02Z)**_
@@ -4123,6 +4228,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.46s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:07Z)**_
@@ -4150,6 +4256,7 @@ ESLint found too many warnings (maximum: 0).
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:18Z)**_
@@ -4163,37 +4270,38 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:19Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-280	  );
-281	};
-282	
-283	export const WordSpell = ({
-284	  config,
-285	  initialState,
-286	  sessionId,
-287	  seed,
-288	}: WordSpellProps) => {
-289	  const skin = useGameSkin('word-spell', config.skin);
-290	  const [sessionEpoch, setSessionEpoch] = useState(0);
-291	  const seenWordsStore = useSeenWordsStore();
-292	  const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
-293	  const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-294	    config,
-295	    sampleSeed,
-296	    seenWordsStore,
-297	  );
-298	
-299	  const resolvedConfig = useMemo<WordSpellConfig>(
-300	    () => ({ ...config, rounds: resolvedRounds }),
-301	    [config, resolvedRounds],
-302	  );
-303	
-304	  const roundsInOrder = resolvedConfig.roundsInOrder === true;
-305	
-306	  const roundOrder = useMemo(() => {
-307	    void sessionEpoch;
-308	    return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
-309	  }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
+280   );
+281 };
+282 
+283 export const WordSpell = ({
+284   config,
+285   initialState,
+286   sessionId,
+287   seed,
+288 }: WordSpellProps) => {
+289   const skin = useGameSkin('word-spell', config.skin);
+290   const [sessionEpoch, setSessionEpoch] = useState(0);
+291   const seenWordsStore = useSeenWordsStore();
+292   const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+293   const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+294     config,
+295     sampleSeed,
+296     seenWordsStore,
+297   );
+298 
+299   const resolvedConfig = useMemo<WordSpellConfig>(
+300     () => ({ ...config, rounds: resolvedRounds }),
+301     [config, resolvedRounds],
+302   );
+303 
+304   const roundsInOrder = resolvedConfig.roundsInOrder === true;
+305 
+306   const roundOrder = useMemo(() => {
+307     void sessionEpoch;
+308     return buildRoundOrder(resolvedRounds.length, roundsInOrder, seed);
+309   }, [resolvedRounds.length, roundsInOrder, seed, sessionEpoch]);
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:24Z)**_
@@ -4209,17 +4317,18 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:25Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-288	}: WordSpellProps) => {
-289	  const skin = useGameSkin('word-spell', config.skin);
-290	  const [sessionEpoch, setSessionEpoch] = useState(0);
-291	  const seenWordsStore = useSeenWordsStore();
-292	  const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
-293	  const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-294	    config,
-295	    sampleSeed,
-296	    seenWordsStore,
-297	  );
+288 }: WordSpellProps) => {
+289   const skin = useGameSkin('word-spell', config.skin);
+290   const [sessionEpoch, setSessionEpoch] = useState(0);
+291   const seenWordsStore = useSeenWordsStore();
+292   const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+293   const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+294     config,
+295     sampleSeed,
+296     seenWordsStore,
+297   );
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:28Z)**_
@@ -4230,6 +4339,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpell/WordSpell.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:30Z)**_
@@ -4255,6 +4365,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:37Z)**_
 
 Done in 6.72s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:52Z)**_
@@ -4272,6 +4383,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 10.51s.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:25:55Z)**_
@@ -4344,6 +4456,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:26:09Z)**_
@@ -4358,6 +4471,7 @@ d0ddd657 chore(word-spell): clean up lint/type findings
 883a04dd feat(word-spell): wire sampleSeed + seenWordsStore through WordSpell
 d7a37233 feat(word-spell): sample library rounds with per-session seed and store
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-15 12:26:15Z)**_
@@ -4380,6 +4494,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:26:17Z)**_
 ```text
 Updated task #3 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:26:18Z)**_
@@ -4390,6 +4505,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:26:18Z)**_
 ```text
 Updated task #4 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:26:24Z)**_
@@ -4409,6 +4525,7 @@ Check Docker status
 ```text
 Docker: running
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:27:45Z)**_
@@ -4480,6 +4597,7 @@ If the change is intentional, run: yarn test:vr:update
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:28:19Z)**_
@@ -4524,6 +4642,7 @@ d7a37233 feat(word-spell): sample library rounds with per-session seed and store
 3f728c37 feat(db): add useSeenWordsStore hook
 eaea0c72 fix(db): raise word_spell_seen_words id maxLength and cover isolation/upsert
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:30:27Z)**_
@@ -4556,6 +4675,7 @@ Overall branch diff scope
  src/lib/seeded-random.ts                           |    19 +
  27 files changed, 91109 insertions(+), 171 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:30:30Z)**_
@@ -4588,6 +4708,7 @@ See earlier part of stat
  src/db/schemas/word_spell_seen_words.ts            |    26 +
  src/db/types.ts                                    |     2 +
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:30:41Z)**_
@@ -4599,6 +4720,7 @@ I need to stop here. The 21 VR diffs are across components our branch never touc
 The plan explicitly says: "If any baselines drifted, stop and root-cause before running `yarn test:vr:update`."
 
 Two likely causes:
+
 1. **Pre-existing drift on master** — baselines in this worktree are stale relative to current master state (the worktree forked before some CSS/theme change landed).
 2. **Local-vs-CI render differences** — even though VR uses Docker, a recent Docker image or Playwright version bump could have shifted rendering.
 
@@ -4670,6 +4792,7 @@ ab970e79 docs(word-spell): spec for library-driven levels in recall mode
 88bdd7b3 Merge branch 'master' of github.com:leocaseiro/base-skill
 4a5bde61 ai(specstory): sync
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:18Z)**_
@@ -4694,6 +4817,7 @@ home-expected.png
 trace.zip
 ===
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:24Z)**_
@@ -4707,6 +4831,7 @@ Find VR baselines
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:28Z)**_
@@ -4739,6 +4864,7 @@ Find baseline PNGs
 ./e2e/__snapshots__/visual.spec.ts/number-match-countable-dots-partial-chromium.png
 ./e2e/__snapshots__/visual.spec.ts/instructions-overlay-chromium.png
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:31Z)**_
@@ -4761,6 +4887,7 @@ a1259b1e chore(vr): refresh baselines after pulling master merge
 d1c95d4a test(game-tiles): add multi-viewport Storybook + VR coverage
 b0a7c81b fix(vr): stabilise VR baselines by removing nondeterminism in default configs (#46)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:38Z)**_
@@ -4776,6 +4903,7 @@ Compare dimensions + pixel diff count
 e2e/__snapshots__/visual.spec.ts/home-chromium.png:             PNG image data, 1280 x 720, 8-bit/color RGB, non-interlaced
 test-results/visual--visual-home-page-chromium/home-actual.png: PNG image data, 1280 x 720, 8-bit/color RGB, non-interlaced
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:45:53Z)**_
@@ -4788,23 +4916,24 @@ _**Agent (claude-opus-4-6 2026-04-15 12:45:54Z)**_
 
 ```text
 
-1	---
-2	name: Run VR tests locally with Docker
-3	description: When generating or updating VR tests, ensure Docker is running and run yarn test:vr:update locally instead of dispatching CI workflows
-4	type: feedback
-5	---
-6	
-7	When an agent needs to run VR (visual regression) tests or update baselines:
-8	
-9	1. Check if Docker Desktop is running. If not, ask the user to launch it.
-10	2. Once Docker is running, execute `yarn test:vr:update` locally to generate/update baselines.
-11	3. Do NOT rely on GitHub Actions workflow_dispatch for baseline updates.
-12	
-13	**Why:** Running VR tests locally via Docker matches the CI environment exactly (Linux/Chromium) and avoids GitHub Actions permissions issues (e.g., the 403 error when github-actions[bot] tried to push baselines back to a feature branch during a workflow_dispatch run on 2026-04-10). Local runs are faster, easier to iterate on, and let the user inspect screenshots immediately.
-14	
-15	**How to apply:** Before generating any VR test or running `yarn test:vr` / `yarn test:vr:update`, confirm Docker is up (or prompt the user). Prefer local execution over dispatching CI workflows for baseline generation.
+1 ---
+2 name: Run VR tests locally with Docker
+3 description: When generating or updating VR tests, ensure Docker is running and run yarn test:vr:update locally instead of dispatching CI workflows
+4 type: feedback
+5 ---
+6 
+7 When an agent needs to run VR (visual regression) tests or update baselines:
+8 
+9 1. Check if Docker Desktop is running. If not, ask the user to launch it.
+10 2. Once Docker is running, execute `yarn test:vr:update` locally to generate/update baselines.
+11 3. Do NOT rely on GitHub Actions workflow_dispatch for baseline updates.
+12 
+13 **Why:** Running VR tests locally via Docker matches the CI environment exactly (Linux/Chromium) and avoids GitHub Actions permissions issues (e.g., the 403 error when github-actions[bot] tried to push baselines back to a feature branch during a workflow_dispatch run on 2026-04-10). Local runs are faster, easier to iterate on, and let the user inspect screenshots immediately.
+14 
+15 **How to apply:** Before generating any VR test or running `yarn test:vr` / `yarn test:vr:update`, confirm Docker is up (or prompt the user). Prefer local execution over dispatching CI workflows for baseline generation.
 16
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:46:00Z)**_
@@ -4823,6 +4952,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:46:03Z)**_
 ```text
 Updated task #4 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:46:04Z)**_
@@ -4833,6 +4963,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:46:04Z)**_
 ```text
 Updated task #5 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:46:58Z)**_
@@ -4860,6 +4991,7 @@ agentId: a3b2b55af30220d04 (use SendMessage with to: 'a3b2b55af30220d04' to cont
 tool_uses: 8
 duration_ms: 37654</usage>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-15 12:46:20Z)**_
@@ -4924,527 +5056,528 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:24Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md`
 
 ```text
-1	# WordSpell — Library Levels (Recall Mode) Design Spec
-2	
-3	Date: 2026-04-15
-4	Branch: `feat/word-spell-library-levels-recall`
-5	
-6	## Summary
-7	
-8	Let WordSpell generate its rounds from the phonics word library
-9	(`src/data/words/`). The Simple Config form — owned by the
-10	`kid-friendly-homepage` PR — writes a `WordSpellSource` onto
-11	`config.source`. This spec covers the **data layer beneath**: sampling
-12	`totalRounds` words randomly from the filtered pool, guaranteeing no
-13	repeats within a session, preferring unseen words across sessions, and
-14	recycling when the unseen pile runs out. Recall mode only.
-15	
-16	## Goals
-17	
-18	- Random sampling of `N = totalRounds` words from the filtered library
-19	  pool when `roundsInOrder` is `false` (the new default for WordSpell).
-20	- No repeats within a single session.
-21	- Fresh set on each replay.
-22	- Different users / visits get different sequences for the same config.
-23	- When the unseen pile is smaller than `N`, take all of it and top up
-24	  from already-seen words so the session still has `N` rounds.
-25	- "Seen words" state persists across reloads, scoped per profile (RxDB).
-26	- Respect `roundsInOrder: true`: skip sampling and recycling entirely;
-27	  play the first `N` hits in the order `filterWords` returns them.
-28	
-29	## Non-goals
-30	
-31	- Simple Config UI for level + sound chips — owned by
-32	  `kid-friendly-homepage`.
-33	- Scramble / picture / sentence-gap modes — recall only in this spec.
-34	- `levelMode` auto-progression (Level 2 → Level 3 after success) — future.
-35	- Smart re-queue of mistakenly-answered words — future.
-36	
-37	## Pool-exhaustion behaviour
-38	
-39	The rule, by example: 11-word pool, 5 rounds per session, 3 sessions.
-40	
-41	| Play | Unseen before | Sample taken (5 distinct)       | Unseen after    |
-42	| ---- | ------------- | ------------------------------- | --------------- |
-43	| 1    | 11            | 5 fresh                         | 6               |
-44	| 2    | 6             | 5 fresh                         | 1               |
-45	| 3    | 1             | 1 unseen + 4 recycled from seen | reset to 4 seen |
-46	
-47	The 4 recycled words in play 3 are picked at random from the "seen"
-48	bucket. After play 3 the seen set is reset to just the words used in
-49	play 3, so the next session starts with 7 fresh unseen words.
-50	
-51	## Boundary with `kid-friendly-homepage`
-52	
-53	That PR owns the Simple Config form and writes:
-54	
-55	```ts
-56	config.source = {
-57	  type: 'word-library',
-58	  filter: {
-59	    region: 'aus',
-60	    level: N,              // or levelRange / levels
-61	    phonemesAllowed: [...],
-62	  },
-63	};
-64	```
-65	
-66	This spec consumes `config.source` in `useLibraryRounds` and samples
-67	from the result. No type changes to `WordSpellConfig`, `WordSpellSource`,
-68	or `WordFilter`. No shared files edited beyond a single-line
-69	`seededRandom` import swap in `build-round-order.ts`.
-70	
-71	## Data layer
-72	
-73	### New: `src/lib/seeded-random.ts`
-74	
-75	Move the existing `seededRandom(seedStr): () => number` helper out of
-76	`src/games/build-round-order.ts` (lines 7-21) into a shared module.
-77	`build-round-order.ts` switches to
-78	`import { seededRandom } from '@/lib/seeded-random'`. No behaviour
-79	change; covered by the existing `build-round-order` tests.
-80	
-81	### New: `src/data/words/sample.ts`
-82	
-83	Fisher–Yates shuffle on a copy of the hits array, then slice.
-84	
-85	```ts
-86	export const sampleHits = (
-87	  hits: WordHit[],
-88	  limit: number,
-89	  seed?: string,
-90	): WordHit[] => {
-91	  if (hits.length === 0 || limit <= 0) return [];
-92	  const random = seed === undefined ? Math.random : seededRandom(seed);
-93	  const copy = [...hits];
-94	  for (let i = copy.length - 1; i > 0; i--) {
-95	    const j = Math.floor(random() * (i + 1));
-96	    [copy[i], copy[j]] = [copy[j]!, copy[i]!];
-97	  }
-98	  return copy.slice(0, Math.min(limit, copy.length));
-99	};
-100	```
-101	
-102	- Pool smaller than `limit` → returns the whole shuffled pool (silent cap).
-103	- `seed === undefined` → `Math.random` path; two calls give different
-104	  sequences (matches how `buildRoundOrder` behaves without a seed).
-105	- Same seed → same sequence (tests get determinism by passing a seed).
-106	
-107	### New: `src/data/words/seen-words.ts`
-108	
-109	Pure logic + a `SeenWordsStore` interface. No storage implementation
-110	here — that's injected by the caller.
-111	
-112	```ts
-113	export interface SeenWordsStore {
-114	  get: (signature: string) => Promise<Set<string>>;
-115	  addSeen: (signature: string, words: string[]) => Promise<void>;
-116	  resetSeen: (signature: string, words: string[]) => Promise<void>;
-117	}
-118	
-119	export const filterSignature = (filter: WordFilter): string => {
-120	  // region | level|levels|levelRange | sorted(phonemesAllowed) |
-121	  // sorted(phonemesRequired) | sorted(graphemesAllowed) |
-122	  // sorted(graphemesRequired) | syllableCountEq | syllableCountRange
-123	  //
-124	  // Sorting the array fields makes the signature stable regardless of
-125	  // the order the Simple Config form emits chips.
-126	};
-127	
-128	export const pickWithRecycling = async (
-129	  hits: WordHit[],
-130	  limit: number,
-131	  signature: string,
-132	  store: SeenWordsStore,
-133	  seed?: string,
-134	): Promise<WordHit[]> => {
-135	  const seen = await store.get(signature);
-136	  const unseen = hits.filter((h) => !seen.has(h.word));
-137	
-138	  if (unseen.length >= limit) {
-139	    const picked = sampleHits(unseen, limit, seed);
-140	    await store.addSeen(
-141	      signature,
-142	      picked.map((h) => h.word),
-143	    );
-144	    return picked;
-145	  }
-146	
-147	  const recycled = sampleHits(
-148	    hits.filter((h) => seen.has(h.word)),
-149	    limit - unseen.length,
-150	    seed,
-151	  );
-152	  const picked = [...unseen, ...recycled];
-153	  await store.resetSeen(
-154	    signature,
-155	    picked.map((h) => h.word),
-156	  );
-157	  return picked;
-158	};
-159	
-160	export const createInMemorySeenWordsStore = (): SeenWordsStore => {
-161	  // Used by tests and as the fallback when RxDB is unavailable.
-162	};
-163	```
-164	
-165	- `filterSignature` is stable across filter objects with the same
-166	  content. Array fields are sorted; `undefined` fields are skipped.
-167	- `resetSeen(sig, picked)` starts the next cycle with the most-recently-
-168	  used words marked seen — matches the "reset to 4 seen" row in the
-169	  table above.
-170	- The in-memory store keeps unit tests isolated and also acts as the
-171	  fallback when the database isn't ready yet (first paint before RxDB
-172	  hydrates).
-173	
-174	### Persistence: RxDB collection
-175	
-176	Seen-words state persists per profile so a kid picking up a tablet
-177	tomorrow still sees fresh words.
-178	
-179	**New schema: `src/db/schemas/word_spell_seen_words.ts`**
-180	
-181	```ts
-182	export type WordSpellSeenWordsDoc = {
-183	  id: string; // `${profileId}__${signature}`
-184	  profileId: string;
-185	  signature: string;
-186	  words: string[];
-187	  updatedAt: string;
-188	};
-189	
-190	export const wordSpellSeenWordsSchema: RxJsonSchema<WordSpellSeenWordsDoc> =
-191	  {
-192	    version: 0,
-193	    primaryKey: 'id',
-194	    type: 'object',
-195	    properties: {
-196	      id: { type: 'string', maxLength: 256 },
-197	      profileId: { type: 'string', maxLength: 36 },
-198	      signature: { type: 'string', maxLength: 512 },
-199	      words: { type: 'array', items: { type: 'string' } },
-200	      updatedAt: { type: 'string', format: 'date-time' },
-201	    },
-202	    required: ['id', 'profileId', 'signature', 'words', 'updatedAt'],
-203	    additionalProperties: false,
-204	  };
-205	```
-206	
-207	- Primary key `${profileId}__${signature}` keeps per-profile isolation
-208	  and lets upserts hit a single row.
-209	- `words` is the whole seen set. Updates always rewrite the array.
-210	  Array size is bounded by level-pool size (hundreds at most).
-211	- Registered in `src/db/schemas/index.ts`, added to `MAX_SCHEMA_VERSION`,
-212	  and wired into `src/db/create-database.ts` alongside the other
-213	  collections.
-214	
-215	**New hook: `src/db/hooks/useSeenWordsStore.ts`**
-216	
-217	```ts
-218	export const useSeenWordsStore = (): SeenWordsStore => {
-219	  const { db } = useRxDB();
-220	  const profileId = ANONYMOUS_PROFILE_ID; // TODO: active profile hook
-221	  const fallback = useMemo(() => createInMemorySeenWordsStore(), []);
-222	
-223	  return useMemo<SeenWordsStore>(() => {
-224	    if (!db) return fallback;
-225	    const docId = (signature: string) => `${profileId}__${signature}`;
-226	
-227	    return {
-228	      get: async (signature) => {
-229	        const doc = await db.word_spell_seen_words
-230	          .findOne(docId(signature))
-231	          .exec();
-232	        return new Set(doc?.words ?? []);
-233	      },
-234	      addSeen: async (signature, words) => {
-235	        const id = docId(signature);
-236	        const existing = await db.word_spell_seen_words
-237	          .findOne(id)
-238	          .exec();
-239	        const merged = Array.from(
-240	          new Set([...(existing?.words ?? []), ...words]),
-241	        );
-242	        await (existing
-243	          ? existing.incrementalPatch({
-244	              words: merged,
-245	              updatedAt: new Date().toISOString(),
-246	            })
-247	          : db.word_spell_seen_words.insert({
-248	              id,
-249	              profileId,
-250	              signature,
-251	              words: merged,
-252	              updatedAt: new Date().toISOString(),
-253	            }));
-254	      },
-255	      resetSeen: async (signature, words) => {
-256	        const id = docId(signature);
-257	        const existing = await db.word_spell_seen_words
-258	          .findOne(id)
-259	          .exec();
-260	        const now = new Date().toISOString();
-261	        await (existing
-262	          ? existing.incrementalPatch({ words, updatedAt: now })
-263	          : db.word_spell_seen_words.insert({
-264	              id,
-265	              profileId,
-266	              signature,
-267	              words,
-268	              updatedAt: now,
-269	            }));
-270	      },
-271	    };
-272	  }, [db, fallback, profileId]);
-273	};
-274	```
-275	
-276	- Uses `ANONYMOUS_PROFILE_ID` today; the hook can later switch to the
-277	  real active profile without callers changing.
-278	- When `db` is still bootstrapping, falls back to the in-memory store
-279	  so the first session still plays correctly — the next session picks
-280	  up the persisted state.
-281	- No explicit migration needed beyond the schema-version bump that
-282	  `MAX_SCHEMA_VERSION` already enforces.
-283	
-284	### No changes to
-285	
-286	- `src/data/words/types.ts`
-287	- `src/data/words/filter.ts`
-288	- `src/data/words/adapters.ts`
-289	
-290	### Config default: `roundsInOrder`
-291	
-292	`WordSpellConfig.roundsInOrder` defaults to **`false`** going forward.
-293	Confirm and update the default where `WordSpellConfig` is instantiated
-294	by the catalog / Simple Config form. When `true`, the game skips the
-295	sampler and recycling entirely — see the branching below.
-296	
-297	## Hook integration
-298	
-299	### `src/games/word-spell/useLibraryRounds.ts`
-300	
-301	Signature:
-302	
-303	```ts
-304	export const useLibraryRounds = (
-305	  config: WordSpellConfig,
-306	  seed: string | undefined,
-307	  store: SeenWordsStore,
-308	): LibraryRoundsState;
-309	```
-310	
-311	In the async effect block, branch on `roundsInOrder`:
-312	
-313	```ts
-314	const source = config.source;
-315	const result = await filterWords(source.filter);
-316	const limit = source.limit ?? config.totalRounds;
-317	
-318	const picked =
-319	  config.roundsInOrder === true
-320	    ? result.hits.slice(0, limit)
-321	    : await pickWithRecycling(
-322	        result.hits,
-323	        limit,
-324	        filterSignature(source.filter),
-325	        store,
-326	        seed,
-327	      );
-328	
-329	const rounds = picked.map(toWordSpellRound);
-330	```
-331	
-332	- `roundsInOrder: true` → deterministic, no RxDB writes, matches the
-333	  current pre-spec behaviour exactly. Useful for teacher demos and
-334	  deterministic screenshots.
-335	- `roundsInOrder: false` (the new default) → full
-336	  random-sample-with-recycling path.
-337	- Effect deps gain `seed` and the `store` identity. When the seed
-338	  changes (new session), the effect re-runs and samples fresh. The
-339	  existing `config.rounds` fast path (hand-authored rounds) is
-340	  untouched — sampling only applies when `config.source` is set.
-341	
-342	### `src/games/word-spell/WordSpell/WordSpell.tsx`
-343	
-344	Two additions: pull the seen-words store, and generate a fresh seed
-345	per session.
-346	
-347	```ts
-348	const seenWordsStore = useSeenWordsStore();
-349	const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
-350	const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
-351	  config,
-352	  sampleSeed,
-353	  seenWordsStore,
-354	);
-355	```
-356	
-357	- First mount → `nanoid()` → random 5, recycling-aware.
-358	- Play Again bumps `sessionEpoch` → new `nanoid()` → different random 5;
-359	  seen-words state (now in RxDB) updates across plays so the next
-360	  session prefers fresh words.
-361	- Two users / two visits → different `nanoid()` → different sequences.
-362	- When `config.roundsInOrder === true`, the hook short-circuits and the
-363	  store is never touched.
-364	
-365	No other WordSpell changes. Recall mode already works end-to-end:
-366	`WordSpell.tsx` lines 204-208 suppress emoji/image when
-367	`config.mode === 'recall'`, and line 234 keeps the `AudioButton` so the
-368	kid hears the word. `buildRoundOrder` continues to handle the play
-369	order — shuffled when `roundsInOrder` is false, sequential when true.
-370	
-371	## End-to-end flow (recall mode, library source, `roundsInOrder: false`)
-372	
-373	1. `kid-friendly-homepage` Simple Config writes
-374	   `config.source = { type: 'word-library', filter: { region: 'aus',
-375	level: 2, phonemesAllowed: [...] } }`, `totalRounds: 5`, and
-376	   `roundsInOrder: false` (the new default).
-377	2. `WordSpell` mounts → `seenWordsStore = useSeenWordsStore()` →
-378	   `sampleSeed = nanoid()` → `useLibraryRounds(config, sampleSeed,
-379	seenWordsStore)`.
-380	3. Hook calls `filterWords(filter)` → e.g., 11 hits.
-381	4. Hook calls `pickWithRecycling(hits, 5, sig, store, seed)` → 5
-382	   distinct `WordHit`s; the RxDB-backed store writes the seen words for
-383	   `(profileId, signature)`.
-384	5. Hook maps to `WordSpellRound[]` via the existing `toWordSpellRound`.
-385	6. `buildRoundOrder(5, false, seed)` shuffles play order.
-386	7. Each round plays in recall mode: TTS speaks the word, kid drags or
-387	   types the letters.
-388	
-389	When `roundsInOrder: true`, step 4 becomes `result.hits.slice(0, 5)`
-390	and the store is bypassed; step 6 produces sequential play order.
-391	
-392	## Testing
-393	
-394	Per `CLAUDE.md`, tests come first (red → green).
-395	
-396	### Unit
-397	
-398	- `src/lib/seeded-random.test.ts` (new) — same seed → same sequence;
-399	  different seeds → different sequences. Guards the extraction.
-400	- `src/data/words/sample.test.ts` (new)
-401	  - Returns `min(limit, hits.length)` items.
-402	  - All items distinct.
-403	  - Same seed → same output; different seed → different output.
-404	  - `limit = 0` → `[]`. Empty pool → `[]`.
-405	- `src/data/words/seen-words.test.ts` (new) — covers `pickWithRecycling`
-406	  with the in-memory store.
-407	  - First call samples `limit` fresh, marks them seen.
-408	  - Second call excludes previously seen when the pool is large enough.
-409	  - **Pool-exhaustion scenario (11 words, 5 rounds, 3 plays)** — asserts
-410	    the table above: 5+5+5 distinct per session, unseen runs out on play
-411	    3, seen set resets to the words just played.
-412	  - `filterSignature` is stable across filter objects with the same
-413	    content regardless of property order or array ordering of
-414	    `phonemesAllowed` / `graphemesAllowed`.
-415	  - Different signatures don't share seen sets.
-416	- `src/db/hooks/useSeenWordsStore.test.tsx` (new)
-417	  - RxDB roundtrip: `addSeen` then `get` returns the merged set.
-418	  - `resetSeen` replaces the set entirely.
-419	  - Different profiles don't share rows (keyed by `${profileId}__${sig}`).
-420	  - When `db` is not yet ready, falls back to in-memory behaviour.
-421	
-422	### Component / hook
-423	
-424	- `src/games/word-spell/useLibraryRounds.test.tsx` — extend:
-425	  - When `seed` changes between renders, rounds re-sample.
-426	  - Small-pool case returns the whole pool (silent cap).
-427	  - `config.roundsInOrder === true` → takes `hits.slice(0, limit)` and
-428	    does not call `store.get` / `store.addSeen`.
-429	  - Hand-authored `config.rounds` path is unaffected.
-430	- `src/games/word-spell/WordSpell/WordSpell.test.tsx` — extend:
-431	  - With `config.source` set, renders `totalRounds` rounds from the
-432	    library.
-433	  - "Play Again" triggers a new sample (assert different words appear
-434	    when the pool is large enough; or assert that the seen-store was
-435	    called with an updated signature).
-436	
-437	### VR / E2E
-438	
-439	- No new VR baselines — the rendered UI for a single recall round is
-440	  unchanged.
-441	- No new E2E — the Simple Config → Play flow belongs to
-442	  `kid-friendly-homepage`. This PR is pure data-layer.
-443	
-444	### TDD order
-445	
-446	1. `seeded-random` extraction + its test — green after the import-site
-447	   swap.
-448	2. `sample.ts` + test — red → green.
-449	3. `seen-words.ts` (interface + in-memory store + `pickWithRecycling`)
-450	   - test including pool-exhaustion table — red → green.
-451	4. New RxDB schema `word_spell_seen_words` registered + schema tests
-452	   updated; `useSeenWordsStore` hook + its test — red → green.
-453	5. `useLibraryRounds` — extend its existing test first (including the
-454	   `roundsInOrder: true` short-circuit), then change the hook.
-455	6. `WordSpell.tsx` — extend the component test first, then pass
-456	   `sampleSeed` + `seenWordsStore`.
-457	7. Update the `roundsInOrder` default to `false` wherever WordSpell
-458	   configs are constructed.
-459	
-460	## Risks
-461	
-462	- **Shared tabs / devices**: two tabs write to the same RxDB collection
-463	  on the same profile, so concurrent `Play Again` presses could race.
-464	  Acceptable for the kid-first audience (one tab at a time in
-465	  practice); the store uses `incrementalPatch` for additive writes.
-466	- **Seen-set growth**: bounded by level-pool size (each level has at
-467	  most a few hundred words); `resetSeen` naturally caps growth when the
-468	  cycle rolls over.
-469	- **Schema migration**: adding a new collection is version 0 in its
-470	  own schema — no data migration of existing collections. The bump to
-471	  `MAX_SCHEMA_VERSION` covers the `app_meta` tracking.
-472	- **Test determinism**: `WordSpell` already threads a `seed` prop; the
-473	  new `sampleSeed` layer uses the same pattern. Tests pass explicit
-474	  seeds or mock `nanoid`; the hook test injects a fresh in-memory
-475	  `SeenWordsStore` per case.
-476	- **Signature drift with `kid-friendly-homepage`**: if that PR ships a
-477	  `WordFilter` shape that differs from today's (`region` + `level` +
-478	  `phonemesAllowed`), only `filterSignature` needs to learn the new
-479	  fields. The sampler itself is shape-agnostic.
-480	- **Profile wiring**: today the hook uses `ANONYMOUS_PROFILE_ID`. When
-481	  the real active-profile hook lands, `useSeenWordsStore` updates in
-482	  one place; no call-site changes needed.
-483	
-484	## Rollout
-485	
-486	Single PR to master, gated by existing CI.
-487	
-488	Files touched:
-489	
-490	- `src/lib/seeded-random.ts` (new)
-491	- `src/games/build-round-order.ts` (import swap, no behaviour change)
-492	- `src/data/words/sample.ts` (new)
-493	- `src/data/words/seen-words.ts` (new — interface, pure logic,
-494	  in-memory store)
-495	- `src/data/words/index.ts` (exports, if needed by consumers)
-496	- `src/db/schemas/word_spell_seen_words.ts` (new)
-497	- `src/db/schemas/index.ts` (register + include in `MAX_SCHEMA_VERSION`)
-498	- `src/db/create-database.ts` (add the new collection)
-499	- `src/db/types.ts` (typed DB handle — if applicable)
-500	- `src/db/hooks/useSeenWordsStore.ts` (new)
-501	- `src/games/word-spell/useLibraryRounds.ts` (add `seed` + `store`,
-502	  branch on `roundsInOrder`)
-503	- `src/games/word-spell/WordSpell/WordSpell.tsx` (wire `sampleSeed` +
-504	  `seenWordsStore`)
-505	- Anywhere a WordSpell config default is constructed — set
-506	  `roundsInOrder: false`
-507	- Test files per the Testing section.
-508	
-509	No architecture docs update required — no game-state logic changes
-510	(reducer, dispatch, behaviours untouched). The CLAUDE.md architecture-
-511	docs rule doesn't trigger for `src/data/words/`, `src/lib/`, or
-512	`src/db/`.
-513	
-514	## Open questions (deferred to future specs)
-515	
-516	- Extending recycling to scramble / picture / sentence-gap modes.
-517	- Wiring `levelMode` auto-progression into WordSpell (Level 2 → Level 3
-518	  after a successful session).
-519	- Smart re-queue for mistakenly-answered words.
+1 # WordSpell — Library Levels (Recall Mode) Design Spec
+2 
+3 Date: 2026-04-15
+4 Branch: `feat/word-spell-library-levels-recall`
+5 
+6 ## Summary
+7 
+8 Let WordSpell generate its rounds from the phonics word library
+9 (`src/data/words/`). The Simple Config form — owned by the
+10 `kid-friendly-homepage` PR — writes a `WordSpellSource` onto
+11 `config.source`. This spec covers the **data layer beneath**: sampling
+12 `totalRounds` words randomly from the filtered pool, guaranteeing no
+13 repeats within a session, preferring unseen words across sessions, and
+14 recycling when the unseen pile runs out. Recall mode only.
+15 
+16 ## Goals
+17 
+18 - Random sampling of `N = totalRounds` words from the filtered library
+19   pool when `roundsInOrder` is `false` (the new default for WordSpell).
+20 - No repeats within a single session.
+21 - Fresh set on each replay.
+22 - Different users / visits get different sequences for the same config.
+23 - When the unseen pile is smaller than `N`, take all of it and top up
+24   from already-seen words so the session still has `N` rounds.
+25 - "Seen words" state persists across reloads, scoped per profile (RxDB).
+26 - Respect `roundsInOrder: true`: skip sampling and recycling entirely;
+27   play the first `N` hits in the order `filterWords` returns them.
+28 
+29 ## Non-goals
+30 
+31 - Simple Config UI for level + sound chips — owned by
+32   `kid-friendly-homepage`.
+33 - Scramble / picture / sentence-gap modes — recall only in this spec.
+34 - `levelMode` auto-progression (Level 2 → Level 3 after success) — future.
+35 - Smart re-queue of mistakenly-answered words — future.
+36 
+37 ## Pool-exhaustion behaviour
+38 
+39 The rule, by example: 11-word pool, 5 rounds per session, 3 sessions.
+40 
+41 | Play | Unseen before | Sample taken (5 distinct)       | Unseen after    |
+42 | ---- | ------------- | ------------------------------- | --------------- |
+43 | 1    | 11            | 5 fresh                         | 6               |
+44 | 2    | 6             | 5 fresh                         | 1               |
+45 | 3    | 1             | 1 unseen + 4 recycled from seen | reset to 4 seen |
+46 
+47 The 4 recycled words in play 3 are picked at random from the "seen"
+48 bucket. After play 3 the seen set is reset to just the words used in
+49 play 3, so the next session starts with 7 fresh unseen words.
+50 
+51 ## Boundary with `kid-friendly-homepage`
+52 
+53 That PR owns the Simple Config form and writes:
+54 
+55 ```ts
+56 config.source = {
+57   type: 'word-library',
+58   filter: {
+59     region: 'aus',
+60     level: N,              // or levelRange / levels
+61     phonemesAllowed: [...],
+62   },
+63 };
+64 ```
+65 
+66 This spec consumes `config.source` in `useLibraryRounds` and samples
+67 from the result. No type changes to `WordSpellConfig`, `WordSpellSource`,
+68 or `WordFilter`. No shared files edited beyond a single-line
+69 `seededRandom` import swap in `build-round-order.ts`.
+70 
+71 ## Data layer
+72 
+73 ### New: `src/lib/seeded-random.ts`
+74 
+75 Move the existing `seededRandom(seedStr): () => number` helper out of
+76 `src/games/build-round-order.ts` (lines 7-21) into a shared module.
+77 `build-round-order.ts` switches to
+78 `import { seededRandom } from '@/lib/seeded-random'`. No behaviour
+79 change; covered by the existing `build-round-order` tests.
+80 
+81 ### New: `src/data/words/sample.ts`
+82 
+83 Fisher–Yates shuffle on a copy of the hits array, then slice.
+84 
+85 ```ts
+86 export const sampleHits = (
+87   hits: WordHit[],
+88   limit: number,
+89   seed?: string,
+90 ): WordHit[] => {
+91   if (hits.length === 0 || limit <= 0) return [];
+92   const random = seed === undefined ? Math.random : seededRandom(seed);
+93   const copy = [...hits];
+94   for (let i = copy.length - 1; i > 0; i--) {
+95     const j = Math.floor(random() * (i + 1));
+96     [copy[i], copy[j]] = [copy[j]!, copy[i]!];
+97   }
+98   return copy.slice(0, Math.min(limit, copy.length));
+99 };
+100 ```
+101 
+102 - Pool smaller than `limit` → returns the whole shuffled pool (silent cap).
+103 - `seed === undefined` → `Math.random` path; two calls give different
+104   sequences (matches how `buildRoundOrder` behaves without a seed).
+105 - Same seed → same sequence (tests get determinism by passing a seed).
+106 
+107 ### New: `src/data/words/seen-words.ts`
+108 
+109 Pure logic + a `SeenWordsStore` interface. No storage implementation
+110 here — that's injected by the caller.
+111 
+112 ```ts
+113 export interface SeenWordsStore {
+114   get: (signature: string) => Promise<Set<string>>;
+115   addSeen: (signature: string, words: string[]) => Promise<void>;
+116   resetSeen: (signature: string, words: string[]) => Promise<void>;
+117 }
+118 
+119 export const filterSignature = (filter: WordFilter): string => {
+120   // region | level|levels|levelRange | sorted(phonemesAllowed) |
+121   // sorted(phonemesRequired) | sorted(graphemesAllowed) |
+122   // sorted(graphemesRequired) | syllableCountEq | syllableCountRange
+123   //
+124   // Sorting the array fields makes the signature stable regardless of
+125   // the order the Simple Config form emits chips.
+126 };
+127 
+128 export const pickWithRecycling = async (
+129   hits: WordHit[],
+130   limit: number,
+131   signature: string,
+132   store: SeenWordsStore,
+133   seed?: string,
+134 ): Promise<WordHit[]> => {
+135   const seen = await store.get(signature);
+136   const unseen = hits.filter((h) => !seen.has(h.word));
+137 
+138   if (unseen.length >= limit) {
+139     const picked = sampleHits(unseen, limit, seed);
+140     await store.addSeen(
+141       signature,
+142       picked.map((h) => h.word),
+143     );
+144     return picked;
+145   }
+146 
+147   const recycled = sampleHits(
+148     hits.filter((h) => seen.has(h.word)),
+149     limit - unseen.length,
+150     seed,
+151   );
+152   const picked = [...unseen, ...recycled];
+153   await store.resetSeen(
+154     signature,
+155     picked.map((h) => h.word),
+156   );
+157   return picked;
+158 };
+159 
+160 export const createInMemorySeenWordsStore = (): SeenWordsStore => {
+161   // Used by tests and as the fallback when RxDB is unavailable.
+162 };
+163 ```
+164 
+165 - `filterSignature` is stable across filter objects with the same
+166   content. Array fields are sorted; `undefined` fields are skipped.
+167 - `resetSeen(sig, picked)` starts the next cycle with the most-recently-
+168   used words marked seen — matches the "reset to 4 seen" row in the
+169   table above.
+170 - The in-memory store keeps unit tests isolated and also acts as the
+171   fallback when the database isn't ready yet (first paint before RxDB
+172   hydrates).
+173 
+174 ### Persistence: RxDB collection
+175 
+176 Seen-words state persists per profile so a kid picking up a tablet
+177 tomorrow still sees fresh words.
+178 
+179 **New schema: `src/db/schemas/word_spell_seen_words.ts`**
+180 
+181 ```ts
+182 export type WordSpellSeenWordsDoc = {
+183   id: string; // `${profileId}__${signature}`
+184   profileId: string;
+185   signature: string;
+186   words: string[];
+187   updatedAt: string;
+188 };
+189 
+190 export const wordSpellSeenWordsSchema: RxJsonSchema<WordSpellSeenWordsDoc> =
+191   {
+192     version: 0,
+193     primaryKey: 'id',
+194     type: 'object',
+195     properties: {
+196       id: { type: 'string', maxLength: 256 },
+197       profileId: { type: 'string', maxLength: 36 },
+198       signature: { type: 'string', maxLength: 512 },
+199       words: { type: 'array', items: { type: 'string' } },
+200       updatedAt: { type: 'string', format: 'date-time' },
+201     },
+202     required: ['id', 'profileId', 'signature', 'words', 'updatedAt'],
+203     additionalProperties: false,
+204   };
+205 ```
+206 
+207 - Primary key `${profileId}__${signature}` keeps per-profile isolation
+208   and lets upserts hit a single row.
+209 - `words` is the whole seen set. Updates always rewrite the array.
+210   Array size is bounded by level-pool size (hundreds at most).
+211 - Registered in `src/db/schemas/index.ts`, added to `MAX_SCHEMA_VERSION`,
+212   and wired into `src/db/create-database.ts` alongside the other
+213   collections.
+214 
+215 **New hook: `src/db/hooks/useSeenWordsStore.ts`**
+216 
+217 ```ts
+218 export const useSeenWordsStore = (): SeenWordsStore => {
+219   const { db } = useRxDB();
+220   const profileId = ANONYMOUS_PROFILE_ID; // TODO: active profile hook
+221   const fallback = useMemo(() => createInMemorySeenWordsStore(), []);
+222 
+223   return useMemo<SeenWordsStore>(() => {
+224     if (!db) return fallback;
+225     const docId = (signature: string) => `${profileId}__${signature}`;
+226 
+227     return {
+228       get: async (signature) => {
+229         const doc = await db.word_spell_seen_words
+230           .findOne(docId(signature))
+231           .exec();
+232         return new Set(doc?.words ?? []);
+233       },
+234       addSeen: async (signature, words) => {
+235         const id = docId(signature);
+236         const existing = await db.word_spell_seen_words
+237           .findOne(id)
+238           .exec();
+239         const merged = Array.from(
+240           new Set([...(existing?.words ?? []), ...words]),
+241         );
+242         await (existing
+243           ? existing.incrementalPatch({
+244               words: merged,
+245               updatedAt: new Date().toISOString(),
+246             })
+247           : db.word_spell_seen_words.insert({
+248               id,
+249               profileId,
+250               signature,
+251               words: merged,
+252               updatedAt: new Date().toISOString(),
+253             }));
+254       },
+255       resetSeen: async (signature, words) => {
+256         const id = docId(signature);
+257         const existing = await db.word_spell_seen_words
+258           .findOne(id)
+259           .exec();
+260         const now = new Date().toISOString();
+261         await (existing
+262           ? existing.incrementalPatch({ words, updatedAt: now })
+263           : db.word_spell_seen_words.insert({
+264               id,
+265               profileId,
+266               signature,
+267               words,
+268               updatedAt: now,
+269             }));
+270       },
+271     };
+272   }, [db, fallback, profileId]);
+273 };
+274 ```
+275 
+276 - Uses `ANONYMOUS_PROFILE_ID` today; the hook can later switch to the
+277   real active profile without callers changing.
+278 - When `db` is still bootstrapping, falls back to the in-memory store
+279   so the first session still plays correctly — the next session picks
+280   up the persisted state.
+281 - No explicit migration needed beyond the schema-version bump that
+282   `MAX_SCHEMA_VERSION` already enforces.
+283 
+284 ### No changes to
+285 
+286 - `src/data/words/types.ts`
+287 - `src/data/words/filter.ts`
+288 - `src/data/words/adapters.ts`
+289 
+290 ### Config default: `roundsInOrder`
+291 
+292 `WordSpellConfig.roundsInOrder` defaults to **`false`** going forward.
+293 Confirm and update the default where `WordSpellConfig` is instantiated
+294 by the catalog / Simple Config form. When `true`, the game skips the
+295 sampler and recycling entirely — see the branching below.
+296 
+297 ## Hook integration
+298 
+299 ### `src/games/word-spell/useLibraryRounds.ts`
+300 
+301 Signature:
+302 
+303 ```ts
+304 export const useLibraryRounds = (
+305   config: WordSpellConfig,
+306   seed: string | undefined,
+307   store: SeenWordsStore,
+308 ): LibraryRoundsState;
+309 ```
+310 
+311 In the async effect block, branch on `roundsInOrder`:
+312 
+313 ```ts
+314 const source = config.source;
+315 const result = await filterWords(source.filter);
+316 const limit = source.limit ?? config.totalRounds;
+317 
+318 const picked =
+319   config.roundsInOrder === true
+320     ? result.hits.slice(0, limit)
+321     : await pickWithRecycling(
+322         result.hits,
+323         limit,
+324         filterSignature(source.filter),
+325         store,
+326         seed,
+327       );
+328 
+329 const rounds = picked.map(toWordSpellRound);
+330 ```
+331 
+332 - `roundsInOrder: true` → deterministic, no RxDB writes, matches the
+333   current pre-spec behaviour exactly. Useful for teacher demos and
+334   deterministic screenshots.
+335 - `roundsInOrder: false` (the new default) → full
+336   random-sample-with-recycling path.
+337 - Effect deps gain `seed` and the `store` identity. When the seed
+338   changes (new session), the effect re-runs and samples fresh. The
+339   existing `config.rounds` fast path (hand-authored rounds) is
+340   untouched — sampling only applies when `config.source` is set.
+341 
+342 ### `src/games/word-spell/WordSpell/WordSpell.tsx`
+343 
+344 Two additions: pull the seen-words store, and generate a fresh seed
+345 per session.
+346 
+347 ```ts
+348 const seenWordsStore = useSeenWordsStore();
+349 const sampleSeed = useMemo(() => nanoid(), [sessionEpoch]);
+350 const { rounds: resolvedRounds, isLoading } = useLibraryRounds(
+351   config,
+352   sampleSeed,
+353   seenWordsStore,
+354 );
+355 ```
+356 
+357 - First mount → `nanoid()` → random 5, recycling-aware.
+358 - Play Again bumps `sessionEpoch` → new `nanoid()` → different random 5;
+359   seen-words state (now in RxDB) updates across plays so the next
+360   session prefers fresh words.
+361 - Two users / two visits → different `nanoid()` → different sequences.
+362 - When `config.roundsInOrder === true`, the hook short-circuits and the
+363   store is never touched.
+364 
+365 No other WordSpell changes. Recall mode already works end-to-end:
+366 `WordSpell.tsx` lines 204-208 suppress emoji/image when
+367 `config.mode === 'recall'`, and line 234 keeps the `AudioButton` so the
+368 kid hears the word. `buildRoundOrder` continues to handle the play
+369 order — shuffled when `roundsInOrder` is false, sequential when true.
+370 
+371 ## End-to-end flow (recall mode, library source, `roundsInOrder: false`)
+372 
+373 1. `kid-friendly-homepage` Simple Config writes
+374    `config.source = { type: 'word-library', filter: { region: 'aus',
+375 level: 2, phonemesAllowed: [...] } }`, `totalRounds: 5`, and
+376    `roundsInOrder: false` (the new default).
+377 2. `WordSpell` mounts → `seenWordsStore = useSeenWordsStore()` →
+378    `sampleSeed = nanoid()` → `useLibraryRounds(config, sampleSeed,
+379 seenWordsStore)`.
+380 3. Hook calls `filterWords(filter)` → e.g., 11 hits.
+381 4. Hook calls `pickWithRecycling(hits, 5, sig, store, seed)` → 5
+382    distinct `WordHit`s; the RxDB-backed store writes the seen words for
+383    `(profileId, signature)`.
+384 5. Hook maps to `WordSpellRound[]` via the existing `toWordSpellRound`.
+385 6. `buildRoundOrder(5, false, seed)` shuffles play order.
+386 7. Each round plays in recall mode: TTS speaks the word, kid drags or
+387    types the letters.
+388 
+389 When `roundsInOrder: true`, step 4 becomes `result.hits.slice(0, 5)`
+390 and the store is bypassed; step 6 produces sequential play order.
+391 
+392 ## Testing
+393 
+394 Per `CLAUDE.md`, tests come first (red → green).
+395 
+396 ### Unit
+397 
+398 - `src/lib/seeded-random.test.ts` (new) — same seed → same sequence;
+399   different seeds → different sequences. Guards the extraction.
+400 - `src/data/words/sample.test.ts` (new)
+401   - Returns `min(limit, hits.length)` items.
+402   - All items distinct.
+403   - Same seed → same output; different seed → different output.
+404   - `limit = 0` → `[]`. Empty pool → `[]`.
+405 - `src/data/words/seen-words.test.ts` (new) — covers `pickWithRecycling`
+406   with the in-memory store.
+407   - First call samples `limit` fresh, marks them seen.
+408   - Second call excludes previously seen when the pool is large enough.
+409   - **Pool-exhaustion scenario (11 words, 5 rounds, 3 plays)** — asserts
+410     the table above: 5+5+5 distinct per session, unseen runs out on play
+411     3, seen set resets to the words just played.
+412   - `filterSignature` is stable across filter objects with the same
+413     content regardless of property order or array ordering of
+414     `phonemesAllowed` / `graphemesAllowed`.
+415   - Different signatures don't share seen sets.
+416 - `src/db/hooks/useSeenWordsStore.test.tsx` (new)
+417   - RxDB roundtrip: `addSeen` then `get` returns the merged set.
+418   - `resetSeen` replaces the set entirely.
+419   - Different profiles don't share rows (keyed by `${profileId}__${sig}`).
+420   - When `db` is not yet ready, falls back to in-memory behaviour.
+421 
+422 ### Component / hook
+423 
+424 - `src/games/word-spell/useLibraryRounds.test.tsx` — extend:
+425   - When `seed` changes between renders, rounds re-sample.
+426   - Small-pool case returns the whole pool (silent cap).
+427   - `config.roundsInOrder === true` → takes `hits.slice(0, limit)` and
+428     does not call `store.get` / `store.addSeen`.
+429   - Hand-authored `config.rounds` path is unaffected.
+430 - `src/games/word-spell/WordSpell/WordSpell.test.tsx` — extend:
+431   - With `config.source` set, renders `totalRounds` rounds from the
+432     library.
+433   - "Play Again" triggers a new sample (assert different words appear
+434     when the pool is large enough; or assert that the seen-store was
+435     called with an updated signature).
+436 
+437 ### VR / E2E
+438 
+439 - No new VR baselines — the rendered UI for a single recall round is
+440   unchanged.
+441 - No new E2E — the Simple Config → Play flow belongs to
+442   `kid-friendly-homepage`. This PR is pure data-layer.
+443 
+444 ### TDD order
+445 
+446 1. `seeded-random` extraction + its test — green after the import-site
+447    swap.
+448 2. `sample.ts` + test — red → green.
+449 3. `seen-words.ts` (interface + in-memory store + `pickWithRecycling`)
+450    - test including pool-exhaustion table — red → green.
+451 4. New RxDB schema `word_spell_seen_words` registered + schema tests
+452    updated; `useSeenWordsStore` hook + its test — red → green.
+453 5. `useLibraryRounds` — extend its existing test first (including the
+454    `roundsInOrder: true` short-circuit), then change the hook.
+455 6. `WordSpell.tsx` — extend the component test first, then pass
+456    `sampleSeed` + `seenWordsStore`.
+457 7. Update the `roundsInOrder` default to `false` wherever WordSpell
+458    configs are constructed.
+459 
+460 ## Risks
+461 
+462 - **Shared tabs / devices**: two tabs write to the same RxDB collection
+463   on the same profile, so concurrent `Play Again` presses could race.
+464   Acceptable for the kid-first audience (one tab at a time in
+465   practice); the store uses `incrementalPatch` for additive writes.
+466 - **Seen-set growth**: bounded by level-pool size (each level has at
+467   most a few hundred words); `resetSeen` naturally caps growth when the
+468   cycle rolls over.
+469 - **Schema migration**: adding a new collection is version 0 in its
+470   own schema — no data migration of existing collections. The bump to
+471   `MAX_SCHEMA_VERSION` covers the `app_meta` tracking.
+472 - **Test determinism**: `WordSpell` already threads a `seed` prop; the
+473   new `sampleSeed` layer uses the same pattern. Tests pass explicit
+474   seeds or mock `nanoid`; the hook test injects a fresh in-memory
+475   `SeenWordsStore` per case.
+476 - **Signature drift with `kid-friendly-homepage`**: if that PR ships a
+477   `WordFilter` shape that differs from today's (`region` + `level` +
+478   `phonemesAllowed`), only `filterSignature` needs to learn the new
+479   fields. The sampler itself is shape-agnostic.
+480 - **Profile wiring**: today the hook uses `ANONYMOUS_PROFILE_ID`. When
+481   the real active-profile hook lands, `useSeenWordsStore` updates in
+482   one place; no call-site changes needed.
+483 
+484 ## Rollout
+485 
+486 Single PR to master, gated by existing CI.
+487 
+488 Files touched:
+489 
+490 - `src/lib/seeded-random.ts` (new)
+491 - `src/games/build-round-order.ts` (import swap, no behaviour change)
+492 - `src/data/words/sample.ts` (new)
+493 - `src/data/words/seen-words.ts` (new — interface, pure logic,
+494   in-memory store)
+495 - `src/data/words/index.ts` (exports, if needed by consumers)
+496 - `src/db/schemas/word_spell_seen_words.ts` (new)
+497 - `src/db/schemas/index.ts` (register + include in `MAX_SCHEMA_VERSION`)
+498 - `src/db/create-database.ts` (add the new collection)
+499 - `src/db/types.ts` (typed DB handle — if applicable)
+500 - `src/db/hooks/useSeenWordsStore.ts` (new)
+501 - `src/games/word-spell/useLibraryRounds.ts` (add `seed` + `store`,
+502   branch on `roundsInOrder`)
+503 - `src/games/word-spell/WordSpell/WordSpell.tsx` (wire `sampleSeed` +
+504   `seenWordsStore`)
+505 - Anywhere a WordSpell config default is constructed — set
+506   `roundsInOrder: false`
+507 - Test files per the Testing section.
+508 
+509 No architecture docs update required — no game-state logic changes
+510 (reducer, dispatch, behaviours untouched). The CLAUDE.md architecture-
+511 docs rule doesn't trigger for `src/data/words/`, `src/lib/`, or
+512 `src/db/`.
+513 
+514 ## Open questions (deferred to future specs)
+515 
+516 - Extending recycling to scramble / picture / sentence-gap modes.
+517 - Wiring `levelMode` auto-progression into WordSpell (Level 2 → Level 3
+518   after a successful session).
+519 - Smart re-queue for mistakenly-answered words.
 520
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:26Z)**_
@@ -5459,6 +5592,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/docs/superpowers/specs/2026-04-15-word-spell-library-levels-recall-design.md has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:32Z)**_
@@ -5539,6 +5673,7 @@ test-results/visual--visual-SortNumbers-mid-game-layout-mobile-chromium/error-co
 test-results/visual--visual-SortNumbers-mid-game-layout-tablet-portrait-chromium/error-context.md:7 error MD025/single-title/single-h1 Multiple top-level headings in the same document [Context: "Test info"]
 test-re
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:36Z)**_
@@ -5560,6 +5695,7 @@ Summary: 0 error(s)
 Checking formatting...
 All matched files use Prettier code style!
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:40Z)**_
@@ -5629,6 +5765,7 @@ act(() => {
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:51Z)**_
@@ -5645,6 +5782,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:51Z)**_
 ```text
 712d6304 docs(word-spell): scope roundsInOrder default to library configs
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:52Z)**_
@@ -5670,6 +5808,7 @@ Date:   Wed Apr 15 22:46:41 2026 +1000
  .../specs/2026-04-15-word-spell-library-levels-recall-design.md   | 8 ++++++++
  1 file changed, 8 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:54Z)**_
@@ -5684,6 +5823,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:54Z)**_
 ```text
 Updated task #5 status
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-15 12:46:58Z)**_
@@ -5710,6 +5850,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:47:01Z)**_
 ```text
 Updated task #5
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:01Z)**_
@@ -5720,6 +5861,7 @@ _**Agent (claude-opus-4-6 2026-04-15 12:47:01Z)**_
 ```text
 Updated task #6 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:08Z)**_
@@ -5754,6 +5896,7 @@ Done in 6.44s.
 husky - pre-push script failed (code 2)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:37Z)**_
@@ -5765,47 +5908,48 @@ _**Agent (claude-opus-4-6 2026-04-15 12:47:38Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/.husky/pre-push`
 
 ```text
-60	  fi
-61	}
-62	
-63	# Phase: pre-push runs every lint-like check + typecheck + unit (related).
-64	run_if_triggered "Prettier"      "prettier"     "SKIP_LINT"      "npx prettier --check ."
-65	run_if_triggered "ESLint"        "eslint"       "SKIP_LINT"      "npx eslint . --max-warnings 0"
-66	run_if_triggered "Stylelint"     "stylelint"    "SKIP_LINT"      "npx stylelint 'src/**/*.css'"
-67	run_if_triggered "Markdownlint"  "markdownlint" "SKIP_LINT"      "yarn lint:md"
-68	run_if_triggered "actionlint"    "actionlint"   "SKIP_LINT"      "yarn lint:actions"
-69	run_if_triggered "shellcheck"    "shellcheck"   "SKIP_LINT"      "yarn lint:shell"
-70	run_if_triggered "Knip"          "knip"         "SKIP_LINT"      "npx knip"
-71	run_if_triggered "TypeScript"    "typecheck"    "SKIP_TYPECHECK" "yarn typecheck"
-72	
-73	# Unit tests — run vitest related against the changed files for speed.
-74	if has_check "unit"; then
-75	  if [ "${SKIP_UNIT:-0}" = "1" ]; then
-76	    skip "Unit tests"
-77	  else
-78	    mapfile -t CHANGED < <(git diff --name-only "$(git merge-base HEAD origin/master)..HEAD" \
-79	      | grep -E '\.(ts|tsx|js|mjs|cjs)$' || true)
-80	    if [ "${#CHANGED[@]}" -gt 0 ]; then
-81	      info "Running: vitest related"
-82	      if npx vitest related "${CHANGED[@]}" --run; then
-83	        pass "Unit tests (vitest related)"
-84	      else
-85	        fail "Unit tests"
-86	        FAILED=1
-87	      fi
-88	    else
-89	      info "unit triggered but no code files in diff — running full suite"
-90	      if yarn test; then
-91	        pass "Unit tests"
-92	      else
-93	        fail "Unit tests"
-94	        FAILED=1
-95	      fi
-96	    fi
-97	  fi
-98	fi
+60   fi
+61 }
+62 
+63 # Phase: pre-push runs every lint-like check + typecheck + unit (related).
+64 run_if_triggered "Prettier"      "prettier"     "SKIP_LINT"      "npx prettier --check ."
+65 run_if_triggered "ESLint"        "eslint"       "SKIP_LINT"      "npx eslint . --max-warnings 0"
+66 run_if_triggered "Stylelint"     "stylelint"    "SKIP_LINT"      "npx stylelint 'src/**/*.css'"
+67 run_if_triggered "Markdownlint"  "markdownlint" "SKIP_LINT"      "yarn lint:md"
+68 run_if_triggered "actionlint"    "actionlint"   "SKIP_LINT"      "yarn lint:actions"
+69 run_if_triggered "shellcheck"    "shellcheck"   "SKIP_LINT"      "yarn lint:shell"
+70 run_if_triggered "Knip"          "knip"         "SKIP_LINT"      "npx knip"
+71 run_if_triggered "TypeScript"    "typecheck"    "SKIP_TYPECHECK" "yarn typecheck"
+72 
+73 # Unit tests — run vitest related against the changed files for speed.
+74 if has_check "unit"; then
+75   if [ "${SKIP_UNIT:-0}" = "1" ]; then
+76     skip "Unit tests"
+77   else
+78     mapfile -t CHANGED < <(git diff --name-only "$(git merge-base HEAD origin/master)..HEAD" \
+79       | grep -E '\.(ts|tsx|js|mjs|cjs)$' || true)
+80     if [ "${#CHANGED[@]}" -gt 0 ]; then
+81       info "Running: vitest related"
+82       if npx vitest related "${CHANGED[@]}" --run; then
+83         pass "Unit tests (vitest related)"
+84       else
+85         fail "Unit tests"
+86         FAILED=1
+87       fi
+88     else
+89       info "unit triggered but no code files in diff — running full suite"
+90       if yarn test; then
+91         pass "Unit tests"
+92       else
+93         fail "Unit tests"
+94         FAILED=1
+95       fi
+96     fi
+97   fi
+98 fi
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:43Z)**_
@@ -5817,17 +5961,18 @@ _**Agent (claude-opus-4-6 2026-04-15 12:47:44Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/.husky/pre-push`
 
 ```text
-1	#!/usr/bin/env bash
-2	# .husky/pre-push — phase-gated quality gate.
-3	#
-4	# Runs each check only when changed files between origin/master and HEAD
-5	# trigger it (see scripts/detect-buckets.mjs).
-6	#
-7	# Skip env vars (unchanged API):
-8	#   SKIP_PREPUSH=1          bypass every check
-9	#   SKIP_LINT=1             skip prettier/eslint/stylelint/markdownlint/knip
-10	#   SKIP_TYPECHECK=1        skip typecheck
+1 #!/usr/bin/env bash
+2 # .husky/pre-push — phase-gated quality gate.
+3 #
+4 # Runs each check only when changed files between origin/master and HEAD
+5 # trigger it (see scripts/detect-buckets.mjs).
+6 #
+7 # Skip env vars (unchanged API):
+8 #   SKIP_PREPUSH=1          bypass every check
+9 #   SKIP_LINT=1             skip prettier/eslint/stylelint/markdownlint/knip
+10 #   SKIP_TYPECHECK=1        skip typecheck
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:52Z)**_
@@ -5846,6 +5991,7 @@ GNU bash, version 5.3.9(1)-release (aarch64-apple-darwin25.1.0)
 ---
 GNU bash, version 5.3.9(1)-release (aarch64-apple-darwin25.1.0)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:47:56Z)**_
@@ -5859,6 +6005,7 @@ Check hook syntax
 ```text
 syntax OK
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:48:06Z)**_
@@ -5885,6 +6032,7 @@ To github.com:leocaseiro/base-skill.git
  * [new branch]        feat/word-spell-library-levels-recall -> feat/word-spell-library-levels-recall
 branch 'feat/word-spell-library-levels-recall' set up to track 'origin/feat/word-spell-library-levels-recall'.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:48:32Z)**_
@@ -5941,6 +6089,7 @@ EOF
 ```text
 https://github.com/leocaseiro/base-skill/pull/107
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:48:35Z)**_
@@ -5951,13 +6100,15 @@ _**Agent (claude-opus-4-6 2026-04-15 12:48:35Z)**_
 ```text
 Updated task #6 status
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 12:48:44Z)**_
 
-All 12 tasks complete. PR #107 opened: https://github.com/leocaseiro/base-skill/pull/107
+All 12 tasks complete. PR #107 opened: <https://github.com/leocaseiro/base-skill/pull/107>
 
 **Summary of this session (Tasks 7–12):**
+
 - Task 7: `d7a37233` — finished `useLibraryRounds` new signature (seed + store)
 - Task 8: `883a04dd` — wired `sampleSeed` + `seenWordsStore` through `WordSpell.tsx`
 - Task 9: `d0ddd657` — lint fixup (`react-hooks/exhaustive-deps` on nanoid memo)
@@ -5966,6 +6117,7 @@ All 12 tasks complete. PR #107 opened: https://github.com/leocaseiro/base-skill/
 - Task 12: branch pushed, PR #107 opened against `master`
 
 **Flagged for follow-up:**
+
 - VR baseline refresh PR (separate) — sub-pixel drift across home/NumberMatch/SortNumbers/etc. not caused by this branch
 - Pre-push hook bug — `.husky/pre-push:78` `mapfile` line fails under husky's shell invocation even though `bash -n` passes
 
@@ -5987,6 +6139,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:18:42Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -6016,6 +6169,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -6024,6 +6178,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -6031,6 +6186,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -6066,6 +6222,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -6079,6 +6236,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -6207,6 +6365,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -6226,6 +6385,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -6276,17 +6436,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -6324,6 +6485,7 @@ cceee297 refactor(lib): extract seededRandom into shared module
 dcf07cda docs(word-spell): implementation plan for library-driven levels
 105a4201 docs(word-spell): fold in RxDB persistence + roundsInOrder handling
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:18:54Z)**_
@@ -6338,6 +6500,7 @@ Find kid-friendly-homepage branch
 + design/kid-friendly-homepage
   remotes/origin/design/kid-friendly-homepage
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:18:59Z)**_
@@ -6365,6 +6528,7 @@ List all worktrees
 /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-syllables                   6503b0af [feat/word-syllables]
 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner                   a69cf440 [tools/phoneme-tuner]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:04Z)**_
@@ -6389,6 +6553,7 @@ d2aec75b fix(homepage): typecheck compat with unicorn/no-useless-undefined
 7227d074 feat(db): expose lastSessionConfigs and return new config id from save
 0ba36788 fix(config): wider Stepper input and SortNumbers range/layout
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:06Z)**_
@@ -6432,6 +6597,7 @@ fd0bd1c9 fix(word-spell): dedupe phoneme chips + CoverPicker default typing
 4f54f09e fix(instructions): reliable scroll in short viewports
 ===
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:11Z)**_
@@ -6455,6 +6621,7 @@ src/data/words/types.ts
 src/data/words/tier2-aus-report.md
 src/data/words/levels.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:16Z)**_
@@ -6464,45 +6631,46 @@ _**Agent (claude-opus-4-6 2026-04-15 13:19:16Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/resolve-simple-config.ts`
 
 ```text
-1	import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
-2	
-3	export const resolveSimpleConfig = (
-4	  simple: WordSpellSimpleConfig,
-5	): WordSpellConfig => ({
-6	  gameId: 'word-spell',
-7	  component: 'WordSpell',
-8	  configMode: 'simple',
-9	  mode: 'scramble',
-10	  tileUnit: 'letter',
-11	  inputMethod: simple.inputMethod,
-12	  wrongTileBehavior: 'lock-manual',
-13	  ttsEnabled: true,
-14	  roundsInOrder: false,
-15	  totalRounds: 4,
-16	  tileBankMode: 'exact',
-17	  source: {
-18	    type: 'word-library',
-19	    filter: {
-20	      region: 'aus',
-21	      level: simple.level,
-22	      phonemesAllowed: simple.phonemesAllowed,
-23	    },
-24	  },
-25	});
-26	
-27	export const advancedToSimple = (
-28	  config: WordSpellConfig,
-29	): WordSpellSimpleConfig => {
-30	  const filter = config.source?.filter;
-31	  return {
-32	    configMode: 'simple',
-33	    level: filter?.level ?? 1,
-34	    phonemesAllowed: filter?.phonemesAllowed ?? [],
-35	    inputMethod: config.inputMethod,
-36	  };
-37	};
+1 import type { WordSpellConfig, WordSpellSimpleConfig } from './types';
+2 
+3 export const resolveSimpleConfig = (
+4   simple: WordSpellSimpleConfig,
+5 ): WordSpellConfig => ({
+6   gameId: 'word-spell',
+7   component: 'WordSpell',
+8   configMode: 'simple',
+9   mode: 'scramble',
+10   tileUnit: 'letter',
+11   inputMethod: simple.inputMethod,
+12   wrongTileBehavior: 'lock-manual',
+13   ttsEnabled: true,
+14   roundsInOrder: false,
+15   totalRounds: 4,
+16   tileBankMode: 'exact',
+17   source: {
+18     type: 'word-library',
+19     filter: {
+20       region: 'aus',
+21       level: simple.level,
+22       phonemesAllowed: simple.phonemesAllowed,
+23     },
+24   },
+25 });
+26 
+27 export const advancedToSimple = (
+28   config: WordSpellConfig,
+29 ): WordSpellSimpleConfig => {
+30   const filter = config.source?.filter;
+31   return {
+32     configMode: 'simple',
+33     level: filter?.level ?? 1,
+34     phonemesAllowed: filter?.phonemesAllowed ?? [],
+35     inputMethod: config.inputMethod,
+36   };
+37 };
 38
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:23Z)**_
@@ -6530,6 +6698,7 @@ src/games/sort-numbers/resolve-simple-config.ts
 src/games/sort-numbers/resolve-simple-config.test.ts
 src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:30Z)**_
@@ -6570,6 +6739,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:19:30Z)**_
 425:    <WordSpell
 662:      <WordSpellGameBody
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:34Z)**_
@@ -6579,177 +6749,178 @@ _**Agent (claude-opus-4-6 2026-04-15 13:19:34Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-90	};
-91	
-92	const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
-93	  gameId: 'word-spell',
-94	  component: 'WordSpell',
-95	  inputMethod: 'drag',
-96	  wrongTileBehavior: 'lock-auto-eject',
-97	  tileBankMode: 'exact',
-98	  totalRounds: 8,
-99	  // Deterministic order by default. `buildRoundOrder` shuffles when this is
-100	  // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
-101	  // cannot pin, causing baseline drift. Users can still opt into shuffling
-102	  // via the settings panel.
-103	  roundsInOrder: true,
-104	  ttsEnabled: true,
-105	  mode: 'picture',
-106	  tileUnit: 'letter',
-107	  rounds: sliceWordSpellRounds(8),
-108	};
-109	
-110	/**
-111	 * Deterministic default round values for NumberMatch. Using a fixed sequence
-112	 * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
-113	 * seeds in the route loader bypass any Math.random pin, so the only reliable
-114	 * fix is to remove randomness from the default config entirely. Users still
-115	 * customise via the settings panel.
-116	 */
-117	const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
-118	
-119	const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
-120	  gameId: 'number-match',
-121	  component: 'NumberMatch',
-122	  inputMethod: 'drag',
-123	  wrongTileBehavior: 'lock-auto-eject',
-124	  tileBankMode: 'distractors',
-125	  distractorCount: 2,
-126	  totalRounds: 3,
-127	  // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
-128	  roundsInOrder: true,
-129	  ttsEnabled: true,
-130	  mode: 'numeral-to-group',
-131	  tileStyle: 'dots',
-132	  range: { min: 1, max: 12 },
-133	  rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
-134	});
-135	
-136	export const resizeNumberMatchRounds = (
-137	  prev: NumberMatchRound[],
-138	  count: number,
-139	  range: { min: number; max: number },
-140	): NumberMatchRound[] => {
-141	  const n = Math.max(1, Math.min(count, 50));
-142	  const span = Math.max(1, range.max - range.min + 1);
-143	  // Deterministic fill: cycle through the range starting at `range.min`. This
-144	  // avoids `Math.random` so defaults stay stable (see note above) and is
-145	  // simple enough for users to understand at a glance. They can override any
-146	  // round value via the settings panel.
-147	  const fillValueAt = (index: number): number =>
-148	    range.min + (index % span);
-149	
-150	  // Detect a collapsed state: every round has the same value even though the
-151	  // range allows variety. This happens when the user narrows the range down
-152	  // to a single value (collapsing every round to that value) and then widens
-153	  // it again — without this check the preserved values stay stuck at the
-154	  // collapse point and the player sees the same number every round. Also
-155	  // handles the empty-prev case from a legacy saved config.
-156	  const firstValue = prev[0]?.value;
-157	  const allCollapsed =
-158	    prev.length >= 2 &&
-159	    span > 1 &&
-160	    prev.every((r) => r.value === firstValue);
-161	  if (prev.length === 0 || allCollapsed) {
-162	    return Array.from({ length: n }, (_, i) => ({
-163	      value: fillValueAt(i),
-164	    }));
-165	  }
-166	
-167	  const next = prev.slice(0, n).map((r, i) => {
-168	    if (r.value >= range.min && r.value <= range.max) return { ...r };
-169	    return { value: fillValueAt(i) };
-170	  });
-171	  while (next.length < n) {
-172	    next.push({ value: fillValueAt(next.length) });
-173	  }
-174	  return next;
-175	};
-176	
-177	const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
-178	  resolveSimpleConfig({
-179	    configMode: 'simple',
-180	    direction: 'ascending',
-181	    start: 2,
-182	    step: 2,
-183	    quantity: 5,
-184	    distractors: false,
-185	  });
-186	
-187	const resolveWordSpellConfig = (
-188	  saved: Record<string, unknown> | null,
-189	): WordSpellConfig => {
-190	  const base: WordSpellConfig = {
-191	    ...DEFAULT_WORD_SPELL_CONFIG,
-192	    rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
-193	      ...r,
-194	    })),
-195	  };
-196	  if (!saved || saved.component !== 'WordSpell') return base;
-197	  const merged: WordSpellConfig = {
-198	    ...base,
-199	    ...(saved as Partial<WordSpellConfig>),
-200	    gameId: 'word-spell',
-201	    component: 'WordSpell',
-202	  };
-203	  const targetTotal = Math.max(
-204	    1,
-205	    Math.min(
-206	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-207	      WORD_SPELL_ROUND_POOL.length,
-208	    ),
-209	  );
-210	  if (
-211	    !Array.isArray(merged.rounds) ||
-212	    merged.rounds.length === 0 ||
-213	    merged.rounds.length !== targetTotal
-214	  ) {
-215	    merged.rounds = sliceWordSpellRounds(targetTotal);
-216	  }
-217	  merged.totalRounds = merged.rounds.length;
-218	  return merged;
-219	};
-220	
-221	const resolveNumberMatchConfig = (
-222	  saved: Record<string, unknown> | null,
-223	): NumberMatchConfig => {
-224	  const base = makeDefaultNumberMatchConfig();
-225	  if (!saved || saved.component !== 'NumberMatch') return base;
-226	  const merged: NumberMatchConfig = {
-227	    ...base,
-228	    ...(saved as Partial<NumberMatchConfig>),
-229	    gameId: 'number-match',
-230	    component: 'NumberMatch',
-231	  };
-232	  const targetLen =
-233	    merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
-234	  merged.rounds = resizeNumberMatchRounds(
-235	    Array.isArray(merged.rounds) ? merged.rounds : [],
-236	    targetLen,
-237	    merged.range,
-238	  );
-239	  return merged;
-240	};
-241	
-242	const resolveSortNumbersConfig = (
-243	  saved: Record<string, unknown> | null,
-244	): SortNumbersConfig => {
-245	  const base = makeDefaultSortNumbersConfig();
-246	  if (!saved || saved.component !== 'SortNumbers') return base;
-247	
-248	  // Simple mode: resolve from 5 fields
-249	  if (saved.configMode === 'simple') {
-250	    const skip = saved.skip as
-251	      | { step?: number; start?: number }
-252	      | undefined;
-253	    return resolveSimpleConfig({
-254	      configMode: 'simple',
-255	      direction:
-256	        saved.direction === 'descending' ? 'descending' : 'ascending',
-257	      start: typeof skip?.start === 'number' ? skip.start : 2,
-258	      step: typeof skip?.step === 'number' ? skip.step : 2,
-259	      quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
+90 };
+91 
+92 const DEFAULT_WORD_SPELL_CONFIG: WordSpellConfig = {
+93   gameId: 'word-spell',
+94   component: 'WordSpell',
+95   inputMethod: 'drag',
+96   wrongTileBehavior: 'lock-auto-eject',
+97   tileBankMode: 'exact',
+98   totalRounds: 8,
+99   // Deterministic order by default. `buildRoundOrder` shuffles when this is
+100   // false using a nanoid-based seed (crypto.getRandomValues) which VR tests
+101   // cannot pin, causing baseline drift. Users can still opt into shuffling
+102   // via the settings panel.
+103   roundsInOrder: true,
+104   ttsEnabled: true,
+105   mode: 'picture',
+106   tileUnit: 'letter',
+107   rounds: sliceWordSpellRounds(8),
+108 };
+109 
+110 /**
+111  * Deterministic default round values for NumberMatch. Using a fixed sequence
+112  * (rather than `Math.random`) keeps VR baselines stable across runs — nanoid
+113  * seeds in the route loader bypass any Math.random pin, so the only reliable
+114  * fix is to remove randomness from the default config entirely. Users still
+115  * customise via the settings panel.
+116  */
+117 const DEFAULT_NUMBER_MATCH_ROUND_VALUES: readonly number[] = [5, 8, 3];
+118 
+119 const makeDefaultNumberMatchConfig = (): NumberMatchConfig => ({
+120   gameId: 'number-match',
+121   component: 'NumberMatch',
+122   inputMethod: 'drag',
+123   wrongTileBehavior: 'lock-auto-eject',
+124   tileBankMode: 'distractors',
+125   distractorCount: 2,
+126   totalRounds: 3,
+127   // Deterministic order by default — see DEFAULT_WORD_SPELL_CONFIG comment.
+128   roundsInOrder: true,
+129   ttsEnabled: true,
+130   mode: 'numeral-to-group',
+131   tileStyle: 'dots',
+132   range: { min: 1, max: 12 },
+133   rounds: DEFAULT_NUMBER_MATCH_ROUND_VALUES.map((value) => ({ value })),
+134 });
+135 
+136 export const resizeNumberMatchRounds = (
+137   prev: NumberMatchRound[],
+138   count: number,
+139   range: { min: number; max: number },
+140 ): NumberMatchRound[] => {
+141   const n = Math.max(1, Math.min(count, 50));
+142   const span = Math.max(1, range.max - range.min + 1);
+143   // Deterministic fill: cycle through the range starting at `range.min`. This
+144   // avoids `Math.random` so defaults stay stable (see note above) and is
+145   // simple enough for users to understand at a glance. They can override any
+146   // round value via the settings panel.
+147   const fillValueAt = (index: number): number =>
+148     range.min + (index % span);
+149 
+150   // Detect a collapsed state: every round has the same value even though the
+151   // range allows variety. This happens when the user narrows the range down
+152   // to a single value (collapsing every round to that value) and then widens
+153   // it again — without this check the preserved values stay stuck at the
+154   // collapse point and the player sees the same number every round. Also
+155   // handles the empty-prev case from a legacy saved config.
+156   const firstValue = prev[0]?.value;
+157   const allCollapsed =
+158     prev.length >= 2 &&
+159     span > 1 &&
+160     prev.every((r) => r.value === firstValue);
+161   if (prev.length === 0 || allCollapsed) {
+162     return Array.from({ length: n }, (_, i) => ({
+163       value: fillValueAt(i),
+164     }));
+165   }
+166 
+167   const next = prev.slice(0, n).map((r, i) => {
+168     if (r.value >= range.min && r.value <= range.max) return { ...r };
+169     return { value: fillValueAt(i) };
+170   });
+171   while (next.length < n) {
+172     next.push({ value: fillValueAt(next.length) });
+173   }
+174   return next;
+175 };
+176 
+177 const makeDefaultSortNumbersConfig = (): SortNumbersConfig =>
+178   resolveSimpleConfig({
+179     configMode: 'simple',
+180     direction: 'ascending',
+181     start: 2,
+182     step: 2,
+183     quantity: 5,
+184     distractors: false,
+185   });
+186 
+187 const resolveWordSpellConfig = (
+188   saved: Record<string, unknown> | null,
+189 ): WordSpellConfig => {
+190   const base: WordSpellConfig = {
+191     ...DEFAULT_WORD_SPELL_CONFIG,
+192     rounds: (DEFAULT_WORD_SPELL_CONFIG.rounds ?? []).map((r) => ({
+193       ...r,
+194     })),
+195   };
+196   if (!saved || saved.component !== 'WordSpell') return base;
+197   const merged: WordSpellConfig = {
+198     ...base,
+199     ...(saved as Partial<WordSpellConfig>),
+200     gameId: 'word-spell',
+201     component: 'WordSpell',
+202   };
+203   const targetTotal = Math.max(
+204     1,
+205     Math.min(
+206       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+207       WORD_SPELL_ROUND_POOL.length,
+208     ),
+209   );
+210   if (
+211     !Array.isArray(merged.rounds) ||
+212     merged.rounds.length === 0 ||
+213     merged.rounds.length !== targetTotal
+214   ) {
+215     merged.rounds = sliceWordSpellRounds(targetTotal);
+216   }
+217   merged.totalRounds = merged.rounds.length;
+218   return merged;
+219 };
+220 
+221 const resolveNumberMatchConfig = (
+222   saved: Record<string, unknown> | null,
+223 ): NumberMatchConfig => {
+224   const base = makeDefaultNumberMatchConfig();
+225   if (!saved || saved.component !== 'NumberMatch') return base;
+226   const merged: NumberMatchConfig = {
+227     ...base,
+228     ...(saved as Partial<NumberMatchConfig>),
+229     gameId: 'number-match',
+230     component: 'NumberMatch',
+231   };
+232   const targetLen =
+233     merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds;
+234   merged.rounds = resizeNumberMatchRounds(
+235     Array.isArray(merged.rounds) ? merged.rounds : [],
+236     targetLen,
+237     merged.range,
+238   );
+239   return merged;
+240 };
+241 
+242 const resolveSortNumbersConfig = (
+243   saved: Record<string, unknown> | null,
+244 ): SortNumbersConfig => {
+245   const base = makeDefaultSortNumbersConfig();
+246   if (!saved || saved.component !== 'SortNumbers') return base;
+247 
+248   // Simple mode: resolve from 5 fields
+249   if (saved.configMode === 'simple') {
+250     const skip = saved.skip as
+251       | { step?: number; start?: number }
+252       | undefined;
+253     return resolveSimpleConfig({
+254       configMode: 'simple',
+255       direction:
+256         saved.direction === 'descending' ? 'descending' : 'ascending',
+257       start: typeof skip?.start === 'number' ? skip.start : 2,
+258       step: typeof skip?.step === 'number' ? skip.step : 2,
+259       quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:19:52Z)**_
@@ -6773,6 +6944,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:19:56Z)**_
 117:            onChange={setPhonemes}
 135:        onChange={(m) => onChange({ ...config, inputMethod: m })}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:20:00Z)**_
@@ -6782,37 +6954,38 @@ _**Agent (claude-opus-4-6 2026-04-15 13:20:00Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx`
 
 ```text
-60	  const setLevel = (n: number) => {
-61	    const available = [
-62	      ...new Set((GRAPHEMES_BY_LEVEL[n] ?? []).map((u) => u.p)),
-63	    ];
-64	    onChange({
-65	      ...config,
-66	      source: {
-67	        type: 'word-library',
-68	        filter: {
-69	          ...(source?.filter ?? { region: 'aus' }),
-70	          level: n,
-71	          phonemesAllowed: available,
-72	        },
-73	      },
-74	    });
-75	  };
-76	
-77	  const setPhonemes = (next: string[]) => {
-78	    onChange({
-79	      ...config,
-80	      source: {
-81	        type: 'word-library',
-82	        filter: {
-83	          ...(source?.filter ?? { region: 'aus' }),
-84	          level,
-85	          phonemesAllowed: next,
-86	        },
-87	      },
-88	    });
-89	  };
+60   const setLevel = (n: number) => {
+61     const available = [
+62       ...new Set((GRAPHEMES_BY_LEVEL[n] ?? []).map((u) => u.p)),
+63     ];
+64     onChange({
+65       ...config,
+66       source: {
+67         type: 'word-library',
+68         filter: {
+69           ...(source?.filter ?? { region: 'aus' }),
+70           level: n,
+71           phonemesAllowed: available,
+72         },
+73       },
+74     });
+75   };
+76 
+77   const setPhonemes = (next: string[]) => {
+78     onChange({
+79       ...config,
+80       source: {
+81         type: 'word-library',
+82         filter: {
+83           ...(source?.filter ?? { region: 'aus' }),
+84           level,
+85           phonemesAllowed: next,
+86         },
+87       },
+88     });
+89   };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:20:11Z)**_
@@ -6835,6 +7008,7 @@ All configMode references
 284:  if (saved.configMode !== 'simple') {
 285:    merged.configMode = 'advanced';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:20:15Z)**_
@@ -6844,67 +7018,68 @@ _**Agent (claude-opus-4-6 2026-04-15 13:20:15Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-242	const resolveSortNumbersConfig = (
-243	  saved: Record<string, unknown> | null,
-244	): SortNumbersConfig => {
-245	  const base = makeDefaultSortNumbersConfig();
-246	  if (!saved || saved.component !== 'SortNumbers') return base;
-247	
-248	  // Simple mode: resolve from 5 fields
-249	  if (saved.configMode === 'simple') {
-250	    const skip = saved.skip as
-251	      | { step?: number; start?: number }
-252	      | undefined;
-253	    return resolveSimpleConfig({
-254	      configMode: 'simple',
-255	      direction:
-256	        saved.direction === 'descending' ? 'descending' : 'ascending',
-257	      start: typeof skip?.start === 'number' ? skip.start : 2,
-258	      step: typeof skip?.step === 'number' ? skip.step : 2,
-259	      quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
-260	      distractors: saved.tileBankMode === 'distractors',
-261	    });
-262	  }
-263	
-264	  // Advanced mode (existing logic)
-265	  // Migrate legacy allowSkips: boolean → skip: SkipConfig
-266	  let migratedSaved = saved;
-267	  if (!saved.skip && typeof saved.allowSkips === 'boolean') {
-268	    migratedSaved = {
-269	      ...saved,
-270	      skip: saved.allowSkips
-271	        ? { mode: 'random' }
-272	        : { mode: 'consecutive' },
-273	    };
-274	  }
-275	
-276	  const merged: SortNumbersConfig = {
-277	    ...base,
-278	    ...(migratedSaved as Partial<SortNumbersConfig>),
-279	    gameId: 'sort-numbers',
-280	    component: 'SortNumbers',
-281	  };
-282	
-283	  // Existing saved configs without configMode are treated as advanced
-284	  if (saved.configMode !== 'simple') {
-285	    merged.configMode = 'advanced';
-286	  }
-287	
-288	  // Advanced mode always runs as level mode with a single seeded round; the
-289	  // generator produces a fresh round per level using the configured rules.
-290	  merged.totalRounds = 1;
-291	
-292	  // Normalize skip: mode 'by' requires step and start.
-293	  if (merged.skip.mode === 'by') {
-294	    const partial = merged.skip as {
-295	      mode: 'by';
-296	      step?: number;
-297	      start?: 'range-min' | 'random' | number;
-298	    };
-299	    merged.skip = {
-300	      mode: 'by',
-301	      step: typeof partial.step === 'number' ? partial.step : 2,
+242 const resolveSortNumbersConfig = (
+243   saved: Record<string, unknown> | null,
+244 ): SortNumbersConfig => {
+245   const base = makeDefaultSortNumbersConfig();
+246   if (!saved || saved.component !== 'SortNumbers') return base;
+247 
+248   // Simple mode: resolve from 5 fields
+249   if (saved.configMode === 'simple') {
+250     const skip = saved.skip as
+251       | { step?: number; start?: number }
+252       | undefined;
+253     return resolveSimpleConfig({
+254       configMode: 'simple',
+255       direction:
+256         saved.direction === 'descending' ? 'descending' : 'ascending',
+257       start: typeof skip?.start === 'number' ? skip.start : 2,
+258       step: typeof skip?.step === 'number' ? skip.step : 2,
+259       quantity: typeof saved.quantity === 'number' ? saved.quantity : 5,
+260       distractors: saved.tileBankMode === 'distractors',
+261     });
+262   }
+263 
+264   // Advanced mode (existing logic)
+265   // Migrate legacy allowSkips: boolean → skip: SkipConfig
+266   let migratedSaved = saved;
+267   if (!saved.skip && typeof saved.allowSkips === 'boolean') {
+268     migratedSaved = {
+269       ...saved,
+270       skip: saved.allowSkips
+271         ? { mode: 'random' }
+272         : { mode: 'consecutive' },
+273     };
+274   }
+275 
+276   const merged: SortNumbersConfig = {
+277     ...base,
+278     ...(migratedSaved as Partial<SortNumbersConfig>),
+279     gameId: 'sort-numbers',
+280     component: 'SortNumbers',
+281   };
+282 
+283   // Existing saved configs without configMode are treated as advanced
+284   if (saved.configMode !== 'simple') {
+285     merged.configMode = 'advanced';
+286   }
+287 
+288   // Advanced mode always runs as level mode with a single seeded round; the
+289   // generator produces a fresh round per level using the configured rules.
+290   merged.totalRounds = 1;
+291 
+292   // Normalize skip: mode 'by' requires step and start.
+293   if (merged.skip.mode === 'by') {
+294     const partial = merged.skip as {
+295       mode: 'by';
+296       step?: number;
+297       start?: 'range-min' | 'random' | number;
+298     };
+299     merged.skip = {
+300       mode: 'by',
+301       step: typeof partial.step === 'number' ? partial.step : 2,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:20:25Z)**_
@@ -6961,6 +7136,7 @@ $gameId.test.tsx
 $gameId.tsx
 resize-number-match-rounds.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:23:43Z)**_
@@ -6997,6 +7173,7 @@ docs/superpowers/plans/2026-04-05-game-config-ui-redesign.md
 .specstory/history/2026-04-05_13-24-31Z-i-want-to-make.md
 .specstory/history/2026-04-04_11-55-16Z-object-literal-duplicate-property-error.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:23:49Z)**_
@@ -7013,6 +7190,7 @@ Test file structure
 11:import { GameRoute } from './$gameId';
 84:    <DbProvider openDatabase={() => Promise.resolve(db)}>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:23:51Z)**_
@@ -7026,6 +7204,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:23:51Z)**_
 699:export const GameRoute = ({
 739:export const Route = createFileRoute('/$locale/_app/game/$gameId')({
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:23:54Z)**_
@@ -7035,120 +7214,121 @@ _**Agent (claude-opus-4-6 2026-04-15 13:23:54Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.test.tsx`
 
 ```text
-1	// src/routes/$locale/_app/game/$gameId.test.tsx
-2	import { render, screen, waitFor } from '@testing-library/react';
-3	import {
-4	  afterEach,
-5	  beforeEach,
-6	  describe,
-7	  expect,
-8	  it,
-9	  vi,
-10	} from 'vitest';
-11	import { GameRoute } from './$gameId';
-12	import type { BaseSkillDatabase } from '@/db/types';
-13	import type {
-14	  GameEngineState,
-15	  ResolvedContent,
-16	  ResolvedGameConfig,
-17	  SessionMeta,
-18	} from '@/lib/game-engine/types';
-19	import type { ReactNode } from 'react';
-20	import {
-21	  createTestDatabase,
-22	  destroyTestDatabase,
-23	} from '@/db/create-database';
-24	import { DbProvider } from '@/providers/DbProvider';
-25	
-26	vi.mock('@tanstack/react-router', async (importOriginal) => {
-27	  const actual =
-28	    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
-29	    await importOriginal<typeof import('@tanstack/react-router')>();
-30	  return {
-31	    ...actual,
-32	    useNavigate: () => vi.fn(),
-33	    useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
-34	  };
-35	});
-36	
-37	const content: ResolvedContent = {
-38	  rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
-39	};
-40	
-41	const testConfig: ResolvedGameConfig = {
-42	  gameId: 'word-builder',
-43	  title: { en: 'Word Builder' },
-44	  gradeBand: 'year1-2',
-45	  maxRounds: 3,
-46	  maxRetries: 1,
-47	  maxUndoDepth: 3,
-48	  timerVisible: false,
-49	  timerDurationSeconds: null,
-50	  difficulty: 'medium',
-51	};
-52	
-53	const testState: GameEngineState = {
-54	  phase: 'instructions',
-55	  roundIndex: 0,
-56	  score: 0,
-57	  streak: 0,
-58	  retryCount: 0,
-59	  content,
-60	  currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
-61	};
-62	
-63	const testMeta: SessionMeta = {
-64	  profileId: 'prof-route',
-65	  gameId: 'word-builder',
-66	  gradeBand: 'year1-2',
-67	  seed: 'seed-route',
-68	  initialContent: content,
-69	  initialState: testState,
-70	};
-71	
-72	let db: BaseSkillDatabase;
-73	
-74	beforeEach(async () => {
-75	  db = await createTestDatabase();
-76	});
-77	
-78	afterEach(async () => {
-79	  await destroyTestDatabase(db);
-80	});
-81	
-82	function wrapper({ children }: { children: ReactNode }) {
-83	  return (
-84	    <DbProvider openDatabase={() => Promise.resolve(db)}>
-85	      {children}
-86	    </DbProvider>
-87	  );
-88	}
-89	
-90	describe('GameRoute', () => {
-91	  it('renders the game shell with title from loaderData', async () => {
-92	    render(
-93	      <GameRoute
-94	        config={testConfig}
-95	        initialLog={null}
-96	        draftState={null}
-97	        sessionId="sess-route-001"
-98	        seed="seed-route"
-99	        meta={testMeta}
-100	        gameSpecificConfig={null}
-101	        bookmarkId={null}
-102	        bookmarkName={null}
-103	        bookmarkColor={null}
-104	        bookmarkCover={null}
-105	      />,
-106	      { wrapper },
-107	    );
-108	    await waitFor(() => {
-109	      expect(screen.getByText('Word Builder')).toBeInTheDocument();
-110	    });
-111	  });
-112	});
+1 // src/routes/$locale/_app/game/$gameId.test.tsx
+2 import { render, screen, waitFor } from '@testing-library/react';
+3 import {
+4   afterEach,
+5   beforeEach,
+6   describe,
+7   expect,
+8   it,
+9   vi,
+10 } from 'vitest';
+11 import { GameRoute } from './$gameId';
+12 import type { BaseSkillDatabase } from '@/db/types';
+13 import type {
+14   GameEngineState,
+15   ResolvedContent,
+16   ResolvedGameConfig,
+17   SessionMeta,
+18 } from '@/lib/game-engine/types';
+19 import type { ReactNode } from 'react';
+20 import {
+21   createTestDatabase,
+22   destroyTestDatabase,
+23 } from '@/db/create-database';
+24 import { DbProvider } from '@/providers/DbProvider';
+25 
+26 vi.mock('@tanstack/react-router', async (importOriginal) => {
+27   const actual =
+28     // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- vitest mock factory requires inline import() type
+29     await importOriginal<typeof import('@tanstack/react-router')>();
+30   return {
+31     ...actual,
+32     useNavigate: () => vi.fn(),
+33     useParams: () => ({ locale: 'en', gameId: 'word-builder' }),
+34   };
+35 });
+36 
+37 const content: ResolvedContent = {
+38   rounds: [{ id: 'r1', prompt: { en: 'Q' }, correctAnswer: 'A' }],
+39 };
+40 
+41 const testConfig: ResolvedGameConfig = {
+42   gameId: 'word-builder',
+43   title: { en: 'Word Builder' },
+44   gradeBand: 'year1-2',
+45   maxRounds: 3,
+46   maxRetries: 1,
+47   maxUndoDepth: 3,
+48   timerVisible: false,
+49   timerDurationSeconds: null,
+50   difficulty: 'medium',
+51 };
+52 
+53 const testState: GameEngineState = {
+54   phase: 'instructions',
+55   roundIndex: 0,
+56   score: 0,
+57   streak: 0,
+58   retryCount: 0,
+59   content,
+60   currentRound: { roundId: 'r1', answer: null, hintsUsed: 0 },
+61 };
+62 
+63 const testMeta: SessionMeta = {
+64   profileId: 'prof-route',
+65   gameId: 'word-builder',
+66   gradeBand: 'year1-2',
+67   seed: 'seed-route',
+68   initialContent: content,
+69   initialState: testState,
+70 };
+71 
+72 let db: BaseSkillDatabase;
+73 
+74 beforeEach(async () => {
+75   db = await createTestDatabase();
+76 });
+77 
+78 afterEach(async () => {
+79   await destroyTestDatabase(db);
+80 });
+81 
+82 function wrapper({ children }: { children: ReactNode }) {
+83   return (
+84     <DbProvider openDatabase={() => Promise.resolve(db)}>
+85       {children}
+86     </DbProvider>
+87   );
+88 }
+89 
+90 describe('GameRoute', () => {
+91   it('renders the game shell with title from loaderData', async () => {
+92     render(
+93       <GameRoute
+94         config={testConfig}
+95         initialLog={null}
+96         draftState={null}
+97         sessionId="sess-route-001"
+98         seed="seed-route"
+99         meta={testMeta}
+100         gameSpecificConfig={null}
+101         bookmarkId={null}
+102         bookmarkName={null}
+103         bookmarkColor={null}
+104         bookmarkCover={null}
+105       />,
+106       { wrapper },
+107     );
+108     await waitFor(() => {
+109       expect(screen.getByText('Word Builder')).toBeInTheDocument();
+110     });
+111   });
+112 });
 113
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:02Z)**_
@@ -7160,52 +7340,53 @@ _**Agent (claude-opus-4-6 2026-04-15 13:24:03Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-30	import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
-31	import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
-32	import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
-33	import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
-34	import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
-35	import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
-36	import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
-37	import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
-38	import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
-39	import { loadGameConfig } from '@/lib/game-engine/config-loader';
-40	import { findInProgressSession } from '@/lib/game-engine/session-finder';
-41	
-42	const STUB_CONTENT: ResolvedContent = {
-43	  rounds: [
-44	    { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
-45	    { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
-46	    { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
-47	  ],
-48	};
-49	
-50	const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
-51	  gameId,
-52	  title: { en: gameId },
-53	  gradeBand: 'year1-2',
-54	  maxRounds: 3,
-55	  maxRetries: 1,
-56	  maxUndoDepth: 3,
-57	  timerVisible: false,
-58	  timerDurationSeconds: null,
-59	  difficulty: 'medium',
-60	});
-61	
-62	interface GameRouteLoaderData {
-63	  config: ResolvedGameConfig;
-64	  initialLog: MoveLog | null;
-65	  draftState: AnswerGameDraftState | null;
-66	  sessionId: string;
-67	  seed: string;
-68	  meta: SessionMeta;
-69	  gameSpecificConfig: Record<string, unknown> | null;
-70	  bookmarkId: string | null;
-71	  bookmarkName: string | null;
-72	  bookmarkColor: string | null;
-73	  bookmarkCover: Cover | null;
-74	}
+30 import { useSavedConfigs } from '@/db/hooks/useSavedConfigs';
+31 import { lastSessionSavedConfigId } from '@/db/last-session-game-config';
+32 import { NumberMatch } from '@/games/number-match/NumberMatch/NumberMatch';
+33 import { createAdvancedLevelGenerator } from '@/games/sort-numbers/advanced-level-generator';
+34 import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
+35 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
+36 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
+37 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+38 import { WordSpell } from '@/games/word-spell/WordSpell/WordSpell';
+39 import { loadGameConfig } from '@/lib/game-engine/config-loader';
+40 import { findInProgressSession } from '@/lib/game-engine/session-finder';
+41 
+42 const STUB_CONTENT: ResolvedContent = {
+43   rounds: [
+44     { id: 'r1', prompt: { en: 'Question 1' }, correctAnswer: 'A' },
+45     { id: 'r2', prompt: { en: 'Question 2' }, correctAnswer: 'B' },
+46     { id: 'r3', prompt: { en: 'Question 3' }, correctAnswer: 'C' },
+47   ],
+48 };
+49 
+50 const makeDefaultConfig = (gameId: string): ResolvedGameConfig => ({
+51   gameId,
+52   title: { en: gameId },
+53   gradeBand: 'year1-2',
+54   maxRounds: 3,
+55   maxRetries: 1,
+56   maxUndoDepth: 3,
+57   timerVisible: false,
+58   timerDurationSeconds: null,
+59   difficulty: 'medium',
+60 });
+61 
+62 interface GameRouteLoaderData {
+63   config: ResolvedGameConfig;
+64   initialLog: MoveLog | null;
+65   draftState: AnswerGameDraftState | null;
+66   sessionId: string;
+67   seed: string;
+68   meta: SessionMeta;
+69   gameSpecificConfig: Record<string, unknown> | null;
+70   bookmarkId: string | null;
+71   bookmarkName: string | null;
+72   bookmarkColor: string | null;
+73   bookmarkCover: Cover | null;
+74 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:05Z)**_
@@ -7220,6 +7401,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:24:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:17Z)**_
@@ -7283,6 +7465,7 @@ describe('resolveWordSpellConfig', () => {
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:23Z)**_
@@ -7335,6 +7518,7 @@ Run failing test
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:30Z)**_
@@ -7357,6 +7541,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:24:31Z)**_
 12-export interface GapDefinition {
 13-  word: string;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:33Z)**_
@@ -7371,6 +7556,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:24:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:47Z)**_
@@ -7381,6 +7567,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:24:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:53Z)**_
@@ -7406,6 +7593,7 @@ $ vitest run 'src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts' --run
 
 Done in 1.76s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:24:56Z)**_
@@ -7425,6 +7613,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.33s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:10Z)**_
@@ -7452,6 +7641,7 @@ Full test suite
 
 Done in 10.14s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:13Z)**_
@@ -7478,6 +7668,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:29Z)**_
@@ -7487,22 +7678,23 @@ _**Agent (claude-opus-4-6 2026-04-15 13:25:29Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-200	  // Delegate to word-spell's resolveSimpleConfig so library words load
-201	  // instead of the emoji-round fallback.
-202	  if (saved.configMode === 'simple') {
-203	    const savedFilter = (saved.source as { filter?: Record<string, unknown> })
-204	      ?.filter;
-205	    const savedInput = saved.inputMethod;
-206	    return resolveWordSpellSimpleConfig({
-207	      configMode: 'simple',
-208	      level: typeof savedFilter?.level === 'number' ? savedFilter.level : 1,
-209	      phonemesAllowed: Array.isArray(savedFilter?.phonemesAllowed)
-210	        ? (savedFilter.phonemesAllowed as string[])
-211	        : [],
-212	      inputMethod:
-213	        savedInput === 'type' || savedInput === 'both' ? savedInput : 'drag',
-214	    });
+200   // Delegate to word-spell's resolveSimpleConfig so library words load
+201   // instead of the emoji-round fallback.
+202   if (saved.configMode === 'simple') {
+203     const savedFilter = (saved.source as { filter?: Record<string, unknown> })
+204       ?.filter;
+205     const savedInput = saved.inputMethod;
+206     return resolveWordSpellSimpleConfig({
+207       configMode: 'simple',
+208       level: typeof savedFilter?.level === 'number' ? savedFilter.level : 1,
+209       phonemesAllowed: Array.isArray(savedFilter?.phonemesAllowed)
+210         ? (savedFilter.phonemesAllowed as string[])
+211         : [],
+212       inputMethod:
+213         savedInput === 'type' || savedInput === 'both' ? savedInput : 'drag',
+214     });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:34Z)**_
@@ -7513,6 +7705,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:25:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:50Z)**_
@@ -7528,6 +7721,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 11.57s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:25:53Z)**_
@@ -7577,6 +7771,7 @@ Done in 9.41s.
  2 files changed, 75 insertions(+), 1 deletion(-)
  create mode 100644 src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:26:19Z)**_
@@ -7616,6 +7811,7 @@ Check level data format
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:08Z)**_
@@ -7654,6 +7850,7 @@ words.test.ts
 writer.test.ts
 writer.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:14Z)**_
@@ -7667,6 +7864,7 @@ Check AUS Level 1 words
 ```text
 AUS L1 sample:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:17Z)**_
@@ -7686,6 +7884,7 @@ See json structure
 ...
    12986 src/data/words/tier2-aus.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:24Z)**_
@@ -7701,6 +7900,7 @@ count: 0
 first 20: 
 has cat: false
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:29Z)**_
@@ -7717,6 +7917,7 @@ keys[0]: [ 'word', 'ipa', 'graphemes' ]
 level distribution:
 { none: 674 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:33Z)**_
@@ -7791,6 +7992,7 @@ export const GRAPHEMES_BY_LEVEL: Record<
     { g: 'b', p: 'b' },
     { g: 'h', p: 'h' },
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:41Z)**_
@@ -7815,6 +8017,7 @@ Where resolver is called
 475:  gameSpecificConfig: Record<string, unknown> | null;
 491:    () => resolveNumberMatchConfig(gameSpecificConfig),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:48Z)**_
@@ -7847,6 +8050,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:30:48Z)**_
 
 [Showing results with pagination = limit: 20]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:30:52Z)**_
@@ -7856,57 +8060,58 @@ _**Agent (claude-opus-4-6 2026-04-15 13:30:52Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-415	        text={t('instructions.word-spell')}
-416	        onStart={() => setShowInstructions(false)}
-417	        ttsEnabled={cfg.ttsEnabled}
-418	        gameTitle={t('word-spell')}
-419	        gameId={gameId}
-420	        cover={bookmarkCover ?? undefined}
-421	        bookmarkId={bookmarkId ?? undefined}
-422	        bookmarkName={bookmarkName ?? undefined}
-423	        bookmarkColor={
-424	          (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
-425	        }
-426	        config={cfg as unknown as Record<string, unknown>}
-427	        onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
-428	        onSaveBookmark={async ({ name, color, config, cover }) =>
-429	          save({
-430	            gameId,
-431	            name,
-432	            color,
-433	            config,
-434	            cover,
-435	          })
-436	        }
-437	        onUpdateBookmark={
-438	          bookmarkId
-439	            ? async (name, config, extras) => {
-440	                await updateConfig(bookmarkId, config, name, extras);
-441	              }
-442	            : undefined
-443	        }
-444	        existingBookmarkNames={existingBookmarkNames}
-445	      />
-446	    );
-447	  }
-448	
-449	  return (
-450	    <WordSpell
-451	      key={cfg.inputMethod}
-452	      config={cfg}
-453	      initialState={draftState ?? undefined}
-454	      sessionId={sessionId}
-455	      seed={seed}
-456	    />
-457	  );
-458	};
-459	
-460	const NumberMatchGameBody = ({
-461	  gameId,
-462	  sessionId,
-463	  seed,
-464	  draftState,
+415         text={t('instructions.word-spell')}
+416         onStart={() => setShowInstructions(false)}
+417         ttsEnabled={cfg.ttsEnabled}
+418         gameTitle={t('word-spell')}
+419         gameId={gameId}
+420         cover={bookmarkCover ?? undefined}
+421         bookmarkId={bookmarkId ?? undefined}
+422         bookmarkName={bookmarkName ?? undefined}
+423         bookmarkColor={
+424           (bookmarkColor ?? undefined) as BookmarkColorKey | undefined
+425         }
+426         config={cfg as unknown as Record<string, unknown>}
+427         onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
+428         onSaveBookmark={async ({ name, color, config, cover }) =>
+429           save({
+430             gameId,
+431             name,
+432             color,
+433             config,
+434             cover,
+435           })
+436         }
+437         onUpdateBookmark={
+438           bookmarkId
+439             ? async (name, config, extras) => {
+440                 await updateConfig(bookmarkId, config, name, extras);
+441               }
+442             : undefined
+443         }
+444         existingBookmarkNames={existingBookmarkNames}
+445       />
+446     );
+447   }
+448 
+449   return (
+450     <WordSpell
+451       key={cfg.inputMethod}
+452       config={cfg}
+453       initialState={draftState ?? undefined}
+454       sessionId={sessionId}
+455       seed={seed}
+456     />
+457   );
+458 };
+459 
+460 const NumberMatchGameBody = ({
+461   gameId,
+462   sessionId,
+463   seed,
+464   draftState,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:02Z)**_
@@ -7938,6 +8143,7 @@ src/games/sort-numbers/resolve-simple-config.ts
 src/games/sort-numbers/resolve-simple-config.test.ts
 src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:08Z)**_
@@ -7963,6 +8169,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:31:08Z)**_
 45-    case 'number-match': {
 46-      return NumberMatchSimpleConfigForm;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:11Z)**_
@@ -7972,67 +8179,68 @@ _**Agent (claude-opus-4-6 2026-04-15 13:31:11Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/games/word-spell/WordSpellSimpleConfigForm/WordSpellSimpleConfigForm.tsx`
 
 ```text
-1	import type { JSX } from 'react';
-2	import { CellSelect } from '@/components/config/CellSelect';
-3	import { ChipStrip } from '@/components/config/ChipStrip';
-4	import { ChunkGroup } from '@/components/config/ChunkGroup';
-5	import { GRAPHEMES_BY_LEVEL } from '@/data/words/levels';
-6	
-7	type Props = {
-8	  config: Record<string, unknown>;
-9	  onChange: (config: Record<string, unknown>) => void;
-10	};
-11	
-12	const LEVEL_OPTIONS = Object.keys(GRAPHEMES_BY_LEVEL).map((n) => ({
-13	  value: n,
-14	  label: `Level ${n}`,
-15	}));
-16	
-17	export const WordSpellSimpleConfigForm = ({
-18	  config,
-19	  onChange,
-20	}: Props): JSX.Element => {
-21	  const source =
-22	    typeof config.source === 'object' && config.source !== null
-23	      ? (config.source as {
-24	          type: 'word-library';
-25	          filter: {
-26	            region: string;
-27	            level: number;
-28	            phonemesAllowed?: string[];
-29	          };
-30	        })
-31	      : undefined;
-32	  const level =
-33	    typeof source?.filter.level === 'number' ? source.filter.level : 1;
-34	  const inputMethod =
-35	    config.inputMethod === 'type' || config.inputMethod === 'both'
-36	      ? config.inputMethod
-37	      : 'drag';
-38	
-39	  const unitsAtLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
-40	  // Multiple graphemes can teach the same phoneme at one level
-41	  // (e.g. level 2 has c, k, ck → /k/). Collapse them into one chip per sound
-42	  // so toggling is unambiguous.
-43	  const phonemeToGraphemes = new Map<string, string[]>();
-44	  for (const u of unitsAtLevel) {
-45	    const existing = phonemeToGraphemes.get(u.p);
-46	    if (existing) {
-47	      existing.push(u.g);
-48	    } else {
-49	      phonemeToGraphemes.set(u.p, [u.g]);
-50	    }
-51	  }
-52	  const allPhonemesAtLevel = [...phonemeToGraphemes.keys()];
-53	  const phonemesAllowed =
-54	    source?.filter.phonemesAllowed ?? allPhonemesAtLevel;
-55	  const chips = allPhonemesAtLevel.map((p) => ({
-56	    value: p,
-57	    label: `${(phonemeToGraphemes.get(p) ?? []).join(', ')} /${p}/`,
-58	  }));
-59	
-60	  const setLevel = (n: number) => {
+1 import type { JSX } from 'react';
+2 import { CellSelect } from '@/components/config/CellSelect';
+3 import { ChipStrip } from '@/components/config/ChipStrip';
+4 import { ChunkGroup } from '@/components/config/ChunkGroup';
+5 import { GRAPHEMES_BY_LEVEL } from '@/data/words/levels';
+6 
+7 type Props = {
+8   config: Record<string, unknown>;
+9   onChange: (config: Record<string, unknown>) => void;
+10 };
+11 
+12 const LEVEL_OPTIONS = Object.keys(GRAPHEMES_BY_LEVEL).map((n) => ({
+13   value: n,
+14   label: `Level ${n}`,
+15 }));
+16 
+17 export const WordSpellSimpleConfigForm = ({
+18   config,
+19   onChange,
+20 }: Props): JSX.Element => {
+21   const source =
+22     typeof config.source === 'object' && config.source !== null
+23       ? (config.source as {
+24           type: 'word-library';
+25           filter: {
+26             region: string;
+27             level: number;
+28             phonemesAllowed?: string[];
+29           };
+30         })
+31       : undefined;
+32   const level =
+33     typeof source?.filter.level === 'number' ? source.filter.level : 1;
+34   const inputMethod =
+35     config.inputMethod === 'type' || config.inputMethod === 'both'
+36       ? config.inputMethod
+37       : 'drag';
+38 
+39   const unitsAtLevel = GRAPHEMES_BY_LEVEL[level] ?? [];
+40   // Multiple graphemes can teach the same phoneme at one level
+41   // (e.g. level 2 has c, k, ck → /k/). Collapse them into one chip per sound
+42   // so toggling is unambiguous.
+43   const phonemeToGraphemes = new Map<string, string[]>();
+44   for (const u of unitsAtLevel) {
+45     const existing = phonemeToGraphemes.get(u.p);
+46     if (existing) {
+47       existing.push(u.g);
+48     } else {
+49       phonemeToGraphemes.set(u.p, [u.g]);
+50     }
+51   }
+52   const allPhonemesAtLevel = [...phonemeToGraphemes.keys()];
+53   const phonemesAllowed =
+54     source?.filter.phonemesAllowed ?? allPhonemesAtLevel;
+55   const chips = allPhonemesAtLevel.map((p) => ({
+56     value: p,
+57     label: `${(phonemeToGraphemes.get(p) ?? []).join(', ')} /${p}/`,
+58   }));
+59 
+60   const setLevel = (n: number) => {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:16Z)**_
@@ -8077,6 +8285,7 @@ src/games/sort-numbers/SortNumbers/SortNumbers.stories.tsx:185:      configMode:
 
 [Showing results with pagination = limit: 30]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:22Z)**_
@@ -8117,6 +8326,7 @@ src/games/sort-numbers/types.ts:30:  configMode?: 'simple' | 'advanced';
 src/games/number-match/types.ts:5:  configMode: 'simple';
 src/games/number-match/types.ts:32:  configMode?: 'simple' | 'advanced';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:33Z)**_
@@ -8158,6 +8368,7 @@ src/games/number-match/resolve-simple-config.test.ts:25:    const full = resolve
 src/games/number-match/resolve-simple-config.test.ts:38:    const full = resolveSimpleConfig({
 src/games/number-match/resolve-simple-config.ts:7:export const resolveSimpleConfig = (
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:31:52Z)**_
@@ -8175,27 +8386,28 @@ _**Agent (claude-opus-4-6 2026-04-15 13:31:55Z)**_
  `./worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-218	          : 'drag',
-219	    });
-220	  }
-221	
-222	  const merged: WordSpellConfig = {
-223	    ...base,
-224	    ...(saved as Partial<WordSpellConfig>),
-225	    gameId: 'word-spell',
-226	    component: 'WordSpell',
-227	  };
-228	  const targetTotal = Math.max(
-229	    1,
-230	    Math.min(
-231	      merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
-232	      WORD_SPELL_ROUND_POOL.length,
-233	    ),
-234	  );
-235	  if (
-236	    !Array.isArray(merged.rounds) ||
-237	    merged.rounds.length === 0 ||
+218           : 'drag',
+219     });
+220   }
+221 
+222   const merged: WordSpellConfig = {
+223     ...base,
+224     ...(saved as Partial<WordSpellConfig>),
+225     gameId: 'word-spell',
+226     component: 'WordSpell',
+227   };
+228   const targetTotal = Math.max(
+229     1,
+230     Math.min(
+231       merged.totalRounds > 0 ? merged.totalRounds : base.totalRounds,
+232       WORD_SPELL_ROUND_POOL.length,
+233     ),
+234   );
+235   if (
+236     !Array.isArray(merged.rounds) ||
+237     merged.rounds.length === 0 ||
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:32:02Z)**_
@@ -8206,6 +8418,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:32:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:32:06Z)**_
@@ -8220,6 +8433,7 @@ _**Agent (claude-opus-4-6 2026-04-15 13:32:10Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/feat-word-spell-library-levels-recall/src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:32:16Z)**_
@@ -8245,6 +8459,7 @@ $ vitest run 'src/routes/$locale/_app/game/resolveWordSpellConfig.test.ts' --run
 
 Done in 2.28s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:32:39Z)**_
@@ -8263,6 +8478,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 14.54s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:33:14Z)**_
@@ -8294,6 +8510,7 @@ Done in 23.55s.
 [feat/word-spell-library-levels-recall__BKP 74371c49] fix(word-spell): drop emoji rounds when advanced config has a source
  2 files changed, 26 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-15 13:33:30Z)**_

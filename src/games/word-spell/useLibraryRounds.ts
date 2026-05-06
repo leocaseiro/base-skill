@@ -63,8 +63,17 @@ export const useLibraryRounds = (
     );
 
     void (async () => {
-      const result = await filterWords(source.filter);
+      let activeFilter = source.filter;
+      let result = await filterWords(activeFilter);
       if (cancellation.isCancelled) return;
+
+      if (result.hits.length === 0 && source.filter.hasVisual) {
+        const { hasVisual: _, ...fallbackFilter } = source.filter;
+        activeFilter = fallbackFilter;
+        result = await filterWords(activeFilter);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- isCancelled may be set to true by cleanup between awaits
+        if (cancellation.isCancelled) return;
+      }
 
       const limit = source.limit ?? config.totalRounds;
       const picked = config.roundsInOrder
@@ -72,7 +81,7 @@ export const useLibraryRounds = (
         : await pickWithRecycling(
             result.hits,
             limit,
-            filterSignature(source.filter),
+            filterSignature(activeFilter),
             store,
             seed,
           );

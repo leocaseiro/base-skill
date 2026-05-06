@@ -1,0 +1,28 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Library/Distractors" />
+
+# Distractors library
+
+Game-agnostic distractor pipeline used by SpotAll today and reusable by any
+game that needs deterministic, source-pluggable distractor candidates.
+
+## Architecture
+
+```text
+DistractorSource           // produces candidates for a (target, ctx)
+  ├── confusable-pairs     // visual confusables from confusable-sets.json
+  └── reversible-chars     // self-mirroring R5b set with CSS transforms
+
+registry                   // map of sourceId -> source (auto-registers built-ins)
+compose(sources, target, ctx, count, rng?)
+                          // merges → dedupes by (label, transform) → shuffles → caps
+```
+
+## Adding a new source
+
+1. Create `sources/<id>.ts` exporting a `DistractorSource`.
+2. Append a `registerSource(<source>)` line to `registry.ts`.
+3. Update `DistractorSourceContext` if your source reads new selection data.
+
+Future sources tracked in [#259](https://github.com/leocaseiro/base-skill/issues/259).

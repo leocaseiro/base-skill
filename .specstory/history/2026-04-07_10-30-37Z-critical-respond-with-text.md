@@ -8,6 +8,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:30:37Z)**_
 
 <think><details><summary>Thought Process</summary>
 Looking at the screenshot, I can see:
+
 1. The tile "n" is being dragged from a slot back to the tilebank. It has red corners/border showing.
 2. The user can't drag tiles from slot to tilebank - only tap works.
 
@@ -15,7 +16,6 @@ Let me analyze:
 
 **Bug: Red corners on dragged tile from slot**
 The slot container has `border-destructive` when wrong/locked. When the tile button (`dragRef`) is being dragged via HTML5 DnD, the browser creates a drag ghost that includes the element and its visual context. Since the button has `size-full` and sits inside the slot container with `border-2 border-destructive`, the rounded corners + border might show through.
-
 
 The issue is specifically with `lock-manual` mode - when a wrong tile is placed, the slot gets the destructive styling but the tile stays in place so the user can drag it back. The HTML5 drag ghost is picking up that destructive border styling from the slot container when the tile is dragged. the slot has `overflow-hidden` and a colored border, the browser might capture the colored border as part of the visual. But actually, `overflow-hidden` clips children to the border-box, so the button inside shouldn't include the slot's border in the drag ghost. Let me look at the actual screenshot more carefully—the dragged tile shows red rounded corners, which suggests the border styling is somehow being included in the drag image.
 
@@ -78,6 +78,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-07 10:35:55Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user is showing me a screenshot of a word-spell game where:
+
 1. The slot tile being dragged shows red corners (border color bleeding into the drag ghost)
 2. Dragging from slot to tilebank doesn't work - only clicking works
 
@@ -86,7 +87,7 @@ Let me analyze these two issues:
 **Issue 1: Red corners on the drag ghost**
 Looking at the screenshot, I can see the tile "n" being dragged has red/colored borders. This is similar to Bug 6 but seems to still be happening. Let me think about why.
 
-In Bug 6, I added `text-card-foreground` to the button. 
+In Bug 6, I added `text-card-foreground` to the button.
 
 The problem is that the HTML5 drag ghost is capturing the entire slot container with its `border-destructive` styling, not just the button inside it. Since the button fills the slot with `size-full` positioning and the slot has `overflow-hidden` with a red border, the drag image includes those red corners from the parent container's border. The drag image is being rendered from the button's computed visual state, and since it's positioned inside the slot container with the destructive border and overflow clipping, the browser might be capturing the parent's visual styling in the drag ghost. The real issue is probably that the button fills the entire slot including the border area, so when the drag image is created, it's picking up the visual appearance of that clipped region. the snapshot.
 
@@ -115,6 +116,7 @@ For the red border showing up in the drag ghost, I'm thinking the browser's defa
 Looking at the pragmatic-drag-and-drop docs, there might be a `onGenerateDragPreview` callback that allows setting a custom drag image using the browser's `setDragImage` method.
 
 Actually from the pragmatic-drag-and-drop source, `draggable` supports:
+
 ```ts
 {
   onGenerateDragPreview?: (args: { nativeSetDragImage: SetDragImage | null }) => void;
@@ -152,7 +154,7 @@ The real issue is that when the button unmounts, the effect cleanup doesn't run 
 
 I'm realizing the problem might be specific to how `lock-manual` handles the tile state versus `lock-auto-eject`, where the latter only dispatches `REMOVE_TILE` in the no-target case but the former leaves the slot tile in a locked state.
 
-The user's report is clear though—dragging doesn't work at all, only tapping does—so I need to trace through the HTML5 drag flow to see where it's breaking: when the user drags the slot button, `dragstart` should fire and initiate the sequence, but something's preventing the drop from registering properly. `onDragStart` callback → `SET_DRAG_ACTIVE(tileId)` 
+The user's report is clear though—dragging doesn't work at all, only tapping does—so I need to trace through the HTML5 drag flow to see where it's breaking: when the user drags the slot button, `dragstart` should fire and initiate the sequence, but something's preventing the drop from registering properly. `onDragStart` callback → `SET_DRAG_ACTIVE(tileId)`
 3. React re-renders → button replaced by hole div (isBeingDragged=true)
 4. User moves mouse to bank area
 5. User releases mouse → `dragend` fires
@@ -228,96 +230,97 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-07 10:35:56Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-29	
-30	  const ariaLabel = isEmpty
-31	    ? `Slot ${index + 1}, empty`
-32	    : `Slot ${index + 1}, filled with ${label}`;
-33	
-34	  const stateClasses = [
-35	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-36	    isEmpty && !isActive
-37	      ? 'border-border'
-38	      : isEmpty && isActive
-39	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-40	        : isWrong
-41	          ? 'border-destructive bg-destructive/10 text-destructive'
-42	          : 'border-primary bg-primary/10 text-primary',
-43	  ]
-44	    .filter(Boolean)
-45	    .join(' ');
-46	
-47	  return (
-48	    <Tag
-49	      ref={
-50	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-51	      }
-52	      aria-label={ariaLabel}
-53	      data-zone-index={index}
-54	      className={[stateClasses, className].filter(Boolean).join(' ')}
-55	    >
-56	      {isEmpty ? (
-57	        <>
-58	          {children(renderProps)}
-59	          {showCursor ? (
-60	            <span
-61	              aria-hidden="true"
-62	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-63	            />
-64	          ) : null}
-65	        </>
-66	      ) : isBeingDragged ? (
-67	        <div
-68	          className="size-full bg-muted/20 shadow-inner"
-69	          aria-hidden="true"
-70	        />
-71	      ) : (
-72	        <button
-73	          ref={dragRef}
-74	          type="button"
-75	          className="flex size-full touch-none select-none cursor-grab items-center justify-center text-card-foreground"
-76	          style={skeuoStyle}
-77	          onClick={handleClick}
-78	          onPointerDown={pointerHandlers.onPointerDown}
-79	          onPointerMove={pointerHandlers.onPointerMove}
-80	          onPointerUp={pointerHandlers.onPointerUp}
-81	          onPointerCancel={pointerHandlers.onPointerCancel}
-82	        >
-83	          {children(renderProps)}
-84	        </button>
-85	      )}
-86	    </Tag>
-87	  );
-88	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+29 
+30   const ariaLabel = isEmpty
+31     ? `Slot ${index + 1}, empty`
+32     : `Slot ${index + 1}, filled with ${label}`;
+33 
+34   const stateClasses = [
+35     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+36     isEmpty && !isActive
+37       ? 'border-border'
+38       : isEmpty && isActive
+39         ? 'border-primary ring-2 ring-primary ring-offset-2'
+40         : isWrong
+41           ? 'border-destructive bg-destructive/10 text-destructive'
+42           : 'border-primary bg-primary/10 text-primary',
+43   ]
+44     .filter(Boolean)
+45     .join(' ');
+46 
+47   return (
+48     <Tag
+49       ref={
+50         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+51       }
+52       aria-label={ariaLabel}
+53       data-zone-index={index}
+54       className={[stateClasses, className].filter(Boolean).join(' ')}
+55     >
+56       {isEmpty ? (
+57         <>
+58           {children(renderProps)}
+59           {showCursor ? (
+60             <span
+61               aria-hidden="true"
+62               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+63             />
+64           ) : null}
+65         </>
+66       ) : isBeingDragged ? (
+67         <div
+68           className="size-full bg-muted/20 shadow-inner"
+69           aria-hidden="true"
+70         />
+71       ) : (
+72         <button
+73           ref={dragRef}
+74           type="button"
+75           className="flex size-full touch-none select-none cursor-grab items-center justify-center text-card-foreground"
+76           style={skeuoStyle}
+77           onClick={handleClick}
+78           onPointerDown={pointerHandlers.onPointerDown}
+79           onPointerMove={pointerHandlers.onPointerMove}
+80           onPointerUp={pointerHandlers.onPointerUp}
+81           onPointerCancel={pointerHandlers.onPointerCancel}
+82         >
+83           {children(renderProps)}
+84         </button>
+85       )}
+86     </Tag>
+87   );
+88 };
 89
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-07 10:35:56Z)**_
@@ -371,12 +374,12 @@ Here's an example of how your output should be structured:
 1. Primary Request and Intent:
    [Detailed description]
 
-2. Key Technical Concepts:
+1. Key Technical Concepts:
    - [Concept 1]
    - [Concept 2]
    - [...]
 
-3. Files and Code Sections:
+2. Files and Code Sections:
    - [File Name 1]
       - [Summary of why this file is important]
       - [Summary of the changes made to this file, if any]
@@ -385,38 +388,40 @@ Here's an example of how your output should be structured:
       - [Important Code Snippet]
    - [...]
 
-4. Errors and fixes:
+3. Errors and fixes:
     - [Detailed description of error 1]:
       - [How you fixed the error]
       - [User feedback on the error if any]
     - [...]
 
-5. Problem Solving:
+4. Problem Solving:
    [Description of solved problems and ongoing troubleshooting]
 
-6. All user messages: 
+5. All user messages:
     - [Detailed non tool use user message]
     - [...]
 
-7. Pending Tasks:
+6. Pending Tasks:
    - [Task 1]
    - [Task 2]
    - [...]
 
-8. Current Work:
+7. Current Work:
    [Precise description of current work]
 
-9. Optional Next Step:
+8. Optional Next Step:
    [Optional Next step to take]
 
 </summary>
 </example>
 
-Please provide your summary based on the conversation so far, following this structure and ensuring precision and thoroughness in your response. 
+Please provide your summary based on the conversation so far, following this structure and ensuring precision and thoroughness in your response.
 
 There may be additional summarization instructions provided in the included context. If so, remember to follow these instructions when creating the above summary. Examples of instructions include:
 <example>
+
 ## Compact Instructions
+
 When summarizing the conversation focus on typescript code changes and also remember the mistakes you made and how you fixed them.
 </example>
 
@@ -424,7 +429,6 @@ When summarizing the conversation focus on typescript code changes and also reme
 # Summary instructions
 When you are using compact - please focus on test output and code changes. Include file reads verbatim.
 </example>
-
 
 REMINDER: Do NOT call any tools. Respond with plain text only — an <analysis> block followed by a <summary> block. Tool calls will be rejected and you will fail the task.
 
@@ -434,10 +438,13 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-07 10:37:47Z)**_
 Let me chronologically analyze this conversation to create a thorough summary.
 
 ## Session Start
+
 The user started by asking to fix bugs in a git worktree at `.claude/worktrees/bold-chatelet/`. They listed 7 bugs to fix one by one.
 
 ## Initial Investigation
+
 I invoked the `superpowers:systematic-debugging` skill, then read key files:
+
 - The implementation plan: `docs/superpowers/plans/2026-04-07-unified-slot-component.md`
 - `Slot.tsx` - the unified slot component
 - `useSlotBehavior.ts` - hook for slot drag/drop/click logic
@@ -466,21 +473,26 @@ I invoked the `superpowers:systematic-debugging` skill, then read key files:
 **Bug 7 (Tile disappears on partial drag):** `onDragStart` dispatches `SET_DRAG_ACTIVE` → React unmounts LetterTile → `lostpointercapture` fires → drag cancelled. Fix: keep tile in DOM with `invisible` class.
 
 ## Subagent-Driven Development Workflow
+
 User invoked `/superpowers:subagent-driven-development`. I created TodoWrite tasks for all 7 bugs, then processed each one:
+
 - Dispatch implementer subagent → spec reviewer → code quality reviewer → fix issues if found → re-review until clean
 
 ## Bug 1 Fix
+
 - Changed all three tilebank components to iterate `allTiles` instead of filtered `bankTileIds`
 - Condition: `bankTileIds.includes(tile.id) && tile.id !== dragActiveTileId` → show tile; else show hole
 - Test names updated, hole assertions added
 - `NumeralTileBank`: extracted `getIsDomino` helper to avoid duplication
 
 ## Bug 2 Fix
+
 - Added `skeuoStyle` const to each file, then extracted to shared `src/components/answer-game/styles.ts`
 - Applied gradient background + layered box-shadow + textShadow from mockup
 - Removed `bg-card shadow-md` from tile buttons
 
 `skeuoStyle`:
+
 ```ts
 export const skeuoStyle: CSSProperties = {
   background: 'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
@@ -490,7 +502,9 @@ export const skeuoStyle: CSSProperties = {
 ```
 
 ## Bug 3 Fix
+
 In `useSlotTileDrag.ts`, collapsed two cancel branches into one `if/else`:
+
 ```ts
 if (targets.length > 0 && typeof targetZoneIndex === 'number') {
   dispatch({ type: 'REMOVE_TILE', zoneIndex: currentZoneIndex });
@@ -502,10 +516,12 @@ if (targets.length > 0 && typeof targetZoneIndex === 'number') {
   dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
 }
 ```
+
 Touch `onDragCancel` also updated to dispatch `REMOVE_TILE`.
 New test file `useSlotTileDrag.test.tsx` created. TypeScript errors fixed with `as unknown as DraggableOptions` cast.
 
 ## Bug 4 Fix
+
 - Added `data-tile-bank-hole={tile.id}` to hole divs in all three tilebank components
 - Changed `triggerEjectReturn` signature from `(el, targetEl: HTMLElement|null, onComplete)` to `(el, tileId: string|null, onComplete)`
 - Internal lookup: `document.querySelector('[data-tile-bank-hole="${tileId}"]')` with fallback to `[data-tile-bank]`
@@ -514,13 +530,17 @@ New test file `useSlotTileDrag.test.tsx` created. TypeScript errors fixed with `
 - Added tests for `triggerEjectReturn`
 
 ## Bug 5 Fix
+
 Simple: `bg-muted/30` → `bg-muted/60` in all 4 files.
 
 ## Bug 6 Fix
+
 Added `text-card-foreground` to the filled-slot button in `Slot.tsx`.
 
 ## Bug 7 Fix
+
 In all three tilebank components, changed from "unmount tile, show hole" to three-state rendering:
+
 1. `inBank && isDragging`: wrapper div with hole + `invisible aria-hidden` div containing tile button
 2. `inBank && !isDragging`: tile button directly
 3. `!inBank`: hole div only
@@ -528,16 +548,20 @@ In all three tilebank components, changed from "unmount tile, show hole" to thre
 Added `aria-hidden="true"` to invisible wrapper divs.
 
 ## Eject Animation (User Request After Bug 7)
+
 User: "remove the fade out of the eject animation, only fadeout when in the correct spot"
 
 Changed `triggerEjectReturn` from single simultaneous transform+opacity to two phases:
+
 - Phase 1: `transform 300ms ease-in` (fly to hole)
 - Phase 2 (on transitionend): `opacity 200ms ease-out` (fade out at hole)
 
 ## Second Animation Fix (Ghost parks at hole, fades only after EJECT_TILE)
+
 User: "the fadeout still happen way earlier than the tile that appears in the tilebank. Can you run the fadeout, only after the new tile is there?"
 
 `triggerEjectReturn` now returns `{ startFade }`:
+
 ```ts
 export const triggerEjectReturn = (
   el: HTMLElement,
@@ -547,6 +571,7 @@ export const triggerEjectReturn = (
 ```
 
 State machine:
+
 ```ts
 let fadeRequested = false;
 let phaseOneDone = false;
@@ -560,18 +585,22 @@ const startFade = () => {
 ```
 
 In `useSlotBehavior.ts`:
+
 - Added `startFadeRef = useRef<(() => void) | null>(null)`
 - On wrong+eject timer: `const { startFade } = triggerEjectReturn(...); startFadeRef.current = startFade;`
 - New branch: `!isWrong && wasWrong && tileId === null` → `startFadeRef.current?.()` (fires when `EJECT_TILE` dispatches)
 
 ## User's Most Recent Request
+
 User shared a screenshot showing:
+
 1. Tile "n" being dragged from slot has red/colored corners (border bleeding into drag ghost)
 2. In `lock-manual` mode, dragging tile from slot to bank doesn't work (only tap/click works)
 
 The user specifically mentioned these are `lock-manual` mode issues.
 
 ## Current Analysis
+
 The two issues in `lock-manual` mode:
 
 **Issue 1 (Can't drag):** When `onDragStart` fires → `SET_DRAG_ACTIVE(tileId)` → React renders `isBeingDragged=true` in Slot.tsx → button replaced by hole div → button unmounts → HTML5 drag potentially cancelled by Chrome when source element removed. Fix: same as Bug 7 for bank tiles — keep button in DOM with `invisible` when `isBeingDragged`.
@@ -579,6 +608,7 @@ The two issues in `lock-manual` mode:
 **Issue 2 (Red corners):** Slot container has `text-destructive` + `bg-destructive/10` + `border-destructive`. The button is `size-full` inside with no border-radius of its own. The HTML5 drag image captures the button inside the slot context; slot's styled background shows at corners. Fix: add `rounded-[inherit]` to the button so it has its own border-radius matching the slot container.
 
 Current state of `Slot.tsx` (read at the end):
+
 ```tsx
 {isEmpty ? (
   <>
@@ -612,10 +642,10 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
    The user wanted to fix 7 specific bugs in a `lock-manual`/`lock-auto-eject` drag-and-drop word game built in a git worktree at `.claude/worktrees/bold-chatelet/`. After completing the 7 bugs they requested two animation improvements for the eject return animation. Most recently (final message), the user shared a screenshot showing two remaining issues in `lock-manual` mode:
    - The draggable tile from a slot shows colored (red/orange) corners in the HTML5 drag ghost
    - Dragging a tile from slot back to the tilebank doesn't work at all in `lock-manual` — only tap/click works
-   
+
    The user explicitly noted: "As already mentioned, there is a border on the effect, that shouldn't be happening. When I drag from the slot to the tilebank... I am not even able to drag the tile back. It only works when I only tap the tile."
 
-2. Key Technical Concepts:
+1. Key Technical Concepts:
    - React 19 + TypeScript + Tailwind CSS v4
    - `@atlaskit/pragmatic-drag-and-drop` for HTML5 DnD
    - Pointer events API for touch drag (`useTouchDrag`)
@@ -632,9 +662,10 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
    - Named exports only (no `export default` on components, per project rules)
    - Worktree-based development (`.claude/worktrees/bold-chatelet/`)
 
-3. Files and Code Sections:
+2. Files and Code Sections:
 
    - **`src/components/answer-game/Slot/Slot.tsx`** — The unified slot component. Currently uses conditional rendering that REPLACES the button with a hole when `isBeingDragged`. This is the root cause of the two current bugs (drag doesn't work + colored corners in ghost). NEEDS FIX.
+
      ```tsx
      // Current (broken) rendering for filled slots:
      } : isBeingDragged ? (
@@ -660,6 +691,7 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
      ```
 
    - **`src/components/answer-game/styles.ts`** — Created in Bug 2. Shared skeuomorphic style:
+
      ```ts
      import type { CSSProperties } from 'react';
      export const skeuoStyle: CSSProperties = {
@@ -670,6 +702,7 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
      ```
 
    - **`src/components/answer-game/Slot/slot-animations.ts`** — `triggerEjectReturn` now returns `{ startFade }`. Ghost parks at hole after phase 1, only fades when `startFade()` is called externally:
+
      ```ts
      export const triggerEjectReturn = (
        el: HTMLElement,
@@ -714,7 +747,7 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
 
    - **`src/components/answer-game/useSlotTileDrag.test.tsx`** — New test file created in Bug 3. Tests HTML5 DnD cancel paths. TypeScript errors fixed with `as unknown as DraggableOptions` cast.
 
-4. Errors and Fixes:
+3. Errors and Fixes:
    - **TypeScript errors in `useSlotTileDrag.test.tsx`** (`Property 'onDrop' does not exist on type 'never'`): Fixed by using `(capturedDraggableOptions as unknown as DraggableOptions).onDrop?.({...})` at all three call sites.
    - **Duplicate `isDomino` logic in NumeralTileBank**: Extracted to module-level `getIsDomino(tileStyle, numericValue)` helper.
    - **`skeuoStyle` duplicated in 4 files**: Extracted to shared `src/components/answer-game/styles.ts`.
@@ -722,30 +755,31 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
    - **Test file after linter reformats**: Linter changed `setAttribute` to `dataset.*` syntax and cast types — accommodated.
    - **`el.style.opacity` never reset after eject animation**: Added `el.style.opacity = ''` to cleanup in `slot-animations.ts`.
 
-5. Problem Solving:
+4. Problem Solving:
    - **Bug 7 root cause** (and now the current slot drag issue): React re-rendering while a drag is in progress unmounts the captured/dragged element. For tilebank tiles, this caused `lostpointercapture` on touch. For slot tiles on desktop Chrome, removing the dragged element likely cancels the HTML5 drag. Solution: keep element in DOM using CSS `visibility: hidden` (`invisible` Tailwind class).
    - **Eject animation timing**: Ghost faded out 150ms before tile appeared in bank. Solved by making `triggerEjectReturn` return a `startFade` handle that the caller invokes when `EJECT_TILE` fires.
    - **Return animation target**: Previously animated to center of entire bank container. Fixed by adding `data-tile-bank-hole` attributes and querying specific hole.
 
-6. All User Messages:
+5. All User Messages:
    - "We are using a git worktree at .claude/worktrees/bold-chatelet/, use the same one. We are trying to fix some bugs... [listed 7 bugs]"
    - (invoked `/superpowers:subagent-driven-development`)
    - "remove the fade out of the eject animation, oe only fadeout when is in the correct spot" [sent while Bug 7 was being reviewed]
    - "for the eject animation from the slot to tilebank, the fadeout still happen way earlier than the tile that appears in the tilebank. Can you run the fadeout, only after the new tile is there?"
    - "Ok, I liked the result of that. Now let's focus on fixing and improving the lock-manual. As already mentioned, there is a border on the effect, that shouldn't be happening. When I drag from the slot to the tilebank. Also, If I drag from slot to tilebank, it should also snap on the tilebank, but currently this is happening. I am not even able to drag the tile back. It only works when I only tap the tile. See attached image from slot back to the bank, which shows me dragging the tile `n`. Note the red corners of the tile." [with screenshot showing "n" tile being dragged with colored corners]
 
-7. Pending Tasks:
+6. Pending Tasks:
    - Fix `Slot.tsx` so the slot button stays in DOM when `isBeingDragged` (same pattern as tilebank Bug 7 fix) — fixes "can't drag from slot to bank" in `lock-manual` mode
    - Fix colored corners in HTML5 drag ghost from slot tiles — add `rounded-[inherit]` to slot button and use `absolute inset-0` layout so button has its own border-radius independent of parent context
 
-8. Current Work:
+7. Current Work:
    The most recent user message shared a screenshot of `lock-manual` mode showing tile "n" being dragged from a wrong/locked slot. Two issues identified:
-   
+
    **Issue 1 (can't drag):** In `Slot.tsx`, when `isBeingDragged=true`, the button is replaced by a hole div (unmounted). This likely cancels the HTML5 drag in Chrome. Fix: mirror the Bug 7 tilebank fix — keep button in DOM with `invisible pointer-events-none aria-hidden` classes when `isBeingDragged`, show hole div using `absolute inset-0` behind it.
-   
+
    **Issue 2 (red corners):** The HTML5 drag image captures the button while it's inside the slot (with `border-destructive`, `bg-destructive/10`). The button lacks its own `border-radius`. Fix: add `rounded-[inherit]` to the button so its corners match the slot container's rounding, making the drag image visually clean.
 
    Current Slot.tsx filled-slot rendering (the section to fix):
+
    ```tsx
    } : isBeingDragged ? (
      <div className="size-full bg-muted/20 shadow-inner" aria-hidden="true" />
@@ -761,8 +795,9 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
      </button>
    )}
    ```
-   
+
    Target structure (both fixes together):
+
    ```tsx
    ) : (
      <>
@@ -785,16 +820,17 @@ Planned fix: change to keep button in DOM with `invisible` when `isBeingDragged`
    )}
    ```
 
-9. Optional Next Step:
+8. Optional Next Step:
    Fix `Slot.tsx` to keep the slot button in DOM when being dragged and add `rounded-[inherit]` for a clean drag ghost.
-   
+
    The user said: "Now let's focus on fixing and improving the lock-manual. As already mentioned, there is a border on the effect, that shouldn't be happening. When I drag from the slot to the tilebank... I am not even able to drag the tile back. It only works when I only tap the tile. Note the red corners of the tile."
-   
+
    The next step is to edit `src/components/answer-game/Slot/Slot.tsx` to:
    1. Replace the `isBeingDragged ? <hole> : <button>` pattern with always-rendered `<hole> + <button>` (button invisible/pointer-events-none/aria-hidden when dragging)
    2. Use `absolute inset-0` for both hole and button
    3. Add `rounded-[inherit]` to button to fix colored corners in drag ghost
    4. Run `yarn typecheck` and `yarn test --run` to verify, then commit
+
 </summary>
 
 ---
@@ -804,11 +840,12 @@ _**User (2026-04-07 10:37:48Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user wanted to fix 7 specific bugs in a `lock-manual`/`lock-auto-eject` drag-and-drop word game built in a git worktree at `.claude/worktrees/bold-chatelet/`. After completing the 7 bugs they requested two animation improvements for the eject return animation. Most recently (final message), the user shared a screenshot showing two remaining issues in `lock-manual` mode:
    - The draggable tile from a slot shows colored (red/orange) corners in the HTML5 drag ghost
    - Dragging a tile from slot back to the tilebank doesn't work at all in `lock-manual` — only tap/click works
-   
+
    The user explicitly noted: "As already mentioned, there is a border on the effect, that shouldn't be happening. When I drag from the slot to the tilebank... I am not even able to drag the tile back. It only works when I only tap the tile."
 
 2. Key Technical Concepts:
@@ -831,6 +868,7 @@ Summary:
 3. Files and Code Sections:
 
    - **`src/components/answer-game/Slot/Slot.tsx`** — The unified slot component. Currently uses conditional rendering that REPLACES the button with a hole when `isBeingDragged`. This is the root cause of the two current bugs (drag doesn't work + colored corners in ghost). NEEDS FIX.
+
      ```tsx
      // Current (broken) rendering for filled slots:
      } : isBeingDragged ? (
@@ -856,6 +894,7 @@ Summary:
      ```
 
    - **`src/components/answer-game/styles.ts`** — Created in Bug 2. Shared skeuomorphic style:
+
      ```ts
      import type { CSSProperties } from 'react';
      export const skeuoStyle: CSSProperties = {
@@ -866,6 +905,7 @@ Summary:
      ```
 
    - **`src/components/answer-game/Slot/slot-animations.ts`** — `triggerEjectReturn` now returns `{ startFade }`. Ghost parks at hole after phase 1, only fades when `startFade()` is called externally:
+
      ```ts
      export const triggerEjectReturn = (
        el: HTMLElement,
@@ -936,12 +976,13 @@ Summary:
 
 8. Current Work:
    The most recent user message shared a screenshot of `lock-manual` mode showing tile "n" being dragged from a wrong/locked slot. Two issues identified:
-   
+
    **Issue 1 (can't drag):** In `Slot.tsx`, when `isBeingDragged=true`, the button is replaced by a hole div (unmounted). This likely cancels the HTML5 drag in Chrome. Fix: mirror the Bug 7 tilebank fix — keep button in DOM with `invisible pointer-events-none aria-hidden` classes when `isBeingDragged`, show hole div using `absolute inset-0` behind it.
-   
+
    **Issue 2 (red corners):** The HTML5 drag image captures the button while it's inside the slot (with `border-destructive`, `bg-destructive/10`). The button lacks its own `border-radius`. Fix: add `rounded-[inherit]` to the button so its corners match the slot container's rounding, making the drag image visually clean.
 
    Current Slot.tsx filled-slot rendering (the section to fix):
+
    ```tsx
    } : isBeingDragged ? (
      <div className="size-full bg-muted/20 shadow-inner" aria-hidden="true" />
@@ -957,8 +998,9 @@ Summary:
      </button>
    )}
    ```
-   
+
    Target structure (both fixes together):
+
    ```tsx
    ) : (
      <>
@@ -983,9 +1025,9 @@ Summary:
 
 9. Optional Next Step:
    Fix `Slot.tsx` to keep the slot button in DOM when being dragged and add `rounded-[inherit]` for a clean drag ghost.
-   
+
    The user said: "Now let's focus on fixing and improving the lock-manual. As already mentioned, there is a border on the effect, that shouldn't be happening. When I drag from the slot to the tilebank... I am not even able to drag the tile back. It only works when I only tap the tile. Note the red corners of the tile."
-   
+
    The next step is to edit `src/components/answer-game/Slot/Slot.tsx` to:
    1. Replace the `isBeingDragged ? <hole> : <button>` pattern with always-rendered `<hole> + <button>` (button invisible/pointer-events-none/aria-hidden when dragging)
    2. Use `absolute inset-0` for both hole and button
@@ -1001,8 +1043,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:37:52Z)**_
 
 <think><details><summary>Thought Process</summary>
 Let me fix the Slot.tsx file in the worktree to address the two issues:
+
 1. Keep button in DOM when being dragged (fix can't drag issue)
 2. Add `rounded-[inherit]` to button (fix colored corners in drag ghost)
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:37:56Z)**_
@@ -1013,6 +1057,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:37:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:38:02Z)**_
@@ -1028,6 +1073,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 3.14s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:38:13Z)**_
@@ -1060,6 +1106,7 @@ Run unit tests
 
 Done in 6.48s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:38:15Z)**_
@@ -1678,6 +1725,7 @@ Done in 5.96s.
 [claude/bold-chatelet 4dc0ebe] fix(slot): keep button in DOM when dragging to fix HTML5 drag cancel
  1 file changed, 21 insertions(+), 17 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:38:35Z)**_
@@ -1707,7 +1755,7 @@ Port 3000 is in use, trying another one...
 
   VITE v7.3.1  ready in 374 ms
 
-  ➜  Local:   http://localhost:3001/base-skill/
+  ➜  Local:   <http://localhost:3001/base-skill/>
   ➜  Network: use --host to expose
   ➜  press h + enter to show help
 [vite] connected.
@@ -1727,98 +1775,99 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:43:08Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-29	
-30	  const ariaLabel = isEmpty
-31	    ? `Slot ${index + 1}, empty`
-32	    : `Slot ${index + 1}, filled with ${label}`;
-33	
-34	  const stateClasses = [
-35	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-36	    isEmpty && !isActive
-37	      ? 'border-border'
-38	      : isEmpty && isActive
-39	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-40	        : isWrong
-41	          ? 'border-destructive bg-destructive/10 text-destructive'
-42	          : 'border-primary bg-primary/10 text-primary',
-43	  ]
-44	    .filter(Boolean)
-45	    .join(' ');
-46	
-47	  return (
-48	    <Tag
-49	      ref={
-50	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-51	      }
-52	      aria-label={ariaLabel}
-53	      data-zone-index={index}
-54	      className={[stateClasses, className].filter(Boolean).join(' ')}
-55	    >
-56	      {isEmpty ? (
-57	        <>
-58	          {children(renderProps)}
-59	          {showCursor ? (
-60	            <span
-61	              aria-hidden="true"
-62	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-63	            />
-64	          ) : null}
-65	        </>
-66	      ) : (
-67	        <>
-68	          <div
-69	            className="absolute inset-0 bg-muted/60 shadow-inner"
-70	            aria-hidden="true"
-71	          />
-72	          <button
-73	            ref={dragRef}
-74	            type="button"
-75	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
-76	            aria-hidden={isBeingDragged ? 'true' : undefined}
-77	            style={skeuoStyle}
-78	            onClick={handleClick}
-79	            onPointerDown={pointerHandlers.onPointerDown}
-80	            onPointerMove={pointerHandlers.onPointerMove}
-81	            onPointerUp={pointerHandlers.onPointerUp}
-82	            onPointerCancel={pointerHandlers.onPointerCancel}
-83	          >
-84	            {children(renderProps)}
-85	          </button>
-86	        </>
-87	      )}
-88	    </Tag>
-89	  );
-90	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+29 
+30   const ariaLabel = isEmpty
+31     ? `Slot ${index + 1}, empty`
+32     : `Slot ${index + 1}, filled with ${label}`;
+33 
+34   const stateClasses = [
+35     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+36     isEmpty && !isActive
+37       ? 'border-border'
+38       : isEmpty && isActive
+39         ? 'border-primary ring-2 ring-primary ring-offset-2'
+40         : isWrong
+41           ? 'border-destructive bg-destructive/10 text-destructive'
+42           : 'border-primary bg-primary/10 text-primary',
+43   ]
+44     .filter(Boolean)
+45     .join(' ');
+46 
+47   return (
+48     <Tag
+49       ref={
+50         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+51       }
+52       aria-label={ariaLabel}
+53       data-zone-index={index}
+54       className={[stateClasses, className].filter(Boolean).join(' ')}
+55     >
+56       {isEmpty ? (
+57         <>
+58           {children(renderProps)}
+59           {showCursor ? (
+60             <span
+61               aria-hidden="true"
+62               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+63             />
+64           ) : null}
+65         </>
+66       ) : (
+67         <>
+68           <div
+69             className="absolute inset-0 bg-muted/60 shadow-inner"
+70             aria-hidden="true"
+71           />
+72           <button
+73             ref={dragRef}
+74             type="button"
+75             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+76             aria-hidden={isBeingDragged ? 'true' : undefined}
+77             style={skeuoStyle}
+78             onClick={handleClick}
+79             onPointerDown={pointerHandlers.onPointerDown}
+80             onPointerMove={pointerHandlers.onPointerMove}
+81             onPointerUp={pointerHandlers.onPointerUp}
+82             onPointerCancel={pointerHandlers.onPointerCancel}
+83           >
+84             {children(renderProps)}
+85           </button>
+86         </>
+87       )}
+88     </Tag>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:43:44Z)**_
@@ -1828,7 +1877,7 @@ The code looks correct - it's keeping the button in DOM and adding `rounded-[inh
 
 1. **"I still see corners"** - The drag ghost for HTML5 drag-and-drop captures the element at `dragstart` time. The ghost image includes the element itself. When the button has `rounded-[inherit]`, it inherits from the parent `<li>` element. But the drag ghost might be capturing just the button, which at the time of capture, might not have the proper rounding applied.
 
-Wait, actually the issue might be different. 
+Wait, actually the issue might be different.
 
 When the HTML5 drag starts, Chrome takes a screenshot of the dragged element. The button is `absolute inset-0` inside the slot `<li>`, so the drag ghost is created from the button element itself. The colored corners I'm seeing might actually be coming from the parent `<li>` being included in the ghost somehow, or the button's styling isn't being captured correctly at drag time. The `@atlaskit/pragmatic-drag-and-drop` library uses native HTML5 DnD under the hood, so I need to understand how it's capturing the element.
 
@@ -1852,126 +1901,127 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:43:45Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTouchDrag } from './useTouchDrag';
-5	import type { TouchDragHandlers } from './useTouchDrag';
-6	import type { RefObject } from 'react';
-7	
-8	export interface SlotTileDrag extends TouchDragHandlers {
-9	  dragRef: RefObject<HTMLButtonElement | null>;
-10	}
-11	
-12	interface UseSlotTileDragOptions {
-13	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-14	  tileId: string | null;
-15	  label: string | null;
-16	  zoneIndex: number;
-17	  /**
-18	   * Called when the dragged tile is dropped on a target zone.
-19	   * REMOVE_TILE is dispatched before this callback, so the tile is back
-20	   * in the bank and can be placed normally.
-21	   */
-22	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-23	}
-24	
-25	/**
-26	 * Enables an occupied slot tile to be dragged back to the bank or to another
-27	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-28	 *
-29	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-30	 * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
-31	 * dispatched first (returning the tile to the bank) then onDrop is called so
-32	 * the drop target can place it normally. On cancel or missed drop, REMOVE_TILE
-33	 * is dispatched to return the tile to the bank.
-34	 */
-35	export const useSlotTileDrag = ({
-36	  tileId,
-37	  label,
-38	  zoneIndex,
-39	  onDrop,
-40	}: UseSlotTileDragOptions): SlotTileDrag => {
-41	  const dispatch = useAnswerGameDispatch();
-42	  const dragRef = useRef<HTMLButtonElement>(null);
-43	
-44	  // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
-45	  const onDropRef = useRef(onDrop);
-46	  useEffect(() => {
-47	    onDropRef.current = onDrop;
-48	  }, [onDrop]);
-49	
-50	  // HTML5 DnD — desktop
-51	  useEffect(() => {
-52	    if (!tileId) return;
-53	    const element = dragRef.current;
-54	    if (!element) return;
-55	    const currentTileId = tileId;
-56	    const currentZoneIndex = zoneIndex;
-57	    return draggable({
-58	      element,
-59	      // Include sourceZoneIndex so the drop target can identify slot-tile drags
-60	      // and defer placement to this hook's onDrop handler.
-61	      getInitialData: () => ({
-62	        tileId: currentTileId,
-63	        sourceZoneIndex: currentZoneIndex,
-64	      }),
-65	      onDragStart: () =>
-66	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-67	      onDrop: ({ location }) => {
-68	        const targets = location.current.dropTargets;
-69	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-70	
-71	        // Always return the tile to the bank first.
-72	        dispatch({ type: 'REMOVE_TILE', zoneIndex: currentZoneIndex });
-73	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-74	
-75	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-76	          // Confirmed drop on a valid zone: place via the onDrop callback.
-77	          onDropRef.current(currentTileId, targetZoneIndex);
-78	        }
-79	        // else: no target or target has no zoneIndex — tile stays in bank.
-80	      },
-81	    });
-82	  }, [tileId, zoneIndex, dispatch]);
-83	
-84	  // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
-85	  const handleTouchDrop = useCallback(
-86	    (droppedTileId: string, targetZoneIndex: number) => {
-87	      dispatch({ type: 'REMOVE_TILE', zoneIndex });
-88	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-89	      onDrop(droppedTileId, targetZoneIndex);
-90	    },
-91	    [dispatch, zoneIndex, onDrop],
-92	  );
-93	
-94	  // Pointer-events drag — touch / mobile
-95	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-96	    useTouchDrag({
-97	      tileId: tileId ?? '',
-98	      label: label ?? '',
-99	      onDragStart: tileId
-100	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-101	        : undefined,
-102	      onDragCancel: tileId
-103	        ? () => {
-104	            dispatch({ type: 'REMOVE_TILE', zoneIndex });
-105	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-106	          }
-107	        : undefined,
-108	      onDrop: handleTouchDrop,
-109	    });
-110	
-111	  return {
-112	    dragRef,
-113	    onPointerDown,
-114	    onPointerMove,
-115	    onPointerUp,
-116	    onPointerCancel,
-117	  };
-118	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTouchDrag } from './useTouchDrag';
+5 import type { TouchDragHandlers } from './useTouchDrag';
+6 import type { RefObject } from 'react';
+7 
+8 export interface SlotTileDrag extends TouchDragHandlers {
+9   dragRef: RefObject<HTMLButtonElement | null>;
+10 }
+11 
+12 interface UseSlotTileDragOptions {
+13   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+14   tileId: string | null;
+15   label: string | null;
+16   zoneIndex: number;
+17   /**
+18    * Called when the dragged tile is dropped on a target zone.
+19    * REMOVE_TILE is dispatched before this callback, so the tile is back
+20    * in the bank and can be placed normally.
+21    */
+22   onDrop: (tileId: string, targetZoneIndex: number) => void;
+23 }
+24 
+25 /**
+26  * Enables an occupied slot tile to be dragged back to the bank or to another
+27  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+28  *
+29  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+30  * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
+31  * dispatched first (returning the tile to the bank) then onDrop is called so
+32  * the drop target can place it normally. On cancel or missed drop, REMOVE_TILE
+33  * is dispatched to return the tile to the bank.
+34  */
+35 export const useSlotTileDrag = ({
+36   tileId,
+37   label,
+38   zoneIndex,
+39   onDrop,
+40 }: UseSlotTileDragOptions): SlotTileDrag => {
+41   const dispatch = useAnswerGameDispatch();
+42   const dragRef = useRef<HTMLButtonElement>(null);
+43 
+44   // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
+45   const onDropRef = useRef(onDrop);
+46   useEffect(() => {
+47     onDropRef.current = onDrop;
+48   }, [onDrop]);
+49 
+50   // HTML5 DnD — desktop
+51   useEffect(() => {
+52     if (!tileId) return;
+53     const element = dragRef.current;
+54     if (!element) return;
+55     const currentTileId = tileId;
+56     const currentZoneIndex = zoneIndex;
+57     return draggable({
+58       element,
+59       // Include sourceZoneIndex so the drop target can identify slot-tile drags
+60       // and defer placement to this hook's onDrop handler.
+61       getInitialData: () => ({
+62         tileId: currentTileId,
+63         sourceZoneIndex: currentZoneIndex,
+64       }),
+65       onDragStart: () =>
+66         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+67       onDrop: ({ location }) => {
+68         const targets = location.current.dropTargets;
+69         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+70 
+71         // Always return the tile to the bank first.
+72         dispatch({ type: 'REMOVE_TILE', zoneIndex: currentZoneIndex });
+73         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+74 
+75         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+76           // Confirmed drop on a valid zone: place via the onDrop callback.
+77           onDropRef.current(currentTileId, targetZoneIndex);
+78         }
+79         // else: no target or target has no zoneIndex — tile stays in bank.
+80       },
+81     });
+82   }, [tileId, zoneIndex, dispatch]);
+83 
+84   // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
+85   const handleTouchDrop = useCallback(
+86     (droppedTileId: string, targetZoneIndex: number) => {
+87       dispatch({ type: 'REMOVE_TILE', zoneIndex });
+88       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+89       onDrop(droppedTileId, targetZoneIndex);
+90     },
+91     [dispatch, zoneIndex, onDrop],
+92   );
+93 
+94   // Pointer-events drag — touch / mobile
+95   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+96     useTouchDrag({
+97       tileId: tileId ?? '',
+98       label: label ?? '',
+99       onDragStart: tileId
+100         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+101         : undefined,
+102       onDragCancel: tileId
+103         ? () => {
+104             dispatch({ type: 'REMOVE_TILE', zoneIndex });
+105             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+106           }
+107         : undefined,
+108       onDrop: handleTouchDrop,
+109     });
+110 
+111   return {
+112     dragRef,
+113     onPointerDown,
+114     onPointerMove,
+115     onPointerUp,
+116     onPointerCancel,
+117   };
+118 };
 119
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:43:46Z)**_
@@ -1981,257 +2031,258 @@ _**Agent (claude-sonnet-4-6 2026-04-07 10:43:46Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	}
-65	
-66	export const useTouchDrag = ({
-67	  tileId,
-68	  label,
-69	  onDragStart,
-70	  onDragCancel,
-71	  onDrop,
-72	}: UseTouchDragOptions): TouchDragHandlers => {
-73	  const onDragCancelRef = useRef(onDragCancel);
-74	  useEffect(() => {
-75	    onDragCancelRef.current = onDragCancel;
-76	  }, [onDragCancel]);
-77	
-78	  const ghostRef = useRef<GhostInfo | null>(null);
-79	  const isDragging = useRef(false);
-80	  const startPos = useRef<{ x: number; y: number } | null>(null);
-81	  const capturedElRef = useRef<HTMLElement | null>(null);
-82	  const capturedPointerIdRef = useRef<number | null>(null);
-83	  const safetyTimerRef = useRef<ReturnType<
-84	    typeof globalThis.setTimeout
-85	  > | null>(null);
-86	
-87	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-88	  // → cleanupGhost re-entry.
-89	  const cleanupInProgressRef = useRef(false);
-90	
-91	  const cleanupGhost = useCallback(() => {
-92	    if (cleanupInProgressRef.current) return;
-93	    cleanupInProgressRef.current = true;
-94	
-95	    if (safetyTimerRef.current !== null) {
-96	      globalThis.clearTimeout(safetyTimerRef.current);
-97	      safetyTimerRef.current = null;
-98	    }
-99	
-100	    ghostRef.current?.el.remove();
-101	    ghostRef.current = null;
-102	
-103	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-104	    // lostpointercapture event triggered by it sees null refs and bails out.
-105	    const el = capturedElRef.current;
-106	    const pointerId = capturedPointerIdRef.current;
-107	    capturedElRef.current = null;
-108	    capturedPointerIdRef.current = null;
-109	
-110	    if (el !== null && pointerId !== null) {
-111	      try {
-112	        el.releasePointerCapture(pointerId);
-113	      } catch {
-114	        // Element may no longer be in the DOM — ignore.
-115	      }
-116	    }
-117	
-118	    isDragging.current = false;
-119	    startPos.current = null;
-120	    cleanupInProgressRef.current = false;
-121	  }, []);
-122	
-123	  const cleanup = useCallback(() => {
-124	    cleanupGhost();
-125	  }, [cleanupGhost]);
-126	
-127	  const onPointerDown = useCallback(
-128	    (e: PointerEvent<HTMLElement>) => {
-129	      if (e.pointerType === 'mouse' || !tileId) return;
-130	      e.currentTarget.setPointerCapture(e.pointerId);
-131	      capturedElRef.current = e.currentTarget;
-132	      capturedPointerIdRef.current = e.pointerId;
-133	      startPos.current = { x: e.clientX, y: e.clientY };
-134	      isDragging.current = false;
-135	
-136	      // When the captured element is removed from the DOM (e.g. a slot tile
-137	      // gets auto-ejected while the user is dragging it), the browser fires
-138	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-139	      // ghost doesn't float for 5 seconds.
-140	      e.currentTarget.addEventListener(
-141	        'lostpointercapture',
-142	        () => {
-143	          if (!cleanupInProgressRef.current && isDragging.current) {
-144	            cleanupGhost();
-145	            onDragCancelRef.current?.();
-146	          }
-147	        },
-148	        { once: true },
-149	      );
-150	    },
-151	    [tileId, cleanupGhost],
-152	  );
-153	
-154	  const onPointerMove = useCallback(
-155	    (e: PointerEvent<HTMLElement>) => {
-156	      if (e.pointerType === 'mouse' || !startPos.current) return;
-157	
-158	      if (!isDragging.current) {
-159	        const dx = e.clientX - startPos.current.x;
-160	        const dy = e.clientY - startPos.current.y;
-161	        if (
-162	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-163	          Math.abs(dy) > DRAG_THRESHOLD_PX
-164	        ) {
-165	          isDragging.current = true;
-166	          ghostRef.current = buildGhost(
-167	            e.currentTarget,
-168	            label,
-169	            e.clientX,
-170	            e.clientY,
-171	          );
-172	          onDragStart?.();
-173	
-174	          safetyTimerRef.current = globalThis.setTimeout(() => {
-175	            cleanupGhost();
-176	            onDragCancelRef.current?.();
-177	          }, 5000);
-178	
-179	          document.addEventListener('contextmenu', cleanupGhost, {
-180	            once: true,
-181	          });
-182	          document.addEventListener('visibilitychange', cleanupGhost, {
-183	            once: true,
-184	          });
-185	        }
-186	      }
-187	
-188	      if (isDragging.current && ghostRef.current) {
-189	        const { el, halfW, halfH } = ghostRef.current;
-190	        el.style.left = `${e.clientX - halfW}px`;
-191	        el.style.top = `${e.clientY - halfH}px`;
-192	      }
-193	    },
-194	    [label, onDragStart, cleanupGhost],
-195	  );
-196	
-197	  const onPointerUp = useCallback(
-198	    (e: PointerEvent<HTMLElement>) => {
-199	      if (e.pointerType === 'mouse' || !startPos.current) return;
-200	
-201	      if (isDragging.current) {
-202	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-203	        ghostRef.current?.el.remove();
-204	        ghostRef.current = null;
-205	
-206	        const elements = document.elementsFromPoint(
-207	          e.clientX,
-208	          e.clientY,
-209	        );
-210	        let dropped = false;
-211	        for (const el of elements) {
-212	          if (
-213	            el instanceof HTMLElement &&
-214	            el.dataset['zoneIndex'] !== undefined
-215	          ) {
-216	            const zoneIndex = Number.parseInt(
-217	              el.dataset['zoneIndex'],
-218	              10,
-219	            );
-220	            if (!Number.isNaN(zoneIndex)) {
-221	              onDrop(tileId, zoneIndex);
-222	              dropped = true;
-223	              break;
-224	            }
-225	          }
-226	        }
-227	        if (!dropped) {
-228	          onDragCancelRef.current?.();
-229	        }
-230	      }
-231	
-232	      cleanup();
-233	    },
-234	    [tileId, onDrop, cleanup],
-235	  );
-236	
-237	  const onPointerCancel = useCallback(
-238	    (e: PointerEvent<HTMLElement>) => {
-239	      if (e.pointerType === 'mouse') return;
-240	      if (isDragging.current) {
-241	        onDragCancelRef.current?.();
-242	      }
-243	      cleanupGhost();
-244	    },
-245	    [cleanupGhost],
-246	  );
-247	
-248	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-249	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64 }
+65 
+66 export const useTouchDrag = ({
+67   tileId,
+68   label,
+69   onDragStart,
+70   onDragCancel,
+71   onDrop,
+72 }: UseTouchDragOptions): TouchDragHandlers => {
+73   const onDragCancelRef = useRef(onDragCancel);
+74   useEffect(() => {
+75     onDragCancelRef.current = onDragCancel;
+76   }, [onDragCancel]);
+77 
+78   const ghostRef = useRef<GhostInfo | null>(null);
+79   const isDragging = useRef(false);
+80   const startPos = useRef<{ x: number; y: number } | null>(null);
+81   const capturedElRef = useRef<HTMLElement | null>(null);
+82   const capturedPointerIdRef = useRef<number | null>(null);
+83   const safetyTimerRef = useRef<ReturnType<
+84     typeof globalThis.setTimeout
+85   > | null>(null);
+86 
+87   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+88   // → cleanupGhost re-entry.
+89   const cleanupInProgressRef = useRef(false);
+90 
+91   const cleanupGhost = useCallback(() => {
+92     if (cleanupInProgressRef.current) return;
+93     cleanupInProgressRef.current = true;
+94 
+95     if (safetyTimerRef.current !== null) {
+96       globalThis.clearTimeout(safetyTimerRef.current);
+97       safetyTimerRef.current = null;
+98     }
+99 
+100     ghostRef.current?.el.remove();
+101     ghostRef.current = null;
+102 
+103     // Clear refs BEFORE releasePointerCapture so that any synchronous
+104     // lostpointercapture event triggered by it sees null refs and bails out.
+105     const el = capturedElRef.current;
+106     const pointerId = capturedPointerIdRef.current;
+107     capturedElRef.current = null;
+108     capturedPointerIdRef.current = null;
+109 
+110     if (el !== null && pointerId !== null) {
+111       try {
+112         el.releasePointerCapture(pointerId);
+113       } catch {
+114         // Element may no longer be in the DOM — ignore.
+115       }
+116     }
+117 
+118     isDragging.current = false;
+119     startPos.current = null;
+120     cleanupInProgressRef.current = false;
+121   }, []);
+122 
+123   const cleanup = useCallback(() => {
+124     cleanupGhost();
+125   }, [cleanupGhost]);
+126 
+127   const onPointerDown = useCallback(
+128     (e: PointerEvent<HTMLElement>) => {
+129       if (e.pointerType === 'mouse' || !tileId) return;
+130       e.currentTarget.setPointerCapture(e.pointerId);
+131       capturedElRef.current = e.currentTarget;
+132       capturedPointerIdRef.current = e.pointerId;
+133       startPos.current = { x: e.clientX, y: e.clientY };
+134       isDragging.current = false;
+135 
+136       // When the captured element is removed from the DOM (e.g. a slot tile
+137       // gets auto-ejected while the user is dragging it), the browser fires
+138       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+139       // ghost doesn't float for 5 seconds.
+140       e.currentTarget.addEventListener(
+141         'lostpointercapture',
+142         () => {
+143           if (!cleanupInProgressRef.current && isDragging.current) {
+144             cleanupGhost();
+145             onDragCancelRef.current?.();
+146           }
+147         },
+148         { once: true },
+149       );
+150     },
+151     [tileId, cleanupGhost],
+152   );
+153 
+154   const onPointerMove = useCallback(
+155     (e: PointerEvent<HTMLElement>) => {
+156       if (e.pointerType === 'mouse' || !startPos.current) return;
+157 
+158       if (!isDragging.current) {
+159         const dx = e.clientX - startPos.current.x;
+160         const dy = e.clientY - startPos.current.y;
+161         if (
+162           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+163           Math.abs(dy) > DRAG_THRESHOLD_PX
+164         ) {
+165           isDragging.current = true;
+166           ghostRef.current = buildGhost(
+167             e.currentTarget,
+168             label,
+169             e.clientX,
+170             e.clientY,
+171           );
+172           onDragStart?.();
+173 
+174           safetyTimerRef.current = globalThis.setTimeout(() => {
+175             cleanupGhost();
+176             onDragCancelRef.current?.();
+177           }, 5000);
+178 
+179           document.addEventListener('contextmenu', cleanupGhost, {
+180             once: true,
+181           });
+182           document.addEventListener('visibilitychange', cleanupGhost, {
+183             once: true,
+184           });
+185         }
+186       }
+187 
+188       if (isDragging.current && ghostRef.current) {
+189         const { el, halfW, halfH } = ghostRef.current;
+190         el.style.left = `${e.clientX - halfW}px`;
+191         el.style.top = `${e.clientY - halfH}px`;
+192       }
+193     },
+194     [label, onDragStart, cleanupGhost],
+195   );
+196 
+197   const onPointerUp = useCallback(
+198     (e: PointerEvent<HTMLElement>) => {
+199       if (e.pointerType === 'mouse' || !startPos.current) return;
+200 
+201       if (isDragging.current) {
+202         // Remove ghost before elementsFromPoint so it doesn't interfere.
+203         ghostRef.current?.el.remove();
+204         ghostRef.current = null;
+205 
+206         const elements = document.elementsFromPoint(
+207           e.clientX,
+208           e.clientY,
+209         );
+210         let dropped = false;
+211         for (const el of elements) {
+212           if (
+213             el instanceof HTMLElement &&
+214             el.dataset['zoneIndex'] !== undefined
+215           ) {
+216             const zoneIndex = Number.parseInt(
+217               el.dataset['zoneIndex'],
+218               10,
+219             );
+220             if (!Number.isNaN(zoneIndex)) {
+221               onDrop(tileId, zoneIndex);
+222               dropped = true;
+223               break;
+224             }
+225           }
+226         }
+227         if (!dropped) {
+228           onDragCancelRef.current?.();
+229         }
+230       }
+231 
+232       cleanup();
+233     },
+234     [tileId, onDrop, cleanup],
+235   );
+236 
+237   const onPointerCancel = useCallback(
+238     (e: PointerEvent<HTMLElement>) => {
+239       if (e.pointerType === 'mouse') return;
+240       if (isDragging.current) {
+241         onDragCancelRef.current?.();
+242       }
+243       cleanupGhost();
+244     },
+245     [cleanupGhost],
+246   );
+247 
+248   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+249 };
 250
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 10:46:07Z)**_
@@ -2246,6 +2297,7 @@ if (e.pointerType === 'mouse' || !tileId) return;
 The `onPointerDown` early-returns for mouse (`e.pointerType === 'mouse'`), but still calls `e.currentTarget.setPointerCapture(e.pointerId)` - no wait, it returns before that. So for mouse, `onPointerDown` does nothing.
 
 But in the Slot.tsx, the button has:
+
 ```
 
 
@@ -2495,7 +2547,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
-
 
 _**User (2026-04-07 10:47:23Z)**_
 

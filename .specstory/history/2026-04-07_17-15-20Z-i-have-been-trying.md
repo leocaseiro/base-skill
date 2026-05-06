@@ -10,10 +10,11 @@ _**User (2026-04-07 17:15:20Z)**_
 
 I have been trying to fix some issues that happened in the latest changes on my current branch .claude/worktrees/bold-chatelet/
 
-1. the tilebank should be droppable from the slots. 
- - 1.a if I drag a tile from the slots to the bank, it should go back to it's slot. We broke that with latest changes
+1. the tilebank should be droppable from the slots.
 
-2. we have rebased from master, but the dark mode now is broken in many UIs, fix that.
+- 1.a if I drag a tile from the slots to the bank, it should go back to it's slot. We broke that with latest changes
+
+1. we have rebased from master, but the dark mode now is broken in many UIs, fix that.
 
 ---
 
@@ -47,6 +48,7 @@ d6125ab fix(slot): slot-to-bank drag, swap evaluation, animations & sounds
 3af82b4 fix(slot): keep button in DOM when dragging to fix HTML5 drag cancel
 edc3a57 fix: ghost parks at hole, fades only after EJECT_TILE fires (tile visible in bank)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:27Z)**_
@@ -108,6 +110,7 @@ src/games/word-spell/types.ts
 src/lib/audio/AudioFeedback.ts
 src/styles.css
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:31Z)**_
@@ -117,37 +120,38 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:31Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useBankDropTarget.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import type { RefObject } from 'react';
-4	
-5	/**
-6	 * Registers a container element as a drop target for the tile bank.
-7	 *
-8	 * This makes the bank an accepted HTML5 drop zone so the browser shows
-9	 * a "move" cursor (instead of the "no drop" reject animation) when a slot
-10	 * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
-11	 * useSlotTileDrag's onDrop — the bank target intentionally carries no
-12	 * zoneIndex so that path treats it as "return to bank".
-13	 */
-14	export const useBankDropTarget = (): {
-15	  bankRef: RefObject<HTMLDivElement | null>;
-16	} => {
-17	  const bankRef = useRef<HTMLDivElement>(null);
-18	
-19	  useEffect(() => {
-20	    const el = bankRef.current;
-21	    if (!el) return;
-22	    return dropTargetForElements({
-23	      element: el,
-24	      getData: () => ({ isBankTarget: true }),
-25	    });
-26	  }, []);
-27	
-28	  return { bankRef };
-29	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import type { RefObject } from 'react';
+4 
+5 /**
+6  * Registers a container element as a drop target for the tile bank.
+7  *
+8  * This makes the bank an accepted HTML5 drop zone so the browser shows
+9  * a "move" cursor (instead of the "no drop" reject animation) when a slot
+10  * tile is dragged over it. The actual REMOVE_TILE dispatch is handled by
+11  * useSlotTileDrag's onDrop — the bank target intentionally carries no
+12  * zoneIndex so that path treats it as "return to bank".
+13  */
+14 export const useBankDropTarget = (): {
+15   bankRef: RefObject<HTMLDivElement | null>;
+16 } => {
+17   const bankRef = useRef<HTMLDivElement>(null);
+18 
+19   useEffect(() => {
+20     const el = bankRef.current;
+21     if (!el) return;
+22     return dropTargetForElements({
+23       element: el,
+24       getData: () => ({ isBankTarget: true }),
+25     });
+26   }, []);
+27 
+28   return { bankRef };
+29 };
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:31Z)**_
@@ -157,317 +161,318 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:31Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    phase: 'playing',
-20	    roundIndex: 0,
-21	    retryCount: 0,
-22	  };
-23	}
-24	
-25	export function answerGameReducer(
-26	  state: AnswerGameState,
-27	  action: AnswerGameAction,
-28	): AnswerGameState {
-29	  switch (action.type) {
-30	    case 'INIT_ROUND': {
-31	      return {
-32	        ...state,
-33	        allTiles: action.tiles,
-34	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-35	        zones: action.zones,
-36	        activeSlotIndex: 0,
-37	        phase: 'playing',
-38	        roundIndex: 0,
-39	        retryCount: 0,
-40	      };
-41	    }
-42	
-43	    case 'PLACE_TILE': {
-44	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-45	      const zone = state.zones[action.zoneIndex];
-46	      if (!tile || !zone) return state;
-47	
-48	      const correct = tile.value === zone.expectedValue;
-49	
-50	      // A tile placement always ends any active drag for that tile.
-51	      const dragActiveTileId =
-52	        state.dragActiveTileId === action.tileId
-53	          ? null
-54	          : state.dragActiveTileId;
-55	
-56	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-57	        return {
-58	          ...state,
-59	          dragActiveTileId,
-60	          retryCount: state.retryCount + 1,
-61	        };
-62	      }
-63	
-64	      if (correct) {
-65	        const previousId = zone.placedTileId;
-66	        let newBankTileIds = state.bankTileIds.filter(
-67	          (id) => id !== action.tileId,
-68	        );
-69	        if (previousId !== null && previousId !== action.tileId) {
-70	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-71	          newBankTileIds = [...newBankTileIds, previousId];
-72	        }
-73	        const newZone: AnswerZone = {
-74	          ...zone,
-75	          placedTileId: action.tileId,
-76	          isWrong: false,
-77	          isLocked: false,
-78	        };
-79	        const newZones = state.zones.map((z, i) =>
-80	          i === action.zoneIndex ? newZone : z,
-81	        );
-82	        const nextActiveSlot = newZones.findIndex(
-83	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-84	        );
-85	        const allFilledCorrectly = newZones.every(
-86	          (z) => z.placedTileId !== null && !z.isWrong,
-87	        );
-88	        const isLastRound =
-89	          state.roundIndex >= state.config.totalRounds - 1;
-90	        return {
-91	          ...state,
-92	          dragActiveTileId,
-93	          zones: newZones,
-94	          bankTileIds: newBankTileIds,
-95	          activeSlotIndex:
-96	            nextActiveSlot === -1
-97	              ? state.activeSlotIndex
-98	              : nextActiveSlot,
-99	          retryCount: state.retryCount,
-100	          phase: allFilledCorrectly
-101	            ? isLastRound
-102	              ? 'game-over'
-103	              : 'round-complete'
-104	            : 'playing',
-105	        };
-106	      }
-107	
-108	      const shouldLock =
-109	        state.config.wrongTileBehavior === 'lock-manual' ||
-110	        state.config.wrongTileBehavior === 'lock-auto-eject';
-111	      const newZone: AnswerZone = {
-112	        ...zone,
-113	        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
-114	        isWrong: true,
-115	        isLocked: true,
-116	      };
-117	      const newZones = state.zones.map((z, i) =>
-118	        i === action.zoneIndex ? newZone : z,
-119	      );
-120	      let newBankTileIds = shouldLock
-121	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-122	        : state.bankTileIds;
-123	      if (
-124	        shouldLock &&
-125	        zone.placedTileId &&
-126	        zone.placedTileId !== action.tileId
-127	      ) {
-128	        newBankTileIds = [...newBankTileIds, zone.placedTileId];
-129	      }
-130	
-131	      return {
-132	        ...state,
-133	        dragActiveTileId,
-134	        zones: newZones,
-135	        bankTileIds: newBankTileIds,
-136	        activeSlotIndex: state.activeSlotIndex,
-137	        retryCount: state.retryCount + 1,
-138	        phase: 'playing',
-139	      };
-140	    }
-141	
-142	    case 'REMOVE_TILE': {
-143	      const zone = state.zones[action.zoneIndex];
-144	      if (!zone?.placedTileId) return state;
-145	      const removedTileId = zone.placedTileId;
-146	      return {
-147	        ...state,
-148	        dragActiveTileId:
-149	          state.dragActiveTileId === removedTileId
-150	            ? null
-151	            : state.dragActiveTileId,
-152	        zones: state.zones.map((z, i) =>
-153	          i === action.zoneIndex
-154	            ? {
-155	                ...z,
-156	                placedTileId: null,
-157	                isWrong: false,
-158	                isLocked: false,
-159	              }
-160	            : z,
-161	        ),
-162	        bankTileIds: [...state.bankTileIds, removedTileId],
-163	      };
-164	    }
-165	
-166	    case 'SWAP_TILES': {
-167	      const fromZone = state.zones[action.fromZoneIndex];
-168	      const toZone = state.zones[action.toZoneIndex];
-169	      if (!fromZone || !toZone) return state;
-170	
-171	      // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
-172	      // Either zone may become empty (null) when moving a tile to an empty slot.
-173	      const tileNowInFrom = toZone.placedTileId
-174	        ? state.allTiles.find((t) => t.id === toZone.placedTileId)
-175	        : null;
-176	      const tileNowInTo = fromZone.placedTileId
-177	        ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
-178	        : null;
-179	      // An empty zone is never wrong.
-180	      const fromCorrect = tileNowInFrom
-181	        ? tileNowInFrom.value === fromZone.expectedValue
-182	        : true;
-183	      const toCorrect = tileNowInTo
-184	        ? tileNowInTo.value === toZone.expectedValue
-185	        : true;
-186	      const shouldLock =
-187	        state.config.wrongTileBehavior === 'lock-manual' ||
-188	        state.config.wrongTileBehavior === 'lock-auto-eject';
-189	
-190	      const newZones = state.zones.map((z, i) => {
-191	        if (i === action.fromZoneIndex)
-192	          return {
-193	            ...z,
-194	            placedTileId: toZone.placedTileId,
-195	            isWrong: toZone.placedTileId !== null && !fromCorrect,
-196	            isLocked:
-197	              toZone.placedTileId !== null &&
-198	              !fromCorrect &&
-199	              shouldLock,
-200	          };
-201	        if (i === action.toZoneIndex)
-202	          return {
-203	            ...z,
-204	            placedTileId: fromZone.placedTileId,
-205	            isWrong: fromZone.placedTileId !== null && !toCorrect,
-206	            isLocked:
-207	              fromZone.placedTileId !== null &&
-208	              !toCorrect &&
-209	              shouldLock,
-210	          };
-211	        return z;
-212	      });
-213	
-214	      // Clear drag state for the tile that just finished dragging.
-215	      const dragActiveTileId =
-216	        state.dragActiveTileId === fromZone.placedTileId
-217	          ? null
-218	          : state.dragActiveTileId;
-219	
-220	      const allFilledCorrectly = newZones.every(
-221	        (z) => z.placedTileId !== null && !z.isWrong,
-222	      );
-223	      const isLastRound =
-224	        state.roundIndex >= state.config.totalRounds - 1;
-225	
-226	      return {
-227	        ...state,
-228	        dragActiveTileId,
-229	        zones: newZones,
-230	        phase: allFilledCorrectly
-231	          ? isLastRound
-232	            ? 'game-over'
-233	            : 'round-complete'
-234	          : 'playing',
-235	      };
-236	    }
-237	
-238	    case 'EJECT_TILE': {
-239	      const zone = state.zones[action.zoneIndex];
-240	      if (!zone) return state;
-241	
-242	      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
-243	      if (!zone.isWrong && !zone.isLocked) return state;
-244	
-245	      if (zone.placedTileId) {
-246	        const ejectedTileId = zone.placedTileId;
-247	        return {
-248	          ...state,
-249	          // If the ejected tile was mid-drag, clear drag state so the bank
-250	          // hole disappears immediately rather than waiting for the drag to end.
-251	          dragActiveTileId:
-252	            state.dragActiveTileId === ejectedTileId
-253	              ? null
-254	              : state.dragActiveTileId,
-255	          zones: state.zones.map((z, i) =>
-256	            i === action.zoneIndex
-257	              ? {
-258	                  ...z,
-259	                  placedTileId: null,
-260	                  isWrong: false,
-261	                  isLocked: false,
-262	                }
-263	              : z,
-264	          ),
-265	          bankTileIds: [...state.bankTileIds, ejectedTileId],
-266	        };
-267	      }
-268	
-269	      return {
-270	        ...state,
-271	        zones: state.zones.map((z, i) =>
-272	          i === action.zoneIndex
-273	            ? {
-274	                ...z,
-275	                placedTileId: null,
-276	                isWrong: false,
-277	                isLocked: false,
-278	              }
-279	            : z,
-280	        ),
-281	      };
-282	    }
-283	
-284	    case 'ADVANCE_ROUND': {
-285	      return {
-286	        ...state,
-287	        allTiles: action.tiles,
-288	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-289	        zones: action.zones,
-290	        activeSlotIndex: 0,
-291	        phase: 'playing',
-292	        roundIndex: state.roundIndex + 1,
-293	        retryCount: 0,
-294	      };
-295	    }
-296	
-297	    case 'COMPLETE_GAME': {
-298	      return { ...state, phase: 'game-over' };
-299	    }
-300	
-301	    case 'SET_DRAG_ACTIVE': {
-302	      return { ...state, dragActiveTileId: action.tileId };
-303	    }
-304	
-305	    default: {
-306	      return state;
-307	    }
-308	  }
-309	}
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     phase: 'playing',
+20     roundIndex: 0,
+21     retryCount: 0,
+22   };
+23 }
+24 
+25 export function answerGameReducer(
+26   state: AnswerGameState,
+27   action: AnswerGameAction,
+28 ): AnswerGameState {
+29   switch (action.type) {
+30     case 'INIT_ROUND': {
+31       return {
+32         ...state,
+33         allTiles: action.tiles,
+34         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+35         zones: action.zones,
+36         activeSlotIndex: 0,
+37         phase: 'playing',
+38         roundIndex: 0,
+39         retryCount: 0,
+40       };
+41     }
+42 
+43     case 'PLACE_TILE': {
+44       const tile = state.allTiles.find((t) => t.id === action.tileId);
+45       const zone = state.zones[action.zoneIndex];
+46       if (!tile || !zone) return state;
+47 
+48       const correct = tile.value === zone.expectedValue;
+49 
+50       // A tile placement always ends any active drag for that tile.
+51       const dragActiveTileId =
+52         state.dragActiveTileId === action.tileId
+53           ? null
+54           : state.dragActiveTileId;
+55 
+56       if (!correct && state.config.wrongTileBehavior === 'reject') {
+57         return {
+58           ...state,
+59           dragActiveTileId,
+60           retryCount: state.retryCount + 1,
+61         };
+62       }
+63 
+64       if (correct) {
+65         const previousId = zone.placedTileId;
+66         let newBankTileIds = state.bankTileIds.filter(
+67           (id) => id !== action.tileId,
+68         );
+69         if (previousId !== null && previousId !== action.tileId) {
+70           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+71           newBankTileIds = [...newBankTileIds, previousId];
+72         }
+73         const newZone: AnswerZone = {
+74           ...zone,
+75           placedTileId: action.tileId,
+76           isWrong: false,
+77           isLocked: false,
+78         };
+79         const newZones = state.zones.map((z, i) =>
+80           i === action.zoneIndex ? newZone : z,
+81         );
+82         const nextActiveSlot = newZones.findIndex(
+83           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+84         );
+85         const allFilledCorrectly = newZones.every(
+86           (z) => z.placedTileId !== null && !z.isWrong,
+87         );
+88         const isLastRound =
+89           state.roundIndex >= state.config.totalRounds - 1;
+90         return {
+91           ...state,
+92           dragActiveTileId,
+93           zones: newZones,
+94           bankTileIds: newBankTileIds,
+95           activeSlotIndex:
+96             nextActiveSlot === -1
+97               ? state.activeSlotIndex
+98               : nextActiveSlot,
+99           retryCount: state.retryCount,
+100           phase: allFilledCorrectly
+101             ? isLastRound
+102               ? 'game-over'
+103               : 'round-complete'
+104             : 'playing',
+105         };
+106       }
+107 
+108       const shouldLock =
+109         state.config.wrongTileBehavior === 'lock-manual' ||
+110         state.config.wrongTileBehavior === 'lock-auto-eject';
+111       const newZone: AnswerZone = {
+112         ...zone,
+113         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
+114         isWrong: true,
+115         isLocked: true,
+116       };
+117       const newZones = state.zones.map((z, i) =>
+118         i === action.zoneIndex ? newZone : z,
+119       );
+120       let newBankTileIds = shouldLock
+121         ? state.bankTileIds.filter((id) => id !== action.tileId)
+122         : state.bankTileIds;
+123       if (
+124         shouldLock &&
+125         zone.placedTileId &&
+126         zone.placedTileId !== action.tileId
+127       ) {
+128         newBankTileIds = [...newBankTileIds, zone.placedTileId];
+129       }
+130 
+131       return {
+132         ...state,
+133         dragActiveTileId,
+134         zones: newZones,
+135         bankTileIds: newBankTileIds,
+136         activeSlotIndex: state.activeSlotIndex,
+137         retryCount: state.retryCount + 1,
+138         phase: 'playing',
+139       };
+140     }
+141 
+142     case 'REMOVE_TILE': {
+143       const zone = state.zones[action.zoneIndex];
+144       if (!zone?.placedTileId) return state;
+145       const removedTileId = zone.placedTileId;
+146       return {
+147         ...state,
+148         dragActiveTileId:
+149           state.dragActiveTileId === removedTileId
+150             ? null
+151             : state.dragActiveTileId,
+152         zones: state.zones.map((z, i) =>
+153           i === action.zoneIndex
+154             ? {
+155                 ...z,
+156                 placedTileId: null,
+157                 isWrong: false,
+158                 isLocked: false,
+159               }
+160             : z,
+161         ),
+162         bankTileIds: [...state.bankTileIds, removedTileId],
+163       };
+164     }
+165 
+166     case 'SWAP_TILES': {
+167       const fromZone = state.zones[action.fromZoneIndex];
+168       const toZone = state.zones[action.toZoneIndex];
+169       if (!fromZone || !toZone) return state;
+170 
+171       // After the swap: fromZone gets toZone's tile, toZone gets fromZone's tile.
+172       // Either zone may become empty (null) when moving a tile to an empty slot.
+173       const tileNowInFrom = toZone.placedTileId
+174         ? state.allTiles.find((t) => t.id === toZone.placedTileId)
+175         : null;
+176       const tileNowInTo = fromZone.placedTileId
+177         ? state.allTiles.find((t) => t.id === fromZone.placedTileId)
+178         : null;
+179       // An empty zone is never wrong.
+180       const fromCorrect = tileNowInFrom
+181         ? tileNowInFrom.value === fromZone.expectedValue
+182         : true;
+183       const toCorrect = tileNowInTo
+184         ? tileNowInTo.value === toZone.expectedValue
+185         : true;
+186       const shouldLock =
+187         state.config.wrongTileBehavior === 'lock-manual' ||
+188         state.config.wrongTileBehavior === 'lock-auto-eject';
+189 
+190       const newZones = state.zones.map((z, i) => {
+191         if (i === action.fromZoneIndex)
+192           return {
+193             ...z,
+194             placedTileId: toZone.placedTileId,
+195             isWrong: toZone.placedTileId !== null && !fromCorrect,
+196             isLocked:
+197               toZone.placedTileId !== null &&
+198               !fromCorrect &&
+199               shouldLock,
+200           };
+201         if (i === action.toZoneIndex)
+202           return {
+203             ...z,
+204             placedTileId: fromZone.placedTileId,
+205             isWrong: fromZone.placedTileId !== null && !toCorrect,
+206             isLocked:
+207               fromZone.placedTileId !== null &&
+208               !toCorrect &&
+209               shouldLock,
+210           };
+211         return z;
+212       });
+213 
+214       // Clear drag state for the tile that just finished dragging.
+215       const dragActiveTileId =
+216         state.dragActiveTileId === fromZone.placedTileId
+217           ? null
+218           : state.dragActiveTileId;
+219 
+220       const allFilledCorrectly = newZones.every(
+221         (z) => z.placedTileId !== null && !z.isWrong,
+222       );
+223       const isLastRound =
+224         state.roundIndex >= state.config.totalRounds - 1;
+225 
+226       return {
+227         ...state,
+228         dragActiveTileId,
+229         zones: newZones,
+230         phase: allFilledCorrectly
+231           ? isLastRound
+232             ? 'game-over'
+233             : 'round-complete'
+234           : 'playing',
+235       };
+236     }
+237 
+238     case 'EJECT_TILE': {
+239       const zone = state.zones[action.zoneIndex];
+240       if (!zone) return state;
+241 
+242       // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+243       if (!zone.isWrong && !zone.isLocked) return state;
+244 
+245       if (zone.placedTileId) {
+246         const ejectedTileId = zone.placedTileId;
+247         return {
+248           ...state,
+249           // If the ejected tile was mid-drag, clear drag state so the bank
+250           // hole disappears immediately rather than waiting for the drag to end.
+251           dragActiveTileId:
+252             state.dragActiveTileId === ejectedTileId
+253               ? null
+254               : state.dragActiveTileId,
+255           zones: state.zones.map((z, i) =>
+256             i === action.zoneIndex
+257               ? {
+258                   ...z,
+259                   placedTileId: null,
+260                   isWrong: false,
+261                   isLocked: false,
+262                 }
+263               : z,
+264           ),
+265           bankTileIds: [...state.bankTileIds, ejectedTileId],
+266         };
+267       }
+268 
+269       return {
+270         ...state,
+271         zones: state.zones.map((z, i) =>
+272           i === action.zoneIndex
+273             ? {
+274                 ...z,
+275                 placedTileId: null,
+276                 isWrong: false,
+277                 isLocked: false,
+278               }
+279             : z,
+280         ),
+281       };
+282     }
+283 
+284     case 'ADVANCE_ROUND': {
+285       return {
+286         ...state,
+287         allTiles: action.tiles,
+288         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+289         zones: action.zones,
+290         activeSlotIndex: 0,
+291         phase: 'playing',
+292         roundIndex: state.roundIndex + 1,
+293         retryCount: 0,
+294       };
+295     }
+296 
+297     case 'COMPLETE_GAME': {
+298       return { ...state, phase: 'game-over' };
+299     }
+300 
+301     case 'SET_DRAG_ACTIVE': {
+302       return { ...state, dragActiveTileId: action.tileId };
+303     }
+304 
+305     default: {
+306       return state;
+307     }
+308   }
+309 }
 310
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:32Z)**_
@@ -477,159 +482,160 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:32Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
-3	import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-4	import { useCallback, useEffect, useRef } from 'react';
-5	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TouchDragHandlers } from './useTouchDrag';
-8	import type { RefObject } from 'react';
-9	
-10	export interface SlotTileDrag extends TouchDragHandlers {
-11	  dragRef: RefObject<HTMLButtonElement | null>;
-12	}
-13	
-14	interface UseSlotTileDragOptions {
-15	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-16	  tileId: string | null;
-17	  label: string | null;
-18	  zoneIndex: number;
-19	  /**
-20	   * Called when the dragged tile is dropped on a target zone.
-21	   * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
-22	   * SWAP_TILES as appropriate.
-23	   */
-24	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-25	}
-26	
-27	/**
-28	 * Enables an occupied slot tile to be dragged to another slot.
-29	 * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-30	 *
-31	 * Tiles never return to the bank via drag — only the eject effect can do that.
-32	 *
-33	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-34	 * visible in the slot during the drag.
-35	 *
-36	 * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
-37	 * called so the caller can dispatch SWAP_TILES.
-38	 *
-39	 * On cancel or no valid drop target: SET_DRAG_ACTIVE is cleared and the tile
-40	 * stays in its current slot (no-op).
-41	 */
-42	export const useSlotTileDrag = ({
-43	  tileId,
-44	  label,
-45	  zoneIndex,
-46	  onDrop,
-47	}: UseSlotTileDragOptions): SlotTileDrag => {
-48	  const dispatch = useAnswerGameDispatch();
-49	  const dragRef = useRef<HTMLButtonElement>(null);
-50	
-51	  // Keep stable refs so the HTML5 adapter closure stays current.
-52	  const onDropRef = useRef(onDrop);
-53	  useEffect(() => {
-54	    onDropRef.current = onDrop;
-55	  }, [onDrop]);
-56	
-57	  // HTML5 DnD — desktop
-58	  useEffect(() => {
-59	    if (!tileId) return;
-60	    const element = dragRef.current;
-61	    if (!element) return;
-62	    const currentTileId = tileId;
-63	    return draggable({
-64	      element,
-65	      getInitialData: () => ({
-66	        tileId: currentTileId,
-67	        sourceZoneIndex: zoneIndex,
-68	      }),
-69	      onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
-70	        setCustomNativeDragPreview({
-71	          nativeSetDragImage,
-72	          getOffset: preserveOffsetOnSource({
-73	            element,
-74	            input: location.current.input,
-75	          }),
-76	          render({ container }) {
-77	            const rect = element.getBoundingClientRect();
-78	            const ghost = document.createElement('div');
-79	            // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
-80	            // inner elements are preserved — avoids the shrunken-font issue
-81	            // that occurs when reading fontSize from the button itself.
-82	            ghost.innerHTML = element.innerHTML;
-83	            Object.assign(ghost.style, {
-84	              width: `${rect.width}px`,
-85	              height: `${rect.height}px`,
-86	              borderRadius: '12px',
-87	              display: 'flex',
-88	              alignItems: 'center',
-89	              justifyContent: 'center',
-90	              background: 'var(--card, #fff)',
-91	              color: 'var(--card-foreground, #000)',
-92	              boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-93	              transform: 'scale(1.08)',
-94	            });
-95	            container.append(ghost);
-96	            return () => ghost.remove();
-97	          },
-98	        });
-99	      },
-100	      onDragStart: () =>
-101	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-102	      onDrop: ({ location }) => {
-103	        const targets = location.current.dropTargets;
-104	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-105	
-106	        // Always clear drag state first.
-107	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-108	
-109	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-110	          // Confirmed drop on a valid slot — caller handles SWAP_TILES.
-111	          onDropRef.current(currentTileId, targetZoneIndex);
-112	        }
-113	        // else: dropped outside a slot — tile stays put (no-op)
-114	      },
-115	    });
-116	  }, [tileId, zoneIndex, dispatch]);
-117	
-118	  // Wrap onDrop for the touch path: caller handles SWAP_TILES.
-119	  const handleTouchDrop = useCallback(
-120	    (droppedTileId: string, targetZoneIndex: number) => {
-121	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-122	      onDrop(droppedTileId, targetZoneIndex);
-123	    },
-124	    [dispatch, onDrop],
-125	  );
-126	
-127	  // Pointer-events drag — touch / mobile
-128	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-129	    useTouchDrag({
-130	      tileId: tileId ?? '',
-131	      label: label ?? '',
-132	      onDragStart: tileId
-133	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-134	        : undefined,
-135	      onDragCancel: tileId
-136	        ? () => {
-137	            // Dropped outside all targets — tile stays in slot (no-op).
-138	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-139	          }
-140	        : undefined,
-141	      onDrop: handleTouchDrop,
-142	    });
-143	
-144	  return {
-145	    dragRef,
-146	    onPointerDown,
-147	    onPointerMove,
-148	    onPointerUp,
-149	    onPointerCancel,
-150	  };
-151	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
+3 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
+4 import { useCallback, useEffect, useRef } from 'react';
+5 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TouchDragHandlers } from './useTouchDrag';
+8 import type { RefObject } from 'react';
+9 
+10 export interface SlotTileDrag extends TouchDragHandlers {
+11   dragRef: RefObject<HTMLButtonElement | null>;
+12 }
+13 
+14 interface UseSlotTileDragOptions {
+15   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+16   tileId: string | null;
+17   label: string | null;
+18   zoneIndex: number;
+19   /**
+20    * Called when the dragged tile is dropped on a target zone.
+21    * The caller (useSlotBehavior.handleDrop) is responsible for dispatching
+22    * SWAP_TILES as appropriate.
+23    */
+24   onDrop: (tileId: string, targetZoneIndex: number) => void;
+25 }
+26 
+27 /**
+28  * Enables an occupied slot tile to be dragged to another slot.
+29  * Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+30  *
+31  * Tiles never return to the bank via drag — only the eject effect can do that.
+32  *
+33  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+34  * visible in the slot during the drag.
+35  *
+36  * On confirmed drop on a valid zone: SET_DRAG_ACTIVE is cleared and onDrop is
+37  * called so the caller can dispatch SWAP_TILES.
+38  *
+39  * On cancel or no valid drop target: SET_DRAG_ACTIVE is cleared and the tile
+40  * stays in its current slot (no-op).
+41  */
+42 export const useSlotTileDrag = ({
+43   tileId,
+44   label,
+45   zoneIndex,
+46   onDrop,
+47 }: UseSlotTileDragOptions): SlotTileDrag => {
+48   const dispatch = useAnswerGameDispatch();
+49   const dragRef = useRef<HTMLButtonElement>(null);
+50 
+51   // Keep stable refs so the HTML5 adapter closure stays current.
+52   const onDropRef = useRef(onDrop);
+53   useEffect(() => {
+54     onDropRef.current = onDrop;
+55   }, [onDrop]);
+56 
+57   // HTML5 DnD — desktop
+58   useEffect(() => {
+59     if (!tileId) return;
+60     const element = dragRef.current;
+61     if (!element) return;
+62     const currentTileId = tileId;
+63     return draggable({
+64       element,
+65       getInitialData: () => ({
+66         tileId: currentTileId,
+67         sourceZoneIndex: zoneIndex,
+68       }),
+69       onGenerateDragPreview: ({ nativeSetDragImage, location }) => {
+70         setCustomNativeDragPreview({
+71           nativeSetDragImage,
+72           getOffset: preserveOffsetOnSource({
+73             element,
+74             input: location.current.input,
+75           }),
+76           render({ container }) {
+77             const rect = element.getBoundingClientRect();
+78             const ghost = document.createElement('div');
+79             // Copy full innerHTML so Tailwind classes (e.g. text-2xl) on
+80             // inner elements are preserved — avoids the shrunken-font issue
+81             // that occurs when reading fontSize from the button itself.
+82             ghost.innerHTML = element.innerHTML;
+83             Object.assign(ghost.style, {
+84               width: `${rect.width}px`,
+85               height: `${rect.height}px`,
+86               borderRadius: '12px',
+87               display: 'flex',
+88               alignItems: 'center',
+89               justifyContent: 'center',
+90               background: 'var(--card, #fff)',
+91               color: 'var(--card-foreground, #000)',
+92               boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+93               transform: 'scale(1.08)',
+94             });
+95             container.append(ghost);
+96             return () => ghost.remove();
+97           },
+98         });
+99       },
+100       onDragStart: () =>
+101         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+102       onDrop: ({ location }) => {
+103         const targets = location.current.dropTargets;
+104         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+105 
+106         // Always clear drag state first.
+107         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+108 
+109         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+110           // Confirmed drop on a valid slot — caller handles SWAP_TILES.
+111           onDropRef.current(currentTileId, targetZoneIndex);
+112         }
+113         // else: dropped outside a slot — tile stays put (no-op)
+114       },
+115     });
+116   }, [tileId, zoneIndex, dispatch]);
+117 
+118   // Wrap onDrop for the touch path: caller handles SWAP_TILES.
+119   const handleTouchDrop = useCallback(
+120     (droppedTileId: string, targetZoneIndex: number) => {
+121       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+122       onDrop(droppedTileId, targetZoneIndex);
+123     },
+124     [dispatch, onDrop],
+125   );
+126 
+127   // Pointer-events drag — touch / mobile
+128   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+129     useTouchDrag({
+130       tileId: tileId ?? '',
+131       label: label ?? '',
+132       onDragStart: tileId
+133         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+134         : undefined,
+135       onDragCancel: tileId
+136         ? () => {
+137             // Dropped outside all targets — tile stays in slot (no-op).
+138             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+139           }
+140         : undefined,
+141       onDrop: handleTouchDrop,
+142     });
+143 
+144   return {
+145     dragRef,
+146     onPointerDown,
+147     onPointerMove,
+148     onPointerUp,
+149     onPointerCancel,
+150   };
+151 };
 152
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
@@ -643,7 +649,6 @@ Let me understand the two issues:
 
 Let me look at the slot tile drag's onDrop handler more closely. On line 102-114, when a tile is dropped:
 
-
 The issue is that when dropping on a bank target, `targetZoneIndex` is undefined since the bank only provides `isBankTarget: true`, so the drop gets ignored as a no-op. I need to modify the handler to dispatch a REMOVE_TILE action when the target is the bank, then check what's changed on master versus the current version.
 
 Now let me look at the dark mode issue.
@@ -656,27 +661,28 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-100	      onDragStart: () =>
-101	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-102	      onDrop: ({ location }) => {
-103	        const targets = location.current.dropTargets;
-104	        const targetZoneIndex = targets[0]?.data['zoneIndex'];
-105	
-106	        // Always clear drag state first.
-107	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-108	
-109	        if (targets.length > 0 && typeof targetZoneIndex === 'number') {
-110	          // Confirmed drop on a valid slot — caller handles SWAP_TILES.
-111	          onDropRef.current(currentTileId, targetZoneIndex);
-112	        }
-113	        // else: dropped outside a slot — tile stays put (no-op)
-114	      },
-115	    });
-116	  }, [tileId, zoneIndex, dispatch]);
-117	
-118	  // Wrap onDrop for the touch path: caller handles SWAP_TILES.
-119	  const handleTouchDrop = useCallback(
+100       onDragStart: () =>
+101         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+102       onDrop: ({ location }) => {
+103         const targets = location.current.dropTargets;
+104         const targetZoneIndex = targets[0]?.data['zoneIndex'];
+105 
+106         // Always clear drag state first.
+107         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+108 
+109         if (targets.length > 0 && typeof targetZoneIndex === 'number') {
+110           // Confirmed drop on a valid slot — caller handles SWAP_TILES.
+111           onDropRef.current(currentTileId, targetZoneIndex);
+112         }
+113         // else: dropped outside a slot — tile stays put (no-op)
+114       },
+115     });
+116   }, [tileId, zoneIndex, dispatch]);
+117 
+118   // Wrap onDrop for the touch path: caller handles SWAP_TILES.
+119   const handleTouchDrop = useCallback(
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
@@ -686,602 +692,603 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-1	@import 'https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400;1,700&family=Edu+NSW+ACT+Foundation:wght@400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap';
-2	@import 'tailwindcss';
-3	@import 'tw-animate-css';
-4	@import 'shadcn/tailwind.css';
-5	@import '@fontsource-variable/geist';
-6	
-7	@custom-variant dark (&:is(.dark *));
-8	
-9	@plugin "@tailwindcss/typography";
-10	
-11	@theme {
-12	  --font-sans:
-13	    'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope',
-14	    ui-sans-serif, system-ui, sans-serif;
-15	}
-16	
-17	:root {
-18	  --sea-ink: #173a40;
-19	  --sea-ink-soft: #416166;
-20	  --lagoon: #4fb8b2;
-21	  --lagoon-light: #7ed3bf;
-22	  --lagoon-deep: #328f97;
-23	  --palm: #2f6a4a;
-24	  --sand: #e7f0e8;
-25	  --foam: #f3faf5;
-26	  --surface: rgb(255 255 255 / 74%);
-27	  --surface-strong: rgb(255 255 255 / 90%);
-28	  --line: rgb(23 58 64 / 14%);
-29	  --inset-glint: rgb(255 255 255 / 82%);
-30	  --kicker: rgb(47 106 74 / 90%);
-31	  --bg-base: #e7f3ec;
-32	  --header-bg: rgb(251 255 248 / 84%);
-33	  --chip-bg: rgb(255 255 255 / 80%);
-34	  --chip-line: rgb(47 106 74 / 18%);
-35	  --link-bg-hover: rgb(255 255 255 / 90%);
-36	  --hero-a: rgb(79 184 178 / 36%);
-37	  --hero-b: rgb(47 106 74 / 20%);
-38	
-39	  /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
-40	  --foreground: var(--bs-text);
-41	  --background: var(--bs-background);
-42	  --popover: oklch(100% 0 0deg);
-43	  --popover-foreground: oklch(14.5% 0 0deg);
-44	  --primary: var(--bs-primary);
-45	  --primary-foreground: var(--bs-surface);
-46	  --secondary: var(--bs-secondary);
-47	  --secondary-foreground: var(--bs-surface);
-48	  --card: var(--bs-surface);
-49	  --card-foreground: var(--bs-text);
-50	  --muted: oklch(97% 0 0deg);
-51	  --muted-foreground: oklch(55.6% 0 0deg);
-52	  --accent: oklch(97% 0 0deg);
-53	  --accent-foreground: oklch(20.5% 0 0deg);
-54	  --destructive: oklch(57.7% 0.245 27.325deg);
-55	  --border: var(--bs-accent);
-56	  --input: oklch(92.2% 0 0deg);
-57	  --ring: var(--bs-primary);
-58	  --chart-1: oklch(87% 0 0deg);
-59	  --chart-2: oklch(55.6% 0 0deg);
-60	  --chart-3: oklch(43.9% 0 0deg);
-61	  --chart-4: oklch(37.1% 0 0deg);
-62	  --chart-5: oklch(26.9% 0 0deg);
-63	  --radius: 0.625rem;
-64	  --sidebar: oklch(98.5% 0 0deg);
-65	  --sidebar-foreground: oklch(14.5% 0 0deg);
-66	  --sidebar-primary: oklch(20.5% 0 0deg);
-67	  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-68	  --sidebar-accent: oklch(97% 0 0deg);
-69	  --sidebar-accent-foreground: oklch(20.5% 0 0deg);
-70	  --sidebar-border: oklch(92.2% 0 0deg);
-71	  --sidebar-ring: oklch(70.8% 0 0deg);
-72	
-73	  /* BaseSkill Design System — light defaults (aligned with Ocean preset / WCAG AA) */
-74	  --bs-primary: #0077b6;
-75	  --bs-secondary: #00b4d8;
-76	  --bs-background: #caf0f8;
-77	  --bs-surface: #fff;
-78	  --bs-text: #03045e;
-79	  --bs-accent: #f77f00;
-80	  --bs-success: #6bcb77;
-81	  --bs-warning: #f4a261;
-82	  --bs-error: #e63946;
-83	  --bs-font-weight-default: 600;
-84	  --bs-radius-card: 1.5rem;
-85	  --bs-radius-button: 1rem;
-86	}
-87	
-88	:root[data-theme='dark'] {
-89	  --sea-ink: #d7ece8;
-90	  --sea-ink-soft: #afcdc8;
-91	  --lagoon: #60d7cf;
-92	  --lagoon-deep: #8de5db;
-93	  --palm: #6ec89a;
-94	  --sand: #0f1a1e;
-95	  --foam: #101d22;
-96	  --surface: rgb(16 30 34 / 80%);
-97	  --surface-strong: rgb(15 27 31 / 92%);
-98	  --line: rgb(141 229 219 / 18%);
-99	  --inset-glint: rgb(194 247 238 / 14%);
-100	  --kicker: #b8efe5;
-101	  --bg-base: #0a1418;
-102	  --header-bg: rgb(10 20 24 / 80%);
-103	  --chip-bg: rgb(13 28 32 / 90%);
-104	  --chip-line: rgb(141 229 219 / 24%);
-105	  --link-bg-hover: rgb(24 44 49 / 80%);
-106	  --hero-a: rgb(96 215 207 / 18%);
-107	  --hero-b: rgb(110 200 154 / 12%);
-108	
-109	  /* BaseSkill Design System — Galaxy (dark) */
-110	  --bs-primary: #ff9f43;
-111	  --bs-secondary: #54a0ff;
-112	  --bs-background: #1a1a2e;
-113	  --bs-surface: #16213e;
-114	  --bs-text: #e8f4fd;
-115	  --bs-accent: #feca57;
-116	  --bs-success: #6bcb77;
-117	  --bs-warning: #f4a261;
-118	  --bs-error: #ff6b6b;
-119	}
-120	
-121	@media (prefers-color-scheme: dark) {
-122	  :root:not([data-theme='light']) {
-123	    --sea-ink: #d7ece8;
-124	    --sea-ink-soft: #afcdc8;
-125	    --lagoon: #60d7cf;
-126	    --lagoon-deep: #8de5db;
-127	    --palm: #6ec89a;
-128	    --sand: #0f1a1e;
-129	    --foam: #101d22;
-130	    --surface: rgb(16 30 34 / 80%);
-131	    --surface-strong: rgb(15 27 31 / 92%);
-132	    --line: rgb(141 229 219 / 18%);
-133	    --inset-glint: rgb(194 247 238 / 14%);
-134	    --kicker: #b8efe5;
-135	    --bg-base: #0a1418;
-136	    --header-bg: rgb(10 20 24 / 80%);
-137	    --chip-bg: rgb(13 28 32 / 90%);
-138	    --chip-line: rgb(141 229 219 / 24%);
-139	    --link-bg-hover: rgb(24 44 49 / 80%);
-140	    --hero-a: rgb(96 215 207 / 18%);
-141	    --hero-b: rgb(110 200 154 / 12%);
-142	
-143	    /* BaseSkill Design System — Galaxy (dark) */
-144	    --bs-primary: #ff9f43;
-145	    --bs-secondary: #54a0ff;
-146	    --bs-background: #1a1a2e;
-147	    --bs-surface: #16213e;
-148	    --bs-text: #e8f4fd;
-149	    --bs-accent: #feca57;
-150	    --bs-success: #6bcb77;
-151	    --bs-warning: #f4a261;
-152	    --bs-error: #ff6b6b;
-153	  }
-154	}
-155	
-156	* {
-157	  box-sizing: border-box;
-158	}
-159	
-160	html,
-161	body,
-162	#app {
-163	  min-height: 100%;
-164	}
-165	
-166	body {
-167	  margin: 0;
-168	  color: var(--sea-ink);
-169	  font-family: var(--font-sans);
-170	  background:
-171	    radial-gradient(
-172	      1100px 620px at -8% -10%,
-173	      var(--hero-a),
-174	      transparent 58%
-175	    ),
-176	    radial-gradient(
-177	      1050px 620px at 112% -12%,
-178	      var(--hero-b),
-179	      transparent 62%
-180	    ),
-181	    radial-gradient(
-182	      720px 380px at 50% 115%,
-183	      rgb(79 184 178 / 10%),
-184	      transparent 68%
-185	    ),
-186	    linear-gradient(
-187	      180deg,
-188	      color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
-189	      var(--foam) 44%,
-190	      var(--bg-base) 100%
-191	    );
-192	  overflow-x: hidden;
-193	  -webkit-font-smoothing: antialiased;
-194	  -moz-osx-font-smoothing: grayscale;
-195	}
-196	
-197	body::before {
-198	  content: '';
-199	  position: fixed;
-200	  inset: 0;
-201	  pointer-events: none;
-202	  z-index: -1;
-203	  opacity: 0.28;
-204	  background:
-205	    radial-gradient(
-206	      circle at 20% 15%,
-207	      rgb(255 255 255 / 80%),
-208	      transparent 34%
-209	    ),
-210	    radial-gradient(
-211	      circle at 78% 26%,
-212	      rgb(79 184 178 / 20%),
-213	      transparent 42%
-214	    ),
-215	    radial-gradient(
-216	      circle at 42% 82%,
-217	      rgb(47 106 74 / 14%),
-218	      transparent 36%
-219	    );
-220	}
-221	
-222	body::after {
-223	  content: '';
-224	  position: fixed;
-225	  inset: 0;
-226	  pointer-events: none;
-227	  z-index: -1;
-228	  opacity: 0.14;
-229	  background-image:
-230	    linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
-231	    linear-gradient(90deg, rgb(255 255 255 / 6%) 1px, transparent 1px);
-232	  background-size: 28px 28px;
-233	  mask-image: radial-gradient(
-234	    circle at 50% 30%,
-235	    oklch(0% 0 0deg),
-236	    transparent 78%
-237	  );
-238	}
-239	
-240	a {
-241	  color: var(--lagoon-deep);
-242	  text-decoration-color: rgb(50 143 151 / 40%);
-243	  text-decoration-thickness: 1px;
-244	  text-underline-offset: 2px;
-245	}
-246	
-247	code {
-248	  font-size: 0.9em;
-249	  border: 1px solid var(--line);
-250	  background: color-mix(
-251	    in oklab,
-252	    var(--surface-strong) 82%,
-253	    oklch(100% 0 0deg) 18%
-254	  );
-255	  border-radius: 7px;
-256	  padding: 2px 7px;
-257	}
-258	
-259	pre code {
-260	  border: 0;
-261	  background: transparent;
-262	  padding: 0;
-263	  border-radius: 0;
-264	  font-size: inherit;
-265	  color: inherit;
-266	}
-267	
-268	.page-wrap {
-269	  width: min(1080px, calc(100% - 2rem));
-270	  margin-inline: auto;
-271	}
-272	
-273	.display-title {
-274	  font-family: Fraunces, Georgia, serif;
-275	}
-276	
-277	.island-shell {
-278	  border: 1px solid var(--line);
-279	  background: linear-gradient(
-280	    165deg,
-281	    var(--surface-strong),
-282	    var(--surface)
-283	  );
-284	  box-shadow:
-285	    0 1px 0 var(--inset-glint) inset,
-286	    0 22px 44px rgb(30 90 72 / 10%),
-287	    0 6px 18px rgb(23 58 64 / 8%);
-288	  backdrop-filter: blur(4px);
-289	}
-290	
-291	.feature-card {
-292	  background: linear-gradient(
-293	    165deg,
-294	    color-mix(
-295	      in oklab,
-296	      var(--surface-strong) 93%,
-297	      oklch(100% 0 0deg) 7%
-298	    ),
-299	    var(--surface)
-300	  );
-301	  box-shadow:
-302	    0 1px 0 var(--inset-glint) inset,
-303	    0 18px 34px rgb(30 90 72 / 10%),
-304	    0 4px 14px rgb(23 58 64 / 6%);
-305	}
-306	
-307	.feature-card:hover {
-308	  transform: translateY(-2px);
-309	  border-color: color-mix(
-310	    in oklab,
-311	    var(--lagoon-deep) 35%,
-312	    var(--line)
-313	  );
-314	}
-315	
-316	button,
-317	.island-shell,
-318	a {
-319	  transition:
-320	    background-color 180ms ease,
-321	    color 180ms ease,
-322	    border-color 180ms ease,
-323	    transform 180ms ease;
-324	}
-325	
-326	a:hover {
-327	  color: var(--lagoon-deep);
-328	}
-329	
-330	.island-kicker {
-331	  letter-spacing: 0.16em;
-332	  text-transform: uppercase;
-333	  font-weight: 700;
-334	  font-size: 0.69rem;
-335	  color: var(--kicker);
-336	}
-337	
-338	.nav-link {
-339	  position: relative;
-340	  display: inline-flex;
-341	  align-items: center;
-342	  text-decoration: none;
-343	  color: var(--sea-ink-soft);
-344	}
-345	
-346	.nav-link::after {
-347	  content: '';
-348	  position: absolute;
-349	  left: 0;
-350	  bottom: -6px;
-351	  width: 100%;
-352	  height: 2px;
-353	  transform: scaleX(0);
-354	  transform-origin: left;
-355	  background: linear-gradient(
-356	    90deg,
-357	    var(--lagoon),
-358	    var(--lagoon-light)
-359	  );
-360	  transition: transform 170ms ease;
-361	}
-362	
-363	.nav-link:hover,
-364	.nav-link.is-active {
-365	  color: var(--sea-ink);
-366	}
-367	
-368	.nav-link:hover::after,
-369	.nav-link.is-active::after {
-370	  transform: scaleX(1);
-371	}
-372	
-373	@media (width <= 640px) {
-374	  .nav-link::after {
-375	    bottom: -4px;
-376	  }
-377	}
-378	
-379	.site-footer {
-380	  border-top: 1px solid var(--line);
-381	  background: color-mix(
-382	    in oklab,
-383	    var(--header-bg) 84%,
-384	    transparent 16%
-385	  );
-386	}
-387	
-388	.rise-in {
-389	  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-390	}
-391	
-392	@keyframes rise-in {
-393	  from {
-394	    opacity: 0;
-395	    transform: translateY(12px);
-396	  }
-397	
-398	  to {
-399	    opacity: 1;
-400	    transform: translateY(0);
-401	  }
-402	}
-403	
-404	@keyframes blink {
-405	  0%,
-406	  100% {
-407	    opacity: 1;
-408	  }
-409	
-410	  50% {
-411	    opacity: 0;
-412	  }
-413	}
-414	
-415	@keyframes shake {
-416	  0%,
-417	  100% {
-418	    transform: translateX(0);
-419	  }
-420	
-421	  20% {
-422	    transform: translateX(-4px);
-423	  }
-424	
-425	  40% {
-426	    transform: translateX(4px);
-427	  }
-428	
-429	  60% {
-430	    transform: translateX(-3px);
-431	  }
-432	
-433	  80% {
-434	    transform: translateX(2px);
-435	  }
-436	}
-437	
-438	@keyframes pop {
-439	  0% {
-440	    transform: scale(1);
-441	  }
-442	
-443	  50% {
-444	    transform: scale(1.08);
-445	  }
-446	
-447	  100% {
-448	    transform: scale(1);
-449	  }
-450	}
-451	
-452	@theme inline {
-453	  --animate-blink: blink 1s step-end infinite;
-454	  --animate-shake: shake 300ms ease-in-out;
-455	  --animate-pop: pop 250ms ease-out;
-456	  --font-heading: var(--font-sans);
-457	  --font-sans:
-458	    'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
-459	    sans-serif;
-460	  --color-sidebar-ring: var(--sidebar-ring);
-461	  --color-sidebar-border: var(--sidebar-border);
-462	  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-463	  --color-sidebar-accent: var(--sidebar-accent);
-464	  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-465	  --color-sidebar-primary: var(--sidebar-primary);
-466	  --color-sidebar-foreground: var(--sidebar-foreground);
-467	  --color-sidebar: var(--sidebar);
-468	  --color-chart-5: var(--chart-5);
-469	  --color-chart-4: var(--chart-4);
-470	  --color-chart-3: var(--chart-3);
-471	  --color-chart-2: var(--chart-2);
-472	  --color-chart-1: var(--chart-1);
-473	  --color-ring: var(--ring);
-474	  --color-input: var(--input);
-475	  --color-border: var(--border);
-476	  --color-destructive: var(--destructive);
-477	  --color-accent-foreground: var(--accent-foreground);
-478	  --color-accent: var(--accent);
-479	  --color-muted-foreground: var(--muted-foreground);
-480	  --color-muted: var(--muted);
-481	  --color-secondary-foreground: var(--secondary-foreground);
-482	  --color-secondary: var(--secondary);
-483	  --color-primary-foreground: var(--primary-foreground);
-484	  --color-primary: var(--primary);
-485	  --color-popover-foreground: var(--popover-foreground);
-486	  --color-popover: var(--popover);
-487	  --color-card-foreground: var(--card-foreground);
-488	  --color-card: var(--card);
-489	  --color-foreground: var(--foreground);
-490	  --color-background: var(--background);
-491	  --radius-sm: calc(var(--radius) * 0.6);
-492	  --radius-md: calc(var(--radius) * 0.8);
-493	  --radius-lg: var(--radius);
-494	  --radius-xl: calc(var(--radius) * 1.4);
-495	  --radius-2xl: calc(var(--radius) * 1.8);
-496	  --radius-3xl: calc(var(--radius) * 2.2);
-497	  --radius-4xl: calc(var(--radius) * 2.6);
-498	}
-499	
-500	.dark {
-501	  --background: oklch(14.5% 0 0deg);
-502	  --foreground: oklch(98.5% 0 0deg);
-503	  --card: oklch(20.5% 0 0deg);
-504	  --card-foreground: oklch(98.5% 0 0deg);
-505	  --popover: oklch(20.5% 0 0deg);
-506	  --popover-foreground: oklch(98.5% 0 0deg);
-507	  --primary: oklch(92.2% 0 0deg);
-508	  --primary-foreground: oklch(20.5% 0 0deg);
-509	  --secondary: oklch(26.9% 0 0deg);
-510	  --secondary-foreground: oklch(98.5% 0 0deg);
-511	  --muted: oklch(26.9% 0 0deg);
-512	  --muted-foreground: oklch(70.8% 0 0deg);
-513	  --accent: oklch(26.9% 0 0deg);
-514	  --accent-foreground: oklch(98.5% 0 0deg);
-515	  --destructive: oklch(70.4% 0.191 22.216deg);
-516	  --border: oklch(100% 0 0deg / 10%);
-517	  --input: oklch(100% 0 0deg / 15%);
-518	  --ring: oklch(55.6% 0 0deg);
-519	  --chart-1: oklch(87% 0 0deg);
-520	  --chart-2: oklch(55.6% 0 0deg);
-521	  --chart-3: oklch(43.9% 0 0deg);
-522	  --chart-4: oklch(37.1% 0 0deg);
-523	  --chart-5: oklch(26.9% 0 0deg);
-524	  --sidebar: oklch(20.5% 0 0deg);
-525	  --sidebar-foreground: oklch(98.5% 0 0deg);
-526	  --sidebar-primary: oklch(48.8% 0.243 264.376deg);
-527	  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-528	  --sidebar-accent: oklch(26.9% 0 0deg);
-529	  --sidebar-accent-foreground: oklch(98.5% 0 0deg);
-530	  --sidebar-border: oklch(100% 0 0deg / 10%);
-531	  --sidebar-ring: oklch(55.6% 0 0deg);
-532	}
-533	
-534	/* Bookmark colour utilities — derived from --bookmark-play set per-component */
-535	.bookmark-bg {
-536	  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
-537	}
-538	
-539	.dark .bookmark-bg {
-540	  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
-541	}
-542	
-543	.bookmark-tag-bg {
-544	  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
-545	}
-546	
-547	.dark .bookmark-tag-bg {
-548	  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
-549	}
-550	
-551	.bookmark-text {
-552	  color: var(--bookmark-play);
-553	}
-554	
-555	@layer base {
-556	  * {
-557	    @apply border-border outline-ring/50;
-558	  }
-559	
-560	  body {
-561	    @apply bg-background text-foreground;
-562	  }
-563	
-564	  html {
-565	    @apply font-sans;
-566	  }
-567	}
-568	
-569	/* ── BaseSkill Design System ─────────────────────────────────────── */
-570	
-571	[data-theme='ocean'] {
-572	  --bs-primary: #0077b6;
-573	  --bs-secondary: #00b4d8;
-574	  --bs-background: #eaf6fb;
-575	  --bs-surface: #fff;
-576	  --bs-text: #023e57;
-577	  --bs-accent: #ffb703;
-578	  --bs-success: #2dc653;
-579	  --bs-warning: #f4a261;
-580	  --bs-error: #e63946;
-581	  --bs-font-weight-default: 600;
-582	}
-583	
-584	@theme inline {
-585	  --color-bs-primary: var(--bs-primary);
-586	  --color-bs-secondary: var(--bs-secondary);
-587	  --color-bs-background: var(--bs-background);
-588	  --color-bs-surface: var(--bs-surface);
-589	  --color-bs-text: var(--bs-text);
-590	  --color-bs-accent: var(--bs-accent);
-591	  --color-bs-success: var(--bs-success);
-592	  --color-bs-warning: var(--bs-warning);
-593	  --color-bs-error: var(--bs-error);
-594	}
+1 @import 'https://fonts.googleapis.com/css2?family=Andika:ital,wght@0,400;0,700;1,400;1,700&family=Edu+NSW+ACT+Foundation:wght@400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap';
+2 @import 'tailwindcss';
+3 @import 'tw-animate-css';
+4 @import 'shadcn/tailwind.css';
+5 @import '@fontsource-variable/geist';
+6 
+7 @custom-variant dark (&:is(.dark *));
+8 
+9 @plugin "@tailwindcss/typography";
+10 
+11 @theme {
+12   --font-sans:
+13     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope',
+14     ui-sans-serif, system-ui, sans-serif;
+15 }
+16 
+17 :root {
+18   --sea-ink: #173a40;
+19   --sea-ink-soft: #416166;
+20   --lagoon: #4fb8b2;
+21   --lagoon-light: #7ed3bf;
+22   --lagoon-deep: #328f97;
+23   --palm: #2f6a4a;
+24   --sand: #e7f0e8;
+25   --foam: #f3faf5;
+26   --surface: rgb(255 255 255 / 74%);
+27   --surface-strong: rgb(255 255 255 / 90%);
+28   --line: rgb(23 58 64 / 14%);
+29   --inset-glint: rgb(255 255 255 / 82%);
+30   --kicker: rgb(47 106 74 / 90%);
+31   --bg-base: #e7f3ec;
+32   --header-bg: rgb(251 255 248 / 84%);
+33   --chip-bg: rgb(255 255 255 / 80%);
+34   --chip-line: rgb(47 106 74 / 18%);
+35   --link-bg-hover: rgb(255 255 255 / 90%);
+36   --hero-a: rgb(79 184 178 / 36%);
+37   --hero-b: rgb(47 106 74 / 20%);
+38 
+39   /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+40   --foreground: var(--bs-text);
+41   --background: var(--bs-background);
+42   --popover: oklch(100% 0 0deg);
+43   --popover-foreground: oklch(14.5% 0 0deg);
+44   --primary: var(--bs-primary);
+45   --primary-foreground: var(--bs-surface);
+46   --secondary: var(--bs-secondary);
+47   --secondary-foreground: var(--bs-surface);
+48   --card: var(--bs-surface);
+49   --card-foreground: var(--bs-text);
+50   --muted: oklch(97% 0 0deg);
+51   --muted-foreground: oklch(55.6% 0 0deg);
+52   --accent: oklch(97% 0 0deg);
+53   --accent-foreground: oklch(20.5% 0 0deg);
+54   --destructive: oklch(57.7% 0.245 27.325deg);
+55   --border: var(--bs-accent);
+56   --input: oklch(92.2% 0 0deg);
+57   --ring: var(--bs-primary);
+58   --chart-1: oklch(87% 0 0deg);
+59   --chart-2: oklch(55.6% 0 0deg);
+60   --chart-3: oklch(43.9% 0 0deg);
+61   --chart-4: oklch(37.1% 0 0deg);
+62   --chart-5: oklch(26.9% 0 0deg);
+63   --radius: 0.625rem;
+64   --sidebar: oklch(98.5% 0 0deg);
+65   --sidebar-foreground: oklch(14.5% 0 0deg);
+66   --sidebar-primary: oklch(20.5% 0 0deg);
+67   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
+68   --sidebar-accent: oklch(97% 0 0deg);
+69   --sidebar-accent-foreground: oklch(20.5% 0 0deg);
+70   --sidebar-border: oklch(92.2% 0 0deg);
+71   --sidebar-ring: oklch(70.8% 0 0deg);
+72 
+73   /* BaseSkill Design System — light defaults (aligned with Ocean preset / WCAG AA) */
+74   --bs-primary: #0077b6;
+75   --bs-secondary: #00b4d8;
+76   --bs-background: #caf0f8;
+77   --bs-surface: #fff;
+78   --bs-text: #03045e;
+79   --bs-accent: #f77f00;
+80   --bs-success: #6bcb77;
+81   --bs-warning: #f4a261;
+82   --bs-error: #e63946;
+83   --bs-font-weight-default: 600;
+84   --bs-radius-card: 1.5rem;
+85   --bs-radius-button: 1rem;
+86 }
+87 
+88 :root[data-theme='dark'] {
+89   --sea-ink: #d7ece8;
+90   --sea-ink-soft: #afcdc8;
+91   --lagoon: #60d7cf;
+92   --lagoon-deep: #8de5db;
+93   --palm: #6ec89a;
+94   --sand: #0f1a1e;
+95   --foam: #101d22;
+96   --surface: rgb(16 30 34 / 80%);
+97   --surface-strong: rgb(15 27 31 / 92%);
+98   --line: rgb(141 229 219 / 18%);
+99   --inset-glint: rgb(194 247 238 / 14%);
+100   --kicker: #b8efe5;
+101   --bg-base: #0a1418;
+102   --header-bg: rgb(10 20 24 / 80%);
+103   --chip-bg: rgb(13 28 32 / 90%);
+104   --chip-line: rgb(141 229 219 / 24%);
+105   --link-bg-hover: rgb(24 44 49 / 80%);
+106   --hero-a: rgb(96 215 207 / 18%);
+107   --hero-b: rgb(110 200 154 / 12%);
+108 
+109   /* BaseSkill Design System — Galaxy (dark) */
+110   --bs-primary: #ff9f43;
+111   --bs-secondary: #54a0ff;
+112   --bs-background: #1a1a2e;
+113   --bs-surface: #16213e;
+114   --bs-text: #e8f4fd;
+115   --bs-accent: #feca57;
+116   --bs-success: #6bcb77;
+117   --bs-warning: #f4a261;
+118   --bs-error: #ff6b6b;
+119 }
+120 
+121 @media (prefers-color-scheme: dark) {
+122   :root:not([data-theme='light']) {
+123     --sea-ink: #d7ece8;
+124     --sea-ink-soft: #afcdc8;
+125     --lagoon: #60d7cf;
+126     --lagoon-deep: #8de5db;
+127     --palm: #6ec89a;
+128     --sand: #0f1a1e;
+129     --foam: #101d22;
+130     --surface: rgb(16 30 34 / 80%);
+131     --surface-strong: rgb(15 27 31 / 92%);
+132     --line: rgb(141 229 219 / 18%);
+133     --inset-glint: rgb(194 247 238 / 14%);
+134     --kicker: #b8efe5;
+135     --bg-base: #0a1418;
+136     --header-bg: rgb(10 20 24 / 80%);
+137     --chip-bg: rgb(13 28 32 / 90%);
+138     --chip-line: rgb(141 229 219 / 24%);
+139     --link-bg-hover: rgb(24 44 49 / 80%);
+140     --hero-a: rgb(96 215 207 / 18%);
+141     --hero-b: rgb(110 200 154 / 12%);
+142 
+143     /* BaseSkill Design System — Galaxy (dark) */
+144     --bs-primary: #ff9f43;
+145     --bs-secondary: #54a0ff;
+146     --bs-background: #1a1a2e;
+147     --bs-surface: #16213e;
+148     --bs-text: #e8f4fd;
+149     --bs-accent: #feca57;
+150     --bs-success: #6bcb77;
+151     --bs-warning: #f4a261;
+152     --bs-error: #ff6b6b;
+153   }
+154 }
+155 
+156 * {
+157   box-sizing: border-box;
+158 }
+159 
+160 html,
+161 body,
+162 #app {
+163   min-height: 100%;
+164 }
+165 
+166 body {
+167   margin: 0;
+168   color: var(--sea-ink);
+169   font-family: var(--font-sans);
+170   background:
+171     radial-gradient(
+172       1100px 620px at -8% -10%,
+173       var(--hero-a),
+174       transparent 58%
+175     ),
+176     radial-gradient(
+177       1050px 620px at 112% -12%,
+178       var(--hero-b),
+179       transparent 62%
+180     ),
+181     radial-gradient(
+182       720px 380px at 50% 115%,
+183       rgb(79 184 178 / 10%),
+184       transparent 68%
+185     ),
+186     linear-gradient(
+187       180deg,
+188       color-mix(in oklab, var(--sand) 68%, oklch(100% 0 0deg)) 0%,
+189       var(--foam) 44%,
+190       var(--bg-base) 100%
+191     );
+192   overflow-x: hidden;
+193   -webkit-font-smoothing: antialiased;
+194   -moz-osx-font-smoothing: grayscale;
+195 }
+196 
+197 body::before {
+198   content: '';
+199   position: fixed;
+200   inset: 0;
+201   pointer-events: none;
+202   z-index: -1;
+203   opacity: 0.28;
+204   background:
+205     radial-gradient(
+206       circle at 20% 15%,
+207       rgb(255 255 255 / 80%),
+208       transparent 34%
+209     ),
+210     radial-gradient(
+211       circle at 78% 26%,
+212       rgb(79 184 178 / 20%),
+213       transparent 42%
+214     ),
+215     radial-gradient(
+216       circle at 42% 82%,
+217       rgb(47 106 74 / 14%),
+218       transparent 36%
+219     );
+220 }
+221 
+222 body::after {
+223   content: '';
+224   position: fixed;
+225   inset: 0;
+226   pointer-events: none;
+227   z-index: -1;
+228   opacity: 0.14;
+229   background-image:
+230     linear-gradient(rgb(255 255 255 / 7%) 1px, transparent 1px),
+231     linear-gradient(90deg, rgb(255 255 255 / 6%) 1px, transparent 1px);
+232   background-size: 28px 28px;
+233   mask-image: radial-gradient(
+234     circle at 50% 30%,
+235     oklch(0% 0 0deg),
+236     transparent 78%
+237   );
+238 }
+239 
+240 a {
+241   color: var(--lagoon-deep);
+242   text-decoration-color: rgb(50 143 151 / 40%);
+243   text-decoration-thickness: 1px;
+244   text-underline-offset: 2px;
+245 }
+246 
+247 code {
+248   font-size: 0.9em;
+249   border: 1px solid var(--line);
+250   background: color-mix(
+251     in oklab,
+252     var(--surface-strong) 82%,
+253     oklch(100% 0 0deg) 18%
+254   );
+255   border-radius: 7px;
+256   padding: 2px 7px;
+257 }
+258 
+259 pre code {
+260   border: 0;
+261   background: transparent;
+262   padding: 0;
+263   border-radius: 0;
+264   font-size: inherit;
+265   color: inherit;
+266 }
+267 
+268 .page-wrap {
+269   width: min(1080px, calc(100% - 2rem));
+270   margin-inline: auto;
+271 }
+272 
+273 .display-title {
+274   font-family: Fraunces, Georgia, serif;
+275 }
+276 
+277 .island-shell {
+278   border: 1px solid var(--line);
+279   background: linear-gradient(
+280     165deg,
+281     var(--surface-strong),
+282     var(--surface)
+283   );
+284   box-shadow:
+285     0 1px 0 var(--inset-glint) inset,
+286     0 22px 44px rgb(30 90 72 / 10%),
+287     0 6px 18px rgb(23 58 64 / 8%);
+288   backdrop-filter: blur(4px);
+289 }
+290 
+291 .feature-card {
+292   background: linear-gradient(
+293     165deg,
+294     color-mix(
+295       in oklab,
+296       var(--surface-strong) 93%,
+297       oklch(100% 0 0deg) 7%
+298     ),
+299     var(--surface)
+300   );
+301   box-shadow:
+302     0 1px 0 var(--inset-glint) inset,
+303     0 18px 34px rgb(30 90 72 / 10%),
+304     0 4px 14px rgb(23 58 64 / 6%);
+305 }
+306 
+307 .feature-card:hover {
+308   transform: translateY(-2px);
+309   border-color: color-mix(
+310     in oklab,
+311     var(--lagoon-deep) 35%,
+312     var(--line)
+313   );
+314 }
+315 
+316 button,
+317 .island-shell,
+318 a {
+319   transition:
+320     background-color 180ms ease,
+321     color 180ms ease,
+322     border-color 180ms ease,
+323     transform 180ms ease;
+324 }
+325 
+326 a:hover {
+327   color: var(--lagoon-deep);
+328 }
+329 
+330 .island-kicker {
+331   letter-spacing: 0.16em;
+332   text-transform: uppercase;
+333   font-weight: 700;
+334   font-size: 0.69rem;
+335   color: var(--kicker);
+336 }
+337 
+338 .nav-link {
+339   position: relative;
+340   display: inline-flex;
+341   align-items: center;
+342   text-decoration: none;
+343   color: var(--sea-ink-soft);
+344 }
+345 
+346 .nav-link::after {
+347   content: '';
+348   position: absolute;
+349   left: 0;
+350   bottom: -6px;
+351   width: 100%;
+352   height: 2px;
+353   transform: scaleX(0);
+354   transform-origin: left;
+355   background: linear-gradient(
+356     90deg,
+357     var(--lagoon),
+358     var(--lagoon-light)
+359   );
+360   transition: transform 170ms ease;
+361 }
+362 
+363 .nav-link:hover,
+364 .nav-link.is-active {
+365   color: var(--sea-ink);
+366 }
+367 
+368 .nav-link:hover::after,
+369 .nav-link.is-active::after {
+370   transform: scaleX(1);
+371 }
+372 
+373 @media (width <= 640px) {
+374   .nav-link::after {
+375     bottom: -4px;
+376   }
+377 }
+378 
+379 .site-footer {
+380   border-top: 1px solid var(--line);
+381   background: color-mix(
+382     in oklab,
+383     var(--header-bg) 84%,
+384     transparent 16%
+385   );
+386 }
+387 
+388 .rise-in {
+389   animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+390 }
+391 
+392 @keyframes rise-in {
+393   from {
+394     opacity: 0;
+395     transform: translateY(12px);
+396   }
+397 
+398   to {
+399     opacity: 1;
+400     transform: translateY(0);
+401   }
+402 }
+403 
+404 @keyframes blink {
+405   0%,
+406   100% {
+407     opacity: 1;
+408   }
+409 
+410   50% {
+411     opacity: 0;
+412   }
+413 }
+414 
+415 @keyframes shake {
+416   0%,
+417   100% {
+418     transform: translateX(0);
+419   }
+420 
+421   20% {
+422     transform: translateX(-4px);
+423   }
+424 
+425   40% {
+426     transform: translateX(4px);
+427   }
+428 
+429   60% {
+430     transform: translateX(-3px);
+431   }
+432 
+433   80% {
+434     transform: translateX(2px);
+435   }
+436 }
+437 
+438 @keyframes pop {
+439   0% {
+440     transform: scale(1);
+441   }
+442 
+443   50% {
+444     transform: scale(1.08);
+445   }
+446 
+447   100% {
+448     transform: scale(1);
+449   }
+450 }
+451 
+452 @theme inline {
+453   --animate-blink: blink 1s step-end infinite;
+454   --animate-shake: shake 300ms ease-in-out;
+455   --animate-pop: pop 250ms ease-out;
+456   --font-heading: var(--font-sans);
+457   --font-sans:
+458     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,
+459     sans-serif;
+460   --color-sidebar-ring: var(--sidebar-ring);
+461   --color-sidebar-border: var(--sidebar-border);
+462   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+463   --color-sidebar-accent: var(--sidebar-accent);
+464   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+465   --color-sidebar-primary: var(--sidebar-primary);
+466   --color-sidebar-foreground: var(--sidebar-foreground);
+467   --color-sidebar: var(--sidebar);
+468   --color-chart-5: var(--chart-5);
+469   --color-chart-4: var(--chart-4);
+470   --color-chart-3: var(--chart-3);
+471   --color-chart-2: var(--chart-2);
+472   --color-chart-1: var(--chart-1);
+473   --color-ring: var(--ring);
+474   --color-input: var(--input);
+475   --color-border: var(--border);
+476   --color-destructive: var(--destructive);
+477   --color-accent-foreground: var(--accent-foreground);
+478   --color-accent: var(--accent);
+479   --color-muted-foreground: var(--muted-foreground);
+480   --color-muted: var(--muted);
+481   --color-secondary-foreground: var(--secondary-foreground);
+482   --color-secondary: var(--secondary);
+483   --color-primary-foreground: var(--primary-foreground);
+484   --color-primary: var(--primary);
+485   --color-popover-foreground: var(--popover-foreground);
+486   --color-popover: var(--popover);
+487   --color-card-foreground: var(--card-foreground);
+488   --color-card: var(--card);
+489   --color-foreground: var(--foreground);
+490   --color-background: var(--background);
+491   --radius-sm: calc(var(--radius) * 0.6);
+492   --radius-md: calc(var(--radius) * 0.8);
+493   --radius-lg: var(--radius);
+494   --radius-xl: calc(var(--radius) * 1.4);
+495   --radius-2xl: calc(var(--radius) * 1.8);
+496   --radius-3xl: calc(var(--radius) * 2.2);
+497   --radius-4xl: calc(var(--radius) * 2.6);
+498 }
+499 
+500 .dark {
+501   --background: oklch(14.5% 0 0deg);
+502   --foreground: oklch(98.5% 0 0deg);
+503   --card: oklch(20.5% 0 0deg);
+504   --card-foreground: oklch(98.5% 0 0deg);
+505   --popover: oklch(20.5% 0 0deg);
+506   --popover-foreground: oklch(98.5% 0 0deg);
+507   --primary: oklch(92.2% 0 0deg);
+508   --primary-foreground: oklch(20.5% 0 0deg);
+509   --secondary: oklch(26.9% 0 0deg);
+510   --secondary-foreground: oklch(98.5% 0 0deg);
+511   --muted: oklch(26.9% 0 0deg);
+512   --muted-foreground: oklch(70.8% 0 0deg);
+513   --accent: oklch(26.9% 0 0deg);
+514   --accent-foreground: oklch(98.5% 0 0deg);
+515   --destructive: oklch(70.4% 0.191 22.216deg);
+516   --border: oklch(100% 0 0deg / 10%);
+517   --input: oklch(100% 0 0deg / 15%);
+518   --ring: oklch(55.6% 0 0deg);
+519   --chart-1: oklch(87% 0 0deg);
+520   --chart-2: oklch(55.6% 0 0deg);
+521   --chart-3: oklch(43.9% 0 0deg);
+522   --chart-4: oklch(37.1% 0 0deg);
+523   --chart-5: oklch(26.9% 0 0deg);
+524   --sidebar: oklch(20.5% 0 0deg);
+525   --sidebar-foreground: oklch(98.5% 0 0deg);
+526   --sidebar-primary: oklch(48.8% 0.243 264.376deg);
+527   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
+528   --sidebar-accent: oklch(26.9% 0 0deg);
+529   --sidebar-accent-foreground: oklch(98.5% 0 0deg);
+530   --sidebar-border: oklch(100% 0 0deg / 10%);
+531   --sidebar-ring: oklch(55.6% 0 0deg);
+532 }
+533 
+534 /* Bookmark colour utilities — derived from --bookmark-play set per-component */
+535 .bookmark-bg {
+536   background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+537 }
+538 
+539 .dark .bookmark-bg {
+540   background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+541 }
+542 
+543 .bookmark-tag-bg {
+544   background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+545 }
+546 
+547 .dark .bookmark-tag-bg {
+548   background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+549 }
+550 
+551 .bookmark-text {
+552   color: var(--bookmark-play);
+553 }
+554 
+555 @layer base {
+556   * {
+557     @apply border-border outline-ring/50;
+558   }
+559 
+560   body {
+561     @apply bg-background text-foreground;
+562   }
+563 
+564   html {
+565     @apply font-sans;
+566   }
+567 }
+568 
+569 /* ── BaseSkill Design System ─────────────────────────────────────── */
+570 
+571 [data-theme='ocean'] {
+572   --bs-primary: #0077b6;
+573   --bs-secondary: #00b4d8;
+574   --bs-background: #eaf6fb;
+575   --bs-surface: #fff;
+576   --bs-text: #023e57;
+577   --bs-accent: #ffb703;
+578   --bs-success: #2dc653;
+579   --bs-warning: #f4a261;
+580   --bs-error: #e63946;
+581   --bs-font-weight-default: 600;
+582 }
+583 
+584 @theme inline {
+585   --color-bs-primary: var(--bs-primary);
+586   --color-bs-secondary: var(--bs-secondary);
+587   --color-bs-background: var(--bs-background);
+588   --color-bs-surface: var(--bs-surface);
+589   --color-bs-text: var(--bs-text);
+590   --color-bs-accent: var(--bs-accent);
+591   --color-bs-success: var(--bs-success);
+592   --color-bs-warning: var(--bs-warning);
+593   --color-bs-error: var(--bs-error);
+594 }
 595
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
@@ -1291,18 +1298,19 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:41Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/styles.ts`
 
 ```text
-1	import type { CSSProperties } from 'react';
-2	
-3	/** Skeuomorphic tile button style — applied to all draggable tile buttons. */
-4	export const skeuoStyle: CSSProperties = {
-5	  background:
-6	    'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
-7	  boxShadow:
-8	    'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
-9	  textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
-10	};
+1 import type { CSSProperties } from 'react';
+2 
+3 /** Skeuomorphic tile button style — applied to all draggable tile buttons. */
+4 export const skeuoStyle: CSSProperties = {
+5   background:
+6     'linear-gradient(180deg, rgba(255,255,255,0) 70.48%, #FFF 93.62%, rgba(255,255,255,0) 100%), linear-gradient(180deg, rgba(30,54,87,0) 0%, rgba(30,54,87,0.01) 100%), #FAFAFA',
+7   boxShadow:
+8     'rgba(0,0,0,0.08) 0 0 0 1px, rgba(0,0,0,0.08) 0 -2px 1px 0 inset, rgba(255,255,255,0.5) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
+9   textShadow: '0px 1px 1px rgba(0,0,0,0.12)',
+10 };
 11
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:53Z)**_
@@ -1312,12 +1320,12 @@ Now let me understand the two issues:
 
 **Issue 1: TileBank should be droppable from slots**
 Looking at `useSlotTileDrag.ts` line 102-114, when a slot tile is dropped:
+
 - It checks for `targetZoneIndex` which is a number (zone index)
 - If dropped on the bank, the bank target data has `isBankTarget: true` but no `zoneIndex`
 - So the drop is treated as a no-op (tile stays in slot)
 
 The fix: check if the drop target has `isBankTarget: true` and dispatch `REMOVE_TILE` in that case.
-
 
 **Issue 2: Dark mode broken**
 The `.dark` class is overriding the `--bs-*` token mappings with hardcoded oklch values, which breaks the connection between shadcn variables like `--card` and `--background` and the base token system. Additionally, the tile styling uses hardcoded light colors that don't adapt to dark mode.
@@ -1336,251 +1344,252 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:53Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useSlotTileDrag } from '../useSlotTileDrag';
-6	import { useTileEvaluation } from '../useTileEvaluation';
-7	import {
-8	  triggerEjectReturn,
-9	  triggerPop,
-10	  triggerShake,
-11	} from './slot-animations';
-12	import type { RefObject } from 'react';
-13	import { playSound } from '@/lib/audio/AudioFeedback';
-14	
-15	export interface SlotRenderProps {
-16	  label: string | null;
-17	  tileId: string | null;
-18	  isActive: boolean;
-19	  isWrong: boolean;
-20	  isLocked: boolean;
-21	  isEmpty: boolean;
-22	  showCursor: boolean;
-23	}
-24	
-25	export interface UseSlotBehaviorReturn {
-26	  renderProps: SlotRenderProps;
-27	  slotRef: RefObject<HTMLElement | null>;
-28	  dragRef: RefObject<HTMLButtonElement | null>;
-29	  handleClick: () => void;
-30	  isBeingDragged: boolean;
-31	  pointerHandlers: {
-32	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-33	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-34	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-35	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-36	  };
-37	}
-38	
-39	export const useSlotBehavior = (
-40	  index: number,
-41	): UseSlotBehaviorReturn => {
-42	  const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
-43	    useAnswerGameContext();
-44	  const dispatch = useAnswerGameDispatch();
-45	  const { placeTile } = useTileEvaluation();
-46	
-47	  const zone = zones[index];
-48	  const tileId = zone?.placedTileId ?? null;
-49	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-50	  const label = tile?.label ?? null;
-51	  const isWrong = zone?.isWrong ?? false;
-52	  const isLocked = zone?.isLocked ?? false;
-53	  const isEmpty = tileId === null;
-54	
-55	  // Resolve interaction mode: explicit config or inferred from inputMethod
-56	  const slotInteraction =
-57	    config.slotInteraction ??
-58	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-59	  const isOrdered = slotInteraction === 'ordered';
-60	
-61	  const isActive = isOrdered && activeSlotIndex === index;
-62	  const showCursor =
-63	    isActive && isEmpty && config.inputMethod !== 'drag';
-64	  const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
-65	
-66	  const slotRef = useRef<HTMLElement | null>(null);
-67	  const prevIsWrongRef = useRef(isWrong);
-68	  const prevTileIdRef = useRef(tileId);
-69	  // Holds the startFade handle returned by triggerEjectReturn so we can call
-70	  // it when EJECT_TILE fires and the tile is back in the bank.
-71	  const startFadeRef = useRef<(() => void) | null>(null);
-72	
-73	  // Drop target handler — choose evaluation or swap based on interaction mode
-74	  const handleDrop = useCallback(
-75	    (droppedTileId: string, targetZoneIndex: number) => {
-76	      if (isOrdered) {
-77	        placeTile(droppedTileId, targetZoneIndex);
-78	        return;
-79	      }
-80	      // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
-81	      // Only fall back to placeTile for bank tiles.
-82	      const targetZone = zones[targetZoneIndex];
-83	      if (!targetZone) return;
-84	      const sourceZoneIndex = zones.findIndex(
-85	        (z) => z.placedTileId === droppedTileId,
-86	      );
-87	      if (sourceZoneIndex !== -1) {
-88	        // Evaluate both outcomes before dispatching to play exactly one sound.
-89	        const droppedTile = allTiles.find(
-90	          (t) => t.id === droppedTileId,
-91	        );
-92	        const displacedTile = targetZone.placedTileId
-93	          ? allTiles.find((t) => t.id === targetZone.placedTileId)
-94	          : null;
-95	        const sourceZone = zones[sourceZoneIndex];
-96	        const droppedCorrect =
-97	          droppedTile?.value === targetZone.expectedValue;
-98	        const displacedCorrect = displacedTile
-99	          ? displacedTile.value === sourceZone?.expectedValue
-100	          : true;
-101	        playSound(
-102	          droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
-103	        );
-104	        dispatch({
-105	          type: 'SWAP_TILES',
-106	          fromZoneIndex: sourceZoneIndex,
-107	          toZoneIndex: targetZoneIndex,
-108	        });
-109	        return;
-110	      }
-111	      placeTile(droppedTileId, targetZoneIndex);
-112	    },
-113	    [isOrdered, placeTile, zones, dispatch, allTiles],
-114	  );
-115	
-116	  // Register as drop target
-117	  useEffect(() => {
-118	    const el = slotRef.current;
-119	    if (!el) return;
-120	    return dropTargetForElements({
-121	      element: el,
-122	      getData: () => ({ zoneIndex: index }),
-123	      onDrop: ({ source }) => {
-124	        // Slot-tile drags (sourceZoneIndex present) handle their own
-125	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-126	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-127	        const sourceTileId = source.data['tileId'];
-128	        if (typeof sourceTileId === 'string') {
-129	          handleDrop(sourceTileId, index);
-130	          // Clear drag active state here — the draggable component (bank tile)
-131	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-132	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-133	        }
-134	      },
-135	    });
-136	  }, [index, handleDrop, dispatch]);
-137	
-138	  // Drag source for filled slots
-139	  const {
-140	    dragRef,
-141	    onPointerDown,
-142	    onPointerMove,
-143	    onPointerUp,
-144	    onPointerCancel,
-145	  } = useSlotTileDrag({
-146	    tileId,
-147	    label,
-148	    zoneIndex: index,
-149	    onDrop: handleDrop,
-150	  });
-151	
-152	  // Click handler: remove tile from slot (returns to bank)
-153	  const handleClick = useCallback(() => {
-154	    if (isEmpty) return;
-155	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-156	  }, [isEmpty, dispatch, index]);
-157	
-158	  // Feedback animations: trigger on state transitions
-159	  useEffect(() => {
-160	    const el = slotRef.current;
-161	    if (!el) return;
-162	
-163	    const wasWrong = prevIsWrongRef.current;
-164	    prevIsWrongRef.current = isWrong;
-165	
-166	    const prevTileId = prevTileIdRef.current;
-167	    prevTileIdRef.current = tileId;
-168	    const freshlyPlaced = tileId !== null && prevTileId === null;
-169	
-170	    if (
-171	      tileId !== null &&
-172	      prevTileId !== null &&
-173	      tileId !== prevTileId
-174	    ) {
-175	      // Tile swapped between slots — animate per zone; sound played once in handleDrop.
-176	      if (isWrong) {
-177	        triggerShake(el);
-178	      } else {
-179	        triggerPop(el);
-180	      }
-181	    } else if (isWrong && !wasWrong) {
-182	      // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
-183	      triggerShake(el);
-184	
-185	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-186	        // Start the eject animation after the shake settles.
-187	        const animationTimerId = setTimeout(() => {
-188	          const tileEl = dragRef.current;
-189	          if (!tileEl) return;
-190	          const { startFade } = triggerEjectReturn(
-191	            tileEl,
-192	            tileId,
-193	            () => {},
-194	          );
-195	          startFadeRef.current = startFade;
-196	        }, 350);
-197	        return () => clearTimeout(animationTimerId);
-198	      }
-199	    } else if (freshlyPlaced && !isWrong) {
-200	      // Correctly placed from bank (sound already played by useTileEvaluation).
-201	      triggerPop(el);
-202	    } else if (tileId === null && prevTileId !== null) {
-203	      // Tile returned to bank (click, drag, or eject).
-204	      playSound('tile-place');
-205	      startFadeRef.current?.();
-206	      startFadeRef.current = null;
-207	    }
-208	  }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
-209	
-210	  // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
-211	  // timer survives when the bank tile unmounts after PLACE_TILE. The animation
-212	  // effect above also uses isWrong/tileId so both fire on the same transition.
-213	  useEffect(() => {
-214	    if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
-215	      return;
-216	    const timerId = setTimeout(() => {
-217	      dispatch({ type: 'EJECT_TILE', zoneIndex: index });
-218	    }, 1000);
-219	    return () => clearTimeout(timerId);
-220	  }, [isWrong, config.wrongTileBehavior, dispatch, index]);
-221	
-222	  return {
-223	    renderProps: {
-224	      label,
-225	      tileId,
-226	      isActive,
-227	      isWrong,
-228	      isLocked,
-229	      isEmpty,
-230	      showCursor,
-231	    },
-232	    slotRef,
-233	    dragRef,
-234	    handleClick,
-235	    isBeingDragged,
-236	    pointerHandlers: {
-237	      onPointerDown,
-238	      onPointerMove,
-239	      onPointerUp,
-240	      onPointerCancel,
-241	    },
-242	  };
-243	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useSlotTileDrag } from '../useSlotTileDrag';
+6 import { useTileEvaluation } from '../useTileEvaluation';
+7 import {
+8   triggerEjectReturn,
+9   triggerPop,
+10   triggerShake,
+11 } from './slot-animations';
+12 import type { RefObject } from 'react';
+13 import { playSound } from '@/lib/audio/AudioFeedback';
+14 
+15 export interface SlotRenderProps {
+16   label: string | null;
+17   tileId: string | null;
+18   isActive: boolean;
+19   isWrong: boolean;
+20   isLocked: boolean;
+21   isEmpty: boolean;
+22   showCursor: boolean;
+23 }
+24 
+25 export interface UseSlotBehaviorReturn {
+26   renderProps: SlotRenderProps;
+27   slotRef: RefObject<HTMLElement | null>;
+28   dragRef: RefObject<HTMLButtonElement | null>;
+29   handleClick: () => void;
+30   isBeingDragged: boolean;
+31   pointerHandlers: {
+32     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+33     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+34     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+35     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+36   };
+37 }
+38 
+39 export const useSlotBehavior = (
+40   index: number,
+41 ): UseSlotBehaviorReturn => {
+42   const { zones, allTiles, activeSlotIndex, config, dragActiveTileId } =
+43     useAnswerGameContext();
+44   const dispatch = useAnswerGameDispatch();
+45   const { placeTile } = useTileEvaluation();
+46 
+47   const zone = zones[index];
+48   const tileId = zone?.placedTileId ?? null;
+49   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+50   const label = tile?.label ?? null;
+51   const isWrong = zone?.isWrong ?? false;
+52   const isLocked = zone?.isLocked ?? false;
+53   const isEmpty = tileId === null;
+54 
+55   // Resolve interaction mode: explicit config or inferred from inputMethod
+56   const slotInteraction =
+57     config.slotInteraction ??
+58     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+59   const isOrdered = slotInteraction === 'ordered';
+60 
+61   const isActive = isOrdered && activeSlotIndex === index;
+62   const showCursor =
+63     isActive && isEmpty && config.inputMethod !== 'drag';
+64   const isBeingDragged = tileId !== null && dragActiveTileId === tileId;
+65 
+66   const slotRef = useRef<HTMLElement | null>(null);
+67   const prevIsWrongRef = useRef(isWrong);
+68   const prevTileIdRef = useRef(tileId);
+69   // Holds the startFade handle returned by triggerEjectReturn so we can call
+70   // it when EJECT_TILE fires and the tile is back in the bank.
+71   const startFadeRef = useRef<(() => void) | null>(null);
+72 
+73   // Drop target handler — choose evaluation or swap based on interaction mode
+74   const handleDrop = useCallback(
+75     (droppedTileId: string, targetZoneIndex: number) => {
+76       if (isOrdered) {
+77         placeTile(droppedTileId, targetZoneIndex);
+78         return;
+79       }
+80       // free-swap: if tile comes from a slot, always SWAP_TILES (even to empty target = move).
+81       // Only fall back to placeTile for bank tiles.
+82       const targetZone = zones[targetZoneIndex];
+83       if (!targetZone) return;
+84       const sourceZoneIndex = zones.findIndex(
+85         (z) => z.placedTileId === droppedTileId,
+86       );
+87       if (sourceZoneIndex !== -1) {
+88         // Evaluate both outcomes before dispatching to play exactly one sound.
+89         const droppedTile = allTiles.find(
+90           (t) => t.id === droppedTileId,
+91         );
+92         const displacedTile = targetZone.placedTileId
+93           ? allTiles.find((t) => t.id === targetZone.placedTileId)
+94           : null;
+95         const sourceZone = zones[sourceZoneIndex];
+96         const droppedCorrect =
+97           droppedTile?.value === targetZone.expectedValue;
+98         const displacedCorrect = displacedTile
+99           ? displacedTile.value === sourceZone?.expectedValue
+100           : true;
+101         playSound(
+102           droppedCorrect || displacedCorrect ? 'correct' : 'wrong',
+103         );
+104         dispatch({
+105           type: 'SWAP_TILES',
+106           fromZoneIndex: sourceZoneIndex,
+107           toZoneIndex: targetZoneIndex,
+108         });
+109         return;
+110       }
+111       placeTile(droppedTileId, targetZoneIndex);
+112     },
+113     [isOrdered, placeTile, zones, dispatch, allTiles],
+114   );
+115 
+116   // Register as drop target
+117   useEffect(() => {
+118     const el = slotRef.current;
+119     if (!el) return;
+120     return dropTargetForElements({
+121       element: el,
+122       getData: () => ({ zoneIndex: index }),
+123       onDrop: ({ source }) => {
+124         // Slot-tile drags (sourceZoneIndex present) handle their own
+125         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+126         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+127         const sourceTileId = source.data['tileId'];
+128         if (typeof sourceTileId === 'string') {
+129           handleDrop(sourceTileId, index);
+130           // Clear drag active state here — the draggable component (bank tile)
+131           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+132           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+133         }
+134       },
+135     });
+136   }, [index, handleDrop, dispatch]);
+137 
+138   // Drag source for filled slots
+139   const {
+140     dragRef,
+141     onPointerDown,
+142     onPointerMove,
+143     onPointerUp,
+144     onPointerCancel,
+145   } = useSlotTileDrag({
+146     tileId,
+147     label,
+148     zoneIndex: index,
+149     onDrop: handleDrop,
+150   });
+151 
+152   // Click handler: remove tile from slot (returns to bank)
+153   const handleClick = useCallback(() => {
+154     if (isEmpty) return;
+155     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+156   }, [isEmpty, dispatch, index]);
+157 
+158   // Feedback animations: trigger on state transitions
+159   useEffect(() => {
+160     const el = slotRef.current;
+161     if (!el) return;
+162 
+163     const wasWrong = prevIsWrongRef.current;
+164     prevIsWrongRef.current = isWrong;
+165 
+166     const prevTileId = prevTileIdRef.current;
+167     prevTileIdRef.current = tileId;
+168     const freshlyPlaced = tileId !== null && prevTileId === null;
+169 
+170     if (
+171       tileId !== null &&
+172       prevTileId !== null &&
+173       tileId !== prevTileId
+174     ) {
+175       // Tile swapped between slots — animate per zone; sound played once in handleDrop.
+176       if (isWrong) {
+177         triggerShake(el);
+178       } else {
+179         triggerPop(el);
+180       }
+181     } else if (isWrong && !wasWrong) {
+182       // Newly wrong via PLACE_TILE (sound already played by useTileEvaluation).
+183       triggerShake(el);
+184 
+185       if (config.wrongTileBehavior === 'lock-auto-eject') {
+186         // Start the eject animation after the shake settles.
+187         const animationTimerId = setTimeout(() => {
+188           const tileEl = dragRef.current;
+189           if (!tileEl) return;
+190           const { startFade } = triggerEjectReturn(
+191             tileEl,
+192             tileId,
+193             () => {},
+194           );
+195           startFadeRef.current = startFade;
+196         }, 350);
+197         return () => clearTimeout(animationTimerId);
+198       }
+199     } else if (freshlyPlaced && !isWrong) {
+200       // Correctly placed from bank (sound already played by useTileEvaluation).
+201       triggerPop(el);
+202     } else if (tileId === null && prevTileId !== null) {
+203       // Tile returned to bank (click, drag, or eject).
+204       playSound('tile-place');
+205       startFadeRef.current?.();
+206       startFadeRef.current = null;
+207     }
+208   }, [isWrong, tileId, config.wrongTileBehavior, dragRef]);
+209 
+210   // EJECT_TILE dispatch lives in its own effect (no DOM ref needed) so the
+211   // timer survives when the bank tile unmounts after PLACE_TILE. The animation
+212   // effect above also uses isWrong/tileId so both fire on the same transition.
+213   useEffect(() => {
+214     if (!isWrong || config.wrongTileBehavior !== 'lock-auto-eject')
+215       return;
+216     const timerId = setTimeout(() => {
+217       dispatch({ type: 'EJECT_TILE', zoneIndex: index });
+218     }, 1000);
+219     return () => clearTimeout(timerId);
+220   }, [isWrong, config.wrongTileBehavior, dispatch, index]);
+221 
+222   return {
+223     renderProps: {
+224       label,
+225       tileId,
+226       isActive,
+227       isWrong,
+228       isLocked,
+229       isEmpty,
+230       showCursor,
+231     },
+232     slotRef,
+233     dragRef,
+234     handleClick,
+235     isBeingDragged,
+236     pointerHandlers: {
+237       onPointerDown,
+238       onPointerMove,
+239       onPointerUp,
+240       onPointerCancel,
+241     },
+242   };
+243 };
 244
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:15:54Z)**_
@@ -1590,98 +1599,99 @@ _**Agent (claude-opus-4-6 2026-04-07 17:15:54Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx`
 
 ```text
-1	import { skeuoStyle } from '../styles';
-2	import { useSlotBehavior } from './useSlotBehavior';
-3	import type { SlotRenderProps } from './useSlotBehavior';
-4	import type { ReactNode, Ref } from 'react';
-5	
-6	interface SlotProps {
-7	  index: number;
-8	  as?: 'li' | 'span' | 'div';
-9	  className?: string;
-10	  children: (props: SlotRenderProps) => ReactNode;
-11	}
-12	
-13	export const Slot = ({
-14	  index,
-15	  as: Tag = 'li',
-16	  className,
-17	  children,
-18	}: SlotProps) => {
-19	  const {
-20	    renderProps,
-21	    slotRef,
-22	    dragRef,
-23	    handleClick,
-24	    pointerHandlers,
-25	    isBeingDragged,
-26	  } = useSlotBehavior(index);
-27	
-28	  const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
-29	
-30	  const ariaLabel = isEmpty
-31	    ? `Slot ${index + 1}, empty`
-32	    : `Slot ${index + 1}, filled with ${label}`;
-33	
-34	  const stateClasses = [
-35	    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
-36	    isEmpty && !isActive
-37	      ? 'border-border'
-38	      : isEmpty && isActive
-39	        ? 'border-primary ring-2 ring-primary ring-offset-2'
-40	        : isWrong
-41	          ? 'border-destructive bg-destructive/10 text-destructive'
-42	          : 'border-primary bg-primary/10 text-primary',
-43	  ]
-44	    .filter(Boolean)
-45	    .join(' ');
-46	
-47	  return (
-48	    <Tag
-49	      ref={
-50	        slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
-51	      }
-52	      aria-label={ariaLabel}
-53	      data-zone-index={index}
-54	      className={[stateClasses, className].filter(Boolean).join(' ')}
-55	    >
-56	      {isEmpty ? (
-57	        <>
-58	          {children(renderProps)}
-59	          {showCursor ? (
-60	            <span
-61	              aria-hidden="true"
-62	              className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
-63	            />
-64	          ) : null}
-65	        </>
-66	      ) : (
-67	        <>
-68	          <div
-69	            className="absolute inset-0 bg-muted/60 shadow-inner"
-70	            aria-hidden="true"
-71	          />
-72	          <button
-73	            ref={dragRef}
-74	            type="button"
-75	            className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
-76	            aria-hidden={isBeingDragged ? 'true' : undefined}
-77	            style={skeuoStyle}
-78	            onClick={handleClick}
-79	            onPointerDown={pointerHandlers.onPointerDown}
-80	            onPointerMove={pointerHandlers.onPointerMove}
-81	            onPointerUp={pointerHandlers.onPointerUp}
-82	            onPointerCancel={pointerHandlers.onPointerCancel}
-83	          >
-84	            {children(renderProps)}
-85	          </button>
-86	        </>
-87	      )}
-88	    </Tag>
-89	  );
-90	};
+1 import { skeuoStyle } from '../styles';
+2 import { useSlotBehavior } from './useSlotBehavior';
+3 import type { SlotRenderProps } from './useSlotBehavior';
+4 import type { ReactNode, Ref } from 'react';
+5 
+6 interface SlotProps {
+7   index: number;
+8   as?: 'li' | 'span' | 'div';
+9   className?: string;
+10   children: (props: SlotRenderProps) => ReactNode;
+11 }
+12 
+13 export const Slot = ({
+14   index,
+15   as: Tag = 'li',
+16   className,
+17   children,
+18 }: SlotProps) => {
+19   const {
+20     renderProps,
+21     slotRef,
+22     dragRef,
+23     handleClick,
+24     pointerHandlers,
+25     isBeingDragged,
+26   } = useSlotBehavior(index);
+27 
+28   const { label, isEmpty, isWrong, isActive, showCursor } = renderProps;
+29 
+30   const ariaLabel = isEmpty
+31     ? `Slot ${index + 1}, empty`
+32     : `Slot ${index + 1}, filled with ${label}`;
+33 
+34   const stateClasses = [
+35     'relative flex items-center justify-center border-2 transition-all overflow-hidden',
+36     isEmpty && !isActive
+37       ? 'border-border'
+38       : isEmpty && isActive
+39         ? 'border-primary ring-2 ring-primary ring-offset-2'
+40         : isWrong
+41           ? 'border-destructive bg-destructive/10 text-destructive'
+42           : 'border-primary bg-primary/10 text-primary',
+43   ]
+44     .filter(Boolean)
+45     .join(' ');
+46 
+47   return (
+48     <Tag
+49       ref={
+50         slotRef as Ref<HTMLLIElement & HTMLSpanElement & HTMLDivElement>
+51       }
+52       aria-label={ariaLabel}
+53       data-zone-index={index}
+54       className={[stateClasses, className].filter(Boolean).join(' ')}
+55     >
+56       {isEmpty ? (
+57         <>
+58           {children(renderProps)}
+59           {showCursor ? (
+60             <span
+61               aria-hidden="true"
+62               className="pointer-events-none absolute bottom-2 left-1/2 h-0.5 w-7 -translate-x-1/2 rounded-sm bg-primary animate-blink"
+63             />
+64           ) : null}
+65         </>
+66       ) : (
+67         <>
+68           <div
+69             className="absolute inset-0 bg-muted/60 shadow-inner"
+70             aria-hidden="true"
+71           />
+72           <button
+73             ref={dragRef}
+74             type="button"
+75             className={`absolute inset-0 flex touch-none select-none cursor-grab items-center justify-center rounded-[inherit] text-card-foreground${isBeingDragged ? ' invisible pointer-events-none' : ''}`}
+76             aria-hidden={isBeingDragged ? 'true' : undefined}
+77             style={skeuoStyle}
+78             onClick={handleClick}
+79             onPointerDown={pointerHandlers.onPointerDown}
+80             onPointerMove={pointerHandlers.onPointerMove}
+81             onPointerUp={pointerHandlers.onPointerUp}
+82             onPointerCancel={pointerHandlers.onPointerCancel}
+83           >
+84             {children(renderProps)}
+85           </button>
+86         </>
+87       )}
+88     </Tag>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:05Z)**_
@@ -1693,7 +1703,7 @@ Now I understand both issues clearly:
 In `useSlotTileDrag.ts`, the `onDrop` handler (line 102-114) only processes drops with a `zoneIndex` number. When dropped on the bank target (which has `isBankTarget: true` but no `zoneIndex`), it falls through to the no-op case. I need to check for `isBankTarget` and dispatch `REMOVE_TILE`.
 
 **Issue 2: Dark mode broken**
-The `.dark` class (line 500-532 in styles.css) overrides shadcn variables with hardcoded oklch values, disconnecting them from the `--bs-*` design system tokens. 
+The `.dark` class (line 500-532 in styles.css) overrides shadcn variables with hardcoded oklch values, disconnecting them from the `--bs-*` design system tokens.
 
 The `:root` section correctly maps the foreground, background, and card variables to the design tokens, but the dark mode class is replacing those with static values instead of using the token variants. Plus, the skeuomorphic styling in `styles.ts` has hardcoded light colors that don't respond to theme changes. I should also verify whether the app applies the dark class directly or uses a data attribute for theme switching.
 </details></think>
@@ -1707,6 +1717,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:05Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:05Z)**_
@@ -1718,6 +1729,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:05Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:06Z)**_
@@ -1731,6 +1743,7 @@ src/routes/__root.tsx:13:  "(function(){try{var prefersDark=window.matchMedia('(
 src/components/ThemeToggle.tsx:13:  document.documentElement.classList.remove('light', 'dark');
 src/components/OfflineIndicator.tsx:27:      className="flex items-center justify-center gap-2 bg-yellow-100 px-4 py-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:09Z)**_
@@ -1740,77 +1753,78 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:09Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/ThemeToggle.tsx`
 
 ```text
-1	import { MoonIcon, SunIcon } from 'lucide-react';
-2	import { useEffect, useState } from 'react';
-3	
-4	type ThemeMode = 'light' | 'dark' | 'auto';
-5	
-6	function applyThemeMode(mode: ThemeMode) {
-7	  const prefersDark = globalThis.matchMedia(
-8	    '(prefers-color-scheme: dark)',
-9	  ).matches;
-10	  const resolved =
-11	    mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
-12	
-13	  document.documentElement.classList.remove('light', 'dark');
-14	  document.documentElement.classList.add(resolved);
-15	
-16	  if (mode === 'auto') {
-17	    delete document.documentElement.dataset.theme;
-18	  } else {
-19	    document.documentElement.dataset.theme = mode;
-20	  }
-21	  document.documentElement.style.colorScheme = resolved;
-22	}
-23	
-24	export const ThemeToggle = () => {
-25	  const [mode, setMode] = useState<ThemeMode>('auto');
-26	
-27	  useEffect(() => {
-28	    applyThemeMode('auto');
-29	  }, []);
-30	
-31	  useEffect(() => {
-32	    if (mode !== 'auto') {
-33	      return;
-34	    }
-35	
-36	    const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
-37	    const onChange = () => applyThemeMode('auto');
-38	
-39	    media.addEventListener('change', onChange);
-40	    return () => {
-41	      media.removeEventListener('change', onChange);
-42	    };
-43	  }, [mode]);
-44	
-45	  const isDark =
-46	    mode === 'dark' ||
-47	    (mode === 'auto' &&
-48	      globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
-49	
-50	  function toggleMode() {
-51	    const nextMode: ThemeMode = isDark ? 'light' : 'dark';
-52	    setMode(nextMode);
-53	    applyThemeMode(nextMode);
-54	  }
-55	
-56	  const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-57	
-58	  return (
-59	    <button
-60	      type="button"
-61	      onClick={toggleMode}
-62	      aria-label={label}
-63	      title={label}
-64	      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] p-2 text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
-65	    >
-66	      {isDark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
-67	    </button>
-68	  );
-69	};
+1 import { MoonIcon, SunIcon } from 'lucide-react';
+2 import { useEffect, useState } from 'react';
+3 
+4 type ThemeMode = 'light' | 'dark' | 'auto';
+5 
+6 function applyThemeMode(mode: ThemeMode) {
+7   const prefersDark = globalThis.matchMedia(
+8     '(prefers-color-scheme: dark)',
+9   ).matches;
+10   const resolved =
+11     mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
+12 
+13   document.documentElement.classList.remove('light', 'dark');
+14   document.documentElement.classList.add(resolved);
+15 
+16   if (mode === 'auto') {
+17     delete document.documentElement.dataset.theme;
+18   } else {
+19     document.documentElement.dataset.theme = mode;
+20   }
+21   document.documentElement.style.colorScheme = resolved;
+22 }
+23 
+24 export const ThemeToggle = () => {
+25   const [mode, setMode] = useState<ThemeMode>('auto');
+26 
+27   useEffect(() => {
+28     applyThemeMode('auto');
+29   }, []);
+30 
+31   useEffect(() => {
+32     if (mode !== 'auto') {
+33       return;
+34     }
+35 
+36     const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
+37     const onChange = () => applyThemeMode('auto');
+38 
+39     media.addEventListener('change', onChange);
+40     return () => {
+41       media.removeEventListener('change', onChange);
+42     };
+43   }, [mode]);
+44 
+45   const isDark =
+46     mode === 'dark' ||
+47     (mode === 'auto' &&
+48       globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
+49 
+50   function toggleMode() {
+51     const nextMode: ThemeMode = isDark ? 'light' : 'dark';
+52     setMode(nextMode);
+53     applyThemeMode(nextMode);
+54   }
+55 
+56   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+57 
+58   return (
+59     <button
+60       type="button"
+61       onClick={toggleMode}
+62       aria-label={label}
+63       title={label}
+64       className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] p-2 text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
+65     >
+66       {isDark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
+67     </button>
+68   );
+69 };
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:09Z)**_
@@ -1820,58 +1834,59 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:09Z)**_
  `./.claude/worktrees/bold-chatelet/src/routes/__root.tsx`
 
 ```text
-1	import { TanStackDevtools } from '@tanstack/react-devtools';
-2	import {
-3	  HeadContent,
-4	  Scripts,
-5	  createRootRoute,
-6	} from '@tanstack/react-router';
-7	import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-8	
-9	import appCss from '../styles.css?url';
-10	
-11	/** First paint only: class + color-scheme from system preference (no localStorage). */
-12	const THEME_INIT_SCRIPT =
-13	  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-14	
-15	const RootDocument = ({ children }: { children: React.ReactNode }) => (
-16	  <html lang="en" suppressHydrationWarning>
-17	    <head>
-18	      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-19	      <HeadContent />
-20	    </head>
-21	    <body className="font-sans antialiased">
-22	      {children}
-23	      <TanStackDevtools
-24	        config={{ position: 'bottom-right' }}
-25	        plugins={[
-26	          {
-27	            name: 'Tanstack Router',
-28	            render: <TanStackRouterDevtoolsPanel />,
-29	          },
-30	        ]}
-31	      />
-32	      <Scripts />
-33	    </body>
-34	  </html>
-35	);
-36	
-37	export const Route = createRootRoute({
-38	  head: () => ({
-39	    meta: [
-40	      { charSet: 'utf8' },
-41	      {
-42	        name: 'viewport',
-43	        content: 'width=device-width, initial-scale=1',
-44	      },
-45	      { title: 'BaseSkill' },
-46	    ],
-47	    links: [{ rel: 'stylesheet', href: appCss }],
-48	  }),
-49	  shellComponent: RootDocument,
-50	});
+1 import { TanStackDevtools } from '@tanstack/react-devtools';
+2 import {
+3   HeadContent,
+4   Scripts,
+5   createRootRoute,
+6 } from '@tanstack/react-router';
+7 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+8 
+9 import appCss from '../styles.css?url';
+10 
+11 /** First paint only: class + color-scheme from system preference (no localStorage). */
+12 const THEME_INIT_SCRIPT =
+13   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
+14 
+15 const RootDocument = ({ children }: { children: React.ReactNode }) => (
+16   <html lang="en" suppressHydrationWarning>
+17     <head>
+18       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+19       <HeadContent />
+20     </head>
+21     <body className="font-sans antialiased">
+22       {children}
+23       <TanStackDevtools
+24         config={{ position: 'bottom-right' }}
+25         plugins={[
+26           {
+27             name: 'Tanstack Router',
+28             render: <TanStackRouterDevtoolsPanel />,
+29           },
+30         ]}
+31       />
+32       <Scripts />
+33     </body>
+34   </html>
+35 );
+36 
+37 export const Route = createRootRoute({
+38   head: () => ({
+39     meta: [
+40       { charSet: 'utf8' },
+41       {
+42         name: 'viewport',
+43         content: 'width=device-width, initial-scale=1',
+44       },
+45       { title: 'BaseSkill' },
+46     ],
+47     links: [{ rel: 'stylesheet', href: appCss }],
+48   }),
+49   shellComponent: RootDocument,
+50 });
 51
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:30Z)**_
@@ -1880,13 +1895,14 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:30Z)**_
 Now I understand the full picture:
 
 **Dark mode system:**
+
 - The app adds `.dark` class to `<html>` element
 - It also sets `data-theme` to `'dark'` or `'light'` when explicitly chosen
 - The initial script only sets the class (not data-theme)
 - CSS uses both `.dark` class and `[data-theme='dark']` / `@media (prefers-color-scheme: dark)`
 
 **Issue 1: Slot-to-bank drag**
-The `useSlotTileDrag.ts` onDrop handler needs to check for `isBankTarget` and dispatch `REMOVE_TILE`. 
+The `useSlotTileDrag.ts` onDrop handler needs to check for `isBankTarget` and dispatch `REMOVE_TILE`.
 
 I also need to apply the same logic to the touch drag handling.
 
@@ -1913,6 +1929,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:30Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:34Z)**_
@@ -1942,257 +1959,258 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:40Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import type { PointerEvent } from 'react';
-3	
-4	const DRAG_THRESHOLD_PX = 8;
-5	
-6	interface GhostInfo {
-7	  el: HTMLDivElement;
-8	  halfW: number;
-9	  halfH: number;
-10	}
-11	
-12	const buildGhost = (
-13	  sourceEl: HTMLElement,
-14	  label: string,
-15	  x: number,
-16	  y: number,
-17	): GhostInfo => {
-18	  const rect = sourceEl.getBoundingClientRect();
-19	  const halfW = rect.width / 2;
-20	  const halfH = rect.height / 2;
-21	  const el = document.createElement('div');
-22	  el.textContent = label;
-23	  el.setAttribute('aria-hidden', 'true');
-24	  Object.assign(el.style, {
-25	    position: 'fixed',
-26	    left: `${x - halfW}px`,
-27	    top: `${y - halfH}px`,
-28	    width: `${rect.width}px`,
-29	    height: `${rect.height}px`,
-30	    display: 'flex',
-31	    alignItems: 'center',
-32	    justifyContent: 'center',
-33	    borderRadius: '12px',
-34	    background: 'var(--card, #fff)',
-35	    color: 'var(--card-foreground, #000)',
-36	    fontSize: getComputedStyle(sourceEl).fontSize,
-37	    fontWeight: 'bold',
-38	    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
-39	    pointerEvents: 'none',
-40	    zIndex: '9999',
-41	    opacity: '0.95',
-42	    userSelect: 'none',
-43	    transform: 'scale(1.08)',
-44	  });
-45	  document.body.append(el);
-46	  return { el, halfW, halfH };
-47	};
-48	
-49	export interface TouchDragHandlers {
-50	  onPointerDown: (e: PointerEvent<HTMLElement>) => void;
-51	  onPointerMove: (e: PointerEvent<HTMLElement>) => void;
-52	  onPointerUp: (e: PointerEvent<HTMLElement>) => void;
-53	  onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
-54	}
-55	
-56	interface UseTouchDragOptions {
-57	  /** Empty string disables the drag (no pointer capture, no ghost). */
-58	  tileId: string;
-59	  label: string;
-60	  onDragStart?: () => void;
-61	  /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
-62	  onDragCancel?: () => void;
-63	  onDrop: (tileId: string, zoneIndex: number) => void;
-64	}
-65	
-66	export const useTouchDrag = ({
-67	  tileId,
-68	  label,
-69	  onDragStart,
-70	  onDragCancel,
-71	  onDrop,
-72	}: UseTouchDragOptions): TouchDragHandlers => {
-73	  const onDragCancelRef = useRef(onDragCancel);
-74	  useEffect(() => {
-75	    onDragCancelRef.current = onDragCancel;
-76	  }, [onDragCancel]);
-77	
-78	  const ghostRef = useRef<GhostInfo | null>(null);
-79	  const isDragging = useRef(false);
-80	  const startPos = useRef<{ x: number; y: number } | null>(null);
-81	  const capturedElRef = useRef<HTMLElement | null>(null);
-82	  const capturedPointerIdRef = useRef<number | null>(null);
-83	  const safetyTimerRef = useRef<ReturnType<
-84	    typeof globalThis.setTimeout
-85	  > | null>(null);
-86	
-87	  // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
-88	  // → cleanupGhost re-entry.
-89	  const cleanupInProgressRef = useRef(false);
-90	
-91	  const cleanupGhost = useCallback(() => {
-92	    if (cleanupInProgressRef.current) return;
-93	    cleanupInProgressRef.current = true;
-94	
-95	    if (safetyTimerRef.current !== null) {
-96	      globalThis.clearTimeout(safetyTimerRef.current);
-97	      safetyTimerRef.current = null;
-98	    }
-99	
-100	    ghostRef.current?.el.remove();
-101	    ghostRef.current = null;
-102	
-103	    // Clear refs BEFORE releasePointerCapture so that any synchronous
-104	    // lostpointercapture event triggered by it sees null refs and bails out.
-105	    const el = capturedElRef.current;
-106	    const pointerId = capturedPointerIdRef.current;
-107	    capturedElRef.current = null;
-108	    capturedPointerIdRef.current = null;
-109	
-110	    if (el !== null && pointerId !== null) {
-111	      try {
-112	        el.releasePointerCapture(pointerId);
-113	      } catch {
-114	        // Element may no longer be in the DOM — ignore.
-115	      }
-116	    }
-117	
-118	    isDragging.current = false;
-119	    startPos.current = null;
-120	    cleanupInProgressRef.current = false;
-121	  }, []);
-122	
-123	  const cleanup = useCallback(() => {
-124	    cleanupGhost();
-125	  }, [cleanupGhost]);
-126	
-127	  const onPointerDown = useCallback(
-128	    (e: PointerEvent<HTMLElement>) => {
-129	      if (e.pointerType === 'mouse' || !tileId) return;
-130	      e.currentTarget.setPointerCapture(e.pointerId);
-131	      capturedElRef.current = e.currentTarget;
-132	      capturedPointerIdRef.current = e.pointerId;
-133	      startPos.current = { x: e.clientX, y: e.clientY };
-134	      isDragging.current = false;
-135	
-136	      // When the captured element is removed from the DOM (e.g. a slot tile
-137	      // gets auto-ejected while the user is dragging it), the browser fires
-138	      // lostpointercapture and onPointerUp never fires.  Clean up here so the
-139	      // ghost doesn't float for 5 seconds.
-140	      e.currentTarget.addEventListener(
-141	        'lostpointercapture',
-142	        () => {
-143	          if (!cleanupInProgressRef.current && isDragging.current) {
-144	            cleanupGhost();
-145	            onDragCancelRef.current?.();
-146	          }
-147	        },
-148	        { once: true },
-149	      );
-150	    },
-151	    [tileId, cleanupGhost],
-152	  );
-153	
-154	  const onPointerMove = useCallback(
-155	    (e: PointerEvent<HTMLElement>) => {
-156	      if (e.pointerType === 'mouse' || !startPos.current) return;
-157	
-158	      if (!isDragging.current) {
-159	        const dx = e.clientX - startPos.current.x;
-160	        const dy = e.clientY - startPos.current.y;
-161	        if (
-162	          Math.abs(dx) > DRAG_THRESHOLD_PX ||
-163	          Math.abs(dy) > DRAG_THRESHOLD_PX
-164	        ) {
-165	          isDragging.current = true;
-166	          ghostRef.current = buildGhost(
-167	            e.currentTarget,
-168	            label,
-169	            e.clientX,
-170	            e.clientY,
-171	          );
-172	          onDragStart?.();
-173	
-174	          safetyTimerRef.current = globalThis.setTimeout(() => {
-175	            cleanupGhost();
-176	            onDragCancelRef.current?.();
-177	          }, 5000);
-178	
-179	          document.addEventListener('contextmenu', cleanupGhost, {
-180	            once: true,
-181	          });
-182	          document.addEventListener('visibilitychange', cleanupGhost, {
-183	            once: true,
-184	          });
-185	        }
-186	      }
-187	
-188	      if (isDragging.current && ghostRef.current) {
-189	        const { el, halfW, halfH } = ghostRef.current;
-190	        el.style.left = `${e.clientX - halfW}px`;
-191	        el.style.top = `${e.clientY - halfH}px`;
-192	      }
-193	    },
-194	    [label, onDragStart, cleanupGhost],
-195	  );
-196	
-197	  const onPointerUp = useCallback(
-198	    (e: PointerEvent<HTMLElement>) => {
-199	      if (e.pointerType === 'mouse' || !startPos.current) return;
-200	
-201	      if (isDragging.current) {
-202	        // Remove ghost before elementsFromPoint so it doesn't interfere.
-203	        ghostRef.current?.el.remove();
-204	        ghostRef.current = null;
-205	
-206	        const elements = document.elementsFromPoint(
-207	          e.clientX,
-208	          e.clientY,
-209	        );
-210	        let dropped = false;
-211	        for (const el of elements) {
-212	          if (
-213	            el instanceof HTMLElement &&
-214	            el.dataset['zoneIndex'] !== undefined
-215	          ) {
-216	            const zoneIndex = Number.parseInt(
-217	              el.dataset['zoneIndex'],
-218	              10,
-219	            );
-220	            if (!Number.isNaN(zoneIndex)) {
-221	              onDrop(tileId, zoneIndex);
-222	              dropped = true;
-223	              break;
-224	            }
-225	          }
-226	        }
-227	        if (!dropped) {
-228	          onDragCancelRef.current?.();
-229	        }
-230	      }
-231	
-232	      cleanup();
-233	    },
-234	    [tileId, onDrop, cleanup],
-235	  );
-236	
-237	  const onPointerCancel = useCallback(
-238	    (e: PointerEvent<HTMLElement>) => {
-239	      if (e.pointerType === 'mouse') return;
-240	      if (isDragging.current) {
-241	        onDragCancelRef.current?.();
-242	      }
-243	      cleanupGhost();
-244	    },
-245	    [cleanupGhost],
-246	  );
-247	
-248	  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
-249	};
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import type { PointerEvent } from 'react';
+3 
+4 const DRAG_THRESHOLD_PX = 8;
+5 
+6 interface GhostInfo {
+7   el: HTMLDivElement;
+8   halfW: number;
+9   halfH: number;
+10 }
+11 
+12 const buildGhost = (
+13   sourceEl: HTMLElement,
+14   label: string,
+15   x: number,
+16   y: number,
+17 ): GhostInfo => {
+18   const rect = sourceEl.getBoundingClientRect();
+19   const halfW = rect.width / 2;
+20   const halfH = rect.height / 2;
+21   const el = document.createElement('div');
+22   el.textContent = label;
+23   el.setAttribute('aria-hidden', 'true');
+24   Object.assign(el.style, {
+25     position: 'fixed',
+26     left: `${x - halfW}px`,
+27     top: `${y - halfH}px`,
+28     width: `${rect.width}px`,
+29     height: `${rect.height}px`,
+30     display: 'flex',
+31     alignItems: 'center',
+32     justifyContent: 'center',
+33     borderRadius: '12px',
+34     background: 'var(--card, #fff)',
+35     color: 'var(--card-foreground, #000)',
+36     fontSize: getComputedStyle(sourceEl).fontSize,
+37     fontWeight: 'bold',
+38     boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+39     pointerEvents: 'none',
+40     zIndex: '9999',
+41     opacity: '0.95',
+42     userSelect: 'none',
+43     transform: 'scale(1.08)',
+44   });
+45   document.body.append(el);
+46   return { el, halfW, halfH };
+47 };
+48 
+49 export interface TouchDragHandlers {
+50   onPointerDown: (e: PointerEvent<HTMLElement>) => void;
+51   onPointerMove: (e: PointerEvent<HTMLElement>) => void;
+52   onPointerUp: (e: PointerEvent<HTMLElement>) => void;
+53   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
+54 }
+55 
+56 interface UseTouchDragOptions {
+57   /** Empty string disables the drag (no pointer capture, no ghost). */
+58   tileId: string;
+59   label: string;
+60   onDragStart?: () => void;
+61   /** Called when the drag is cancelled or the pointer is released with no valid drop zone. */
+62   onDragCancel?: () => void;
+63   onDrop: (tileId: string, zoneIndex: number) => void;
+64 }
+65 
+66 export const useTouchDrag = ({
+67   tileId,
+68   label,
+69   onDragStart,
+70   onDragCancel,
+71   onDrop,
+72 }: UseTouchDragOptions): TouchDragHandlers => {
+73   const onDragCancelRef = useRef(onDragCancel);
+74   useEffect(() => {
+75     onDragCancelRef.current = onDragCancel;
+76   }, [onDragCancel]);
+77 
+78   const ghostRef = useRef<GhostInfo | null>(null);
+79   const isDragging = useRef(false);
+80   const startPos = useRef<{ x: number; y: number } | null>(null);
+81   const capturedElRef = useRef<HTMLElement | null>(null);
+82   const capturedPointerIdRef = useRef<number | null>(null);
+83   const safetyTimerRef = useRef<ReturnType<
+84     typeof globalThis.setTimeout
+85   > | null>(null);
+86 
+87   // Guards against cleanupGhost → releasePointerCapture → lostpointercapture
+88   // → cleanupGhost re-entry.
+89   const cleanupInProgressRef = useRef(false);
+90 
+91   const cleanupGhost = useCallback(() => {
+92     if (cleanupInProgressRef.current) return;
+93     cleanupInProgressRef.current = true;
+94 
+95     if (safetyTimerRef.current !== null) {
+96       globalThis.clearTimeout(safetyTimerRef.current);
+97       safetyTimerRef.current = null;
+98     }
+99 
+100     ghostRef.current?.el.remove();
+101     ghostRef.current = null;
+102 
+103     // Clear refs BEFORE releasePointerCapture so that any synchronous
+104     // lostpointercapture event triggered by it sees null refs and bails out.
+105     const el = capturedElRef.current;
+106     const pointerId = capturedPointerIdRef.current;
+107     capturedElRef.current = null;
+108     capturedPointerIdRef.current = null;
+109 
+110     if (el !== null && pointerId !== null) {
+111       try {
+112         el.releasePointerCapture(pointerId);
+113       } catch {
+114         // Element may no longer be in the DOM — ignore.
+115       }
+116     }
+117 
+118     isDragging.current = false;
+119     startPos.current = null;
+120     cleanupInProgressRef.current = false;
+121   }, []);
+122 
+123   const cleanup = useCallback(() => {
+124     cleanupGhost();
+125   }, [cleanupGhost]);
+126 
+127   const onPointerDown = useCallback(
+128     (e: PointerEvent<HTMLElement>) => {
+129       if (e.pointerType === 'mouse' || !tileId) return;
+130       e.currentTarget.setPointerCapture(e.pointerId);
+131       capturedElRef.current = e.currentTarget;
+132       capturedPointerIdRef.current = e.pointerId;
+133       startPos.current = { x: e.clientX, y: e.clientY };
+134       isDragging.current = false;
+135 
+136       // When the captured element is removed from the DOM (e.g. a slot tile
+137       // gets auto-ejected while the user is dragging it), the browser fires
+138       // lostpointercapture and onPointerUp never fires.  Clean up here so the
+139       // ghost doesn't float for 5 seconds.
+140       e.currentTarget.addEventListener(
+141         'lostpointercapture',
+142         () => {
+143           if (!cleanupInProgressRef.current && isDragging.current) {
+144             cleanupGhost();
+145             onDragCancelRef.current?.();
+146           }
+147         },
+148         { once: true },
+149       );
+150     },
+151     [tileId, cleanupGhost],
+152   );
+153 
+154   const onPointerMove = useCallback(
+155     (e: PointerEvent<HTMLElement>) => {
+156       if (e.pointerType === 'mouse' || !startPos.current) return;
+157 
+158       if (!isDragging.current) {
+159         const dx = e.clientX - startPos.current.x;
+160         const dy = e.clientY - startPos.current.y;
+161         if (
+162           Math.abs(dx) > DRAG_THRESHOLD_PX ||
+163           Math.abs(dy) > DRAG_THRESHOLD_PX
+164         ) {
+165           isDragging.current = true;
+166           ghostRef.current = buildGhost(
+167             e.currentTarget,
+168             label,
+169             e.clientX,
+170             e.clientY,
+171           );
+172           onDragStart?.();
+173 
+174           safetyTimerRef.current = globalThis.setTimeout(() => {
+175             cleanupGhost();
+176             onDragCancelRef.current?.();
+177           }, 5000);
+178 
+179           document.addEventListener('contextmenu', cleanupGhost, {
+180             once: true,
+181           });
+182           document.addEventListener('visibilitychange', cleanupGhost, {
+183             once: true,
+184           });
+185         }
+186       }
+187 
+188       if (isDragging.current && ghostRef.current) {
+189         const { el, halfW, halfH } = ghostRef.current;
+190         el.style.left = `${e.clientX - halfW}px`;
+191         el.style.top = `${e.clientY - halfH}px`;
+192       }
+193     },
+194     [label, onDragStart, cleanupGhost],
+195   );
+196 
+197   const onPointerUp = useCallback(
+198     (e: PointerEvent<HTMLElement>) => {
+199       if (e.pointerType === 'mouse' || !startPos.current) return;
+200 
+201       if (isDragging.current) {
+202         // Remove ghost before elementsFromPoint so it doesn't interfere.
+203         ghostRef.current?.el.remove();
+204         ghostRef.current = null;
+205 
+206         const elements = document.elementsFromPoint(
+207           e.clientX,
+208           e.clientY,
+209         );
+210         let dropped = false;
+211         for (const el of elements) {
+212           if (
+213             el instanceof HTMLElement &&
+214             el.dataset['zoneIndex'] !== undefined
+215           ) {
+216             const zoneIndex = Number.parseInt(
+217               el.dataset['zoneIndex'],
+218               10,
+219             );
+220             if (!Number.isNaN(zoneIndex)) {
+221               onDrop(tileId, zoneIndex);
+222               dropped = true;
+223               break;
+224             }
+225           }
+226         }
+227         if (!dropped) {
+228           onDragCancelRef.current?.();
+229         }
+230       }
+231 
+232       cleanup();
+233     },
+234     [tileId, onDrop, cleanup],
+235   );
+236 
+237   const onPointerCancel = useCallback(
+238     (e: PointerEvent<HTMLElement>) => {
+239       if (e.pointerType === 'mouse') return;
+240       if (isDragging.current) {
+241         onDragCancelRef.current?.();
+242       }
+243       cleanupGhost();
+244     },
+245     [cleanupGhost],
+246   );
+247 
+248   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };
+249 };
 250
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:40Z)**_
@@ -2202,98 +2220,99 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:40Z)**_
  `./.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { skeuoStyle } from '@/components/answer-game/styles';
-3	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-4	import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
-5	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-6	
-7	const LetterTile = ({ tile }: { tile: TileItem }) => {
-8	  const {
-9	    ref,
-10	    handleClick,
-11	    onPointerDown,
-12	    onPointerMove,
-13	    onPointerUp,
-14	    onPointerCancel,
-15	  } = useDraggableTile(tile);
-16	
-17	  return (
-18	    <button
-19	      ref={ref}
-20	      type="button"
-21	      aria-label={`Letter ${tile.label}`}
-22	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
-23	      style={skeuoStyle}
-24	      onClick={handleClick}
-25	      onPointerDown={onPointerDown}
-26	      onPointerMove={onPointerMove}
-27	      onPointerUp={onPointerUp}
-28	      onPointerCancel={onPointerCancel}
-29	    >
-30	      {tile.label}
-31	    </button>
-32	  );
-33	};
-34	
-35	export const LetterTileBank = () => {
-36	  const { allTiles, bankTileIds, config, dragActiveTileId } =
-37	    useAnswerGameContext();
-38	  const { bankRef } = useBankDropTarget();
-39	
-40	  if (config.inputMethod === 'type') {
-41	    const isTouch = navigator.maxTouchPoints > 0;
-42	    return (
-43	      <p className="text-sm text-muted-foreground" aria-live="polite">
-44	        {isTouch
-45	          ? 'Tap a slot to type'
-46	          : '⌨️ Type the letters on your keyboard'}
-47	      </p>
-48	    );
-49	  }
-50	
-51	  return (
-52	    <div
-53	      ref={bankRef}
-54	      data-tile-bank=""
-55	      className="flex flex-wrap justify-center gap-3"
-56	    >
-57	      {allTiles.map((tile) => {
-58	        const inBank = bankTileIds.includes(tile.id);
-59	        const isDragging = tile.id === dragActiveTileId;
-60	
-61	        if (inBank) {
-62	          return (
-63	            <div key={tile.id} className="relative size-14">
-64	              <div
-65	                data-tile-bank-hole={tile.id}
-66	                className="size-14 rounded-xl bg-muted/60 shadow-inner"
-67	                aria-hidden="true"
-68	              />
-69	              <div
-70	                className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
-71	                aria-hidden={isDragging || undefined}
-72	              >
-73	                <LetterTile tile={tile} />
-74	              </div>
-75	            </div>
-76	          );
-77	        }
-78	
-79	        return (
-80	          <div
-81	            key={tile.id}
-82	            data-tile-bank-hole={tile.id}
-83	            className="size-14 rounded-xl bg-muted/60 shadow-inner"
-84	            aria-hidden="true"
-85	          />
-86	        );
-87	      })}
-88	    </div>
-89	  );
-90	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { skeuoStyle } from '@/components/answer-game/styles';
+3 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+4 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
+5 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+6 
+7 const LetterTile = ({ tile }: { tile: TileItem }) => {
+8   const {
+9     ref,
+10     handleClick,
+11     onPointerDown,
+12     onPointerMove,
+13     onPointerUp,
+14     onPointerCancel,
+15   } = useDraggableTile(tile);
+16 
+17   return (
+18     <button
+19       ref={ref}
+20       type="button"
+21       aria-label={`Letter ${tile.label}`}
+22       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl text-2xl font-bold transition-transform active:scale-95 active:cursor-grabbing"
+23       style={skeuoStyle}
+24       onClick={handleClick}
+25       onPointerDown={onPointerDown}
+26       onPointerMove={onPointerMove}
+27       onPointerUp={onPointerUp}
+28       onPointerCancel={onPointerCancel}
+29     >
+30       {tile.label}
+31     </button>
+32   );
+33 };
+34 
+35 export const LetterTileBank = () => {
+36   const { allTiles, bankTileIds, config, dragActiveTileId } =
+37     useAnswerGameContext();
+38   const { bankRef } = useBankDropTarget();
+39 
+40   if (config.inputMethod === 'type') {
+41     const isTouch = navigator.maxTouchPoints > 0;
+42     return (
+43       <p className="text-sm text-muted-foreground" aria-live="polite">
+44         {isTouch
+45           ? 'Tap a slot to type'
+46           : '⌨️ Type the letters on your keyboard'}
+47       </p>
+48     );
+49   }
+50 
+51   return (
+52     <div
+53       ref={bankRef}
+54       data-tile-bank=""
+55       className="flex flex-wrap justify-center gap-3"
+56     >
+57       {allTiles.map((tile) => {
+58         const inBank = bankTileIds.includes(tile.id);
+59         const isDragging = tile.id === dragActiveTileId;
+60 
+61         if (inBank) {
+62           return (
+63             <div key={tile.id} className="relative size-14">
+64               <div
+65                 data-tile-bank-hole={tile.id}
+66                 className="size-14 rounded-xl bg-muted/60 shadow-inner"
+67                 aria-hidden="true"
+68               />
+69               <div
+70                 className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
+71                 aria-hidden={isDragging || undefined}
+72               >
+73                 <LetterTile tile={tile} />
+74               </div>
+75             </div>
+76           );
+77         }
+78 
+79         return (
+80           <div
+81             key={tile.id}
+82             data-tile-bank-hole={tile.id}
+83             className="size-14 rounded-xl bg-muted/60 shadow-inner"
+84             aria-hidden="true"
+85           />
+86         );
+87       })}
+88     </div>
+89   );
+90 };
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:16:52Z)**_
@@ -2306,7 +2325,7 @@ Now I have a clear picture. Let me fix both issues:
 In `useSlotTileDrag.ts`, the HTML5 DnD `onDrop` handler needs to check if the drop target is the bank (has `isBankTarget: true`) and dispatch `REMOVE_TILE`. Currently it only handles `zoneIndex` drops.
 
 For touch drag (`useTouchDrag.ts`), the `onPointerUp` handler looks for elements with `data-zone-index`. It needs to also check for `data-tile-bank` attribute to detect bank drops.
- 
+
 **Issue 2: Dark mode**
 
 The `.dark` block in styles.css is using hardcoded oklch values instead of the `--bs-*` tokens, which breaks the connection to the design system. I need to update it to reference those same tokens like `:root` does. Additionally, `skeuoStyle` in `styles.ts` has hardcoded light colors baked in, so I'll need to make it respond to dark mode, probably by leveraging CSS custom properties.
@@ -2338,6 +2357,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:16:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:03Z)**_
@@ -2352,6 +2372,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:17:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:12Z)**_
@@ -2362,6 +2383,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:17:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:16Z)**_
@@ -2376,6 +2398,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:17:19Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:24Z)**_
@@ -2390,6 +2413,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:17:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:39Z)**_
@@ -2404,6 +2428,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:17:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:17:45Z)**_
@@ -2430,6 +2455,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:06Z)**_
@@ -2444,6 +2470,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:14Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/styles.ts has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:18Z)**_
@@ -2458,6 +2485,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:28Z)**_
@@ -2472,6 +2500,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:34Z)**_
@@ -2486,6 +2515,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:37Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:41Z)**_
@@ -2500,6 +2530,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:49Z)**_
@@ -2513,78 +2544,79 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:49Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useAutoNextSlot } from './useAutoNextSlot';
-5	import { useGameTTS } from './useGameTTS';
-6	import { useTileEvaluation } from './useTileEvaluation';
-7	import { useTouchDrag } from './useTouchDrag';
-8	import type { TileItem } from './types';
-9	import type { TouchDragHandlers } from './useTouchDrag';
-10	import type { RefObject } from 'react';
-11	
-12	export interface DraggableTile extends TouchDragHandlers {
-13	  ref: RefObject<HTMLButtonElement | null>;
-14	  handleClick: () => void;
-15	}
-16	
-17	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-18	  const ref = useRef<HTMLButtonElement>(null);
-19	  const dispatch = useAnswerGameDispatch();
-20	  const { placeInNextSlot } = useAutoNextSlot();
-21	  const { speakTile } = useGameTTS();
-22	  const speakTileRef = useRef(speakTile);
-23	  const { placeTile } = useTileEvaluation();
-24	
-25	  useEffect(() => {
-26	    speakTileRef.current = speakTile;
-27	  }, [speakTile]);
-28	
-29	  // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => speakTileRef.current(tile.label),
-37	    });
-38	  }, [tile.id, tile.label]);
-39	
-40	  // Pointer-events drag — touch / mobile
-41	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-42	    useTouchDrag({
-43	      tileId: tile.id,
-44	      label: tile.label,
-45	      onDragStart: () => {
-46	        speakTileRef.current(tile.label);
-47	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-48	      },
-49	      onDragCancel: () =>
-50	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
-51	      onDrop: (droppedTileId, zoneIndex) => {
-52	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-53	        placeTile(droppedTileId, zoneIndex);
-54	      },
-55	    });
-56	
-57	  const handleClick = () => {
-58	    speakTile(tile.label);
-59	    placeInNextSlot(tile.id);
-60	  };
-61	
-62	  return {
-63	    ref,
-64	    handleClick,
-65	    onPointerDown,
-66	    onPointerMove,
-67	    onPointerUp,
-68	    onPointerCancel,
-69	  };
-70	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useAutoNextSlot } from './useAutoNextSlot';
+5 import { useGameTTS } from './useGameTTS';
+6 import { useTileEvaluation } from './useTileEvaluation';
+7 import { useTouchDrag } from './useTouchDrag';
+8 import type { TileItem } from './types';
+9 import type { TouchDragHandlers } from './useTouchDrag';
+10 import type { RefObject } from 'react';
+11 
+12 export interface DraggableTile extends TouchDragHandlers {
+13   ref: RefObject<HTMLButtonElement | null>;
+14   handleClick: () => void;
+15 }
+16 
+17 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+18   const ref = useRef<HTMLButtonElement>(null);
+19   const dispatch = useAnswerGameDispatch();
+20   const { placeInNextSlot } = useAutoNextSlot();
+21   const { speakTile } = useGameTTS();
+22   const speakTileRef = useRef(speakTile);
+23   const { placeTile } = useTileEvaluation();
+24 
+25   useEffect(() => {
+26     speakTileRef.current = speakTile;
+27   }, [speakTile]);
+28 
+29   // HTML5 DnD — desktop (no SET_DRAG_ACTIVE to avoid browser snap-back fadeout)
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => speakTileRef.current(tile.label),
+37     });
+38   }, [tile.id, tile.label]);
+39 
+40   // Pointer-events drag — touch / mobile
+41   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+42     useTouchDrag({
+43       tileId: tile.id,
+44       label: tile.label,
+45       onDragStart: () => {
+46         speakTileRef.current(tile.label);
+47         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+48       },
+49       onDragCancel: () =>
+50         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null }),
+51       onDrop: (droppedTileId, zoneIndex) => {
+52         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+53         placeTile(droppedTileId, zoneIndex);
+54       },
+55     });
+56 
+57   const handleClick = () => {
+58     speakTile(tile.label);
+59     placeInNextSlot(tile.id);
+60   };
+61 
+62   return {
+63     ref,
+64     handleClick,
+65     onPointerDown,
+66     onPointerMove,
+67     onPointerUp,
+68     onPointerCancel,
+69   };
+70 };
 71
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:18:57Z)**_
@@ -2598,77 +2630,78 @@ _**Agent (claude-opus-4-6 2026-04-07 17:18:58Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-88	  --skeuo-highlight: rgb(255 255 255 / 100%);
-89	  --skeuo-ring: rgb(0 0 0 / 8%);
-90	  --skeuo-inset-bottom: rgb(0 0 0 / 8%);
-91	  --skeuo-inset-top: rgb(255 255 255 / 50%);
-92	  --skeuo-text-shadow: rgb(0 0 0 / 12%);
-93	}
-94	
-95	:root[data-theme='dark'] {
-96	  --sea-ink: #d7ece8;
-97	  --sea-ink-soft: #afcdc8;
-98	  --lagoon: #60d7cf;
-99	  --lagoon-deep: #8de5db;
-100	  --palm: #6ec89a;
-101	  --sand: #0f1a1e;
-102	  --foam: #101d22;
-103	  --surface: rgb(16 30 34 / 80%);
-104	  --surface-strong: rgb(15 27 31 / 92%);
-105	  --line: rgb(141 229 219 / 18%);
-106	  --inset-glint: rgb(194 247 238 / 14%);
-107	  --kicker: #b8efe5;
-108	  --bg-base: #0a1418;
-109	  --header-bg: rgb(10 20 24 / 80%);
-110	  --chip-bg: rgb(13 28 32 / 90%);
-111	  --chip-line: rgb(141 229 219 / 24%);
-112	  --link-bg-hover: rgb(24 44 49 / 80%);
-113	  --hero-a: rgb(96 215 207 / 18%);
-114	  --hero-b: rgb(110 200 154 / 12%);
-115	
-116	  /* BaseSkill Design System — Galaxy (dark) */
-117	  --bs-primary: #ff9f43;
-118	  --bs-secondary: #54a0ff;
-119	  --bs-background: #1a1a2e;
-120	  --bs-surface: #16213e;
-121	  --bs-text: #e8f4fd;
-122	  --bs-accent: #feca57;
-123	  --bs-success: #6bcb77;
-124	  --bs-warning: #f4a261;
-125	  --bs-error: #ff6b6b;
-126	}
-127	
-128	@media (prefers-color-scheme: dark) {
-129	  :root:not([data-theme='light']) {
-130	    --sea-ink: #d7ece8;
-131	    --sea-ink-soft: #afcdc8;
-132	    --lagoon: #60d7cf;
-133	    --lagoon-deep: #8de5db;
-134	    --palm: #6ec89a;
-135	    --sand: #0f1a1e;
-136	    --foam: #101d22;
-137	    --surface: rgb(16 30 34 / 80%);
-138	    --surface-strong: rgb(15 27 31 / 92%);
-139	    --line: rgb(141 229 219 / 18%);
-140	    --inset-glint: rgb(194 247 238 / 14%);
-141	    --kicker: #b8efe5;
-142	    --bg-base: #0a1418;
-143	    --header-bg: rgb(10 20 24 / 80%);
-144	    --chip-bg: rgb(13 28 32 / 90%);
-145	    --chip-line: rgb(141 229 219 / 24%);
-146	    --link-bg-hover: rgb(24 44 49 / 80%);
-147	    --hero-a: rgb(96 215 207 / 18%);
-148	    --hero-b: rgb(110 200 154 / 12%);
-149	
-150	    /* BaseSkill Design System — Galaxy (dark) */
-151	    --bs-primary: #ff9f43;
-152	    --bs-secondary: #54a0ff;
-153	    --bs-background: #1a1a2e;
-154	    --bs-surface: #16213e;
-155	    --bs-text: #e8f4fd;
-156	    --bs-accent: #feca57;
-157	    --bs-success: #6bcb77;
+88   --skeuo-highlight: rgb(255 255 255 / 100%);
+89   --skeuo-ring: rgb(0 0 0 / 8%);
+90   --skeuo-inset-bottom: rgb(0 0 0 / 8%);
+91   --skeuo-inset-top: rgb(255 255 255 / 50%);
+92   --skeuo-text-shadow: rgb(0 0 0 / 12%);
+93 }
+94 
+95 :root[data-theme='dark'] {
+96   --sea-ink: #d7ece8;
+97   --sea-ink-soft: #afcdc8;
+98   --lagoon: #60d7cf;
+99   --lagoon-deep: #8de5db;
+100   --palm: #6ec89a;
+101   --sand: #0f1a1e;
+102   --foam: #101d22;
+103   --surface: rgb(16 30 34 / 80%);
+104   --surface-strong: rgb(15 27 31 / 92%);
+105   --line: rgb(141 229 219 / 18%);
+106   --inset-glint: rgb(194 247 238 / 14%);
+107   --kicker: #b8efe5;
+108   --bg-base: #0a1418;
+109   --header-bg: rgb(10 20 24 / 80%);
+110   --chip-bg: rgb(13 28 32 / 90%);
+111   --chip-line: rgb(141 229 219 / 24%);
+112   --link-bg-hover: rgb(24 44 49 / 80%);
+113   --hero-a: rgb(96 215 207 / 18%);
+114   --hero-b: rgb(110 200 154 / 12%);
+115 
+116   /* BaseSkill Design System — Galaxy (dark) */
+117   --bs-primary: #ff9f43;
+118   --bs-secondary: #54a0ff;
+119   --bs-background: #1a1a2e;
+120   --bs-surface: #16213e;
+121   --bs-text: #e8f4fd;
+122   --bs-accent: #feca57;
+123   --bs-success: #6bcb77;
+124   --bs-warning: #f4a261;
+125   --bs-error: #ff6b6b;
+126 }
+127 
+128 @media (prefers-color-scheme: dark) {
+129   :root:not([data-theme='light']) {
+130     --sea-ink: #d7ece8;
+131     --sea-ink-soft: #afcdc8;
+132     --lagoon: #60d7cf;
+133     --lagoon-deep: #8de5db;
+134     --palm: #6ec89a;
+135     --sand: #0f1a1e;
+136     --foam: #101d22;
+137     --surface: rgb(16 30 34 / 80%);
+138     --surface-strong: rgb(15 27 31 / 92%);
+139     --line: rgb(141 229 219 / 18%);
+140     --inset-glint: rgb(194 247 238 / 14%);
+141     --kicker: #b8efe5;
+142     --bg-base: #0a1418;
+143     --header-bg: rgb(10 20 24 / 80%);
+144     --chip-bg: rgb(13 28 32 / 90%);
+145     --chip-line: rgb(141 229 219 / 24%);
+146     --link-bg-hover: rgb(24 44 49 / 80%);
+147     --hero-a: rgb(96 215 207 / 18%);
+148     --hero-b: rgb(110 200 154 / 12%);
+149 
+150     /* BaseSkill Design System — Galaxy (dark) */
+151     --bs-primary: #ff9f43;
+152     --bs-secondary: #54a0ff;
+153     --bs-background: #1a1a2e;
+154     --bs-surface: #16213e;
+155     --bs-text: #e8f4fd;
+156     --bs-accent: #feca57;
+157     --bs-success: #6bcb77;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:04Z)**_
@@ -2688,6 +2721,7 @@ TypeScript type check
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:13Z)**_
@@ -2701,6 +2735,7 @@ TypeScript type check in worktree
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:18Z)**_
@@ -2714,6 +2749,7 @@ TypeScript type check in worktree
 ```text
 src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx(3,37): error TS2307: Cannot find module './NumberSequenceSlots' or its corresponding type declarations.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:22Z)**_
@@ -2731,6 +2767,7 @@ Check for new TS errors from our changes
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:29Z)**_
@@ -2775,6 +2812,7 @@ Number of calls: **2**
    Start at  03:19:30
    Duration  1.87s (transform 992ms, setup 2.08s, collect 5.09s, tests 1.32s, environment 12.20s, prepare 1.40s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:35Z)**_
@@ -2788,57 +2826,58 @@ _**Agent (claude-opus-4-6 2026-04-07 17:19:36Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx`
 
 ```text
-130	
-131	  describe('HTML5 onDrop — dropped on bank target', () => {
-132	    it('clears drag state and does NOT dispatch REMOVE_TILE (tile stays in slot)', () => {
-133	      capturedDraggableOptions = null;
-134	      mockDispatch.mockClear();
-135	      const mockOnDrop = vi.fn();
-136	
-137	      render(
-138	        <SlotTileDragHarness
-139	          tileId="tile-1"
-140	          zoneIndex={0}
-141	          onDrop={mockOnDrop}
-142	        />,
-143	      );
-144	
-145	      expect(capturedDraggableOptions).not.toBeNull();
-146	
-147	      (
-148	        capturedDraggableOptions as unknown as DraggableOptions
-149	      ).onDrop?.({
-150	        location: {
-151	          current: {
-152	            dropTargets: [{ data: { isBankTarget: true } }],
-153	          },
-154	        },
-155	      });
-156	
-157	      expect(mockDispatch).toHaveBeenCalledWith({
-158	        type: 'SET_DRAG_ACTIVE',
-159	        tileId: null,
-160	      });
-161	      expect(mockDispatch).not.toHaveBeenCalledWith(
-162	        expect.objectContaining({ type: 'REMOVE_TILE' }),
-163	      );
-164	      expect(mockOnDrop).not.toHaveBeenCalled();
-165	    });
-166	  });
-167	
-168	  describe('HTML5 onDrop — confirmed drop on valid target', () => {
-169	    it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns SWAP_TILES', () => {
-170	      capturedDraggableOptions = null;
-171	      mockDispatch.mockClear();
-172	      const mockOnDrop = vi.fn();
-173	
-174	      render(
-175	        <SlotTileDragHarness
-176	          tileId="tile-1"
-177	          zoneIndex={0}
-178	          onDrop={mockOnDrop}
-179	        />,
+130 
+131   describe('HTML5 onDrop — dropped on bank target', () => {
+132     it('clears drag state and does NOT dispatch REMOVE_TILE (tile stays in slot)', () => {
+133       capturedDraggableOptions = null;
+134       mockDispatch.mockClear();
+135       const mockOnDrop = vi.fn();
+136 
+137       render(
+138         <SlotTileDragHarness
+139           tileId="tile-1"
+140           zoneIndex={0}
+141           onDrop={mockOnDrop}
+142         />,
+143       );
+144 
+145       expect(capturedDraggableOptions).not.toBeNull();
+146 
+147       (
+148         capturedDraggableOptions as unknown as DraggableOptions
+149       ).onDrop?.({
+150         location: {
+151           current: {
+152             dropTargets: [{ data: { isBankTarget: true } }],
+153           },
+154         },
+155       });
+156 
+157       expect(mockDispatch).toHaveBeenCalledWith({
+158         type: 'SET_DRAG_ACTIVE',
+159         tileId: null,
+160       });
+161       expect(mockDispatch).not.toHaveBeenCalledWith(
+162         expect.objectContaining({ type: 'REMOVE_TILE' }),
+163       );
+164       expect(mockOnDrop).not.toHaveBeenCalled();
+165     });
+166   });
+167 
+168   describe('HTML5 onDrop — confirmed drop on valid target', () => {
+169     it('dispatches SET_DRAG_ACTIVE and calls onDrop — caller owns SWAP_TILES', () => {
+170       capturedDraggableOptions = null;
+171       mockDispatch.mockClear();
+172       const mockOnDrop = vi.fn();
+173 
+174       render(
+175         <SlotTileDragHarness
+176           tileId="tile-1"
+177           zoneIndex={0}
+178           onDrop={mockOnDrop}
+179         />,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:40Z)**_
@@ -2853,6 +2892,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:19:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useSlotTileDrag.test.tsx has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:53Z)**_
@@ -2879,6 +2919,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
    Start at  03:19:51
    Duration  2.10s (transform 1.11s, setup 2.32s, collect 5.61s, tests 1.36s, environment 13.99s, prepare 1.59s)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:19:56Z)**_
@@ -2896,6 +2937,7 @@ Lint the CSS file
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:20:01Z)**_
@@ -2914,6 +2956,7 @@ src/components/answer-game/useSlotTileDrag.ts:90:              background: 'var(
 src/components/answer-game/styles.ts:6:    'linear-gradient(180deg, transparent 70.48%, var(--skeuo-highlight, rgba(255,255,255,1)) 93.62%, transparent 100%), var(--card, #FAFAFA)',
 src/components/answer-game/styles.ts:8:    'var(--skeuo-ring, rgba(0,0,0,0.08)) 0 0 0 1px, var(--skeuo-inset-bottom, rgba(0,0,0,0.08)) 0 -2px 1px 0 inset, var(--skeuo-inset-top, rgba(255,255,255,0.5)) 0 2px 1px 0 inset, 0 2px 5px -1px rgba(0,0,0,0.05), 0 1px 3px -1px rgba(0,0,0,0.3)',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:20:07Z)**_
@@ -2966,11 +3009,11 @@ Where our branch has:
 _**Agent (claude-opus-4-6 2026-04-07 17:26:38Z)**_
 
 <think><details><summary>Thought Process</summary>
-The classes are identical between master and the branch. So the issue isn't the Card component's classes - it's the CSS variable `--card` which resolves to `var(--bs-surface)`. 
+The classes are identical between master and the branch. So the issue isn't the Card component's classes - it's the CSS variable `--card` which resolves to `var(--bs-surface)`.
 
 In dark mode, `--bs-surface` is `#16213e` (a dark blue), but the `.dark` block I wrote maps `--card: var(--bs-surface)`. That should work...
 
-Wait, let me re-read the issue. The user says the cards have white BG in dark mode. That means `--card` is resolving to white. Let me check: in `:root`, `--card: var(--bs-surface)` and `--bs-surface: #fff`. 
+Wait, let me re-read the issue. The user says the cards have white BG in dark mode. That means `--card` is resolving to white. Let me check: in `:root`, `--card: var(--bs-surface)` and `--bs-surface: #fff`.
 
 I see the problem now - the `.dark` class sets `--card: var(--bs-surface)`, but it doesn't actually update `--bs-surface` itself. The dark mode tokens are only applied when using `data-theme='dark'` or the prefers-color-scheme media query, not just the `.dark` class. So in auto dark mode with `<html class="dark">`, the `--bs-surface` variable stays at its root value instead of switching to the dark variant. I'm realizing the real issue here—CSS custom properties resolve at use time, not when they're declared. So when `--card` is set to `var(--bs-surface)`, the actual color depends on what `--bs-surface` evaluates to in that specific context, which means the cascade and specificity of where `--bs-surface` is defined matters more than I initially thought.
 
@@ -3032,6 +3075,7 @@ Check master's .dark block
   --sidebar-ring: oklch(55.6% 0 0deg);
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:27:31Z)**_
@@ -3040,10 +3084,11 @@ _**Agent (claude-opus-4-6 2026-04-07 17:27:31Z)**_
 I see the problem now. On master, `.dark` sets `--card: oklch(20.5% 0 0deg)` - a dark gray. But in my change, I set `--card: var(--bs-surface)`.
 
 The issue is that `--bs-surface` is only set to the dark value in two places:
-1. `:root[data-theme='dark']` 
+
+1. `:root[data-theme='dark']`
 2. `@media (prefers-color-scheme: dark) :root:not([data-theme='light'])`
 
-But `--card: var(--bs-surface)` in `.dark` resolves to whatever `--bs-surface` is on the element. 
+But `--card: var(--bs-surface)` in `.dark` resolves to whatever `--bs-surface` is on the element.
 
 Since `.dark` is on `<html>` and `:root` sets both `--bs-surface: #fff` and `--card: var(--bs-surface)`, my `.dark` block's `--card: var(--bs-surface)` just references the same light value - the override doesn't actually change anything because both are using the same variable expression.
 
@@ -3069,67 +3114,68 @@ _**Agent (claude-opus-4-6 2026-04-07 17:27:32Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-500	  --radius-lg: var(--radius);
-501	  --radius-xl: calc(var(--radius) * 1.4);
-502	  --radius-2xl: calc(var(--radius) * 1.8);
-503	  --radius-3xl: calc(var(--radius) * 2.2);
-504	  --radius-4xl: calc(var(--radius) * 2.6);
-505	}
-506	
-507	.dark {
-508	  /* Wire shadcn vars from --bs-* tokens so the design system drives dark mode */
-509	  --foreground: var(--bs-text);
-510	  --background: var(--bs-background);
-511	  --card: var(--bs-surface);
-512	  --card-foreground: var(--bs-text);
-513	  --popover: var(--bs-surface);
-514	  --popover-foreground: var(--bs-text);
-515	  --primary: var(--bs-primary);
-516	  --primary-foreground: var(--bs-surface);
-517	  --secondary: var(--bs-secondary);
-518	  --secondary-foreground: var(--bs-surface);
-519	  --muted: color-mix(in oklch, var(--bs-surface) 80%, var(--bs-text) 20%);
-520	  --muted-foreground: color-mix(
-521	    in oklch,
-522	    var(--bs-text) 60%,
-523	    var(--bs-surface) 40%
-524	  );
-525	  --accent: color-mix(in oklch, var(--bs-surface) 80%, var(--bs-text) 20%);
-526	  --accent-foreground: var(--bs-text);
-527	  --destructive: var(--bs-error);
-528	  --border: var(--bs-accent);
-529	  --input: color-mix(in oklch, var(--bs-surface) 85%, var(--bs-text) 15%);
-530	  --ring: var(--bs-primary);
-531	  --chart-1: var(--bs-primary);
-532	  --chart-2: var(--bs-secondary);
-533	  --chart-3: var(--bs-accent);
-534	  --chart-4: var(--bs-success);
-535	  --chart-5: var(--bs-warning);
-536	  --sidebar: var(--bs-surface);
-537	  --sidebar-foreground: var(--bs-text);
-538	  --sidebar-primary: var(--bs-primary);
-539	  --sidebar-primary-foreground: var(--bs-surface);
-540	  --sidebar-accent: color-mix(
-541	    in oklch,
-542	    var(--bs-surface) 80%,
-543	    var(--bs-text) 20%
-544	  );
-545	  --sidebar-accent-foreground: var(--bs-text);
-546	  --sidebar-border: color-mix(
-547	    in oklch,
-548	    var(--bs-surface) 90%,
-549	    var(--bs-text) 10%
-550	  );
-551	  --sidebar-ring: var(--bs-primary);
-552	
-553	  /* Skeuomorphic tile tokens — dark */
-554	  --skeuo-highlight: rgb(255 255 255 / 6%);
-555	  --skeuo-ring: rgb(255 255 255 / 10%);
-556	  --skeuo-inset-bottom: rgb(255 255 255 / 4%);
-557	  --skeuo-inset-top: rgb(255 255 255 / 8%);
-558	  --skeuo-text-shadow: rgb(0 0 0 / 40%);
-559	}
+500   --radius-lg: var(--radius);
+501   --radius-xl: calc(var(--radius) * 1.4);
+502   --radius-2xl: calc(var(--radius) * 1.8);
+503   --radius-3xl: calc(var(--radius) * 2.2);
+504   --radius-4xl: calc(var(--radius) * 2.6);
+505 }
+506 
+507 .dark {
+508   /* Wire shadcn vars from --bs-* tokens so the design system drives dark mode */
+509   --foreground: var(--bs-text);
+510   --background: var(--bs-background);
+511   --card: var(--bs-surface);
+512   --card-foreground: var(--bs-text);
+513   --popover: var(--bs-surface);
+514   --popover-foreground: var(--bs-text);
+515   --primary: var(--bs-primary);
+516   --primary-foreground: var(--bs-surface);
+517   --secondary: var(--bs-secondary);
+518   --secondary-foreground: var(--bs-surface);
+519   --muted: color-mix(in oklch, var(--bs-surface) 80%, var(--bs-text) 20%);
+520   --muted-foreground: color-mix(
+521     in oklch,
+522     var(--bs-text) 60%,
+523     var(--bs-surface) 40%
+524   );
+525   --accent: color-mix(in oklch, var(--bs-surface) 80%, var(--bs-text) 20%);
+526   --accent-foreground: var(--bs-text);
+527   --destructive: var(--bs-error);
+528   --border: var(--bs-accent);
+529   --input: color-mix(in oklch, var(--bs-surface) 85%, var(--bs-text) 15%);
+530   --ring: var(--bs-primary);
+531   --chart-1: var(--bs-primary);
+532   --chart-2: var(--bs-secondary);
+533   --chart-3: var(--bs-accent);
+534   --chart-4: var(--bs-success);
+535   --chart-5: var(--bs-warning);
+536   --sidebar: var(--bs-surface);
+537   --sidebar-foreground: var(--bs-text);
+538   --sidebar-primary: var(--bs-primary);
+539   --sidebar-primary-foreground: var(--bs-surface);
+540   --sidebar-accent: color-mix(
+541     in oklch,
+542     var(--bs-surface) 80%,
+543     var(--bs-text) 20%
+544   );
+545   --sidebar-accent-foreground: var(--bs-text);
+546   --sidebar-border: color-mix(
+547     in oklch,
+548     var(--bs-surface) 90%,
+549     var(--bs-text) 10%
+550   );
+551   --sidebar-ring: var(--bs-primary);
+552 
+553   /* Skeuomorphic tile tokens — dark */
+554   --skeuo-highlight: rgb(255 255 255 / 6%);
+555   --skeuo-ring: rgb(255 255 255 / 10%);
+556   --skeuo-inset-bottom: rgb(255 255 255 / 4%);
+557   --skeuo-inset-top: rgb(255 255 255 / 8%);
+558   --skeuo-text-shadow: rgb(0 0 0 / 40%);
+559 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:27:48Z)**_
@@ -3141,7 +3187,6 @@ The issue is now clear. The `.dark` block sets `--card: var(--bs-surface)`. But 
 2. `@media (prefers-color-scheme: dark) :root:not([data-theme='light'])` — only when system is dark
 
 The `.dark` class can be added manually (via ThemeToggle) even when the system is NOT in dark mode. In that case:
-
 
 ThemeToggle correctly sets `data-theme='dark'` when the mode is 'dark', which should trigger the `:root[data-theme='dark']` selector and apply the dark surface color. But I'm going in circles trying to trace through the logic—let me step back and try a different approach to debug this.
 
@@ -3164,6 +3209,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:11Z)**_
@@ -3173,13 +3219,14 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:11Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-516	  --bs-warning: #f4a261;
-517	  --bs-error: #ff6b6b;
-518	
-519	  --foreground: var(--bs-text);
-520	  --background: var(--bs-background);
-521	  --card: var(--bs-surface);
+516   --bs-warning: #f4a261;
+517   --bs-error: #ff6b6b;
+518 
+519   --foreground: var(--bs-text);
+520   --background: var(--bs-background);
+521   --card: var(--bs-surface);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:16Z)**_
@@ -3190,6 +3237,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:21Z)**_
@@ -3206,6 +3254,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:22Z)**_
 .claude/worktrees/bold-chatelet/src/components/ui/card.stories.tsx
 .claude/worktrees/bold-chatelet/src/components/ui/card.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:25Z)**_
@@ -3215,115 +3264,116 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:25Z)**_
  `./.claude/worktrees/bold-chatelet/src/components/ui/card.tsx`
 
 ```text
-1	import type * as React from 'react';
-2	
-3	import { cn } from '#/lib/utils';
-4	
-5	const Card = ({
-6	  className,
-7	  size = 'default',
-8	  ...props
-9	}: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) => (
-10	  <div
-11	    data-slot="card"
-12	    data-size={size}
-13	    className={cn(
-14	      'group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
-15	      className,
-16	    )}
-17	    {...props}
-18	  />
-19	);
-20	
-21	const CardHeader = ({
-22	  className,
-23	  ...props
-24	}: React.ComponentProps<'div'>) => (
-25	  <div
-26	    data-slot="card-header"
-27	    className={cn(
-28	      'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3',
-29	      className,
-30	    )}
-31	    {...props}
-32	  />
-33	);
-34	
-35	const CardTitle = ({
-36	  className,
-37	  ...props
-38	}: React.ComponentProps<'div'>) => (
-39	  <div
-40	    data-slot="card-title"
-41	    className={cn(
-42	      'font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm',
-43	      className,
-44	    )}
-45	    {...props}
-46	  />
-47	);
-48	
-49	const CardDescription = ({
-50	  className,
-51	  ...props
-52	}: React.ComponentProps<'div'>) => (
-53	  <div
-54	    data-slot="card-description"
-55	    className={cn('text-sm text-muted-foreground', className)}
-56	    {...props}
-57	  />
-58	);
-59	
-60	const CardAction = ({
-61	  className,
-62	  ...props
-63	}: React.ComponentProps<'div'>) => (
-64	  <div
-65	    data-slot="card-action"
-66	    className={cn(
-67	      'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
-68	      className,
-69	    )}
-70	    {...props}
-71	  />
-72	);
-73	
-74	const CardContent = ({
-75	  className,
-76	  ...props
-77	}: React.ComponentProps<'div'>) => (
-78	  <div
-79	    data-slot="card-content"
-80	    className={cn('px-4 group-data-[size=sm]/card:px-3', className)}
-81	    {...props}
-82	  />
-83	);
-84	
-85	const CardFooter = ({
-86	  className,
-87	  ...props
-88	}: React.ComponentProps<'div'>) => (
-89	  <div
-90	    data-slot="card-footer"
-91	    className={cn(
-92	      'flex items-center rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/card:p-3',
-93	      className,
-94	    )}
-95	    {...props}
-96	  />
-97	);
-98	
-99	export {
-100	  Card,
-101	  CardHeader,
-102	  CardFooter,
-103	  CardTitle,
-104	  CardAction,
-105	  CardDescription,
-106	  CardContent,
-107	};
+1 import type * as React from 'react';
+2 
+3 import { cn } from '#/lib/utils';
+4 
+5 const Card = ({
+6   className,
+7   size = 'default',
+8   ...props
+9 }: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) => (
+10   <div
+11     data-slot="card"
+12     data-size={size}
+13     className={cn(
+14       'group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+15       className,
+16     )}
+17     {...props}
+18   />
+19 );
+20 
+21 const CardHeader = ({
+22   className,
+23   ...props
+24 }: React.ComponentProps<'div'>) => (
+25   <div
+26     data-slot="card-header"
+27     className={cn(
+28       'group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3',
+29       className,
+30     )}
+31     {...props}
+32   />
+33 );
+34 
+35 const CardTitle = ({
+36   className,
+37   ...props
+38 }: React.ComponentProps<'div'>) => (
+39   <div
+40     data-slot="card-title"
+41     className={cn(
+42       'font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm',
+43       className,
+44     )}
+45     {...props}
+46   />
+47 );
+48 
+49 const CardDescription = ({
+50   className,
+51   ...props
+52 }: React.ComponentProps<'div'>) => (
+53   <div
+54     data-slot="card-description"
+55     className={cn('text-sm text-muted-foreground', className)}
+56     {...props}
+57   />
+58 );
+59 
+60 const CardAction = ({
+61   className,
+62   ...props
+63 }: React.ComponentProps<'div'>) => (
+64   <div
+65     data-slot="card-action"
+66     className={cn(
+67       'col-start-2 row-span-2 row-start-1 self-start justify-self-end',
+68       className,
+69     )}
+70     {...props}
+71   />
+72 );
+73 
+74 const CardContent = ({
+75   className,
+76   ...props
+77 }: React.ComponentProps<'div'>) => (
+78   <div
+79     data-slot="card-content"
+80     className={cn('px-4 group-data-[size=sm]/card:px-3', className)}
+81     {...props}
+82   />
+83 );
+84 
+85 const CardFooter = ({
+86   className,
+87   ...props
+88 }: React.ComponentProps<'div'>) => (
+89   <div
+90     data-slot="card-footer"
+91     className={cn(
+92       'flex items-center rounded-b-xl border-t bg-muted/50 p-4 group-data-[size=sm]/card:p-3',
+93       className,
+94     )}
+95     {...props}
+96   />
+97 );
+98 
+99 export {
+100   Card,
+101   CardHeader,
+102   CardFooter,
+103   CardTitle,
+104   CardAction,
+105   CardDescription,
+106   CardContent,
+107 };
 108
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:39Z)**_
@@ -3333,7 +3383,7 @@ The Card uses `bg-card` which maps to `--color-card` → `var(--card)`. In my `.
 
 But wait, the user said "they have those filters I think oklch(98.5% 0 0)". Let me check if the Tailwind CSS output is caching or if there's an issue with the `@theme inline` block.
 
-Actually, `oklch(98.5% 0 0)` is the `--foreground` value from the original shadcn `.dark` block on master: `--foreground: oklch(98.5% 0 0deg)`. 
+Actually, `oklch(98.5% 0 0)` is the `--foreground` value from the original shadcn `.dark` block on master: `--foreground: oklch(98.5% 0 0deg)`.
 
 I'm wondering if Tailwind's build process is resolving the `@theme inline` variables at compile time instead of leaving them as runtime CSS custom properties, which could explain why the user is seeing that foreground color applied to the card background.
 
@@ -3355,6 +3405,7 @@ Find shadcn CSS file
 ```text
 /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/shadcn/dist/tailwind.css
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:44Z)**_
@@ -3366,6 +3417,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:44Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:47Z)**_
@@ -3375,115 +3427,116 @@ _**Agent (claude-opus-4-6 2026-04-07 17:28:47Z)**_
  `./.claude/worktrees/bold-chatelet/node_modules/shadcn/dist/tailwind.css`
 
 ```text
-1	@theme inline {
-2	  @keyframes accordion-down {
-3	    from {
-4	      height: 0;
-5	    }
-6	    to {
-7	      height: var(
-8	        --radix-accordion-content-height,
-9	        var(--accordion-panel-height, auto)
-10	      );
-11	    }
-12	  }
-13	
-14	  @keyframes accordion-up {
-15	    from {
-16	      height: var(
-17	        --radix-accordion-content-height,
-18	        var(--accordion-panel-height, auto)
-19	      );
-20	    }
-21	    to {
-22	      height: 0;
-23	    }
-24	  }
-25	}
-26	
-27	/* Custom variants */
-28	@custom-variant data-open {
-29	  &:where([data-state="open"]),
-30	  &:where([data-open]:not([data-open="false"])) {
-31	    @slot;
-32	  }
-33	}
-34	
-35	@custom-variant data-closed {
-36	  &:where([data-state="closed"]),
-37	  &:where([data-closed]:not([data-closed="false"])) {
-38	    @slot;
-39	  }
-40	}
-41	
-42	@custom-variant data-checked {
-43	  &:where([data-state="checked"]),
-44	  &:where([data-checked]:not([data-checked="false"])) {
-45	    @slot;
-46	  }
-47	}
-48	
-49	@custom-variant data-unchecked {
-50	  &:where([data-state="unchecked"]),
-51	  &:where([data-unchecked]:not([data-unchecked="false"])) {
-52	    @slot;
-53	  }
-54	}
-55	
-56	@custom-variant data-selected {
-57	  &:where([data-selected="true"]) {
-58	    @slot;
-59	  }
-60	}
-61	
-62	@custom-variant data-disabled {
-63	  &:where([data-disabled="true"]),
-64	  &:where([data-disabled]:not([data-disabled="false"])) {
-65	    @slot;
-66	  }
-67	}
-68	
-69	@custom-variant data-active {
-70	  &:where([data-state="active"]),
-71	  &:where([data-active]:not([data-active="false"])) {
-72	    @slot;
-73	  }
-74	}
-75	
-76	@custom-variant data-horizontal {
-77	  &:where([data-orientation="horizontal"]) {
-78	    @slot;
-79	  }
-80	}
-81	
-82	@custom-variant data-vertical {
-83	  &:where([data-orientation="vertical"]) {
-84	    @slot;
-85	  }
-86	}
-87	
-88	@utility no-scrollbar {
-89	  -ms-overflow-style: none;
-90	  scrollbar-width: none;
-91	
-92	  &::-webkit-scrollbar {
-93	    display: none;
-94	  }
-95	}
+1 @theme inline {
+2   @keyframes accordion-down {
+3     from {
+4       height: 0;
+5     }
+6     to {
+7       height: var(
+8         --radix-accordion-content-height,
+9         var(--accordion-panel-height, auto)
+10       );
+11     }
+12   }
+13 
+14   @keyframes accordion-up {
+15     from {
+16       height: var(
+17         --radix-accordion-content-height,
+18         var(--accordion-panel-height, auto)
+19       );
+20     }
+21     to {
+22       height: 0;
+23     }
+24   }
+25 }
+26 
+27 /* Custom variants */
+28 @custom-variant data-open {
+29   &:where([data-state="open"]),
+30   &:where([data-open]:not([data-open="false"])) {
+31     @slot;
+32   }
+33 }
+34 
+35 @custom-variant data-closed {
+36   &:where([data-state="closed"]),
+37   &:where([data-closed]:not([data-closed="false"])) {
+38     @slot;
+39   }
+40 }
+41 
+42 @custom-variant data-checked {
+43   &:where([data-state="checked"]),
+44   &:where([data-checked]:not([data-checked="false"])) {
+45     @slot;
+46   }
+47 }
+48 
+49 @custom-variant data-unchecked {
+50   &:where([data-state="unchecked"]),
+51   &:where([data-unchecked]:not([data-unchecked="false"])) {
+52     @slot;
+53   }
+54 }
+55 
+56 @custom-variant data-selected {
+57   &:where([data-selected="true"]) {
+58     @slot;
+59   }
+60 }
+61 
+62 @custom-variant data-disabled {
+63   &:where([data-disabled="true"]),
+64   &:where([data-disabled]:not([data-disabled="false"])) {
+65     @slot;
+66   }
+67 }
+68 
+69 @custom-variant data-active {
+70   &:where([data-state="active"]),
+71   &:where([data-active]:not([data-active="false"])) {
+72     @slot;
+73   }
+74 }
+75 
+76 @custom-variant data-horizontal {
+77   &:where([data-orientation="horizontal"]) {
+78     @slot;
+79   }
+80 }
+81 
+82 @custom-variant data-vertical {
+83   &:where([data-orientation="vertical"]) {
+84     @slot;
+85   }
+86 }
+87 
+88 @utility no-scrollbar {
+89   -ms-overflow-style: none;
+90   scrollbar-width: none;
+91 
+92   &::-webkit-scrollbar {
+93     display: none;
+94   }
+95 }
 96
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:28:57Z)**_
 
 <think><details><summary>Thought Process</summary>
-OK so shadcn's CSS doesn't override any of the dark mode vars. 
+OK so shadcn's CSS doesn't override any of the dark mode vars.
 
 The user says "they have those filters I think oklch(98.5% 0 0)". This is a near-white oklch color. It was used in master's `.dark` block as `--foreground: oklch(98.5% 0 0deg)` and `--card-foreground: oklch(98.5% 0 0deg)`.
 
 But wait - the user mentioned it in context of something causing white cards. Let me think...
 
-`oklch(98.5% 0 0deg)` would be nearly white (98.5% lightness). 
+`oklch(98.5% 0 0deg)` would be nearly white (98.5% lightness).
 
 If that value got assigned to `--card` instead of `--card-foreground`, that would create white backgrounds. But my current setup has `--card` pointing to `--bs-surface` which is `#16213e`, a dark blue, so that shouldn't be happening. Let me actually build this out and see what's rendering.
 </details></think>
@@ -3504,6 +3557,7 @@ Build Tailwind CSS output
 npm error could not determine executable to run
 npm error A complete log of this run can be found in: /Users/leocaseiro/.npm/_logs/2026-04-07T17_28_57_911Z-debug-0.log
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:29:07Z)**_
@@ -3515,7 +3569,7 @@ Build to check CSS output
 `npx vite build --mode development 2>&1 | tail -10`
 
 ```text
-						      ^
+            ^
 
 Error: Failed to fetch /: Internal Server Error
     at file:///Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/node_modules/@tanstack/start-plugin-core/dist/esm/prerender.js:103:13
@@ -3526,6 +3580,7 @@ Error: Failed to fetch /: Internal Server Error
 
 Node.js v24.14.1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:29:16Z)**_
@@ -3568,6 +3623,7 @@ Try tailwind CLI to check output
 --
   .dark\:hover\:bg-destructive\/30 {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:29:21Z)**_
@@ -3593,6 +3649,7 @@ Check PR #27 details
 ```text
 {"body":"## Summary\r\n\r\n- **CSS variable architecture fix** — inline styles only set `--bs-*` vars; shadcn vars (`--background`, `--primary`, etc.) derive from `--bs-*` in `:root` so the `.dark` class cascade wins over inline specificity\r\n- **Bookmark colour system** — `ColorTokens` slimmed to `{border, playBg}`; CSS utility classes `.bookmark-bg`, `.bookmark-tag-bg`, `.bookmark-text` via `color-mix()` handle all tints (including dark mode at higher opacities); 4 components updated (`GameNameChip`, `SavedConfigChip`, `InstructionsOverlay`, `SaveConfigDialog`)\r\n- **Linting enforcement** — Stylelint bans hardcoded colours in CSS; ESLint `no-restricted-syntax` bans hardcoded colours in JSX inline styles\r\n- **E2E VR test coverage** — 12 visual regression tests (6 light + 6 dark); `setDarkMode` sets `.dark` class + `data-theme=dark` + suppresses CSS transitions before screenshot\r\n- **Storybook** — `withDarkMode`/`withDocumentDarkMode` decorators; 6 new story files with dark variants; `ThemeShowcase` page with 4 locked-theme VR snapshots (Ocean Light/Dark, Forest Light/Dark)\r\n- **Forest theme** — new theme variant added to `withTheme.tsx` toolbar\r\n\r\n## Test Plan\r\n\r\n- [x] `yarn lint` — 0 ESLint + Knip errors\r\n- [x] `yarn typecheck` — 0 TypeScript errors\r\n- [x] `yarn test` — 332/332 unit tests pass\r\n- [x] `yarn test:vr` — 12 VR baselines pass (1 updated: `game-shell` due to bookmark colour changes)\r\n- [x] `yarn test:e2e` — 15 E2E tests pass (smoke + a11y)\r\n- [x] Storybook interaction tests \r\n\r\n🤖 Generated with [Claude Code](https://claude.com/claude-code)","files":[{"path":".claude/skills/write-storybook/SKILL.md","additions":39,"deletions":0,"changeType":"MODIFIED"},{"path":".specstory/history/2026-04-07_01-50-46Z-i-want-to-fix.md","additions":3510,"deletions":0,"changeType":"MODIFIED"},{"path":".specstory/history/2026-04-07_03-09-02Z.md","additions":3395,"deletions":0,"changeType":"ADDED"},{"path":".specstory/statistics.json","additions":63,"deletions":54,"changeType":"MODIFIED"},{"path":".storybook/decorators.tsx","additions":45,"deletions":0,"changeType":"ADDED"},{"path":".storybook/decorators/withTheme.tsx","additions":25,"deletions":1,"changeType":"MODIFIED"},{"path":".storybook/preview.tsx","additions":7,"deletions":1,"changeType":"MODIFIED"},{"path":".stylelintrc.yaml","additions":8,"deletions":0,"changeType":"MODIFIED"},{"path":"CLAUDE.md","additions":45,"deletions":1,"changeType":"MODIFIED"},{"path":"docs/superpowers/plans/2026-04-07-dark-mode-a11y-vr.md","additions":2095,"deletions":0,"changeType":"ADDED"},{"path":"docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md","additions":234,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/game-shell-chromium.png","additions":0,"deletions":0,"changeType":"MODIFIED"},{"path":"e2e/__snapshots__/visual.spec.ts/game-shell-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/home-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/instructions-overlay-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/instructions-overlay-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/number-match-numeral-to-group-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/sort-numbers-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/sort-numbers-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/__snapshots__/visual.spec.ts/word-spell-picture-mode-dark-chromium.png","additions":0,"deletions":0,"changeType":"ADDED"},{"path":"e2e/visual.spec.ts","additions":133,"deletions":4,"changeType":"MODIFIED"},{"path":"eslint.config.js","additions":10,"deletions":0,"changeType":"MODIFIED"},{"path":"src/components/ConfigFormFields.stories.tsx","additions":50,"deletions":0,"changeType":"ADDED"},{"path":"src/components/GameNameChip.stories.tsx","additions":79,"deletions":0,"changeType":"ADDED"},{"path":"src/components/GameNameChip.tsx","additions":11,"deletions":21,"changeType":"MODIFIED"},{"path":"src/components/SaveConfigDialog.tsx","additions":10,"deletions":10,"changeType":"MODIFIED"},{"path":"src/components/SavedConfigChip.stories.tsx","additions":69,"deletions":0,"changeType":"ADDED"},{"path":"src/components/SavedConfigChip.tsx","additions":23,"deletions":29,"changeType":"MODIFIED"},{"path":"src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx","additions":61,"deletions":0,"changeType":"ADDED"},{"path":"src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx","additions":16,"deletions":14,"changeType":"MODIFIED"},{"path":"src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx","additions":67,"deletions":0,"changeType":"ADDED"},{"path":"src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx","additions":76,"deletions":0,"changeType":"ADDED"},{"path":"src/lib/bookmark-colors.ts","additions":14,"deletions":102,"changeType":"MODIFIED"},{"path":"src/lib/theme/css-vars.ts","additions":0,"deletions":9,"changeType":"MODIFIED"},{"path":"src/lib/theme/default-tokens.ts","additions":0,"deletions":10,"changeType":"MODIFIED"},{"path":"src/stories/ThemeShowcase.stories.tsx","additions":160,"deletions":0,"changeType":"ADDED"},{"path":"src/styles.css","additions":52,"deletions":16,"changeType":"MODIFIED"}]}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:29:44Z)**_
@@ -3602,10 +3659,11 @@ The PR description says:
 > "CSS variable architecture fix — inline styles only set `--bs-*` vars; shadcn vars (`--background`, `--primary`, etc.) derive from `--bs-*` in `:root` so the `.dark` class cascade wins over inline specificity"
 
 So the key insight from the PR is that:
+
 1. `:root` maps shadcn vars to `--bs-*` tokens (e.g., `--card: var(--bs-surface)`)
 2. `.dark` class should override things so they work
 
-But the issue is: the `.dark` class on master had hardcoded oklch values. 
+But the issue is: the `.dark` class on master had hardcoded oklch values.
 
 The PR's changes to `src/styles.css` likely preserved those hardcoded values, but I'm realizing my modification broke the dark mode by replacing the hardcoded oklch values with `var(--bs-surface)`, which doesn't account for the fact that the bootstrap variable itself needs to change in dark mode.
 
@@ -3627,67 +3685,69 @@ _**Agent (claude-opus-4-6 2026-04-07 17:29:46Z)**_
  `./.claude/worktrees/bold-chatelet/src/styles.css`
 
 ```text
-507	.dark {
-508	  /* Galaxy dark theme — hardcoded so .dark class works without data-theme */
-509	  --bs-primary: #ff9f43;
-510	  --bs-secondary: #54a0ff;
-511	  --bs-background: #1a1a2e;
-512	  --bs-surface: #16213e;
-513	  --bs-text: #e8f4fd;
-514	  --bs-accent: #feca57;
-515	  --bs-success: #6bcb77;
-516	  --bs-warning: #f4a261;
-517	  --bs-error: #ff6b6b;
-518	  --foreground: var(--bs-text);
-519	  --background: var(--bs-background);
-520	  --card: var(--bs-surface);
-521	  --card-foreground: var(--bs-text);
-522	  --popover: var(--bs-surface);
-523	  --popover-foreground: var(--bs-text);
-524	  --primary: var(--bs-primary);
-525	  --primary-foreground: var(--bs-background);
-526	  --secondary: var(--bs-secondary);
-527	  --secondary-foreground: var(--bs-background);
-528	  --muted: #1e2a4a;
-529	  --muted-foreground: #8fa4c4;
-530	  --accent: #1e2a4a;
-531	  --accent-foreground: var(--bs-text);
-532	  --destructive: var(--bs-error);
-533	  --border: rgb(255 255 255 / 10%);
-534	  --input: rgb(255 255 255 / 15%);
-535	  --ring: var(--bs-primary);
-536	  --chart-1: var(--bs-primary);
-537	  --chart-2: var(--bs-secondary);
-538	  --chart-3: var(--bs-accent);
-539	  --chart-4: var(--bs-success);
-540	  --chart-5: var(--bs-warning);
-541	  --sidebar: var(--bs-surface);
-542	  --sidebar-foreground: var(--bs-text);
-543	  --sidebar-primary: var(--bs-primary);
-544	  --sidebar-primary-foreground: var(--bs-background);
-545	  --sidebar-accent: #1e2a4a;
-546	  --sidebar-accent-foreground: var(--bs-text);
-547	  --sidebar-border: rgb(255 255 255 / 10%);
-548	  --sidebar-ring: var(--bs-primary);
-549	
-550	  /* Skeuomorphic tile tokens — dark */
-551	  --skeuo-highlight: rgb(255 255 255 / 6%);
-552	  --skeuo-ring: rgb(255 255 255 / 10%);
-553	  --skeuo-inset-bottom: rgb(255 255 255 / 4%);
-554	  --skeuo-inset-top: rgb(255 255 255 / 8%);
-555	  --skeuo-text-shadow: rgb(0 0 0 / 40%);
-556	}
-557	
-558	/* Bookmark colour utilities — derived from --bookmark-play set per-component */
-559	.bookmark-bg {
-560	  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
-561	}
+507 .dark {
+508   /* Galaxy dark theme — hardcoded so .dark class works without data-theme */
+509   --bs-primary: #ff9f43;
+510   --bs-secondary: #54a0ff;
+511   --bs-background: #1a1a2e;
+512   --bs-surface: #16213e;
+513   --bs-text: #e8f4fd;
+514   --bs-accent: #feca57;
+515   --bs-success: #6bcb77;
+516   --bs-warning: #f4a261;
+517   --bs-error: #ff6b6b;
+518   --foreground: var(--bs-text);
+519   --background: var(--bs-background);
+520   --card: var(--bs-surface);
+521   --card-foreground: var(--bs-text);
+522   --popover: var(--bs-surface);
+523   --popover-foreground: var(--bs-text);
+524   --primary: var(--bs-primary);
+525   --primary-foreground: var(--bs-background);
+526   --secondary: var(--bs-secondary);
+527   --secondary-foreground: var(--bs-background);
+528   --muted: #1e2a4a;
+529   --muted-foreground: #8fa4c4;
+530   --accent: #1e2a4a;
+531   --accent-foreground: var(--bs-text);
+532   --destructive: var(--bs-error);
+533   --border: rgb(255 255 255 / 10%);
+534   --input: rgb(255 255 255 / 15%);
+535   --ring: var(--bs-primary);
+536   --chart-1: var(--bs-primary);
+537   --chart-2: var(--bs-secondary);
+538   --chart-3: var(--bs-accent);
+539   --chart-4: var(--bs-success);
+540   --chart-5: var(--bs-warning);
+541   --sidebar: var(--bs-surface);
+542   --sidebar-foreground: var(--bs-text);
+543   --sidebar-primary: var(--bs-primary);
+544   --sidebar-primary-foreground: var(--bs-background);
+545   --sidebar-accent: #1e2a4a;
+546   --sidebar-accent-foreground: var(--bs-text);
+547   --sidebar-border: rgb(255 255 255 / 10%);
+548   --sidebar-ring: var(--bs-primary);
+549 
+550   /* Skeuomorphic tile tokens — dark */
+551   --skeuo-highlight: rgb(255 255 255 / 6%);
+552   --skeuo-ring: rgb(255 255 255 / 10%);
+553   --skeuo-inset-bottom: rgb(255 255 255 / 4%);
+554   --skeuo-inset-top: rgb(255 255 255 / 8%);
+555   --skeuo-text-shadow: rgb(0 0 0 / 40%);
+556 }
+557 
+558 /* Bookmark colour utilities — derived from --bookmark-play set per-component */
+559 .bookmark-bg {
+560   background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+561 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:29:51Z)**_
 
 The `.dark` block now:
+
 1. Sets all `--bs-*` tokens to Galaxy dark values directly (so no dependency on `data-theme` or media query)
 2. Maps all shadcn vars (`--card`, `--background`, etc.) from those `--bs-*` tokens
 
@@ -3711,242 +3771,243 @@ _**Agent (claude-opus-4-6 2026-04-07 17:30:02Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/specs/2026-04-07-dark-mode-a11y-vr-design.md`
 
 ```text
-1	# Dark Mode Fix, A11Y Colour Enforcement & VR Tests
-2	
-3	**Date:** 2026-04-07  
-4	**Branch strategy:** Single PR (`feat/dark-mode-a11y-vr`)  
-5	**Status:** Approved — ready for implementation plan
-6	
-7	---
-8	
-9	## Problem Summary
-10	
-11	1. **Dark mode backgrounds invisible** — `InstructionsOverlay` (ocean + forest themes) shows a near-white overlay in dark mode. Game config form inputs show white backgrounds with unreadable text.
-12	2. **Root cause** — `ThemeRuntimeProvider` sets shadcn CSS vars (`--background`, `--primary`, etc.) as **inline styles** on `<html>`. Inline styles have higher specificity than the `.dark` class, so dark mode overrides in `styles.css` never apply.
-13	3. **Hardcoded colours** — `BOOKMARK_COLORS` (12 palettes, all light-mode hex values), plus two isolated spots in `InstructionsOverlay` and `SavedConfigChip`.
-14	4. **No enforcement** — nothing prevents new hardcoded colours being added to CSS or TSX inline styles.
-15	5. **No dark-mode VR coverage** — all 4 existing E2E visual tests are light-mode only. `SortNumbers` has no VR tests at all.
-16	
-17	---
-18	
-19	## Section 1 — CSS Variable Architecture Fix
-20	
-21	### Approach
-22	
-23	Stop setting shadcn/Tailwind vars inline in the runtime. Only `--bs-*` vars are applied inline. CSS derives shadcn vars from `--bs-*` in the `:root` block; the `.dark` class then correctly wins via cascade order.
-24	
-25	### Changes
-26	
-27	**`src/lib/theme/css-vars.ts`** — remove these keys from the returned object:
-28	
-29	- `--background`, `--primary`, `--primary-foreground`
-30	- `--secondary`, `--secondary-foreground`
-31	- `--border`, `--ring`
-32	
-33	**`src/lib/theme/default-tokens.ts`** — remove the same keys.
-34	
-35	**`src/styles.css`** — add to the existing `:root` block:
-36	
-37	```css
-38	/* Wire shadcn vars from theme bs-* tokens (inline style sets bs-* only; dark class overrides these) */
-39	--foreground: var(--bs-text);
-40	--background: var(--bs-background);
-41	--primary: var(--bs-primary);
-42	--primary-foreground: var(--bs-surface);
-43	--secondary: var(--bs-secondary);
-44	--secondary-foreground: var(--bs-surface);
-45	--border: var(--bs-accent);
-46	--ring: var(--bs-primary);
-47	```
-48	
-49	The `.dark {}` block (already present, already correct) now wins — no changes needed there.
-50	
-51	### Result
-52	
-53	- `InstructionsOverlay`'s `bg-background/95` goes dark automatically.
-54	- `ConfigFormFields` inputs' `bg-background` go dark automatically.
-55	- Zero component-level changes needed for this fix.
-56	
-57	---
-58	
-59	## Section 2 — BOOKMARK_COLORS Dark Mode
-60	
-61	### Approach
-62	
-63	`playBg` (strong saturated hex) is the single source of truth. Pale `bg`/`tagBg` tokens are replaced by CSS using `color-mix` to create transparent overlays from `playBg`. Text uses `playBg` directly (saturated colours read on both light and dark surfaces).
-64	
-65	### Changes
-66	
-67	**`src/lib/bookmark-colors.ts`** — remove `bg`, `tagBg`, `tagText`, `headerText` from `ColorTokens`. Keep `border` and `playBg`.
-68	
-69	```ts
-70	export type ColorTokens = {
-71	  border: string; // used for selected ring in colour picker
-72	  playBg: string; // primary colour — all other uses derived from this
-73	};
-74	```
-75	
-76	**`src/styles.css`** — add utility classes:
-77	
-78	```css
-79	.bookmark-bg {
-80	  background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
-81	}
-82	.dark .bookmark-bg {
-83	  background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
-84	}
-85	
-86	.bookmark-tag-bg {
-87	  background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
-88	}
-89	.dark .bookmark-tag-bg {
-90	  background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
-91	}
-92	
-93	.bookmark-text {
-94	  color: var(--bookmark-play);
-95	}
-96	```
-97	
-98	**Components to update** — set `style={{ '--bookmark-play': colors.playBg } as React.CSSProperties}` and replace inline background/color with the new utility classes:
-99	
-100	- `src/components/GameNameChip.tsx`
-101	- `src/components/SavedConfigChip.tsx`
-102	- `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
-103	- `src/components/SaveConfigDialog.tsx`
-104	
-105	---
-106	
-107	## Section 3 — Hardcoded Colour Cleanup
-108	
-109	| File                      | Location | Current value             | Replacement                     |
-110	| ------------------------- | -------- | ------------------------- | ------------------------------- |
-111	| `InstructionsOverlay.tsx` | line 124 | `'rgba(255,255,255,0.7)'` | Tailwind `text-white/70` class  |
-112	| `SavedConfigChip.tsx`     | line 99  | `'rgb(254 226 226)'`      | `bg-bs-error/15` Tailwind class |
-113	
-114	---
-115	
-116	## Section 4 — Linting Enforcement
-117	
-118	### Stylelint (CSS files)
-119	
-120	Add to `.stylelintrc`:
-121	
-122	```yaml
-123	color-named: 'never'
-124	declaration-property-value-disallowed-list:
-125	  - {
-126	      '/^(color|background|background-color|border-color|outline-color|fill|stroke)$/':
-127	        ['/^#/', '/^rgb/', '/^rgba/', '/^hsl/', '/^oklch/'],
-128	    }
-129	```
-130	
-131	Allowlist exceptions: `transparent`, `inherit`, `currentColor`, `none` — these are not matched by the patterns above.
-132	
-133	Run via existing `yarn lint:css` command.
-134	
-135	### ESLint (TSX inline styles)
-136	
-137	Add to `eslint.config.js` using `no-restricted-syntax` (no new package needed):
-138	
-139	```js
-140	{
-141	  selector:
-142	    'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|outlineColor|fill|stroke)$/i] > Literal[value=/^(#|rgb|rgba|hsl|oklch)/i]',
-143	  message:
-144	    'Use a CSS variable (var(--...)) instead of a hardcoded colour in inline styles.',
-145	}
-146	```
-147	
-148	**Exemption:** `src/lib/bookmark-colors.ts` is a constants file (not a JSX file), so the JSX rule does not apply. `playBg`/`border` hex values there remain the canonical palette definitions.
-149	
-150	---
-151	
-152	## Section 5 — VR Tests
-153	
-154	### E2E Playwright (`e2e/visual.spec.ts`)
-155	
-156	Add helper:
-157	
-158	```ts
-159	async function setDarkMode(page: Page) {
-160	  await page.evaluate(() => {
-161	    document.documentElement.classList.add('dark');
-162	    document.documentElement.style.colorScheme = 'dark';
-163	  });
-164	}
-165	```
-166	
-167	**Test matrix:**
-168	
-169	| Screen                                | Light    | Dark |
-170	| ------------------------------------- | -------- | ---- |
-171	| Home                                  | existing | new  |
-172	| Game shell                            | existing | new  |
-173	| WordSpell mid-game                    | existing | new  |
-174	| NumberMatch mid-game                  | existing | new  |
-175	| SortNumbers mid-game                  | new      | new  |
-176	| InstructionsOverlay (before Let's go) | new      | new  |
-177	
-178	Total snapshots: 12 (up from 4). All chromium-only (matching existing baseline approach).
-179	
-180	**InstructionsOverlay test:** navigate to `/en/game/sort-numbers`, wait for the overlay's "Let's go" button to appear, screenshot — do not click.
-181	
-182	**SortNumbers test:** navigate to `/en/game/sort-numbers`, click "Let's go", wait for tile bank to appear, screenshot.
-183	
-184	### Storybook VR (component-level)
-185	
-186	Add `withDarkMode` decorator in `.storybook/decorators.tsx`:
-187	
-188	```tsx
-189	export const withDarkMode: Decorator = (Story) => (
-190	  <div
-191	    className="dark"
-192	    style={{ background: 'oklch(14.5% 0 0)', padding: '1rem' }}
-193	  >
-194	    <Story />
-195	  </div>
-196	);
-197	```
-198	
-199	**New/updated story files:**
-200	
-201	| File                                            | Stories to add                                                       |
-202	| ----------------------------------------------- | -------------------------------------------------------------------- |
-203	| `InstructionsOverlay.stories.tsx` (new)         | `Default`, `SettingsExpanded`, `DefaultDark`, `SettingsExpandedDark` |
-204	| `ConfigFormFields.stories.tsx` (new)            | `AllFieldTypes`, `AllFieldTypesDark`                                 |
-205	| `GameNameChip.stories.tsx` (update existing)    | `*Dark` variants for each existing story                             |
-206	| `SavedConfigChip.stories.tsx` (update existing) | `*Dark` variants                                                     |
-207	| `SortNumbersTileBank.stories.tsx` (new)         | `Default`, `DefaultDark`                                             |
-208	| `NumberSequenceSlots.stories.tsx` (new)         | `Default`, `DefaultDark`                                             |
-209	
-210	---
-211	
-212	## A11Y Contrast Requirement
-213	
-214	All colours used by the design system must meet **WCAG AA** (4.5:1 for text, 3:1 for UI components) in both light and dark mode. The `--bs-*` palette in `src/styles.css` and `src/db/seed-themes.ts` already meets AA for the ocean and forest presets (documented in existing comments). New dark-mode colour additions (e.g. `color-mix` overlays for bookmarks) must be validated before merging — the VR tests serve as the visual gate; contrast ratio checks are a PR checklist item.
-215	
-216	---
-217	
-218	## Files Changed Summary
-219	
-220	| File                                                                     | Change type                                                          |
-221	| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-222	| `src/styles.css`                                                         | Add `:root` shadcn-from-bs derivations; add bookmark utility classes |
-223	| `src/lib/theme/css-vars.ts`                                              | Remove shadcn vars from inline set                                   |
-224	| `src/lib/theme/default-tokens.ts`                                        | Remove shadcn vars from inline set                                   |
-225	| `src/lib/bookmark-colors.ts`                                             | Slim `ColorTokens` to `border` + `playBg`                            |
-226	| `src/components/GameNameChip.tsx`                                        | Switch to `--bookmark-play` + utility classes                        |
-227	| `src/components/SavedConfigChip.tsx`                                     | Switch to `--bookmark-play` + utility classes; fix hardcoded red     |
-228	| `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Switch to `--bookmark-play`; fix hardcoded white/70                  |
-229	| `src/components/SaveConfigDialog.tsx`                                    | Switch to `--bookmark-play` + utility classes                        |
-230	| `.stylelintrc`                                                           | Add `color-named` + `declaration-property-value-disallowed-list`     |
-231	| `eslint.config.js`                                                       | Add `no-restricted-syntax` inline colour rule                        |
-232	| `e2e/visual.spec.ts`                                                     | Add dark variants + SortNumbers + InstructionsOverlay                |
-233	| `.storybook/decorators.tsx`                                              | New `withDarkMode` decorator                                         |
-234	| 6x story files                                                           | New/updated with dark variants                                       |
+1 # Dark Mode Fix, A11Y Colour Enforcement & VR Tests
+2 
+3 **Date:** 2026-04-07  
+4 **Branch strategy:** Single PR (`feat/dark-mode-a11y-vr`)  
+5 **Status:** Approved — ready for implementation plan
+6 
+7 ---
+8 
+9 ## Problem Summary
+10 
+11 1. **Dark mode backgrounds invisible** — `InstructionsOverlay` (ocean + forest themes) shows a near-white overlay in dark mode. Game config form inputs show white backgrounds with unreadable text.
+12 2. **Root cause** — `ThemeRuntimeProvider` sets shadcn CSS vars (`--background`, `--primary`, etc.) as **inline styles** on `<html>`. Inline styles have higher specificity than the `.dark` class, so dark mode overrides in `styles.css` never apply.
+13 3. **Hardcoded colours** — `BOOKMARK_COLORS` (12 palettes, all light-mode hex values), plus two isolated spots in `InstructionsOverlay` and `SavedConfigChip`.
+14 4. **No enforcement** — nothing prevents new hardcoded colours being added to CSS or TSX inline styles.
+15 5. **No dark-mode VR coverage** — all 4 existing E2E visual tests are light-mode only. `SortNumbers` has no VR tests at all.
+16 
+17 ---
+18 
+19 ## Section 1 — CSS Variable Architecture Fix
+20 
+21 ### Approach
+22 
+23 Stop setting shadcn/Tailwind vars inline in the runtime. Only `--bs-*` vars are applied inline. CSS derives shadcn vars from `--bs-*` in the `:root` block; the `.dark` class then correctly wins via cascade order.
+24 
+25 ### Changes
+26 
+27 **`src/lib/theme/css-vars.ts`** — remove these keys from the returned object:
+28 
+29 - `--background`, `--primary`, `--primary-foreground`
+30 - `--secondary`, `--secondary-foreground`
+31 - `--border`, `--ring`
+32 
+33 **`src/lib/theme/default-tokens.ts`** — remove the same keys.
+34 
+35 **`src/styles.css`** — add to the existing `:root` block:
+36 
+37 ```css
+38 /* Wire shadcn vars from theme bs-* tokens (inline style sets bs-* only; dark class overrides these) */
+39 --foreground: var(--bs-text);
+40 --background: var(--bs-background);
+41 --primary: var(--bs-primary);
+42 --primary-foreground: var(--bs-surface);
+43 --secondary: var(--bs-secondary);
+44 --secondary-foreground: var(--bs-surface);
+45 --border: var(--bs-accent);
+46 --ring: var(--bs-primary);
+47 ```
+48 
+49 The `.dark {}` block (already present, already correct) now wins — no changes needed there.
+50 
+51 ### Result
+52 
+53 - `InstructionsOverlay`'s `bg-background/95` goes dark automatically.
+54 - `ConfigFormFields` inputs' `bg-background` go dark automatically.
+55 - Zero component-level changes needed for this fix.
+56 
+57 ---
+58 
+59 ## Section 2 — BOOKMARK_COLORS Dark Mode
+60 
+61 ### Approach
+62 
+63 `playBg` (strong saturated hex) is the single source of truth. Pale `bg`/`tagBg` tokens are replaced by CSS using `color-mix` to create transparent overlays from `playBg`. Text uses `playBg` directly (saturated colours read on both light and dark surfaces).
+64 
+65 ### Changes
+66 
+67 **`src/lib/bookmark-colors.ts`** — remove `bg`, `tagBg`, `tagText`, `headerText` from `ColorTokens`. Keep `border` and `playBg`.
+68 
+69 ```ts
+70 export type ColorTokens = {
+71   border: string; // used for selected ring in colour picker
+72   playBg: string; // primary colour — all other uses derived from this
+73 };
+74 ```
+75 
+76 **`src/styles.css`** — add utility classes:
+77 
+78 ```css
+79 .bookmark-bg {
+80   background: color-mix(in srgb, var(--bookmark-play) 12%, transparent);
+81 }
+82 .dark .bookmark-bg {
+83   background: color-mix(in srgb, var(--bookmark-play) 20%, transparent);
+84 }
+85 
+86 .bookmark-tag-bg {
+87   background: color-mix(in srgb, var(--bookmark-play) 18%, transparent);
+88 }
+89 .dark .bookmark-tag-bg {
+90   background: color-mix(in srgb, var(--bookmark-play) 25%, transparent);
+91 }
+92 
+93 .bookmark-text {
+94   color: var(--bookmark-play);
+95 }
+96 ```
+97 
+98 **Components to update** — set `style={{ '--bookmark-play': colors.playBg } as React.CSSProperties}` and replace inline background/color with the new utility classes:
+99 
+100 - `src/components/GameNameChip.tsx`
+101 - `src/components/SavedConfigChip.tsx`
+102 - `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`
+103 - `src/components/SaveConfigDialog.tsx`
+104 
+105 ---
+106 
+107 ## Section 3 — Hardcoded Colour Cleanup
+108 
+109 | File                      | Location | Current value             | Replacement                     |
+110 | ------------------------- | -------- | ------------------------- | ------------------------------- |
+111 | `InstructionsOverlay.tsx` | line 124 | `'rgba(255,255,255,0.7)'` | Tailwind `text-white/70` class  |
+112 | `SavedConfigChip.tsx`     | line 99  | `'rgb(254 226 226)'`      | `bg-bs-error/15` Tailwind class |
+113 
+114 ---
+115 
+116 ## Section 4 — Linting Enforcement
+117 
+118 ### Stylelint (CSS files)
+119 
+120 Add to `.stylelintrc`:
+121 
+122 ```yaml
+123 color-named: 'never'
+124 declaration-property-value-disallowed-list:
+125   - {
+126       '/^(color|background|background-color|border-color|outline-color|fill|stroke)$/':
+127         ['/^#/', '/^rgb/', '/^rgba/', '/^hsl/', '/^oklch/'],
+128     }
+129 ```
+130 
+131 Allowlist exceptions: `transparent`, `inherit`, `currentColor`, `none` — these are not matched by the patterns above.
+132 
+133 Run via existing `yarn lint:css` command.
+134 
+135 ### ESLint (TSX inline styles)
+136 
+137 Add to `eslint.config.js` using `no-restricted-syntax` (no new package needed):
+138 
+139 ```js
+140 {
+141   selector:
+142     'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression > Property[key.name=/^(color|background|backgroundColor|borderColor|outlineColor|fill|stroke)$/i] > Literal[value=/^(#|rgb|rgba|hsl|oklch)/i]',
+143   message:
+144     'Use a CSS variable (var(--...)) instead of a hardcoded colour in inline styles.',
+145 }
+146 ```
+147 
+148 **Exemption:** `src/lib/bookmark-colors.ts` is a constants file (not a JSX file), so the JSX rule does not apply. `playBg`/`border` hex values there remain the canonical palette definitions.
+149 
+150 ---
+151 
+152 ## Section 5 — VR Tests
+153 
+154 ### E2E Playwright (`e2e/visual.spec.ts`)
+155 
+156 Add helper:
+157 
+158 ```ts
+159 async function setDarkMode(page: Page) {
+160   await page.evaluate(() => {
+161     document.documentElement.classList.add('dark');
+162     document.documentElement.style.colorScheme = 'dark';
+163   });
+164 }
+165 ```
+166 
+167 **Test matrix:**
+168 
+169 | Screen                                | Light    | Dark |
+170 | ------------------------------------- | -------- | ---- |
+171 | Home                                  | existing | new  |
+172 | Game shell                            | existing | new  |
+173 | WordSpell mid-game                    | existing | new  |
+174 | NumberMatch mid-game                  | existing | new  |
+175 | SortNumbers mid-game                  | new      | new  |
+176 | InstructionsOverlay (before Let's go) | new      | new  |
+177 
+178 Total snapshots: 12 (up from 4). All chromium-only (matching existing baseline approach).
+179 
+180 **InstructionsOverlay test:** navigate to `/en/game/sort-numbers`, wait for the overlay's "Let's go" button to appear, screenshot — do not click.
+181 
+182 **SortNumbers test:** navigate to `/en/game/sort-numbers`, click "Let's go", wait for tile bank to appear, screenshot.
+183 
+184 ### Storybook VR (component-level)
+185 
+186 Add `withDarkMode` decorator in `.storybook/decorators.tsx`:
+187 
+188 ```tsx
+189 export const withDarkMode: Decorator = (Story) => (
+190   <div
+191     className="dark"
+192     style={{ background: 'oklch(14.5% 0 0)', padding: '1rem' }}
+193   >
+194     <Story />
+195   </div>
+196 );
+197 ```
+198 
+199 **New/updated story files:**
+200 
+201 | File                                            | Stories to add                                                       |
+202 | ----------------------------------------------- | -------------------------------------------------------------------- |
+203 | `InstructionsOverlay.stories.tsx` (new)         | `Default`, `SettingsExpanded`, `DefaultDark`, `SettingsExpandedDark` |
+204 | `ConfigFormFields.stories.tsx` (new)            | `AllFieldTypes`, `AllFieldTypesDark`                                 |
+205 | `GameNameChip.stories.tsx` (update existing)    | `*Dark` variants for each existing story                             |
+206 | `SavedConfigChip.stories.tsx` (update existing) | `*Dark` variants                                                     |
+207 | `SortNumbersTileBank.stories.tsx` (new)         | `Default`, `DefaultDark`                                             |
+208 | `NumberSequenceSlots.stories.tsx` (new)         | `Default`, `DefaultDark`                                             |
+209 
+210 ---
+211 
+212 ## A11Y Contrast Requirement
+213 
+214 All colours used by the design system must meet **WCAG AA** (4.5:1 for text, 3:1 for UI components) in both light and dark mode. The `--bs-*` palette in `src/styles.css` and `src/db/seed-themes.ts` already meets AA for the ocean and forest presets (documented in existing comments). New dark-mode colour additions (e.g. `color-mix` overlays for bookmarks) must be validated before merging — the VR tests serve as the visual gate; contrast ratio checks are a PR checklist item.
+215 
+216 ---
+217 
+218 ## Files Changed Summary
+219 
+220 | File                                                                     | Change type                                                          |
+221 | ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+222 | `src/styles.css`                                                         | Add `:root` shadcn-from-bs derivations; add bookmark utility classes |
+223 | `src/lib/theme/css-vars.ts`                                              | Remove shadcn vars from inline set                                   |
+224 | `src/lib/theme/default-tokens.ts`                                        | Remove shadcn vars from inline set                                   |
+225 | `src/lib/bookmark-colors.ts`                                             | Slim `ColorTokens` to `border` + `playBg`                            |
+226 | `src/components/GameNameChip.tsx`                                        | Switch to `--bookmark-play` + utility classes                        |
+227 | `src/components/SavedConfigChip.tsx`                                     | Switch to `--bookmark-play` + utility classes; fix hardcoded red     |
+228 | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx` | Switch to `--bookmark-play`; fix hardcoded white/70                  |
+229 | `src/components/SaveConfigDialog.tsx`                                    | Switch to `--bookmark-play` + utility classes                        |
+230 | `.stylelintrc`                                                           | Add `color-named` + `declaration-property-value-disallowed-list`     |
+231 | `eslint.config.js`                                                       | Add `no-restricted-syntax` inline colour rule                        |
+232 | `e2e/visual.spec.ts`                                                     | Add dark variants + SortNumbers + InstructionsOverlay                |
+233 | `.storybook/decorators.tsx`                                              | New `withDarkMode` decorator                                         |
+234 | 6x story files                                                           | New/updated with dark variants                                       |
 235
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:30:02Z)**_
@@ -3956,107 +4017,108 @@ _**Agent (claude-opus-4-6 2026-04-07 17:30:02Z)**_
  `./.claude/worktrees/bold-chatelet/docs/superpowers/plans/2026-04-07-dark-mode-a11y-vr.md`
 
 ```text
-1	# Dark Mode Fix, A11Y Colour Enforcement & VR Tests Implementation Plan
-2	
-3	> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-4	
-5	**Goal:** Fix dark mode CSS variable specificity, replace hardcoded bookmark colours with CSS utility classes, add Stylelint/ESLint colour enforcement, expand VR test coverage to include dark mode and SortNumbers screens, and add a Storybook theme showcase page with 4 locked-theme VR snapshots (Ocean/Forest × light/dark).
-6	
-7	**Architecture:** CSS-first fix — inline styles only set `--bs-*` vars; shadcn vars derive from `--bs-*` in `:root` so the `.dark` class cascade wins. Bookmark colours collapse to two tokens (`border`, `playBg`); CSS utility classes using `color-mix` handle all other tints. Components set `--bookmark-play` as a CSS custom property and use utility classes.
-8	
-9	**Tech Stack:** React 19, TypeScript, Tailwind CSS v4, CSS `color-mix()`, Playwright E2E, Storybook 10, Vitest.
-10	
-11	---
-12	
-13	## File Map
-14	
-15	| Action | Path                                                                             |
-16	| ------ | -------------------------------------------------------------------------------- |
-17	| Modify | `src/styles.css`                                                                 |
-18	| Modify | `src/lib/theme/css-vars.ts`                                                      |
-19	| Modify | `src/lib/theme/default-tokens.ts`                                                |
-20	| Modify | `src/lib/bookmark-colors.ts`                                                     |
-21	| Modify | `src/components/GameNameChip.tsx`                                                |
-22	| Modify | `src/components/SavedConfigChip.tsx`                                             |
-23	| Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`         |
-24	| Modify | `src/components/SaveConfigDialog.tsx`                                            |
-25	| Modify | `.stylelintrc.yaml`                                                              |
-26	| Modify | `eslint.config.js`                                                               |
-27	| Modify | `e2e/visual.spec.ts`                                                             |
-28	| Create | `.storybook/decorators.tsx`                                                      |
-29	| Create | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` |
-30	| Create | `src/components/ConfigFormFields.stories.tsx`                                    |
-31	| Create | `src/components/GameNameChip.stories.tsx`                                        |
-32	| Create | `src/components/SavedConfigChip.stories.tsx`                                     |
-33	| Create | `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`     |
-34	| Create | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx`     |
-35	| Modify | `.storybook/decorators/withTheme.tsx`                                            |
-36	| Modify | `.storybook/preview.tsx`                                                         |
-37	| Create | `src/stories/ThemeShowcase.stories.tsx`                                          |
-38	
-39	---
-40	
-41	## Task 1: Worktree Setup
-42	
-43	**Files:**
-44	
-45	- None (git plumbing only)
-46	
-47	- [ ] **Step 1: Create worktree from project root**
-48	
-49	Run from `/Users/leocaseiro/Sites/base-skill`:
-50	
-51	```bash
-52	git worktree add ./worktrees/feat-dark-mode-a11y-vr -b feat/dark-mode-a11y-vr
-53	cd ./worktrees/feat-dark-mode-a11y-vr && yarn install
-54	```
-55	
-56	Expected: `Preparing worktree (new branch 'feat/dark-mode-a11y-vr')` — no errors.
-57	
-58	---
-59	
-60	## Task 2: CSS Variable Architecture Fix
-61	
-62	The root cause of dark mode not working: `ThemeRuntimeProvider` sets shadcn CSS vars (`--background`, `--primary`, etc.) as inline styles on `<html>`, which have higher specificity than the `.dark` class in `styles.css`. Fix: only set `--bs-*` vars inline; derive shadcn vars from `--bs-*` in the `:root` block so the cascade works correctly.
-63	
-64	**Files:**
-65	
-66	- Modify: `src/styles.css`
-67	- Modify: `src/lib/theme/css-vars.ts`
-68	- Modify: `src/lib/theme/default-tokens.ts`
-69	
-70	- [ ] **Step 1: Run TypeScript check to confirm it currently passes (baseline)**
-71	
-72	```bash
-73	yarn typecheck
-74	```
-75	
-76	Expected: 0 errors.
-77	
-78	- [ ] **Step 2: Add shadcn-from-bs derivations to `:root` in `src/styles.css`**
-79	
-80	Find the `:root` block (ends around line 83 with `--bs-font-weight-default`). Add inside that block, before the closing `}`:
-81	
-82	```css
-83	/* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
-84	--foreground: var(--bs-text);
-85	--background: var(--bs-background);
-86	--primary: var(--bs-primary);
-87	--primary-foreground: var(--bs-surface);
-88	--secondary: var(--bs-secondary);
-89	--secondary-foreground: var(--bs-surface);
-90	--border: var(--bs-accent);
-91	--ring: var(--bs-primary);
-92	```
-93	
-94	- [ ] **Step 3: Remove shadcn vars from `src/lib/theme/css-vars.ts`**
-95	
-96	Replace the entire `themeDocToCssVars` function body so it only returns `--bs-*` keys:
-97	
-98	```ts
-99	import { defaultThemeCssVars as defaultThemeCssVariables } from './default-tokens';
-100	import type { ThemeDoc } from '@/db/schemas/themes';
+1 # Dark Mode Fix, A11Y Colour Enforcement & VR Tests Implementation Plan
+2 
+3 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+4 
+5 **Goal:** Fix dark mode CSS variable specificity, replace hardcoded bookmark colours with CSS utility classes, add Stylelint/ESLint colour enforcement, expand VR test coverage to include dark mode and SortNumbers screens, and add a Storybook theme showcase page with 4 locked-theme VR snapshots (Ocean/Forest × light/dark).
+6 
+7 **Architecture:** CSS-first fix — inline styles only set `--bs-*` vars; shadcn vars derive from `--bs-*` in `:root` so the `.dark` class cascade wins. Bookmark colours collapse to two tokens (`border`, `playBg`); CSS utility classes using `color-mix` handle all other tints. Components set `--bookmark-play` as a CSS custom property and use utility classes.
+8 
+9 **Tech Stack:** React 19, TypeScript, Tailwind CSS v4, CSS `color-mix()`, Playwright E2E, Storybook 10, Vitest.
+10 
+11 ---
+12 
+13 ## File Map
+14 
+15 | Action | Path                                                                             |
+16 | ------ | -------------------------------------------------------------------------------- |
+17 | Modify | `src/styles.css`                                                                 |
+18 | Modify | `src/lib/theme/css-vars.ts`                                                      |
+19 | Modify | `src/lib/theme/default-tokens.ts`                                                |
+20 | Modify | `src/lib/bookmark-colors.ts`                                                     |
+21 | Modify | `src/components/GameNameChip.tsx`                                                |
+22 | Modify | `src/components/SavedConfigChip.tsx`                                             |
+23 | Modify | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx`         |
+24 | Modify | `src/components/SaveConfigDialog.tsx`                                            |
+25 | Modify | `.stylelintrc.yaml`                                                              |
+26 | Modify | `eslint.config.js`                                                               |
+27 | Modify | `e2e/visual.spec.ts`                                                             |
+28 | Create | `.storybook/decorators.tsx`                                                      |
+29 | Create | `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.stories.tsx` |
+30 | Create | `src/components/ConfigFormFields.stories.tsx`                                    |
+31 | Create | `src/components/GameNameChip.stories.tsx`                                        |
+32 | Create | `src/components/SavedConfigChip.stories.tsx`                                     |
+33 | Create | `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`     |
+34 | Create | `src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx`     |
+35 | Modify | `.storybook/decorators/withTheme.tsx`                                            |
+36 | Modify | `.storybook/preview.tsx`                                                         |
+37 | Create | `src/stories/ThemeShowcase.stories.tsx`                                          |
+38 
+39 ---
+40 
+41 ## Task 1: Worktree Setup
+42 
+43 **Files:**
+44 
+45 - None (git plumbing only)
+46 
+47 - [ ] **Step 1: Create worktree from project root**
+48 
+49 Run from `/Users/leocaseiro/Sites/base-skill`:
+50 
+51 ```bash
+52 git worktree add ./worktrees/feat-dark-mode-a11y-vr -b feat/dark-mode-a11y-vr
+53 cd ./worktrees/feat-dark-mode-a11y-vr && yarn install
+54 ```
+55 
+56 Expected: `Preparing worktree (new branch 'feat/dark-mode-a11y-vr')` — no errors.
+57 
+58 ---
+59 
+60 ## Task 2: CSS Variable Architecture Fix
+61 
+62 The root cause of dark mode not working: `ThemeRuntimeProvider` sets shadcn CSS vars (`--background`, `--primary`, etc.) as inline styles on `<html>`, which have higher specificity than the `.dark` class in `styles.css`. Fix: only set `--bs-*` vars inline; derive shadcn vars from `--bs-*` in the `:root` block so the cascade works correctly.
+63 
+64 **Files:**
+65 
+66 - Modify: `src/styles.css`
+67 - Modify: `src/lib/theme/css-vars.ts`
+68 - Modify: `src/lib/theme/default-tokens.ts`
+69 
+70 - [ ] **Step 1: Run TypeScript check to confirm it currently passes (baseline)**
+71 
+72 ```bash
+73 yarn typecheck
+74 ```
+75 
+76 Expected: 0 errors.
+77 
+78 - [ ] **Step 2: Add shadcn-from-bs derivations to `:root` in `src/styles.css`**
+79 
+80 Find the `:root` block (ends around line 83 with `--bs-font-weight-default`). Add inside that block, before the closing `}`:
+81 
+82 ```css
+83 /* Wire shadcn vars from --bs-* tokens; inline style only sets --bs-*, so .dark class wins */
+84 --foreground: var(--bs-text);
+85 --background: var(--bs-background);
+86 --primary: var(--bs-primary);
+87 --primary-foreground: var(--bs-surface);
+88 --secondary: var(--bs-secondary);
+89 --secondary-foreground: var(--bs-surface);
+90 --border: var(--bs-accent);
+91 --ring: var(--bs-primary);
+92 ```
+93 
+94 - [ ] **Step 3: Remove shadcn vars from `src/lib/theme/css-vars.ts`**
+95 
+96 Replace the entire `themeDocToCssVars` function body so it only returns `--bs-*` keys:
+97 
+98 ```ts
+99 import { defaultThemeCssVars as defaultThemeCssVariables } from './default-tokens';
+100 import type { ThemeDoc } from '@/db/schemas/themes';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:30:34Z)**_
@@ -4069,8 +4131,8 @@ Now I see the key insight from the spec. The important part is:
 The spec says the `.dark` block on master was "already correct" with its hardcoded oklch values. The architecture fix was about making the `:root` block derive shadcn vars from `--bs-*` tokens, and removing shadcn vars from inline styles, so that the `.dark` cascade override works.
 
 But looking at the current branch code, what happened is:
-1. The `.dark` block on master had hardcoded oklch neutral gray values (shadcn defaults)
 
+1. The `.dark` block on master had hardcoded oklch neutral gray values (shadcn defaults)
 
 2. PR #27 fixed the CSS var architecture by having inline styles only set `--bs-*` and deriving shadcn vars from those at the `:root` level
 3. After rebasing, my first change incorrectly replaced the hardcoded `.dark` oklch values with `var(--bs-*)` references, creating a circular dependency, then I tried fixing it by adding `--bs-*` dark values directly into the `.dark` block
@@ -4109,37 +4171,38 @@ _**Agent (claude-opus-4-6 2026-04-07 17:30:36Z)**_
  `./.claude/worktrees/bold-chatelet/src/lib/theme/css-vars.ts`
 
 ```text
-1	import { defaultThemeCssVars as defaultThemeCssVariables } from './default-tokens';
-2	import type { ThemeDoc } from '@/db/schemas/themes';
-3	
-4	export function themeDocToCssVars(
-5	  document_: ThemeDoc,
-6	): Record<string, string> {
-7	  const { primary, secondary, background, surface, text, accent } =
-8	    document_.colors;
-9	  return {
-10	    '--bs-primary': primary,
-11	    '--bs-secondary': secondary,
-12	    '--bs-background': background,
-13	    '--bs-surface': surface,
-14	    '--bs-text': text,
-15	    '--bs-accent': accent,
-16	    '--bs-success': defaultThemeCssVariables['--bs-success']!,
-17	    '--bs-warning': defaultThemeCssVariables['--bs-warning']!,
-18	    '--bs-error': defaultThemeCssVariables['--bs-error']!,
-19	  };
-20	}
-21	
-22	export function applyThemeCssVars(
-23	  element: HTMLElement,
-24	  variables: Record<string, string>,
-25	): void {
-26	  for (const [k, v] of Object.entries(variables)) {
-27	    element.style.setProperty(k, v);
-28	  }
-29	}
+1 import { defaultThemeCssVars as defaultThemeCssVariables } from './default-tokens';
+2 import type { ThemeDoc } from '@/db/schemas/themes';
+3 
+4 export function themeDocToCssVars(
+5   document_: ThemeDoc,
+6 ): Record<string, string> {
+7   const { primary, secondary, background, surface, text, accent } =
+8     document_.colors;
+9   return {
+10     '--bs-primary': primary,
+11     '--bs-secondary': secondary,
+12     '--bs-background': background,
+13     '--bs-surface': surface,
+14     '--bs-text': text,
+15     '--bs-accent': accent,
+16     '--bs-success': defaultThemeCssVariables['--bs-success']!,
+17     '--bs-warning': defaultThemeCssVariables['--bs-warning']!,
+18     '--bs-error': defaultThemeCssVariables['--bs-error']!,
+19   };
+20 }
+21 
+22 export function applyThemeCssVars(
+23   element: HTMLElement,
+24   variables: Record<string, string>,
+25 ): void {
+26   for (const [k, v] of Object.entries(variables)) {
+27     element.style.setProperty(k, v);
+28   }
+29 }
 30
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:30:41Z)**_
@@ -4156,6 +4219,7 @@ _**Agent (claude-opus-4-6 2026-04-07 17:30:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/styles.css has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:31:05Z)**_
@@ -4169,6 +4233,7 @@ Lint CSS
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-07 17:31:12Z)**_

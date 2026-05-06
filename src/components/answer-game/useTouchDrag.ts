@@ -53,7 +53,7 @@ export interface TouchDragHandlers {
   onPointerCancel: (e: PointerEvent<HTMLElement>) => void;
 }
 
-interface UseTouchDragOptions {
+interface UseTouchDragBaseOptions {
   /** Empty string disables the drag (no pointer capture, no ghost). */
   tileId: string;
   label: string;
@@ -70,6 +70,27 @@ interface UseTouchDragOptions {
   onHoverBankTile?: (bankTileId: string | null) => void;
 }
 
+type UseTouchDragOptions = UseTouchDragBaseOptions &
+  (
+    | {
+        tapForgivenessThreshold?: undefined;
+        tapForgivenessTimeMs?: undefined;
+        onTapFallback?: undefined;
+      }
+    | {
+        tapForgivenessThreshold: number;
+        /**
+         * Optional duration ceiling (milliseconds). If the gesture's
+         * total time from pointerdown to up/cancel is shorter, treat as
+         * a tap regardless of distance. Catches thumb-release drift
+         * where the contact point can travel 75–100px in 50–65ms even
+         * for what the user perceives as a tap.
+         */
+        tapForgivenessTimeMs?: number;
+        onTapFallback: () => void;
+      }
+  );
+
 export const useTouchDrag = ({
   tileId,
   label,
@@ -80,11 +101,19 @@ export const useTouchDrag = ({
   onDropOnBankTile,
   onHoverZone,
   onHoverBankTile,
+  tapForgivenessThreshold,
+  tapForgivenessTimeMs,
+  onTapFallback,
 }: UseTouchDragOptions): TouchDragHandlers => {
   const onDragCancelRef = useRef(onDragCancel);
   useEffect(() => {
     onDragCancelRef.current = onDragCancel;
   }, [onDragCancel]);
+
+  const onTapFallbackRef = useRef(onTapFallback);
+  useEffect(() => {
+    onTapFallbackRef.current = onTapFallback;
+  }, [onTapFallback]);
 
   const onHoverZoneRef = useRef(onHoverZone);
   useEffect(() => {
@@ -99,6 +128,7 @@ export const useTouchDrag = ({
   const ghostRef = useRef<GhostInfo | null>(null);
   const isDragging = useRef(false);
   const startPos = useRef<{ x: number; y: number } | null>(null);
+  const startTime = useRef<number | null>(null);
   const capturedElRef = useRef<HTMLElement | null>(null);
   const capturedPointerIdRef = useRef<number | null>(null);
   const safetyTimerRef = useRef<ReturnType<
@@ -142,6 +172,7 @@ export const useTouchDrag = ({
     lastHoverZoneRef.current = null;
     lastHoverBankTileRef.current = null;
     startPos.current = null;
+    startTime.current = null;
     cleanupInProgressRef.current = false;
   }, []);
 
@@ -156,6 +187,7 @@ export const useTouchDrag = ({
       capturedElRef.current = e.currentTarget;
       capturedPointerIdRef.current = e.pointerId;
       startPos.current = { x: e.clientX, y: e.clientY };
+      startTime.current = Date.now();
       isDragging.current = false;
 
       // When the captured element is removed from the DOM (e.g. a slot tile
@@ -283,6 +315,51 @@ export const useTouchDrag = ({
       if (e.pointerType === 'mouse' || !startPos.current) return;
 
       if (isDragging.current) {
+        // Tap forgiveness: treat as a tap if EITHER displacement is small
+        // (slow careful tap) OR duration is short (thumb-release drift —
+        // the contact point can travel 75–100px in 50–65ms during release
+        // even when the user perceives no movement). Both signals are
+        // configurable per-profile.
+        if (
+          tapForgivenessThreshold !== undefined &&
+          onTapFallbackRef.current
+        ) {
+          const dx = e.clientX - startPos.current.x;
+          const dy = e.clientY - startPos.current.y;
+          const dist = Math.hypot(dx, dy);
+          const duration =
+            startTime.current === null
+              ? Number.POSITIVE_INFINITY
+              : Date.now() - startTime.current;
+          const distancePassed = dist < tapForgivenessThreshold;
+          const timePassed =
+            tapForgivenessTimeMs !== undefined &&
+            duration < tapForgivenessTimeMs;
+          if (distancePassed || timePassed) {
+            // Check there's no zone under the center point before treating as tap.
+            ghostRef.current?.el.remove();
+            ghostRef.current = null;
+            let zoneUnderPointer = false;
+            for (const el of document.elementsFromPoint(
+              e.clientX,
+              e.clientY,
+            )) {
+              if (
+                el instanceof HTMLElement &&
+                el.dataset['zoneIndex'] !== undefined
+              ) {
+                zoneUnderPointer = true;
+                break;
+              }
+            }
+            if (!zoneUnderPointer) {
+              onTapFallbackRef.current();
+              cleanup();
+              return;
+            }
+          }
+        }
+
         // Capture ghost dimensions before removing.
         const ghostHalfW = ghostRef.current?.halfW ?? 0;
         const ghostHalfH = ghostRef.current?.halfH ?? 0;
@@ -421,18 +498,52 @@ export const useTouchDrag = ({
 
       cleanup();
     },
-    [tileId, onDrop, onDropOnBank, onDropOnBankTile, cleanup],
+    [
+      tileId,
+      onDrop,
+      onDropOnBank,
+      onDropOnBankTile,
+      tapForgivenessThreshold,
+      tapForgivenessTimeMs,
+      cleanup,
+    ],
   );
 
   const onPointerCancel = useCallback(
     (e: PointerEvent<HTMLElement>) => {
       if (e.pointerType === 'mouse') return;
       if (isDragging.current) {
+        // Mirror the same tap forgiveness rules here. Defends against any
+        // platform that fires pointercancel rather than pointerup for short
+        // gestures (documented but not observed on Chrome Android or Brave
+        // iOS in our captures — kept as defence in depth).
+        if (
+          startPos.current &&
+          tapForgivenessThreshold !== undefined &&
+          onTapFallbackRef.current
+        ) {
+          const dx = e.clientX - startPos.current.x;
+          const dy = e.clientY - startPos.current.y;
+          const dist = Math.hypot(dx, dy);
+          const duration =
+            startTime.current === null
+              ? Number.POSITIVE_INFINITY
+              : Date.now() - startTime.current;
+          const distancePassed = dist < tapForgivenessThreshold;
+          const timePassed =
+            tapForgivenessTimeMs !== undefined &&
+            duration < tapForgivenessTimeMs;
+          if (distancePassed || timePassed) {
+            onTapFallbackRef.current();
+            cleanupGhost();
+            return;
+          }
+        }
         onDragCancelRef.current?.();
       }
       cleanupGhost();
     },
-    [cleanupGhost],
+    [tapForgivenessThreshold, tapForgivenessTimeMs, cleanupGhost],
   );
 
   return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel };

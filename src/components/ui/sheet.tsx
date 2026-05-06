@@ -71,7 +71,12 @@ const SheetContent = ({
         <SheetPrimitive.Close data-slot="sheet-close" asChild>
           <Button
             variant="ghost"
-            className="absolute top-3 right-3"
+            className={cn(
+              'absolute top-3',
+              // Mirror the close affordance to the trigger side so the open
+              // and close tap targets share the same screen edge.
+              side === 'left' ? 'left-3' : 'right-3',
+            )}
             size="icon-sm"
           >
             <XIcon />

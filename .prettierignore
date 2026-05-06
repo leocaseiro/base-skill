@@ -8,6 +8,9 @@ yarn.lock
 .husky/
 .vscode/
 
+# Local debug harness (gitignored, scratch HTML/JS/Python)
+debug/
+
 # Git worktrees — run `yarn fix` inside the worktree, not from root
 worktrees/
 

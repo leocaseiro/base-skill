@@ -6,9 +6,9 @@
 
 _**User (2026-04-28 23:56:16Z)**_
 
-I am currently using https://github.com/ComposioHQ/agent-orchestrator
+I am currently using <https://github.com/ComposioHQ/agent-orchestrator>
 
-Can you verify how we can automate spawning an agent session via github? I believe we can raise gh issues, and it would start an agent session. How is this possible? Can we trigger by an issue tag? 
+Can you verify how we can automate spawning an agent session via github? I believe we can raise gh issues, and it would start an agent session. How is this possible? Can we trigger by an issue tag?
 Alternativelly, find me ways that I could start a Claude code session into this laptop I have remotelly. I know we can notify via discord. provide me the documentation or explanation for those.
 
 ---
@@ -32,26 +32,32 @@ I have everything needed. Composing the report.
 
 - **Mechanism:** label-driven polling, not a webhook. Source: [`packages/web/src/lib/services.ts`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/web/src/lib/services.ts):
   ```
+
   // Backlog auto-claim — polls for labeled issues and auto-spawns agents
   const BACKLOG_LABEL = "agent:backlog";
   const BACKLOG_POLL_INTERVAL = 60_000; // 1 minute
   const MAX_CONCURRENT_AGENTS = 5;
+
   ```
   Started by `startBacklogPoller()` in [`packages/web/src/app/api/backlog/route.ts`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/web/src/app/api/backlog/route.ts) on first hit of `GET /api/backlog`. While `ao` is running on your Mac, every 60 s it lists open issues in the configured tracker, finds those with the `agent:backlog` label, and spawns a worker agent in a fresh worktree (capped at 5 concurrent). On PR-merge it relabels the issue to `merged-unverified`.
 
 - **How to wire `gh issue create`:**
   ```
+
   gh issue create --title "…" --body "…" --label "agent:backlog"
+
   ```
   Then within ~60 s `ao` claims it. No extra setup — works as long as `ao start` is running and the project's `tracker:` slot points at GitHub (default).
 
 - **Webhook path also exists** for SCM acceleration (push/PR events for the reaction system, *not* issue spawning). From [`agent-orchestrator.yaml.example`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/agent-orchestrator.yaml.example):
   ```
+
   scm:
     plugin: github
     webhook:
       path: /api/webhooks/github
       secretEnvVar: GITHUB_WEBHOOK_SECRET
+
   ```
   This requires your laptop to be reachable (Tailscale / tunnel). The polling path is the documented happy path.
 
@@ -63,9 +69,11 @@ I have everything needed. Composing the report.
 
 **Claude Code Routines** is the official remote-trigger feature. Each routine gets a dedicated endpoint:
 ```
-POST https://api.anthropic.com/v1/claude_code/routines/{trigger_id}/fire
+
+POST <https://api.anthropic.com/v1/claude_code/routines/{trigger_id}/fire>
   -H "Authorization: Bearer $ROUTINE_TOKEN"
   -H "anthropic-beta: experimental-cc-routine-2026-04-01"
+
 ```
 Three trigger types: **schedule (cron)**, **API (HTTP POST)**, **GitHub events** (PR open/close/sync, releases — *not* arbitrary issue events). Routines run on **Anthropic-managed cloud, not your laptop** — they survive a closed lid. Refs: [Builder.io routines guide](https://www.builder.io/blog/claude-code-routines), [allthings.how overview](https://allthings.how/claude-code-routines-how-anthropics-scheduled-ai-agents-work/).
 
@@ -103,6 +111,7 @@ agentId: a624c173efb777ec4 (use SendMessage with to: 'a624c173efb777ec4' to cont
 tool_uses: 28
 duration_ms: 812853</usage>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:10:06Z)**_
@@ -150,11 +159,11 @@ Official remote-trigger feature, but runs in **Anthropic's cloud**, not on your 
 - Refs: [Builder.io: Claude Code Routines](https://www.builder.io/blog/claude-code-routines), [allthings.how overview](https://allthings.how/claude-code-routines-how-anthropics-scheduled-ai-agents-work/).
 - Your harness has `RemoteTrigger`/`CronCreate` tools that wrap this.
 
-Use it if you want a session "somewhere" from your phone (e.g. iOS Shortcut → POST to the fire URL). Use **(a)** or **(c)** if it must run *on this laptop*.
+Use it if you want a session "somewhere" from your phone (e.g. iOS Shortcut → POST to the fire URL). Use **(a)** or **(c)** if it must run _on this laptop_.
 
 ### c) **Self-hosted runner / webhook on your laptop (laptop-side execution)**
 
-If a job *must* run on this Mac:
+If a job _must_ run on this Mac:
 
 - **GitHub Actions self-hosted runner on the Mac**, plus [`anthropics/claude-code-action`](https://github.com/anthropics/claude-code-action). Triggers on `issue_comment` containing `@claude`, `pull_request: [opened, synchronize]`. From the iPhone you just comment `@claude do X` on any issue/PR.
 - **Tiny webhook receiver** behind [Tailscale Funnel](https://tailscale.com/kb/1223/funnel) or [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) → exec `claude -p "<prompt>" --bare` ([headless docs](https://code.claude.com/docs/en/headless)). No port-forwarding required; Tunnel/Funnel terminate TLS in their cloud.
@@ -220,6 +229,7 @@ packages/plugins/scm-github/src/index.ts
 packages/web/src/components/PRCommentThread.tsx
 packages/web/src/components/session-detail-agent-actions.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:08Z)**_
@@ -237,6 +247,7 @@ packages/plugins/scm-github/src/index.ts:344:  if (rawEventType === "issue_comme
 packages/core/src/types.ts:46:  | "resolving_review_comments"
 packages/core/src/types.ts:910:export type SCMWebhookEventKind = "pull_request" | "ci" | "review" | "comment" | "push" | "unknown";
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:11Z)**_
@@ -246,97 +257,98 @@ _**Agent (claude-opus-4-7 2026-04-29 00:19:11Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/plugins/scm-github/src/index.ts`
 
 ```text
-290	    const head = pr["head"] as Record<string, unknown> | undefined;
-291	    return {
-292	      provider: "github",
-293	      kind: "pull_request",
-294	      action,
-295	      rawEventType,
-296	      deliveryId,
-297	      repository,
-298	      prNumber:
-299	        typeof payload["number"] === "number"
-300	          ? (payload["number"] as number)
-301	          : typeof pr["number"] === "number"
-302	            ? (pr["number"] as number)
-303	            : undefined,
-304	      branch: typeof head?.["ref"] === "string" ? head["ref"] : undefined,
-305	      sha: typeof head?.["sha"] === "string" ? head["sha"] : undefined,
-306	      timestamp: parseWebhookTimestamp(pr["updated_at"]),
-307	      data: payload,
-308	    };
-309	  }
-310	
-311	  if (rawEventType === "pull_request_review" || rawEventType === "pull_request_review_comment") {
-312	    const pullRequest = payload["pull_request"];
-313	    if (!pullRequest || typeof pullRequest !== "object") return null;
-314	    const pr = pullRequest as Record<string, unknown>;
-315	    const head = pr["head"] as Record<string, unknown> | undefined;
-316	    return {
-317	      provider: "github",
-318	      kind: rawEventType === "pull_request_review" ? "review" : "comment",
-319	      action,
-320	      rawEventType,
-321	      deliveryId,
-322	      repository,
-323	      prNumber:
-324	        typeof payload["number"] === "number"
-325	          ? (payload["number"] as number)
-326	          : typeof pr["number"] === "number"
-327	            ? (pr["number"] as number)
-328	            : undefined,
-329	      branch: typeof head?.["ref"] === "string" ? head["ref"] : undefined,
-330	      sha: typeof head?.["sha"] === "string" ? head["sha"] : undefined,
-331	      timestamp:
-332	        rawEventType === "pull_request_review"
-333	          ? parseWebhookTimestamp(
-334	              (payload["review"] as Record<string, unknown> | undefined)?.["submitted_at"],
-335	            )
-336	          : parseWebhookTimestamp(
-337	              (payload["comment"] as Record<string, unknown> | undefined)?.["updated_at"] ??
-338	                (payload["comment"] as Record<string, unknown> | undefined)?.["created_at"],
-339	            ),
-340	      data: payload,
-341	    };
-342	  }
-343	
-344	  if (rawEventType === "issue_comment") {
-345	    const issue = payload["issue"];
-346	    if (!issue || typeof issue !== "object") return null;
-347	    const issueRecord = issue as Record<string, unknown>;
-348	    if (!("pull_request" in issueRecord)) return null;
-349	    return {
-350	      provider: "github",
-351	      kind: "comment",
-352	      action,
-353	      rawEventType,
-354	      deliveryId,
-355	      repository,
-356	      prNumber: typeof issueRecord["number"] === "number" ? issueRecord["number"] : undefined,
-357	      timestamp: parseWebhookTimestamp(
-358	        (payload["comment"] as Record<string, unknown> | undefined)?.["updated_at"] ??
-359	          (payload["comment"] as Record<string, unknown> | undefined)?.["created_at"],
-360	      ),
-361	      data: payload,
-362	    };
-363	  }
-364	
-365	  if (rawEventType === "check_run" || rawEventType === "check_suite") {
-366	    const check = payload[rawEventType] as Record<string, unknown> | undefined;
-367	    const pullRequests = Array.isArray(check?.["pull_requests"])
-368	      ? (check?.["pull_requests"] as Array<Record<string, unknown>>)
-369	      : [];
-370	    const firstPR = pullRequests[0];
-371	    return {
-372	      provider: "github",
-373	      kind: "ci",
-374	      action,
-375	      rawEventType,
-376	      deliveryId,
-377	      repository,
-378	      prNumber: typeof firstPR?.["number"] === "number" ? firstPR["number"] : undefined,
-379	      branch:
+290     const head = pr["head"] as Record<string, unknown> | undefined;
+291     return {
+292       provider: "github",
+293       kind: "pull_request",
+294       action,
+295       rawEventType,
+296       deliveryId,
+297       repository,
+298       prNumber:
+299         typeof payload["number"] === "number"
+300           ? (payload["number"] as number)
+301           : typeof pr["number"] === "number"
+302             ? (pr["number"] as number)
+303             : undefined,
+304       branch: typeof head?.["ref"] === "string" ? head["ref"] : undefined,
+305       sha: typeof head?.["sha"] === "string" ? head["sha"] : undefined,
+306       timestamp: parseWebhookTimestamp(pr["updated_at"]),
+307       data: payload,
+308     };
+309   }
+310 
+311   if (rawEventType === "pull_request_review" || rawEventType === "pull_request_review_comment") {
+312     const pullRequest = payload["pull_request"];
+313     if (!pullRequest || typeof pullRequest !== "object") return null;
+314     const pr = pullRequest as Record<string, unknown>;
+315     const head = pr["head"] as Record<string, unknown> | undefined;
+316     return {
+317       provider: "github",
+318       kind: rawEventType === "pull_request_review" ? "review" : "comment",
+319       action,
+320       rawEventType,
+321       deliveryId,
+322       repository,
+323       prNumber:
+324         typeof payload["number"] === "number"
+325           ? (payload["number"] as number)
+326           : typeof pr["number"] === "number"
+327             ? (pr["number"] as number)
+328             : undefined,
+329       branch: typeof head?.["ref"] === "string" ? head["ref"] : undefined,
+330       sha: typeof head?.["sha"] === "string" ? head["sha"] : undefined,
+331       timestamp:
+332         rawEventType === "pull_request_review"
+333           ? parseWebhookTimestamp(
+334               (payload["review"] as Record<string, unknown> | undefined)?.["submitted_at"],
+335             )
+336           : parseWebhookTimestamp(
+337               (payload["comment"] as Record<string, unknown> | undefined)?.["updated_at"] ??
+338                 (payload["comment"] as Record<string, unknown> | undefined)?.["created_at"],
+339             ),
+340       data: payload,
+341     };
+342   }
+343 
+344   if (rawEventType === "issue_comment") {
+345     const issue = payload["issue"];
+346     if (!issue || typeof issue !== "object") return null;
+347     const issueRecord = issue as Record<string, unknown>;
+348     if (!("pull_request" in issueRecord)) return null;
+349     return {
+350       provider: "github",
+351       kind: "comment",
+352       action,
+353       rawEventType,
+354       deliveryId,
+355       repository,
+356       prNumber: typeof issueRecord["number"] === "number" ? issueRecord["number"] : undefined,
+357       timestamp: parseWebhookTimestamp(
+358         (payload["comment"] as Record<string, unknown> | undefined)?.["updated_at"] ??
+359           (payload["comment"] as Record<string, unknown> | undefined)?.["created_at"],
+360       ),
+361       data: payload,
+362     };
+363   }
+364 
+365   if (rawEventType === "check_run" || rawEventType === "check_suite") {
+366     const check = payload[rawEventType] as Record<string, unknown> | undefined;
+367     const pullRequests = Array.isArray(check?.["pull_requests"])
+368       ? (check?.["pull_requests"] as Array<Record<string, unknown>>)
+369       : [];
+370     const firstPR = pullRequests[0];
+371     return {
+372       provider: "github",
+373       kind: "ci",
+374       action,
+375       rawEventType,
+376       deliveryId,
+377       repository,
+378       prNumber: typeof firstPR?.["number"] === "number" ? firstPR["number"] : undefined,
+379       branch:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:15Z)**_
@@ -369,6 +381,7 @@ packages/core/src/__tests__/prompt-builder.test.ts
 packages/core/src/__tests__/recovery-actions.test.ts
 packages/core/src/__tests__/portfolio-projects.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:19Z)**_
@@ -421,6 +434,7 @@ packages/core/src/lifecycle-manager.ts:1404:        unresolvedComments: unresolv
 packages/core/src/lifecycle-manager.ts:1410:        reviews: reviewSummaries.map((r) => ({
 packages/core/src/lifecycle-manager.ts:1415:        commentsUpdatedAt: new Date().toISOString(),
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:22Z)**_
@@ -465,6 +479,7 @@ openclaw-plugin/index.ts:757:          if (!rest) return { text: "Usage: /ao ret
 openclaw-plugin/index.ts:767:          if (!rest) return { text: "Usage: /ao kill <session-id>" };
 openclaw-plugin/index.ts:833:          steps.push("Then verify with: /ao doctor");
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:29Z)**_
@@ -478,6 +493,7 @@ Find core handler of "comment" kind events
 ```text
 packages/core/src/types.ts:910:export type SCMWebhookEventKind = "pull_request" | "ci" | "review" | "comment" | "push" | "unknown";
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:32Z)**_
@@ -503,6 +519,7 @@ packages/web/src/lib/scm-webhooks.test.ts:154:    const event: SCMWebhookEvent =
 packages/web/src/lib/scm-webhooks.ts:48:export function eventMatchesProject(event: SCMWebhookEvent, project: ProjectConfig): boolean {
 packages/web/src/lib/scm-webhooks.ts:60:  event: SCMWebhookEvent,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:34Z)**_
@@ -512,93 +529,94 @@ _**Agent (claude-opus-4-7 2026-04-29 00:19:34Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/web/src/lib/scm-webhooks.ts`
 
 ```text
-1	import "server-only";
-2	
-3	import {
-4	  TERMINAL_STATUSES,
-5	  type OrchestratorConfig,
-6	  type PluginRegistry,
-7	  type ProjectConfig,
-8	  type SCM,
-9	  type SCMWebhookEvent,
-10	  type SCMWebhookRequest,
-11	  type Session,
-12	} from "@aoagents/ao-core";
-13	
-14	export interface WebhookProjectMatch {
-15	  projectId: string;
-16	  project: ProjectConfig;
-17	  scm: SCM;
-18	}
-19	
-20	function requestHeadersToRecord(headers: Headers): Record<string, string> {
-21	  const record: Record<string, string> = {};
-22	  headers.forEach((value, key) => {
-23	    record[key] = value;
-24	  });
-25	  return record;
-26	}
-27	
-28	function getProjectWebhookPath(project: ProjectConfig): string | null {
-29	  if (!project.scm?.webhook || project.scm.webhook.enabled === false) return null;
-30	  return project.scm.webhook.path ?? `/api/webhooks/${project.scm.plugin}`;
-31	}
-32	
-33	export function findWebhookProjects(
-34	  config: OrchestratorConfig,
-35	  registry: PluginRegistry,
-36	  pathname: string,
-37	): WebhookProjectMatch[] {
-38	  return Object.entries(config.projects).flatMap(([projectId, project]) => {
-39	    if (!project.repo || !project.scm?.plugin) return [];
-40	    const webhookPath = getProjectWebhookPath(project);
-41	    if (!webhookPath || webhookPath !== pathname) return [];
-42	    const scm = registry.get<SCM>("scm", project.scm.plugin);
-43	    if (!scm?.parseWebhook || !scm.verifyWebhook) return [];
-44	    return [{ projectId, project, scm }];
-45	  });
-46	}
-47	
-48	export function eventMatchesProject(event: SCMWebhookEvent, project: ProjectConfig): boolean {
-49	  if (!event.repository) return false;
-50	  if (!project.repo) return false;
-51	  return (
-52	    `${event.repository.owner}/${event.repository.name}`.toLowerCase() ===
-53	    project.repo.toLowerCase()
-54	  );
-55	}
-56	
-57	export function findAffectedSessions(
-58	  sessions: Session[],
-59	  projectId: string,
-60	  event: SCMWebhookEvent,
-61	): Session[] {
-62	  return sessions.filter((session) => {
-63	    if (session.projectId !== projectId) return false;
-64	    if (TERMINAL_STATUSES.has(session.status)) return false;
-65	    if (event.prNumber !== undefined && session.pr?.number === event.prNumber) return true;
-66	    if (event.branch && session.branch === event.branch) return true;
-67	    return false;
-68	  });
-69	}
-70	
-71	export function buildWebhookRequest(
-72	  request: Request,
-73	  body: string,
-74	  rawBody: Uint8Array,
-75	): SCMWebhookRequest {
-76	  const url = new URL(request.url);
-77	  return {
-78	    method: request.method,
-79	    headers: requestHeadersToRecord(request.headers),
-80	    body,
-81	    rawBody,
-82	    path: url.pathname,
-83	    query: Object.fromEntries(url.searchParams.entries()),
-84	  };
-85	}
+1 import "server-only";
+2 
+3 import {
+4   TERMINAL_STATUSES,
+5   type OrchestratorConfig,
+6   type PluginRegistry,
+7   type ProjectConfig,
+8   type SCM,
+9   type SCMWebhookEvent,
+10   type SCMWebhookRequest,
+11   type Session,
+12 } from "@aoagents/ao-core";
+13 
+14 export interface WebhookProjectMatch {
+15   projectId: string;
+16   project: ProjectConfig;
+17   scm: SCM;
+18 }
+19 
+20 function requestHeadersToRecord(headers: Headers): Record<string, string> {
+21   const record: Record<string, string> = {};
+22   headers.forEach((value, key) => {
+23     record[key] = value;
+24   });
+25   return record;
+26 }
+27 
+28 function getProjectWebhookPath(project: ProjectConfig): string | null {
+29   if (!project.scm?.webhook || project.scm.webhook.enabled === false) return null;
+30   return project.scm.webhook.path ?? `/api/webhooks/${project.scm.plugin}`;
+31 }
+32 
+33 export function findWebhookProjects(
+34   config: OrchestratorConfig,
+35   registry: PluginRegistry,
+36   pathname: string,
+37 ): WebhookProjectMatch[] {
+38   return Object.entries(config.projects).flatMap(([projectId, project]) => {
+39     if (!project.repo || !project.scm?.plugin) return [];
+40     const webhookPath = getProjectWebhookPath(project);
+41     if (!webhookPath || webhookPath !== pathname) return [];
+42     const scm = registry.get<SCM>("scm", project.scm.plugin);
+43     if (!scm?.parseWebhook || !scm.verifyWebhook) return [];
+44     return [{ projectId, project, scm }];
+45   });
+46 }
+47 
+48 export function eventMatchesProject(event: SCMWebhookEvent, project: ProjectConfig): boolean {
+49   if (!event.repository) return false;
+50   if (!project.repo) return false;
+51   return (
+52     `${event.repository.owner}/${event.repository.name}`.toLowerCase() ===
+53     project.repo.toLowerCase()
+54   );
+55 }
+56 
+57 export function findAffectedSessions(
+58   sessions: Session[],
+59   projectId: string,
+60   event: SCMWebhookEvent,
+61 ): Session[] {
+62   return sessions.filter((session) => {
+63     if (session.projectId !== projectId) return false;
+64     if (TERMINAL_STATUSES.has(session.status)) return false;
+65     if (event.prNumber !== undefined && session.pr?.number === event.prNumber) return true;
+66     if (event.branch && session.branch === event.branch) return true;
+67     return false;
+68   });
+69 }
+70 
+71 export function buildWebhookRequest(
+72   request: Request,
+73   body: string,
+74   rawBody: Uint8Array,
+75 ): SCMWebhookRequest {
+76   const url = new URL(request.url);
+77   return {
+78     method: request.method,
+79     headers: requestHeadersToRecord(request.headers),
+80     body,
+81     rawBody,
+82     path: url.pathname,
+83     query: Object.fromEntries(url.searchParams.entries()),
+84   };
+85 }
 86
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-7 2026-04-29 00:19:46Z)**_
@@ -616,11 +634,13 @@ What the code does, line by line:
 
 - **GitHub webhook parser** ([`packages/plugins/scm-github/src/index.ts:311-363`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/plugins/scm-github/src/index.ts#L311-L363)) recognises `pull_request_review`, `pull_request_review_comment`, and `issue_comment` events.
 - **Issue-comment guard** at line 348:
+
   ```ts
   if (!("pull_request" in issueRecord)) return null;
   ```
-  GitHub only sets `pull_request` on the issue object when the issue *is* a PR. So comments on regular issues are dropped on the floor.
-- **Routing** ([`packages/web/src/lib/scm-webhooks.ts:57-69`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/web/src/lib/scm-webhooks.ts#L57-L69)): events only route to a *non-terminal session* whose `pr.number` or `branch` matches. They never spawn a new session.
+
+  GitHub only sets `pull_request` on the issue object when the issue _is_ a PR. So comments on regular issues are dropped on the floor.
+- **Routing** ([`packages/web/src/lib/scm-webhooks.ts:57-69`](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/web/src/lib/scm-webhooks.ts#L57-L69)): events only route to a _non-terminal session_ whose `pr.number` or `branch` matches. They never spawn a new session.
 - **Lifecycle pickup** ([`packages/core/src/lifecycle-manager.ts` around `maybeDispatchReviewBacklog`, line 1331+](https://github.com/ComposioHQ/agent-orchestrator/blob/main/packages/core/src/lifecycle-manager.ts#L1331)): the matching session pulls unresolved review threads / pending comments and dispatches them to the agent under the reaction key `bugbot-comments`. Throttled to once per 2 minutes per session (`REVIEW_BACKLOG_THROTTLE_MS = 2 * 60 * 1000`, line 420).
 
 ### What that means in practice
@@ -635,7 +655,7 @@ What the code does, line by line:
 
 ### Caveats
 
-- Webhook routing requires the SCM webhook to actually reach your laptop — that means you've configured `scm.webhook.path` and exposed it via Tailscale Funnel / Cloudflare Tunnel / similar. If you're relying purely on the **polling** path (no public URL), `ao` still picks up PR review comments because `maybeDispatchReviewBacklog` calls `scm.getReviewThreads` / `getPendingComments` directly — it doesn't *require* the webhook. So polling-only setups still react to PR review comments, just on a 2-minute floor instead of webhook-instant.
+- Webhook routing requires the SCM webhook to actually reach your laptop — that means you've configured `scm.webhook.path` and exposed it via Tailscale Funnel / Cloudflare Tunnel / similar. If you're relying purely on the **polling** path (no public URL), `ao` still picks up PR review comments because `maybeDispatchReviewBacklog` calls `scm.getReviewThreads` / `getPendingComments` directly — it doesn't _require_ the webhook. So polling-only setups still react to PR review comments, just on a 2-minute floor instead of webhook-instant.
 - "Redo what you ask" is whatever the agent decides to do given the new comments + the orchestrator prompt; it's the same behavior as a human reviewer leaving comments. There is no special slash-command grammar.
 - There is no `@claude` / `@ao` mention parser. Anthropic's [`claude-code-action`](https://github.com/anthropics/claude-code-action) does that, but `ao` does not — it just feeds the comment text to the agent verbatim.
 
@@ -727,6 +747,7 @@ packages/core/src/activity-log.ts:134: * callers fall through to their native si
 packages/core/src/migration/storage-v2.ts:644:    // Flatten archives into sessions/ as terminated records
 packages/core/src/migration/storage-v2.ts:645:    const oldArchiveDir = join(oldSessionsDir, "archive");
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:04Z)**_
@@ -789,6 +810,7 @@ Find what kill/archive does to worktree and tmux
 2377:          handle.runtimeName === "tmux"
 2424:          handle.runtimeName === "tmux"
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:09Z)**_
@@ -798,107 +820,108 @@ _**Agent (claude-sonnet-4-6 2026-04-29 03:02:09Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/core/src/session-manager.ts`
 
 ```text
-2017	  async function kill(sessionId: SessionId, options?: KillOptions): Promise<KillResult> {
-2018	    const located = findSessionRecord(sessionId);
-2019	    if (!located) {
-2020	      // Session not found via findSessionRecord — check if it exists with
-2021	      // a terminated lifecycle so auto-cleanup retries don't throw.
-2022	      for (const [killProjectId] of Object.entries(config.projects)) {
-2023	        const sessionsDir = getProjectSessionsDir(killProjectId);
-2024	        const raw = readMetadataRaw(sessionsDir, sessionId);
-2025	        if (raw) {
-2026	          const lifecycle = parseLifecycleFromRaw(raw);
-2027	          if (lifecycle?.session.state === "terminated") {
-2028	            return { cleaned: false, alreadyTerminated: true };
-2029	          }
-2030	        }
-2031	      }
-2032	      throw new SessionNotFoundError(sessionId);
-2033	    }
-2034	    const { raw, sessionsDir, project, projectId } = located;
-2035	
-2036	    // Idempotency: if lifecycle already says terminated, don't re-run destroys
-2037	    // (which could double-purge opencode or race with concurrent kills).
-2038	    const existingLifecycle = parseCanonicalLifecycle(raw);
-2039	    if (existingLifecycle?.session.state === "terminated") {
-2040	      return { cleaned: false, alreadyTerminated: true };
-2041	    }
-2042	
-2043	    const killReason: LifecycleKillReason = options?.reason ?? "manually_killed";
-2044	    const cleanupAgent = resolveSelectionForSession(project, sessionId, raw).agentName;
-2045	
-2046	    // Destroy runtime — prefer handle.runtimeName to find the correct plugin
-2047	    if (raw["runtimeHandle"]) {
-2048	      const handle = safeJsonParse<RuntimeHandle>(raw["runtimeHandle"]);
-2049	      if (handle) {
-2050	        const runtimePlugin = registry.get<Runtime>(
-2051	          "runtime",
-2052	          handle.runtimeName ??
-2053	            (project ? (project.runtime ?? config.defaults.runtime) : config.defaults.runtime),
-2054	        );
-2055	        if (runtimePlugin) {
-2056	          try {
-2057	            await runtimePlugin.destroy(handle);
-2058	          } catch {
-2059	            // Runtime might already be gone
-2060	          }
-2061	        }
-2062	      }
-2063	    }
-2064	
-2065	    const worktree = raw["worktree"];
-2066	    if (worktree && shouldDestroyWorkspacePath(project, projectId, worktree)) {
-2067	      const workspacePlugin = project
-2068	        ? resolvePlugins(project).workspace
-2069	        : registry.get<Workspace>("workspace", config.defaults.workspace);
-2070	      if (workspacePlugin) {
-2071	        try {
-2072	          await workspacePlugin.destroy(worktree);
-2073	        } catch {
-2074	          // Workspace might already be gone
-2075	        }
-2076	      }
-2077	    }
-2078	
-2079	    let didPurgeOpenCodeSession = false;
-2080	    if (options?.purgeOpenCode === true && cleanupAgent === "opencode") {
-2081	      const mappedOpenCodeSessionId =
-2082	        asValidOpenCodeSessionId(raw["opencodeSessionId"]) ??
-2083	        (await discoverOpenCodeSessionIdByTitle(
-2084	          sessionId,
-2085	          OPENCODE_INTERACTIVE_DISCOVERY_TIMEOUT_MS,
-2086	        ));
-2087	
-2088	      if (mappedOpenCodeSessionId) {
-2089	        try {
-2090	          await deleteOpenCodeSession(mappedOpenCodeSessionId);
-2091	          didPurgeOpenCodeSession = true;
-2092	        } catch {
-2093	          void 0;
-2094	        }
-2095	      }
-2096	    }
-2097	
-2098	    const runtimeReason =
-2099	      killReason === "pr_merged"
-2100	        ? "pr_merged_cleanup"
-2101	        : killReason === "auto_cleanup"
-2102	          ? "auto_cleanup"
-2103	          : "manual_kill_requested";
-2104	    const terminatedLifecycle = buildUpdatedLifecycle(sessionId, raw, (next) => {
-2105	      next.session.state = "terminated";
-2106	      next.session.reason = killReason;
-2107	      next.session.terminatedAt = new Date().toISOString();
-2108	      next.session.lastTransitionAt = next.session.terminatedAt;
-2109	      next.runtime.state = raw["runtimeHandle"] || raw["tmuxName"] ? "missing" : "exited";
-2110	      next.runtime.reason = runtimeReason;
-2111	      next.runtime.lastObservedAt = new Date().toISOString();
-2112	    });
-2113	    updateMetadata(sessionsDir, sessionId, {
-2114	      ...lifecycleMetadataUpdates(raw, terminatedLifecycle),
-2115	      ...(didPurgeOpenCodeSession && {
-2116	        opencodeSessionId: "",
+2017   async function kill(sessionId: SessionId, options?: KillOptions): Promise<KillResult> {
+2018     const located = findSessionRecord(sessionId);
+2019     if (!located) {
+2020       // Session not found via findSessionRecord — check if it exists with
+2021       // a terminated lifecycle so auto-cleanup retries don't throw.
+2022       for (const [killProjectId] of Object.entries(config.projects)) {
+2023         const sessionsDir = getProjectSessionsDir(killProjectId);
+2024         const raw = readMetadataRaw(sessionsDir, sessionId);
+2025         if (raw) {
+2026           const lifecycle = parseLifecycleFromRaw(raw);
+2027           if (lifecycle?.session.state === "terminated") {
+2028             return { cleaned: false, alreadyTerminated: true };
+2029           }
+2030         }
+2031       }
+2032       throw new SessionNotFoundError(sessionId);
+2033     }
+2034     const { raw, sessionsDir, project, projectId } = located;
+2035 
+2036     // Idempotency: if lifecycle already says terminated, don't re-run destroys
+2037     // (which could double-purge opencode or race with concurrent kills).
+2038     const existingLifecycle = parseCanonicalLifecycle(raw);
+2039     if (existingLifecycle?.session.state === "terminated") {
+2040       return { cleaned: false, alreadyTerminated: true };
+2041     }
+2042 
+2043     const killReason: LifecycleKillReason = options?.reason ?? "manually_killed";
+2044     const cleanupAgent = resolveSelectionForSession(project, sessionId, raw).agentName;
+2045 
+2046     // Destroy runtime — prefer handle.runtimeName to find the correct plugin
+2047     if (raw["runtimeHandle"]) {
+2048       const handle = safeJsonParse<RuntimeHandle>(raw["runtimeHandle"]);
+2049       if (handle) {
+2050         const runtimePlugin = registry.get<Runtime>(
+2051           "runtime",
+2052           handle.runtimeName ??
+2053             (project ? (project.runtime ?? config.defaults.runtime) : config.defaults.runtime),
+2054         );
+2055         if (runtimePlugin) {
+2056           try {
+2057             await runtimePlugin.destroy(handle);
+2058           } catch {
+2059             // Runtime might already be gone
+2060           }
+2061         }
+2062       }
+2063     }
+2064 
+2065     const worktree = raw["worktree"];
+2066     if (worktree && shouldDestroyWorkspacePath(project, projectId, worktree)) {
+2067       const workspacePlugin = project
+2068         ? resolvePlugins(project).workspace
+2069         : registry.get<Workspace>("workspace", config.defaults.workspace);
+2070       if (workspacePlugin) {
+2071         try {
+2072           await workspacePlugin.destroy(worktree);
+2073         } catch {
+2074           // Workspace might already be gone
+2075         }
+2076       }
+2077     }
+2078 
+2079     let didPurgeOpenCodeSession = false;
+2080     if (options?.purgeOpenCode === true && cleanupAgent === "opencode") {
+2081       const mappedOpenCodeSessionId =
+2082         asValidOpenCodeSessionId(raw["opencodeSessionId"]) ??
+2083         (await discoverOpenCodeSessionIdByTitle(
+2084           sessionId,
+2085           OPENCODE_INTERACTIVE_DISCOVERY_TIMEOUT_MS,
+2086         ));
+2087 
+2088       if (mappedOpenCodeSessionId) {
+2089         try {
+2090           await deleteOpenCodeSession(mappedOpenCodeSessionId);
+2091           didPurgeOpenCodeSession = true;
+2092         } catch {
+2093           void 0;
+2094         }
+2095       }
+2096     }
+2097 
+2098     const runtimeReason =
+2099       killReason === "pr_merged"
+2100         ? "pr_merged_cleanup"
+2101         : killReason === "auto_cleanup"
+2102           ? "auto_cleanup"
+2103           : "manual_kill_requested";
+2104     const terminatedLifecycle = buildUpdatedLifecycle(sessionId, raw, (next) => {
+2105       next.session.state = "terminated";
+2106       next.session.reason = killReason;
+2107       next.session.terminatedAt = new Date().toISOString();
+2108       next.session.lastTransitionAt = next.session.terminatedAt;
+2109       next.runtime.state = raw["runtimeHandle"] || raw["tmuxName"] ? "missing" : "exited";
+2110       next.runtime.reason = runtimeReason;
+2111       next.runtime.lastObservedAt = new Date().toISOString();
+2112     });
+2113     updateMetadata(sessionsDir, sessionId, {
+2114       ...lifecycleMetadataUpdates(raw, terminatedLifecycle),
+2115       ...(didPurgeOpenCodeSession && {
+2116         opencodeSessionId: "",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:12Z)**_
@@ -913,6 +936,7 @@ Check what metadata and activity log do on delete
 packages/core/src/metadata.ts:420:export function deleteMetadata(dataDir: string, sessionId: SessionId): void {
 packages/core/src/activity-log.ts:134: * callers fall through to their native signals (git commits, chat history,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:14Z)**_
@@ -922,27 +946,28 @@ _**Agent (claude-sonnet-4-6 2026-04-29 03:02:14Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/core/src/metadata.ts`
 
 ```text
-415	}
-416	
-417	/**
-418	 * Delete a session's metadata file permanently.
-419	 */
-420	export function deleteMetadata(dataDir: string, sessionId: SessionId): void {
-421	  const path = metadataPath(dataDir, sessionId);
-422	  if (!existsSync(path)) return;
-423	
-424	  try {
-425	    unlinkSync(path);
-426	  } catch {
-427	    // File may already be deleted by a concurrent process — not an error
-428	  }
-429	}
-430	
-431	/**
-432	 * List all session IDs that have metadata files.
-433	 * Reads .json files from the sessions directory.
-434	 */
+415 }
+416 
+417 /**
+418  * Delete a session's metadata file permanently.
+419  */
+420 export function deleteMetadata(dataDir: string, sessionId: SessionId): void {
+421   const path = metadataPath(dataDir, sessionId);
+422   if (!existsSync(path)) return;
+423 
+424   try {
+425     unlinkSync(path);
+426   } catch {
+427     // File may already be deleted by a concurrent process — not an error
+428   }
+429 }
+430 
+431 /**
+432  * List all session IDs that have metadata files.
+433  * Reads .json files from the sessions directory.
+434  */
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:17Z)**_
@@ -985,6 +1010,7 @@ handoff/pr-1466/architecture.md:195:| `~/.agent-orchestrator/config.yaml` | Pers
 website/content/docs/cli.mdx:179:Behavior depends on how AO was installed — git, npm-global, pnpm-global, or unknown (manual instructions printed).
 website/content/docs/dashboard.mdx:49:For review comments, use **Ask Agent to Fix** when the right next step is obvious. Use a manual message when you need to add context or constrain the fix:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:21Z)**_
@@ -1026,6 +1052,7 @@ Project settings let you edit behavior fields without changing the repository id
 If a project is degraded because its local config is invalid or still in an older wrapped format, the dashboard shows a repair state instead of hiding the project.
 
 ## Use The Terminal
+
 ```
 </details></tool-use>
 
@@ -1109,6 +1136,7 @@ Open the session detail page and send a short, direct instruction. The agent rec
   <Card title="Remote access" href="/docs/configuration/remote-access" description="Open the dashboard from another device safely." />
 </Cards>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:28Z)**_
@@ -1122,6 +1150,7 @@ Find the exported kill function and what it destroys
 ```text
 packages/core/src/session-manager.ts:2017:  async function kill(sessionId: SessionId, options?: KillOptions): Promise<KillResult> {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:30Z)**_
@@ -1131,67 +1160,68 @@ _**Agent (claude-sonnet-4-6 2026-04-29 03:02:30Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/core/src/session-manager.ts`
 
 ```text
-2110	      next.runtime.reason = runtimeReason;
-2111	      next.runtime.lastObservedAt = new Date().toISOString();
-2112	    });
-2113	    updateMetadata(sessionsDir, sessionId, {
-2114	      ...lifecycleMetadataUpdates(raw, terminatedLifecycle),
-2115	      ...(didPurgeOpenCodeSession && {
-2116	        opencodeSessionId: "",
-2117	        opencodeCleanedAt: new Date().toISOString(),
-2118	      }),
-2119	    });
-2120	
-2121	    invalidateCache();
-2122	    return { cleaned: true, alreadyTerminated: false };
-2123	  }
-2124	
-2125	  async function cleanup(
-2126	    projectId?: string,
-2127	    options?: { dryRun?: boolean; purgeOpenCode?: boolean },
-2128	  ): Promise<CleanupResult> {
-2129	    const result: CleanupResult = { killed: [], skipped: [], errors: [] };
-2130	    const sessions = await list(projectId);
-2131	
-2132	    const killedKeys = new Set<string>();
-2133	    const skippedKeys = new Set<string>();
-2134	
-2135	    const toEntryKey = (entryProjectId: string, id: string): string => `${entryProjectId}:${id}`;
-2136	    const fromEntryKey = (entryKey: string): { projectId: string; id: string } => {
-2137	      const separatorIndex = entryKey.indexOf(":");
-2138	      if (separatorIndex === -1) {
-2139	        return { projectId: "", id: entryKey };
-2140	      }
-2141	      return {
-2142	        projectId: entryKey.slice(0, separatorIndex),
-2143	        id: entryKey.slice(separatorIndex + 1),
-2144	      };
-2145	    };
-2146	
-2147	    const pushKilled = (entryProjectId: string, id: string): void => {
-2148	      const key = toEntryKey(entryProjectId, id);
-2149	      skippedKeys.delete(key);
-2150	      killedKeys.add(key);
-2151	    };
-2152	
-2153	    const pushSkipped = (entryProjectId: string, id: string): void => {
-2154	      const key = toEntryKey(entryProjectId, id);
-2155	      if (killedKeys.has(key)) return;
-2156	      skippedKeys.add(key);
-2157	    };
-2158	
-2159	    const shouldPurgeOpenCode = options?.purgeOpenCode !== false;
-2160	
-2161	    for (const session of sessions) {
-2162	      try {
-2163	        const project = config.projects[session.projectId];
-2164	        if (!project) {
-2165	          pushSkipped(session.projectId, session.id);
-2166	          continue;
-2167	        }
-2168	
-2169	        if (isCleanupProtectedSession(project, session.id, session.metadata)) {
+2110       next.runtime.reason = runtimeReason;
+2111       next.runtime.lastObservedAt = new Date().toISOString();
+2112     });
+2113     updateMetadata(sessionsDir, sessionId, {
+2114       ...lifecycleMetadataUpdates(raw, terminatedLifecycle),
+2115       ...(didPurgeOpenCodeSession && {
+2116         opencodeSessionId: "",
+2117         opencodeCleanedAt: new Date().toISOString(),
+2118       }),
+2119     });
+2120 
+2121     invalidateCache();
+2122     return { cleaned: true, alreadyTerminated: false };
+2123   }
+2124 
+2125   async function cleanup(
+2126     projectId?: string,
+2127     options?: { dryRun?: boolean; purgeOpenCode?: boolean },
+2128   ): Promise<CleanupResult> {
+2129     const result: CleanupResult = { killed: [], skipped: [], errors: [] };
+2130     const sessions = await list(projectId);
+2131 
+2132     const killedKeys = new Set<string>();
+2133     const skippedKeys = new Set<string>();
+2134 
+2135     const toEntryKey = (entryProjectId: string, id: string): string => `${entryProjectId}:${id}`;
+2136     const fromEntryKey = (entryKey: string): { projectId: string; id: string } => {
+2137       const separatorIndex = entryKey.indexOf(":");
+2138       if (separatorIndex === -1) {
+2139         return { projectId: "", id: entryKey };
+2140       }
+2141       return {
+2142         projectId: entryKey.slice(0, separatorIndex),
+2143         id: entryKey.slice(separatorIndex + 1),
+2144       };
+2145     };
+2146 
+2147     const pushKilled = (entryProjectId: string, id: string): void => {
+2148       const key = toEntryKey(entryProjectId, id);
+2149       skippedKeys.delete(key);
+2150       killedKeys.add(key);
+2151     };
+2152 
+2153     const pushSkipped = (entryProjectId: string, id: string): void => {
+2154       const key = toEntryKey(entryProjectId, id);
+2155       if (killedKeys.has(key)) return;
+2156       skippedKeys.add(key);
+2157     };
+2158 
+2159     const shouldPurgeOpenCode = options?.purgeOpenCode !== false;
+2160 
+2161     for (const session of sessions) {
+2162       try {
+2163         const project = config.projects[session.projectId];
+2164         if (!project) {
+2165           pushSkipped(session.projectId, session.id);
+2166           continue;
+2167         }
+2168 
+2169         if (isCleanupProtectedSession(project, session.id, session.metadata)) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:02:49Z)**_
@@ -1220,7 +1250,7 @@ From [`session-manager.ts:2017-2122`](https://github.com/ComposioHQ/agent-orches
 
 ### The conflict problem you're describing
 
-If you're working on the same branch/PR in your own Claude session *and* `ao` also has a live session on it, you're in a race condition — both agents push commits to the same branch and neither knows about the other's changes. Killing the ao session cleanly resolves it, but you need to do it in the right order.
+If you're working on the same branch/PR in your own Claude session _and_ `ao` also has a live session on it, you're in a race condition — both agents push commits to the same branch and neither knows about the other's changes. Killing the ao session cleanly resolves it, but you need to do it in the right order.
 
 ---
 
@@ -1261,6 +1291,7 @@ The PR is still open, all of ao's commits are on the branch, and review comments
 ## What about the chat history?
 
 `ao`'s "chat history" is the Claude session stored by the agent backend (Claude Code / OpenCode). When ao kills a session:
+
 - **OpenCode** (if that's your agent): the `opencode session delete` command is called → **chat history gone**.
 - **Claude Code**: no explicit session purge is done by ao (it just kills the tmux pane). The Claude Code conversation is stored in `~/.claude/projects/…` — it may still be readable there, but ao's dashboard will no longer show it.
 
@@ -1330,6 +1361,7 @@ packages/core/src/session-manager.ts:582:            sessionKind: isOrchestrator
 packages/core/src/session-manager.ts:597:      if (isOrchestratorSessionRecord(record.sessionName, record.raw, sessionPrefix)) {
 packages/core/src/session-manager.ts:598:        record.raw = repairSingleSessionMetadataOnRead(sessionsDir, record, sessionPrefix).raw;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:36Z)**_
@@ -1372,6 +1404,7 @@ packages/core/src/session-manager.ts:570:    sessionPrefix?: string,
 packages/core/src/session-manager.ts:582:            sessionKind: isOrchestratorSessionRecord(record.sessionName, record.raw, sessionPrefix)
 packages/core/src/session-manager.ts:584:              : "worker",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:40Z)**_
@@ -1387,6 +1420,7 @@ packages/core/src/session-manager.ts
 packages/core/src/metadata.ts
 packages/core/src/__tests__/metadata.test.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:42Z)**_
@@ -1402,6 +1436,7 @@ Find session ID reservation in metadata
 194:  if (!content) return null; // empty file (e.g. from reserveSessionId)
 457:export function reserveSessionId(dataDir: string, sessionId: SessionId): boolean {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:48Z)**_
@@ -1444,6 +1479,7 @@ Find how session number is incremented
 874:        Object.values(config.projects).map((p) => p.sessionPrefix),
 919:        project.sessionPrefix,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:52Z)**_
@@ -1453,52 +1489,53 @@ _**Agent (claude-sonnet-4-6 2026-04-29 03:15:52Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/core/src/session-manager.ts`
 
 ```text
-790	  async function reserveNextSessionIdentity(
-791	    project: ProjectConfig,
-792	    sessionsDir: string,
-793	  ): Promise<{
-794	    num: number;
-795	    sessionId: string;
-796	    tmuxName: string | undefined;
-797	  }> {
-798	    const usedNumbers = new Set<number>();
-799	    for (const sessionName of listMetadata(sessionsDir)) {
-800	      const num = getSessionNumber(sessionName, project.sessionPrefix);
-801	      if (num !== undefined) usedNumbers.add(num);
-802	    }
-803	    for (const num of await listRemoteSessionNumbers(project)) {
-804	      usedNumbers.add(num);
-805	    }
-806	
-807	    let num = getNextSessionNumber(
-808	      [...usedNumbers].map((value) => `${project.sessionPrefix}-${value}`),
-809	      project.sessionPrefix,
-810	    );
-811	    for (let attempts = 0; attempts < 10_000; attempts++) {
-812	      const sessionId = `${project.sessionPrefix}-${num}`;
-813	      const tmuxName = project.path
-814	        ? generateSessionName(project.sessionPrefix, num)
-815	        : undefined;
-816	
-817	      if (!usedNumbers.has(num) && reserveSessionId(sessionsDir, sessionId)) {
-818	        return { num, sessionId, tmuxName };
-819	      }
-820	
-821	      usedNumbers.add(num);
-822	      num += 1;
-823	    }
-824	
-825	    throw new Error(
-826	      `Failed to reserve session ID after 10000 attempts (prefix: ${project.sessionPrefix})`,
-827	    );
-828	  }
-829	
-830	  function reserveFixedOrchestratorIdentity(
-831	    project: ProjectConfig,
-832	    sessionsDir: string,
-833	  ): { sessionId: string; tmuxName: string | undefined } {
-834	    const sessionId = getOrchestratorSessionId(project);
+790   async function reserveNextSessionIdentity(
+791     project: ProjectConfig,
+792     sessionsDir: string,
+793   ): Promise<{
+794     num: number;
+795     sessionId: string;
+796     tmuxName: string | undefined;
+797   }> {
+798     const usedNumbers = new Set<number>();
+799     for (const sessionName of listMetadata(sessionsDir)) {
+800       const num = getSessionNumber(sessionName, project.sessionPrefix);
+801       if (num !== undefined) usedNumbers.add(num);
+802     }
+803     for (const num of await listRemoteSessionNumbers(project)) {
+804       usedNumbers.add(num);
+805     }
+806 
+807     let num = getNextSessionNumber(
+808       [...usedNumbers].map((value) => `${project.sessionPrefix}-${value}`),
+809       project.sessionPrefix,
+810     );
+811     for (let attempts = 0; attempts < 10_000; attempts++) {
+812       const sessionId = `${project.sessionPrefix}-${num}`;
+813       const tmuxName = project.path
+814         ? generateSessionName(project.sessionPrefix, num)
+815         : undefined;
+816 
+817       if (!usedNumbers.has(num) && reserveSessionId(sessionsDir, sessionId)) {
+818         return { num, sessionId, tmuxName };
+819       }
+820 
+821       usedNumbers.add(num);
+822       num += 1;
+823     }
+824 
+825     throw new Error(
+826       `Failed to reserve session ID after 10000 attempts (prefix: ${project.sessionPrefix})`,
+827     );
+828   }
+829 
+830   function reserveFixedOrchestratorIdentity(
+831     project: ProjectConfig,
+832     sessionsDir: string,
+833   ): { sessionId: string; tmuxName: string | undefined } {
+834     const sessionId = getOrchestratorSessionId(project);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:55Z)**_
@@ -1531,6 +1568,7 @@ packages/core/src/global-config.ts:709:      existing?.sessionPrefix ??
 packages/core/src/global-config.ts:710:      localConfig?.sessionPrefix ??
 packages/core/src/global-config.ts:714:    const explicitSessionPrefix = !existing?.sessionPrefix && Boolean(localConfig?.sessionPrefix);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:15:58Z)**_
@@ -1550,6 +1588,7 @@ packages/core/src/config.ts:27:import { generateSessionPrefix } from "./paths.js
 packages/core/src/config.ts:587:      project.sessionPrefix = generateSessionPrefix(basename(project.path));
 packages/core/src/config.ts:625:    const prefix = project.sessionPrefix || generateSessionPrefix(projectId);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:16:01Z)**_
@@ -1573,6 +1612,7 @@ export function generateSessionPrefix(projectId: string): string {
     return uppercase.join("").toLowerCase();
   }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:16:03Z)**_
@@ -1582,37 +1622,38 @@ _**Agent (claude-sonnet-4-6 2026-04-29 03:16:03Z)**_
  `/tmp/ao-research/agent-orchestrator/packages/core/src/paths.ts`
 
 ```text
-64	export function generateSessionPrefix(projectId: string): string {
-65	  if (projectId.length <= 4) {
-66	    return projectId.toLowerCase();
-67	  }
-68	
-69	  // CamelCase: extract uppercase letters
-70	  const uppercase = projectId.match(/[A-Z]/g);
-71	  if (uppercase && uppercase.length > 1) {
-72	    return uppercase.join("").toLowerCase();
-73	  }
-74	
-75	  // kebab-case or snake_case: use initials
-76	  if (projectId.includes("-") || projectId.includes("_")) {
-77	    const separator = projectId.includes("-") ? "-" : "_";
-78	    return projectId
-79	      .split(separator)
-80	      .map((word) => word[0])
-81	      .join("")
-82	      .toLowerCase();
-83	  }
-84	
-85	  // Single word: first 3 characters
-86	  return projectId.slice(0, 3).toLowerCase();
-87	}
-88	
-89	// =============================================================================
-90	// V2 PATH FUNCTIONS (projects/{projectId}/ layout)
-91	// =============================================================================
-92	
-93	/** Maximum allowed length for a project ID. */
+64 export function generateSessionPrefix(projectId: string): string {
+65   if (projectId.length <= 4) {
+66     return projectId.toLowerCase();
+67   }
+68 
+69   // CamelCase: extract uppercase letters
+70   const uppercase = projectId.match(/[A-Z]/g);
+71   if (uppercase && uppercase.length > 1) {
+72     return uppercase.join("").toLowerCase();
+73   }
+74 
+75   // kebab-case or snake_case: use initials
+76   if (projectId.includes("-") || projectId.includes("_")) {
+77     const separator = projectId.includes("-") ? "-" : "_";
+78     return projectId
+79       .split(separator)
+80       .map((word) => word[0])
+81       .join("")
+82       .toLowerCase();
+83   }
+84 
+85   // Single word: first 3 characters
+86   return projectId.slice(0, 3).toLowerCase();
+87 }
+88 
+89 // =============================================================================
+90 // V2 PATH FUNCTIONS (projects/{projectId}/ layout)
+91 // =============================================================================
+92 
+93 /** Maximum allowed length for a project ID. */
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:16:09Z)**_
@@ -1627,8 +1668,8 @@ Now I have a complete picture. Let me summarize:
 3. Orchestrator session is `bs-orchestrator`
 4. Where to see it in the UI: The dashboard shows session cards with the session ID. Looking at the docs about the dashboard.
 
-
 5. Now I should verify this session ID format works with the `ao kill` command in the CLI.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:16:16Z)**_
@@ -1740,6 +1781,7 @@ packages/cli/src/commands/send.ts:116:    .command("send")
 packages/cli/src/commands/start.ts:1585:    .command("start [project]")
 packages/cli/src/commands/start.ts:2358:    .command("stop [project]")
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-29 03:17:33Z)**_

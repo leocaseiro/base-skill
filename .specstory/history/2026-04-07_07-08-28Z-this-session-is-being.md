@@ -9,6 +9,7 @@ _**User (2026-04-07 07:08:28Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user requested execution of a large implementation plan (`docs/superpowers/plans/2026-04-07-unified-slot-component.md`) using `superpowers:subagent-driven-development`. The plan replaces three game-specific slot components (`OrderedSlots`, `MatchingPairZones`, `NumberSequenceSlots`) with a unified `<Slot>` compound component, fixes mobile drag bugs, adds feedback animations, and adds sentence-gap inline slot support for WordSpell. After the 18-task implementation was completed and a PR was created (leocaseiro/base-skill#28), the user tested the app and reported 4 bugs to fix.
 
@@ -29,6 +30,7 @@ Summary:
 3. Files and Code Sections:
 
    - **`src/components/answer-game/Slot/Slot.tsx`** — The unified Slot component. Recently modified (post-PR) to add `overflow-hidden` to the slot container and `bg-card shadow-md` to the filled-slot button to fix Issue 1 (skeuomorphic look mismatch):
+
      ```tsx
      const stateClasses = [
        'relative flex items-center justify-center border-2 transition-all overflow-hidden', // overflow-hidden added
@@ -45,6 +47,7 @@ Summary:
      ```
 
    - **`src/components/answer-game/useDraggableTile.ts`** — Used by all tile banks. Does NOT dispatch `SET_DRAG_ACTIVE` on drag start — this is why the bank hole never appears. Fix needed: add `dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id })` to `onDragStart` and clear on `onDrop`.
+
      ```typescript
      return draggable({
        element,
@@ -54,6 +57,7 @@ Summary:
      ```
 
    - **`src/components/answer-game/useSlotTileDrag.ts`** — Handles dragging tiles out of slots. Does dispatch `SET_DRAG_ACTIVE` correctly on start/end. Key structure:
+
      ```typescript
      onDragStart: () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
      onDrop: ({ location }) => {
@@ -63,6 +67,7 @@ Summary:
      ```
 
    - **`src/components/answer-game/Slot/useSlotBehavior.ts`** — Core behavioral hook. Currently reads `{ zones, allTiles, activeSlotIndex, config }` from context but NOT `dragActiveTileId`. Missing `isBeingDragged` in render props (needed for slot hole effect):
+
      ```typescript
      export interface SlotRenderProps {
        label: string | null;
@@ -133,6 +138,7 @@ Summary:
    Working on fixing 4 post-PR bugs reported by the user after testing the implementation. Fix 1 (Issue 1 — skeuomorphic appearance) was partially applied: added `overflow-hidden` to slot container stateClasses and `bg-card shadow-md` to the filled-slot button in `Slot.tsx`. The user then reported Issues 2, 3, and 4 before the fix was committed.
 
    Current state of `Slot.tsx` (two edits applied, not yet committed):
+
    ```tsx
    // stateClasses line changed:
    'relative flex items-center justify-center border-2 transition-all overflow-hidden',
@@ -176,68 +182,69 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:08:39Z)**_
  `./src/components/answer-game/useDraggableTile.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useEffect, useRef } from 'react';
-3	import { useAutoNextSlot } from './useAutoNextSlot';
-4	import { useGameTTS } from './useGameTTS';
-5	import { useTileEvaluation } from './useTileEvaluation';
-6	import { useTouchDrag } from './useTouchDrag';
-7	import type { TileItem } from './types';
-8	import type { TouchDragHandlers } from './useTouchDrag';
-9	import type { RefObject } from 'react';
-10	
-11	export interface DraggableTile extends TouchDragHandlers {
-12	  ref: RefObject<HTMLButtonElement | null>;
-13	  handleClick: () => void;
-14	}
-15	
-16	export const useDraggableTile = (tile: TileItem): DraggableTile => {
-17	  const ref = useRef<HTMLButtonElement>(null);
-18	  const { placeInNextSlot } = useAutoNextSlot();
-19	  const { speakTile } = useGameTTS();
-20	  const speakTileRef = useRef(speakTile);
-21	  const { placeTile } = useTileEvaluation();
-22	
-23	  useEffect(() => {
-24	    speakTileRef.current = speakTile;
-25	  }, [speakTile]);
-26	
-27	  // HTML5 DnD — desktop
-28	  useEffect(() => {
-29	    const element = ref.current;
-30	    if (!element) return;
-31	    return draggable({
-32	      element,
-33	      getInitialData: () => ({ tileId: tile.id }),
-34	      onDragStart: () => speakTileRef.current(tile.label),
-35	    });
-36	  }, [tile.id, tile.label]);
-37	
-38	  // Pointer-events drag — touch / mobile
-39	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-40	    useTouchDrag({
-41	      tileId: tile.id,
-42	      label: tile.label,
-43	      onDragStart: () => speakTileRef.current(tile.label),
-44	      onDrop: (tileId, zoneIndex) => placeTile(tileId, zoneIndex),
-45	    });
-46	
-47	  const handleClick = () => {
-48	    speakTile(tile.label);
-49	    placeInNextSlot(tile.id);
-50	  };
-51	
-52	  return {
-53	    ref,
-54	    handleClick,
-55	    onPointerDown,
-56	    onPointerMove,
-57	    onPointerUp,
-58	    onPointerCancel,
-59	  };
-60	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useEffect, useRef } from 'react';
+3 import { useAutoNextSlot } from './useAutoNextSlot';
+4 import { useGameTTS } from './useGameTTS';
+5 import { useTileEvaluation } from './useTileEvaluation';
+6 import { useTouchDrag } from './useTouchDrag';
+7 import type { TileItem } from './types';
+8 import type { TouchDragHandlers } from './useTouchDrag';
+9 import type { RefObject } from 'react';
+10 
+11 export interface DraggableTile extends TouchDragHandlers {
+12   ref: RefObject<HTMLButtonElement | null>;
+13   handleClick: () => void;
+14 }
+15 
+16 export const useDraggableTile = (tile: TileItem): DraggableTile => {
+17   const ref = useRef<HTMLButtonElement>(null);
+18   const { placeInNextSlot } = useAutoNextSlot();
+19   const { speakTile } = useGameTTS();
+20   const speakTileRef = useRef(speakTile);
+21   const { placeTile } = useTileEvaluation();
+22 
+23   useEffect(() => {
+24     speakTileRef.current = speakTile;
+25   }, [speakTile]);
+26 
+27   // HTML5 DnD — desktop
+28   useEffect(() => {
+29     const element = ref.current;
+30     if (!element) return;
+31     return draggable({
+32       element,
+33       getInitialData: () => ({ tileId: tile.id }),
+34       onDragStart: () => speakTileRef.current(tile.label),
+35     });
+36   }, [tile.id, tile.label]);
+37 
+38   // Pointer-events drag — touch / mobile
+39   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+40     useTouchDrag({
+41       tileId: tile.id,
+42       label: tile.label,
+43       onDragStart: () => speakTileRef.current(tile.label),
+44       onDrop: (tileId, zoneIndex) => placeTile(tileId, zoneIndex),
+45     });
+46 
+47   const handleClick = () => {
+48     speakTile(tile.label);
+49     placeInNextSlot(tile.id);
+50   };
+51 
+52   return {
+53     ref,
+54     handleClick,
+55     onPointerDown,
+56     onPointerMove,
+57     onPointerUp,
+58     onPointerCancel,
+59   };
+60 };
 61
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:08:40Z)**_
@@ -247,163 +254,164 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:08:40Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-1	import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameContext } from '../useAnswerGameContext';
-4	import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
-5	import { useFreeSwap } from '../useFreeSwap';
-6	import { useSlotTileDrag } from '../useSlotTileDrag';
-7	import { useTileEvaluation } from '../useTileEvaluation';
-8	import { triggerPop, triggerShake } from './slot-animations';
-9	import type { RefObject } from 'react';
-10	
-11	export interface SlotRenderProps {
-12	  label: string | null;
-13	  tileId: string | null;
-14	  isActive: boolean;
-15	  isWrong: boolean;
-16	  isLocked: boolean;
-17	  isEmpty: boolean;
-18	  showCursor: boolean;
-19	}
-20	
-21	export interface UseSlotBehaviorReturn {
-22	  renderProps: SlotRenderProps;
-23	  slotRef: RefObject<HTMLElement | null>;
-24	  dragRef: RefObject<HTMLButtonElement | null>;
-25	  handleClick: () => void;
-26	  pointerHandlers: {
-27	    onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
-28	    onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
-29	    onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
-30	    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
-31	  };
-32	}
-33	
-34	export const useSlotBehavior = (
-35	  index: number,
-36	): UseSlotBehaviorReturn => {
-37	  const { zones, allTiles, activeSlotIndex, config } =
-38	    useAnswerGameContext();
-39	  const dispatch = useAnswerGameDispatch();
-40	  const { placeTile } = useTileEvaluation();
-41	  const { swapOrPlace } = useFreeSwap();
-42	
-43	  const zone = zones[index];
-44	  const tileId = zone?.placedTileId ?? null;
-45	  const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
-46	  const label = tile?.label ?? null;
-47	  const isWrong = zone?.isWrong ?? false;
-48	  const isLocked = zone?.isLocked ?? false;
-49	  const isEmpty = tileId === null;
-50	
-51	  // Resolve interaction mode: explicit config or inferred from inputMethod
-52	  const slotInteraction =
-53	    config.slotInteraction ??
-54	    (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
-55	  const isOrdered = slotInteraction === 'ordered';
-56	
-57	  const isActive = isOrdered && activeSlotIndex === index;
-58	  const showCursor =
-59	    isActive && isEmpty && config.inputMethod !== 'drag';
-60	
-61	  const slotRef = useRef<HTMLElement | null>(null);
-62	  const prevIsWrongRef = useRef(isWrong);
-63	  const prevTileIdRef = useRef(tileId);
-64	
-65	  // Drop target handler — choose evaluation or swap based on interaction mode
-66	  const handleDrop = useCallback(
-67	    (droppedTileId: string, targetZoneIndex: number) => {
-68	      if (isOrdered) {
-69	        placeTile(droppedTileId, targetZoneIndex);
-70	      } else {
-71	        swapOrPlace(droppedTileId, targetZoneIndex);
-72	      }
-73	    },
-74	    [isOrdered, placeTile, swapOrPlace],
-75	  );
-76	
-77	  // Register as drop target
-78	  useEffect(() => {
-79	    const el = slotRef.current;
-80	    if (!el) return;
-81	    return dropTargetForElements({
-82	      element: el,
-83	      getData: () => ({ zoneIndex: index }),
-84	      onDrop: ({ source }) => {
-85	        // Slot-tile drags (sourceZoneIndex present) handle their own
-86	        // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
-87	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-88	        const sourceTileId = source.data['tileId'];
-89	        if (typeof sourceTileId === 'string') {
-90	          handleDrop(sourceTileId, index);
-91	        }
-92	      },
-93	    });
-94	  }, [index, handleDrop]);
-95	
-96	  // Drag source for filled slots
-97	  const {
-98	    dragRef,
-99	    onPointerDown,
-100	    onPointerMove,
-101	    onPointerUp,
-102	    onPointerCancel,
-103	  } = useSlotTileDrag({
-104	    tileId,
-105	    label,
-106	    zoneIndex: index,
-107	    onDrop: handleDrop,
-108	  });
-109	
-110	  // Click handler: remove tile from slot (returns to bank)
-111	  const handleClick = useCallback(() => {
-112	    if (isEmpty) return;
-113	    dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
-114	  }, [isEmpty, dispatch, index]);
-115	
-116	  // Feedback animations: trigger on state transitions
-117	  useEffect(() => {
-118	    const el = slotRef.current;
-119	    if (!el) return;
-120	
-121	    const wasWrong = prevIsWrongRef.current;
-122	    prevIsWrongRef.current = isWrong;
-123	
-124	    const prevTileId = prevTileIdRef.current;
-125	    prevTileIdRef.current = tileId;
-126	    const freshlyPlaced = tileId !== null && prevTileId === null;
-127	
-128	    if (isWrong && !wasWrong) {
-129	      triggerShake(el);
-130	    } else if (freshlyPlaced && !isWrong) {
-131	      triggerPop(el);
-132	    }
-133	  }, [isWrong, tileId]);
-134	
-135	  return {
-136	    renderProps: {
-137	      label,
-138	      tileId,
-139	      isActive,
-140	      isWrong,
-141	      isLocked,
-142	      isEmpty,
-143	      showCursor,
-144	    },
-145	    slotRef,
-146	    dragRef,
-147	    handleClick,
-148	    pointerHandlers: {
-149	      onPointerDown,
-150	      onPointerMove,
-151	      onPointerUp,
-152	      onPointerCancel,
-153	    },
-154	  };
-155	};
+1 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameContext } from '../useAnswerGameContext';
+4 import { useAnswerGameDispatch } from '../useAnswerGameDispatch';
+5 import { useFreeSwap } from '../useFreeSwap';
+6 import { useSlotTileDrag } from '../useSlotTileDrag';
+7 import { useTileEvaluation } from '../useTileEvaluation';
+8 import { triggerPop, triggerShake } from './slot-animations';
+9 import type { RefObject } from 'react';
+10 
+11 export interface SlotRenderProps {
+12   label: string | null;
+13   tileId: string | null;
+14   isActive: boolean;
+15   isWrong: boolean;
+16   isLocked: boolean;
+17   isEmpty: boolean;
+18   showCursor: boolean;
+19 }
+20 
+21 export interface UseSlotBehaviorReturn {
+22   renderProps: SlotRenderProps;
+23   slotRef: RefObject<HTMLElement | null>;
+24   dragRef: RefObject<HTMLButtonElement | null>;
+25   handleClick: () => void;
+26   pointerHandlers: {
+27     onPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
+28     onPointerMove: (e: React.PointerEvent<HTMLElement>) => void;
+29     onPointerUp: (e: React.PointerEvent<HTMLElement>) => void;
+30     onPointerCancel: (e: React.PointerEvent<HTMLElement>) => void;
+31   };
+32 }
+33 
+34 export const useSlotBehavior = (
+35   index: number,
+36 ): UseSlotBehaviorReturn => {
+37   const { zones, allTiles, activeSlotIndex, config } =
+38     useAnswerGameContext();
+39   const dispatch = useAnswerGameDispatch();
+40   const { placeTile } = useTileEvaluation();
+41   const { swapOrPlace } = useFreeSwap();
+42 
+43   const zone = zones[index];
+44   const tileId = zone?.placedTileId ?? null;
+45   const tile = tileId ? allTiles.find((t) => t.id === tileId) : null;
+46   const label = tile?.label ?? null;
+47   const isWrong = zone?.isWrong ?? false;
+48   const isLocked = zone?.isLocked ?? false;
+49   const isEmpty = tileId === null;
+50 
+51   // Resolve interaction mode: explicit config or inferred from inputMethod
+52   const slotInteraction =
+53     config.slotInteraction ??
+54     (config.inputMethod === 'type' ? 'ordered' : 'free-swap');
+55   const isOrdered = slotInteraction === 'ordered';
+56 
+57   const isActive = isOrdered && activeSlotIndex === index;
+58   const showCursor =
+59     isActive && isEmpty && config.inputMethod !== 'drag';
+60 
+61   const slotRef = useRef<HTMLElement | null>(null);
+62   const prevIsWrongRef = useRef(isWrong);
+63   const prevTileIdRef = useRef(tileId);
+64 
+65   // Drop target handler — choose evaluation or swap based on interaction mode
+66   const handleDrop = useCallback(
+67     (droppedTileId: string, targetZoneIndex: number) => {
+68       if (isOrdered) {
+69         placeTile(droppedTileId, targetZoneIndex);
+70       } else {
+71         swapOrPlace(droppedTileId, targetZoneIndex);
+72       }
+73     },
+74     [isOrdered, placeTile, swapOrPlace],
+75   );
+76 
+77   // Register as drop target
+78   useEffect(() => {
+79     const el = slotRef.current;
+80     if (!el) return;
+81     return dropTargetForElements({
+82       element: el,
+83       getData: () => ({ zoneIndex: index }),
+84       onDrop: ({ source }) => {
+85         // Slot-tile drags (sourceZoneIndex present) handle their own
+86         // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
+87         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+88         const sourceTileId = source.data['tileId'];
+89         if (typeof sourceTileId === 'string') {
+90           handleDrop(sourceTileId, index);
+91         }
+92       },
+93     });
+94   }, [index, handleDrop]);
+95 
+96   // Drag source for filled slots
+97   const {
+98     dragRef,
+99     onPointerDown,
+100     onPointerMove,
+101     onPointerUp,
+102     onPointerCancel,
+103   } = useSlotTileDrag({
+104     tileId,
+105     label,
+106     zoneIndex: index,
+107     onDrop: handleDrop,
+108   });
+109 
+110   // Click handler: remove tile from slot (returns to bank)
+111   const handleClick = useCallback(() => {
+112     if (isEmpty) return;
+113     dispatch({ type: 'REMOVE_TILE', zoneIndex: index });
+114   }, [isEmpty, dispatch, index]);
+115 
+116   // Feedback animations: trigger on state transitions
+117   useEffect(() => {
+118     const el = slotRef.current;
+119     if (!el) return;
+120 
+121     const wasWrong = prevIsWrongRef.current;
+122     prevIsWrongRef.current = isWrong;
+123 
+124     const prevTileId = prevTileIdRef.current;
+125     prevTileIdRef.current = tileId;
+126     const freshlyPlaced = tileId !== null && prevTileId === null;
+127 
+128     if (isWrong && !wasWrong) {
+129       triggerShake(el);
+130     } else if (freshlyPlaced && !isWrong) {
+131       triggerPop(el);
+132     }
+133   }, [isWrong, tileId]);
+134 
+135   return {
+136     renderProps: {
+137       label,
+138       tileId,
+139       isActive,
+140       isWrong,
+141       isLocked,
+142       isEmpty,
+143       showCursor,
+144     },
+145     slotRef,
+146     dragRef,
+147     handleClick,
+148     pointerHandlers: {
+149       onPointerDown,
+150       onPointerMove,
+151       onPointerUp,
+152       onPointerCancel,
+153     },
+154   };
+155 };
 156
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:08:40Z)**_
@@ -413,84 +421,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:08:40Z)**_
  `./src/components/answer-game/Slot/slot-animations.ts`
 
 ```text
-1	/** Adds animate-shake class, removes it on animationend. */
-2	export const triggerShake = (el: HTMLElement): void => {
-3	  el.classList.remove('animate-shake');
-4	  // Force reflow to restart animation if already running
-5	  void el.offsetWidth;
-6	  el.classList.add('animate-shake');
-7	  el.addEventListener(
-8	    'animationend',
-9	    () => el.classList.remove('animate-shake'),
-10	    { once: true },
-11	  );
-12	};
-13	
-14	/** Adds animate-pop class, removes it on animationend. */
-15	export const triggerPop = (el: HTMLElement): void => {
-16	  el.classList.remove('animate-pop');
-17	  void el.offsetWidth;
-18	  el.classList.add('animate-pop');
-19	  el.addEventListener(
-20	    'animationend',
-21	    () => el.classList.remove('animate-pop'),
-22	    { once: true },
-23	  );
-24	};
-25	
-26	/**
-27	 * Animates a tile sliding from its slot toward a target position,
-28	 * then calls onComplete. Used for auto-eject return animation.
-29	 */
-30	export const triggerEjectReturn = (
-31	  el: HTMLElement,
-32	  targetEl: HTMLElement | null,
-33	  onComplete: () => void,
-34	): void => {
-35	  if (!targetEl) {
-36	    el.style.transition = 'opacity 300ms ease-in';
-37	    el.style.opacity = '0';
-38	    el.addEventListener(
-39	      'transitionend',
-40	      () => {
-41	        el.style.removeProperty('transition');
-42	        el.style.removeProperty('opacity');
-43	        onComplete();
-44	      },
-45	      { once: true },
-46	    );
-47	    return;
-48	  }
-49	
-50	  const slotRect = el.getBoundingClientRect();
-51	  const bankRect = targetEl.getBoundingClientRect();
-52	  const deltaX =
-53	    bankRect.left +
-54	    bankRect.width / 2 -
-55	    (slotRect.left + slotRect.width / 2);
-56	  const deltaY =
-57	    bankRect.top +
-58	    bankRect.height / 2 -
-59	    (slotRect.top + slotRect.height / 2);
-60	
-61	  el.style.transition =
-62	    'transform 300ms ease-in, opacity 300ms ease-in';
-63	  el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
-64	  el.style.opacity = '0.7';
-65	
-66	  el.addEventListener(
-67	    'transitionend',
-68	    () => {
-69	      el.style.removeProperty('transition');
-70	      el.style.removeProperty('transform');
-71	      el.style.removeProperty('opacity');
-72	      onComplete();
-73	    },
-74	    { once: true },
-75	  );
-76	};
+1 /** Adds animate-shake class, removes it on animationend. */
+2 export const triggerShake = (el: HTMLElement): void => {
+3   el.classList.remove('animate-shake');
+4   // Force reflow to restart animation if already running
+5   void el.offsetWidth;
+6   el.classList.add('animate-shake');
+7   el.addEventListener(
+8     'animationend',
+9     () => el.classList.remove('animate-shake'),
+10     { once: true },
+11   );
+12 };
+13 
+14 /** Adds animate-pop class, removes it on animationend. */
+15 export const triggerPop = (el: HTMLElement): void => {
+16   el.classList.remove('animate-pop');
+17   void el.offsetWidth;
+18   el.classList.add('animate-pop');
+19   el.addEventListener(
+20     'animationend',
+21     () => el.classList.remove('animate-pop'),
+22     { once: true },
+23   );
+24 };
+25 
+26 /**
+27  * Animates a tile sliding from its slot toward a target position,
+28  * then calls onComplete. Used for auto-eject return animation.
+29  */
+30 export const triggerEjectReturn = (
+31   el: HTMLElement,
+32   targetEl: HTMLElement | null,
+33   onComplete: () => void,
+34 ): void => {
+35   if (!targetEl) {
+36     el.style.transition = 'opacity 300ms ease-in';
+37     el.style.opacity = '0';
+38     el.addEventListener(
+39       'transitionend',
+40       () => {
+41         el.style.removeProperty('transition');
+42         el.style.removeProperty('opacity');
+43         onComplete();
+44       },
+45       { once: true },
+46     );
+47     return;
+48   }
+49 
+50   const slotRect = el.getBoundingClientRect();
+51   const bankRect = targetEl.getBoundingClientRect();
+52   const deltaX =
+53     bankRect.left +
+54     bankRect.width / 2 -
+55     (slotRect.left + slotRect.width / 2);
+56   const deltaY =
+57     bankRect.top +
+58     bankRect.height / 2 -
+59     (slotRect.top + slotRect.height / 2);
+60 
+61   el.style.transition =
+62     'transform 300ms ease-in, opacity 300ms ease-in';
+63   el.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+64   el.style.opacity = '0.7';
+65 
+66   el.addEventListener(
+67     'transitionend',
+68     () => {
+69       el.style.removeProperty('transition');
+70       el.style.removeProperty('transform');
+71       el.style.removeProperty('opacity');
+72       onComplete();
+73     },
+74     { once: true },
+75   );
+76 };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:08:45Z)**_
@@ -500,75 +509,76 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:08:45Z)**_
  `./src/components/answer-game/useTileEvaluation.ts`
 
 ```text
-1	import { useCallback, useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { playSound } from '@/lib/audio/AudioFeedback';
-5	import { getGameEventBus } from '@/lib/game-event-bus';
-6	
-7	const AUTO_EJECT_DELAY_MS = 1000;
-8	
-9	export interface TileEvaluation {
-10	  placeTile: (tileId: string, zoneIndex: number) => void;
-11	}
-12	
-13	export function useTileEvaluation(): TileEvaluation {
-14	  const state = useAnswerGameContext();
-15	  const dispatch = useAnswerGameDispatch();
-16	  const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-17	    null,
-18	  );
-19	
-20	  const clearEjectionTimer = useCallback(() => {
-21	    if (ejectionTimerRef.current !== null) {
-22	      clearTimeout(ejectionTimerRef.current);
-23	      ejectionTimerRef.current = null;
-24	    }
-25	  }, []);
-26	
-27	  useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
-28	
-29	  const placeTile = useCallback(
-30	    (tileId: string, zoneIndex: number) => {
-31	      clearEjectionTimer();
-32	
-33	      const tile = state.allTiles.find((t) => t.id === tileId);
-34	      const zone = state.zones[zoneIndex];
-35	      if (!tile || !zone) return;
-36	
-37	      const correct = tile.value === zone.expectedValue;
-38	      playSound(correct ? 'correct' : 'wrong', 0.8);
-39	      dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
-40	
-41	      getGameEventBus().emit({
-42	        type: 'game:evaluate',
-43	        gameId: state.config.gameId,
-44	        sessionId: '',
-45	        profileId: '',
-46	        timestamp: Date.now(),
-47	        roundIndex: state.roundIndex,
-48	        answer: tileId,
-49	        correct,
-50	        nearMiss: false,
-51	      });
-52	
-53	      if (
-54	        !correct &&
-55	        state.config.wrongTileBehavior === 'lock-auto-eject'
-56	      ) {
-57	        ejectionTimerRef.current = setTimeout(() => {
-58	          dispatch({ type: 'EJECT_TILE', zoneIndex });
-59	          ejectionTimerRef.current = null;
-60	        }, AUTO_EJECT_DELAY_MS);
-61	      }
-62	    },
-63	    [state, dispatch, clearEjectionTimer],
-64	  );
-65	
-66	  return { placeTile };
-67	}
+1 import { useCallback, useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { playSound } from '@/lib/audio/AudioFeedback';
+5 import { getGameEventBus } from '@/lib/game-event-bus';
+6 
+7 const AUTO_EJECT_DELAY_MS = 1000;
+8 
+9 export interface TileEvaluation {
+10   placeTile: (tileId: string, zoneIndex: number) => void;
+11 }
+12 
+13 export function useTileEvaluation(): TileEvaluation {
+14   const state = useAnswerGameContext();
+15   const dispatch = useAnswerGameDispatch();
+16   const ejectionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+17     null,
+18   );
+19 
+20   const clearEjectionTimer = useCallback(() => {
+21     if (ejectionTimerRef.current !== null) {
+22       clearTimeout(ejectionTimerRef.current);
+23       ejectionTimerRef.current = null;
+24     }
+25   }, []);
+26 
+27   useEffect(() => () => clearEjectionTimer(), [clearEjectionTimer]);
+28 
+29   const placeTile = useCallback(
+30     (tileId: string, zoneIndex: number) => {
+31       clearEjectionTimer();
+32 
+33       const tile = state.allTiles.find((t) => t.id === tileId);
+34       const zone = state.zones[zoneIndex];
+35       if (!tile || !zone) return;
+36 
+37       const correct = tile.value === zone.expectedValue;
+38       playSound(correct ? 'correct' : 'wrong', 0.8);
+39       dispatch({ type: 'PLACE_TILE', tileId, zoneIndex });
+40 
+41       getGameEventBus().emit({
+42         type: 'game:evaluate',
+43         gameId: state.config.gameId,
+44         sessionId: '',
+45         profileId: '',
+46         timestamp: Date.now(),
+47         roundIndex: state.roundIndex,
+48         answer: tileId,
+49         correct,
+50         nearMiss: false,
+51       });
+52 
+53       if (
+54         !correct &&
+55         state.config.wrongTileBehavior === 'lock-auto-eject'
+56       ) {
+57         ejectionTimerRef.current = setTimeout(() => {
+58           dispatch({ type: 'EJECT_TILE', zoneIndex });
+59           ejectionTimerRef.current = null;
+60         }, AUTO_EJECT_DELAY_MS);
+61       }
+62     },
+63     [state, dispatch, clearEjectionTimer],
+64   );
+65 
+66   return { placeTile };
+67 }
 68
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:08:45Z)**_
@@ -578,131 +588,132 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:08:45Z)**_
  `./src/components/answer-game/useSlotTileDrag.ts`
 
 ```text
-1	import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-2	import { useCallback, useEffect, useRef } from 'react';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTouchDrag } from './useTouchDrag';
-5	import type { TouchDragHandlers } from './useTouchDrag';
-6	import type { RefObject } from 'react';
-7	
-8	export interface SlotTileDrag extends TouchDragHandlers {
-9	  dragRef: RefObject<HTMLButtonElement | null>;
-10	}
-11	
-12	interface UseSlotTileDragOptions {
-13	  /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
-14	  tileId: string | null;
-15	  label: string | null;
-16	  zoneIndex: number;
-17	  /**
-18	   * Called when the dragged tile is dropped on a target zone.
-19	   * REMOVE_TILE is dispatched before this callback, so the tile is back
-20	   * in the bank and can be placed normally.
-21	   */
-22	  onDrop: (tileId: string, targetZoneIndex: number) => void;
-23	}
-24	
-25	/**
-26	 * Enables an occupied slot tile to be dragged back to the bank or to another
-27	 * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
-28	 *
-29	 * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
-30	 * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
-31	 * dispatched first (returning the tile to the bank) then onDrop is called so
-32	 * the drop target can place it normally. On cancel or missed drop, the tile
-33	 * snaps back via SET_DRAG_ACTIVE with tileId: null.
-34	 */
-35	export const useSlotTileDrag = ({
-36	  tileId,
-37	  label,
-38	  zoneIndex,
-39	  onDrop,
-40	}: UseSlotTileDragOptions): SlotTileDrag => {
-41	  const dispatch = useAnswerGameDispatch();
-42	  const dragRef = useRef<HTMLButtonElement>(null);
-43	
-44	  // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
-45	  const onDropRef = useRef(onDrop);
-46	  useEffect(() => {
-47	    onDropRef.current = onDrop;
-48	  }, [onDrop]);
-49	
-50	  // HTML5 DnD — desktop
-51	  useEffect(() => {
-52	    if (!tileId) return;
-53	    const element = dragRef.current;
-54	    if (!element) return;
-55	    const currentTileId = tileId;
-56	    const currentZoneIndex = zoneIndex;
-57	    return draggable({
-58	      element,
-59	      // Include sourceZoneIndex so the drop target can identify slot-tile drags
-60	      // and defer placement to this hook's onDrop handler.
-61	      getInitialData: () => ({
-62	        tileId: currentTileId,
-63	        sourceZoneIndex: currentZoneIndex,
-64	      }),
-65	      onDragStart: () =>
-66	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
-67	      onDrop: ({ location }) => {
-68	        const targets = location.current.dropTargets;
-69	        if (targets.length > 0) {
-70	          // Confirmed drop on a zone: remove tile from source slot first,
-71	          // then place via the onDrop callback.
-72	          const targetZoneIndex = targets[0]?.data['zoneIndex'];
-73	          if (typeof targetZoneIndex === 'number') {
-74	            dispatch({
-75	              type: 'REMOVE_TILE',
-76	              zoneIndex: currentZoneIndex,
-77	            });
-78	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-79	            onDropRef.current(currentTileId, targetZoneIndex);
-80	          } else {
-81	            // Drop target exists but has no zoneIndex — treat as cancel.
-82	            dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-83	          }
-84	        } else {
-85	          // No drop target — cancel, tile snaps back.
-86	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-87	        }
-88	      },
-89	    });
-90	  }, [tileId, zoneIndex, dispatch]);
-91	
-92	  // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
-93	  const handleTouchDrop = useCallback(
-94	    (droppedTileId: string, targetZoneIndex: number) => {
-95	      dispatch({ type: 'REMOVE_TILE', zoneIndex });
-96	      dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-97	      onDrop(droppedTileId, targetZoneIndex);
-98	    },
-99	    [dispatch, zoneIndex, onDrop],
-100	  );
-101	
-102	  // Pointer-events drag — touch / mobile
-103	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-104	    useTouchDrag({
-105	      tileId: tileId ?? '',
-106	      label: label ?? '',
-107	      onDragStart: tileId
-108	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
-109	        : undefined,
-110	      onDragCancel: tileId
-111	        ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })
-112	        : undefined,
-113	      onDrop: handleTouchDrop,
-114	    });
-115	
-116	  return {
-117	    dragRef,
-118	    onPointerDown,
-119	    onPointerMove,
-120	    onPointerUp,
-121	    onPointerCancel,
-122	  };
-123	};
+1 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+2 import { useCallback, useEffect, useRef } from 'react';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTouchDrag } from './useTouchDrag';
+5 import type { TouchDragHandlers } from './useTouchDrag';
+6 import type { RefObject } from 'react';
+7 
+8 export interface SlotTileDrag extends TouchDragHandlers {
+9   dragRef: RefObject<HTMLButtonElement | null>;
+10 }
+11 
+12 interface UseSlotTileDragOptions {
+13   /** ID of the tile currently in this slot. Null = slot is empty (drag disabled). */
+14   tileId: string | null;
+15   label: string | null;
+16   zoneIndex: number;
+17   /**
+18    * Called when the dragged tile is dropped on a target zone.
+19    * REMOVE_TILE is dispatched before this callback, so the tile is back
+20    * in the bank and can be placed normally.
+21    */
+22   onDrop: (tileId: string, targetZoneIndex: number) => void;
+23 }
+24 
+25 /**
+26  * Enables an occupied slot tile to be dragged back to the bank or to another
+27  * slot. Works with both the HTML5 DnD (desktop) and pointer-events drag (touch).
+28  *
+29  * On drag start the tile is marked active via SET_DRAG_ACTIVE so it remains
+30  * visible in the slot during the drag. On a confirmed drop, REMOVE_TILE is
+31  * dispatched first (returning the tile to the bank) then onDrop is called so
+32  * the drop target can place it normally. On cancel or missed drop, the tile
+33  * snaps back via SET_DRAG_ACTIVE with tileId: null.
+34  */
+35 export const useSlotTileDrag = ({
+36   tileId,
+37   label,
+38   zoneIndex,
+39   onDrop,
+40 }: UseSlotTileDragOptions): SlotTileDrag => {
+41   const dispatch = useAnswerGameDispatch();
+42   const dragRef = useRef<HTMLButtonElement>(null);
+43 
+44   // Keep a stable ref to onDrop so the HTML5 adapter closure stays current.
+45   const onDropRef = useRef(onDrop);
+46   useEffect(() => {
+47     onDropRef.current = onDrop;
+48   }, [onDrop]);
+49 
+50   // HTML5 DnD — desktop
+51   useEffect(() => {
+52     if (!tileId) return;
+53     const element = dragRef.current;
+54     if (!element) return;
+55     const currentTileId = tileId;
+56     const currentZoneIndex = zoneIndex;
+57     return draggable({
+58       element,
+59       // Include sourceZoneIndex so the drop target can identify slot-tile drags
+60       // and defer placement to this hook's onDrop handler.
+61       getInitialData: () => ({
+62         tileId: currentTileId,
+63         sourceZoneIndex: currentZoneIndex,
+64       }),
+65       onDragStart: () =>
+66         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: currentTileId }),
+67       onDrop: ({ location }) => {
+68         const targets = location.current.dropTargets;
+69         if (targets.length > 0) {
+70           // Confirmed drop on a zone: remove tile from source slot first,
+71           // then place via the onDrop callback.
+72           const targetZoneIndex = targets[0]?.data['zoneIndex'];
+73           if (typeof targetZoneIndex === 'number') {
+74             dispatch({
+75               type: 'REMOVE_TILE',
+76               zoneIndex: currentZoneIndex,
+77             });
+78             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+79             onDropRef.current(currentTileId, targetZoneIndex);
+80           } else {
+81             // Drop target exists but has no zoneIndex — treat as cancel.
+82             dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+83           }
+84         } else {
+85           // No drop target — cancel, tile snaps back.
+86           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+87         }
+88       },
+89     });
+90   }, [tileId, zoneIndex, dispatch]);
+91 
+92   // Wrap onDrop for the touch path: dispatch REMOVE_TILE before calling onDrop.
+93   const handleTouchDrop = useCallback(
+94     (droppedTileId: string, targetZoneIndex: number) => {
+95       dispatch({ type: 'REMOVE_TILE', zoneIndex });
+96       dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+97       onDrop(droppedTileId, targetZoneIndex);
+98     },
+99     [dispatch, zoneIndex, onDrop],
+100   );
+101 
+102   // Pointer-events drag — touch / mobile
+103   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+104     useTouchDrag({
+105       tileId: tileId ?? '',
+106       label: label ?? '',
+107       onDragStart: tileId
+108         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId })
+109         : undefined,
+110       onDragCancel: tileId
+111         ? () => dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null })
+112         : undefined,
+113       onDrop: handleTouchDrop,
+114     });
+115 
+116   return {
+117     dragRef,
+118     onPointerDown,
+119     onPointerMove,
+120     onPointerUp,
+121     onPointerCancel,
+122   };
+123 };
 124
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:09:47Z)**_
@@ -718,21 +729,22 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:09:48Z)**_
  `./src/components/answer-game/useAnswerGameContext.ts`
 
 ```text
-1	import { use } from 'react';
-2	import { AnswerGameStateContext } from './AnswerGameProvider';
-3	import type { AnswerGameState } from './types';
-4	
-5	export function useAnswerGameContext(): AnswerGameState {
-6	  const ctx = use(AnswerGameStateContext);
-7	  if (!ctx) {
-8	    throw new Error(
-9	      'useAnswerGameContext must be used inside AnswerGameProvider',
-10	    );
-11	  }
-12	  return ctx;
-13	}
+1 import { use } from 'react';
+2 import { AnswerGameStateContext } from './AnswerGameProvider';
+3 import type { AnswerGameState } from './types';
+4 
+5 export function useAnswerGameContext(): AnswerGameState {
+6   const ctx = use(AnswerGameStateContext);
+7   if (!ctx) {
+8     throw new Error(
+9       'useAnswerGameContext must be used inside AnswerGameProvider',
+10     );
+11   }
+12   return ctx;
+13 }
 14
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:09:49Z)**_
@@ -742,226 +754,227 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:09:49Z)**_
  `./src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-6	import type { SortNumbersConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { Slot } from '@/components/answer-game/Slot/Slot';
-16	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { buildRoundOrder } from '@/games/build-round-order';
-22	
-23	interface SortNumbersProps {
-24	  config: SortNumbersConfig;
-25	}
-26	
-27	const SortNumbersSession = ({
-28	  sortNumbersConfig,
-29	  roundOrder,
-30	  onRestartSession,
-31	}: {
-32	  sortNumbersConfig: SortNumbersConfig;
-33	  roundOrder: readonly number[];
-34	  onRestartSession: () => void;
-35	}) => {
-36	  const { t } = useTranslation('games');
-37	  const { phase, roundIndex, retryCount, zones } =
-38	    useAnswerGameContext();
-39	  const dispatch = useAnswerGameDispatch();
-40	  const { confettiReady, gameOverReady } = useGameSounds();
-41	  const navigate = useNavigate();
-42	  const { locale } = useParams({ from: '/$locale' });
-43	  const completionToken = useRef(0);
-44	
-45	  const configRoundIndex = roundOrder[roundIndex];
-46	  const round =
-47	    configRoundIndex === undefined
-48	      ? undefined
-49	      : sortNumbersConfig.rounds[configRoundIndex];
-50	
-51	  const directionLabel =
-52	    sortNumbersConfig.direction === 'ascending'
-53	      ? t('sort-numbers-ui.ascending-label')
-54	      : t('sort-numbers-ui.descending-label');
-55	
-56	  useRoundTTS(directionLabel);
-57	
-58	  const handleHome = () => {
-59	    void navigate({ to: '/$locale', params: { locale } });
-60	  };
-61	
-62	  const handlePlayAgain = () => {
-63	    onRestartSession();
-64	  };
-65	
-66	  useEffect(() => {
-67	    if (phase !== 'round-complete' || !confettiReady) return;
-68	
-69	    const token = ++completionToken.current;
-70	    const delayMs = 750;
-71	    const timer = globalThis.setTimeout(() => {
-72	      if (completionToken.current !== token) return;
-73	
-74	      const isLastRound = roundIndex >= roundOrder.length - 1;
-75	      if (isLastRound) {
-76	        dispatch({ type: 'COMPLETE_GAME' });
-77	        return;
-78	      }
-79	
-80	      const nextConfigIndex = roundOrder[roundIndex + 1];
-81	      const nextRound =
-82	        nextConfigIndex === undefined
-83	          ? undefined
-84	          : sortNumbersConfig.rounds[nextConfigIndex];
-85	
-86	      if (!nextRound) {
-87	        dispatch({ type: 'COMPLETE_GAME' });
-88	        return;
-89	      }
-90	
-91	      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-92	        nextRound.sequence,
-93	        sortNumbersConfig.direction,
-94	      );
-95	      dispatch({
-96	        type: 'ADVANCE_ROUND',
-97	        tiles: nextTiles,
-98	        zones: nextZones,
-99	      });
-100	    }, delayMs);
-101	
-102	    return () => {
-103	      globalThis.clearTimeout(timer);
-104	    };
-105	  }, [
-106	    phase,
-107	    confettiReady,
-108	    roundIndex,
-109	    dispatch,
-110	    roundOrder,
-111	    sortNumbersConfig.rounds,
-112	    sortNumbersConfig.direction,
-113	  ]);
-114	
-115	  if (!round) return null;
-116	
-117	  return (
-118	    <>
-119	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-120	        <AnswerGame.Question>
-121	          <p className="text-center text-lg font-semibold text-foreground">
-122	            {directionLabel}
-123	          </p>
-124	        </AnswerGame.Question>
-125	        <AnswerGame.Answer>
-126	          <SlotRow className="gap-2">
-127	            {zones.map((zone, i) => (
-128	              <Slot
-129	                key={zone.id}
-130	                index={i}
-131	                className="size-14 rounded-lg"
-132	              >
-133	                {({ label }) => (
-134	                  <span className="text-2xl font-bold">{label}</span>
-135	                )}
-136	              </Slot>
-137	            ))}
-138	          </SlotRow>
-139	        </AnswerGame.Answer>
-140	        <AnswerGame.Choices>
-141	          <SortNumbersTileBank />
-142	        </AnswerGame.Choices>
-143	      </div>
-144	      <ScoreAnimation visible={confettiReady} />
-145	      {gameOverReady ? (
-146	        <GameOverOverlay
-147	          retryCount={retryCount}
-148	          onPlayAgain={handlePlayAgain}
-149	          onHome={handleHome}
-150	        />
-151	      ) : null}
-152	    </>
-153	  );
-154	};
-155	
-156	export const SortNumbers = ({ config }: SortNumbersProps) => {
-157	  const roundsInOrder = config.roundsInOrder === true;
-158	  const [sessionEpoch, setSessionEpoch] = useState(0);
-159	
-160	  const roundOrder = useMemo(() => {
-161	    void sessionEpoch;
-162	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-163	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-164	
-165	  const firstConfigIndex = roundOrder[0];
-166	  const round0 =
-167	    firstConfigIndex === undefined
-168	      ? undefined
-169	      : config.rounds[firstConfigIndex];
-170	
-171	  const { tiles, zones } = useMemo(() => {
-172	    if (!round0) {
-173	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-174	    }
-175	    return buildSortRound(round0.sequence, config.direction);
-176	  }, [round0, config.direction]);
-177	
-178	  const answerGameConfig = useMemo(
-179	    (): AnswerGameConfig => ({
-180	      gameId: config.gameId,
-181	      inputMethod: config.inputMethod,
-182	      wrongTileBehavior: config.wrongTileBehavior,
-183	      tileBankMode: config.tileBankMode,
-184	      totalRounds: config.rounds.length,
-185	      roundsInOrder: config.roundsInOrder,
-186	      ttsEnabled: config.ttsEnabled,
-187	      touchKeyboardInputMode: 'numeric',
-188	      initialTiles: tiles,
-189	      initialZones: zones,
-190	      slotInteraction: 'free-swap' as const,
-191	    }),
-192	    [
-193	      config.gameId,
-194	      config.inputMethod,
-195	      config.wrongTileBehavior,
-196	      config.tileBankMode,
-197	      config.rounds.length,
-198	      config.roundsInOrder,
-199	      config.ttsEnabled,
-200	      tiles,
-201	      zones,
-202	    ],
-203	  );
-204	
-205	  if (!round0) return null;
-206	
-207	  return (
-208	    <AnswerGame config={answerGameConfig}>
-209	      <SortNumbersSession
-210	        sortNumbersConfig={config}
-211	        roundOrder={roundOrder}
-212	        onRestartSession={() => {
-213	          setSessionEpoch((e) => e + 1);
-214	        }}
-215	      />
-216	    </AnswerGame>
-217	  );
-218	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+6 import type { SortNumbersConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { Slot } from '@/components/answer-game/Slot/Slot';
+16 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { buildRoundOrder } from '@/games/build-round-order';
+22 
+23 interface SortNumbersProps {
+24   config: SortNumbersConfig;
+25 }
+26 
+27 const SortNumbersSession = ({
+28   sortNumbersConfig,
+29   roundOrder,
+30   onRestartSession,
+31 }: {
+32   sortNumbersConfig: SortNumbersConfig;
+33   roundOrder: readonly number[];
+34   onRestartSession: () => void;
+35 }) => {
+36   const { t } = useTranslation('games');
+37   const { phase, roundIndex, retryCount, zones } =
+38     useAnswerGameContext();
+39   const dispatch = useAnswerGameDispatch();
+40   const { confettiReady, gameOverReady } = useGameSounds();
+41   const navigate = useNavigate();
+42   const { locale } = useParams({ from: '/$locale' });
+43   const completionToken = useRef(0);
+44 
+45   const configRoundIndex = roundOrder[roundIndex];
+46   const round =
+47     configRoundIndex === undefined
+48       ? undefined
+49       : sortNumbersConfig.rounds[configRoundIndex];
+50 
+51   const directionLabel =
+52     sortNumbersConfig.direction === 'ascending'
+53       ? t('sort-numbers-ui.ascending-label')
+54       : t('sort-numbers-ui.descending-label');
+55 
+56   useRoundTTS(directionLabel);
+57 
+58   const handleHome = () => {
+59     void navigate({ to: '/$locale', params: { locale } });
+60   };
+61 
+62   const handlePlayAgain = () => {
+63     onRestartSession();
+64   };
+65 
+66   useEffect(() => {
+67     if (phase !== 'round-complete' || !confettiReady) return;
+68 
+69     const token = ++completionToken.current;
+70     const delayMs = 750;
+71     const timer = globalThis.setTimeout(() => {
+72       if (completionToken.current !== token) return;
+73 
+74       const isLastRound = roundIndex >= roundOrder.length - 1;
+75       if (isLastRound) {
+76         dispatch({ type: 'COMPLETE_GAME' });
+77         return;
+78       }
+79 
+80       const nextConfigIndex = roundOrder[roundIndex + 1];
+81       const nextRound =
+82         nextConfigIndex === undefined
+83           ? undefined
+84           : sortNumbersConfig.rounds[nextConfigIndex];
+85 
+86       if (!nextRound) {
+87         dispatch({ type: 'COMPLETE_GAME' });
+88         return;
+89       }
+90 
+91       const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+92         nextRound.sequence,
+93         sortNumbersConfig.direction,
+94       );
+95       dispatch({
+96         type: 'ADVANCE_ROUND',
+97         tiles: nextTiles,
+98         zones: nextZones,
+99       });
+100     }, delayMs);
+101 
+102     return () => {
+103       globalThis.clearTimeout(timer);
+104     };
+105   }, [
+106     phase,
+107     confettiReady,
+108     roundIndex,
+109     dispatch,
+110     roundOrder,
+111     sortNumbersConfig.rounds,
+112     sortNumbersConfig.direction,
+113   ]);
+114 
+115   if (!round) return null;
+116 
+117   return (
+118     <>
+119       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+120         <AnswerGame.Question>
+121           <p className="text-center text-lg font-semibold text-foreground">
+122             {directionLabel}
+123           </p>
+124         </AnswerGame.Question>
+125         <AnswerGame.Answer>
+126           <SlotRow className="gap-2">
+127             {zones.map((zone, i) => (
+128               <Slot
+129                 key={zone.id}
+130                 index={i}
+131                 className="size-14 rounded-lg"
+132               >
+133                 {({ label }) => (
+134                   <span className="text-2xl font-bold">{label}</span>
+135                 )}
+136               </Slot>
+137             ))}
+138           </SlotRow>
+139         </AnswerGame.Answer>
+140         <AnswerGame.Choices>
+141           <SortNumbersTileBank />
+142         </AnswerGame.Choices>
+143       </div>
+144       <ScoreAnimation visible={confettiReady} />
+145       {gameOverReady ? (
+146         <GameOverOverlay
+147           retryCount={retryCount}
+148           onPlayAgain={handlePlayAgain}
+149           onHome={handleHome}
+150         />
+151       ) : null}
+152     </>
+153   );
+154 };
+155 
+156 export const SortNumbers = ({ config }: SortNumbersProps) => {
+157   const roundsInOrder = config.roundsInOrder === true;
+158   const [sessionEpoch, setSessionEpoch] = useState(0);
+159 
+160   const roundOrder = useMemo(() => {
+161     void sessionEpoch;
+162     return buildRoundOrder(config.rounds.length, roundsInOrder);
+163   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+164 
+165   const firstConfigIndex = roundOrder[0];
+166   const round0 =
+167     firstConfigIndex === undefined
+168       ? undefined
+169       : config.rounds[firstConfigIndex];
+170 
+171   const { tiles, zones } = useMemo(() => {
+172     if (!round0) {
+173       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+174     }
+175     return buildSortRound(round0.sequence, config.direction);
+176   }, [round0, config.direction]);
+177 
+178   const answerGameConfig = useMemo(
+179     (): AnswerGameConfig => ({
+180       gameId: config.gameId,
+181       inputMethod: config.inputMethod,
+182       wrongTileBehavior: config.wrongTileBehavior,
+183       tileBankMode: config.tileBankMode,
+184       totalRounds: config.rounds.length,
+185       roundsInOrder: config.roundsInOrder,
+186       ttsEnabled: config.ttsEnabled,
+187       touchKeyboardInputMode: 'numeric',
+188       initialTiles: tiles,
+189       initialZones: zones,
+190       slotInteraction: 'free-swap' as const,
+191     }),
+192     [
+193       config.gameId,
+194       config.inputMethod,
+195       config.wrongTileBehavior,
+196       config.tileBankMode,
+197       config.rounds.length,
+198       config.roundsInOrder,
+199       config.ttsEnabled,
+200       tiles,
+201       zones,
+202     ],
+203   );
+204 
+205   if (!round0) return null;
+206 
+207   return (
+208     <AnswerGame config={answerGameConfig}>
+209       <SortNumbersSession
+210         sortNumbersConfig={config}
+211         roundOrder={roundOrder}
+212         onRestartSession={() => {
+213           setSessionEpoch((e) => e + 1);
+214         }}
+215       />
+216     </AnswerGame>
+217   );
+218 };
 219
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:10:40Z)**_
@@ -999,6 +1012,7 @@ src/components/answer-game/useTouchDrag.ts
 src/components/answer-game/Slot/parse-sentence-template.test.ts
 src/components/answer-game/Slot/parse-sentence-template.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:10:44Z)**_
@@ -1008,237 +1022,238 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:10:44Z)**_
  `./src/components/answer-game/answer-game-reducer.ts`
 
 ```text
-1	import type {
-2	  AnswerGameAction,
-3	  AnswerGameConfig,
-4	  AnswerGameState,
-5	  AnswerZone,
-6	  TileItem,
-7	} from './types';
-8	
-9	export function makeInitialState(
-10	  config: AnswerGameConfig,
-11	): AnswerGameState {
-12	  return {
-13	    config,
-14	    allTiles: [],
-15	    bankTileIds: [],
-16	    zones: [],
-17	    activeSlotIndex: 0,
-18	    dragActiveTileId: null,
-19	    phase: 'playing',
-20	    roundIndex: 0,
-21	    retryCount: 0,
-22	  };
-23	}
-24	
-25	export function answerGameReducer(
-26	  state: AnswerGameState,
-27	  action: AnswerGameAction,
-28	): AnswerGameState {
-29	  switch (action.type) {
-30	    case 'INIT_ROUND': {
-31	      return {
-32	        ...state,
-33	        allTiles: action.tiles,
-34	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-35	        zones: action.zones,
-36	        activeSlotIndex: 0,
-37	        phase: 'playing',
-38	        roundIndex: 0,
-39	        retryCount: 0,
-40	      };
-41	    }
-42	
-43	    case 'PLACE_TILE': {
-44	      const tile = state.allTiles.find((t) => t.id === action.tileId);
-45	      const zone = state.zones[action.zoneIndex];
-46	      if (!tile || !zone) return state;
-47	
-48	      const correct = tile.value === zone.expectedValue;
-49	
-50	      if (!correct && state.config.wrongTileBehavior === 'reject') {
-51	        return { ...state, retryCount: state.retryCount + 1 };
-52	      }
-53	
-54	      if (correct) {
-55	        const previousId = zone.placedTileId;
-56	        let newBankTileIds = state.bankTileIds.filter(
-57	          (id) => id !== action.tileId,
-58	        );
-59	        if (previousId !== null && previousId !== action.tileId) {
-60	          // Bank tile dropped on an occupied slot: previous occupant returns to bank.
-61	          newBankTileIds = [...newBankTileIds, previousId];
-62	        }
-63	        const newZone: AnswerZone = {
-64	          ...zone,
-65	          placedTileId: action.tileId,
-66	          isWrong: false,
-67	          isLocked: false,
-68	        };
-69	        const newZones = state.zones.map((z, i) =>
-70	          i === action.zoneIndex ? newZone : z,
-71	        );
-72	        const nextActiveSlot = newZones.findIndex(
-73	          (z, i) => i > action.zoneIndex && z.placedTileId === null,
-74	        );
-75	        const allFilledCorrectly = newZones.every(
-76	          (z) => z.placedTileId !== null && !z.isWrong,
-77	        );
-78	        const isLastRound =
-79	          state.roundIndex >= state.config.totalRounds - 1;
-80	        return {
-81	          ...state,
-82	          zones: newZones,
-83	          bankTileIds: newBankTileIds,
-84	          activeSlotIndex:
-85	            nextActiveSlot === -1
-86	              ? state.activeSlotIndex
-87	              : nextActiveSlot,
-88	          retryCount: state.retryCount,
-89	          phase: allFilledCorrectly
-90	            ? isLastRound
-91	              ? 'game-over'
-92	              : 'round-complete'
-93	            : 'playing',
-94	        };
-95	      }
-96	
-97	      const shouldLock =
-98	        state.config.wrongTileBehavior === 'lock-manual' ||
-99	        state.config.wrongTileBehavior === 'lock-auto-eject';
-100	      const newZone: AnswerZone = {
-101	        ...zone,
-102	        placedTileId: shouldLock ? action.tileId : zone.placedTileId,
-103	        isWrong: true,
-104	        isLocked: true,
-105	      };
-106	      const newZones = state.zones.map((z, i) =>
-107	        i === action.zoneIndex ? newZone : z,
-108	      );
-109	      let newBankTileIds = shouldLock
-110	        ? state.bankTileIds.filter((id) => id !== action.tileId)
-111	        : state.bankTileIds;
-112	      if (
-113	        shouldLock &&
-114	        zone.placedTileId &&
-115	        zone.placedTileId !== action.tileId
-116	      ) {
-117	        newBankTileIds = [...newBankTileIds, zone.placedTileId];
-118	      }
-119	
-120	      return {
-121	        ...state,
-122	        zones: newZones,
-123	        bankTileIds: newBankTileIds,
-124	        activeSlotIndex: state.activeSlotIndex,
-125	        retryCount: state.retryCount + 1,
-126	        phase: 'playing',
-127	      };
-128	    }
-129	
-130	    case 'REMOVE_TILE': {
-131	      const zone = state.zones[action.zoneIndex];
-132	      if (!zone?.placedTileId) return state;
-133	      return {
-134	        ...state,
-135	        zones: state.zones.map((z, i) =>
-136	          i === action.zoneIndex
-137	            ? {
-138	                ...z,
-139	                placedTileId: null,
-140	                isWrong: false,
-141	                isLocked: false,
-142	              }
-143	            : z,
-144	        ),
-145	        bankTileIds: [...state.bankTileIds, zone.placedTileId],
-146	      };
-147	    }
-148	
-149	    case 'SWAP_TILES': {
-150	      const fromZone = state.zones[action.fromZoneIndex];
-151	      const toZone = state.zones[action.toZoneIndex];
-152	      if (!fromZone || !toZone) return state;
-153	      return {
-154	        ...state,
-155	        zones: state.zones.map((z, i) => {
-156	          if (i === action.fromZoneIndex)
-157	            return { ...z, placedTileId: toZone.placedTileId };
-158	          if (i === action.toZoneIndex)
-159	            return { ...z, placedTileId: fromZone.placedTileId };
-160	          return z;
-161	        }),
-162	      };
-163	    }
-164	
-165	    case 'EJECT_TILE': {
-166	      const zone = state.zones[action.zoneIndex];
-167	      if (!zone) return state;
-168	
-169	      // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
-170	      if (!zone.isWrong && !zone.isLocked) return state;
-171	
-172	      if (zone.placedTileId) {
-173	        return {
-174	          ...state,
-175	          zones: state.zones.map((z, i) =>
-176	            i === action.zoneIndex
-177	              ? {
-178	                  ...z,
-179	                  placedTileId: null,
-180	                  isWrong: false,
-181	                  isLocked: false,
-182	                }
-183	              : z,
-184	          ),
-185	          bankTileIds: [...state.bankTileIds, zone.placedTileId],
-186	        };
-187	      }
-188	
-189	      return {
-190	        ...state,
-191	        zones: state.zones.map((z, i) =>
-192	          i === action.zoneIndex
-193	            ? {
-194	                ...z,
-195	                placedTileId: null,
-196	                isWrong: false,
-197	                isLocked: false,
-198	              }
-199	            : z,
-200	        ),
-201	      };
-202	    }
-203	
-204	    case 'ADVANCE_ROUND': {
-205	      return {
-206	        ...state,
-207	        allTiles: action.tiles,
-208	        bankTileIds: action.tiles.map((t: TileItem) => t.id),
-209	        zones: action.zones,
-210	        activeSlotIndex: 0,
-211	        phase: 'playing',
-212	        roundIndex: state.roundIndex + 1,
-213	        retryCount: 0,
-214	      };
-215	    }
-216	
-217	    case 'COMPLETE_GAME': {
-218	      return { ...state, phase: 'game-over' };
-219	    }
-220	
-221	    case 'SET_DRAG_ACTIVE': {
-222	      return { ...state, dragActiveTileId: action.tileId };
-223	    }
-224	
-225	    default: {
-226	      return state;
-227	    }
-228	  }
-229	}
+1 import type {
+2   AnswerGameAction,
+3   AnswerGameConfig,
+4   AnswerGameState,
+5   AnswerZone,
+6   TileItem,
+7 } from './types';
+8 
+9 export function makeInitialState(
+10   config: AnswerGameConfig,
+11 ): AnswerGameState {
+12   return {
+13     config,
+14     allTiles: [],
+15     bankTileIds: [],
+16     zones: [],
+17     activeSlotIndex: 0,
+18     dragActiveTileId: null,
+19     phase: 'playing',
+20     roundIndex: 0,
+21     retryCount: 0,
+22   };
+23 }
+24 
+25 export function answerGameReducer(
+26   state: AnswerGameState,
+27   action: AnswerGameAction,
+28 ): AnswerGameState {
+29   switch (action.type) {
+30     case 'INIT_ROUND': {
+31       return {
+32         ...state,
+33         allTiles: action.tiles,
+34         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+35         zones: action.zones,
+36         activeSlotIndex: 0,
+37         phase: 'playing',
+38         roundIndex: 0,
+39         retryCount: 0,
+40       };
+41     }
+42 
+43     case 'PLACE_TILE': {
+44       const tile = state.allTiles.find((t) => t.id === action.tileId);
+45       const zone = state.zones[action.zoneIndex];
+46       if (!tile || !zone) return state;
+47 
+48       const correct = tile.value === zone.expectedValue;
+49 
+50       if (!correct && state.config.wrongTileBehavior === 'reject') {
+51         return { ...state, retryCount: state.retryCount + 1 };
+52       }
+53 
+54       if (correct) {
+55         const previousId = zone.placedTileId;
+56         let newBankTileIds = state.bankTileIds.filter(
+57           (id) => id !== action.tileId,
+58         );
+59         if (previousId !== null && previousId !== action.tileId) {
+60           // Bank tile dropped on an occupied slot: previous occupant returns to bank.
+61           newBankTileIds = [...newBankTileIds, previousId];
+62         }
+63         const newZone: AnswerZone = {
+64           ...zone,
+65           placedTileId: action.tileId,
+66           isWrong: false,
+67           isLocked: false,
+68         };
+69         const newZones = state.zones.map((z, i) =>
+70           i === action.zoneIndex ? newZone : z,
+71         );
+72         const nextActiveSlot = newZones.findIndex(
+73           (z, i) => i > action.zoneIndex && z.placedTileId === null,
+74         );
+75         const allFilledCorrectly = newZones.every(
+76           (z) => z.placedTileId !== null && !z.isWrong,
+77         );
+78         const isLastRound =
+79           state.roundIndex >= state.config.totalRounds - 1;
+80         return {
+81           ...state,
+82           zones: newZones,
+83           bankTileIds: newBankTileIds,
+84           activeSlotIndex:
+85             nextActiveSlot === -1
+86               ? state.activeSlotIndex
+87               : nextActiveSlot,
+88           retryCount: state.retryCount,
+89           phase: allFilledCorrectly
+90             ? isLastRound
+91               ? 'game-over'
+92               : 'round-complete'
+93             : 'playing',
+94         };
+95       }
+96 
+97       const shouldLock =
+98         state.config.wrongTileBehavior === 'lock-manual' ||
+99         state.config.wrongTileBehavior === 'lock-auto-eject';
+100       const newZone: AnswerZone = {
+101         ...zone,
+102         placedTileId: shouldLock ? action.tileId : zone.placedTileId,
+103         isWrong: true,
+104         isLocked: true,
+105       };
+106       const newZones = state.zones.map((z, i) =>
+107         i === action.zoneIndex ? newZone : z,
+108       );
+109       let newBankTileIds = shouldLock
+110         ? state.bankTileIds.filter((id) => id !== action.tileId)
+111         : state.bankTileIds;
+112       if (
+113         shouldLock &&
+114         zone.placedTileId &&
+115         zone.placedTileId !== action.tileId
+116       ) {
+117         newBankTileIds = [...newBankTileIds, zone.placedTileId];
+118       }
+119 
+120       return {
+121         ...state,
+122         zones: newZones,
+123         bankTileIds: newBankTileIds,
+124         activeSlotIndex: state.activeSlotIndex,
+125         retryCount: state.retryCount + 1,
+126         phase: 'playing',
+127       };
+128     }
+129 
+130     case 'REMOVE_TILE': {
+131       const zone = state.zones[action.zoneIndex];
+132       if (!zone?.placedTileId) return state;
+133       return {
+134         ...state,
+135         zones: state.zones.map((z, i) =>
+136           i === action.zoneIndex
+137             ? {
+138                 ...z,
+139                 placedTileId: null,
+140                 isWrong: false,
+141                 isLocked: false,
+142               }
+143             : z,
+144         ),
+145         bankTileIds: [...state.bankTileIds, zone.placedTileId],
+146       };
+147     }
+148 
+149     case 'SWAP_TILES': {
+150       const fromZone = state.zones[action.fromZoneIndex];
+151       const toZone = state.zones[action.toZoneIndex];
+152       if (!fromZone || !toZone) return state;
+153       return {
+154         ...state,
+155         zones: state.zones.map((z, i) => {
+156           if (i === action.fromZoneIndex)
+157             return { ...z, placedTileId: toZone.placedTileId };
+158           if (i === action.toZoneIndex)
+159             return { ...z, placedTileId: fromZone.placedTileId };
+160           return z;
+161         }),
+162       };
+163     }
+164 
+165     case 'EJECT_TILE': {
+166       const zone = state.zones[action.zoneIndex];
+167       if (!zone) return state;
+168 
+169       // Guard: never eject a correctly-placed tile (isWrong=false, isLocked=false)
+170       if (!zone.isWrong && !zone.isLocked) return state;
+171 
+172       if (zone.placedTileId) {
+173         return {
+174           ...state,
+175           zones: state.zones.map((z, i) =>
+176             i === action.zoneIndex
+177               ? {
+178                   ...z,
+179                   placedTileId: null,
+180                   isWrong: false,
+181                   isLocked: false,
+182                 }
+183               : z,
+184           ),
+185           bankTileIds: [...state.bankTileIds, zone.placedTileId],
+186         };
+187       }
+188 
+189       return {
+190         ...state,
+191         zones: state.zones.map((z, i) =>
+192           i === action.zoneIndex
+193             ? {
+194                 ...z,
+195                 placedTileId: null,
+196                 isWrong: false,
+197                 isLocked: false,
+198               }
+199             : z,
+200         ),
+201       };
+202     }
+203 
+204     case 'ADVANCE_ROUND': {
+205       return {
+206         ...state,
+207         allTiles: action.tiles,
+208         bankTileIds: action.tiles.map((t: TileItem) => t.id),
+209         zones: action.zones,
+210         activeSlotIndex: 0,
+211         phase: 'playing',
+212         roundIndex: state.roundIndex + 1,
+213         retryCount: 0,
+214       };
+215     }
+216 
+217     case 'COMPLETE_GAME': {
+218       return { ...state, phase: 'game-over' };
+219     }
+220 
+221     case 'SET_DRAG_ACTIVE': {
+222       return { ...state, dragActiveTileId: action.tileId };
+223     }
+224 
+225     default: {
+226       return state;
+227     }
+228   }
+229 }
 230
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:12:16Z)**_
@@ -1250,49 +1265,50 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:12:17Z)**_
  `./src/components/answer-game/useFreeSwap.ts`
 
 ```text
-1	import { useCallback } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-4	import { useTileEvaluation } from './useTileEvaluation';
-5	
-6	export interface FreeSwap {
-7	  swapOrPlace: (tileId: string, targetZoneIndex: number) => void;
-8	}
-9	
-10	export function useFreeSwap(): FreeSwap {
-11	  const { zones } = useAnswerGameContext();
-12	  const dispatch = useAnswerGameDispatch();
-13	  const { placeTile } = useTileEvaluation();
-14	
-15	  const swapOrPlace = useCallback(
-16	    (tileId: string, targetZoneIndex: number) => {
-17	      const targetZone = zones[targetZoneIndex];
-18	      if (!targetZone) return;
-19	
-20	      if (targetZone.placedTileId === null) {
-21	        placeTile(tileId, targetZoneIndex);
-22	      } else {
-23	        const sourceZoneIndex = zones.findIndex(
-24	          (z) => z.placedTileId === tileId,
-25	        );
-26	        if (sourceZoneIndex === -1) {
-27	          placeTile(tileId, targetZoneIndex);
-28	        } else {
-29	          dispatch({
-30	            type: 'SWAP_TILES',
-31	            fromZoneIndex: sourceZoneIndex,
-32	            toZoneIndex: targetZoneIndex,
-33	          });
-34	        }
-35	      }
-36	    },
-37	    [zones, dispatch, placeTile],
-38	  );
-39	
-40	  return { swapOrPlace };
-41	}
+1 import { useCallback } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+4 import { useTileEvaluation } from './useTileEvaluation';
+5 
+6 export interface FreeSwap {
+7   swapOrPlace: (tileId: string, targetZoneIndex: number) => void;
+8 }
+9 
+10 export function useFreeSwap(): FreeSwap {
+11   const { zones } = useAnswerGameContext();
+12   const dispatch = useAnswerGameDispatch();
+13   const { placeTile } = useTileEvaluation();
+14 
+15   const swapOrPlace = useCallback(
+16     (tileId: string, targetZoneIndex: number) => {
+17       const targetZone = zones[targetZoneIndex];
+18       if (!targetZone) return;
+19 
+20       if (targetZone.placedTileId === null) {
+21         placeTile(tileId, targetZoneIndex);
+22       } else {
+23         const sourceZoneIndex = zones.findIndex(
+24           (z) => z.placedTileId === tileId,
+25         );
+26         if (sourceZoneIndex === -1) {
+27           placeTile(tileId, targetZoneIndex);
+28         } else {
+29           dispatch({
+30             type: 'SWAP_TILES',
+31             fromZoneIndex: sourceZoneIndex,
+32             toZoneIndex: targetZoneIndex,
+33           });
+34         }
+35       }
+36     },
+37     [zones, dispatch, placeTile],
+38   );
+39 
+40   return { swapOrPlace };
+41 }
 42
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:12:18Z)**_
@@ -1302,314 +1318,315 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:12:18Z)**_
  `./src/games/word-spell/WordSpell/WordSpell.tsx`
 
 ```text
-1	import { useNavigate } from '@tanstack/react-router';
-2	import { nanoid } from 'nanoid';
-3	import { useEffect, useMemo, useRef, useState } from 'react';
-4	import { buildSentenceGapRound } from '../build-sentence-gap-round';
-5	import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
-6	import type { WordSpellConfig } from '../types';
-7	import type {
-8	  AnswerGameConfig,
-9	  AnswerZone,
-10	  TileItem,
-11	} from '@/components/answer-game/types';
-12	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-13	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-14	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-15	import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
-16	import { Slot } from '@/components/answer-game/Slot/Slot';
-17	import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-18	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-19	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-20	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-21	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-22	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-23	import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
-24	import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
-25	import { buildRoundOrder } from '@/games/build-round-order';
-26	
-27	function segmentsForWord(
-28	  word: string,
-29	  tileUnit: WordSpellConfig['tileUnit'],
-30	): string[] {
-31	  const trimmed = word.trim();
-32	  if (tileUnit === 'word') return [trimmed];
-33	  if (tileUnit === 'syllable') {
-34	    const parts = trimmed.split(/[-\s]+/).filter(Boolean);
-35	    return parts.length > 0 ? parts : [trimmed];
-36	  }
-37	  return [...trimmed.toLowerCase()];
-38	}
-39	
-40	function buildTilesAndZones(
-41	  word: string,
-42	  tileUnit: WordSpellConfig['tileUnit'],
-43	): {
-44	  tiles: TileItem[];
-45	  zones: AnswerZone[];
-46	} {
-47	  const segments = segmentsForWord(word, tileUnit);
-48	  const values = segments.map((s) =>
-49	    tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
-50	  );
-51	  const zones: AnswerZone[] = values.map((value, i) => ({
-52	    id: `z${i}`,
-53	    index: i,
-54	    expectedValue: value,
-55	    placedTileId: null,
-56	    isWrong: false,
-57	    isLocked: false,
-58	  }));
-59	  const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
-60	  const tiles: TileItem[] = shuffled.map((value) => ({
-61	    id: nanoid(),
-62	    label: value,
-63	    value,
-64	  }));
-65	  return { tiles, zones };
-66	}
-67	
-68	interface WordSpellProps {
-69	  config: WordSpellConfig;
-70	}
-71	
-72	/** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
-73	const WordSpellSession = ({
-74	  wordSpellConfig,
-75	  roundOrder,
-76	  onRestartSession,
-77	}: {
-78	  wordSpellConfig: WordSpellConfig;
-79	  roundOrder: readonly number[];
-80	  onRestartSession: () => void;
-81	}) => {
-82	  const { phase, roundIndex, retryCount, zones } =
-83	    useAnswerGameContext();
-84	  const dispatch = useAnswerGameDispatch();
-85	  const { confettiReady, gameOverReady } = useGameSounds();
-86	  const navigate = useNavigate();
-87	  const completionToken = useRef(0);
-88	
-89	  const configRoundIndex = roundOrder[roundIndex];
-90	  const round =
-91	    configRoundIndex === undefined
-92	      ? undefined
-93	      : wordSpellConfig.rounds[configRoundIndex];
-94	
-95	  useRoundTTS(round?.word ?? '');
-96	
-97	  const handleHome = () => {
-98	    void navigate({
-99	      to: '/$locale',
-100	      params: { locale: 'en' },
-101	    });
-102	  };
-103	
-104	  const handlePlayAgain = () => {
-105	    onRestartSession();
-106	  };
-107	
-108	  useEffect(() => {
-109	    if (phase !== 'round-complete' || !confettiReady) return;
-110	
-111	    const token = ++completionToken.current;
-112	    const delayMs = 750;
-113	    const timer = globalThis.setTimeout(() => {
-114	      if (completionToken.current !== token) return;
-115	
-116	      const isLastRound = roundIndex >= roundOrder.length - 1;
-117	      if (isLastRound) {
-118	        dispatch({ type: 'COMPLETE_GAME' });
-119	        return;
-120	      }
-121	
-122	      const nextConfigIndex = roundOrder[roundIndex + 1];
-123	      const nextRound =
-124	        nextConfigIndex === undefined
-125	          ? undefined
-126	          : wordSpellConfig.rounds[nextConfigIndex];
-127	      const word = nextRound?.word.trim() ?? '';
-128	      if (!word) {
-129	        dispatch({ type: 'COMPLETE_GAME' });
-130	        return;
-131	      }
-132	      if (nextRound?.gaps && nextRound.gaps.length > 0) {
-133	        const { tiles: nextTiles, zones: nextZones } =
-134	          buildSentenceGapRound(nextRound.gaps);
-135	        dispatch({
-136	          type: 'ADVANCE_ROUND',
-137	          tiles: nextTiles,
-138	          zones: nextZones,
-139	        });
-140	      } else {
-141	        const { tiles: nextTiles, zones: nextZones } =
-142	          buildTilesAndZones(word, wordSpellConfig.tileUnit);
-143	        dispatch({
-144	          type: 'ADVANCE_ROUND',
-145	          tiles: nextTiles,
-146	          zones: nextZones,
-147	        });
-148	      }
-149	    }, delayMs);
-150	
-151	    return () => {
-152	      globalThis.clearTimeout(timer);
-153	    };
-154	  }, [
-155	    phase,
-156	    confettiReady,
-157	    roundIndex,
-158	    dispatch,
-159	    roundOrder,
-160	    wordSpellConfig.rounds,
-161	    wordSpellConfig.tileUnit,
-162	  ]);
-163	
-164	  if (!round) return null;
-165	
-166	  const hasEmoji =
-167	    wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
-168	  const imageSrc = round.sceneImage ?? round.image;
-169	  const hasImageUrl =
-170	    wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
-171	
-172	  return (
-173	    <>
-174	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-175	        <AnswerGame.Question>
-176	          {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
-177	            round.gaps && round.gaps.length > 0 ? (
-178	              <SentenceWithGaps
-179	                sentence={round.sentence}
-180	                className="max-w-md text-center text-foreground"
-181	              />
-182	            ) : (
-183	              <p className="max-w-md text-center text-lg text-foreground">
-184	                {round.sentence}
-185	              </p>
-186	            )
-187	          ) : null}
-188	          {hasEmoji ? (
-189	            <EmojiQuestion
-190	              emoji={round.emoji!.trim()}
-191	              prompt={round.word}
-192	            />
-193	          ) : hasImageUrl ? (
-194	            <ImageQuestion src={imageSrc!} prompt={round.word} />
-195	          ) : null}
-196	          <AudioButton prompt={round.word} />
-197	        </AnswerGame.Question>
-198	        <AnswerGame.Answer>
-199	          {round.gaps && round.gaps.length > 0 ? null : (
-200	            <SlotRow className="gap-2">
-201	              {zones.map((zone, i) => (
-202	                <Slot
-203	                  key={zone.id}
-204	                  index={i}
-205	                  className="size-14 rounded-lg"
-206	                >
-207	                  {({ label }) => (
-208	                    <span className="text-2xl font-bold">{label}</span>
-209	                  )}
-210	                </Slot>
-211	              ))}
-212	            </SlotRow>
-213	          )}
-214	        </AnswerGame.Answer>
-215	        <AnswerGame.Choices>
-216	          <LetterTileBank />
-217	        </AnswerGame.Choices>
-218	      </div>
-219	      <ScoreAnimation visible={confettiReady} />
-220	      {gameOverReady ? (
-221	        <GameOverOverlay
-222	          retryCount={retryCount}
-223	          onPlayAgain={handlePlayAgain}
-224	          onHome={handleHome}
-225	        />
-226	      ) : null}
-227	    </>
-228	  );
-229	};
-230	
-231	export const WordSpell = ({ config }: WordSpellProps) => {
-232	  const roundsInOrder = config.roundsInOrder === true;
-233	  const [sessionEpoch, setSessionEpoch] = useState(0);
-234	
-235	  const roundOrder = useMemo(() => {
-236	    void sessionEpoch;
-237	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-238	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-239	
-240	  const firstConfigIndex = roundOrder[0];
-241	  const round0 =
-242	    firstConfigIndex === undefined
-243	      ? undefined
-244	      : config.rounds[firstConfigIndex];
-245	  const roundWord = round0?.word.trim() ? round0.word : '';
-246	
-247	  const { tiles, zones } = useMemo(() => {
-248	    if (!roundWord)
-249	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-250	
-251	    // Sentence-gap with gaps array
-252	    if (round0?.gaps && round0.gaps.length > 0) {
-253	      return buildSentenceGapRound(round0.gaps);
-254	    }
-255	
-256	    // Default: letter/syllable/word spelling
-257	    return buildTilesAndZones(roundWord, config.tileUnit);
-258	  }, [roundWord, config.tileUnit, round0]);
-259	
-260	  const answerGameConfig = useMemo(
-261	    (): AnswerGameConfig => ({
-262	      gameId: config.gameId,
-263	      inputMethod: config.inputMethod,
-264	      wrongTileBehavior: config.wrongTileBehavior,
-265	      tileBankMode: config.tileBankMode,
-266	      distractorCount: config.distractorCount,
-267	      totalRounds: config.rounds.length,
-268	      roundsInOrder: config.roundsInOrder,
-269	      ttsEnabled: config.ttsEnabled,
-270	      touchKeyboardInputMode: 'text',
-271	      initialTiles: tiles,
-272	      initialZones: zones,
-273	      slotInteraction:
-274	        config.mode === 'scramble' || config.mode === 'sentence-gap'
-275	          ? 'free-swap'
-276	          : 'ordered',
-277	    }),
-278	    [
-279	      config.gameId,
-280	      config.inputMethod,
-281	      config.wrongTileBehavior,
-282	      config.tileBankMode,
-283	      config.distractorCount,
-284	      config.rounds.length,
-285	      config.roundsInOrder,
-286	      config.ttsEnabled,
-287	      config.mode,
-288	      tiles,
-289	      zones,
-290	    ],
-291	  );
-292	
-293	  if (!round0) return null;
-294	
-295	  return (
-296	    <AnswerGame config={answerGameConfig}>
-297	      <WordSpellSession
-298	        wordSpellConfig={config}
-299	        roundOrder={roundOrder}
-300	        onRestartSession={() => {
-301	          setSessionEpoch((e) => e + 1);
-302	        }}
-303	      />
-304	    </AnswerGame>
-305	  );
-306	};
+1 import { useNavigate } from '@tanstack/react-router';
+2 import { nanoid } from 'nanoid';
+3 import { useEffect, useMemo, useRef, useState } from 'react';
+4 import { buildSentenceGapRound } from '../build-sentence-gap-round';
+5 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
+6 import type { WordSpellConfig } from '../types';
+7 import type {
+8   AnswerGameConfig,
+9   AnswerZone,
+10   TileItem,
+11 } from '@/components/answer-game/types';
+12 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+13 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+14 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+15 import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
+16 import { Slot } from '@/components/answer-game/Slot/Slot';
+17 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
+18 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+19 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+20 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+21 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+22 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+23 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
+24 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
+25 import { buildRoundOrder } from '@/games/build-round-order';
+26 
+27 function segmentsForWord(
+28   word: string,
+29   tileUnit: WordSpellConfig['tileUnit'],
+30 ): string[] {
+31   const trimmed = word.trim();
+32   if (tileUnit === 'word') return [trimmed];
+33   if (tileUnit === 'syllable') {
+34     const parts = trimmed.split(/[-\s]+/).filter(Boolean);
+35     return parts.length > 0 ? parts : [trimmed];
+36   }
+37   return [...trimmed.toLowerCase()];
+38 }
+39 
+40 function buildTilesAndZones(
+41   word: string,
+42   tileUnit: WordSpellConfig['tileUnit'],
+43 ): {
+44   tiles: TileItem[];
+45   zones: AnswerZone[];
+46 } {
+47   const segments = segmentsForWord(word, tileUnit);
+48   const values = segments.map((s) =>
+49     tileUnit === 'letter' ? s.toLowerCase() : s.toUpperCase(),
+50   );
+51   const zones: AnswerZone[] = values.map((value, i) => ({
+52     id: `z${i}`,
+53     index: i,
+54     expectedValue: value,
+55     placedTileId: null,
+56     isWrong: false,
+57     isLocked: false,
+58   }));
+59   const shuffled = [...values].toSorted((a, b) => a.localeCompare(b));
+60   const tiles: TileItem[] = shuffled.map((value) => ({
+61     id: nanoid(),
+62     label: value,
+63     value,
+64   }));
+65   return { tiles, zones };
+66 }
+67 
+68 interface WordSpellProps {
+69   config: WordSpellConfig;
+70 }
+71 
+72 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
+73 const WordSpellSession = ({
+74   wordSpellConfig,
+75   roundOrder,
+76   onRestartSession,
+77 }: {
+78   wordSpellConfig: WordSpellConfig;
+79   roundOrder: readonly number[];
+80   onRestartSession: () => void;
+81 }) => {
+82   const { phase, roundIndex, retryCount, zones } =
+83     useAnswerGameContext();
+84   const dispatch = useAnswerGameDispatch();
+85   const { confettiReady, gameOverReady } = useGameSounds();
+86   const navigate = useNavigate();
+87   const completionToken = useRef(0);
+88 
+89   const configRoundIndex = roundOrder[roundIndex];
+90   const round =
+91     configRoundIndex === undefined
+92       ? undefined
+93       : wordSpellConfig.rounds[configRoundIndex];
+94 
+95   useRoundTTS(round?.word ?? '');
+96 
+97   const handleHome = () => {
+98     void navigate({
+99       to: '/$locale',
+100       params: { locale: 'en' },
+101     });
+102   };
+103 
+104   const handlePlayAgain = () => {
+105     onRestartSession();
+106   };
+107 
+108   useEffect(() => {
+109     if (phase !== 'round-complete' || !confettiReady) return;
+110 
+111     const token = ++completionToken.current;
+112     const delayMs = 750;
+113     const timer = globalThis.setTimeout(() => {
+114       if (completionToken.current !== token) return;
+115 
+116       const isLastRound = roundIndex >= roundOrder.length - 1;
+117       if (isLastRound) {
+118         dispatch({ type: 'COMPLETE_GAME' });
+119         return;
+120       }
+121 
+122       const nextConfigIndex = roundOrder[roundIndex + 1];
+123       const nextRound =
+124         nextConfigIndex === undefined
+125           ? undefined
+126           : wordSpellConfig.rounds[nextConfigIndex];
+127       const word = nextRound?.word.trim() ?? '';
+128       if (!word) {
+129         dispatch({ type: 'COMPLETE_GAME' });
+130         return;
+131       }
+132       if (nextRound?.gaps && nextRound.gaps.length > 0) {
+133         const { tiles: nextTiles, zones: nextZones } =
+134           buildSentenceGapRound(nextRound.gaps);
+135         dispatch({
+136           type: 'ADVANCE_ROUND',
+137           tiles: nextTiles,
+138           zones: nextZones,
+139         });
+140       } else {
+141         const { tiles: nextTiles, zones: nextZones } =
+142           buildTilesAndZones(word, wordSpellConfig.tileUnit);
+143         dispatch({
+144           type: 'ADVANCE_ROUND',
+145           tiles: nextTiles,
+146           zones: nextZones,
+147         });
+148       }
+149     }, delayMs);
+150 
+151     return () => {
+152       globalThis.clearTimeout(timer);
+153     };
+154   }, [
+155     phase,
+156     confettiReady,
+157     roundIndex,
+158     dispatch,
+159     roundOrder,
+160     wordSpellConfig.rounds,
+161     wordSpellConfig.tileUnit,
+162   ]);
+163 
+164   if (!round) return null;
+165 
+166   const hasEmoji =
+167     wordSpellConfig.mode !== 'recall' && Boolean(round.emoji?.trim());
+168   const imageSrc = round.sceneImage ?? round.image;
+169   const hasImageUrl =
+170     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+171 
+172   return (
+173     <>
+174       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+175         <AnswerGame.Question>
+176           {wordSpellConfig.mode === 'sentence-gap' && round.sentence ? (
+177             round.gaps && round.gaps.length > 0 ? (
+178               <SentenceWithGaps
+179                 sentence={round.sentence}
+180                 className="max-w-md text-center text-foreground"
+181               />
+182             ) : (
+183               <p className="max-w-md text-center text-lg text-foreground">
+184                 {round.sentence}
+185               </p>
+186             )
+187           ) : null}
+188           {hasEmoji ? (
+189             <EmojiQuestion
+190               emoji={round.emoji!.trim()}
+191               prompt={round.word}
+192             />
+193           ) : hasImageUrl ? (
+194             <ImageQuestion src={imageSrc!} prompt={round.word} />
+195           ) : null}
+196           <AudioButton prompt={round.word} />
+197         </AnswerGame.Question>
+198         <AnswerGame.Answer>
+199           {round.gaps && round.gaps.length > 0 ? null : (
+200             <SlotRow className="gap-2">
+201               {zones.map((zone, i) => (
+202                 <Slot
+203                   key={zone.id}
+204                   index={i}
+205                   className="size-14 rounded-lg"
+206                 >
+207                   {({ label }) => (
+208                     <span className="text-2xl font-bold">{label}</span>
+209                   )}
+210                 </Slot>
+211               ))}
+212             </SlotRow>
+213           )}
+214         </AnswerGame.Answer>
+215         <AnswerGame.Choices>
+216           <LetterTileBank />
+217         </AnswerGame.Choices>
+218       </div>
+219       <ScoreAnimation visible={confettiReady} />
+220       {gameOverReady ? (
+221         <GameOverOverlay
+222           retryCount={retryCount}
+223           onPlayAgain={handlePlayAgain}
+224           onHome={handleHome}
+225         />
+226       ) : null}
+227     </>
+228   );
+229 };
+230 
+231 export const WordSpell = ({ config }: WordSpellProps) => {
+232   const roundsInOrder = config.roundsInOrder === true;
+233   const [sessionEpoch, setSessionEpoch] = useState(0);
+234 
+235   const roundOrder = useMemo(() => {
+236     void sessionEpoch;
+237     return buildRoundOrder(config.rounds.length, roundsInOrder);
+238   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+239 
+240   const firstConfigIndex = roundOrder[0];
+241   const round0 =
+242     firstConfigIndex === undefined
+243       ? undefined
+244       : config.rounds[firstConfigIndex];
+245   const roundWord = round0?.word.trim() ? round0.word : '';
+246 
+247   const { tiles, zones } = useMemo(() => {
+248     if (!roundWord)
+249       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+250 
+251     // Sentence-gap with gaps array
+252     if (round0?.gaps && round0.gaps.length > 0) {
+253       return buildSentenceGapRound(round0.gaps);
+254     }
+255 
+256     // Default: letter/syllable/word spelling
+257     return buildTilesAndZones(roundWord, config.tileUnit);
+258   }, [roundWord, config.tileUnit, round0]);
+259 
+260   const answerGameConfig = useMemo(
+261     (): AnswerGameConfig => ({
+262       gameId: config.gameId,
+263       inputMethod: config.inputMethod,
+264       wrongTileBehavior: config.wrongTileBehavior,
+265       tileBankMode: config.tileBankMode,
+266       distractorCount: config.distractorCount,
+267       totalRounds: config.rounds.length,
+268       roundsInOrder: config.roundsInOrder,
+269       ttsEnabled: config.ttsEnabled,
+270       touchKeyboardInputMode: 'text',
+271       initialTiles: tiles,
+272       initialZones: zones,
+273       slotInteraction:
+274         config.mode === 'scramble' || config.mode === 'sentence-gap'
+275           ? 'free-swap'
+276           : 'ordered',
+277     }),
+278     [
+279       config.gameId,
+280       config.inputMethod,
+281       config.wrongTileBehavior,
+282       config.tileBankMode,
+283       config.distractorCount,
+284       config.rounds.length,
+285       config.roundsInOrder,
+286       config.ttsEnabled,
+287       config.mode,
+288       tiles,
+289       zones,
+290     ],
+291   );
+292 
+293   if (!round0) return null;
+294 
+295   return (
+296     <AnswerGame config={answerGameConfig}>
+297       <WordSpellSession
+298         wordSpellConfig={config}
+299         roundOrder={roundOrder}
+300         onRestartSession={() => {
+301           setSessionEpoch((e) => e + 1);
+302         }}
+303       />
+304     </AnswerGame>
+305   );
+306 };
 307
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:14:17Z)**_
@@ -1631,6 +1648,7 @@ src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx
 src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
 src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:18:56Z)**_
@@ -1640,170 +1658,171 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:18:56Z)**_
  `./src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-3	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-4	
-5	type TileStyle = 'dots' | 'objects' | 'fingers';
-6	
-7	/** Pip positions (0–8) for each die value in a 3×3 grid. */
-8	const DICE_PIPS: Record<number, number[]> = {
-9	  1: [4],
-10	  2: [2, 6],
-11	  3: [2, 4, 6],
-12	  4: [0, 2, 6, 8],
-13	  5: [0, 2, 4, 6, 8],
-14	  6: [0, 2, 3, 5, 6, 8],
-15	};
-16	
-17	/** Which two die values add up to n for values 7–12. */
-18	const DOMINO_SPLIT: Record<number, [number, number]> = {
-19	  7: [4, 3],
-20	  8: [4, 4],
-21	  9: [5, 4],
-22	  10: [6, 4],
-23	  11: [6, 5],
-24	  12: [6, 6],
-25	};
-26	
-27	export const DiceFace = ({ value }: { value: number }) => {
-28	  const pips = DICE_PIPS[value] ?? [];
-29	  return (
-30	    <div
-31	      className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
-32	      aria-hidden="true"
-33	    >
-34	      {Array.from({ length: 9 }, (_, i) => (
-35	        <span
-36	          key={i}
-37	          data-cell=""
-38	          data-pip={pips.includes(i) ? '' : undefined}
-39	          className={[
-40	            'size-2.5 rounded-full',
-41	            pips.includes(i) ? 'bg-current' : 'bg-transparent',
-42	          ].join(' ')}
-43	        />
-44	      ))}
-45	    </div>
-46	  );
-47	};
-48	
-49	export const DominoTile = ({ value }: { value: number }) => {
-50	  const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
-51	  return (
-52	    <div className="flex items-center gap-0" aria-hidden="true">
-53	      <DiceFace value={left} />
-54	      <span
-55	        data-divider=""
-56	        className="h-10 w-px shrink-0 bg-current opacity-30"
-57	      />
-58	      <DiceFace value={right} />
-59	    </div>
-60	  );
-61	};
-62	
-63	const NumeralTile = ({
-64	  tile,
-65	  tileStyle,
-66	}: {
-67	  tile: TileItem;
-68	  tileStyle: TileStyle;
-69	}) => {
-70	  const {
-71	    ref,
-72	    handleClick,
-73	    onPointerDown,
-74	    onPointerMove,
-75	    onPointerUp,
-76	    onPointerCancel,
-77	  } = useDraggableTile(tile);
-78	  const numericValue = Number.parseInt(tile.value, 10);
-79	
-80	  const isDomino =
-81	    tileStyle === 'dots' &&
-82	    !Number.isNaN(numericValue) &&
-83	    numericValue > 6 &&
-84	    numericValue <= 12;
-85	
-86	  return (
-87	    <button
-88	      ref={ref}
-89	      type="button"
-90	      aria-label={`Number ${tile.label}`}
-91	      className={[
-92	        'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
-93	        isDomino ? 'h-[72px] w-32' : 'size-20',
-94	      ].join(' ')}
-95	      onClick={handleClick}
-96	      onPointerDown={onPointerDown}
-97	      onPointerMove={onPointerMove}
-98	      onPointerUp={onPointerUp}
-99	      onPointerCancel={onPointerCancel}
-100	    >
-101	      {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
-102	        numericValue <= 6 ? (
-103	          <DiceFace value={numericValue} />
-104	        ) : numericValue <= 12 ? (
-105	          <DominoTile value={numericValue} />
-106	        ) : (
-107	          <span className="text-3xl font-bold tabular-nums leading-none">
-108	            {tile.label}
-109	          </span>
-110	        )
-111	      ) : (
-112	        <span className="text-3xl font-bold tabular-nums leading-none">
-113	          {tile.label}
-114	        </span>
-115	      )}
-116	    </button>
-117	  );
-118	};
-119	
-120	export interface NumeralTileBankProps {
-121	  tileStyle: TileStyle;
-122	}
-123	
-124	export const NumeralTileBank = ({
-125	  tileStyle,
-126	}: NumeralTileBankProps) => {
-127	  const { allTiles, bankTileIds, dragActiveTileId } =
-128	    useAnswerGameContext();
-129	  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-130	
-131	  return (
-132	    <div className="flex flex-wrap justify-center gap-3">
-133	      {bankTiles.map((tile) => {
-134	        if (tile.id === dragActiveTileId) {
-135	          const numericValue = Number.parseInt(tile.value, 10);
-136	          const isDomino =
-137	            tileStyle === 'dots' &&
-138	            !Number.isNaN(numericValue) &&
-139	            numericValue > 6 &&
-140	            numericValue <= 12;
-141	          return (
-142	            <div
-143	              key={tile.id}
-144	              className={[
-145	                'rounded-2xl bg-muted/30 shadow-inner',
-146	                isDomino ? 'h-[72px] w-32' : 'size-20',
-147	              ].join(' ')}
-148	              aria-hidden="true"
-149	            />
-150	          );
-151	        }
-152	        return (
-153	          <NumeralTile
-154	            key={tile.id}
-155	            tile={tile}
-156	            tileStyle={tileStyle}
-157	          />
-158	        );
-159	      })}
-160	    </div>
-161	  );
-162	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+3 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+4 
+5 type TileStyle = 'dots' | 'objects' | 'fingers';
+6 
+7 /** Pip positions (0–8) for each die value in a 3×3 grid. */
+8 const DICE_PIPS: Record<number, number[]> = {
+9   1: [4],
+10   2: [2, 6],
+11   3: [2, 4, 6],
+12   4: [0, 2, 6, 8],
+13   5: [0, 2, 4, 6, 8],
+14   6: [0, 2, 3, 5, 6, 8],
+15 };
+16 
+17 /** Which two die values add up to n for values 7–12. */
+18 const DOMINO_SPLIT: Record<number, [number, number]> = {
+19   7: [4, 3],
+20   8: [4, 4],
+21   9: [5, 4],
+22   10: [6, 4],
+23   11: [6, 5],
+24   12: [6, 6],
+25 };
+26 
+27 export const DiceFace = ({ value }: { value: number }) => {
+28   const pips = DICE_PIPS[value] ?? [];
+29   return (
+30     <div
+31       className="grid grid-cols-3 grid-rows-3 gap-1 p-1"
+32       aria-hidden="true"
+33     >
+34       {Array.from({ length: 9 }, (_, i) => (
+35         <span
+36           key={i}
+37           data-cell=""
+38           data-pip={pips.includes(i) ? '' : undefined}
+39           className={[
+40             'size-2.5 rounded-full',
+41             pips.includes(i) ? 'bg-current' : 'bg-transparent',
+42           ].join(' ')}
+43         />
+44       ))}
+45     </div>
+46   );
+47 };
+48 
+49 export const DominoTile = ({ value }: { value: number }) => {
+50   const [left, right] = DOMINO_SPLIT[value] ?? [6, value - 6];
+51   return (
+52     <div className="flex items-center gap-0" aria-hidden="true">
+53       <DiceFace value={left} />
+54       <span
+55         data-divider=""
+56         className="h-10 w-px shrink-0 bg-current opacity-30"
+57       />
+58       <DiceFace value={right} />
+59     </div>
+60   );
+61 };
+62 
+63 const NumeralTile = ({
+64   tile,
+65   tileStyle,
+66 }: {
+67   tile: TileItem;
+68   tileStyle: TileStyle;
+69 }) => {
+70   const {
+71     ref,
+72     handleClick,
+73     onPointerDown,
+74     onPointerMove,
+75     onPointerUp,
+76     onPointerCancel,
+77   } = useDraggableTile(tile);
+78   const numericValue = Number.parseInt(tile.value, 10);
+79 
+80   const isDomino =
+81     tileStyle === 'dots' &&
+82     !Number.isNaN(numericValue) &&
+83     numericValue > 6 &&
+84     numericValue <= 12;
+85 
+86   return (
+87     <button
+88       ref={ref}
+89       type="button"
+90       aria-label={`Number ${tile.label}`}
+91       className={[
+92         'flex shrink-0 touch-none select-none cursor-grab flex-col items-center justify-center gap-0.5 rounded-2xl bg-card p-2 shadow-md transition-transform active:scale-95 active:cursor-grabbing',
+93         isDomino ? 'h-[72px] w-32' : 'size-20',
+94       ].join(' ')}
+95       onClick={handleClick}
+96       onPointerDown={onPointerDown}
+97       onPointerMove={onPointerMove}
+98       onPointerUp={onPointerUp}
+99       onPointerCancel={onPointerCancel}
+100     >
+101       {tileStyle === 'dots' && !Number.isNaN(numericValue) ? (
+102         numericValue <= 6 ? (
+103           <DiceFace value={numericValue} />
+104         ) : numericValue <= 12 ? (
+105           <DominoTile value={numericValue} />
+106         ) : (
+107           <span className="text-3xl font-bold tabular-nums leading-none">
+108             {tile.label}
+109           </span>
+110         )
+111       ) : (
+112         <span className="text-3xl font-bold tabular-nums leading-none">
+113           {tile.label}
+114         </span>
+115       )}
+116     </button>
+117   );
+118 };
+119 
+120 export interface NumeralTileBankProps {
+121   tileStyle: TileStyle;
+122 }
+123 
+124 export const NumeralTileBank = ({
+125   tileStyle,
+126 }: NumeralTileBankProps) => {
+127   const { allTiles, bankTileIds, dragActiveTileId } =
+128     useAnswerGameContext();
+129   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+130 
+131   return (
+132     <div className="flex flex-wrap justify-center gap-3">
+133       {bankTiles.map((tile) => {
+134         if (tile.id === dragActiveTileId) {
+135           const numericValue = Number.parseInt(tile.value, 10);
+136           const isDomino =
+137             tileStyle === 'dots' &&
+138             !Number.isNaN(numericValue) &&
+139             numericValue > 6 &&
+140             numericValue <= 12;
+141           return (
+142             <div
+143               key={tile.id}
+144               className={[
+145                 'rounded-2xl bg-muted/30 shadow-inner',
+146                 isDomino ? 'h-[72px] w-32' : 'size-20',
+147               ].join(' ')}
+148               aria-hidden="true"
+149             />
+150           );
+151         }
+152         return (
+153           <NumeralTile
+154             key={tile.id}
+155             tile={tile}
+156             tileStyle={tileStyle}
+157           />
+158         );
+159       })}
+160     </div>
+161   );
+162 };
 163
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:20:45Z)**_
@@ -1821,84 +1840,85 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:22:10Z)**_
  `./src/components/answer-game/types.ts`
 
 ```text
-1	export interface AnswerGameConfig {
-2	  gameId: string;
-3	  /** @default 'drag' */
-4	  inputMethod: 'drag' | 'type' | 'both';
-5	  /** @default 'lock-auto-eject' */
-6	  wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
-7	  tileBankMode: 'exact' | 'distractors';
-8	  distractorCount?: number;
-9	  /** Total number of rounds in this session */
-10	  totalRounds: number;
-11	  /**
-12	   * When `true`, rounds follow the order of `rounds` in config.
-13	   * When `false` or omitted, order is shuffled once per session (again after Play again).
-14	   */
-15	  roundsInOrder?: boolean;
-16	  /** Whether TTS is enabled for this profile */
-17	  ttsEnabled: boolean;
-18	  /**
-19	   * Controls the OS keyboard type shown on touch devices in type/both mode.
-20	   * @default 'text'
-21	   */
-22	  touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
-23	  /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
-24	  initialTiles?: TileItem[];
-25	  initialZones?: AnswerZone[];
-26	  /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
-27	  slotInteraction?: 'ordered' | 'free-swap';
-28	}
-29	
-30	export interface TileItem {
-31	  id: string;
-32	  /** Display label shown on the tile (e.g. "A", "cat", "3") */
-33	  label: string;
-34	  /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
-35	  value: string;
-36	}
-37	
-38	export interface AnswerZone {
-39	  id: string;
-40	  index: number;
-41	  /** Correct tile value for this slot; matched against `TileItem.value` */
-42	  expectedValue: string;
-43	  placedTileId: string | null;
-44	  isWrong: boolean;
-45	  isLocked: boolean;
-46	}
-47	
-48	export type AnswerGamePhase =
-49	  | 'playing'
-50	  | 'round-complete'
-51	  | 'game-over';
-52	
-53	export interface AnswerGameState {
-54	  config: AnswerGameConfig;
-55	  /** Full tile list for the current round — never mutated mid-round */
-56	  allTiles: TileItem[];
-57	  /** IDs of tiles currently visible in the choice bank */
-58	  bankTileIds: string[];
-59	  zones: AnswerZone[];
-60	  /** Index of next slot to fill in auto-next-slot mode */
-61	  activeSlotIndex: number;
-62	  dragActiveTileId: string | null;
-63	  phase: AnswerGamePhase;
-64	  roundIndex: number;
-65	  retryCount: number;
-66	}
-67	
-68	export type AnswerGameAction =
-69	  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-70	  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
-71	  | { type: 'REMOVE_TILE'; zoneIndex: number }
-72	  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
-73	  | { type: 'EJECT_TILE'; zoneIndex: number }
-74	  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
-75	  | { type: 'COMPLETE_GAME' }
-76	  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
+1 export interface AnswerGameConfig {
+2   gameId: string;
+3   /** @default 'drag' */
+4   inputMethod: 'drag' | 'type' | 'both';
+5   /** @default 'lock-auto-eject' */
+6   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
+7   tileBankMode: 'exact' | 'distractors';
+8   distractorCount?: number;
+9   /** Total number of rounds in this session */
+10   totalRounds: number;
+11   /**
+12    * When `true`, rounds follow the order of `rounds` in config.
+13    * When `false` or omitted, order is shuffled once per session (again after Play again).
+14    */
+15   roundsInOrder?: boolean;
+16   /** Whether TTS is enabled for this profile */
+17   ttsEnabled: boolean;
+18   /**
+19    * Controls the OS keyboard type shown on touch devices in type/both mode.
+20    * @default 'text'
+21    */
+22   touchKeyboardInputMode?: 'text' | 'numeric' | 'none';
+23   /** When set, `AnswerGameProvider` dispatches `INIT_ROUND` on mount / game change */
+24   initialTiles?: TileItem[];
+25   initialZones?: AnswerZone[];
+26   /** @default inferred: 'free-swap' for drag/both, 'ordered' for type */
+27   slotInteraction?: 'ordered' | 'free-swap';
+28 }
+29 
+30 export interface TileItem {
+31   id: string;
+32   /** Display label shown on the tile (e.g. "A", "cat", "3") */
+33   label: string;
+34   /** Semantic value used for evaluation — matches `AnswerZone.expectedValue` */
+35   value: string;
+36 }
+37 
+38 export interface AnswerZone {
+39   id: string;
+40   index: number;
+41   /** Correct tile value for this slot; matched against `TileItem.value` */
+42   expectedValue: string;
+43   placedTileId: string | null;
+44   isWrong: boolean;
+45   isLocked: boolean;
+46 }
+47 
+48 export type AnswerGamePhase =
+49   | 'playing'
+50   | 'round-complete'
+51   | 'game-over';
+52 
+53 export interface AnswerGameState {
+54   config: AnswerGameConfig;
+55   /** Full tile list for the current round — never mutated mid-round */
+56   allTiles: TileItem[];
+57   /** IDs of tiles currently visible in the choice bank */
+58   bankTileIds: string[];
+59   zones: AnswerZone[];
+60   /** Index of next slot to fill in auto-next-slot mode */
+61   activeSlotIndex: number;
+62   dragActiveTileId: string | null;
+63   phase: AnswerGamePhase;
+64   roundIndex: number;
+65   retryCount: number;
+66 }
+67 
+68 export type AnswerGameAction =
+69   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+70   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+71   | { type: 'REMOVE_TILE'; zoneIndex: number }
+72   | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+73   | { type: 'EJECT_TILE'; zoneIndex: number }
+74   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+75   | { type: 'COMPLETE_GAME' }
+76   | { type: 'SET_DRAG_ACTIVE'; tileId: string | null };
 77
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:24:01Z)**_
@@ -1925,6 +1945,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:25:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/answer-game-reducer.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:25:34Z)**_
@@ -1939,6 +1960,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:25:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:25:53Z)**_
@@ -1949,6 +1971,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:25:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useTouchDrag.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:25:56Z)**_
@@ -1963,6 +1986,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:11Z)**_
@@ -1973,6 +1997,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/useDraggableTile.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:15Z)**_
@@ -1987,6 +2012,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:28Z)**_
@@ -1997,6 +2023,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:34Z)**_
@@ -2007,6 +2034,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:34Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:39Z)**_
@@ -2017,6 +2045,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:39Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:42Z)**_
@@ -2031,6 +2060,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:53Z)**_
@@ -2045,6 +2075,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:26:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:26:59Z)**_
@@ -2059,6 +2090,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:27:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:09Z)**_
@@ -2069,6 +2101,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:27:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/Slot.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:12Z)**_
@@ -2083,6 +2116,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:27:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/word-spell/LetterTileBank/LetterTileBank.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:17Z)**_
@@ -2093,6 +2127,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:27:17Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:20Z)**_
@@ -2103,6 +2138,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:27:20Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/games/number-match/NumeralTileBank/NumeralTileBank.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:22Z)**_
@@ -2158,6 +2194,7 @@ Cannot update a component (`AnswerGameProvider`) while rendering a different com
 
 Done in 2.06s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:29Z)**_
@@ -2176,6 +2213,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 2.20s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:37Z)**_
@@ -2207,6 +2245,7 @@ react-i18next:: useTranslation: You will need to pass in an i18next instance by 
 
 Done in 1.27s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:27:39Z)**_
@@ -2232,6 +2271,7 @@ Show changed files summary
  .../word-spell/LetterTileBank/LetterTileBank.tsx   |  2 +-
  8 files changed, 94 insertions(+), 23 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:28:03Z)**_
@@ -2294,6 +2334,7 @@ Preview (first 2KB):
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:28:06Z)**_
@@ -2311,6 +2352,7 @@ Check recent commits
 ab06a5b fix: correct sentence template in InlineSentenceGap story
 5b9b7d5 feat: add Storybook stories for unified Slot component
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:28:09Z)**_
@@ -2347,6 +2389,7 @@ Done in 12.71s.
 husky - pre-push script failed (code 1)
 error: failed to push some refs to 'github.com:leocaseiro/base-skill.git'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:28:42Z)**_
@@ -2441,11 +2484,13 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 stderr | src/components/game/GameShell.test.tsx > GameShell > renders game title in top bar
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:28:59Z)**_
 
 Two issues:
+
 1. ESLint: missing `dragRef` in `useEffect` deps in `useSlotBehavior.ts`
 2. TypeScript: `document.querySelector` returns `Element | null`, needs cast to `HTMLElement | null`
 
@@ -2458,32 +2503,33 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:29:00Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-125	    if (!el) return;
-126	
-127	    const wasWrong = prevIsWrongRef.current;
-128	    prevIsWrongRef.current = isWrong;
-129	
-130	    const prevTileId = prevTileIdRef.current;
-131	    prevTileIdRef.current = tileId;
-132	    const freshlyPlaced = tileId !== null && prevTileId === null;
-133	
-134	    if (isWrong && !wasWrong) {
-135	      triggerShake(el);
-136	
-137	      if (config.wrongTileBehavior === 'lock-auto-eject') {
-138	        // After the shake settles, animate the tile flying back toward the bank.
-139	        // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
-140	        const timerId = setTimeout(() => {
-141	          const tileEl = dragRef.current;
-142	          if (!tileEl) return;
-143	          const bankEl = document.querySelector('[data-tile-bank]');
-144	          triggerEjectReturn(tileEl, bankEl, () => {
-145	            // Keep the tile invisible in its slot until EJECT_TILE clears it.
-146	            tileEl.style.opacity = '0';
-147	          });
-148	        }, 350);
-149	        return () => clearTimeout(timerId);
+125     if (!el) return;
+126 
+127     const wasWrong = prevIsWrongRef.current;
+128     prevIsWrongRef.current = isWrong;
+129 
+130     const prevTileId = prevTileIdRef.current;
+131     prevTileIdRef.current = tileId;
+132     const freshlyPlaced = tileId !== null && prevTileId === null;
+133 
+134     if (isWrong && !wasWrong) {
+135       triggerShake(el);
+136 
+137       if (config.wrongTileBehavior === 'lock-auto-eject') {
+138         // After the shake settles, animate the tile flying back toward the bank.
+139         // EJECT_TILE fires at 1000ms; this animation runs from ~350ms to ~650ms.
+140         const timerId = setTimeout(() => {
+141           const tileEl = dragRef.current;
+142           if (!tileEl) return;
+143           const bankEl = document.querySelector('[data-tile-bank]');
+144           triggerEjectReturn(tileEl, bankEl, () => {
+145             // Keep the tile invisible in its slot until EJECT_TILE clears it.
+146             tileEl.style.opacity = '0';
+147           });
+148         }, 350);
+149         return () => clearTimeout(timerId);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:29:09Z)**_
@@ -2496,6 +2542,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:29:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:29:14Z)**_
@@ -2509,17 +2556,18 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:29:15Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-148	            tileEl.style.opacity = '0';
-149	          });
-150	        }, 350);
-151	        return () => clearTimeout(timerId);
-152	      }
-153	    } else if (freshlyPlaced && !isWrong) {
-154	      triggerPop(el);
-155	    }
-156	  }, [isWrong, tileId, config.wrongTileBehavior]);
+148             tileEl.style.opacity = '0';
+149           });
+150         }, 350);
+151         return () => clearTimeout(timerId);
+152       }
+153     } else if (freshlyPlaced && !isWrong) {
+154       triggerPop(el);
+155     }
+156   }, [isWrong, tileId, config.wrongTileBehavior]);
 157
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:29:18Z)**_
@@ -2530,6 +2578,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:29:18Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:30:16Z)**_
@@ -2555,6 +2604,7 @@ $ eslint . --max-warnings 0 && knip --no-config-hints
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:30:30Z)**_
@@ -2567,6 +2617,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 07:30:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:31:36Z)**_
@@ -2580,6 +2631,7 @@ Check typecheck and lint pass
 ```text
 Command running in background with ID: bs5k5nz7m. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill--claude-worktrees-bold-chatelet/4946705f-253f-4952-abb4-f4c8a9656612/tasks/bs5k5nz7m.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:32:22Z)**_
@@ -2595,6 +2647,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 40.25s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:32:41Z)**_
@@ -2610,6 +2663,7 @@ yarn run v1.22.22
 $ tsc --noEmit
 Done in 14.53s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:32:45Z)**_
@@ -2666,6 +2720,7 @@ stderr | src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:33:34Z)**_
@@ -2681,6 +2736,7 @@ Check commit status
 ab06a5b fix: correct sentence template in InlineSentenceGap story
 5b9b7d5 feat: add Storybook stories for unified Slot component
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:35:03Z)**_
@@ -2713,6 +2769,7 @@ Done in 19.32s.
 To github.com:leocaseiro/base-skill.git
    ab06a5b..1260e15  claude/bold-chatelet -> claude/bold-chatelet
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 07:35:18Z)**_
@@ -2728,6 +2785,7 @@ All checks passed and pushed. Here's what was fixed:
 **Issue 3 — Auto-eject animation:** After wrong placement, once the shake settles (~350ms), `triggerEjectReturn` animates the tile button flying toward the `[data-tile-bank]` element, then keeps it invisible until `EJECT_TILE` fires at 1000ms. Added `data-tile-bank` to all three tile bank containers.
 
 **Issue 4 — Race condition (tile disappears):** Two-part fix:
+
 - `EJECT_TILE` reducer now clears `dragActiveTileId` if it matches the ejected tile — bank hole disappears immediately instead of staying stuck.
 - `useTouchDrag` registers a native `lostpointercapture` listener in `onPointerDown` that immediately cleans up the ghost when the dragged element is removed from the DOM mid-drag (e.g. when auto-eject fires). A `cleanupInProgressRef` guard prevents re-entry from the `releasePointerCapture` → `lostpointercapture` cycle.
 
@@ -2774,27 +2832,28 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:29:14Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-77	        swapOrPlace(droppedTileId, targetZoneIndex);
-78	      }
-79	    },
-80	    [isOrdered, placeTile, swapOrPlace],
-81	  );
-82	
-83	  // Register as drop target
-84	  useEffect(() => {
-85	    const el = slotRef.current;
-86	    if (!el) return;
-87	    return dropTargetForElements({
-88	      element: el,
-89	      getData: () => ({ zoneIndex: index }),
-90	      onDrop: ({ source }) => {
-91	        // Slot-tile drags (sourceZoneIndex present) handle their own
-92	        // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
-93	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-94	        const sourceTileId = source.data['tileId'];
-95	        if (typeof sourceTileId === 'string') {
-96	          handleDrop(sourceTileId, index);
+77         swapOrPlace(droppedTileId, targetZoneIndex);
+78       }
+79     },
+80     [isOrdered, placeTile, swapOrPlace],
+81   );
+82 
+83   // Register as drop target
+84   useEffect(() => {
+85     const el = slotRef.current;
+86     if (!el) return;
+87     return dropTargetForElements({
+88       element: el,
+89       getData: () => ({ zoneIndex: index }),
+90       onDrop: ({ source }) => {
+91         // Slot-tile drags (sourceZoneIndex present) handle their own
+92         // REMOVE_TILE + placeTile sequence via useSlotTileDrag's onDrop.
+93         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+94         const sourceTileId = source.data['tileId'];
+95         if (typeof sourceTileId === 'string') {
+96           handleDrop(sourceTileId, index);
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:29:50Z)**_
@@ -2813,6 +2872,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:29:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:29:59Z)**_
@@ -2826,27 +2886,28 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:30:00Z)**_
  `./src/components/answer-game/useDraggableTile.ts`
 
 ```text
-28	
-29	  // HTML5 DnD — desktop
-30	  useEffect(() => {
-31	    const element = ref.current;
-32	    if (!element) return;
-33	    return draggable({
-34	      element,
-35	      getInitialData: () => ({ tileId: tile.id }),
-36	      onDragStart: () => {
-37	        speakTileRef.current(tile.label);
-38	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
-39	      },
-40	      onDrop: () => {
-41	        dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-42	      },
-43	    });
-44	  }, [tile.id, tile.label, dispatch]);
-45	
-46	  // Pointer-events drag — touch / mobile
-47	  const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
+28 
+29   // HTML5 DnD — desktop
+30   useEffect(() => {
+31     const element = ref.current;
+32     if (!element) return;
+33     return draggable({
+34       element,
+35       getInitialData: () => ({ tileId: tile.id }),
+36       onDragStart: () => {
+37         speakTileRef.current(tile.label);
+38         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: tile.id });
+39       },
+40       onDrop: () => {
+41         dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+42       },
+43     });
+44   }, [tile.id, tile.label, dispatch]);
+45 
+46   // Pointer-events drag — touch / mobile
+47   const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:30:16Z)**_
@@ -2880,6 +2941,7 @@ Run Slot tests
 
 Done in 1.52s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:30:34Z)**_
@@ -2898,6 +2960,7 @@ ESLint found too many warnings (maximum: 0).
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:30:45Z)**_
@@ -2920,6 +2983,7 @@ ESLint found too many warnings (maximum: 0).
 error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:30:48Z)**_
@@ -2929,32 +2993,33 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:30:48Z)**_
  `./src/components/answer-game/Slot/useSlotBehavior.ts`
 
 ```text
-83	  // Register as drop target
-84	  useEffect(() => {
-85	    const el = slotRef.current;
-86	    if (!el) return;
-87	    return dropTargetForElements({
-88	      element: el,
-89	      getData: () => ({ zoneIndex: index }),
-90	      onDrop: ({ source }) => {
-91	        // Slot-tile drags (sourceZoneIndex present) handle their own
-92	        // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
-93	        if (typeof source.data['sourceZoneIndex'] === 'number') return;
-94	        const sourceTileId = source.data['tileId'];
-95	        if (typeof sourceTileId === 'string') {
-96	          handleDrop(sourceTileId, index);
-97	          // Clear drag active state here — the draggable component (bank tile)
-98	          // unmounts when PLACE_TILE fires, so its own onDrop may never run.
-99	          dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
-100	        }
-101	      },
-102	    });
-103	  }, [index, handleDrop]);
-104	
-105	  // Drag source for filled slots
-106	  const {
-107	    dragRef,
+83   // Register as drop target
+84   useEffect(() => {
+85     const el = slotRef.current;
+86     if (!el) return;
+87     return dropTargetForElements({
+88       element: el,
+89       getData: () => ({ zoneIndex: index }),
+90       onDrop: ({ source }) => {
+91         // Slot-tile drags (sourceZoneIndex present) handle their own
+92         // REMOVE_TILE + SET_DRAG_ACTIVE sequence via useSlotTileDrag's onDrop.
+93         if (typeof source.data['sourceZoneIndex'] === 'number') return;
+94         const sourceTileId = source.data['tileId'];
+95         if (typeof sourceTileId === 'string') {
+96           handleDrop(sourceTileId, index);
+97           // Clear drag active state here — the draggable component (bank tile)
+98           // unmounts when PLACE_TILE fires, so its own onDrop may never run.
+99           dispatch({ type: 'SET_DRAG_ACTIVE', tileId: null });
+100         }
+101       },
+102     });
+103   }, [index, handleDrop]);
+104 
+105   // Drag source for filled slots
+106   const {
+107     dragRef,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:30:53Z)**_
@@ -2965,6 +3030,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 08:30:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.claude/worktrees/bold-chatelet/src/components/answer-game/Slot/useSlotBehavior.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:31:11Z)**_
@@ -2983,6 +3049,7 @@ yarn run v1.22.22
 $ eslint . --max-warnings 0 && knip --no-config-hints
 Done in 7.06s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:31:14Z)**_
@@ -3008,6 +3075,7 @@ Done in 4.74s.
  Date: Tue Apr 7 17:27:54 2026 +1000
  8 files changed, 112 insertions(+), 25 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:31:54Z)**_
@@ -3030,6 +3098,7 @@ hint: its remote counterpart. If you want to integrate the remote changes,
 hint: use 'git pull' before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:32:26Z)**_
@@ -3052,6 +3121,7 @@ Done in 11.26s.
 To github.com:leocaseiro/base-skill.git
  + 1260e15...c95abab claude/bold-chatelet -> claude/bold-chatelet (forced update)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 08:32:32Z)**_

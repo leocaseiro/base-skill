@@ -51,7 +51,7 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
     expect(resolved.rounds).toBeUndefined();
   });
 
-  it('preserves picture mode + emoji rounds when saved.mode === "picture"', () => {
+  it('returns library-sourced picture mode with hasVisual when saved.mode === "picture"', () => {
     const saved = {
       component: 'WordSpell',
       configMode: 'advanced',
@@ -62,8 +62,10 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
     const resolved = resolveWordSpellConfig(saved);
 
     expect(resolved.mode).toBe('picture');
-    expect(resolved.rounds?.length).toBe(8);
-    expect(resolved.source).toBeUndefined();
+    expect(resolved.source?.type).toBe('word-library');
+    expect(resolved.source?.filter.hasVisual).toBe(true);
+    expect(resolved.rounds).toBeUndefined();
+    expect(resolved.totalRounds).toBe(4);
   });
 
   it('drops explicit rounds when advanced saved config explicitly sets recall + source', () => {
@@ -186,7 +188,7 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
     expect(resolved.selectedUnits).toEqual(units);
   });
 
-  it('drops source when picture mode is explicitly chosen', () => {
+  it('uses source with hasVisual when picture mode is chosen, dropping any leaked source', () => {
     const saved = {
       component: 'WordSpell',
       configMode: 'advanced',
@@ -203,7 +205,7 @@ describe('resolveWordSpellConfig — mode-driven defaults', () => {
 
     const resolved = resolveWordSpellConfig(saved);
 
-    expect(resolved.source).toBeUndefined();
-    expect(resolved.rounds?.length).toBeGreaterThan(0);
+    expect(resolved.source?.filter.hasVisual).toBe(true);
+    expect(resolved.rounds).toBeUndefined();
   });
 });

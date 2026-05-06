@@ -463,3 +463,17 @@ test('@visual Slot drag preview target dark (empty slot hover)', async ({
 
   await page.mouse.up();
 });
+
+test('@visual spot-all happy-path layout', async ({ page }) => {
+  await page.goto('/en/game/spot-all?seed=vr-spot-all-1');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  // Dismiss instructions overlay.
+  const startBtn = page.getByRole('button', { name: /let's go/i });
+  await startBtn.waitFor({ state: 'visible' });
+  await startBtn.click();
+  // Wait for the grid tiles to be present so the screenshot is stable.
+  await page.locator('button[aria-pressed]').first().waitFor();
+  await expect(page).toHaveScreenshot('spot-all-grid.png', {
+    fullPage: true,
+  });
+});

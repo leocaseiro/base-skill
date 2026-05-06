@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await seedMathRandom(page);
 });
 
-test('kid flow: tap a default card, see instructions, play without saving', async ({
+test('kid flow: tap a default card, see instructions, play immediately (clean config)', async ({
   page,
 }) => {
   await page.goto('/en/');
@@ -18,19 +18,11 @@ test('kid flow: tap a default card, see instructions, play without saving', asyn
   // Instructions overlay appears with a "Let's go" button.
   const letsGo = page.getByRole('button', { name: /let's go/i });
   await expect(letsGo).toBeVisible();
+
+  // No config edits — draft is clean. Let's go plays immediately without any dialog.
   await letsGo.click();
 
-  // Save-on-play prompt asks whether to save these settings as a custom game.
-  await expect(
-    page.getByText(/save these settings as a custom game\?/i),
-  ).toBeVisible();
-
-  // Kid opts out — go straight into the game.
-  await page
-    .getByRole('button', { name: /play without saving/i })
-    .click();
-
-  // Game mounts — the instructions overlay is gone.
+  // Game mounts — the instructions overlay is gone (no save prompt shown).
   await expect(
     page.getByRole('dialog', { name: /game instructions/i }),
   ).toBeHidden();

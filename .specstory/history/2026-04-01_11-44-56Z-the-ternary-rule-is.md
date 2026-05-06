@@ -13,9 +13,8 @@ The ternary rule is messing with my ternary.
 I wanted to have on the next line, but the indentation should be there still.
 is it possible? If not we can remove those ternary rules and keep whatever prettier likes.
 
-
-
 E.g.
+
 ```
 {entries.length === 0 ? (
         <p className="py-16 text-center text-muted-foreground">
@@ -141,6 +140,7 @@ node_modules/arraybuffer.prototype.slice/.eslintrc
 worktrees/milestone-3-app-shell/node_modules/arraybuffer.prototype.slice/.eslintrc
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:45:00Z)**_
@@ -179,6 +179,7 @@ worktrees/milestone-3-app-shell/node_modules/node-exports-info/eslint.config.mjs
 eslint.config.js
 worktrees/milestone-3-app-shell/eslint.config.js
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:45:04Z)**_
@@ -188,157 +189,158 @@ _**Agent (claude-sonnet-4-6 2026-04-01 11:45:04Z)**_
  `./eslint.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
-4	import eslintPluginUnicorn from 'eslint-plugin-unicorn';
-5	import { tanstackConfig } from '@tanstack/eslint-config';
-6	import eslintConfigPrettier from 'eslint-config-prettier/flat';
-7	import jsxA11y from 'eslint-plugin-jsx-a11y';
-8	import reactPlugin from 'eslint-plugin-react';
-9	import reactHooks from 'eslint-plugin-react-hooks';
-10	
-11	// Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
-12	// Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
-13	// Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
-14	
-15	export default [
-16	  ...tanstackConfig,
-17	  reactPlugin.configs.flat.recommended,
-18	  reactPlugin.configs.flat['jsx-runtime'],
-19	  // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
-20	  // but the top-level recommended-latest still uses the legacy string array format,
-21	  // so we construct the flat config object manually here.
-22	  {
-23	    plugins: {
-24	      'react-hooks': reactHooks,
-25	      // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
-26	      'eslint-comments': eslintComments,
-27	    },
-28	    rules: reactHooks.configs['recommended-latest'].rules,
-29	  },
-30	  jsxA11y.flatConfigs.recommended,
-31	  eslintPluginUnicorn.configs.recommended,
-32	  {
-33	    settings: {
-34	      react: { version: 'detect' },
-35	    },
-36	    rules: {
-37	      // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
-38	      // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
-39	      // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
-40	      // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
-41	      'unicorn/filename-case': 'off',
-42	      'unicorn/prevent-abbreviations': 'off',
-43	      'unicorn/no-null': 'off',
-44	      // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
-45	      'unicorn/relative-url-style': ['error', 'always'],
-46	
-47	      // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
-48	      'eslint-comments/require-description': 'error',
-49	
-50	      'import/no-default-export': 'error',
-51	      'import/no-cycle': 'off',
-52	      '@typescript-eslint/array-type': 'off',
-53	      '@typescript-eslint/require-await': 'off',
-54	      'pnpm/json-enforce-catalog': 'off',
-55	      '@typescript-eslint/no-explicit-any': 'error',
-56	      '@typescript-eslint/no-unsafe-assignment': 'error',
-57	
-58	      'import/order': [
-59	        'error',
-60	        {
-61	          groups: [
-62	            'builtin',
-63	            'external',
-64	            'internal',
-65	            'parent',
-66	            'sibling',
-67	            'index',
-68	            'object',
-69	            'type',
-70	          ],
-71	          alphabetize: { order: 'asc', caseInsensitive: true },
-72	        },
-73	      ],
-74	
-75	      // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
-76	      // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
-77	      'arrow-body-style': ['error', 'as-needed'],
-78	
-79	      'react/function-component-definition': [
-80	        'error',
-81	        {
-82	          namedComponents: 'arrow-function',
-83	          unnamedComponents: 'arrow-function',
-84	        },
-85	      ],
-86	      'react/jsx-max-depth': ['warn', { max: 5 }],
-87	      'react/no-unstable-nested-components': 'error',
-88	      'react/no-array-index-key': 'warn',
-89	      // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
-90	      // enforcing no-spread would require per-file disables or unnatural APIs.
-91	      'react/jsx-props-no-spreading': 'off',
-92	      'react/no-unknown-property': 'error',
-93	
-94	      '@typescript-eslint/no-unused-vars': [
-95	        'error',
-96	        {
-97	          argsIgnorePattern: '^_',
-98	          varsIgnorePattern: '^_',
-99	        },
-100	      ],
-101	    },
-102	  },
-103	  {
-104	    files: ['src/**/*.ts', '!src/**/*.tsx'],
-105	    rules: {
-106	      '@typescript-eslint/explicit-module-boundary-types': 'warn',
-107	    },
-108	  },
-109	  eslintConfigPrettier,
-110	  // Prettier disables these in eslint-config-prettier; we re-enable after it.
-111	  // For operator-linebreak, use `null` as the position so the rule’s built-in default
-112	  // applies: `?` / `:` → "before" only; other operators use "after" (Prettier-friendly).
-113	  // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
-114	  {
-115	    rules: {
-116	      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
-117	      '@stylistic/operator-linebreak': [
-118	        'error',
-119	        null,
-120	        {
-121	          // Prettier often puts leading `|` / `&` in multiline union/intersection types.
-122	          overrides: { '|': 'ignore', '&': 'ignore' },
-123	        },
-124	      ],
-125	    },
-126	  },
-127	  {
-128	    // Framework config files require `export default` by convention (Vite, Vitest,
-129	    // Playwright, Knip); allow it only in these root-level config files.
-130	    files: [
-131	      'vite.config.ts',
-132	      'vitest.config.ts',
-133	      'playwright.config.ts',
-134	      'knip.config.ts',
-135	    ],
-136	    rules: {
-137	      'import/no-default-export': 'off',
-138	    },
-139	  },
-140	  {
-141	    // TanStack Router output; ships with undescribed blanket eslint-disable
-142	    ignores: [
-143	      'eslint.config.js',
-144	      'prettier.config.js',
-145	      '**/routeTree.gen.ts',
-146	      '.specstory/**',
-147	    ],
-148	  },
-149	];
+1 //  @ts-check
+2 
+3 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+4 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+5 import { tanstackConfig } from '@tanstack/eslint-config';
+6 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+7 import jsxA11y from 'eslint-plugin-jsx-a11y';
+8 import reactPlugin from 'eslint-plugin-react';
+9 import reactHooks from 'eslint-plugin-react-hooks';
+10 
+11 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
+12 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
+13 // Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
+14 
+15 export default [
+16   ...tanstackConfig,
+17   reactPlugin.configs.flat.recommended,
+18   reactPlugin.configs.flat['jsx-runtime'],
+19   // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
+20   // but the top-level recommended-latest still uses the legacy string array format,
+21   // so we construct the flat config object manually here.
+22   {
+23     plugins: {
+24       'react-hooks': reactHooks,
+25       // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
+26       'eslint-comments': eslintComments,
+27     },
+28     rules: reactHooks.configs['recommended-latest'].rules,
+29   },
+30   jsxA11y.flatConfigs.recommended,
+31   eslintPluginUnicorn.configs.recommended,
+32   {
+33     settings: {
+34       react: { version: 'detect' },
+35     },
+36     rules: {
+37       // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
+38       // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
+39       // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
+40       // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
+41       'unicorn/filename-case': 'off',
+42       'unicorn/prevent-abbreviations': 'off',
+43       'unicorn/no-null': 'off',
+44       // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
+45       'unicorn/relative-url-style': ['error', 'always'],
+46 
+47       // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
+48       'eslint-comments/require-description': 'error',
+49 
+50       'import/no-default-export': 'error',
+51       'import/no-cycle': 'off',
+52       '@typescript-eslint/array-type': 'off',
+53       '@typescript-eslint/require-await': 'off',
+54       'pnpm/json-enforce-catalog': 'off',
+55       '@typescript-eslint/no-explicit-any': 'error',
+56       '@typescript-eslint/no-unsafe-assignment': 'error',
+57 
+58       'import/order': [
+59         'error',
+60         {
+61           groups: [
+62             'builtin',
+63             'external',
+64             'internal',
+65             'parent',
+66             'sibling',
+67             'index',
+68             'object',
+69             'type',
+70           ],
+71           alphabetize: { order: 'asc', caseInsensitive: true },
+72         },
+73       ],
+74 
+75       // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
+76       // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
+77       'arrow-body-style': ['error', 'as-needed'],
+78 
+79       'react/function-component-definition': [
+80         'error',
+81         {
+82           namedComponents: 'arrow-function',
+83           unnamedComponents: 'arrow-function',
+84         },
+85       ],
+86       'react/jsx-max-depth': ['warn', { max: 5 }],
+87       'react/no-unstable-nested-components': 'error',
+88       'react/no-array-index-key': 'warn',
+89       // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
+90       // enforcing no-spread would require per-file disables or unnatural APIs.
+91       'react/jsx-props-no-spreading': 'off',
+92       'react/no-unknown-property': 'error',
+93 
+94       '@typescript-eslint/no-unused-vars': [
+95         'error',
+96         {
+97           argsIgnorePattern: '^_',
+98           varsIgnorePattern: '^_',
+99         },
+100       ],
+101     },
+102   },
+103   {
+104     files: ['src/**/*.ts', '!src/**/*.tsx'],
+105     rules: {
+106       '@typescript-eslint/explicit-module-boundary-types': 'warn',
+107     },
+108   },
+109   eslintConfigPrettier,
+110   // Prettier disables these in eslint-config-prettier; we re-enable after it.
+111   // For operator-linebreak, use `null` as the position so the rule’s built-in default
+112   // applies: `?` / `:` → "before" only; other operators use "after" (Prettier-friendly).
+113   // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
+114   {
+115     rules: {
+116       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+117       '@stylistic/operator-linebreak': [
+118         'error',
+119         null,
+120         {
+121           // Prettier often puts leading `|` / `&` in multiline union/intersection types.
+122           overrides: { '|': 'ignore', '&': 'ignore' },
+123         },
+124       ],
+125     },
+126   },
+127   {
+128     // Framework config files require `export default` by convention (Vite, Vitest,
+129     // Playwright, Knip); allow it only in these root-level config files.
+130     files: [
+131       'vite.config.ts',
+132       'vitest.config.ts',
+133       'playwright.config.ts',
+134       'knip.config.ts',
+135     ],
+136     rules: {
+137       'import/no-default-export': 'off',
+138     },
+139   },
+140   {
+141     // TanStack Router output; ships with undescribed blanket eslint-disable
+142     ignores: [
+143       'eslint.config.js',
+144       'prettier.config.js',
+145       '**/routeTree.gen.ts',
+146       '.specstory/**',
+147     ],
+148   },
+149 ];
 150
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:45:28Z)**_
@@ -355,7 +357,6 @@ The issue is the `@stylistic/multiline-ternary` rule set to `'always-multiline'`
 ```
 
 The `@stylistic/multiline-ternary` with `'always-multiline'` would likely fight with Prettier's formatting, or force all three parts (`condition`, `?`, `:`) to be on separate lines.
-
 
 The user is asking whether they can keep that formatting style or if they should disable the ternary rules and let Prettier handle it. I'm realizing that `always-multiline` actually requires the `?` and `:` operators to be on their own lines when the ternary spans multiple lines, which conflicts with the format they're showing where the operators stay with the condition and colon.
 
@@ -384,6 +385,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 11:45:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/eslint.config.js has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:45:36Z)**_
@@ -447,6 +449,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 11:49:51Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:49:54Z)**_
@@ -456,178 +459,179 @@ _**Agent (claude-sonnet-4-6 2026-04-01 11:49:54Z)**_
  `./worktrees/milestone-3-app-shell/eslint.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
-4	import stylisticPlugin from '@stylistic/eslint-plugin';
-5	import { tanstackConfig } from '@tanstack/eslint-config';
-6	import eslintConfigPrettier from 'eslint-config-prettier/flat';
-7	import importPlugin from 'eslint-plugin-import-x';
-8	import jsxA11y from 'eslint-plugin-jsx-a11y';
-9	import reactPlugin from 'eslint-plugin-react';
-10	import reactHooks from 'eslint-plugin-react-hooks';
-11	import eslintPluginUnicorn from 'eslint-plugin-unicorn';
-12	import tseslint from 'typescript-eslint';
-13	
-14	// Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
-15	// Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
-16	// Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
-17	
-18	export default [
-19	  ...tanstackConfig,
-20	  reactPlugin.configs.flat.recommended,
-21	  reactPlugin.configs.flat['jsx-runtime'],
-22	  // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
-23	  // but the top-level recommended-latest still uses the legacy string array format,
-24	  // so we construct the flat config object manually here.
-25	  {
-26	    plugins: {
-27	      'react-hooks': reactHooks,
-28	      // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
-29	      'eslint-comments': eslintComments,
-30	    },
-31	    rules: reactHooks.configs['recommended-latest'].rules,
-32	  },
-33	  jsxA11y.flatConfigs.recommended,
-34	  eslintPluginUnicorn.configs.recommended,
-35	  // Global plugin registry — makes plugins available to all subsequent config objects.
-36	  // ESLint v9 flat config requires plugins to be declared in each config object that
-37	  // uses their rules; registering here (no rules) satisfies that requirement globally.
-38	  {
-39	    plugins: {
-40	      import: importPlugin,
-41	      '@stylistic': stylisticPlugin,
-42	      '@typescript-eslint': tseslint.plugin,
-43	    },
-44	  },
-45	  {
-46	    settings: {
-47	      react: { version: 'detect' },
-48	    },
-49	    rules: {
-50	      // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
-51	      // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
-52	      // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
-53	      // Radix); disable rules instead of "fixing" imports or prop shapes to satisfy ESLint.
-54	      'unicorn/filename-case': 'off',
-55	      'unicorn/prevent-abbreviations': 'off',
-56	      'unicorn/no-null': 'off',
-57	      // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
-58	      'unicorn/relative-url-style': ['error', 'always'],
-59	
-60	      // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
-61	      'eslint-comments/require-description': 'error',
-62	
-63	      'import/no-default-export': 'error',
-64	      'import/no-cycle': 'off',
-65	      'pnpm/json-enforce-catalog': 'off',
-66	
-67	      'import/order': [
-68	        'error',
-69	        {
-70	          groups: [
-71	            'builtin',
-72	            'external',
-73	            'internal',
-74	            'parent',
-75	            'sibling',
-76	            'index',
-77	            'object',
-78	            'type',
-79	          ],
-80	          alphabetize: { order: 'asc', caseInsensitive: true },
-81	        },
-82	      ],
-83	
-84	      // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
-85	      // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
-86	      'arrow-body-style': ['error', 'as-needed'],
-87	
-88	      'react/function-component-definition': [
-89	        'error',
-90	        {
-91	          namedComponents: 'arrow-function',
-92	          unnamedComponents: 'arrow-function',
-93	        },
-94	      ],
-95	      'react/jsx-max-depth': ['warn', { max: 5 }],
-96	      'react/no-unstable-nested-components': 'error',
-97	      'react/no-array-index-key': 'warn',
-98	      // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
-99	      // enforcing no-spread would require per-file disables or unnatural APIs.
-100	      'react/jsx-props-no-spreading': 'off',
-101	      'react/no-unknown-property': 'error',
-102	    },
-103	  },
-104	  // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript
-105	  // parser (set up by tanstackConfig) and must not run on plain JS or config files.
-106	  {
-107	    files: ['**/*.{ts,tsx}'],
-108	    rules: {
-109	      '@typescript-eslint/array-type': 'off',
-110	      '@typescript-eslint/require-await': 'off',
-111	      '@typescript-eslint/no-explicit-any': 'error',
-112	      '@typescript-eslint/no-unsafe-assignment': 'error',
-113	      '@typescript-eslint/no-unused-vars': [
-114	        'error',
-115	        {
-116	          argsIgnorePattern: '^_',
-117	          varsIgnorePattern: '^_',
-118	        },
-119	      ],
-120	    },
-121	  },
-122	  {
-123	    files: ['src/**/*.ts', '!src/**/*.tsx'],
-124	    rules: {
-125	      '@typescript-eslint/explicit-module-boundary-types': 'warn',
-126	    },
-127	  },
-128	  eslintConfigPrettier,
-129	  // Prettier disables these in eslint-config-prettier; we re-enable after it.
-130	  // For operator-linebreak, use `null` as the position so the rule's built-in default
-131	  // applies: `?` / `:` -> "before" only; other operators use "after" (Prettier-friendly).
-132	  // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
-133	  {
-134	    rules: {
-135	      '@stylistic/multiline-ternary': ['error', 'always-multiline'],
-136	      '@stylistic/operator-linebreak': [
-137	        'error',
-138	        null,
-139	        {
-140	          // Prettier often puts leading `|` / `&` in multiline union/intersection types.
-141	          overrides: { '|': 'ignore', '&': 'ignore' },
-142	        },
-143	      ],
-144	    },
-145	  },
-146	  {
-147	    // Framework config files require `export default` by convention (Vite, Vitest,
-148	    // Playwright, Knip, lint-staged); allow it only in these root-level config files.
-149	    files: [
-150	      'vite.config.ts',
-151	      'vitest.config.ts',
-152	      'playwright.config.ts',
-153	      'knip.config.ts',
-154	      '.lintstagedrc.mjs',
-155	    ],
-156	    rules: {
-157	      'import/no-default-export': 'off',
-158	    },
-159	  },
-160	  {
-161	    // TanStack Router output; ships with undescribed blanket eslint-disable
-162	    ignores: [
-163	      'eslint.config.js',
-164	      'prettier.config.js',
-165	      '**/routeTree.gen.ts',
-166	      '.specstory/**',
-167	      '.lintstagedrc.mjs',
-168	    ],
-169	  },
-170	];
+1 //  @ts-check
+2 
+3 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+4 import stylisticPlugin from '@stylistic/eslint-plugin';
+5 import { tanstackConfig } from '@tanstack/eslint-config';
+6 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+7 import importPlugin from 'eslint-plugin-import-x';
+8 import jsxA11y from 'eslint-plugin-jsx-a11y';
+9 import reactPlugin from 'eslint-plugin-react';
+10 import reactHooks from 'eslint-plugin-react-hooks';
+11 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+12 import tseslint from 'typescript-eslint';
+13 
+14 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
+15 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
+16 // Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
+17 
+18 export default [
+19   ...tanstackConfig,
+20   reactPlugin.configs.flat.recommended,
+21   reactPlugin.configs.flat['jsx-runtime'],
+22   // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
+23   // but the top-level recommended-latest still uses the legacy string array format,
+24   // so we construct the flat config object manually here.
+25   {
+26     plugins: {
+27       'react-hooks': reactHooks,
+28       // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
+29       'eslint-comments': eslintComments,
+30     },
+31     rules: reactHooks.configs['recommended-latest'].rules,
+32   },
+33   jsxA11y.flatConfigs.recommended,
+34   eslintPluginUnicorn.configs.recommended,
+35   // Global plugin registry — makes plugins available to all subsequent config objects.
+36   // ESLint v9 flat config requires plugins to be declared in each config object that
+37   // uses their rules; registering here (no rules) satisfies that requirement globally.
+38   {
+39     plugins: {
+40       import: importPlugin,
+41       '@stylistic': stylisticPlugin,
+42       '@typescript-eslint': tseslint.plugin,
+43     },
+44   },
+45   {
+46     settings: {
+47       react: { version: 'detect' },
+48     },
+49     rules: {
+50       // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
+51       // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
+52       // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
+53       // Radix); disable rules instead of "fixing" imports or prop shapes to satisfy ESLint.
+54       'unicorn/filename-case': 'off',
+55       'unicorn/prevent-abbreviations': 'off',
+56       'unicorn/no-null': 'off',
+57       // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
+58       'unicorn/relative-url-style': ['error', 'always'],
+59 
+60       // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
+61       'eslint-comments/require-description': 'error',
+62 
+63       'import/no-default-export': 'error',
+64       'import/no-cycle': 'off',
+65       'pnpm/json-enforce-catalog': 'off',
+66 
+67       'import/order': [
+68         'error',
+69         {
+70           groups: [
+71             'builtin',
+72             'external',
+73             'internal',
+74             'parent',
+75             'sibling',
+76             'index',
+77             'object',
+78             'type',
+79           ],
+80           alphabetize: { order: 'asc', caseInsensitive: true },
+81         },
+82       ],
+83 
+84       // Layout (semicolons, quotes, commas, spacing, arrows) is handled by Prettier +
+85       // eslint-config-prettier. Trailing commas: `trailingComma: 'all'` in prettier.config.js.
+86       'arrow-body-style': ['error', 'as-needed'],
+87 
+88       'react/function-component-definition': [
+89         'error',
+90         {
+91           namedComponents: 'arrow-function',
+92           unnamedComponents: 'arrow-function',
+93         },
+94       ],
+95       'react/jsx-max-depth': ['warn', { max: 5 }],
+96       'react/no-unstable-nested-components': 'error',
+97       'react/no-array-index-key': 'warn',
+98       // Shadcn/Radix wrappers use `{...props}` with `ComponentProps<typeof Primitive>`;
+99       // enforcing no-spread would require per-file disables or unnatural APIs.
+100       'react/jsx-props-no-spreading': 'off',
+101       'react/no-unknown-property': 'error',
+102     },
+103   },
+104   // TypeScript-specific rules scoped to TS/TSX files — these require the TypeScript
+105   // parser (set up by tanstackConfig) and must not run on plain JS or config files.
+106   {
+107     files: ['**/*.{ts,tsx}'],
+108     rules: {
+109       '@typescript-eslint/array-type': 'off',
+110       '@typescript-eslint/require-await': 'off',
+111       '@typescript-eslint/no-explicit-any': 'error',
+112       '@typescript-eslint/no-unsafe-assignment': 'error',
+113       '@typescript-eslint/no-unused-vars': [
+114         'error',
+115         {
+116           argsIgnorePattern: '^_',
+117           varsIgnorePattern: '^_',
+118         },
+119       ],
+120     },
+121   },
+122   {
+123     files: ['src/**/*.ts', '!src/**/*.tsx'],
+124     rules: {
+125       '@typescript-eslint/explicit-module-boundary-types': 'warn',
+126     },
+127   },
+128   eslintConfigPrettier,
+129   // Prettier disables these in eslint-config-prettier; we re-enable after it.
+130   // For operator-linebreak, use `null` as the position so the rule's built-in default
+131   // applies: `?` / `:` -> "before" only; other operators use "after" (Prettier-friendly).
+132   // Passing `"before"` globally fights Prettier on `=`, `&&`, `&` in types, etc.
+133   {
+134     rules: {
+135       '@stylistic/multiline-ternary': ['error', 'always-multiline'],
+136       '@stylistic/operator-linebreak': [
+137         'error',
+138         null,
+139         {
+140           // Prettier often puts leading `|` / `&` in multiline union/intersection types.
+141           overrides: { '|': 'ignore', '&': 'ignore' },
+142         },
+143       ],
+144     },
+145   },
+146   {
+147     // Framework config files require `export default` by convention (Vite, Vitest,
+148     // Playwright, Knip, lint-staged); allow it only in these root-level config files.
+149     files: [
+150       'vite.config.ts',
+151       'vitest.config.ts',
+152       'playwright.config.ts',
+153       'knip.config.ts',
+154       '.lintstagedrc.mjs',
+155     ],
+156     rules: {
+157       'import/no-default-export': 'off',
+158     },
+159   },
+160   {
+161     // TanStack Router output; ships with undescribed blanket eslint-disable
+162     ignores: [
+163       'eslint.config.js',
+164       'prettier.config.js',
+165       '**/routeTree.gen.ts',
+166       '.specstory/**',
+167       '.lintstagedrc.mjs',
+168     ],
+169   },
+170 ];
 171
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:49:59Z)**_
@@ -644,6 +648,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 11:50:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/milestone-3-app-shell/eslint.config.js has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 11:50:07Z)**_

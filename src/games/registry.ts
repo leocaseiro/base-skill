@@ -49,4 +49,16 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
       gradient: ['#bbf7d0', '#10b981'],
     },
   },
+  {
+    id: 'spot-all',
+    titleKey: 'spot-all',
+    descriptionKey: 'spot-all-description',
+    levels: ['PK', 'K', '1'],
+    subject: 'letters',
+    defaultCover: {
+      kind: 'emoji',
+      emoji: '🕵️',
+      gradient: ['#ddd6fe', '#60a5fa'],
+    },
+  },
 ];

@@ -23,6 +23,7 @@ _**Agent (default)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -36,6 +37,7 @@ _**Agent (default)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -56,10 +58,12 @@ git worktree list && git rev-parse --show-toplevel && git branch --show-current
 master
 
 ```
+
 </details>
 </tool-use>
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
@@ -76,16 +80,17 @@ _**Agent (default)**_
 
 Directory: **/Users/leocaseiro/.cursor/projects/Users-leocaseiro-Sites-base-skill/terminals** (3 files)
 
-| File |
-|------|
-| `1.txt` |
+| File         |
+| ------------ |
+| `1.txt`      |
 | `354857.txt` |
-| `23051.txt` |
+| `23051.txt`  |
 
 </details>
 </tool-use>
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+
 <summary>Tool use: **glob_file_search**</summary>
 
 </details></tool-use>
@@ -103,10 +108,12 @@ pwd
 /Users/leocaseiro/Sites/base-skill
 
 ```
+
 </details>
 </tool-use>
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
@@ -120,6 +127,7 @@ _**Agent (default)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -133,6 +141,7 @@ _**Agent (default)**_
 </tool-use>
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+
 <summary>Tool use: **read_file_v2**</summary>
 
 </details></tool-use>
@@ -199,10 +208,12 @@ git worktree list
 /Users/leocaseiro/Sites/base-skill/.worktrees/milestone-1-scaffolding f488094 [milestone-1-scaffolding]
 
 ```
+
 </details>
 </tool-use>
 
 <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+
 <summary>Tool use: **run_terminal_command_v2**</summary>
 
 </details></tool-use>
@@ -235,18 +246,18 @@ _**Agent (default)**_
 
 From your repo root, the normal flow is:
 
-1. Check what changed  
+1. Check what changed
    - `git status`
 
-2. Stage files  
-   - All changes: `git add .`  
+2. Stage files
+   - All changes: `git add .`
    - Specific files: `git add path/to/file`
 
-3. Commit with a message  
+3. Commit with a message
    - `git commit -m "describe why this change exists"`
 
-4. Push to GitHub  
-   - Current branch: `git push`  
+4. Push to GitHub
+   - Current branch: `git push`
    - First push for a new branch: `git push -u origin <branch-name>`
 
 Quick example:

@@ -26,6 +26,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:49:15Z)**_
 ```text
 Launching skill: superpowers:writing-plans
 ```
+
 </details></tool-use>
 
 ---
@@ -47,6 +48,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
 **Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+
 - (User preferences for plan location override this default)
 
 ## Scope Check
@@ -67,6 +69,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
+
 - "Write the failing test" - step
 - "Run it to make sure it fails" - step
 - "Implement the minimal code to make the test pass" - step
@@ -137,6 +140,7 @@ git commit -m "feat: add specific feature"
 ## No Placeholders
 
 Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
+
 - "TBD", "TODO", "implement later", "fill in details"
 - "Add appropriate error handling" / "add validation" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
@@ -145,6 +149,7 @@ Every step must contain the actual content an engineer needs. These are **plan f
 - References to types, functions, or methods not defined in any task
 
 ## Remember
+
 - Exact file paths always
 - Complete code in every step — if a step changes code, show the code
 - Exact commands with expected output
@@ -175,13 +180,14 @@ After saving the plan, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
 
 **If Inline Execution chosen:**
+
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
 - Batch execution with checkpoints for review
-
 
 ---
 
@@ -202,316 +208,317 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:49:19Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-1	# Storybook Setup Design
-2	
-3	**Date:** 2026-04-02
-4	**Status:** Approved
-5	
-6	---
-7	
-8	## Overview
-9	
-10	Set up Storybook 10 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
-11	
-12	---
-13	
-14	## Architecture & Deployment
-15	
-16	Storybook 10 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
-17	
-18	**Config structure:**
-19	
-20	```
-21	.storybook/
-22	  main.ts               ← addon list, viteFinal sets base: '/base-skill/docs/'
-23	  preview.ts            ← global decorators (theme, i18n, providers), viewport config, CSS import
-24	  decorators/
-25	    withTheme.tsx       ← injects CSS vars from toolbar theme selection
-26	```
-27	
-28	`styles.css` is imported directly in `preview.ts` via `import '../src/styles.css'` — the standard Vite approach. No `preview-head.html` needed.
-29	
-30	**Build output merging:**
-31	
-32	```
-33	dist/                   → https://leocaseiro.github.io/base-skill/
-34	dist/docs/              → https://leocaseiro.github.io/base-skill/docs/
-35	```
-36	
-37	Storybook builds to `storybook-static/`, then CI copies it to `dist/docs/` after the main app builds. One `gh-pages` branch, one deploy step, two static apps.
-38	
-39	**Development:** Storybook runs on port 6006 (`yarn storybook`) alongside the main app on port 3000 (`yarn dev`). No conflicts.
-40	
-41	**App navigation:** A "Docs" link in the app header points to `/base-skill/docs/`. No TanStack route is needed — the browser loads Storybook's own `index.html`, which handles all internal navigation via query params (`?path=/story/...`). Deep links are bookmarkable and shareable.
-42	
-43	---
-44	
-45	## Story Conventions
-46	
-47	Stories use CSF 3.0, co-located with their source file:
-48	
-49	```
-50	src/components/GameCard.tsx
-51	src/components/GameCard.stories.tsx      ← component stories
-52	
-53	src/lib/speech/SpeechOutput.ts
-54	src/lib/speech/SpeechOutput.stories.mdx ← MDX for services
-55	src/lib/speech/SpeechOutput.demo.tsx    ← interactive demo component
-56	```
-57	
-58	**Standard component story structure:**
-59	
-60	```tsx
-61	import type { Meta, StoryObj } from '@storybook/react';
-62	import { GameCard } from './GameCard';
-63	
-64	const meta: Meta<typeof GameCard> = {
-65	  component: GameCard,
-66	  tags: ['autodocs'],
-67	  args: {
-68	    isBookmarked: false,
-69	  },
-70	};
-71	export default meta;
-72	
-73	type Story = StoryObj<typeof GameCard>;
-74	
-75	export const Default: Story = { args: { ... } };
-76	export const Bookmarked: Story = { args: { isBookmarked: true } };
-77	```
-78	
-79	**Rules:**
-80	
-81	- All component stories get `tags: ['autodocs']` — auto-generates a docs page with prop table and live examples
-82	- Callbacks (`onPlay`, `onBookmarkToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
-83	- Each meaningful visual state gets its own named export (`Default`, `Bookmarked`, `Loading`, `Empty`, etc.)
-84	- shadcn/ui primitives (`button.tsx`, `card.tsx`, `input.tsx`, etc.) also get stories — they are the VR baselines for the design system
-85	- `export default meta` is required by Storybook's CSF format — `.stories.tsx` files and all `.storybook/` config files are treated as framework config files, exempt from the project's no-default-export rule
-86	
-87	---
-88	
-89	## Theme Decorator & Toolbar
-90	
-91	A global decorator in `preview.ts` calls the same `injectCssVars()` function from `src/lib/theme/css-vars.ts` that the app already uses. No duplication — theme changes in the app automatically reflect in Storybook.
-92	
-93	A "Theme" dropdown in the Storybook toolbar is populated from `src/lib/theme/default-tokens.ts`. Selecting a theme applies its CSS variables to the story wrapper element.
-94	
-95	```ts
-96	// .storybook/preview.ts
-97	export const globalTypes = {
-98	  theme: {
-99	    name: 'Theme',
-100	    toolbar: {
-101	      icon: 'paintbrush',
-102	      items: ['light', 'dark', 'high-contrast'],
-103	      dynamicTitle: true,
-104	    },
-105	  },
-106	};
-107	
-108	export const decorators = [withTheme];
-109	```
-110	
-111	The `withTheme` decorator also toggles the `<html>` class (`light`/`dark`) to match the app's `THEME_INIT_SCRIPT` behaviour, ensuring dark mode CSS rules apply correctly in stories.
-112	
-113	---
-114	
-115	## Service & Utility Stories
-116	
-117	Non-visual modules use MDX files with interactive demo components where the service can run in the browser.
-118	
-119	**Pattern for services with side effects:**
-120	
-121	```
-122	src/lib/speech/SpeechOutput.stories.mdx   ← API docs + embedded demo
-123	src/lib/speech/SpeechOutput.demo.tsx      ← minimal interactive React component
-124	```
-125	
-126	The `.demo.tsx` file is Storybook-only — not a test, not production code. It provides just enough UI to exercise the service interactively.
-127	
-128	**RxDB hooks** (`useSettings`, `useBookmarks`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
-129	
-130	**Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
-131	
-132	**Services covered in this milestone:**
-133	
-134	| Module           | Story type | Interactive?                |
-135	| ---------------- | ---------- | --------------------------- |
-136	| `SpeechOutput`   | MDX + demo | Yes — speak button          |
-137	| `SpeechInput`    | MDX + demo | Yes — listen button         |
-138	| `game-event-bus` | MDX + demo | Yes — emit/subscribe UI     |
-139	| `useSettings`    | MDX + demo | Yes — wrapped in DbProvider |
-140	| `useBookmarks`   | MDX + demo | Yes — wrapped in DbProvider |
-141	| `useRxQuery`     | MDX + demo | Yes — wrapped in DbProvider |
-142	| `css-vars`       | MDX only   | No                          |
-143	| `catalog-utils`  | MDX only   | No                          |
-144	| `i18n`           | MDX only   | No                          |
-145	
-146	---
-147	
-148	## Viewport Configuration
-149	
-150	Default viewport is **Tablet Landscape** — the primary device orientation for children using this app.
-151	
-152	```ts
-153	export const parameters = {
-154	  viewport: {
-155	    viewports: {
-156	      mobileSm: {
-157	        name: 'Phone S (360×640)',
-158	        styles: { width: '360px', height: '640px' },
-159	      },
-160	      mobileLg: {
-161	        name: 'Phone L (390×844)',
-162	        styles: { width: '390px', height: '844px' },
-163	      },
-164	      tabletPortrait: {
-165	        name: 'Tablet Portrait (768×1024)',
-166	        styles: { width: '768px', height: '1024px' },
-167	      },
-168	      tabletLandscape: {
-169	        name: 'Tablet Landscape (1024×768)',
-170	        styles: { width: '1024px', height: '768px' },
-171	      },
-172	      desktop: {
-173	        name: 'Desktop (1280×800)',
-174	        styles: { width: '1280px', height: '800px' },
-175	      },
-176	    },
-177	    defaultViewport: 'tabletLandscape',
-178	  },
-179	};
-180	```
-181	
-182	---
-183	
-184	## Visual Regression & Accessibility Testing
-185	
-186	**Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
-187	
-188	**VR screenshots** are captured at three viewports per story:
-189	
-190	- `mobileLg` (390×844)
-191	- `tabletPortrait` (768×1024)
-192	- `tabletLandscape` (1024×768)
-193	
-194	Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
-195	
-196	Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
-197	
-198	**Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
-199	
-200	**Trace recording:** Playwright traces are enabled with `trace: 'retain-on-failure'` in `playwright.config.ts`. The test-runner respects this config, so any failed story test (VR diff, a11y violation, crash) produces a `.zip` trace file. Traces are uploaded as a CI artifact and can be replayed locally with:
-201	
-202	```bash
-203	npx playwright show-trace trace.zip
-204	```
-205	
-206	This allows step-by-step reproduction of any failing test without needing to re-run CI.
-207	
-208	---
-209	
-210	## CI Integration
-211	
-212	Two additions to the GitHub Actions workflow:
-213	
-214	**`storybook-build` step** (after main app build, before deploy):
-215	
-216	```yaml
-217	- name: Build Storybook
-218	  run: yarn build-storybook --output-dir storybook-static
-219	
-220	- name: Merge into dist
-221	  run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
-222	```
-223	
-224	**`storybook-test` step** (separate job, runs against built output):
-225	
-226	```yaml
-227	- name: Serve Storybook
-228	  run: npx http-server storybook-static --port 6006 &
-229	
-230	- name: Run Storybook tests
-231	  run: yarn test-storybook --url http://localhost:6006
-232	
-233	- name: Upload Playwright traces on failure
-234	  if: failure()
-235	  uses: actions/upload-artifact@v4
-236	  with:
-237	    name: storybook-playwright-traces
-238	    path: test-results/
-239	    retention-days: 7
-240	```
-241	
-242	**New `package.json` scripts:**
-243	
-244	```json
-245	"storybook": "storybook dev --port 6006",
-246	"build-storybook": "storybook build",
-247	"test:storybook": "test-storybook"
-248	```
-249	
-250	---
-251	
-252	## Addons
-253	
-254	| Addon                         | Purpose                                                      |
-255	| ----------------------------- | ------------------------------------------------------------ |
-256	| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars     |
-257	| `@storybook/addon-a11y`       | Accessibility panel + CI assertions                          |
-258	| `@storybook/addon-themes`     | Theme toolbar integration                                    |
-259	| `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)            |
-260	| `@storybook/addon-mcp`        | MCP server for AI-assisted story authoring (Storybook 10.3+) |
-261	
-262	---
-263	
-264	## MCP Developer Tooling
-265	
-266	Two MCP servers are configured to enable AI-assisted development with Claude Code against the running Storybook instance.
-267	
-268	**`@storybook/addon-mcp`** — installed as a Storybook addon. When `yarn storybook` runs, it auto-starts an MCP server at `http://localhost:6006/mcp`. Claude Code can use it to query the component catalog, inspect story metadata, and trigger test execution without leaving the editor. Install via:
-269	
-270	```bash
-271	npx storybook add @storybook/addon-mcp
-272	```
-273	
-274	**`@playwright/mcp`** — configured in the project's `.mcp.json` as a local MCP server. Gives Claude Code a live browser to navigate Storybook, interact with Controls, take screenshots, and replay failing VR tests visually. Config:
-275	
-276	```json
-277	{
-278	  "mcpServers": {
-279	    "playwright": {
-280	      "command": "npx",
-281	      "args": ["@playwright/mcp@latest"]
-282	    }
-283	  }
-284	}
-285	```
-286	
-287	**How they complement each other during development:**
-288	
-289	| Task                                   | Tool                                                      |
-290	| -------------------------------------- | --------------------------------------------------------- |
-291	| "What props does `GameCard` accept?"   | Storybook MCP — queries story metadata                    |
-292	| "Show me the Bookmarked variant"       | Storybook MCP — previews story live                       |
-293	| "Why is this VR test failing?"         | Playwright MCP — navigates browser, takes screenshot      |
-294	| "Write a story for this new component" | Storybook MCP — provides component context for generation |
-295	
-296	Neither MCP server is used in CI — they are local dev tooling only.
-297	
-298	---
-299	
-300	## Scope for This Milestone
-301	
-302	This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
-303	
-304	- `src/components/` — all components including shadcn/ui primitives
-305	- `src/lib/` — speech, theme, i18n, game-event-bus
-306	- `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
-307	
-308	Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
+1 # Storybook Setup Design
+2 
+3 **Date:** 2026-04-02
+4 **Status:** Approved
+5 
+6 ---
+7 
+8 ## Overview
+9 
+10 Set up Storybook 10 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
+11 
+12 ---
+13 
+14 ## Architecture & Deployment
+15 
+16 Storybook 10 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
+17 
+18 **Config structure:**
+19 
+20 ```
+21 .storybook/
+22   main.ts               ← addon list, viteFinal sets base: '/base-skill/docs/'
+23   preview.ts            ← global decorators (theme, i18n, providers), viewport config, CSS import
+24   decorators/
+25     withTheme.tsx       ← injects CSS vars from toolbar theme selection
+26 ```
+27 
+28 `styles.css` is imported directly in `preview.ts` via `import '../src/styles.css'` — the standard Vite approach. No `preview-head.html` needed.
+29 
+30 **Build output merging:**
+31 
+32 ```
+33 dist/                   → https://leocaseiro.github.io/base-skill/
+34 dist/docs/              → https://leocaseiro.github.io/base-skill/docs/
+35 ```
+36 
+37 Storybook builds to `storybook-static/`, then CI copies it to `dist/docs/` after the main app builds. One `gh-pages` branch, one deploy step, two static apps.
+38 
+39 **Development:** Storybook runs on port 6006 (`yarn storybook`) alongside the main app on port 3000 (`yarn dev`). No conflicts.
+40 
+41 **App navigation:** A "Docs" link in the app header points to `/base-skill/docs/`. No TanStack route is needed — the browser loads Storybook's own `index.html`, which handles all internal navigation via query params (`?path=/story/...`). Deep links are bookmarkable and shareable.
+42 
+43 ---
+44 
+45 ## Story Conventions
+46 
+47 Stories use CSF 3.0, co-located with their source file:
+48 
+49 ```
+50 src/components/GameCard.tsx
+51 src/components/GameCard.stories.tsx      ← component stories
+52 
+53 src/lib/speech/SpeechOutput.ts
+54 src/lib/speech/SpeechOutput.stories.mdx ← MDX for services
+55 src/lib/speech/SpeechOutput.demo.tsx    ← interactive demo component
+56 ```
+57 
+58 **Standard component story structure:**
+59 
+60 ```tsx
+61 import type { Meta, StoryObj } from '@storybook/react';
+62 import { GameCard } from './GameCard';
+63 
+64 const meta: Meta<typeof GameCard> = {
+65   component: GameCard,
+66   tags: ['autodocs'],
+67   args: {
+68     isBookmarked: false,
+69   },
+70 };
+71 export default meta;
+72 
+73 type Story = StoryObj<typeof GameCard>;
+74 
+75 export const Default: Story = { args: { ... } };
+76 export const Bookmarked: Story = { args: { isBookmarked: true } };
+77 ```
+78 
+79 **Rules:**
+80 
+81 - All component stories get `tags: ['autodocs']` — auto-generates a docs page with prop table and live examples
+82 - Callbacks (`onPlay`, `onBookmarkToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
+83 - Each meaningful visual state gets its own named export (`Default`, `Bookmarked`, `Loading`, `Empty`, etc.)
+84 - shadcn/ui primitives (`button.tsx`, `card.tsx`, `input.tsx`, etc.) also get stories — they are the VR baselines for the design system
+85 - `export default meta` is required by Storybook's CSF format — `.stories.tsx` files and all `.storybook/` config files are treated as framework config files, exempt from the project's no-default-export rule
+86 
+87 ---
+88 
+89 ## Theme Decorator & Toolbar
+90 
+91 A global decorator in `preview.ts` calls the same `injectCssVars()` function from `src/lib/theme/css-vars.ts` that the app already uses. No duplication — theme changes in the app automatically reflect in Storybook.
+92 
+93 A "Theme" dropdown in the Storybook toolbar is populated from `src/lib/theme/default-tokens.ts`. Selecting a theme applies its CSS variables to the story wrapper element.
+94 
+95 ```ts
+96 // .storybook/preview.ts
+97 export const globalTypes = {
+98   theme: {
+99     name: 'Theme',
+100     toolbar: {
+101       icon: 'paintbrush',
+102       items: ['light', 'dark', 'high-contrast'],
+103       dynamicTitle: true,
+104     },
+105   },
+106 };
+107 
+108 export const decorators = [withTheme];
+109 ```
+110 
+111 The `withTheme` decorator also toggles the `<html>` class (`light`/`dark`) to match the app's `THEME_INIT_SCRIPT` behaviour, ensuring dark mode CSS rules apply correctly in stories.
+112 
+113 ---
+114 
+115 ## Service & Utility Stories
+116 
+117 Non-visual modules use MDX files with interactive demo components where the service can run in the browser.
+118 
+119 **Pattern for services with side effects:**
+120 
+121 ```
+122 src/lib/speech/SpeechOutput.stories.mdx   ← API docs + embedded demo
+123 src/lib/speech/SpeechOutput.demo.tsx      ← minimal interactive React component
+124 ```
+125 
+126 The `.demo.tsx` file is Storybook-only — not a test, not production code. It provides just enough UI to exercise the service interactively.
+127 
+128 **RxDB hooks** (`useSettings`, `useBookmarks`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
+129 
+130 **Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
+131 
+132 **Services covered in this milestone:**
+133 
+134 | Module           | Story type | Interactive?                |
+135 | ---------------- | ---------- | --------------------------- |
+136 | `SpeechOutput`   | MDX + demo | Yes — speak button          |
+137 | `SpeechInput`    | MDX + demo | Yes — listen button         |
+138 | `game-event-bus` | MDX + demo | Yes — emit/subscribe UI     |
+139 | `useSettings`    | MDX + demo | Yes — wrapped in DbProvider |
+140 | `useBookmarks`   | MDX + demo | Yes — wrapped in DbProvider |
+141 | `useRxQuery`     | MDX + demo | Yes — wrapped in DbProvider |
+142 | `css-vars`       | MDX only   | No                          |
+143 | `catalog-utils`  | MDX only   | No                          |
+144 | `i18n`           | MDX only   | No                          |
+145 
+146 ---
+147 
+148 ## Viewport Configuration
+149 
+150 Default viewport is **Tablet Landscape** — the primary device orientation for children using this app.
+151 
+152 ```ts
+153 export const parameters = {
+154   viewport: {
+155     viewports: {
+156       mobileSm: {
+157         name: 'Phone S (360×640)',
+158         styles: { width: '360px', height: '640px' },
+159       },
+160       mobileLg: {
+161         name: 'Phone L (390×844)',
+162         styles: { width: '390px', height: '844px' },
+163       },
+164       tabletPortrait: {
+165         name: 'Tablet Portrait (768×1024)',
+166         styles: { width: '768px', height: '1024px' },
+167       },
+168       tabletLandscape: {
+169         name: 'Tablet Landscape (1024×768)',
+170         styles: { width: '1024px', height: '768px' },
+171       },
+172       desktop: {
+173         name: 'Desktop (1280×800)',
+174         styles: { width: '1280px', height: '800px' },
+175       },
+176     },
+177     defaultViewport: 'tabletLandscape',
+178   },
+179 };
+180 ```
+181 
+182 ---
+183 
+184 ## Visual Regression & Accessibility Testing
+185 
+186 **Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
+187 
+188 **VR screenshots** are captured at three viewports per story:
+189 
+190 - `mobileLg` (390×844)
+191 - `tabletPortrait` (768×1024)
+192 - `tabletLandscape` (1024×768)
+193 
+194 Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
+195 
+196 Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
+197 
+198 **Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
+199 
+200 **Trace recording:** Playwright traces are enabled with `trace: 'retain-on-failure'` in `playwright.config.ts`. The test-runner respects this config, so any failed story test (VR diff, a11y violation, crash) produces a `.zip` trace file. Traces are uploaded as a CI artifact and can be replayed locally with:
+201 
+202 ```bash
+203 npx playwright show-trace trace.zip
+204 ```
+205 
+206 This allows step-by-step reproduction of any failing test without needing to re-run CI.
+207 
+208 ---
+209 
+210 ## CI Integration
+211 
+212 Two additions to the GitHub Actions workflow:
+213 
+214 **`storybook-build` step** (after main app build, before deploy):
+215 
+216 ```yaml
+217 - name: Build Storybook
+218   run: yarn build-storybook --output-dir storybook-static
+219 
+220 - name: Merge into dist
+221   run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
+222 ```
+223 
+224 **`storybook-test` step** (separate job, runs against built output):
+225 
+226 ```yaml
+227 - name: Serve Storybook
+228   run: npx http-server storybook-static --port 6006 &
+229 
+230 - name: Run Storybook tests
+231   run: yarn test-storybook --url http://localhost:6006
+232 
+233 - name: Upload Playwright traces on failure
+234   if: failure()
+235   uses: actions/upload-artifact@v4
+236   with:
+237     name: storybook-playwright-traces
+238     path: test-results/
+239     retention-days: 7
+240 ```
+241 
+242 **New `package.json` scripts:**
+243 
+244 ```json
+245 "storybook": "storybook dev --port 6006",
+246 "build-storybook": "storybook build",
+247 "test:storybook": "test-storybook"
+248 ```
+249 
+250 ---
+251 
+252 ## Addons
+253 
+254 | Addon                         | Purpose                                                      |
+255 | ----------------------------- | ------------------------------------------------------------ |
+256 | `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars     |
+257 | `@storybook/addon-a11y`       | Accessibility panel + CI assertions                          |
+258 | `@storybook/addon-themes`     | Theme toolbar integration                                    |
+259 | `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)            |
+260 | `@storybook/addon-mcp`        | MCP server for AI-assisted story authoring (Storybook 10.3+) |
+261 
+262 ---
+263 
+264 ## MCP Developer Tooling
+265 
+266 Two MCP servers are configured to enable AI-assisted development with Claude Code against the running Storybook instance.
+267 
+268 **`@storybook/addon-mcp`** — installed as a Storybook addon. When `yarn storybook` runs, it auto-starts an MCP server at `http://localhost:6006/mcp`. Claude Code can use it to query the component catalog, inspect story metadata, and trigger test execution without leaving the editor. Install via:
+269 
+270 ```bash
+271 npx storybook add @storybook/addon-mcp
+272 ```
+273 
+274 **`@playwright/mcp`** — configured in the project's `.mcp.json` as a local MCP server. Gives Claude Code a live browser to navigate Storybook, interact with Controls, take screenshots, and replay failing VR tests visually. Config:
+275 
+276 ```json
+277 {
+278   "mcpServers": {
+279     "playwright": {
+280       "command": "npx",
+281       "args": ["@playwright/mcp@latest"]
+282     }
+283   }
+284 }
+285 ```
+286 
+287 **How they complement each other during development:**
+288 
+289 | Task                                   | Tool                                                      |
+290 | -------------------------------------- | --------------------------------------------------------- |
+291 | "What props does `GameCard` accept?"   | Storybook MCP — queries story metadata                    |
+292 | "Show me the Bookmarked variant"       | Storybook MCP — previews story live                       |
+293 | "Why is this VR test failing?"         | Playwright MCP — navigates browser, takes screenshot      |
+294 | "Write a story for this new component" | Storybook MCP — provides component context for generation |
+295 
+296 Neither MCP server is used in CI — they are local dev tooling only.
+297 
+298 ---
+299 
+300 ## Scope for This Milestone
+301 
+302 This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
+303 
+304 - `src/components/` — all components including shadcn/ui primitives
+305 - `src/lib/` — speech, theme, i18n, game-event-bus
+306 - `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
+307 
+308 Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
 309
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:22Z)**_
@@ -563,6 +570,7 @@ seed-themes.ts
 setup-validation.test.ts
 types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:25Z)**_
@@ -673,6 +681,7 @@ Read package.json
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:30Z)**_
@@ -712,6 +721,7 @@ useRxQuery.ts
 useSettings.test.tsx
 useSettings.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:30Z)**_
@@ -1028,6 +1038,7 @@ jobs:
         if: steps.visual.outcome == 'failure'
         run: exit 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:35Z)**_
@@ -1141,6 +1152,7 @@ const config = defineConfig({
 
 export default config;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:37Z)**_
@@ -1194,6 +1206,7 @@ export const defaultThemeCssVars: Record<string, string> = {
   '--bs-error': '#E63946',
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:41Z)**_
@@ -1465,6 +1478,7 @@ export const Header = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:42Z)**_
@@ -1564,6 +1578,7 @@ export function getGameEventBus(): GameEventBus {
   return singleton;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:45Z)**_
@@ -1652,6 +1667,7 @@ function plainSettingsFromQuery(
   }
   return doc as SettingsDoc;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:49:48Z)**_
@@ -1665,6 +1681,7 @@ Check for tsconfig and mcp files
 ```text
 tsconfig.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:16Z)**_
@@ -1673,13 +1690,13 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:50:16Z)**_
 Now I have enough to write the plan. Let me now think about the structure:
 
 The spec covers:
+
 1. Install & configure Storybook 10 (`@storybook/react-vite`)
 2. `.storybook/main.ts` - config with addons, viteFinal
 3. `.storybook/preview.ts` - global decorators, viewport config, CSS import
 4. `.storybook/decorators/withTheme.tsx` - theme decorator
 5. Stories for existing components in `src/components/`
 6. Stories for shadcn/ui primitives in `src/components/ui/`
-
 
 7. Stories for the service layer including speech I/O and event bus utilities
 8. Stories for theme utilities and internationalization helpers
@@ -2013,6 +2030,7 @@ export const ThemeToggle = () => {
   );
 };
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:17Z)**_
@@ -2087,6 +2105,7 @@ export function useRxQuery<T>(
   return value;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:21Z)**_
@@ -2135,6 +2154,7 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
   },
 ];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:24Z)**_
@@ -2179,6 +2199,7 @@ void i18n.use(initReactI18next).init({
 en
 pt-BR
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:28Z)**_
@@ -2216,6 +2237,7 @@ export function useRxDB(): DbContextValue {
   return ctx;
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:33Z)**_
@@ -2280,6 +2302,7 @@ export const DbProvider = ({
       .then(async (instance) => {
         if (cancelled) {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:54Z)**_
@@ -2292,7 +2315,6 @@ Now I have enough to write the implementation plan. Let me organize the tasks:
 3. **Task 3: Configure `.storybook/preview.ts` and `withTheme` decorator** - Global decorators, viewport, CSS import
 4. **Task 4: Add package.json scripts** - storybook, build-storybook, test:storybook
 
-
 5. **Task 5: Update `playwright.config.ts` trace setting** - Adjust trace configuration for testing
 6. **Task 6: Configure `.mcp.json`** - Set up MCP configuration
 7. **Task 7: Add Docs link to Header** - Update the Header component with documentation link
@@ -2303,6 +2325,7 @@ Now I have enough to write the implementation plan. Let me organize the tasks:
 12. **Task 21-26: Hook and service stories with MDX** - Document SpeechOutput, SpeechInput, game-event-bus, useSettings, useBookmarks, and useRxQuery with interactive demos
 13. **Task 27-29: Pure utility documentation** - Add MDX files for css-vars and i18n, but I need to verify if catalog-utils.ts actually exists since the spec mentions it but I'm not finding it in the file structure
 14. **Task 30-31: CI pipeline updates** - Integrate Storybook testing into the deployment and CI workflows I should just include `catalog-utils` in the plan as the spec mentions it, and note that if the file doesn't exist, that story can be skipped—the engineer executing this will know where to find it or whether it needs to be created.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:54Z)**_
@@ -2318,6 +2341,7 @@ Find catalog-utils files
 /Users/leocaseiro/Sites/base-skill/src/games/catalog-utils.test.ts
 /Users/leocaseiro/Sites/base-skill/src/games/catalog-utils.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:50:58Z)**_
@@ -2379,6 +2403,7 @@ export function paginateCatalog<T>(
   };
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:52:34Z)**_
@@ -2387,12 +2412,12 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:52:34Z)**_
 Now I have all the context I need. Let me write the implementation plan. This is a comprehensive plan.
 
 Let me think about the task decomposition. The TDD approach for Storybook is a bit different since stories ARE the tests in a way (via test-runner). For the core Storybook setup, we can't really write failing tests first - we install packages, create configs, then verify it works. For stories themselves, we can approach it as:
+
 1. Write the story
 2. Run storybook to verify it loads
 3. Commit
 
 But the "test-runner" is run against built Storybook, so in development we manually verify. Let me think about this more carefully...
-
 
 Actually, the test-runner will handle a11y checks against every story, so the cycle becomes writing the story file, starting Storybook to verify it renders, then committing. Since there are many components, I'll group related stories together rather than making each component a separate task.
 
@@ -2522,6 +2547,7 @@ const CardHeader = ({
       className,
     )}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:52:36Z)**_
@@ -2637,6 +2663,7 @@ const Slider = ({
       defaultValue={defaultValue}
       value={value}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:52:46Z)**_
@@ -2645,10 +2672,10 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:52:46Z)**_
 Now I have enough to write the plan. Let me write it. It will be comprehensive. Let me organize the tasks well.
 
 I need to note a few things:
+
 1. The `@storybook/addon-mcp` requires Storybook 10.3+. For the initial install we should install Storybook 10.x and then add the MCP addon.
 2. For the Storybook base URL in `viteFinal`, the spec says `base: '/base-skill/docs/'`.
 3. The deploy should merge into `dist/client/docs/` not `dist/docs/` since the Pages artifact is `dist/client/`.
-
 
 4. The `src/styles.css` needs to be imported in `preview.ts`.
 5. For i18n in stories, we need to initialize i18n. The `preview.ts` should import the i18n setup.
@@ -2668,6 +2695,7 @@ Check knip config
 ```text
 no knip config file
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:52:47Z)**_
@@ -2720,6 +2748,7 @@ Read tsconfig
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:53:16Z)**_
@@ -2728,9 +2757,10 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:53:16Z)**_
 Now I have everything I need to write the plan. Let me write it.
 
 Key notes:
+
 1. knip is used without a config file, which means it uses heuristics. Story files (`.stories.tsx`) should be auto-detected by knip as test/story files, but `.demo.tsx` and `.storybook/` config files might need to be excluded. Actually, let me check what `knip --no-config-hints` does with stories.
 
-Actually, since knip runs as `knip --no-config-hints` in the lint script, and knip has built-in support for Storybook, it should handle `.stories.tsx` files. 
+Actually, since knip runs as `knip --no-config-hints` in the lint script, and knip has built-in support for Storybook, it should handle `.stories.tsx` files.
 
 The `.demo.tsx` files might get flagged as unused since they're only imported from `.stories.mdx` files and aren't part of the standard Storybook detection. I should add a knip config to explicitly include them, or at least verify that knip's Storybook support covers this case before deciding if configuration is needed.
 
@@ -2793,6 +2823,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:53:16Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:53:20Z)**_
@@ -5265,6 +5296,7 @@ EOF
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/plans/2026-04-02-storybook-setup.md
 ```
+
 </details></tool-use>
 
 _**Agent (<synthetic> 2026-04-01 20:59:17Z)**_

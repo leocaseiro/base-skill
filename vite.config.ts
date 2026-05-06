@@ -7,11 +7,17 @@ import { devtools } from '@tanstack/devtools-vite';
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import viteReact from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { version } from './package.json';
 import type { Plugin } from 'vite';
+
+// Enable HTTPS + LAN host binding when launched via `yarn devhost`. Required
+// because RxDB needs `crypto.subtle` which is only exposed in secure contexts
+// (HTTPS or localhost) — plain HTTP on a LAN IP throws RxDB error UT8.
+const enableHttps = process.env['VITE_HTTPS'] === '1';
 
 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
 
@@ -133,6 +139,7 @@ const config = defineConfig({
     }),
     viteReact(),
     workboxPlugin(),
+    ...(enableHttps ? [basicSsl()] : []),
   ],
 });
 

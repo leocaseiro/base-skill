@@ -64,7 +64,23 @@ const COLLECTIONS = {
   },
   profiles: { schema: profilesSchema },
   progress: { schema: progressSchema },
-  settings: { schema: settingsSchema },
+  settings: {
+    schema: settingsSchema,
+    migrationStrategies: {
+      1: (oldDoc: Record<string, unknown>) => oldDoc,
+      2: (oldDoc: Record<string, unknown>) => oldDoc,
+      3: (oldDoc: Record<string, unknown>) => {
+        const legacyVolume =
+          typeof oldDoc.volume === 'number' ? oldDoc.volume : 0.8;
+        const { volume: _removed, ...rest } = oldDoc;
+        return {
+          ...rest,
+          soundEffectsVolume: legacyVolume,
+          voiceVolume: legacyVolume,
+        };
+      },
+    },
+  },
   game_config_overrides: { schema: gameConfigOverridesSchema },
   saved_game_configs: {
     schema: savedGameConfigsSchema,

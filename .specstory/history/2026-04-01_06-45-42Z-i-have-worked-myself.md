@@ -27,258 +27,259 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:45:45Z)**_
  `./docs/superpowers/plans/2026-04-01-comprehensive-linting-v2.md`
 
 ```text
-1	# Comprehensive Linting — Run Commands
-2	
-3	Run all steps from inside the worktree: `./worktrees/feat/linting-setup`
-4	
-5	---
-6	
-7	## 1. Create worktree + install deps
-8	
-9	```bash
-10	git worktree add ./worktrees/feat/linting-setup -b feat/linting-setup
-11	cd ./worktrees/feat/linting-setup
-12	yarn install
-13	yarn add -D \
-14	  lint-staged \
-15	  eslint-plugin-react \
-16	  eslint-plugin-react-hooks \
-17	  eslint-plugin-jsx-a11y \
-18	  eslint-plugin-tailwindcss \
-19	  stylelint \
-20	  stylelint-config-standard \
-21	  markdownlint-cli2
-22	git add package.json yarn.lock
-23	git commit -m "chore(deps): add linting devDependencies"
-24	```
-25	
-26	---
-27	
-28	## 2. Create `.stylelintrc.yaml`
-29	
-30	```bash
-31	cat > .stylelintrc.yaml << 'EOF'
-32	extends:
-33	  - stylelint-config-standard
-34	rules:
-35	  at-rule-no-unknown:
-36	    - true
-37	    - ignoreAtRules:
-38	        - theme
-39	        - plugin
-40	        - custom-variant
-41	        - apply
-42	        - layer
-43	        - tailwind
-44	        - utility
-45	        - variant
-46	        - source
-47	  property-no-unknown: true
-48	  color-no-invalid-hex: true
-49	  declaration-block-no-duplicate-properties: true
-50	EOF
-51	npx stylelint --fix "src/**/*.css"
-52	npx stylelint "src/**/*.css"
-53	git add .stylelintrc.yaml src/styles.css
-54	git commit -m "chore(lint): add stylelint config"
-55	```
-56	
-57	---
-58	
-59	## 3. Create `.markdownlint.yaml`
-60	
-61	```bash
-62	cat > .markdownlint.yaml << 'EOF'
-63	default: true
-64	MD013: false
-65	MD033: false
-66	MD041: false
-67	EOF
-68	npx markdownlint-cli2 --fix "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
-69	npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
-70	git add .markdownlint.yaml
-71	git add $(git diff --name-only -- "*.md" 2>/dev/null)
-72	git commit -m "chore(lint): add markdownlint config and fix violations"
-73	```
-74	
-75	---
-76	
-77	## 4. Update `eslint.config.js`
-78	
-79	```bash
-80	cat > eslint.config.js << 'EOF'
-81	//  @ts-check
-82	
-83	import { tanstackConfig } from '@tanstack/eslint-config'
-84	import jsxA11y from 'eslint-plugin-jsx-a11y'
-85	import reactPlugin from 'eslint-plugin-react'
-86	import reactHooks from 'eslint-plugin-react-hooks'
-87	import tailwindcss from 'eslint-plugin-tailwindcss'
-88	
-89	export default [
-90	  ...tanstackConfig,
-91	  reactPlugin.configs.flat.recommended,
-92	  reactPlugin.configs.flat['jsx-runtime'],
-93	  reactHooks.configs['recommended-latest'],
-94	  jsxA11y.flatConfigs.recommended,
-95	  ...tailwindcss.configs['flat/recommended'],
-96	  {
-97	    rules: {
-98	      'import/no-cycle': 'off',
-99	      '@typescript-eslint/array-type': 'off',
-100	      '@typescript-eslint/require-await': 'off',
-101	      'pnpm/json-enforce-catalog': 'off',
-102	      '@typescript-eslint/no-explicit-any': 'error',
-103	      '@typescript-eslint/no-unsafe-assignment': 'error',
-104	
-105	      'import/order': [
-106	        'error',
-107	        {
-108	          groups: [
-109	            'builtin',
-110	            'external',
-111	            'internal',
-112	            'parent',
-113	            'sibling',
-114	            'index',
-115	            'object',
-116	            'type',
-117	          ],
-118	          alphabetize: { order: 'asc', caseInsensitive: true },
-119	        },
-120	      ],
-121	
-122	      'react/function-component-definition': [
-123	        'error',
-124	        {
-125	          namedComponents: 'arrow-function',
-126	          unnamedComponents: 'arrow-function',
-127	        },
-128	      ],
-129	      'react/jsx-max-depth': ['warn', { max: 5 }],
-130	      'react/no-unstable-nested-components': 'error',
-131	      'react/no-array-index-key': 'warn',
-132	      'react/jsx-props-no-spreading': [
-133	        'warn',
-134	        {
-135	          html: 'enforce',
-136	          custom: 'enforce',
-137	          explicitSpread: 'ignore',
-138	        },
-139	      ],
-140	      'react/no-unknown-property': 'error',
-141	
-142	      '@typescript-eslint/no-unused-vars': [
-143	        'error',
-144	        {
-145	          argsIgnorePattern: '^_',
-146	          varsIgnorePattern: '^_',
-147	        },
-148	      ],
-149	    },
-150	  },
-151	  {
-152	    files: ['src/**/*.ts', '!src/**/*.tsx'],
-153	    rules: {
-154	      '@typescript-eslint/explicit-module-boundary-types': 'warn',
-155	    },
-156	  },
-157	  {
-158	    ignores: ['eslint.config.js', 'prettier.config.js'],
-159	  },
-160	]
-161	EOF
-162	git add eslint.config.js
-163	git commit -m "chore(eslint): add React, hooks, a11y, tailwind plugins and opinionated rules"
-164	```
-165	
-166	---
-167	
-168	## 5. Auto-fix ESLint violations
-169	
-170	```bash
-171	npx eslint . --fix
-172	npx eslint . --max-warnings 0
-173	# Fix any remaining manual violations, then:
-174	git add src/
-175	git commit -m "fix(lint): resolve ESLint violations from new rules"
-176	```
-177	
-178	---
-179	
-180	## 6. Update pre-commit hook + lint-staged config
-181	
-182	```bash
-183	cat > .husky/pre-commit << 'EOF'
-184	npx lint-staged
-185	yarn test
-186	EOF
-187	```
-188	
-189	Add to `package.json` at the top level (alongside `"scripts"`):
-190	
-191	```json
-192	"lint-staged": {
-193	  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-194	  "*.css":      ["stylelint --fix", "prettier --write"],
-195	  "*.md":       ["markdownlint-cli2 --fix", "prettier --write"],
-196	  "*.json":     ["prettier --write"]
-197	},
-198	```
-199	
-200	```bash
-201	git add .husky/pre-commit package.json
-202	git commit -m "chore(husky): replace yarn fix with lint-staged for staged-only pre-commit"
-203	```
-204	
-205	---
-206	
-207	## 7. Add new scripts to `package.json`
-208	
-209	Add inside the `"scripts"` block:
-210	
-211	```json
-212	"lint:css": "stylelint 'src/**/*.css'",
-213	"lint:md":  "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
-214	"fix:css":  "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
-215	"fix:md":   "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'"
-216	```
-217	
-218	```bash
-219	git add package.json
-220	git commit -m "chore(scripts): add lint:css, lint:md, fix:css, fix:md"
-221	```
-222	
-223	---
-224	
-225	## 8. Update CI
-226	
-227	In `.github/workflows/ci.yml`, add after the `Prettier` step in the `lint` job:
-228	
-229	```yaml
-230	      - name: Stylelint
-231	        run: npx stylelint "src/**/*.css"
-232	
-233	      - name: Markdownlint
-234	        run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
-235	```
-236	
-237	```bash
-238	git add .github/workflows/ci.yml
-239	git commit -m "ci: add stylelint and markdownlint steps to lint job"
-240	```
-241	
-242	---
-243	
-244	## 9. Final verification
-245	
-246	```bash
-247	yarn lint && yarn lint:css && yarn lint:md && yarn typecheck && yarn test
-248	```
-249	
-250	All must exit 0.
+1 # Comprehensive Linting — Run Commands
+2 
+3 Run all steps from inside the worktree: `./worktrees/feat/linting-setup`
+4 
+5 ---
+6 
+7 ## 1. Create worktree + install deps
+8 
+9 ```bash
+10 git worktree add ./worktrees/feat/linting-setup -b feat/linting-setup
+11 cd ./worktrees/feat/linting-setup
+12 yarn install
+13 yarn add -D \
+14   lint-staged \
+15   eslint-plugin-react \
+16   eslint-plugin-react-hooks \
+17   eslint-plugin-jsx-a11y \
+18   eslint-plugin-tailwindcss \
+19   stylelint \
+20   stylelint-config-standard \
+21   markdownlint-cli2
+22 git add package.json yarn.lock
+23 git commit -m "chore(deps): add linting devDependencies"
+24 ```
+25 
+26 ---
+27 
+28 ## 2. Create `.stylelintrc.yaml`
+29 
+30 ```bash
+31 cat > .stylelintrc.yaml << 'EOF'
+32 extends:
+33   - stylelint-config-standard
+34 rules:
+35   at-rule-no-unknown:
+36     - true
+37     - ignoreAtRules:
+38         - theme
+39         - plugin
+40         - custom-variant
+41         - apply
+42         - layer
+43         - tailwind
+44         - utility
+45         - variant
+46         - source
+47   property-no-unknown: true
+48   color-no-invalid-hex: true
+49   declaration-block-no-duplicate-properties: true
+50 EOF
+51 npx stylelint --fix "src/**/*.css"
+52 npx stylelint "src/**/*.css"
+53 git add .stylelintrc.yaml src/styles.css
+54 git commit -m "chore(lint): add stylelint config"
+55 ```
+56 
+57 ---
+58 
+59 ## 3. Create `.markdownlint.yaml`
+60 
+61 ```bash
+62 cat > .markdownlint.yaml << 'EOF'
+63 default: true
+64 MD013: false
+65 MD033: false
+66 MD041: false
+67 EOF
+68 npx markdownlint-cli2 --fix "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
+69 npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
+70 git add .markdownlint.yaml
+71 git add $(git diff --name-only -- "*.md" 2>/dev/null)
+72 git commit -m "chore(lint): add markdownlint config and fix violations"
+73 ```
+74 
+75 ---
+76 
+77 ## 4. Update `eslint.config.js`
+78 
+79 ```bash
+80 cat > eslint.config.js << 'EOF'
+81 //  @ts-check
+82 
+83 import { tanstackConfig } from '@tanstack/eslint-config'
+84 import jsxA11y from 'eslint-plugin-jsx-a11y'
+85 import reactPlugin from 'eslint-plugin-react'
+86 import reactHooks from 'eslint-plugin-react-hooks'
+87 import tailwindcss from 'eslint-plugin-tailwindcss'
+88 
+89 export default [
+90   ...tanstackConfig,
+91   reactPlugin.configs.flat.recommended,
+92   reactPlugin.configs.flat['jsx-runtime'],
+93   reactHooks.configs['recommended-latest'],
+94   jsxA11y.flatConfigs.recommended,
+95   ...tailwindcss.configs['flat/recommended'],
+96   {
+97     rules: {
+98       'import/no-cycle': 'off',
+99       '@typescript-eslint/array-type': 'off',
+100       '@typescript-eslint/require-await': 'off',
+101       'pnpm/json-enforce-catalog': 'off',
+102       '@typescript-eslint/no-explicit-any': 'error',
+103       '@typescript-eslint/no-unsafe-assignment': 'error',
+104 
+105       'import/order': [
+106         'error',
+107         {
+108           groups: [
+109             'builtin',
+110             'external',
+111             'internal',
+112             'parent',
+113             'sibling',
+114             'index',
+115             'object',
+116             'type',
+117           ],
+118           alphabetize: { order: 'asc', caseInsensitive: true },
+119         },
+120       ],
+121 
+122       'react/function-component-definition': [
+123         'error',
+124         {
+125           namedComponents: 'arrow-function',
+126           unnamedComponents: 'arrow-function',
+127         },
+128       ],
+129       'react/jsx-max-depth': ['warn', { max: 5 }],
+130       'react/no-unstable-nested-components': 'error',
+131       'react/no-array-index-key': 'warn',
+132       'react/jsx-props-no-spreading': [
+133         'warn',
+134         {
+135           html: 'enforce',
+136           custom: 'enforce',
+137           explicitSpread: 'ignore',
+138         },
+139       ],
+140       'react/no-unknown-property': 'error',
+141 
+142       '@typescript-eslint/no-unused-vars': [
+143         'error',
+144         {
+145           argsIgnorePattern: '^_',
+146           varsIgnorePattern: '^_',
+147         },
+148       ],
+149     },
+150   },
+151   {
+152     files: ['src/**/*.ts', '!src/**/*.tsx'],
+153     rules: {
+154       '@typescript-eslint/explicit-module-boundary-types': 'warn',
+155     },
+156   },
+157   {
+158     ignores: ['eslint.config.js', 'prettier.config.js'],
+159   },
+160 ]
+161 EOF
+162 git add eslint.config.js
+163 git commit -m "chore(eslint): add React, hooks, a11y, tailwind plugins and opinionated rules"
+164 ```
+165 
+166 ---
+167 
+168 ## 5. Auto-fix ESLint violations
+169 
+170 ```bash
+171 npx eslint . --fix
+172 npx eslint . --max-warnings 0
+173 # Fix any remaining manual violations, then:
+174 git add src/
+175 git commit -m "fix(lint): resolve ESLint violations from new rules"
+176 ```
+177 
+178 ---
+179 
+180 ## 6. Update pre-commit hook + lint-staged config
+181 
+182 ```bash
+183 cat > .husky/pre-commit << 'EOF'
+184 npx lint-staged
+185 yarn test
+186 EOF
+187 ```
+188 
+189 Add to `package.json` at the top level (alongside `"scripts"`):
+190 
+191 ```json
+192 "lint-staged": {
+193   "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+194   "*.css":      ["stylelint --fix", "prettier --write"],
+195   "*.md":       ["markdownlint-cli2 --fix", "prettier --write"],
+196   "*.json":     ["prettier --write"]
+197 },
+198 ```
+199 
+200 ```bash
+201 git add .husky/pre-commit package.json
+202 git commit -m "chore(husky): replace yarn fix with lint-staged for staged-only pre-commit"
+203 ```
+204 
+205 ---
+206 
+207 ## 7. Add new scripts to `package.json`
+208 
+209 Add inside the `"scripts"` block:
+210 
+211 ```json
+212 "lint:css": "stylelint 'src/**/*.css'",
+213 "lint:md":  "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
+214 "fix:css":  "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
+215 "fix:md":   "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'"
+216 ```
+217 
+218 ```bash
+219 git add package.json
+220 git commit -m "chore(scripts): add lint:css, lint:md, fix:css, fix:md"
+221 ```
+222 
+223 ---
+224 
+225 ## 8. Update CI
+226 
+227 In `.github/workflows/ci.yml`, add after the `Prettier` step in the `lint` job:
+228 
+229 ```yaml
+230       - name: Stylelint
+231         run: npx stylelint "src/**/*.css"
+232 
+233       - name: Markdownlint
+234         run: npx markdownlint-cli2 "**/*.md" "#node_modules" "#.specstory" "#.cursor" "#dist" "#worktrees"
+235 ```
+236 
+237 ```bash
+238 git add .github/workflows/ci.yml
+239 git commit -m "ci: add stylelint and markdownlint steps to lint job"
+240 ```
+241 
+242 ---
+243 
+244 ## 9. Final verification
+245 
+246 ```bash
+247 yarn lint && yarn lint:css && yarn lint:md && yarn typecheck && yarn test
+248 ```
+249 
+250 All must exit 0.
 251
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:45:46Z)**_
@@ -290,6 +291,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:45:46Z)**_
 ```text
 File does not exist. Note: your current working directory is /Users/leocaseiro/Sites/base-skill.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:45:48Z)**_
@@ -307,6 +309,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:45:49Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:45:50Z)**_
@@ -318,6 +321,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:45:50Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:45:55Z)**_
@@ -390,6 +394,7 @@ Check package.json for current state
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:45:55Z)**_
@@ -424,6 +429,7 @@ export default [
   },
 ]
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:04Z)**_
@@ -432,10 +438,11 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:46:04Z)**_
 The user says they've already worked on step 4 themselves, but the eslint.config.js looks like the basic one, not the updated one from the plan. However, the user says they're "happy with the linting and prettier settings" - so they may have a different version of step 4 they applied themselves.
 
 The user wants:
+
 1. **lint-staged setup** (step 6 from the plan)
 2. **No `export default`** rule added to ESLint (unless required by frameworks)
 
-Let me check what frameworks they use - TanStack Router, React, Vite. TanStack Router requires `export default` for route files. 
+Let me check what frameworks they use - TanStack Router, React, Vite. TanStack Router requires `export default` for route files.
 
 So we need to allow `export default` in route files but ban it elsewhere. Let me check their package.json to see if lint-staged is already installed, and look at the husky configuration to understand the current pre-commit setup.
 </details></think>
@@ -446,12 +453,13 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:46:04Z)**_
 <summary>Tool use: **Bash**</summary>
 Check for lint-staged and husky
 
-`cat package.json | grep -E "lint-staged|husky" `
+`cat package.json | grep -E "lint-staged|husky"`
 
 ```text
     "prepare": "husky"
     "husky": "^9.1.7",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:04Z)**_
@@ -466,6 +474,7 @@ Check pre-commit hook
 yarn fix
 yarn test
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:15Z)**_
@@ -476,7 +485,6 @@ So lint-staged is NOT installed yet. The pre-commit hook currently runs `yarn fi
 For the `no export default` rule: ESLint has a rule called `import/no-default-export`. However, TanStack Router requires `export default` in route files. Let me think about this...
 
 Looking at the TanStack Router file-based routing, route files need `export default` (the `createFileRoute` result). Also, Vite config files (but those are already ignored), and app entry points.
-
 
 I can set `import/no-default-export` to error globally, then disable it for the route files matching `src/routes/**/*.tsx` since those need default exports. The user mentioned they've already completed step 4 themselves, so I should focus on what they're actually asking for now.
 </details></think>
@@ -508,6 +516,7 @@ test-setup.ts
 types
 vite-env.d.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:15Z)**_
@@ -526,6 +535,7 @@ Check scripts section
     "preview": "vite preview",
     "test": "vitest run",
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:19Z)**_
@@ -551,6 +561,7 @@ export const Route = createFileRoute('/')({
   beforeLoad: () => {
     throw redirect({
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:46Z)**_
@@ -567,6 +578,7 @@ __root.test.tsx
 __root.tsx
 index.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:51Z)**_
@@ -583,13 +595,15 @@ src/components/ThemeToggle.tsx
 src/components/Header.tsx
 src/lib/i18n/i18n.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:46:56Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I understand the picture:
-- TanStack Router route files do NOT use `export default` - they use `export const Route = createFileRoute(...)({...})` 
+
+- TanStack Router route files do NOT use `export default` - they use `export const Route = createFileRoute(...)({...})`
 - The files using `export default` are: components/Footer.tsx, components/ThemeToggle.tsx, components/Header.tsx, and lib/i18n/i18n.ts
 - So we can ban `export default` everywhere without needing framework exceptions!
 
@@ -607,6 +621,7 @@ Check if routes or router use export default
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:47:03Z)**_
@@ -614,8 +629,9 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:47:03Z)**_
 TanStack Router doesn't require `export default` in route files (it uses `export const Route = ...`). The 4 files using `export default` are components/i18n that should be converted.
 
 Here's the plan:
+
 1. **Create worktree** for this work
-2. **Install `lint-staged`** 
+2. **Install `lint-staged`**
 3. **Update `.husky/pre-commit`** to use lint-staged
 4. **Add `lint-staged` config to `package.json`**
 5. **Add `import/no-default-export` rule** to eslint.config.js
@@ -650,6 +666,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
+
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
@@ -658,6 +675,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ### Step 2: Execute Tasks
 
 For each task:
+
 1. Mark as in_progress
 2. Follow each step exactly (plan has bite-sized steps)
 3. Run verifications as specified
@@ -666,6 +684,7 @@ For each task:
 ### Step 3: Complete Development
 
 After all tasks complete and verified:
+
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
 - **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
@@ -673,6 +692,7 @@ After all tasks complete and verified:
 ## When to Stop and Ask for Help
 
 **STOP executing immediately when:**
+
 - Hit a blocker (missing dependency, test fails, instruction unclear)
 - Plan has critical gaps preventing starting
 - You don't understand an instruction
@@ -683,12 +703,14 @@ After all tasks complete and verified:
 ## When to Revisit Earlier Steps
 
 **Return to Review (Step 1) when:**
+
 - Partner updates the plan based on your feedback
 - Fundamental approach needs rethinking
 
 **Don't force through blockers** - stop and ask.
 
 ## Remember
+
 - Review plan critically first
 - Follow plan steps exactly
 - Don't skip verifications
@@ -699,10 +721,10 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
+
 - **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
 - **superpowers:writing-plans** - Creates the plan this skill executes
 - **superpowers:finishing-a-development-branch** - Complete development after all tasks
-
 
 ---
 
@@ -719,12 +741,13 @@ The user has invoked the executing-plans skill. I need to follow the skill's pro
 The plan is already loaded (I read it). Let me review it critically.
 
 The user's context:
+
 - They've already completed step 4 (eslint config) themselves
 - They want lint-staged setup (step 6)
 - They want `no-default-export` rule added (new requirement)
 - They asked about `yarn test` in pre-commit and about converting the 4 files
 
-But I didn't get answers to my questions. 
+But I didn't get answers to my questions.
 
 Looking back at what they said, they've completed steps 1-4 and are happy with the linting setup, so they're ready to move forward with lint-staged and the remaining steps, plus adding the `no-default-export` rule. of step 4. So the eslint.config.js I see IS their version (not the plan's version). They're happy with it.
 
@@ -754,6 +777,7 @@ List all devDependencies
 ```text
 devDeps: ['@axe-core/playwright', '@playwright/test', '@tailwindcss/typography', '@tanstack/devtools-vite', '@tanstack/eslint-config', '@testing-library/dom', '@testing-library/jest-dom', '@testing-library/react', '@types/node', '@types/react', '@types/react-dom', '@vitejs/plugin-react', '@vitest/coverage-v8', 'eslint', 'fake-indexeddb', 'husky', 'jsdom', 'prettier', 'typescript', 'vite', 'vite-plugin-pwa', 'vite-tsconfig-paths', 'vitest', 'workbox-build', 'workbox-window']
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:48:28Z)**_
@@ -775,19 +799,20 @@ Check existing config files and branches
   remotes/origin/milestone-1-scaffolding
   remotes/origin/milestone-2-data-layer
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:48:38Z)**_
 
 <think><details><summary>Thought Process</summary>
 So:
+
 - `feat/linting-setup` branch already exists! (worktree was removed but branch exists)
 - lint-staged, eslint-plugin-react, eslint-plugin-react-hooks, eslint-plugin-jsx-a11y, eslint-plugin-tailwindcss, stylelint, stylelint-config-standard, markdownlint-cli2 are NOT installed
 - No .stylelintrc* files
 - No .markdownlint* files
 
 This means steps 1-4 were done but maybe not committed to the branch? Or the user did their own step 4 on master?
-
 
 The user mentioned they've already completed step 4 with their own linting and prettier setup, so their changes are either on the feat/linting-setup branch or already committed to master. Since the eslint.config.js on master looks basic and isn't showing as modified, I need to check what's actually on that branch to see where their work ended up.
 </details></think>
@@ -812,6 +837,7 @@ fbf3a1b chore(cursor): simplify cursor rule to reference CLAUDE.md as source of 
 e4bd627 chore: enforce worktree workflow — add CLAUDE.md, Cursor rule, gitignore, and symlink config
 c9ae636 docs: add Mermaid diagrams for route tree, provider hierarchy, RxDB hooks, and event bus flow
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:48:39Z)**_
@@ -925,20 +951,22 @@ vite.config.ts
 vitest.config.ts
 yarn.lock
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:48:49Z)**_
 
 <think><details><summary>Thought Process</summary>
-The `feat/linting-setup` branch exists and has all the linting work already done (steps 1-5). The user has been working on this branch and says they're happy with the result. 
+The `feat/linting-setup` branch exists and has all the linting work already done (steps 1-5). The user has been working on this branch and says they're happy with the result.
 
 Now I need to:
+
 1. Continue on this branch (create a worktree for it)
 2. Do step 6: lint-staged setup
 3. Add the `no-default-export` rule (new requirement from user)
 4. Steps 7-9: scripts, CI, final verification
 
-But wait, do I need a NEW worktree? The `feat/linting-setup` branch already exists. 
+But wait, do I need a NEW worktree? The `feat/linting-setup` branch already exists.
 
 I should create a worktree to work on that branch. Looking at the current state, the user is on master with some modified files, but the actual linting work is on `feat/linting-setup`. Let me check what's already installed on that branch, particularly whether lint-staged is there.
 </details></think>
@@ -960,6 +988,7 @@ lint-staged installed: False
 scripts: ['start', 'dev', 'build', 'preview', 'test', 'test:coverage', 'test:e2e', 'test:e2e:a11y', 'typecheck', 'lint', 'format', 'fix', 'prepare']
 lint-staged config: None
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:48:53Z)**_
@@ -974,12 +1003,14 @@ Check pre-commit hook on linting branch
 yarn fix
 yarn test
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:49:00Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a clear picture:
+
 - `feat/linting-setup` has steps 1-5 done
 - lint-staged is NOT installed
 - `.husky/pre-commit` still has `yarn fix` + `yarn test`
@@ -991,7 +1022,6 @@ Plus the user's new requirement: `no-default-export` rule.
 Let me also check if the scripts from step 7 are there yet.
 
 The scripts section doesn't include `lint:css`, `lint:md`, `fix:css`, `fix:md` - so step 7 is also pending.
-
 
 I need to look at what's currently in the eslint.config.js file on the feat/linting-setup branch to see what rules and configurations the user has already set up.
 </details></think>
@@ -1140,12 +1170,14 @@ export default [
   },
 ];
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:49:16Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a great picture. The user has done a very comprehensive step 4 on the `feat/linting-setup` branch. It includes:
+
 - unicorn plugin
 - eslint-comments plugin
 - jsx-a11y
@@ -1153,10 +1185,10 @@ Now I have a great picture. The user has done a very comprehensive step 4 on the
 - eslint-config-prettier
 
 Now I need to:
-1. Create a worktree for `feat/linting-setup` to continue working
-2. Add `import/no-default-export` rule 
-3. Fix the 4 files that use `export default` (check which ones are on this branch)
 
+1. Create a worktree for `feat/linting-setup` to continue working
+2. Add `import/no-default-export` rule
+3. Fix the 4 files that use `export default` (check which ones are on this branch)
 
 4. Install lint-staged and update the pre-commit hook
 5. Add lint-staged config to package.json
@@ -1189,12 +1221,14 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:49:16Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:49:22Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now let me create the todo list and start executing the plan. The remaining steps are:
+
 1. Create worktree for feat/linting-setup
 2. Add `import/no-default-export` rule to eslint.config.js
 3. Fix files using export default (check which ones exist on the branch)
@@ -1234,6 +1268,7 @@ Exit code 128
 Preparing worktree (checking out 'feat/linting-setup')
 fatal: 'feat/linting-setup' is already used by worktree at '/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:49:31Z)**_
@@ -1256,6 +1291,7 @@ knip.config.ts
 node_modules
 package.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:49:35Z)**_
@@ -1289,6 +1325,7 @@ src/components/Footer.tsx
 src/components/ThemeToggle.tsx
 src/components/Header.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:17Z)**_
@@ -1302,6 +1339,7 @@ Check export default usage in the 3 component files
 ```text
 (eval):cd:1: no such file or directory: .worktrees/feat/linting-setup
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:20Z)**_
@@ -1320,6 +1358,7 @@ drwxr-xr-x@  3 leocaseiro  staff    96 Apr  1 14:57 feat
 drwxr-xr-x@ 33 leocaseiro  staff  1056 Mar 31 22:40 milestone-1-scaffolding
 drwxr-xr-x@ 33 leocaseiro  staff  1056 Apr  1 00:28 milestone-2-data-layer
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:23Z)**_
@@ -1351,6 +1390,7 @@ vite.config.ts
 vitest.config.ts
 yarn.lock
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:27Z)**_
@@ -1366,6 +1406,7 @@ Check export default usage in component files
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/ThemeToggle.tsx:69:export default ThemeToggle;
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx:77:export default Header;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:31Z)**_
@@ -1375,64 +1416,65 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:50:31Z)**_
  `./.worktrees/feat/linting-setup/src/components/Footer.tsx`
 
 ```text
-1	const Footer = () => {
-2	  const year = new Date().getFullYear();
-3	
-4	  return (
-5	    <footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
-6	      <div className="page-wrap flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
-7	        <p className="m-0 text-sm">
-8	          &copy; {year} Your name here. All rights reserved.
-9	        </p>
-10	        <p className="island-kicker m-0">Built with TanStack Start</p>
-11	      </div>
-12	      <div className="mt-4 flex justify-center gap-4">
-13	        <a
-14	          href="https://x.com/tan_stack"
-15	          target="_blank"
-16	          rel="noreferrer"
-17	          className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-18	        >
-19	          <span className="sr-only">Follow TanStack on X</span>
-20	          <svg
-21	            viewBox="0 0 16 16"
-22	            aria-hidden="true"
-23	            width="32"
-24	            height="32"
-25	          >
-26	            <path
-27	              fill="currentColor"
-28	              d="M12.6 1h2.2L10 6.48 15.64 15h-4.41L7.78 9.82 3.23 15H1l5.14-5.84L.72 1h4.52l3.12 4.73L12.6 1zm-.77 12.67h1.22L4.57 2.26H3.26l8.57 11.41z"
-29	            />
-30	          </svg>
-31	        </a>
-32	        <a
-33	          href="https://github.com/TanStack"
-34	          target="_blank"
-35	          rel="noreferrer"
-36	          className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
-37	        >
-38	          <span className="sr-only">Go to TanStack GitHub</span>
-39	          <svg
-40	            viewBox="0 0 16 16"
-41	            aria-hidden="true"
-42	            width="32"
-43	            height="32"
-44	          >
-45	            <path
-46	              fill="currentColor"
-47	              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-48	            />
-49	          </svg>
-50	        </a>
-51	      </div>
-52	    </footer>
-53	  );
-54	};
-55	
-56	export default Footer;
+1 const Footer = () => {
+2   const year = new Date().getFullYear();
+3 
+4   return (
+5     <footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
+6       <div className="page-wrap flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+7         <p className="m-0 text-sm">
+8           &copy; {year} Your name here. All rights reserved.
+9         </p>
+10         <p className="island-kicker m-0">Built with TanStack Start</p>
+11       </div>
+12       <div className="mt-4 flex justify-center gap-4">
+13         <a
+14           href="https://x.com/tan_stack"
+15           target="_blank"
+16           rel="noreferrer"
+17           className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+18         >
+19           <span className="sr-only">Follow TanStack on X</span>
+20           <svg
+21             viewBox="0 0 16 16"
+22             aria-hidden="true"
+23             width="32"
+24             height="32"
+25           >
+26             <path
+27               fill="currentColor"
+28               d="M12.6 1h2.2L10 6.48 15.64 15h-4.41L7.78 9.82 3.23 15H1l5.14-5.84L.72 1h4.52l3.12 4.73L12.6 1zm-.77 12.67h1.22L4.57 2.26H3.26l8.57 11.41z"
+29             />
+30           </svg>
+31         </a>
+32         <a
+33           href="https://github.com/TanStack"
+34           target="_blank"
+35           rel="noreferrer"
+36           className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+37         >
+38           <span className="sr-only">Go to TanStack GitHub</span>
+39           <svg
+40             viewBox="0 0 16 16"
+41             aria-hidden="true"
+42             width="32"
+43             height="32"
+44           >
+45             <path
+46               fill="currentColor"
+47               d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+48             />
+49           </svg>
+50         </a>
+51       </div>
+52     </footer>
+53   );
+54 };
+55 
+56 export default Footer;
 57
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:32Z)**_
@@ -1442,77 +1484,78 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:50:32Z)**_
  `./.worktrees/feat/linting-setup/src/components/ThemeToggle.tsx`
 
 ```text
-1	import { useEffect, useState } from 'react';
-2	
-3	type ThemeMode = 'light' | 'dark' | 'auto';
-4	
-5	function applyThemeMode(mode: ThemeMode) {
-6	  const prefersDark = globalThis.matchMedia(
-7	    '(prefers-color-scheme: dark)',
-8	  ).matches;
-9	  const resolved =
-10	    mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
-11	
-12	  document.documentElement.classList.remove('light', 'dark');
-13	  document.documentElement.classList.add(resolved);
-14	
-15	  if (mode === 'auto') {
-16	    delete document.documentElement.dataset.theme;
-17	  } else {
-18	    document.documentElement.dataset.theme = mode;
-19	  }
-20	  document.documentElement.style.colorScheme = resolved;
-21	}
-22	
-23	const ThemeToggle = () => {
-24	  const [mode, setMode] = useState<ThemeMode>('auto');
-25	
-26	  useEffect(() => {
-27	    applyThemeMode('auto');
-28	  }, []);
-29	
-30	  useEffect(() => {
-31	    if (mode !== 'auto') {
-32	      return;
-33	    }
-34	
-35	    const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
-36	    const onChange = () => applyThemeMode('auto');
-37	
-38	    media.addEventListener('change', onChange);
-39	    return () => {
-40	      media.removeEventListener('change', onChange);
-41	    };
-42	  }, [mode]);
-43	
-44	  function toggleMode() {
-45	    const nextMode: ThemeMode =
-46	      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
-47	    setMode(nextMode);
-48	    applyThemeMode(nextMode);
-49	  }
-50	
-51	  const label =
-52	    mode === 'auto'
-53	      ? 'Theme mode: auto (system). Click to switch to light mode.'
-54	      : `Theme mode: ${mode}. Click to switch mode.`;
-55	
-56	  return (
-57	    <button
-58	      type="button"
-59	      onClick={toggleMode}
-60	      aria-label={label}
-61	      title={label}
-62	      className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
-63	    >
-64	      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
-65	    </button>
-66	  );
-67	};
-68	
-69	export default ThemeToggle;
+1 import { useEffect, useState } from 'react';
+2 
+3 type ThemeMode = 'light' | 'dark' | 'auto';
+4 
+5 function applyThemeMode(mode: ThemeMode) {
+6   const prefersDark = globalThis.matchMedia(
+7     '(prefers-color-scheme: dark)',
+8   ).matches;
+9   const resolved =
+10     mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode;
+11 
+12   document.documentElement.classList.remove('light', 'dark');
+13   document.documentElement.classList.add(resolved);
+14 
+15   if (mode === 'auto') {
+16     delete document.documentElement.dataset.theme;
+17   } else {
+18     document.documentElement.dataset.theme = mode;
+19   }
+20   document.documentElement.style.colorScheme = resolved;
+21 }
+22 
+23 const ThemeToggle = () => {
+24   const [mode, setMode] = useState<ThemeMode>('auto');
+25 
+26   useEffect(() => {
+27     applyThemeMode('auto');
+28   }, []);
+29 
+30   useEffect(() => {
+31     if (mode !== 'auto') {
+32       return;
+33     }
+34 
+35     const media = globalThis.matchMedia('(prefers-color-scheme: dark)');
+36     const onChange = () => applyThemeMode('auto');
+37 
+38     media.addEventListener('change', onChange);
+39     return () => {
+40       media.removeEventListener('change', onChange);
+41     };
+42   }, [mode]);
+43 
+44   function toggleMode() {
+45     const nextMode: ThemeMode =
+46       mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light';
+47     setMode(nextMode);
+48     applyThemeMode(nextMode);
+49   }
+50 
+51   const label =
+52     mode === 'auto'
+53       ? 'Theme mode: auto (system). Click to switch to light mode.'
+54       : `Theme mode: ${mode}. Click to switch mode.`;
+55 
+56   return (
+57     <button
+58       type="button"
+59       onClick={toggleMode}
+60       aria-label={label}
+61       title={label}
+62       className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
+63     >
+64       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
+65     </button>
+66   );
+67 };
+68 
+69 export default ThemeToggle;
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:32Z)**_
@@ -1522,91 +1565,93 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:50:32Z)**_
  `./.worktrees/feat/linting-setup/src/components/Header.tsx`
 
 ```text
-1	import { Link, useParams } from '@tanstack/react-router';
-2	import ThemeToggle from './ThemeToggle';
-3	
-4	const Header = () => {
-5	  const { locale } = useParams({ from: '/$locale' });
-6	
-7	  return (
-8	    <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
-9	      <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
-10	        <h2 className="m-0 flex-shrink-0 text-base font-semibold tracking-tight">
-11	          <Link
-12	            to="/$locale"
-13	            params={{ locale }}
-14	            className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(30,90,72,0.08)] sm:px-4 sm:py-2"
-15	          >
-16	            <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#0077B6,#00B4D8)]" />
-17	            BaseSkill
-18	          </Link>
-19	        </h2>
-20	
-21	        <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
-22	          <a
-23	            href="https://github.com/leocaseiro/base-skill"
-24	            target="_blank"
-25	            rel="noreferrer"
-26	            className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
-27	          >
-28	            <span className="sr-only">BaseSkill on GitHub</span>
-29	            <svg
-30	              viewBox="0 0 16 16"
-31	              aria-hidden="true"
-32	              width="24"
-33	              height="24"
-34	            >
-35	              <path
-36	                fill="currentColor"
-37	                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-38	              />
-39	            </svg>
-40	          </a>
-41	
-42	          <ThemeToggle />
-43	        </div>
-44	
-45	        <div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-2 sm:w-auto sm:flex-nowrap sm:pb-0">
-46	          <Link
-47	            to="/$locale"
-48	            params={{ locale }}
-49	            className="nav-link"
-50	            activeOptions={{ exact: true }}
-51	            activeProps={{ className: 'nav-link is-active' }}
-52	          >
-53	            Home
-54	          </Link>
-55	          <Link
-56	            to="/$locale/dashboard"
-57	            params={{ locale }}
-58	            className="nav-link"
-59	            activeProps={{ className: 'nav-link is-active' }}
-60	          >
-61	            Dashboard
-62	          </Link>
-63	          <Link
-64	            to="/$locale/parent"
-65	            params={{ locale }}
-66	            className="nav-link"
-67	            activeProps={{ className: 'nav-link is-active' }}
-68	          >
-69	            Parent
-70	          </Link>
-71	        </div>
-72	      </nav>
-73	    </header>
-74	  );
-75	};
-76	
-77	export default Header;
+1 import { Link, useParams } from '@tanstack/react-router';
+2 import ThemeToggle from './ThemeToggle';
+3 
+4 const Header = () => {
+5   const { locale } = useParams({ from: '/$locale' });
+6 
+7   return (
+8     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg">
+9       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
+10         <h2 className="m-0 flex-shrink-0 text-base font-semibold tracking-tight">
+11           <Link
+12             to="/$locale"
+13             params={{ locale }}
+14             className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(30,90,72,0.08)] sm:px-4 sm:py-2"
+15           >
+16             <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#0077B6,#00B4D8)]" />
+17             BaseSkill
+18           </Link>
+19         </h2>
+20 
+21         <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
+22           <a
+23             href="https://github.com/leocaseiro/base-skill"
+24             target="_blank"
+25             rel="noreferrer"
+26             className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
+27           >
+28             <span className="sr-only">BaseSkill on GitHub</span>
+29             <svg
+30               viewBox="0 0 16 16"
+31               aria-hidden="true"
+32               width="24"
+33               height="24"
+34             >
+35               <path
+36                 fill="currentColor"
+37                 d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+38               />
+39             </svg>
+40           </a>
+41 
+42           <ThemeToggle />
+43         </div>
+44 
+45         <div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-2 sm:w-auto sm:flex-nowrap sm:pb-0">
+46           <Link
+47             to="/$locale"
+48             params={{ locale }}
+49             className="nav-link"
+50             activeOptions={{ exact: true }}
+51             activeProps={{ className: 'nav-link is-active' }}
+52           >
+53             Home
+54           </Link>
+55           <Link
+56             to="/$locale/dashboard"
+57             params={{ locale }}
+58             className="nav-link"
+59             activeProps={{ className: 'nav-link is-active' }}
+60           >
+61             Dashboard
+62           </Link>
+63           <Link
+64             to="/$locale/parent"
+65             params={{ locale }}
+66             className="nav-link"
+67             activeProps={{ className: 'nav-link is-active' }}
+68           >
+69             Parent
+70           </Link>
+71         </div>
+72       </nav>
+73     </header>
+74   );
+75 };
+76 
+77 export default Header;
 78
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:36Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I need to:
+
 1. Check if `Header.tsx` imports `ThemeToggle` using default import
 2. Convert the 3 components to named exports
 3. Update imports in files that import them
@@ -1630,6 +1675,7 @@ Find all imports of the 3 components
 ```text
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx:2:import ThemeToggle from './ThemeToggle';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:41Z)**_
@@ -1643,6 +1689,7 @@ Find imports in route files
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:45Z)**_
@@ -1677,6 +1724,7 @@ Find all references to Footer and Header components
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx:4:const Header = () => {
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx:77:export default Header;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:50Z)**_
@@ -1692,58 +1740,59 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:50:50Z)**_
  `./.worktrees/feat/linting-setup/src/routes/__root.tsx`
 
 ```text
-1	import { TanStackDevtools } from '@tanstack/react-devtools';
-2	import {
-3	  HeadContent,
-4	  Scripts,
-5	  createRootRoute,
-6	} from '@tanstack/react-router';
-7	import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-8	
-9	import appCss from '../styles.css?url';
-10	
-11	/** First paint only: class + color-scheme from system preference (no localStorage). */
-12	const THEME_INIT_SCRIPT =
-13	  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-14	
-15	const RootDocument = ({ children }: { children: React.ReactNode }) => (
-16	  <html lang="en" suppressHydrationWarning>
-17	    <head>
-18	      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-19	      <HeadContent />
-20	    </head>
-21	    <body className="font-sans antialiased">
-22	      {children}
-23	      <TanStackDevtools
-24	        config={{ position: 'bottom-right' }}
-25	        plugins={[
-26	          {
-27	            name: 'Tanstack Router',
-28	            render: <TanStackRouterDevtoolsPanel />,
-29	          },
-30	        ]}
-31	      />
-32	      <Scripts />
-33	    </body>
-34	  </html>
-35	);
-36	
-37	export const Route = createRootRoute({
-38	  head: () => ({
-39	    meta: [
-40	      { charSet: 'utf8' },
-41	      {
-42	        name: 'viewport',
-43	        content: 'width=device-width, initial-scale=1',
-44	      },
-45	      { title: 'BaseSkill' },
-46	    ],
-47	    links: [{ rel: 'stylesheet', href: appCss }],
-48	  }),
-49	  shellComponent: RootDocument,
-50	});
+1 import { TanStackDevtools } from '@tanstack/react-devtools';
+2 import {
+3   HeadContent,
+4   Scripts,
+5   createRootRoute,
+6 } from '@tanstack/react-router';
+7 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+8 
+9 import appCss from '../styles.css?url';
+10 
+11 /** First paint only: class + color-scheme from system preference (no localStorage). */
+12 const THEME_INIT_SCRIPT =
+13   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
+14 
+15 const RootDocument = ({ children }: { children: React.ReactNode }) => (
+16   <html lang="en" suppressHydrationWarning>
+17     <head>
+18       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+19       <HeadContent />
+20     </head>
+21     <body className="font-sans antialiased">
+22       {children}
+23       <TanStackDevtools
+24         config={{ position: 'bottom-right' }}
+25         plugins={[
+26           {
+27             name: 'Tanstack Router',
+28             render: <TanStackRouterDevtoolsPanel />,
+29           },
+30         ]}
+31       />
+32       <Scripts />
+33     </body>
+34   </html>
+35 );
+36 
+37 export const Route = createRootRoute({
+38   head: () => ({
+39     meta: [
+40       { charSet: 'utf8' },
+41       {
+42         name: 'viewport',
+43         content: 'width=device-width, initial-scale=1',
+44       },
+45       { title: 'BaseSkill' },
+46     ],
+47     links: [{ rel: 'stylesheet', href: appCss }],
+48   }),
+49   shellComponent: RootDocument,
+50 });
 51
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:59Z)**_
@@ -1752,12 +1801,13 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:50:59Z)**_
 `Header` and `Footer` are not actually imported anywhere currently - they seem to be "orphaned" components. The `Header.tsx` imports `ThemeToggle` (default import), but Header itself isn't imported from anywhere.
 
 So the changes I need to make:
+
 1. Convert `Footer`, `ThemeToggle`, and `Header` from `export default X` to `export const X = ...`
 2. Fix the import in `Header.tsx` (changes `import ThemeToggle from './ThemeToggle'` to `import { ThemeToggle } from './ThemeToggle'`)
 3. Add `import/no-default-export` to eslint.config.js
 
-
 4. Now I'm converting each component to use named exports instead of default exports, and updating the import statement in Header to match.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:50:59Z)**_
@@ -1772,6 +1822,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:51:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Footer.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:51:01Z)**_
@@ -1782,6 +1833,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:51:01Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/ThemeToggle.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:51:02Z)**_
@@ -1792,6 +1844,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:51:02Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 ---
@@ -1822,12 +1875,14 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:58:55Z)**_
 The user wants me to continue with the task. I was in the middle of converting components to named exports. Let me continue from where I was interrupted.
 
 I had already:
+
 1. Created worktree (it existed at `.worktrees/feat/linting-setup`)
 2. Converted `Footer`, `Header`, `ThemeToggle` const declarations to `export const`
 3. But I still need to:
    - Remove the `export default X;` lines at the bottom of the files
    - Update the import in `Header.tsx` (line 2: `import ThemeToggle from './ThemeToggle'` → `import { ThemeToggle } from './ThemeToggle'`)
    - Add the `import/no-default-export` rule to eslint.config.js to enforce this pattern going forward
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:58:55Z)**_
@@ -1842,6 +1897,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:58:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Footer.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:58:58Z)**_
@@ -1852,6 +1908,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:58:58Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/ThemeToggle.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:58:59Z)**_
@@ -1862,6 +1919,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:58:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:59:03Z)**_
@@ -1876,6 +1934,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:59:04Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/components/Header.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:59:09Z)**_
@@ -1889,57 +1948,58 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:59:10Z)**_
  `./.worktrees/feat/linting-setup/eslint.config.js`
 
 ```text
-1	//  @ts-check
-2	
-3	import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
-4	import eslintPluginUnicorn from 'eslint-plugin-unicorn';
-5	import { tanstackConfig } from '@tanstack/eslint-config';
-6	import eslintConfigPrettier from 'eslint-config-prettier/flat';
-7	import jsxA11y from 'eslint-plugin-jsx-a11y';
-8	import reactPlugin from 'eslint-plugin-react';
-9	import reactHooks from 'eslint-plugin-react-hooks';
-10	
-11	// Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
-12	// Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
-13	// Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
-14	
-15	export default [
-16	  ...tanstackConfig,
-17	  reactPlugin.configs.flat.recommended,
-18	  reactPlugin.configs.flat['jsx-runtime'],
-19	  // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
-20	  // but the top-level recommended-latest still uses the legacy string array format,
-21	  // so we construct the flat config object manually here.
-22	  {
-23	    plugins: {
-24	      'react-hooks': reactHooks,
-25	      // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
-26	      'eslint-comments': eslintComments,
-27	    },
-28	    rules: reactHooks.configs['recommended-latest'].rules,
-29	  },
-30	  jsxA11y.flatConfigs.recommended,
-31	  eslintPluginUnicorn.configs.recommended,
-32	  {
-33	    settings: {
-34	      react: { version: 'detect' },
-35	    },
-36	    rules: {
-37	      // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
-38	      // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
-39	      // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
-40	      // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
-41	      'unicorn/filename-case': 'off',
-42	      'unicorn/prevent-abbreviations': 'off',
-43	      'unicorn/no-null': 'off',
-44	      // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
-45	      'unicorn/relative-url-style': ['error', 'always'],
-46	
-47	      // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
-48	      'eslint-comments/require-description': 'error',
-49	
-50	      'import/no-cycle': 'off',
+1 //  @ts-check
+2 
+3 import eslintComments from '@eslint-community/eslint-plugin-eslint-comments';
+4 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+5 import { tanstackConfig } from '@tanstack/eslint-config';
+6 import eslintConfigPrettier from 'eslint-config-prettier/flat';
+7 import jsxA11y from 'eslint-plugin-jsx-a11y';
+8 import reactPlugin from 'eslint-plugin-react';
+9 import reactHooks from 'eslint-plugin-react-hooks';
+10 
+11 // Note: eslint-plugin-tailwindcss v3 is incompatible with Tailwind CSS v4
+12 // Tailwind v4 removed the `./resolveConfig` subpath export that this plugin requires.
+13 // Re-enable once eslint-plugin-tailwindcss adds Tailwind v4 support.
+14 
+15 export default [
+16   ...tanstackConfig,
+17   reactPlugin.configs.flat.recommended,
+18   reactPlugin.configs.flat['jsx-runtime'],
+19   // eslint-plugin-react-hooks v7 ships a flat config under configs.flat
+20   // but the top-level recommended-latest still uses the legacy string array format,
+21   // so we construct the flat config object manually here.
+22   {
+23     plugins: {
+24       'react-hooks': reactHooks,
+25       // Only `require-description`: unicorn has no equivalent for mandatory `-- <why>` on disables.
+26       'eslint-comments': eslintComments,
+27     },
+28     rules: reactHooks.configs['recommended-latest'].rules,
+29   },
+30   jsxA11y.flatConfigs.recommended,
+31   eslintPluginUnicorn.configs.recommended,
+32   {
+33     settings: {
+34       react: { version: 'detect' },
+35     },
+36     rules: {
+37       // Unicorn `recommended` is on above; these rules clash with React (PascalCase files,
+38       // `props`), TanStack Router (`$param` routes), and routine TS/React naming (`db`, `doc`).
+39       // Do not rename/destructure around third-party typings (e.g. `React.ComponentProps`,
+40       // Radix); disable rules instead of “fixing” imports or prop shapes to satisfy ESLint.
+41       'unicorn/filename-case': 'off',
+42       'unicorn/prevent-abbreviations': 'off',
+43       'unicorn/no-null': 'off',
+44       // Prefer explicit `./` in `new URL(..., import.meta.url)` (unicorn default is `never`).
+45       'unicorn/relative-url-style': ['error', 'always'],
+46 
+47       // Applies to every `eslint-disable-*` / `eslint-enable` line, including `unicorn/…` rules.
+48       'eslint-comments/require-description': 'error',
+49 
+50       'import/no-cycle': 'off',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:59:13Z)**_
@@ -1950,6 +2010,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 06:59:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/eslint.config.js has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:59:18Z)**_
@@ -1967,6 +2028,7 @@ Lint the 3 converted component files
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 06:59:32Z)**_
@@ -1999,20 +2061,22 @@ Full lint to catch any remaining default export violations
 
 ✖ 5 problems (5 errors, 0 warnings)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:26Z)**_
 
 <think><details><summary>Thought Process</summary>
 So I have violations in:
+
 1. `knip.config.ts` - this is a config file for Knip, which requires `export default`. Need to allow.
 2. `playwright.config.ts` - Playwright requires `export default`. Need to allow.
 3. `src/lib/i18n/i18n.ts` - This uses `export { default }` which is re-exporting a default. Need to fix.
 4. `vite.config.ts` - Vite requires `export default`. Need to allow.
 5. `vitest.config.ts` - Vitest requires `export default`. Need to allow.
 
-
 6. I can add a rule override for all `*.config.ts` files to allow `export default` since that's a framework requirement, but I should investigate what's happening in the i18n file to see if it's a legitimate re-export or something that needs fixing.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:26Z)**_
@@ -2030,6 +2094,7 @@ Check i18n.ts exports
 ```text
 33:export { default } from 'i18next';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:29Z)**_
@@ -2039,41 +2104,42 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:00:29Z)**_
  `./.worktrees/feat/linting-setup/src/lib/i18n/i18n.ts`
 
 ```text
-1	import i18n from 'i18next';
-2	import { initReactI18next } from 'react-i18next';
-3	import enCommon from './locales/en/common.json';
-4	import enEncouragements from './locales/en/encouragements.json';
-5	import enGames from './locales/en/games.json';
-6	import enSettings from './locales/en/settings.json';
-7	import ptCommon from './locales/pt-BR/common.json';
-8	import ptEncouragements from './locales/pt-BR/encouragements.json';
-9	import ptGames from './locales/pt-BR/games.json';
-10	import ptSettings from './locales/pt-BR/settings.json';
-11	
-12	void i18n.use(initReactI18next).init({
-13	  lng: 'en',
-14	  fallbackLng: 'en',
-15	  defaultNS: 'common',
-16	  interpolation: { escapeValue: false },
-17	  resources: {
-18	    en: {
-19	      common: enCommon,
-20	      games: enGames,
-21	      settings: enSettings,
-22	      encouragements: enEncouragements,
-23	    },
-24	    'pt-BR': {
-25	      common: ptCommon,
-26	      games: ptGames,
-27	      settings: ptSettings,
-28	      encouragements: ptEncouragements,
-29	    },
-30	  },
-31	});
-32	
-33	export { default } from 'i18next';
+1 import i18n from 'i18next';
+2 import { initReactI18next } from 'react-i18next';
+3 import enCommon from './locales/en/common.json';
+4 import enEncouragements from './locales/en/encouragements.json';
+5 import enGames from './locales/en/games.json';
+6 import enSettings from './locales/en/settings.json';
+7 import ptCommon from './locales/pt-BR/common.json';
+8 import ptEncouragements from './locales/pt-BR/encouragements.json';
+9 import ptGames from './locales/pt-BR/games.json';
+10 import ptSettings from './locales/pt-BR/settings.json';
+11 
+12 void i18n.use(initReactI18next).init({
+13   lng: 'en',
+14   fallbackLng: 'en',
+15   defaultNS: 'common',
+16   interpolation: { escapeValue: false },
+17   resources: {
+18     en: {
+19       common: enCommon,
+20       games: enGames,
+21       settings: enSettings,
+22       encouragements: enEncouragements,
+23     },
+24     'pt-BR': {
+25       common: ptCommon,
+26       games: ptGames,
+27       settings: ptSettings,
+28       encouragements: ptEncouragements,
+29     },
+30   },
+31 });
+32 
+33 export { default } from 'i18next';
 34
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:35Z)**_
@@ -2094,19 +2160,20 @@ Find consumers of i18n.ts
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/route.tsx:7:import i18n from '@/lib/i18n/i18n';
 /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app.tsx:4:import i18n from '@/lib/i18n/i18n';
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:44Z)**_
 
 <think><details><summary>Thought Process</summary>
 Two route files import `i18n` as a default import from `i18n.ts`. I need to:
+
 1. Change `i18n.ts` to export the i18n instance as a named export instead of re-exporting the default
 2. Update the two route files to use named import
 
 The `i18n` variable is `import i18n from 'i18next'` which is the initialized i18n instance. I can re-export it as a named export.
 
 Instead of `export { default } from 'i18next'`, I can do `export { i18n }` since the variable is already named `i18n`.
-
 
 Since `i18n.ts` imports the i18n instance, mutates it with `.use().init()`, and then re-exports it, I just need to change the export statement to use the named export and update both route files to import it as a named import instead of a default import.
 </details></think>
@@ -2123,6 +2190,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:00:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/lib/i18n/i18n.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:53Z)**_
@@ -2137,6 +2205,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:00:55Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:00:58Z)**_
@@ -2147,6 +2216,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:00:58Z)**_
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:01:49Z)**_
@@ -2180,6 +2250,7 @@ const AppLayout = () => (
   <DbProvider onDatabaseReady={seedThemesOnce}>
     <I18nextProvider i18n={i18n}>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:01:52Z)**_
@@ -2189,42 +2260,43 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:01:52Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/route.tsx`
 
 ```text
-1	import {
-2	  Outlet,
-3	  createFileRoute,
-4	  redirect,
-5	} from '@tanstack/react-router';
-6	import { useEffect } from 'react';
-7	import i18n from '@/lib/i18n/i18n';
-8	
-9	const LOCALES = ['en', 'pt-BR'] as const;
-10	export type AppLocale = (typeof LOCALES)[number];
-11	
-12	export const Route = createFileRoute('/$locale')({
-13	  beforeLoad: ({ params }) => {
-14	    if (!LOCALES.includes(params.locale as AppLocale)) {
-15	      throw redirect({
-16	        to: '/$locale',
-17	        params: { locale: 'en' },
-18	        replace: true,
-19	      });
-20	    }
-21	  },
-22	  component: LocaleLayout,
-23	});
-24	
-25	const LocaleLayout = () => {
-26	  const { locale } = Route.useParams();
-27	  void i18n.changeLanguage(locale);
-28	
-29	  useEffect(() => {
-30	    document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
-31	  }, [locale]);
-32	
-33	  return <Outlet />;
-34	};
+1 import {
+2   Outlet,
+3   createFileRoute,
+4   redirect,
+5 } from '@tanstack/react-router';
+6 import { useEffect } from 'react';
+7 import i18n from '@/lib/i18n/i18n';
+8 
+9 const LOCALES = ['en', 'pt-BR'] as const;
+10 export type AppLocale = (typeof LOCALES)[number];
+11 
+12 export const Route = createFileRoute('/$locale')({
+13   beforeLoad: ({ params }) => {
+14     if (!LOCALES.includes(params.locale as AppLocale)) {
+15       throw redirect({
+16         to: '/$locale',
+17         params: { locale: 'en' },
+18         replace: true,
+19       });
+20     }
+21   },
+22   component: LocaleLayout,
+23 });
+24 
+25 const LocaleLayout = () => {
+26   const { locale } = Route.useParams();
+27   void i18n.changeLanguage(locale);
+28 
+29   useEffect(() => {
+30     document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
+31   }, [locale]);
+32 
+33   return <Outlet />;
+34 };
 35
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:01:52Z)**_
@@ -2234,30 +2306,31 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:01:52Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app.tsx`
 
 ```text
-1	import { Outlet, createFileRoute } from '@tanstack/react-router';
-2	import { I18nextProvider } from 'react-i18next';
-3	import { seedThemesOnce } from '@/db/seed-themes';
-4	import i18n from '@/lib/i18n/i18n';
-5	import { DbProvider } from '@/providers/DbProvider';
-6	import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
-7	
-8	const AppLayout = () => (
-9	  <DbProvider onDatabaseReady={seedThemesOnce}>
-10	    <I18nextProvider i18n={i18n}>
-11	      <ThemeRuntimeProvider>
-12	        <main className="min-h-screen">
-13	          <Outlet />
-14	        </main>
-15	      </ThemeRuntimeProvider>
-16	    </I18nextProvider>
-17	  </DbProvider>
-18	);
-19	
-20	export const Route = createFileRoute('/$locale/_app')({
-21	  component: AppLayout,
-22	});
+1 import { Outlet, createFileRoute } from '@tanstack/react-router';
+2 import { I18nextProvider } from 'react-i18next';
+3 import { seedThemesOnce } from '@/db/seed-themes';
+4 import i18n from '@/lib/i18n/i18n';
+5 import { DbProvider } from '@/providers/DbProvider';
+6 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+7 
+8 const AppLayout = () => (
+9   <DbProvider onDatabaseReady={seedThemesOnce}>
+10     <I18nextProvider i18n={i18n}>
+11       <ThemeRuntimeProvider>
+12         <main className="min-h-screen">
+13           <Outlet />
+14         </main>
+15       </ThemeRuntimeProvider>
+16     </I18nextProvider>
+17   </DbProvider>
+18 );
+19 
+20 export const Route = createFileRoute('/$locale/_app')({
+21   component: AppLayout,
+22 });
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:01:56Z)**_
@@ -2268,6 +2341,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:01:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/route.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:01:57Z)**_
@@ -2278,6 +2352,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:01:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:02Z)**_
@@ -2291,24 +2366,25 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:02:03Z)**_
  `./.worktrees/feat/linting-setup/eslint.config.js`
 
 ```text
-120	        {
-121	          // Prettier often puts leading `|` / `&` in multiline union/intersection types.
-122	          overrides: { '|': 'ignore', '&': 'ignore' },
-123	        },
-124	      ],
-125	    },
-126	  },
-127	  {
-128	    // TanStack Router output; ships with undescribed blanket eslint-disable
-129	    ignores: [
-130	      'eslint.config.js',
-131	      'prettier.config.js',
-132	      '**/routeTree.gen.ts',
-133	    ],
-134	  },
-135	];
+120         {
+121           // Prettier often puts leading `|` / `&` in multiline union/intersection types.
+122           overrides: { '|': 'ignore', '&': 'ignore' },
+123         },
+124       ],
+125     },
+126   },
+127   {
+128     // TanStack Router output; ships with undescribed blanket eslint-disable
+129     ignores: [
+130       'eslint.config.js',
+131       'prettier.config.js',
+132       '**/routeTree.gen.ts',
+133     ],
+134   },
+135 ];
 136
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:11Z)**_
@@ -2319,6 +2395,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:02:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/eslint.config.js has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:20Z)**_
@@ -2338,6 +2415,7 @@ Exit code 1
 ✖ 1 problem (1 error, 0 warnings)
   1 error and 0 warnings potentially fixable with the `--fix` option.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:40Z)**_
@@ -2345,7 +2423,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:02:40Z)**_
 <think><details><summary>Thought Process</summary>
 Unicorn is flagging that I should use `export { i18n } from 'i18next'` instead of importing and re-exporting. Let me check: the i18n.ts file imports i18n, mutates it via `.use().init()`, and then exports it. The unicorn rule suggests using `export { i18n } from 'i18next'` directly - but that wouldn't work because we need to run the init first.
 
-Actually wait - I changed it to `export { i18n }` where `i18n` is the local variable (imported at the top). 
+Actually wait - I changed it to `export { i18n }` where `i18n` is the local variable (imported at the top).
 
 The unicorn rule is suggesting to use `export { i18n } from 'i18next'` as a re-export instead, but that would skip the initialization side-effect that needs to happen first. The rule is detecting that I'm importing from 'i18next' and then re-exporting the same thing, which normally could be condensed - but in this case, the initialization logic in between makes that optimization impossible.
 
@@ -2366,6 +2444,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:02:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/lib/i18n/i18n.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:50Z)**_
@@ -2379,6 +2458,7 @@ Full lint check
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:02:53Z)**_
@@ -2578,12 +2658,14 @@ error Command failed with exit code 1.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:03:08Z)**_
 
 <think><details><summary>Thought Process</summary>
 The pre-commit hook runs `yarn fix` (prettier + eslint --fix) and then `yarn test`. The test failure is:
+
 ```
 TypeError: Cannot read properties of undefined (reading 'changeLanguage')
 ```
@@ -2604,19 +2686,20 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:03:09Z)**_
  `./.worktrees/feat/linting-setup/src/lib/i18n/i18n.test.ts`
 
 ```text
-1	import { describe, expect, it } from 'vitest';
-2	import i18n from './i18n';
-3	
-4	describe('i18n', () => {
-5	  it('resolves common:appName for en and pt-BR', async () => {
-6	    await i18n.changeLanguage('en');
-7	    expect(i18n.t('common:appName')).toBe('BaseSkill');
-8	    await i18n.changeLanguage('pt-BR');
-9	    expect(i18n.t('common:appName')).toBe('BaseSkill');
-10	  });
-11	});
+1 import { describe, expect, it } from 'vitest';
+2 import i18n from './i18n';
+3 
+4 describe('i18n', () => {
+5   it('resolves common:appName for en and pt-BR', async () => {
+6     await i18n.changeLanguage('en');
+7     expect(i18n.t('common:appName')).toBe('BaseSkill');
+8     await i18n.changeLanguage('pt-BR');
+9     expect(i18n.t('common:appName')).toBe('BaseSkill');
+10   });
+11 });
 12
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:03:13Z)**_
@@ -2627,6 +2710,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:03:13Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/lib/i18n/i18n.test.ts has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:06:17Z)**_
@@ -2647,6 +2731,7 @@ Run i18n test to verify fix
    Start at  18:06:16
    Duration  479ms (transform 26ms, setup 36ms, collect 36ms, tests 3ms, environment 227ms, prepare 35ms)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:06:19Z)**_
@@ -2665,23 +2750,24 @@ Stage all changed files
 On branch feat/linting-setup
 Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
-	modified:   eslint.config.js
-	modified:   src/components/Footer.tsx
-	modified:   src/components/Header.tsx
-	modified:   src/components/ThemeToggle.tsx
-	modified:   src/lib/i18n/i18n.test.ts
-	modified:   src/lib/i18n/i18n.ts
-	modified:   src/routes/$locale/_app.tsx
-	modified:   src/routes/$locale/route.tsx
+ modified:   eslint.config.js
+ modified:   src/components/Footer.tsx
+ modified:   src/components/Header.tsx
+ modified:   src/components/ThemeToggle.tsx
+ modified:   src/lib/i18n/i18n.test.ts
+ modified:   src/lib/i18n/i18n.ts
+ modified:   src/routes/$locale/_app.tsx
+ modified:   src/routes/$locale/route.tsx
 
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .specstory/history/2026-04-01_05-15-20Z-transition-to-eslint-plugin-unicorn-rules.md
-	modified:   .specstory/history/2026-04-01_06-04-42Z-sheetheader-component-formatting-preference.md
-	modified:   .specstory/history/2026-04-01_06-29-29Z-eslint-multiline-ternary-and-prettier-compatibility.md
-	modified:   .specstory/statistics.json
+ modified:   .specstory/history/2026-04-01_05-15-20Z-transition-to-eslint-plugin-unicorn-rules.md
+ modified:   .specstory/history/2026-04-01_06-04-42Z-sheetheader-component-formatting-preference.md
+ modified:   .specstory/history/2026-04-01_06-29-29Z-eslint-multiline-ternary-and-prettier-compatibility.md
+ modified:   .specstory/statistics.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:06:34Z)**_
@@ -2863,6 +2949,7 @@ Done in 1.77s.
 [feat/linting-setup 30048f9] feat(eslint): ban export default; convert components and i18n to named exports
  8 files changed, 23 insertions(+), 14 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:06:37Z)**_
@@ -2898,6 +2985,7 @@ Install lint-staged
 $ husky
 Done in 2.11s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:06:50Z)**_
@@ -2911,100 +2999,101 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:06:50Z)**_
  `./.worktrees/feat/linting-setup/package.json`
 
 ```text
-1	{
-2	  "name": "base-skill",
-3	  "version": "0.1.0",
-4	  "private": true,
-5	  "type": "module",
-6	  "imports": {
-7	    "#/*": "./src/*"
-8	  },
-9	  "scripts": {
-10	    "start": "yarn dev",
-11	    "dev": "vite dev --port 3000",
-12	    "build": "vite build",
-13	    "preview": "vite preview",
-14	    "test": "vitest run",
-15	    "test:coverage": "vitest run --coverage",
-16	    "test:e2e": "playwright test",
-17	    "test:e2e:a11y": "playwright test --grep @a11y",
-18	    "typecheck": "tsc --noEmit",
-19	    "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
-20	    "format": "prettier --check .",
-21	    "fix": "prettier --write . && eslint --fix .",
-22	    "prepare": "husky"
-23	  },
-24	  "dependencies": {
-25	    "@fontsource-variable/geist": "^5.2.8",
-26	    "@tailwindcss/vite": "^4.1.18",
-27	    "@tanstack/react-devtools": "latest",
-28	    "@tanstack/react-router": "latest",
-29	    "@tanstack/react-router-devtools": "latest",
-30	    "@tanstack/react-router-ssr-query": "latest",
-31	    "@tanstack/react-start": "latest",
-32	    "@tanstack/router-plugin": "^1.132.0",
-33	    "class-variance-authority": "^0.7.1",
-34	    "clsx": "^2.1.1",
-35	    "dexie": "^4.4.2",
-36	    "eslint-plugin-unicorn": "^64.0.0",
-37	    "i18next": "^26.0.3",
-38	    "lucide-react": "^0.545.0",
-39	    "nanoid": "^5.1.7",
-40	    "next-themes": "^0.4.6",
-41	    "radix-ui": "^1.4.3",
-42	    "react": "^19.2.0",
-43	    "react-dom": "^19.2.0",
-44	    "react-i18next": "^17.0.2",
-45	    "rxdb": "^17.0.0",
-46	    "rxjs": "^7.8.2",
-47	    "shadcn": "^4.1.1",
-48	    "sonner": "^2.0.7",
-49	    "tailwind-merge": "^3.5.0",
-50	    "tailwindcss": "^4.1.18",
-51	    "tw-animate-css": "^1.4.0"
-52	  },
-53	  "devDependencies": {
-54	    "@axe-core/playwright": "^4.11.1",
-55	    "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
-56	    "@playwright/test": "^1.58.2",
-57	    "@tailwindcss/typography": "^0.5.16",
-58	    "@tanstack/devtools-vite": "latest",
-59	    "@tanstack/eslint-config": "^0.3.4",
-60	    "@testing-library/dom": "^10.4.1",
-61	    "@testing-library/jest-dom": "^6.9.1",
-62	    "@testing-library/react": "^16.3.0",
-63	    "@types/node": "^22.10.2",
-64	    "@types/react": "^19.2.0",
-65	    "@types/react-dom": "^19.2.0",
-66	    "@vitejs/plugin-react": "^5.1.4",
-67	    "@vitest/coverage-v8": "3.2.4",
-68	    "eslint": "^9.18.0",
-69	    "eslint-config-prettier": "^10.1.8",
-70	    "eslint-plugin-jsx-a11y": "^6.10.2",
-71	    "eslint-plugin-react": "^7.37.5",
-72	    "eslint-plugin-react-hooks": "^7.0.1",
-73	    "fake-indexeddb": "^6.2.5",
-74	    "husky": "^9.1.7",
-75	    "jsdom": "^28.1.0",
-76	    "knip": "^6.1.1",
-77	    "lint-staged": "^16.4.0",
-78	    "prettier": "^3.8.1",
-79	    "stylelint": "^17.6.0",
-80	    "stylelint-config-standard": "^40.0.0",
-81	    "typescript": "^5.7.2",
-82	    "vite": "^7.3.1",
-83	    "vite-plugin-pwa": "^1.2.0",
-84	    "vite-tsconfig-paths": "^5.1.4",
-85	    "vitest": "^3.0.5",
-86	    "workbox-build": "^7.4.0",
-87	    "workbox-window": "^7.4.0"
-88	  },
-89	  "engines": {
-90	    "node": ">=22.12.0"
-91	  }
-92	}
+1 {
+2   "name": "base-skill",
+3   "version": "0.1.0",
+4   "private": true,
+5   "type": "module",
+6   "imports": {
+7     "#/*": "./src/*"
+8   },
+9   "scripts": {
+10     "start": "yarn dev",
+11     "dev": "vite dev --port 3000",
+12     "build": "vite build",
+13     "preview": "vite preview",
+14     "test": "vitest run",
+15     "test:coverage": "vitest run --coverage",
+16     "test:e2e": "playwright test",
+17     "test:e2e:a11y": "playwright test --grep @a11y",
+18     "typecheck": "tsc --noEmit",
+19     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
+20     "format": "prettier --check .",
+21     "fix": "prettier --write . && eslint --fix .",
+22     "prepare": "husky"
+23   },
+24   "dependencies": {
+25     "@fontsource-variable/geist": "^5.2.8",
+26     "@tailwindcss/vite": "^4.1.18",
+27     "@tanstack/react-devtools": "latest",
+28     "@tanstack/react-router": "latest",
+29     "@tanstack/react-router-devtools": "latest",
+30     "@tanstack/react-router-ssr-query": "latest",
+31     "@tanstack/react-start": "latest",
+32     "@tanstack/router-plugin": "^1.132.0",
+33     "class-variance-authority": "^0.7.1",
+34     "clsx": "^2.1.1",
+35     "dexie": "^4.4.2",
+36     "eslint-plugin-unicorn": "^64.0.0",
+37     "i18next": "^26.0.3",
+38     "lucide-react": "^0.545.0",
+39     "nanoid": "^5.1.7",
+40     "next-themes": "^0.4.6",
+41     "radix-ui": "^1.4.3",
+42     "react": "^19.2.0",
+43     "react-dom": "^19.2.0",
+44     "react-i18next": "^17.0.2",
+45     "rxdb": "^17.0.0",
+46     "rxjs": "^7.8.2",
+47     "shadcn": "^4.1.1",
+48     "sonner": "^2.0.7",
+49     "tailwind-merge": "^3.5.0",
+50     "tailwindcss": "^4.1.18",
+51     "tw-animate-css": "^1.4.0"
+52   },
+53   "devDependencies": {
+54     "@axe-core/playwright": "^4.11.1",
+55     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
+56     "@playwright/test": "^1.58.2",
+57     "@tailwindcss/typography": "^0.5.16",
+58     "@tanstack/devtools-vite": "latest",
+59     "@tanstack/eslint-config": "^0.3.4",
+60     "@testing-library/dom": "^10.4.1",
+61     "@testing-library/jest-dom": "^6.9.1",
+62     "@testing-library/react": "^16.3.0",
+63     "@types/node": "^22.10.2",
+64     "@types/react": "^19.2.0",
+65     "@types/react-dom": "^19.2.0",
+66     "@vitejs/plugin-react": "^5.1.4",
+67     "@vitest/coverage-v8": "3.2.4",
+68     "eslint": "^9.18.0",
+69     "eslint-config-prettier": "^10.1.8",
+70     "eslint-plugin-jsx-a11y": "^6.10.2",
+71     "eslint-plugin-react": "^7.37.5",
+72     "eslint-plugin-react-hooks": "^7.0.1",
+73     "fake-indexeddb": "^6.2.5",
+74     "husky": "^9.1.7",
+75     "jsdom": "^28.1.0",
+76     "knip": "^6.1.1",
+77     "lint-staged": "^16.4.0",
+78     "prettier": "^3.8.1",
+79     "stylelint": "^17.6.0",
+80     "stylelint-config-standard": "^40.0.0",
+81     "typescript": "^5.7.2",
+82     "vite": "^7.3.1",
+83     "vite-plugin-pwa": "^1.2.0",
+84     "vite-tsconfig-paths": "^5.1.4",
+85     "vitest": "^3.0.5",
+86     "workbox-build": "^7.4.0",
+87     "workbox-window": "^7.4.0"
+88   },
+89   "engines": {
+90     "node": ">=22.12.0"
+91   }
+92 }
 93
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:01Z)**_
@@ -3014,7 +3103,7 @@ I need to check if there's a `markdownlint-cli2` installed. The plan says to ins
 
 Actually, looking at the package.json, I don't see `markdownlint-cli2` in devDependencies. But the plan says it should have been installed in step 1. Let me check if it's available.
 
-Wait, `markdownlint-cli2` is not in the devDependencies. 
+Wait, `markdownlint-cli2` is not in the devDependencies.
 
 I should check the .markdownlint.yaml file to see what's there, and I may need to install `markdownlint-cli2` if it's not already present. But first, I notice the lint:md script isn't in package.json yet—that's step 7. So I need to work through the earlier steps: adding the lint-staged configuration to package.json, updating the pre-commit hook, and adding the new linting scripts for CSS and markdown.
 
@@ -3035,6 +3124,7 @@ Check if markdownlint-cli2 is installed
 (eval):1: no matches found: node_modules/.bin/markdownlint*
 not found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:07Z)**_
@@ -3050,6 +3140,7 @@ Install markdownlint-cli2
 $ husky
 Done in 2.39s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:10Z)**_
@@ -3064,6 +3155,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:15Z)**_
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:18Z)**_
@@ -3073,101 +3165,102 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:18Z)**_
  `./.worktrees/feat/linting-setup/package.json`
 
 ```text
-1	{
-2	  "name": "base-skill",
-3	  "version": "0.1.0",
-4	  "private": true,
-5	  "type": "module",
-6	  "imports": {
-7	    "#/*": "./src/*"
-8	  },
-9	  "scripts": {
-10	    "start": "yarn dev",
-11	    "dev": "vite dev --port 3000",
-12	    "build": "vite build",
-13	    "preview": "vite preview",
-14	    "test": "vitest run",
-15	    "test:coverage": "vitest run --coverage",
-16	    "test:e2e": "playwright test",
-17	    "test:e2e:a11y": "playwright test --grep @a11y",
-18	    "typecheck": "tsc --noEmit",
-19	    "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
-20	    "format": "prettier --check .",
-21	    "fix": "prettier --write . && eslint --fix .",
-22	    "prepare": "husky"
-23	  },
-24	  "dependencies": {
-25	    "@fontsource-variable/geist": "^5.2.8",
-26	    "@tailwindcss/vite": "^4.1.18",
-27	    "@tanstack/react-devtools": "latest",
-28	    "@tanstack/react-router": "latest",
-29	    "@tanstack/react-router-devtools": "latest",
-30	    "@tanstack/react-router-ssr-query": "latest",
-31	    "@tanstack/react-start": "latest",
-32	    "@tanstack/router-plugin": "^1.132.0",
-33	    "class-variance-authority": "^0.7.1",
-34	    "clsx": "^2.1.1",
-35	    "dexie": "^4.4.2",
-36	    "eslint-plugin-unicorn": "^64.0.0",
-37	    "i18next": "^26.0.3",
-38	    "lucide-react": "^0.545.0",
-39	    "nanoid": "^5.1.7",
-40	    "next-themes": "^0.4.6",
-41	    "radix-ui": "^1.4.3",
-42	    "react": "^19.2.0",
-43	    "react-dom": "^19.2.0",
-44	    "react-i18next": "^17.0.2",
-45	    "rxdb": "^17.0.0",
-46	    "rxjs": "^7.8.2",
-47	    "shadcn": "^4.1.1",
-48	    "sonner": "^2.0.7",
-49	    "tailwind-merge": "^3.5.0",
-50	    "tailwindcss": "^4.1.18",
-51	    "tw-animate-css": "^1.4.0"
-52	  },
-53	  "devDependencies": {
-54	    "@axe-core/playwright": "^4.11.1",
-55	    "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
-56	    "@playwright/test": "^1.58.2",
-57	    "@tailwindcss/typography": "^0.5.16",
-58	    "@tanstack/devtools-vite": "latest",
-59	    "@tanstack/eslint-config": "^0.3.4",
-60	    "@testing-library/dom": "^10.4.1",
-61	    "@testing-library/jest-dom": "^6.9.1",
-62	    "@testing-library/react": "^16.3.0",
-63	    "@types/node": "^22.10.2",
-64	    "@types/react": "^19.2.0",
-65	    "@types/react-dom": "^19.2.0",
-66	    "@vitejs/plugin-react": "^5.1.4",
-67	    "@vitest/coverage-v8": "3.2.4",
-68	    "eslint": "^9.18.0",
-69	    "eslint-config-prettier": "^10.1.8",
-70	    "eslint-plugin-jsx-a11y": "^6.10.2",
-71	    "eslint-plugin-react": "^7.37.5",
-72	    "eslint-plugin-react-hooks": "^7.0.1",
-73	    "fake-indexeddb": "^6.2.5",
-74	    "husky": "^9.1.7",
-75	    "jsdom": "^28.1.0",
-76	    "knip": "^6.1.1",
-77	    "lint-staged": "^16.4.0",
-78	    "markdownlint-cli2": "^0.22.0",
-79	    "prettier": "^3.8.1",
-80	    "stylelint": "^17.6.0",
-81	    "stylelint-config-standard": "^40.0.0",
-82	    "typescript": "^5.7.2",
-83	    "vite": "^7.3.1",
-84	    "vite-plugin-pwa": "^1.2.0",
-85	    "vite-tsconfig-paths": "^5.1.4",
-86	    "vitest": "^3.0.5",
-87	    "workbox-build": "^7.4.0",
-88	    "workbox-window": "^7.4.0"
-89	  },
-90	  "engines": {
-91	    "node": ">=22.12.0"
-92	  }
-93	}
+1 {
+2   "name": "base-skill",
+3   "version": "0.1.0",
+4   "private": true,
+5   "type": "module",
+6   "imports": {
+7     "#/*": "./src/*"
+8   },
+9   "scripts": {
+10     "start": "yarn dev",
+11     "dev": "vite dev --port 3000",
+12     "build": "vite build",
+13     "preview": "vite preview",
+14     "test": "vitest run",
+15     "test:coverage": "vitest run --coverage",
+16     "test:e2e": "playwright test",
+17     "test:e2e:a11y": "playwright test --grep @a11y",
+18     "typecheck": "tsc --noEmit",
+19     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
+20     "format": "prettier --check .",
+21     "fix": "prettier --write . && eslint --fix .",
+22     "prepare": "husky"
+23   },
+24   "dependencies": {
+25     "@fontsource-variable/geist": "^5.2.8",
+26     "@tailwindcss/vite": "^4.1.18",
+27     "@tanstack/react-devtools": "latest",
+28     "@tanstack/react-router": "latest",
+29     "@tanstack/react-router-devtools": "latest",
+30     "@tanstack/react-router-ssr-query": "latest",
+31     "@tanstack/react-start": "latest",
+32     "@tanstack/router-plugin": "^1.132.0",
+33     "class-variance-authority": "^0.7.1",
+34     "clsx": "^2.1.1",
+35     "dexie": "^4.4.2",
+36     "eslint-plugin-unicorn": "^64.0.0",
+37     "i18next": "^26.0.3",
+38     "lucide-react": "^0.545.0",
+39     "nanoid": "^5.1.7",
+40     "next-themes": "^0.4.6",
+41     "radix-ui": "^1.4.3",
+42     "react": "^19.2.0",
+43     "react-dom": "^19.2.0",
+44     "react-i18next": "^17.0.2",
+45     "rxdb": "^17.0.0",
+46     "rxjs": "^7.8.2",
+47     "shadcn": "^4.1.1",
+48     "sonner": "^2.0.7",
+49     "tailwind-merge": "^3.5.0",
+50     "tailwindcss": "^4.1.18",
+51     "tw-animate-css": "^1.4.0"
+52   },
+53   "devDependencies": {
+54     "@axe-core/playwright": "^4.11.1",
+55     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
+56     "@playwright/test": "^1.58.2",
+57     "@tailwindcss/typography": "^0.5.16",
+58     "@tanstack/devtools-vite": "latest",
+59     "@tanstack/eslint-config": "^0.3.4",
+60     "@testing-library/dom": "^10.4.1",
+61     "@testing-library/jest-dom": "^6.9.1",
+62     "@testing-library/react": "^16.3.0",
+63     "@types/node": "^22.10.2",
+64     "@types/react": "^19.2.0",
+65     "@types/react-dom": "^19.2.0",
+66     "@vitejs/plugin-react": "^5.1.4",
+67     "@vitest/coverage-v8": "3.2.4",
+68     "eslint": "^9.18.0",
+69     "eslint-config-prettier": "^10.1.8",
+70     "eslint-plugin-jsx-a11y": "^6.10.2",
+71     "eslint-plugin-react": "^7.37.5",
+72     "eslint-plugin-react-hooks": "^7.0.1",
+73     "fake-indexeddb": "^6.2.5",
+74     "husky": "^9.1.7",
+75     "jsdom": "^28.1.0",
+76     "knip": "^6.1.1",
+77     "lint-staged": "^16.4.0",
+78     "markdownlint-cli2": "^0.22.0",
+79     "prettier": "^3.8.1",
+80     "stylelint": "^17.6.0",
+81     "stylelint-config-standard": "^40.0.0",
+82     "typescript": "^5.7.2",
+83     "vite": "^7.3.1",
+84     "vite-plugin-pwa": "^1.2.0",
+85     "vite-tsconfig-paths": "^5.1.4",
+86     "vitest": "^3.0.5",
+87     "workbox-build": "^7.4.0",
+88     "workbox-window": "^7.4.0"
+89   },
+90   "engines": {
+91     "node": ">=22.12.0"
+92   }
+93 }
 94
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:24Z)**_
@@ -3178,6 +3271,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/package.json has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:29Z)**_
@@ -3192,6 +3286,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:30Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/package.json has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:34Z)**_
@@ -3212,6 +3307,7 @@ yarn test
 ```text
 <tool_use_error>File has not been read yet. Read it first before writing to it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:38Z)**_
@@ -3221,10 +3317,11 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:38Z)**_
  `./.worktrees/feat/linting-setup/.husky/pre-commit`
 
 ```text
-1	yarn fix
-2	yarn test
+1 yarn fix
+2 yarn test
 3
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:41Z)**_
@@ -3235,6 +3332,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:07:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/.husky/pre-commit has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:07:51Z)**_
@@ -3333,6 +3431,7 @@ Done in 1.94s.
 [feat/linting-setup 767ff0c] chore(husky): replace yarn fix with lint-staged for staged-only pre-commit
  3 files changed, 588 insertions(+), 10 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:08:03Z)**_
@@ -3346,107 +3445,108 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:08:03Z)**_
  `./.worktrees/feat/linting-setup/.github/workflows/ci.yml`
 
 ```text
-1	# .github/workflows/ci.yml
-2	name: CI
-3	
-4	on:
-5	  push:
-6	    branches: ['**']
-7	  pull_request:
-8	    branches: [master]
-9	
-10	concurrency:
-11	  group: ci-${{ github.ref }}
-12	  cancel-in-progress: true
-13	
-14	jobs:
-15	  lint:
-16	    name: Lint
-17	    runs-on: ubuntu-latest
-18	    steps:
-19	      - uses: actions/checkout@v4
-20	
-21	      - uses: actions/setup-node@v4
-22	        with:
-23	          node-version-file: '.nvmrc'
-24	          cache: yarn
-25	
-26	      - name: Install dependencies
-27	        run: yarn install --frozen-lockfile
-28	
-29	      - name: ESLint
-30	        run: npx eslint . --max-warnings 0
-31	
-32	      - name: Prettier
-33	        run: npx prettier --check .
-34	
-35	  typecheck:
-36	    name: Type Check
-37	    runs-on: ubuntu-latest
-38	    steps:
-39	      - uses: actions/checkout@v4
-40	
-41	      - uses: actions/setup-node@v4
-42	        with:
-43	          node-version-file: '.nvmrc'
-44	          cache: yarn
-45	
-46	      - name: Install dependencies
-47	        run: yarn install --frozen-lockfile
-48	
-49	      - name: TypeScript
-50	        run: npx tsc --noEmit
-51	
-52	  unit-test:
-53	    name: Unit Tests
-54	    runs-on: ubuntu-latest
-55	    steps:
-56	      - uses: actions/checkout@v4
-57	
-58	      - uses: actions/setup-node@v4
-59	        with:
-60	          node-version-file: '.nvmrc'
-61	          cache: yarn
-62	
-63	      - name: Install dependencies
-64	        run: yarn install --frozen-lockfile
-65	
-66	      - name: Vitest with coverage
-67	        run: npx vitest run --coverage
-68	
-69	      - name: Upload coverage report
-70	        if: always()
-71	        uses: actions/upload-artifact@v4
-72	        with:
-73	          name: coverage-report
-74	          path: coverage/
-75	          retention-days: 7
-76	
-77	  build:
-78	    name: Build
-79	    runs-on: ubuntu-latest
-80	    steps:
-81	      - uses: actions/checkout@v4
-82	
-83	      - uses: actions/setup-node@v4
-84	        with:
-85	          node-version-file: '.nvmrc'
-86	          cache: yarn
-87	
-88	      - name: Install dependencies
-89	        run: yarn install --frozen-lockfile
-90	
-91	      - name: Build
-92	        run: yarn build
-93	
-94	      - name: Upload build artifact
-95	        uses: actions/upload-artifact@v4
-96	        with:
-97	          name: dist-ci
-98	          path: dist/
-99	          retention-days: 1
+1 # .github/workflows/ci.yml
+2 name: CI
+3 
+4 on:
+5   push:
+6     branches: ['**']
+7   pull_request:
+8     branches: [master]
+9 
+10 concurrency:
+11   group: ci-${{ github.ref }}
+12   cancel-in-progress: true
+13 
+14 jobs:
+15   lint:
+16     name: Lint
+17     runs-on: ubuntu-latest
+18     steps:
+19       - uses: actions/checkout@v4
+20 
+21       - uses: actions/setup-node@v4
+22         with:
+23           node-version-file: '.nvmrc'
+24           cache: yarn
+25 
+26       - name: Install dependencies
+27         run: yarn install --frozen-lockfile
+28 
+29       - name: ESLint
+30         run: npx eslint . --max-warnings 0
+31 
+32       - name: Prettier
+33         run: npx prettier --check .
+34 
+35   typecheck:
+36     name: Type Check
+37     runs-on: ubuntu-latest
+38     steps:
+39       - uses: actions/checkout@v4
+40 
+41       - uses: actions/setup-node@v4
+42         with:
+43           node-version-file: '.nvmrc'
+44           cache: yarn
+45 
+46       - name: Install dependencies
+47         run: yarn install --frozen-lockfile
+48 
+49       - name: TypeScript
+50         run: npx tsc --noEmit
+51 
+52   unit-test:
+53     name: Unit Tests
+54     runs-on: ubuntu-latest
+55     steps:
+56       - uses: actions/checkout@v4
+57 
+58       - uses: actions/setup-node@v4
+59         with:
+60           node-version-file: '.nvmrc'
+61           cache: yarn
+62 
+63       - name: Install dependencies
+64         run: yarn install --frozen-lockfile
+65 
+66       - name: Vitest with coverage
+67         run: npx vitest run --coverage
+68 
+69       - name: Upload coverage report
+70         if: always()
+71         uses: actions/upload-artifact@v4
+72         with:
+73           name: coverage-report
+74           path: coverage/
+75           retention-days: 7
+76 
+77   build:
+78     name: Build
+79     runs-on: ubuntu-latest
+80     steps:
+81       - uses: actions/checkout@v4
+82 
+83       - uses: actions/setup-node@v4
+84         with:
+85           node-version-file: '.nvmrc'
+86           cache: yarn
+87 
+88       - name: Install dependencies
+89         run: yarn install --frozen-lockfile
+90 
+91       - name: Build
+92         run: yarn build
+93 
+94       - name: Upload build artifact
+95         uses: actions/upload-artifact@v4
+96         with:
+97           name: dist-ci
+98           path: dist/
+99           retention-days: 1
 100
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:08:09Z)**_
@@ -3457,6 +3557,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:08:09Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/.github/workflows/ci.yml has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:08:18Z)**_
@@ -3515,6 +3616,7 @@ Done in 1.64s.
 [feat/linting-setup 85b70d9] ci: add stylelint and markdownlint steps to lint job
  1 file changed, 6 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:08:21Z)**_
@@ -3587,6 +3689,7 @@ src/routes/$locale/route.tsx(22,14): error TS2454: Variable 'LocaleLayout' is us
 error Command failed with exit code 2.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:08:53Z)**_
@@ -3604,7 +3707,7 @@ const Dashboard = () => (...);  // ← declared here (after)
 
 Wait, looking at the error - it says "used before its declaration". This could be an existing issue pre-existing our changes, or it could be related to our changes. Let me check one of the affected files.
 
-The `route.tsx` also has this error with `LocaleLayout`. 
+The `route.tsx` also has this error with `LocaleLayout`.
 
 I'm seeing the same temporal dead zone issue in the route files where components are referenced before they're declared. This was working before, so either it's pre-existing or something about our changes triggered the linter to catch it. Let me trace back through the git history to see if the `react/function-component-definition` rule was recently added. I need to verify whether these TypeScript errors existed before our changes by checking the previous commit, and then examine the actual file structure in `dashboard.tsx` to understand if the issue is the component being defined after the route export rather than before it.
 </details></think>
@@ -3632,14 +3735,15 @@ On branch feat/linting-setup
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
-	modified:   .specstory/history/2026-04-01_05-15-20Z-transition-to-eslint-plugin-unicorn-rules.md
-	modified:   .specstory/history/2026-04-01_06-04-42Z-sheetheader-component-formatting-preference.md
-	modified:   .specstory/history/2026-04-01_06-29-29Z-eslint-multiline-ternary-and-prettier-compatibility.md
-	modified:   .specstory/statistics.json
+ modified:   .specstory/history/2026-04-01_05-15-20Z-transition-to-eslint-plugin-unicorn-rules.md
+ modified:   .specstory/history/2026-04-01_06-04-42Z-sheetheader-component-formatting-preference.md
+ modified:   .specstory/history/2026-04-01_06-29-29Z-eslint-multiline-ternary-and-prettier-compatibility.md
+ modified:   .specstory/statistics.json
 
 no changes added to commit (use "git add" and/or "git commit -a")
 Dropped refs/stash@{0} (c6a5da2223ed051761adf20c819eec38d79e6078)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:09:00Z)**_
@@ -3655,28 +3759,30 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:09:02Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/dashboard.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/dashboard')({
-4	  component: Dashboard,
-5	});
-6	
-7	const Dashboard = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Dashboard</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Learner progress overview.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/dashboard')({
+4   component: Dashboard,
+5 });
+6 
+7 const Dashboard = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Dashboard</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Learner progress overview.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:09:14Z)**_
 
 <think><details><summary>Thought Process</summary>
 The pattern is:
+
 ```ts
 export const Route = createFileRoute(...)({
   component: Dashboard,  // used here
@@ -3686,13 +3792,13 @@ const Dashboard = () => ...;  // declared here (after)
 ```
 
 This is an existing TypeScript error. The fix would be to either:
+
 1. Move the component declaration before the `Route` export
 2. Use a function declaration (which is hoisted) instead of arrow function
 
 But `react/function-component-definition` forces arrow functions. However, we could move the component declaration before the Route export.
 
 This is a pre-existing issue and not introduced by our changes. The plan's step 9 says "All must exit 0" for `yarn lint && yarn lint:css && yarn lint:md && yarn typecheck && yarn test`.
-
 
 Since the plan requires all checks to pass and step 5 says to fix remaining violations, I need to address these TypeScript errors even though they're pre-existing. The solution is straightforward—move each component declaration above its Route export. I'm counting about 11 affected files across the routes directory, so I'll need to apply this fix systematically to each one.
 
@@ -3730,6 +3836,7 @@ agentId: a44e7a5dd7635a612 (use SendMessage with to: 'a44e7a5dd7635a612' to cont
 tool_uses: 55
 duration_ms: 2629234</usage>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-01 07:09:22Z)**_
@@ -3737,6 +3844,7 @@ _**Agent - sidechain (2026-04-01 07:09:22Z)**_
 In the worktree at `/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup`, there are pre-existing TypeScript errors of the form "Block-scoped variable 'X' used before its declaration" in TanStack Router route files.
 
 The pattern causing the issue is:
+
 ```ts
 export const Route = createFileRoute(...)({
   component: Dashboard,  // ← uses Dashboard before it's declared
@@ -3748,6 +3856,7 @@ const Dashboard = () => (...);  // ← declared after
 The fix is to reorder: move the component `const` declaration to **before** the `export const Route = ...` in each file.
 
 Please fix ALL these files:
+
 1. `src/routes/$locale/_app/dashboard.tsx`
 2. `src/routes/$locale/_app/game/$gameId.tsx`
 3. `src/routes/$locale/_app/index.tsx`
@@ -3762,6 +3871,7 @@ Please fix ALL these files:
 12. `src/routes/$locale/route.tsx` (has `LocaleLayout`)
 
 For each file:
+
 1. Read the file
 2. Move the component const declaration (and any helper types/functions it needs) to before `export const Route = ...`
 3. Edit the file
@@ -3769,6 +3879,7 @@ For each file:
 Do NOT change any logic. Just reorder the declarations.
 
 After editing all files, run:
+
 ```
 cd /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup && node_modules/.bin/tsc --noEmit 2>&1 | head -20
 ```
@@ -3788,22 +3899,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:25Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/dashboard.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/dashboard')({
-4	  component: Dashboard,
-5	});
-6	
-7	const Dashboard = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Dashboard</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Learner progress overview.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/dashboard')({
+4   component: Dashboard,
+5 });
+6 
+7 const Dashboard = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Dashboard</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Learner progress overview.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:26Z)**_
@@ -3813,25 +3925,26 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:26Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-4	  component: GameShell,
-5	});
-6	
-7	const GameShell = () => {
-8	  const { gameId } = Route.useParams();
-9	  return (
-10	    <div className="p-8">
-11	      <h1 className="text-2xl font-bold">Game Shell</h1>
-12	      <p className="mt-2 text-muted-foreground">
-13	        Loading game: {gameId}
-14	      </p>
-15	    </div>
-16	  );
-17	};
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+4   component: GameShell,
+5 });
+6 
+7 const GameShell = () => {
+8   const { gameId } = Route.useParams();
+9   return (
+10     <div className="p-8">
+11       <h1 className="text-2xl font-bold">Game Shell</h1>
+12       <p className="mt-2 text-muted-foreground">
+13         Loading game: {gameId}
+14       </p>
+15     </div>
+16   );
+17 };
 18
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:26Z)**_
@@ -3841,36 +3954,37 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:26Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/index.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { useTranslation } from 'react-i18next';
-3	import { GAME_CATALOG } from '@/games/registry';
-4	
-5	export const Route = createFileRoute('/$locale/_app/')({
-6	  component: HomeCatalog,
-7	});
-8	
-9	const HomeCatalog = () => {
-10	  const { t } = useTranslation('games');
-11	
-12	  return (
-13	    <div className="p-8">
-14	      <h1 className="text-2xl font-bold">Profile Picker</h1>
-15	      <p className="mt-2 text-muted-foreground">
-16	        Select or create a learner profile.
-17	      </p>
-18	      <section className="mt-8">
-19	        <h2 className="text-lg font-semibold">Games</h2>
-20	        <ul className="mt-3 list-inside list-disc space-y-1">
-21	          {GAME_CATALOG.map((g) => (
-22	            <li key={g.id}>{t(g.titleKey)}</li>
-23	          ))}
-24	        </ul>
-25	      </section>
-26	    </div>
-27	  );
-28	};
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { useTranslation } from 'react-i18next';
+3 import { GAME_CATALOG } from '@/games/registry';
+4 
+5 export const Route = createFileRoute('/$locale/_app/')({
+6   component: HomeCatalog,
+7 });
+8 
+9 const HomeCatalog = () => {
+10   const { t } = useTranslation('games');
+11 
+12   return (
+13     <div className="p-8">
+14       <h1 className="text-2xl font-bold">Profile Picker</h1>
+15       <p className="mt-2 text-muted-foreground">
+16         Select or create a learner profile.
+17       </p>
+18       <section className="mt-8">
+19         <h2 className="text-lg font-semibold">Games</h2>
+20         <ul className="mt-3 list-inside list-disc space-y-1">
+21           {GAME_CATALOG.map((g) => (
+22             <li key={g.id}>{t(g.titleKey)}</li>
+23           ))}
+24         </ul>
+25       </section>
+26     </div>
+27   );
+28 };
 29
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:27Z)**_
@@ -3880,20 +3994,21 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:27Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent.tsx`
 
 ```text
-1	import { Outlet, createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent')({
-4	  component: ParentLayout,
-5	});
-6	
-7	const ParentLayout = () => (
-8	  <div>
-9	    {/* Parent settings layout */}
-10	    <Outlet />
-11	  </div>
-12	);
+1 import { Outlet, createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent')({
+4   component: ParentLayout,
+5 });
+6 
+7 const ParentLayout = () => (
+8   <div>
+9     {/* Parent settings layout */}
+10     <Outlet />
+11   </div>
+12 );
 13
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
@@ -3903,22 +4018,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/data.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/data')({
-4	  component: DataManagement,
-5	});
-6	
-7	const DataManagement = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Data Management</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Export, import, or delete learner data.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/data')({
+4   component: DataManagement,
+5 });
+6 
+7 const DataManagement = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Data Management</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Export, import, or delete learner data.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
@@ -3928,22 +4044,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/history.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/history')({
-4	  component: SessionHistory,
-5	});
-6	
-7	const SessionHistory = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Session History</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Review past learning sessions.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/history')({
+4   component: SessionHistory,
+5 });
+6 
+7 const SessionHistory = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Session History</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Review past learning sessions.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
@@ -3953,22 +4070,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/index.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/')({
-4	  component: ParentHome,
-5	});
-6	
-7	const ParentHome = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Parent Settings</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Manage learner profiles and app configuration.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/')({
+4   component: ParentHome,
+5 });
+6 
+7 const ParentHome = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Parent Settings</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Manage learner profiles and app configuration.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
@@ -3978,22 +4096,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:28Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/overrides.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/overrides')({
-4	  component: GameOverrides,
-5	});
-6	
-7	const GameOverrides = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Game Overrides</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Customize game difficulty and content per learner.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/overrides')({
+4   component: GameOverrides,
+5 });
+6 
+7 const GameOverrides = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Game Overrides</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Customize game difficulty and content per learner.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:29Z)**_
@@ -4003,22 +4122,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:29Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/sync.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/sync')({
-4	  component: CloudSync,
-5	});
-6	
-7	const CloudSync = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Cloud Sync</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Sync learner data across devices.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/sync')({
+4   component: CloudSync,
+5 });
+6 
+7 const CloudSync = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Cloud Sync</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Sync learner data across devices.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:30Z)**_
@@ -4028,22 +4148,23 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:30Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/voices.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/parent/voices')({
-4	  component: VoiceSelector,
-5	});
-6	
-7	const VoiceSelector = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">TTS Voice Selector</h1>
-10	    <p className="mt-2 text-muted-foreground">
-11	      Choose text-to-speech voices for each learner.
-12	    </p>
-13	  </div>
-14	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/parent/voices')({
+4   component: VoiceSelector,
+5 });
+6 
+7 const VoiceSelector = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">TTS Voice Selector</h1>
+10     <p className="mt-2 text-muted-foreground">
+11       Choose text-to-speech voices for each learner.
+12     </p>
+13   </div>
+14 );
 15
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:30Z)**_
@@ -4053,20 +4174,21 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:30Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/settings')({
-4	  component: Settings,
-5	});
-6	
-7	const Settings = () => (
-8	  <div className="p-8">
-9	    <h1 className="text-2xl font-bold">Settings</h1>
-10	    <p className="mt-2 text-muted-foreground">App settings.</p>
-11	  </div>
-12	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/settings')({
+4   component: Settings,
+5 });
+6 
+7 const Settings = () => (
+8   <div className="p-8">
+9     <h1 className="text-2xl font-bold">Settings</h1>
+10     <p className="mt-2 text-muted-foreground">App settings.</p>
+11   </div>
+12 );
 13
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:31Z)**_
@@ -4076,42 +4198,43 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:31Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/route.tsx`
 
 ```text
-1	import {
-2	  Outlet,
-3	  createFileRoute,
-4	  redirect,
-5	} from '@tanstack/react-router';
-6	import { useEffect } from 'react';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	
-9	const LOCALES = ['en', 'pt-BR'] as const;
-10	export type AppLocale = (typeof LOCALES)[number];
-11	
-12	export const Route = createFileRoute('/$locale')({
-13	  beforeLoad: ({ params }) => {
-14	    if (!LOCALES.includes(params.locale as AppLocale)) {
-15	      throw redirect({
-16	        to: '/$locale',
-17	        params: { locale: 'en' },
-18	        replace: true,
-19	      });
-20	    }
-21	  },
-22	  component: LocaleLayout,
-23	});
-24	
-25	const LocaleLayout = () => {
-26	  const { locale } = Route.useParams();
-27	  void i18n.changeLanguage(locale);
-28	
-29	  useEffect(() => {
-30	    document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
-31	  }, [locale]);
-32	
-33	  return <Outlet />;
-34	};
+1 import {
+2   Outlet,
+3   createFileRoute,
+4   redirect,
+5 } from '@tanstack/react-router';
+6 import { useEffect } from 'react';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 
+9 const LOCALES = ['en', 'pt-BR'] as const;
+10 export type AppLocale = (typeof LOCALES)[number];
+11 
+12 export const Route = createFileRoute('/$locale')({
+13   beforeLoad: ({ params }) => {
+14     if (!LOCALES.includes(params.locale as AppLocale)) {
+15       throw redirect({
+16         to: '/$locale',
+17         params: { locale: 'en' },
+18         replace: true,
+19       });
+20     }
+21   },
+22   component: LocaleLayout,
+23 });
+24 
+25 const LocaleLayout = () => {
+26   const { locale } = Route.useParams();
+27   void i18n.changeLanguage(locale);
+28 
+29   useEffect(() => {
+30     document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
+31   }, [locale]);
+32 
+33   return <Outlet />;
+34 };
 35
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:35Z)**_
@@ -4126,6 +4249,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/dashboard.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:43Z)**_
@@ -4136,6 +4260,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:43Z)**_
 ```text
 <tool_use_error>No changes to make: old_string and new_string are exactly the same.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:46Z)**_
@@ -4146,6 +4271,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:48Z)**_
@@ -4156,6 +4282,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:49Z)**_
@@ -4166,6 +4293,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/data.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:51Z)**_
@@ -4176,6 +4304,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:51Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/history.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:52Z)**_
@@ -4186,6 +4315,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:52Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:53Z)**_
@@ -4196,6 +4326,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/overrides.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:54Z)**_
@@ -4206,6 +4337,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/sync.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:56Z)**_
@@ -4216,6 +4348,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:56Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/voices.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:57Z)**_
@@ -4226,6 +4359,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:59Z)**_
@@ -4236,6 +4370,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:09:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/route.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:07Z)**_
@@ -4249,32 +4384,33 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:08Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/index.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	import { useTranslation } from 'react-i18next';
-3	import { GAME_CATALOG } from '@/games/registry';
-4	
-5	const HomeCatalog = () => {
-6	  const { t } = useTranslation('games');
-7	
-8	  return (
-9	    <div className="p-8">
-10	      <h1 className="text-2xl font-bold">Profile Picker</h1>
-11	      <p className="mt-2 text-muted-foreground">
-12	        Select or create a learner profile.
-13	      </p>
-14	      <section className="mt-8">
-15	        <h2 className="text-lg font-semibold">Games</h2>
-16	        <ul className="mt-3 list-inside list-disc space-y-1">
-17	          {GAME_CATALOG.map((g) => (
-18	            <li key={g.id}>{t(g.titleKey)}</li>
-19	          ))}
-20	        </ul>
-21	      </section>
-22	    </div>
-23	  );
-24	};
+1 import { createFileRoute } from '@tanstack/react-router';
+2 import { useTranslation } from 'react-i18next';
+3 import { GAME_CATALOG } from '@/games/registry';
+4 
+5 const HomeCatalog = () => {
+6   const { t } = useTranslation('games');
+7 
+8   return (
+9     <div className="p-8">
+10       <h1 className="text-2xl font-bold">Profile Picker</h1>
+11       <p className="mt-2 text-muted-foreground">
+12         Select or create a learner profile.
+13       </p>
+14       <section className="mt-8">
+15         <h2 className="text-lg font-semibold">Games</h2>
+16         <ul className="mt-3 list-inside list-disc space-y-1">
+17           {GAME_CATALOG.map((g) => (
+18             <li key={g.id}>{t(g.titleKey)}</li>
+19           ))}
+20         </ul>
+21       </section>
+22     </div>
+23   );
+24 };
 25
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:09Z)**_
@@ -4284,18 +4420,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:09Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/data.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const DataManagement = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Data Management</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Export, import, or delete learner data.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const DataManagement = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Data Management</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Export, import, or delete learner data.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
@@ -4305,18 +4442,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/history.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const SessionHistory = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Session History</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Review past learning sessions.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const SessionHistory = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Session History</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Review past learning sessions.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
@@ -4326,18 +4464,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/index.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const ParentHome = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Parent Settings</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Manage learner profiles and app configuration.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const ParentHome = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Parent Settings</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Manage learner profiles and app configuration.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
@@ -4347,18 +4486,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:10Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/overrides.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const GameOverrides = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Game Overrides</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Customize game difficulty and content per learner.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const GameOverrides = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Game Overrides</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Customize game difficulty and content per learner.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
@@ -4368,18 +4508,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/sync.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const CloudSync = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Cloud Sync</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Sync learner data across devices.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const CloudSync = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Cloud Sync</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Sync learner data across devices.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
@@ -4389,18 +4530,19 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/voices.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const VoiceSelector = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">TTS Voice Selector</h1>
-6	    <p className="mt-2 text-muted-foreground">
-7	      Choose text-to-speech voices for each learner.
-8	    </p>
-9	  </div>
-10	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const VoiceSelector = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">TTS Voice Selector</h1>
+6     <p className="mt-2 text-muted-foreground">
+7       Choose text-to-speech voices for each learner.
+8     </p>
+9   </div>
+10 );
 11
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
@@ -4410,16 +4552,17 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/settings.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	const Settings = () => (
-4	  <div className="p-8">
-5	    <h1 className="text-2xl font-bold">Settings</h1>
-6	    <p className="mt-2 text-muted-foreground">App settings.</p>
-7	  </div>
-8	);
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 const Settings = () => (
+4   <div className="p-8">
+5     <h1 className="text-2xl font-bold">Settings</h1>
+6     <p className="mt-2 text-muted-foreground">App settings.</p>
+7   </div>
+8 );
 9
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
@@ -4429,29 +4572,30 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:11Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/route.tsx`
 
 ```text
-1	import {
-2	  Outlet,
-3	  createFileRoute,
-4	  redirect,
-5	} from '@tanstack/react-router';
-6	import { useEffect } from 'react';
-7	import { i18n } from '@/lib/i18n/i18n';
-8	
-9	const LOCALES = ['en', 'pt-BR'] as const;
-10	export type AppLocale = (typeof LOCALES)[number];
-11	
-12	const LocaleLayout = () => {
-13	  const { locale } = Route.useParams();
-14	  void i18n.changeLanguage(locale);
-15	
-16	  useEffect(() => {
-17	    document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
-18	  }, [locale]);
-19	
-20	  return <Outlet />;
-21	};
+1 import {
+2   Outlet,
+3   createFileRoute,
+4   redirect,
+5 } from '@tanstack/react-router';
+6 import { useEffect } from 'react';
+7 import { i18n } from '@/lib/i18n/i18n';
+8 
+9 const LOCALES = ['en', 'pt-BR'] as const;
+10 export type AppLocale = (typeof LOCALES)[number];
+11 
+12 const LocaleLayout = () => {
+13   const { locale } = Route.useParams();
+14   void i18n.changeLanguage(locale);
+15 
+16   useEffect(() => {
+17     document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
+18   }, [locale]);
+19 
+20   return <Outlet />;
+21 };
 22
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:24Z)**_
@@ -4471,6 +4615,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:26Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:39Z)**_
@@ -4495,6 +4640,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:41Z)**_
 String:   };
 };</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:42Z)**_
@@ -4505,6 +4651,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/data.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:43Z)**_
@@ -4515,6 +4662,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:43Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/history.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:44Z)**_
@@ -4525,6 +4673,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:44Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:45Z)**_
@@ -4535,6 +4684,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/overrides.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:46Z)**_
@@ -4545,6 +4695,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/sync.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:47Z)**_
@@ -4555,6 +4706,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/parent/voices.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:48Z)**_
@@ -4565,6 +4717,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/settings.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:53Z)**_
@@ -4580,6 +4733,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:54Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:54Z)**_
@@ -4591,6 +4745,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:10:54Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:27Z)**_
@@ -4602,31 +4757,32 @@ Show current content of index.tsx
 `cat -n "/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/\$locale/_app/index.tsx"`
 
 ```text
-     1	import { createFileRoute } from '@tanstack/react-router';
-     2	import { useTranslation } from 'react-i18next';
-     3	import { GAME_CATALOG } from '@/games/registry';
-     4	
-     5	const HomeCatalog = () => {
-     6	  const { t } = useTranslation('games');
-     7	
-     8	  return (
-     9	    <div className="p-8">
-    10	      <h1 className="text-2xl font-bold">Profile Picker</h1>
-    11	      <p className="mt-2 text-muted-foreground">
-    12	        Select or create a learner profile.
-    13	      </p>
-    14	      <section className="mt-8">
-    15	        <h2 className="text-lg font-semibold">Games</h2>
-    16	        <ul className="mt-3 list-inside list-disc space-y-1">
-    17	          {GAME_CATALOG.map((g) => (
-    18	            <li key={g.id}>{t(g.titleKey)}</li>
-    19	          ))}
-    20	        </ul>
-    21	      </section>
-    22	    </div>
-    23	  );
-    24	};
+     1 import { createFileRoute } from '@tanstack/react-router';
+     2 import { useTranslation } from 'react-i18next';
+     3 import { GAME_CATALOG } from '@/games/registry';
+     4 
+     5 const HomeCatalog = () => {
+     6   const { t } = useTranslation('games');
+     7 
+     8   return (
+     9     <div className="p-8">
+    10       <h1 className="text-2xl font-bold">Profile Picker</h1>
+    11       <p className="mt-2 text-muted-foreground">
+    12         Select or create a learner profile.
+    13       </p>
+    14       <section className="mt-8">
+    15         <h2 className="text-lg font-semibold">Games</h2>
+    16         <ul className="mt-3 list-inside list-disc space-y-1">
+    17           {GAME_CATALOG.map((g) => (
+    18             <li key={g.id}>{t(g.titleKey)}</li>
+    19           ))}
+    20         </ul>
+    21       </section>
+    22     </div>
+    23   );
+    24 };
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:28Z)**_
@@ -4638,33 +4794,34 @@ Show current content of route.tsx
 `cat -n "/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/\$locale/route.tsx"`
 
 ```text
-     1	import {
-     2	  Outlet,
-     3	  createFileRoute,
-     4	  redirect,
-     5	} from '@tanstack/react-router';
-     6	import { useEffect } from 'react';
-     7	import { i18n } from '@/lib/i18n/i18n';
-     8	
-     9	const LOCALES = ['en', 'pt-BR'] as const;
-    10	export type AppLocale = (typeof LOCALES)[number];
-    11	
-    12	const LocaleLayout = () => {
-    13	  const { locale } = Route.useParams();
-    14	  void i18n.changeLanguage(locale);
-    15	
-    16	  useEffect(() => {
-    17	    document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
-    18	  }, [locale]);
-    19	
-    20	  return <Outlet />;
-    21	};
+     1 import {
+     2   Outlet,
+     3   createFileRoute,
+     4   redirect,
+     5 } from '@tanstack/react-router';
+     6 import { useEffect } from 'react';
+     7 import { i18n } from '@/lib/i18n/i18n';
+     8 
+     9 const LOCALES = ['en', 'pt-BR'] as const;
+    10 export type AppLocale = (typeof LOCALES)[number];
+    11 
+    12 const LocaleLayout = () => {
+    13   const { locale } = Route.useParams();
+    14   void i18n.changeLanguage(locale);
+    15 
+    16   useEffect(() => {
+    17     document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
+    18   }, [locale]);
+    19 
+    20   return <Outlet />;
+    21 };
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:36Z)**_
 
-Both files are missing their `Route` export. I need to add it. For `route.tsx`, `LocaleLayout` uses `Route.useParams()` — but since `LocaleLayout` is a `const` arrow function, `Route` just needs to be in scope when `LocaleLayout` is *called* (at runtime), not when it's *defined*. TypeScript however checks at the point of the reference in the source text. The only clean solution without changing logic is to add `Route` after `LocaleLayout` in `route.tsx` — but then `Route` references `LocaleLayout` before it's declared... no, `LocaleLayout` is already declared before `Route` now. The issue is `LocaleLayout` references `Route` which comes after. 
+Both files are missing their `Route` export. I need to add it. For `route.tsx`, `LocaleLayout` uses `Route.useParams()` — but since `LocaleLayout` is a `const` arrow function, `Route` just needs to be in scope when `LocaleLayout` is _called_ (at runtime), not when it's _defined_. TypeScript however checks at the point of the reference in the source text. The only clean solution without changing logic is to add `Route` after `LocaleLayout` in `route.tsx` — but then `Route` references `LocaleLayout` before it's declared... no, `LocaleLayout` is already declared before `Route` now. The issue is `LocaleLayout` references `Route` which comes after.
 
 The practical TypeScript solution here is to use a `function` declaration for `LocaleLayout` so it's hoisted. Same for `GameShell` in `$gameId.tsx`. This is a trivial syntax change with identical runtime behavior.
 
@@ -4676,6 +4833,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:40Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/index.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:43Z)**_
@@ -4686,6 +4844,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:43Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/route.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:47Z)**_
@@ -4700,6 +4859,7 @@ _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/_app/game/$gameId.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:11:52Z)**_
@@ -4717,6 +4877,7 @@ Run TypeScript type check
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:12:05Z)**_
@@ -4730,6 +4891,7 @@ Run TypeScript type check with full path
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:12:09Z)**_
@@ -4743,6 +4905,7 @@ Run TypeScript type check in worktree directory
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:19:41Z)**_
@@ -4756,6 +4919,7 @@ Run tsc noEmit and capture exit code
 ```text
 EXIT:0
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:19:43Z)**_
@@ -4773,6 +4937,7 @@ Run tsc in worktree directory
 ```text
 EXIT:0
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:19:49Z)**_
@@ -4788,59 +4953,60 @@ Verify route.tsx and gameId.tsx final state
 `cat -n "/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/\$locale/route.tsx" && echo "---" && cat -n "/Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/\$locale/_app/game/\$gameId.tsx"`
 
 ```text
-     1	import {
-     2	  Outlet,
-     3	  createFileRoute,
-     4	  redirect,
-     5	} from '@tanstack/react-router';
-     6	import { useEffect } from 'react';
-     7	import { i18n } from '@/lib/i18n/i18n';
-     8	
-     9	const LOCALES = ['en', 'pt-BR'] as const;
-    10	export type AppLocale = (typeof LOCALES)[number];
-    11	
-    12	export const Route = createFileRoute('/$locale')({
-    13	  beforeLoad: ({ params }) => {
-    14	    if (!LOCALES.includes(params.locale as AppLocale)) {
-    15	      throw redirect({
-    16	        to: '/$locale',
-    17	        params: { locale: 'en' },
-    18	        replace: true,
-    19	      });
-    20	    }
-    21	  },
-    22	  component: LocaleLayout,
-    23	});
-    24	
-    25	function LocaleLayout() {
-    26	  const { locale } = Route.useParams();
-    27	  void i18n.changeLanguage(locale);
-    28	
-    29	  useEffect(() => {
-    30	    document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
-    31	  }, [locale]);
-    32	
-    33	  return <Outlet />;
-    34	}
+     1 import {
+     2   Outlet,
+     3   createFileRoute,
+     4   redirect,
+     5 } from '@tanstack/react-router';
+     6 import { useEffect } from 'react';
+     7 import { i18n } from '@/lib/i18n/i18n';
+     8 
+     9 const LOCALES = ['en', 'pt-BR'] as const;
+    10 export type AppLocale = (typeof LOCALES)[number];
+    11 
+    12 export const Route = createFileRoute('/$locale')({
+    13   beforeLoad: ({ params }) => {
+    14     if (!LOCALES.includes(params.locale as AppLocale)) {
+    15       throw redirect({
+    16         to: '/$locale',
+    17         params: { locale: 'en' },
+    18         replace: true,
+    19       });
+    20     }
+    21   },
+    22   component: LocaleLayout,
+    23 });
+    24 
+    25 function LocaleLayout() {
+    26   const { locale } = Route.useParams();
+    27   void i18n.changeLanguage(locale);
+    28 
+    29   useEffect(() => {
+    30     document.documentElement.lang = locale === 'pt-BR' ? 'pt-BR' : 'en';
+    31   }, [locale]);
+    32 
+    33   return <Outlet />;
+    34 }
 ---
-     1	import { createFileRoute } from '@tanstack/react-router';
-     2	
-     3	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-     4	  component: GameShell,
-     5	});
-     6	
-     7	function GameShell() {
-     8	  const { gameId } = Route.useParams();
-     9	  return (
-    10	    <div className="p-8">
-    11	      <h1 className="text-2xl font-bold">Game Shell</h1>
-    12	      <p className="mt-2 text-muted-foreground">
-    13	        Loading game: {gameId}
-    14	      </p>
-    15	    </div>
-    16	  );
-    17	}
+     1 import { createFileRoute } from '@tanstack/react-router';
+     2 
+     3 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+     4   component: GameShell,
+     5 });
+     6 
+     7 function GameShell() {
+     8   const { gameId } = Route.useParams();
+     9   return (
+    10     <div className="p-8">
+    11       <h1 className="text-2xl font-bold">Game Shell</h1>
+    12       <p className="mt-2 text-muted-foreground">
+    13         Loading game: {gameId}
+    14       </p>
+    15     </div>
+    16   );
+    17 }
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-sonnet-4-6 2026-04-01 07:53:11Z)**_
@@ -4867,7 +5033,6 @@ Wait, the subagent converted `LocaleLayout` from an arrow function to a `functio
 Let me check if the ESLint rule `react/function-component-definition` would flag `function LocaleLayout()`.
 
 Actually yes - the user said "I'm very happy with the linting and prettier settings" and one of those rules is `react/function-component-definition: arrow-function`. The agent's fix for the circular reference files would violate this rule.
-
 
 I should verify whether ESLint is actually reporting any violations now.
 </details></think>
@@ -4896,19 +5061,19 @@ Exit code 1
 ✖ 2 problems (2 errors, 0 warnings)
   2 errors and 0 warnings potentially fixable with the `--fix` option.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:53:43Z)**_
 
 <think><details><summary>Thought Process</summary>
-As expected. The agent used `function` declarations for the two files but that violates `react/function-component-definition: arrow-function`. 
+As expected. The agent used `function` declarations for the two files but that violates `react/function-component-definition: arrow-function`.
 
 For these two files where `Route.useParams()` creates a circular reference, the real fix is different. The issue is:
 
 1. `route.tsx`: `export const Route = createFileRoute(...)({ component: LocaleLayout })` then `const LocaleLayout = () => { Route.useParams() }` — can't move `LocaleLayout` before `Route` because it uses `Route`
 
 2. `$gameId.tsx`: Same issue.
-
 
 The simplest solution is to import `useParams` directly from `@tanstack/react-router` instead of calling it through `Route.useParams()`, which breaks the circular dependency and lets me declare the component before the Route definition.
 </details></think>
@@ -4926,6 +5091,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:53:44Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:53:45Z)**_
@@ -4935,25 +5101,26 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:53:45Z)**_
  `./.worktrees/feat/linting-setup/src/routes/$locale/_app/game/$gameId.tsx`
 
 ```text
-1	import { createFileRoute } from '@tanstack/react-router';
-2	
-3	export const Route = createFileRoute('/$locale/_app/game/$gameId')({
-4	  component: GameShell,
-5	});
-6	
-7	function GameShell() {
-8	  const { gameId } = Route.useParams();
-9	  return (
-10	    <div className="p-8">
-11	      <h1 className="text-2xl font-bold">Game Shell</h1>
-12	      <p className="mt-2 text-muted-foreground">
-13	        Loading game: {gameId}
-14	      </p>
-15	    </div>
-16	  );
-17	}
+1 import { createFileRoute } from '@tanstack/react-router';
+2 
+3 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
+4   component: GameShell,
+5 });
+6 
+7 function GameShell() {
+8   const { gameId } = Route.useParams();
+9   return (
+10     <div className="p-8">
+11       <h1 className="text-2xl font-bold">Game Shell</h1>
+12       <p className="mt-2 text-muted-foreground">
+13         Loading game: {gameId}
+14       </p>
+15     </div>
+16   );
+17 }
 18
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:53:52Z)**_
@@ -4964,6 +5131,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:53:52Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/.worktrees/feat/linting-setup/src/routes/$locale/route.tsx has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:53:57Z)**_
@@ -4974,6 +5142,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:53:57Z)**_
 ```text
 <tool_use_error>File has been modified since read, either by the user or by a linter. Read it again before attempting to write it.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:54:03Z)**_
@@ -4982,14 +5151,15 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:54:03Z)**_
 Ah, prettier changed the file back. The linter reformatted it back to arrow function but reverted the reordering. Let me read the current state and fix it properly.
 
 The current state shows:
+
 - `Route` is defined first (line 12-23)
 - `LocaleLayout` is defined after (line 25)
 - `LocaleLayout` still uses `Route.useParams()` (line 26)
 
 I need to:
+
 1. Move `LocaleLayout` before `Route` (while adding `useParams` import)
 2. Change `Route.useParams()` to `useParams({ from: '/$locale' })`
-
 
 3. Add `useParams` to the import from `@tanstack/react-router`
 
@@ -5005,6 +5175,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:54:03Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:55:30Z)**_
@@ -5018,6 +5189,7 @@ Read current route.tsx with line numbers
 ```text
 The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  I fixed
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:55:40Z)**_
@@ -5031,6 +5203,7 @@ Check current state of typecheck and lint
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:55:43Z)**_
@@ -5083,6 +5256,7 @@ This ensures that you're testing the behavior the user would see in the browser.
 
 Done in 1.92s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:55:57Z)**_
@@ -5170,6 +5344,7 @@ Done in 1.74s.
 [feat/linting-setup 6007ed9] fix(typecheck): resolve TDZ errors in route files by reordering declarations
  12 files changed, 55 insertions(+), 55 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:56:12Z)**_
@@ -5206,6 +5381,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:56:19Z)**_
 ```text
 File created successfully at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/MEMORY.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:56:24Z)**_
@@ -5231,6 +5407,7 @@ Always use named exports. Avoid `export default` everywhere.
 ```text
 File created successfully at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/feedback_no_default_export.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:56:28Z)**_
@@ -5245,6 +5422,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:56:29Z)**_
 ```text
 Launching skill: superpowers:finishing-a-development-branch
 ```
+
 </details></tool-use>
 
 ---
@@ -5275,6 +5453,7 @@ npm test / cargo test / pytest / go test ./...
 ```
 
 **If tests fail:**
+
 ```
 Tests failing (<N> failures). Must fix before completing:
 
@@ -5364,6 +5543,7 @@ Report: "Keeping branch <name>. Worktree preserved at <path>."
 #### Option 4: Discard
 
 **Confirm first:**
+
 ```
 This will permanently delete:
 - Branch <name>
@@ -5376,6 +5556,7 @@ Type 'discard' to confirm.
 Wait for exact confirmation.
 
 If confirmed:
+
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
@@ -5388,11 +5569,13 @@ Then: Cleanup worktree (Step 5)
 **For Options 1, 2, 4:**
 
 Check if in worktree:
+
 ```bash
 git worktree list | grep $(git branch --show-current)
 ```
 
 If yes:
+
 ```bash
 git worktree remove <worktree-path>
 ```
@@ -5411,30 +5594,36 @@ git worktree remove <worktree-path>
 ## Common Mistakes
 
 **Skipping test verification**
+
 - **Problem:** Merge broken code, create failing PR
 - **Fix:** Always verify tests before offering options
 
 **Open-ended questions**
+
 - **Problem:** "What should I do next?" → ambiguous
 - **Fix:** Present exactly 4 structured options
 
 **Automatic worktree cleanup**
+
 - **Problem:** Remove worktree when might need it (Option 2, 3)
 - **Fix:** Only cleanup for Options 1 and 4
 
 **No confirmation for discard**
+
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
 
 ## Red Flags
 
 **Never:**
+
 - Proceed with failing tests
 - Merge without verifying tests on result
 - Delete work without confirmation
 - Force-push without explicit request
 
 **Always:**
+
 - Verify tests before offering options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
@@ -5443,12 +5632,13 @@ git worktree remove <worktree-path>
 ## Integration
 
 **Called by:**
+
 - **subagent-driven-development** (Step 7) - After all tasks complete
 - **executing-plans** (Step 5) - After all batches complete
 
 **Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
 
+- **using-git-worktrees** - Cleans up worktree created by that skill
 
 ---
 
@@ -5460,6 +5650,7 @@ I'm using the finishing-a-development-branch skill. Let me follow the process:
 1. Verify tests pass
 2. Determine base branch
 3. Present options
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:56:34Z)**_
@@ -5488,6 +5679,7 @@ a3f64fb chore(eslint): add React, hooks, a11y, tailwind plugins and opinionated 
 1d8239d chore(lint): add stylelint config
 dc0be29 chore(deps): add linting devDependencies
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:56:38Z)**_
@@ -5517,12 +5709,14 @@ _**Agent (claude-sonnet-4-6 2026-04-01 07:57:04Z)**_
 The user chose option 1: Merge back to master locally.
 
 Steps:
+
 1. Switch to master (from the worktree root)
 2. Pull latest
 3. Merge feat/linting-setup
 4. Verify tests
 5. Delete the feature branch
 6. Cleanup worktree
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:08Z)**_
@@ -5536,18 +5730,18 @@ Switch to master and pull latest
 ```text
 Exit code 1
 Already on 'master'
-M	.claude/settings.local.json
-M	.specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md
-M	.specstory/history/2026-03-31_10-14-41Z-repository-structure-exploration.md
-M	.specstory/history/2026-03-31_10-16-45Z-milestone-1-scaffolding-plan-execution.md
-M	.specstory/history/2026-03-31_10-49-30Z-(1)-milestone-1-scaffolding-plan-execution.md
-M	.specstory/history/2026-03-31_10-50-00Z-worktree-to-main-repo-transition.md
-M	.specstory/history/2026-03-31_12-08-42Z-milestone-2-brainstorming.md
-M	.specstory/history/2026-03-31_12-12-56Z-code-patterns-and-file-search-in-workspace.md
-M	.specstory/history/2026-04-01_01-40-40Z-claude-plugin-install-superpowers.md
-M	.specstory/statistics.json
-M	.vscode/settings.json
-M	src/lib/game-event-bus.md
+M .claude/settings.local.json
+M .specstory/history/2026-03-31_09-53-23Z-milestone-breakdown-plan-discussion.md
+M .specstory/history/2026-03-31_10-14-41Z-repository-structure-exploration.md
+M .specstory/history/2026-03-31_10-16-45Z-milestone-1-scaffolding-plan-execution.md
+M .specstory/history/2026-03-31_10-49-30Z-(1)-milestone-1-scaffolding-plan-execution.md
+M .specstory/history/2026-03-31_10-50-00Z-worktree-to-main-repo-transition.md
+M .specstory/history/2026-03-31_12-08-42Z-milestone-2-brainstorming.md
+M .specstory/history/2026-03-31_12-12-56Z-code-patterns-and-file-search-in-workspace.md
+M .specstory/history/2026-04-01_01-40-40Z-claude-plugin-install-superpowers.md
+M .specstory/statistics.json
+M .vscode/settings.json
+M src/lib/game-event-bus.md
 There is no tracking information for the current branch.
 Please specify which branch you want to merge with.
 See git-pull(1) for details.
@@ -5558,6 +5752,7 @@ If you wish to set tracking information for this branch you can do so with:
 
     git branch --set-upstream-to=origin/<branch> master
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:14Z)**_
@@ -5573,6 +5768,7 @@ From github.com:leocaseiro/base-skill
  * branch            master     -> FETCH_HEAD
 Already up to date.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:22Z)**_
@@ -5586,11 +5782,12 @@ Merge feat/linting-setup into master
 ```text
 Exit code 1
 error: Your local changes to the following files would be overwritten by merge:
-	.specstory/statistics.json
+ .specstory/statistics.json
 Please commit your changes or stash them before you merge.
 Aborting
 Updating fbf3a1b..6007ed9
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:32Z)**_
@@ -5719,6 +5916,7 @@ Fast-forward
  create mode 100644 .stylelintrc.yaml
  create mode 100644 knip.config.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:36Z)**_
@@ -5745,6 +5943,7 @@ Verify tests pass on merged master
 
 Done in 1.85s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 07:57:51Z)**_
@@ -5760,6 +5959,7 @@ The user doesn't want to proceed with this tool use. The tool use was rejected (
 
 Note: The user's next message may contain a correction or preference. Pay close attention — if they explain what went wrong or how they'd prefer you to work, consider saving that to memory for future sessions.
 ```
+
 </details></tool-use>
 
 ---

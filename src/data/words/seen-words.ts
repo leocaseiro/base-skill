@@ -39,6 +39,7 @@ export const filterSignature = (filter: WordFilter): string => {
     `phonemesRequired=${sortedCsv(filter.phonemesRequired)}`,
     `graphemesAllowed=${sortedPairsCsv(filter.graphemesAllowed)}`,
     `graphemesRequired=${sortedPairsCsv(filter.graphemesRequired)}`,
+    `hasVisual=${filter.hasVisual ?? ''}`,
   ];
   return parts.join('|');
 };

@@ -35,16 +35,25 @@ afterEach(async () => {
 });
 
 describe('useSettings', () => {
-  it('returns default volume 0.8 when no settings doc exists', async () => {
+  it('returns default soundEffectsVolume 0.8 when no settings doc exists', async () => {
     db = await createTestDatabase();
     const { result } = renderHook(() => useSettingsUnderTest(), {
       wrapper: makeWrapper(db),
     });
     await waitFor(() => expect(result.current.isReady).toBe(true));
-    expect(result.current.settings.volume).toBe(0.8);
+    expect(result.current.settings.soundEffectsVolume).toBe(0.8);
   });
 
-  it('persists updated volume to RxDB', async () => {
+  it('returns default voiceVolume 0.8 when no settings doc exists', async () => {
+    db = await createTestDatabase();
+    const { result } = renderHook(() => useSettingsUnderTest(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    expect(result.current.settings.voiceVolume).toBe(0.8);
+  });
+
+  it('persists updated soundEffectsVolume to RxDB', async () => {
     db = await createTestDatabase();
     const { result } = renderHook(() => useSettingsUnderTest(), {
       wrapper: makeWrapper(db),
@@ -52,11 +61,11 @@ describe('useSettings', () => {
     await waitFor(() => expect(result.current.isReady).toBe(true));
 
     await act(async () => {
-      await result.current.update({ volume: 0.5 });
+      await result.current.update({ soundEffectsVolume: 0.5 });
     });
 
     await waitFor(() => {
-      expect(result.current.settings.volume).toBe(0.5);
+      expect(result.current.settings.soundEffectsVolume).toBe(0.5);
     });
   });
 
@@ -73,7 +82,7 @@ describe('useSettings', () => {
 
     await waitFor(() => {
       expect(result.current.settings.speechRate).toBe(1.5);
-      expect(result.current.settings.volume).toBe(0.8);
+      expect(result.current.settings.soundEffectsVolume).toBe(0.8);
     });
   });
 });

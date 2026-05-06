@@ -1,0 +1,233 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { EMPTY } from 'rxjs';
+import type { ThemeDoc } from '@/db/schemas/themes';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { useRxDB } from '@/db/hooks/useRxDB';
+import { useRxQuery } from '@/db/hooks/useRxQuery';
+import { useSettings } from '@/db/hooks/useSettings';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
+
+const LOCALES = [
+  { code: 'en', label: '🇬🇧 English' },
+  { code: 'pt-BR', label: '🇧🇷 Português' },
+] as const;
+
+type Locale = (typeof LOCALES)[number]['code'];
+
+type SettingsPanelProps = {
+  locale: string;
+  onLocaleChange: (locale: Locale) => void;
+};
+
+export const SettingsPanel = ({
+  locale,
+  onLocaleChange,
+}: SettingsPanelProps) => {
+  const { t } = useTranslation('settings');
+  const { settings, update } = useSettings();
+  const { db } = useRxDB();
+
+  const soundEffectsVolume = settings.soundEffectsVolume ?? 0.8;
+  const voiceVolume = settings.voiceVolume ?? 0.8;
+  const speechRate = settings.speechRate ?? 1;
+  const preferredVoice = settings.preferredVoiceURI ?? '';
+  const voiceSelectValue =
+    preferredVoice === '' ? '__default__' : preferredVoice;
+  const tapForgiveness = settings.tapForgivenessThreshold ?? 17;
+  const tapForgivenessTime = settings.tapForgivenessTimeMs ?? 150;
+
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voicesLoaded, setVoicesLoaded] = useState(() => {
+    const synth = (
+      globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+    ).speechSynthesis;
+    return !synth;
+  });
+
+  useEffect(() => {
+    const synth = (
+      globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
+    ).speechSynthesis;
+    if (!synth) return;
+    const load = () => {
+      setVoices(safeGetVoices(synth));
+      setVoicesLoaded(true);
+    };
+    load();
+    synth.addEventListener('voiceschanged', load);
+    return () => synth.removeEventListener('voiceschanged', load);
+  }, []);
+
+  const themes$ = useMemo(
+    () => (db ? db.themes.find().$ : EMPTY),
+    [db],
+  );
+  const themeDocs = useRxQuery<{ toJSON: () => ThemeDoc }[]>(
+    themes$,
+    [],
+  );
+  const themes = themeDocs.map((d) => d.toJSON());
+  const activeThemeId = settings.themeId ?? 'theme_ocean_preset';
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-soundEffectsVolume">
+          {t('soundEffectsVolume', {
+            percent: Math.round(soundEffectsVolume * 100),
+          })}
+        </Label>
+        <Slider
+          id="settings-soundEffectsVolume"
+          min={0}
+          max={1}
+          step={0.05}
+          value={[soundEffectsVolume]}
+          onValueChange={([v]) =>
+            void update({ soundEffectsVolume: v })
+          }
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-voiceVolume">
+          {t('voiceVolume', {
+            percent: Math.round(voiceVolume * 100),
+          })}
+        </Label>
+        <Slider
+          id="settings-voiceVolume"
+          min={0}
+          max={1}
+          step={0.05}
+          value={[voiceVolume]}
+          onValueChange={([v]) => void update({ voiceVolume: v })}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-speechRate">
+          {t('speechRate', { rate: speechRate })}
+        </Label>
+        <Slider
+          id="settings-speechRate"
+          min={0.5}
+          max={2}
+          step={0.1}
+          value={[speechRate]}
+          onValueChange={([v]) => void update({ speechRate: v })}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-voice">{t('voice')}</Label>
+        <Select
+          value={voiceSelectValue}
+          onValueChange={(v) =>
+            void update({
+              preferredVoiceURI: v === '__default__' ? '' : v,
+            })
+          }
+          disabled={!voicesLoaded}
+        >
+          <SelectTrigger id="settings-voice">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__default__">
+              {t('voiceDefault')}
+            </SelectItem>
+            {voices.map((v) => (
+              <SelectItem key={v.name} value={v.name}>
+                {v.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-language">{t('language')}</Label>
+        <Select
+          value={locale}
+          onValueChange={(v) => onLocaleChange(v as Locale)}
+        >
+          <SelectTrigger id="settings-language">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LOCALES.map(({ code, label }) => (
+              <SelectItem key={code} value={code}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {themes.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="settings-theme">{t('theme')}</Label>
+          <Select
+            value={activeThemeId}
+            onValueChange={(v) => void update({ themeId: v })}
+          >
+            <SelectTrigger id="settings-theme">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {themes.map(({ id, name, isPreset }) => (
+                <SelectItem key={id} value={id}>
+                  {isPreset
+                    ? t(`themes.${id}`, { defaultValue: name })
+                    : name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-tapForgiveness">
+          {t('tapForgiveness', { px: tapForgiveness })}
+        </Label>
+        <Slider
+          id="settings-tapForgiveness"
+          min={0}
+          max={100}
+          step={1}
+          value={[tapForgiveness]}
+          onValueChange={([v]) =>
+            void update({ tapForgivenessThreshold: v })
+          }
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="settings-tapForgivenessTime">
+          {t('tapForgivenessTime', { ms: tapForgivenessTime })}
+        </Label>
+        <Slider
+          id="settings-tapForgivenessTime"
+          min={0}
+          max={500}
+          step={10}
+          value={[tapForgivenessTime]}
+          onValueChange={([v]) =>
+            void update({ tapForgivenessTimeMs: v })
+          }
+        />
+      </div>
+    </div>
+  );
+};

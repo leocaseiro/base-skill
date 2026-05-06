@@ -43,4 +43,20 @@ describe('toWordSpellRound', () => {
       }).word,
     ).toBe('liquid');
   });
+
+  it('maps emoji from WordHit to WordSpellRound', () => {
+    const round = toWordSpellRound({ ...base, emoji: '🐱' });
+    expect(round.emoji).toBe('🐱');
+  });
+
+  it('maps image from WordHit to WordSpellRound', () => {
+    const round = toWordSpellRound({ ...base, image: '/img/cat.svg' });
+    expect(round.image).toBe('/img/cat.svg');
+  });
+
+  it('omits emoji and image when not set on WordHit', () => {
+    const round = toWordSpellRound(base);
+    expect(round.emoji).toBeUndefined();
+    expect(round.image).toBeUndefined();
+  });
 });

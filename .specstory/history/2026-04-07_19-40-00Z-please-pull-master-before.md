@@ -34,6 +34,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:04Z)**_
 ```text
 Launching skill: superpowers:brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -202,13 +203,13 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:07Z)**_
 
 <think><details><summary>Thought Process</summary>
 Let me follow the brainstorming skill. I need to:
+
 1. Explore project context first
 2. Ask clarifying questions one at a time
 
@@ -230,6 +231,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:07Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:11Z)**_
@@ -269,6 +271,7 @@ Pull latest master
  create mode 100644 src/lib/service-worker/useServiceWorker.ts
  create mode 100644 src/lib/version.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:23Z)**_
@@ -283,6 +286,7 @@ src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
 src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:26Z)**_
@@ -303,6 +307,7 @@ src/games/sort-numbers/NumberSequenceSlots/NumberSequenceSlots.stories.tsx
 src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx
 src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:28Z)**_
@@ -312,98 +317,99 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:28Z)**_
  `./src/games/sort-numbers/types.ts`
 
 ```text
-1	import type { AnswerGameConfig } from '@/components/answer-game/types';
-2	import type { ConfigField } from '@/lib/config-fields';
-3	
-4	export interface SortNumbersConfig extends AnswerGameConfig {
-5	  component: 'SortNumbers';
-6	  direction: 'ascending' | 'descending';
-7	  range: { min: number; max: number };
-8	  /** How many numbers to sort per round */
-9	  quantity: number;
-10	  allowSkips: boolean;
-11	  rounds: SortNumbersRound[];
-12	}
-13	
-14	export interface SortNumbersRound {
-15	  sequence: number[];
-16	}
-17	
-18	export const sortNumbersConfigFields: ConfigField[] = [
-19	  {
-20	    type: 'select',
-21	    key: 'inputMethod',
-22	    label: 'Input method',
-23	    options: [
-24	      { value: 'drag', label: 'drag' },
-25	      { value: 'type', label: 'type' },
-26	      { value: 'both', label: 'both' },
-27	    ],
-28	  },
-29	  {
-30	    type: 'select',
-31	    key: 'wrongTileBehavior',
-32	    label: 'Wrong tile behaviour',
-33	    options: [
-34	      { value: 'reject', label: 'reject' },
-35	      { value: 'lock-manual', label: 'lock-manual' },
-36	      { value: 'lock-auto-eject', label: 'lock-auto-eject' },
-37	    ],
-38	  },
-39	  {
-40	    type: 'select',
-41	    key: 'tileBankMode',
-42	    label: 'Tile bank mode',
-43	    options: [
-44	      { value: 'exact', label: 'exact' },
-45	      { value: 'distractors', label: 'distractors' },
-46	    ],
-47	  },
-48	  {
-49	    type: 'number',
-50	    key: 'totalRounds',
-51	    label: 'Total rounds',
-52	    min: 1,
-53	    max: 30,
-54	  },
-55	  { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
-56	  {
-57	    type: 'select',
-58	    key: 'direction',
-59	    label: 'Direction',
-60	    options: [
-61	      { value: 'ascending', label: 'ascending' },
-62	      { value: 'descending', label: 'descending' },
-63	    ],
-64	  },
-65	  {
-66	    type: 'number',
-67	    key: 'quantity',
-68	    label: 'Quantity',
-69	    min: 2,
-70	    max: 8,
-71	  },
-72	  {
-73	    type: 'nested-number',
-74	    key: 'range',
-75	    subKey: 'min',
-76	    label: 'Range min',
-77	    min: 1,
-78	    max: 999,
-79	  },
-80	  {
-81	    type: 'nested-number',
-82	    key: 'range',
-83	    subKey: 'max',
-84	    label: 'Range max',
-85	    min: 1,
-86	    max: 999,
-87	  },
-88	  { type: 'checkbox', key: 'allowSkips', label: 'Allow skips' },
-89	  { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
-90	];
+1 import type { AnswerGameConfig } from '@/components/answer-game/types';
+2 import type { ConfigField } from '@/lib/config-fields';
+3 
+4 export interface SortNumbersConfig extends AnswerGameConfig {
+5   component: 'SortNumbers';
+6   direction: 'ascending' | 'descending';
+7   range: { min: number; max: number };
+8   /** How many numbers to sort per round */
+9   quantity: number;
+10   allowSkips: boolean;
+11   rounds: SortNumbersRound[];
+12 }
+13 
+14 export interface SortNumbersRound {
+15   sequence: number[];
+16 }
+17 
+18 export const sortNumbersConfigFields: ConfigField[] = [
+19   {
+20     type: 'select',
+21     key: 'inputMethod',
+22     label: 'Input method',
+23     options: [
+24       { value: 'drag', label: 'drag' },
+25       { value: 'type', label: 'type' },
+26       { value: 'both', label: 'both' },
+27     ],
+28   },
+29   {
+30     type: 'select',
+31     key: 'wrongTileBehavior',
+32     label: 'Wrong tile behaviour',
+33     options: [
+34       { value: 'reject', label: 'reject' },
+35       { value: 'lock-manual', label: 'lock-manual' },
+36       { value: 'lock-auto-eject', label: 'lock-auto-eject' },
+37     ],
+38   },
+39   {
+40     type: 'select',
+41     key: 'tileBankMode',
+42     label: 'Tile bank mode',
+43     options: [
+44       { value: 'exact', label: 'exact' },
+45       { value: 'distractors', label: 'distractors' },
+46     ],
+47   },
+48   {
+49     type: 'number',
+50     key: 'totalRounds',
+51     label: 'Total rounds',
+52     min: 1,
+53     max: 30,
+54   },
+55   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
+56   {
+57     type: 'select',
+58     key: 'direction',
+59     label: 'Direction',
+60     options: [
+61       { value: 'ascending', label: 'ascending' },
+62       { value: 'descending', label: 'descending' },
+63     ],
+64   },
+65   {
+66     type: 'number',
+67     key: 'quantity',
+68     label: 'Quantity',
+69     min: 2,
+70     max: 8,
+71   },
+72   {
+73     type: 'nested-number',
+74     key: 'range',
+75     subKey: 'min',
+76     label: 'Range min',
+77     min: 1,
+78     max: 999,
+79   },
+80   {
+81     type: 'nested-number',
+82     key: 'range',
+83     subKey: 'max',
+84     label: 'Range max',
+85     min: 1,
+86     max: 999,
+87   },
+88   { type: 'checkbox', key: 'allowSkips', label: 'Allow skips' },
+89   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+90 ];
 91
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:28Z)**_
@@ -413,97 +419,98 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:28Z)**_
  `./src/games/sort-numbers/build-sort-round.ts`
 
 ```text
-1	import { nanoid } from 'nanoid';
-2	import type { SortNumbersRound } from './types';
-3	import type {
-4	  AnswerZone,
-5	  TileItem,
-6	} from '@/components/answer-game/types';
-7	
-8	export function buildSortRound(
-9	  numbers: number[],
-10	  direction: 'ascending' | 'descending',
-11	): { tiles: TileItem[]; zones: AnswerZone[] } {
-12	  const sorted = numbers.toSorted((a, b) =>
-13	    direction === 'ascending' ? a - b : b - a,
-14	  );
-15	
-16	  const zones: AnswerZone[] = sorted.map((n, i) => ({
-17	    id: `z${i}`,
-18	    index: i,
-19	    expectedValue: String(n),
-20	    placedTileId: null,
-21	    isWrong: false,
-22	    isLocked: false,
-23	  }));
-24	
-25	  // Shuffle tiles (Fisher-Yates)
-26	  const shuffled = [...numbers];
-27	  for (let i = shuffled.length - 1; i > 0; i--) {
-28	    const j = Math.floor(Math.random() * (i + 1));
-29	    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
-30	  }
-31	
-32	  const tiles: TileItem[] = shuffled.map((n) => ({
-33	    id: nanoid(),
-34	    label: String(n),
-35	    value: String(n),
-36	  }));
-37	
-38	  return { tiles, zones };
-39	}
-40	
-41	interface GenerateOptions {
-42	  range: { min: number; max: number };
-43	  quantity: number;
-44	  allowSkips: boolean;
-45	  totalRounds: number;
-46	}
-47	
-48	export function generateSortRounds(
-49	  options: GenerateOptions,
-50	): SortNumbersRound[] {
-51	  const { range, quantity, allowSkips, totalRounds } = options;
-52	
-53	  return Array.from({ length: totalRounds }, () => {
-54	    if (allowSkips) {
-55	      const pool = Array.from(
-56	        { length: range.max - range.min + 1 },
-57	        (_, i) => range.min + i,
-58	      );
-59	      const picked: number[] = [];
-60	      const available = [...pool];
-61	      for (let i = 0; i < quantity && available.length > 0; i++) {
-62	        const idx = Math.floor(Math.random() * available.length);
-63	        picked.push(available[idx]!);
-64	        available.splice(idx, 1);
-65	      }
-66	      return { sequence: picked };
-67	    }
-68	
-69	    // Consecutive: pick a random start such that start + quantity - 1 <= max
-70	    const rangeSize = range.max - range.min + 1;
-71	    if (quantity > rangeSize) {
-72	      // quantity exceeds range — fall back to the full range in order
-73	      const sequence = Array.from(
-74	        { length: rangeSize },
-75	        (_, i) => range.min + i,
-76	      );
-77	      return { sequence };
-78	    }
-79	    const maxStart = range.max - quantity + 1;
-80	    const start =
-81	      Math.floor(Math.random() * (maxStart - range.min + 1)) +
-82	      range.min;
-83	    const sequence = Array.from(
-84	      { length: quantity },
-85	      (_, i) => start + i,
-86	    );
-87	    return { sequence };
-88	  });
-89	}
+1 import { nanoid } from 'nanoid';
+2 import type { SortNumbersRound } from './types';
+3 import type {
+4   AnswerZone,
+5   TileItem,
+6 } from '@/components/answer-game/types';
+7 
+8 export function buildSortRound(
+9   numbers: number[],
+10   direction: 'ascending' | 'descending',
+11 ): { tiles: TileItem[]; zones: AnswerZone[] } {
+12   const sorted = numbers.toSorted((a, b) =>
+13     direction === 'ascending' ? a - b : b - a,
+14   );
+15 
+16   const zones: AnswerZone[] = sorted.map((n, i) => ({
+17     id: `z${i}`,
+18     index: i,
+19     expectedValue: String(n),
+20     placedTileId: null,
+21     isWrong: false,
+22     isLocked: false,
+23   }));
+24 
+25   // Shuffle tiles (Fisher-Yates)
+26   const shuffled = [...numbers];
+27   for (let i = shuffled.length - 1; i > 0; i--) {
+28     const j = Math.floor(Math.random() * (i + 1));
+29     [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+30   }
+31 
+32   const tiles: TileItem[] = shuffled.map((n) => ({
+33     id: nanoid(),
+34     label: String(n),
+35     value: String(n),
+36   }));
+37 
+38   return { tiles, zones };
+39 }
+40 
+41 interface GenerateOptions {
+42   range: { min: number; max: number };
+43   quantity: number;
+44   allowSkips: boolean;
+45   totalRounds: number;
+46 }
+47 
+48 export function generateSortRounds(
+49   options: GenerateOptions,
+50 ): SortNumbersRound[] {
+51   const { range, quantity, allowSkips, totalRounds } = options;
+52 
+53   return Array.from({ length: totalRounds }, () => {
+54     if (allowSkips) {
+55       const pool = Array.from(
+56         { length: range.max - range.min + 1 },
+57         (_, i) => range.min + i,
+58       );
+59       const picked: number[] = [];
+60       const available = [...pool];
+61       for (let i = 0; i < quantity && available.length > 0; i++) {
+62         const idx = Math.floor(Math.random() * available.length);
+63         picked.push(available[idx]!);
+64         available.splice(idx, 1);
+65       }
+66       return { sequence: picked };
+67     }
+68 
+69     // Consecutive: pick a random start such that start + quantity - 1 <= max
+70     const rangeSize = range.max - range.min + 1;
+71     if (quantity > rangeSize) {
+72       // quantity exceeds range — fall back to the full range in order
+73       const sequence = Array.from(
+74         { length: rangeSize },
+75         (_, i) => range.min + i,
+76       );
+77       return { sequence };
+78     }
+79     const maxStart = range.max - quantity + 1;
+80     const start =
+81       Math.floor(Math.random() * (maxStart - range.min + 1)) +
+82       range.min;
+83     const sequence = Array.from(
+84       { length: quantity },
+85       (_, i) => start + i,
+86     );
+87     return { sequence };
+88   });
+89 }
 90
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:31Z)**_
@@ -513,220 +520,221 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:31Z)**_
  `./src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildSortRound } from '../build-sort-round';
-5	import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
-6	import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
-7	import type { SortNumbersConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerGameDraftState,
-11	  AnswerZone,
-12	  TileItem,
-13	} from '@/components/answer-game/types';
-14	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-15	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { buildRoundOrder } from '@/games/build-round-order';
-22	
-23	interface SortNumbersProps {
-24	  config: SortNumbersConfig;
-25	  initialState?: AnswerGameDraftState;
-26	  sessionId?: string;
-27	  seed?: string;
-28	}
-29	
-30	const SortNumbersSession = ({
-31	  sortNumbersConfig,
-32	  roundOrder,
-33	  onRestartSession,
-34	}: {
-35	  sortNumbersConfig: SortNumbersConfig;
-36	  roundOrder: readonly number[];
-37	  onRestartSession: () => void;
-38	}) => {
-39	  const { t } = useTranslation('games');
-40	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-41	  const dispatch = useAnswerGameDispatch();
-42	  const { confettiReady, gameOverReady } = useGameSounds();
-43	  const navigate = useNavigate();
-44	  const { locale } = useParams({ from: '/$locale' });
-45	  const completionToken = useRef(0);
-46	
-47	  const configRoundIndex = roundOrder[roundIndex];
-48	  const round =
-49	    configRoundIndex === undefined
-50	      ? undefined
-51	      : sortNumbersConfig.rounds[configRoundIndex];
-52	
-53	  const directionLabel =
-54	    sortNumbersConfig.direction === 'ascending'
-55	      ? t('sort-numbers-ui.ascending-label')
-56	      : t('sort-numbers-ui.descending-label');
-57	
-58	  useRoundTTS(directionLabel);
-59	
-60	  const handleHome = () => {
-61	    void navigate({ to: '/$locale', params: { locale } });
-62	  };
-63	
-64	  const handlePlayAgain = () => {
-65	    onRestartSession();
-66	  };
-67	
-68	  useEffect(() => {
-69	    if (phase !== 'round-complete' || !confettiReady) return;
-70	
-71	    const token = ++completionToken.current;
-72	    const delayMs = 750;
-73	    const timer = globalThis.setTimeout(() => {
-74	      if (completionToken.current !== token) return;
-75	
-76	      const isLastRound = roundIndex >= roundOrder.length - 1;
-77	      if (isLastRound) {
-78	        dispatch({ type: 'COMPLETE_GAME' });
-79	        return;
-80	      }
-81	
-82	      const nextConfigIndex = roundOrder[roundIndex + 1];
-83	      const nextRound =
-84	        nextConfigIndex === undefined
-85	          ? undefined
-86	          : sortNumbersConfig.rounds[nextConfigIndex];
-87	
-88	      if (!nextRound) {
-89	        dispatch({ type: 'COMPLETE_GAME' });
-90	        return;
-91	      }
-92	
-93	      const { tiles, zones } = buildSortRound(
-94	        nextRound.sequence,
-95	        sortNumbersConfig.direction,
-96	      );
-97	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-98	    }, delayMs);
-99	
-100	    return () => {
-101	      globalThis.clearTimeout(timer);
-102	    };
-103	  }, [
-104	    phase,
-105	    confettiReady,
-106	    roundIndex,
-107	    dispatch,
-108	    roundOrder,
-109	    sortNumbersConfig.rounds,
-110	    sortNumbersConfig.direction,
-111	  ]);
-112	
-113	  if (!round) return null;
-114	
-115	  return (
-116	    <>
-117	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-118	        <AnswerGame.Question>
-119	          <p className="text-center text-lg font-semibold text-foreground">
-120	            {directionLabel}
-121	          </p>
-122	        </AnswerGame.Question>
-123	        <AnswerGame.Answer>
-124	          <NumberSequenceSlots />
-125	        </AnswerGame.Answer>
-126	        <AnswerGame.Choices>
-127	          <SortNumbersTileBank />
-128	        </AnswerGame.Choices>
-129	      </div>
-130	      <ScoreAnimation visible={confettiReady} />
-131	      {gameOverReady ? (
-132	        <GameOverOverlay
-133	          retryCount={retryCount}
-134	          onPlayAgain={handlePlayAgain}
-135	          onHome={handleHome}
-136	        />
-137	      ) : null}
-138	    </>
-139	  );
-140	};
-141	
-142	export const SortNumbers = ({
-143	  config,
-144	  initialState,
-145	  sessionId,
-146	  seed,
-147	}: SortNumbersProps) => {
-148	  const roundsInOrder = config.roundsInOrder === true;
-149	  const [sessionEpoch, setSessionEpoch] = useState(0);
-150	
-151	  const roundOrder = useMemo(() => {
-152	    void sessionEpoch;
-153	    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-154	  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-155	
-156	  const firstConfigIndex = roundOrder[0];
-157	  const round0 =
-158	    firstConfigIndex === undefined
-159	      ? undefined
-160	      : config.rounds[firstConfigIndex];
-161	
-162	  const { tiles, zones } = useMemo(() => {
-163	    if (!round0) {
-164	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-165	    }
-166	    return buildSortRound(round0.sequence, config.direction);
-167	  }, [round0, config.direction]);
-168	
-169	  const answerGameConfig = useMemo(
-170	    (): AnswerGameConfig => ({
-171	      gameId: config.gameId,
-172	      inputMethod: config.inputMethod,
-173	      wrongTileBehavior: config.wrongTileBehavior,
-174	      tileBankMode: config.tileBankMode,
-175	      totalRounds: config.rounds.length,
-176	      roundsInOrder: config.roundsInOrder,
-177	      ttsEnabled: config.ttsEnabled,
-178	      touchKeyboardInputMode: 'numeric',
-179	      initialTiles: tiles,
-180	      initialZones: zones,
-181	    }),
-182	    [
-183	      config.gameId,
-184	      config.inputMethod,
-185	      config.wrongTileBehavior,
-186	      config.tileBankMode,
-187	      config.rounds.length,
-188	      config.roundsInOrder,
-189	      config.ttsEnabled,
-190	      tiles,
-191	      zones,
-192	    ],
-193	  );
-194	
-195	  if (!round0) return null;
-196	
-197	  return (
-198	    <AnswerGame
-199	      config={answerGameConfig}
-200	      initialState={initialState}
-201	      sessionId={sessionId}
-202	    >
-203	      <SortNumbersSession
-204	        sortNumbersConfig={config}
-205	        roundOrder={roundOrder}
-206	        onRestartSession={() => {
-207	          setSessionEpoch((e) => e + 1);
-208	        }}
-209	      />
-210	    </AnswerGame>
-211	  );
-212	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildSortRound } from '../build-sort-round';
+5 import { NumberSequenceSlots } from '../NumberSequenceSlots/NumberSequenceSlots';
+6 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+7 import type { SortNumbersConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerGameDraftState,
+11   AnswerZone,
+12   TileItem,
+13 } from '@/components/answer-game/types';
+14 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+15 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { buildRoundOrder } from '@/games/build-round-order';
+22 
+23 interface SortNumbersProps {
+24   config: SortNumbersConfig;
+25   initialState?: AnswerGameDraftState;
+26   sessionId?: string;
+27   seed?: string;
+28 }
+29 
+30 const SortNumbersSession = ({
+31   sortNumbersConfig,
+32   roundOrder,
+33   onRestartSession,
+34 }: {
+35   sortNumbersConfig: SortNumbersConfig;
+36   roundOrder: readonly number[];
+37   onRestartSession: () => void;
+38 }) => {
+39   const { t } = useTranslation('games');
+40   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+41   const dispatch = useAnswerGameDispatch();
+42   const { confettiReady, gameOverReady } = useGameSounds();
+43   const navigate = useNavigate();
+44   const { locale } = useParams({ from: '/$locale' });
+45   const completionToken = useRef(0);
+46 
+47   const configRoundIndex = roundOrder[roundIndex];
+48   const round =
+49     configRoundIndex === undefined
+50       ? undefined
+51       : sortNumbersConfig.rounds[configRoundIndex];
+52 
+53   const directionLabel =
+54     sortNumbersConfig.direction === 'ascending'
+55       ? t('sort-numbers-ui.ascending-label')
+56       : t('sort-numbers-ui.descending-label');
+57 
+58   useRoundTTS(directionLabel);
+59 
+60   const handleHome = () => {
+61     void navigate({ to: '/$locale', params: { locale } });
+62   };
+63 
+64   const handlePlayAgain = () => {
+65     onRestartSession();
+66   };
+67 
+68   useEffect(() => {
+69     if (phase !== 'round-complete' || !confettiReady) return;
+70 
+71     const token = ++completionToken.current;
+72     const delayMs = 750;
+73     const timer = globalThis.setTimeout(() => {
+74       if (completionToken.current !== token) return;
+75 
+76       const isLastRound = roundIndex >= roundOrder.length - 1;
+77       if (isLastRound) {
+78         dispatch({ type: 'COMPLETE_GAME' });
+79         return;
+80       }
+81 
+82       const nextConfigIndex = roundOrder[roundIndex + 1];
+83       const nextRound =
+84         nextConfigIndex === undefined
+85           ? undefined
+86           : sortNumbersConfig.rounds[nextConfigIndex];
+87 
+88       if (!nextRound) {
+89         dispatch({ type: 'COMPLETE_GAME' });
+90         return;
+91       }
+92 
+93       const { tiles, zones } = buildSortRound(
+94         nextRound.sequence,
+95         sortNumbersConfig.direction,
+96       );
+97       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+98     }, delayMs);
+99 
+100     return () => {
+101       globalThis.clearTimeout(timer);
+102     };
+103   }, [
+104     phase,
+105     confettiReady,
+106     roundIndex,
+107     dispatch,
+108     roundOrder,
+109     sortNumbersConfig.rounds,
+110     sortNumbersConfig.direction,
+111   ]);
+112 
+113   if (!round) return null;
+114 
+115   return (
+116     <>
+117       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+118         <AnswerGame.Question>
+119           <p className="text-center text-lg font-semibold text-foreground">
+120             {directionLabel}
+121           </p>
+122         </AnswerGame.Question>
+123         <AnswerGame.Answer>
+124           <NumberSequenceSlots />
+125         </AnswerGame.Answer>
+126         <AnswerGame.Choices>
+127           <SortNumbersTileBank />
+128         </AnswerGame.Choices>
+129       </div>
+130       <ScoreAnimation visible={confettiReady} />
+131       {gameOverReady ? (
+132         <GameOverOverlay
+133           retryCount={retryCount}
+134           onPlayAgain={handlePlayAgain}
+135           onHome={handleHome}
+136         />
+137       ) : null}
+138     </>
+139   );
+140 };
+141 
+142 export const SortNumbers = ({
+143   config,
+144   initialState,
+145   sessionId,
+146   seed,
+147 }: SortNumbersProps) => {
+148   const roundsInOrder = config.roundsInOrder === true;
+149   const [sessionEpoch, setSessionEpoch] = useState(0);
+150 
+151   const roundOrder = useMemo(() => {
+152     void sessionEpoch;
+153     return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+154   }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
+155 
+156   const firstConfigIndex = roundOrder[0];
+157   const round0 =
+158     firstConfigIndex === undefined
+159       ? undefined
+160       : config.rounds[firstConfigIndex];
+161 
+162   const { tiles, zones } = useMemo(() => {
+163     if (!round0) {
+164       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+165     }
+166     return buildSortRound(round0.sequence, config.direction);
+167   }, [round0, config.direction]);
+168 
+169   const answerGameConfig = useMemo(
+170     (): AnswerGameConfig => ({
+171       gameId: config.gameId,
+172       inputMethod: config.inputMethod,
+173       wrongTileBehavior: config.wrongTileBehavior,
+174       tileBankMode: config.tileBankMode,
+175       totalRounds: config.rounds.length,
+176       roundsInOrder: config.roundsInOrder,
+177       ttsEnabled: config.ttsEnabled,
+178       touchKeyboardInputMode: 'numeric',
+179       initialTiles: tiles,
+180       initialZones: zones,
+181     }),
+182     [
+183       config.gameId,
+184       config.inputMethod,
+185       config.wrongTileBehavior,
+186       config.tileBankMode,
+187       config.rounds.length,
+188       config.roundsInOrder,
+189       config.ttsEnabled,
+190       tiles,
+191       zones,
+192     ],
+193   );
+194 
+195   if (!round0) return null;
+196 
+197   return (
+198     <AnswerGame
+199       config={answerGameConfig}
+200       initialState={initialState}
+201       sessionId={sessionId}
+202     >
+203       <SortNumbersSession
+204         sortNumbersConfig={config}
+205         roundOrder={roundOrder}
+206         onRestartSession={() => {
+207           setSessionEpoch((e) => e + 1);
+208         }}
+209       />
+210     </AnswerGame>
+211   );
+212 };
 213
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:37Z)**_
@@ -739,7 +747,7 @@ Now I have a good understanding of the current implementation. Let me understand
 2. **Distractors**: Currently when `tileBankMode: 'distractors'`, the distractor numbers seem to be random. The user wants to be able to set distractors to either:
    - Random (like now)
    - Numbers between the correct ones (e.g., if counting by 2s: 2,4,6,8,10, distractors could be 1,3,5,7,9 - the numbers in between)
-   
+
 Let me examine how the tile bank generates distractors currently.
 </details></think>
 
@@ -750,52 +758,53 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:38Z)**_
  `./src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
 
 ```text
-1	import type { TileItem } from '@/components/answer-game/types';
-2	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-3	import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
-4	
-5	const NumberTile = ({ tile }: { tile: TileItem }) => {
-6	  const {
-7	    ref,
-8	    handleClick,
-9	    onPointerDown,
-10	    onPointerMove,
-11	    onPointerUp,
-12	    onPointerCancel,
-13	  } = useDraggableTile(tile);
-14	
-15	  return (
-16	    <button
-17	      ref={ref}
-18	      type="button"
-19	      aria-label={`Number ${tile.label}`}
-20	      className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
-21	      onClick={handleClick}
-22	      onPointerDown={onPointerDown}
-23	      onPointerMove={onPointerMove}
-24	      onPointerUp={onPointerUp}
-25	      onPointerCancel={onPointerCancel}
-26	    >
-27	      {tile.label}
-28	    </button>
-29	  );
-30	};
-31	
-32	export const SortNumbersTileBank = () => {
-33	  const { allTiles, bankTileIds } = useAnswerGameContext();
-34	
-35	  const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
-36	
-37	  return (
-38	    <div className="flex flex-wrap justify-center gap-3">
-39	      {bankTiles.map((tile) => (
-40	        <NumberTile key={tile.id} tile={tile} />
-41	      ))}
-42	    </div>
-43	  );
-44	};
+1 import type { TileItem } from '@/components/answer-game/types';
+2 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+3 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
+4 
+5 const NumberTile = ({ tile }: { tile: TileItem }) => {
+6   const {
+7     ref,
+8     handleClick,
+9     onPointerDown,
+10     onPointerMove,
+11     onPointerUp,
+12     onPointerCancel,
+13   } = useDraggableTile(tile);
+14 
+15   return (
+16     <button
+17       ref={ref}
+18       type="button"
+19       aria-label={`Number ${tile.label}`}
+20       className="flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl bg-card text-2xl font-bold shadow-md transition-transform active:scale-95 active:cursor-grabbing"
+21       onClick={handleClick}
+22       onPointerDown={onPointerDown}
+23       onPointerMove={onPointerMove}
+24       onPointerUp={onPointerUp}
+25       onPointerCancel={onPointerCancel}
+26     >
+27       {tile.label}
+28     </button>
+29   );
+30 };
+31 
+32 export const SortNumbersTileBank = () => {
+33   const { allTiles, bankTileIds } = useAnswerGameContext();
+34 
+35   const bankTiles = allTiles.filter((t) => bankTileIds.includes(t.id));
+36 
+37   return (
+38     <div className="flex flex-wrap justify-center gap-3">
+39       {bankTiles.map((tile) => (
+40         <NumberTile key={tile.id} tile={tile} />
+41       ))}
+42     </div>
+43   );
+44 };
 45
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:40Z)**_
@@ -859,6 +868,7 @@ src/components/answer-game/useKeyboardDrag.test.tsx
 src/components/answer-game/AnswerGame/AnswerGame.test.tsx
 src/lib/game-engine/types.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:44Z)**_
@@ -876,6 +886,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:40:44Z)**_
 9-  /** Total number of rounds in this session */
 10-  totalRounds: number;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:44Z)**_
@@ -893,6 +904,7 @@ src/games/sort-numbers/types.ts:45:      { value: 'distractors', label: 'distrac
 /Users/leocaseiro/Sites/base-skill/src/games/sort-numbers/types.ts-47-  },
 /Users/leocaseiro/Sites/base-skill/src/games/sort-numbers/types.ts-48-  {
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:48Z)**_
@@ -911,6 +923,7 @@ src/components/answer-game/types.ts:8:  distractorCount?: number;
 src/components/answer-game/types.ts-10-  totalRounds: number;
 /Users/leocaseiro/Sites/base-skill/src/components/answer-game/types.ts-11-  /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:40:50Z)**_
@@ -1062,6 +1075,7 @@ src/components/answer-game/types.ts:8:  distractorCount?: number;
 src/components/answer-game/types.ts-10-  totalRounds: number;
 /Users/leocaseiro/Sites/base-skill/src/components/answer-game/types.ts-11-  /**
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 19:41:03Z)**_
@@ -1070,10 +1084,10 @@ _**Agent (claude-sonnet-4-6 2026-04-07 19:41:03Z)**_
 Now I have a solid understanding of the current codebase. Let me summarize what I know:
 
 Current state:
+
 - `SortNumbersConfig` has `allowSkips: boolean` - when true, picks random numbers from the range
 - When `allowSkips: false`, it picks consecutive numbers
 - `tileBankMode: 'exact' | 'distractors'` - when 'distractors', it presumably adds extra tiles beyond the correct ones (but SortNumbers doesn't seem to pass `distractorCount` to the answer game config - it doesn't pass it in `SortNumbers.tsx`)
-
 
 - The distractor behavior for SortNumbers isn't fully implemented yet since it's missing the `distractorCount` configuration.
 
@@ -1106,12 +1120,14 @@ Yes, this makes complete sense. I've read through the current code — here's wh
 - `tileBankMode: 'distractors'` — SortNumbers doesn't yet wire up `distractorCount`, so it's essentially not producing extra distractor tiles
 
 Your two changes are clear:
+
 1. **Skip mode**: `random` (current behavior) or `by N` (e.g. by 2 → 2,4,6,8...)
 2. **Distractor source**: `random` (current) or `between` (the numbers skipped over)
 
 First clarifying question: for **"skip by N"**, should the starting number always be `range.min`, or should it start at a random valid position within the range?
 
 For example, with range 1–20, skip by 3, quantity 4:
+
 - **Fixed start**: always starts at `range.min`, so → 1, 4, 7, 10
 - **Random start**: could start at 2 → 2, 5, 8, 11 — or 3 → 3, 6, 9, 12
 
@@ -1397,6 +1413,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:11Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:12Z)**_
@@ -1408,6 +1425,7 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:12Z)**_
 ```text
 <tool_use_error>Path does not exist: /Users/leocaseiro/Sites/base-skill/src/lib/config-fields. Note: your current working directory is /Users/leocaseiro/Sites/base-skill.</tool_use_error>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:16Z)**_
@@ -1435,6 +1453,7 @@ src/components/GameCard.tsx
 src/components/ConfigFormFields.tsx
 src/components/ConfigFormFields.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:20Z)**_
@@ -1444,33 +1463,34 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:20Z)**_
  `./src/lib/config-fields.ts`
 
 ```text
-1	// src/lib/config-fields.ts
-2	export type ConfigField =
-3	  | {
-4	      type: 'select';
-5	      key: string;
-6	      label: string;
-7	      options: { value: string; label: string }[];
-8	    }
-9	  | {
-10	      type: 'number';
-11	      key: string;
-12	      label: string;
-13	      min: number;
-14	      max: number;
-15	    }
-16	  | {
-17	      /** A number field that reads/writes from a nested object: config[key][subKey] */
-18	      type: 'nested-number';
-19	      key: string;
-20	      subKey: string;
-21	      label: string;
-22	      min: number;
-23	      max: number;
-24	    }
-25	  | { type: 'checkbox'; key: string; label: string };
+1 // src/lib/config-fields.ts
+2 export type ConfigField =
+3   | {
+4       type: 'select';
+5       key: string;
+6       label: string;
+7       options: { value: string; label: string }[];
+8     }
+9   | {
+10       type: 'number';
+11       key: string;
+12       label: string;
+13       min: number;
+14       max: number;
+15     }
+16   | {
+17       /** A number field that reads/writes from a nested object: config[key][subKey] */
+18       type: 'nested-number';
+19       key: string;
+20       subKey: string;
+21       label: string;
+22       min: number;
+23       max: number;
+24     }
+25   | { type: 'checkbox'; key: string; label: string };
 26
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:23Z)**_
@@ -1480,141 +1500,143 @@ _**Agent (claude-sonnet-4-6 2026-04-07 20:25:23Z)**_
  `./src/components/ConfigFormFields.tsx`
 
 ```text
-1	// src/components/ConfigFormFields.tsx
-2	import type { ConfigField } from '@/lib/config-fields';
-3	import type { JSX } from 'react';
-4	
-5	type ConfigFormFieldsProps = {
-6	  fields: ConfigField[];
-7	  config: Record<string, unknown>;
-8	  onChange: (config: Record<string, unknown>) => void;
-9	};
-10	
-11	export const ConfigFormFields = ({
-12	  fields,
-13	  config,
-14	  onChange,
-15	}: ConfigFormFieldsProps): JSX.Element => (
-16	  <div className="flex flex-col gap-3">
-17	    {fields.map((field) => {
-18	      if (field.type === 'select') {
-19	        return (
-20	          <label
-21	            key={field.key}
-22	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-23	          >
-24	            {field.label}
-25	            <select
-26	              aria-label={field.label}
-27	              value={String(config[field.key] ?? '')}
-28	              onChange={(e) =>
-29	                onChange({ ...config, [field.key]: e.target.value })
-30	              }
-31	              className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
-32	            >
-33	              {field.options.map((opt) => (
-34	                <option key={opt.value} value={opt.value}>
-35	                  {opt.label}
-36	                </option>
-37	              ))}
-38	            </select>
-39	          </label>
-40	        );
-41	      }
-42	
-43	      if (field.type === 'nested-number') {
-44	        const nested = config[field.key] as
-45	          | Record<string, unknown>
-46	          | undefined;
-47	        return (
-48	          <label
-49	            key={`${field.key}.${field.subKey}`}
-50	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-51	          >
-52	            {field.label}
-53	            <input
-54	              type="number"
-55	              aria-label={field.label}
-56	              value={Number(nested?.[field.subKey] ?? field.min)}
-57	              min={field.min}
-58	              max={field.max}
-59	              onChange={(e) =>
-60	                onChange({
-61	                  ...config,
-62	                  [field.key]: {
-63	                    ...nested,
-64	                    [field.subKey]: Number(e.target.value),
-65	                  },
-66	                })
-67	              }
-68	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-69	            />
-70	          </label>
-71	        );
-72	      }
-73	
-74	      if (field.type === 'number') {
-75	        return (
-76	          <label
-77	            key={field.key}
-78	            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
-79	          >
-80	            {field.label}
-81	            <input
-82	              type="number"
-83	              aria-label={field.label}
-84	              value={Number(config[field.key] ?? field.min)}
-85	              min={field.min}
-86	              max={field.max}
-87	              onChange={(e) =>
-88	                onChange({
-89	                  ...config,
-90	                  [field.key]: Number(e.target.value),
-91	                })
-92	              }
-93	              className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
-94	            />
-95	          </label>
-96	        );
-97	      }
-98	
-99	      // checkbox
-100	      return (
-101	        <label
-102	          key={field.key}
-103	          className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
-104	        >
-105	          <input
-106	            type="checkbox"
-107	            aria-label={field.label}
-108	            checked={Boolean(config[field.key])}
-109	            onChange={(e) =>
-110	              onChange({ ...config, [field.key]: e.target.checked })
-111	            }
-112	            className="h-5 w-5 accent-primary"
-113	          />
-114	          {field.label}
-115	        </label>
-116	      );
-117	    })}
-118	  </div>
-119	);
+1 // src/components/ConfigFormFields.tsx
+2 import type { ConfigField } from '@/lib/config-fields';
+3 import type { JSX } from 'react';
+4 
+5 type ConfigFormFieldsProps = {
+6   fields: ConfigField[];
+7   config: Record<string, unknown>;
+8   onChange: (config: Record<string, unknown>) => void;
+9 };
+10 
+11 export const ConfigFormFields = ({
+12   fields,
+13   config,
+14   onChange,
+15 }: ConfigFormFieldsProps): JSX.Element => (
+16   <div className="flex flex-col gap-3">
+17     {fields.map((field) => {
+18       if (field.type === 'select') {
+19         return (
+20           <label
+21             key={field.key}
+22             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+23           >
+24             {field.label}
+25             <select
+26               aria-label={field.label}
+27               value={String(config[field.key] ?? '')}
+28               onChange={(e) =>
+29                 onChange({ ...config, [field.key]: e.target.value })
+30               }
+31               className="h-12 rounded-lg border border-input bg-background px-3 text-sm"
+32             >
+33               {field.options.map((opt) => (
+34                 <option key={opt.value} value={opt.value}>
+35                   {opt.label}
+36                 </option>
+37               ))}
+38             </select>
+39           </label>
+40         );
+41       }
+42 
+43       if (field.type === 'nested-number') {
+44         const nested = config[field.key] as
+45           | Record<string, unknown>
+46           | undefined;
+47         return (
+48           <label
+49             key={`${field.key}.${field.subKey}`}
+50             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+51           >
+52             {field.label}
+53             <input
+54               type="number"
+55               aria-label={field.label}
+56               value={Number(nested?.[field.subKey] ?? field.min)}
+57               min={field.min}
+58               max={field.max}
+59               onChange={(e) =>
+60                 onChange({
+61                   ...config,
+62                   [field.key]: {
+63                     ...nested,
+64                     [field.subKey]: Number(e.target.value),
+65                   },
+66                 })
+67               }
+68               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+69             />
+70           </label>
+71         );
+72       }
+73 
+74       if (field.type === 'number') {
+75         return (
+76           <label
+77             key={field.key}
+78             className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+79           >
+80             {field.label}
+81             <input
+82               type="number"
+83               aria-label={field.label}
+84               value={Number(config[field.key] ?? field.min)}
+85               min={field.min}
+86               max={field.max}
+87               onChange={(e) =>
+88                 onChange({
+89                   ...config,
+90                   [field.key]: Number(e.target.value),
+91                 })
+92               }
+93               className="h-12 w-28 rounded-lg border border-input bg-background px-3 text-sm"
+94             />
+95           </label>
+96         );
+97       }
+98 
+99       // checkbox
+100       return (
+101         <label
+102           key={field.key}
+103           className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-semibold text-foreground"
+104         >
+105           <input
+106             type="checkbox"
+107             aria-label={field.label}
+108             checked={Boolean(config[field.key])}
+109             onChange={(e) =>
+110               onChange({ ...config, [field.key]: e.target.checked })
+111             }
+112             className="h-5 w-5 accent-primary"
+113           />
+114           {field.label}
+115         </label>
+116       );
+117     })}
+118   </div>
+119 );
 120
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:25:40Z)**_
 
 <think><details><summary>Thought Process</summary>
 Now I have a full picture. The `ConfigFormFields` component:
+
 - Has `nested-number` support for reading/writing from `config[key][subKey]`
 - Does NOT support nested selects (like `config.skip.mode`)
 - Does NOT support conditional fields (show only when another field has a certain value)
 
 So the new work required for the config fields would be:
+
 1. Add `nested-select` type for `skip.mode`, `skip.start`, `distractors.source`
 2. Add `nested-number` for `skip.step` (already exists but for `config[key][subKey]`, which would work)
-
 
 3. Add conditional/dependent fields support (show `skip.step` and `skip.start` only when `skip.mode === 'by'`)
 4. Add a new field type for `distractors.count` which is `number | 'all'`
@@ -1681,6 +1703,7 @@ Create worktree for spec branch
 Preparing worktree (new branch 'feat/sort-numbers-skip-config')
 HEAD is now at 20ac7f9 feat: service worker offline setup, game session resume, and PWA hardening (#29)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:27:50Z)**_
@@ -1694,6 +1717,7 @@ Create specs directory
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:32Z)**_
@@ -1895,6 +1919,7 @@ The existing `allowSkips` checkbox entry is removed.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/feat/sort-numbers-skip-config/docs/superpowers/specs/2026-04-08-sort-numbers-skip-config-design.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:35Z)**_
@@ -1912,6 +1937,7 @@ $ markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#d
 error Command failed with exit code 127.
 info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:28:40Z)**_
@@ -1926,6 +1952,7 @@ Install dependencies in worktree
 Exit code 1
 (eval):cd:1: no such file or directory: ./worktrees/feat/sort-numbers-skip-config
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:09Z)**_
@@ -1943,6 +1970,7 @@ warning Workspaces can only be enabled in private projects.
 $ husky
 Done in 26.07s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:29:18Z)**_
@@ -1965,6 +1993,7 @@ scope.md 4ms (unchanged)
 src/lib/game-event-bus.md 1ms (unchanged)
 Done in 6.43s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:30:00Z)**_
@@ -2024,6 +2053,7 @@ stdout | src/lib/speech/SpeechOutput.test.ts > SpeechOutput > speak sets utteran
 ...
 </persisted-output>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-07 20:30:06Z)**_

@@ -12,11 +12,11 @@ Before we continue with milestone 4, I want to setup storybookjs.
 
 Plan that work with superpowers:brainstorm, before writing the plan via superpowers:writing-plan.
 
-We could make usage of the https://storybook.js.org/docs/writing-docs/autodocs. 
+We could make usage of the <https://storybook.js.org/docs/writing-docs/autodocs>.
 
-Any UI component should be documented with examples with multi-variations using https://storybook.js.org/docs/essentials/actions and https://storybook.js.org/docs/essentials/controls
+Any UI component should be documented with examples with multi-variations using <https://storybook.js.org/docs/essentials/actions> and <https://storybook.js.org/docs/essentials/controls>
 
-Tjhey would be handy for VR tests, combined with the different screen sizes in https://storybook.js.org/docs/essentials/viewport
+Tjhey would be handy for VR tests, combined with the different screen sizes in <https://storybook.js.org/docs/essentials/viewport>
 
 Can you also evaluate if we can have any service/util also documented in storybook?
 
@@ -38,6 +38,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:17:56Z)**_
 ```text
 Launching skill: superpowers:brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -206,7 +207,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:00Z)**_
@@ -232,6 +232,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:00Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:03Z)**_
@@ -365,6 +366,7 @@ node_modules/source-map-js/lib/util.js
 node_modules/source-map-js/lib/source-node.d.ts
 (Results are truncated. Consider using a more specific path or pattern.)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:11Z)**_
@@ -374,275 +376,276 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:11Z)**_
  `./docs/baseskill_milestone_breakdown_85146c93.plan.md`
 
 ```text
-1	---
-2	name: BaseSkill Milestone Breakdown
-3	overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
-4	todos:
-5	  - id: m0-design-docs
-6	    content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
-7	    status: pending
-8	  - id: m1-scaffolding
-9	    content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
-10	    status: pending
-11	  - id: m2-data-layer
-12	    content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
-13	    status: completed
-14	  - id: m3-app-shell
-15	    content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
-16	    status: pending
-17	  - id: m4-game-engine
-18	    content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
-19	    status: pending
-20	  - id: m5-reference-games
-21	    content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
-22	    status: pending
-23	  - id: m6-cloud-sync
-24	    content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
-25	    status: pending
-26	  - id: m7-parent-features
-27	    content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
-28	    status: pending
-29	  - id: m8-polish
-30	    content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
-31	    status: pending
-32	isProject: false
-33	---
-34	
-35	# BaseSkill: PRD to Completion Milestone Breakdown
-36	
-37	**Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
-38	
-39	This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
-40	
-41	---
-42	
-43	## Milestone 0 -- Design Documents (SYNC prerequisite)
-44	
-45	Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
-46	
-47	**ASYNC work streams:**
-48	
-49	- `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
-50	- `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
-51	- `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
-52	- `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
-53	- `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
-54	- `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
-55	- `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
-56	- `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
-57	- `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
-58	
-59	**SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
-60	
-61	---
-62	
-63	## Milestone 1 -- Project Scaffolding and CI/CD
-64	
-65	Bootstrap the repository and get a green CI pipeline on an empty app shell.
-66	
-67	**SYNC (sequential):**
-68	
-69	1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
-70	2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
-71	3. Set up TanStack Router nested layouts for app shell / game shell / settings
-72	4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
-73	5. Add `LICENSE` (GPL v3)
-74	6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
-75	7. Set up Vitest + React Testing Library
-76	8. Set up Playwright (empty E2E suite)
-77	9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
-78	10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
-79	11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
-80	12. App versioning: semver stamp in build output
-81	
-82	**Key TanStack decisions:**
-83	
-84	- Use TanStack Router's file-based routing convention (`routes/` directory)
-85	- Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
-86	- Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
-87	- Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
-88	
-89	**Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
-90	
-91	---
-92	
-93	## Milestone 2 -- Data Layer and Core Infrastructure
-94	
-95	Set up RxDB and the foundational systems that everything else depends on.
-96	
-97	**SYNC (must complete in order):**
-98	
-99	1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
-100	2. Schema migration framework (version tracking via `app_meta`)
-101	3. React hooks for reactive RxDB queries
-102	4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
-103	
-104	**ASYNC (can proceed in parallel once RxDB is up):**
-105	
-106	- **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
-107	- **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
-108	- **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
-109	- **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
-110	
-111	---
-112	
-113	## Milestone 3 -- Profile System and App Shell UI
-114	
-115	Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
-116	
-117	**SYNC (sequential):**
-118	
-119	1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
-120	2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
-121	3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
-122	4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
-123	5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
-124	6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
-125	7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
-126	
-127	**ASYNC (can start once profile + layout exist):**
-128	
-129	- **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
-130	- **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
-131	
-132	---
-133	
-134	## Milestone 4 -- Game Engine Framework
-135	
-136	Build the reusable game infrastructure (no specific games yet).
-137	
-138	**SYNC (sequential):**
-139	
-140	1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
-141	2. **Game shell UI** -- consistent header, game area, controls, back/exit
-142	3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
-143	4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
-144	
-145	**ASYNC (reusable components, independent of each other):**
-146	
-147	- `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
-148	- `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
-149	- `MultipleChoice` -- tap/click answer selection
-150	- `Timer` -- configurable, hideable per parent settings
-151	- `ScoreAnimation` -- confetti, stars, CSS-only reward animations
-152	- `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
-153	- `ProgressBar` / `ScoreBoard` -- in-game progress display
-154	
-155	---
-156	
-157	## Milestone 5 -- Reference Games
-158	
-159	Implement the 5 reference games. Each game is independent and can be built in parallel.
-160	
-161	**ASYNC (all 5 are independent):**
-162	
-163	- **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
-164	- **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
-165	- **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
-166	- **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
-167	- **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
-168	
-169	Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
-170	
-171	---
-172	
-173	## Milestone 6 -- Cloud Sync and OAuth
-174	
-175	Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
-176	
-177	**SYNC (sequential):**
-178	
-179	1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
-180	2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
-181	3. **Token management** -- encrypted IndexedDB storage, refresh token handling
-182	4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
-183	5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
-184	
-185	**ASYNC (within this milestone):**
-186	
-187	- Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
-188	- OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
-189	
-190	---
-191	
-192	## Milestone 7 -- Parent/Guardian Features
-193	
-194	Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
-195	
-196	**ASYNC (independent screens):**
-197	
-198	- **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
-199	- **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
-200	- **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
-201	- **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
-202	- **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
-203	
-204	---
-205	
-206	## Milestone 8 -- Polish, Accessibility, and Testing
-207	
-208	Final hardening pass. Most of this is ASYNC.
-209	
-210	**ASYNC work streams:**
-211	
-212	- **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
-213	- **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
-214	- **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
-215	- **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
-216	- **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
-217	- **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
-218	- **PWA install prompt** -- custom install banner, iOS/Android handling
-219	- **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
-220	
-221	---
-222	
-223	## Dependency Graph
-224	
-225	```mermaid
-226	graph TD
-227	    M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
-228	    M1 --> M2[M2: Data Layer and Core Infra]
-229	    M2 --> M3[M3: Profile System and App Shell]
-230	    M2 --> M4[M4: Game Engine Framework]
-231	    M2 --> M6[M6: Cloud Sync and OAuth]
-232	    M3 --> M5[M5: Reference Games]
-233	    M4 --> M5
-234	    M3 --> M7[M7: Parent Features]
-235	    M4 --> M7
-236	    M6 --> M7
-237	    M5 --> M8[M8: Polish and Testing]
-238	    M7 --> M8
-239	```
-240	
-241	---
-242	
-243	## Summary: What Can Run in Parallel
-244	
-245	| Phase | Parallel Streams                                |
-246	| ----- | ----------------------------------------------- |
-247	| M0    | Most design docs can be written concurrently    |
-248	| M2    | Event bus, i18n, theme engine, speech services  |
-249	| M3    | Bookmarks, recents (after shell exists)         |
-250	| M4    | All 7 reusable game components                  |
-251	| M5    | All 5 reference games                           |
-252	| M6    | OneDrive plugin, Google Drive plugin, CF Worker |
-253	| M7    | All 5 parent settings screens                   |
-254	| M8    | All 8 polish work streams                       |
-255	
-256	The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
-257	
-258	---
-259	
-260	## Future: Server Upgrade Path (post-M8)
-261	
-262	When premium/server features are needed, TanStack Start enables a smooth transition:
-263	
-264	- Switch from static preset to Cloudflare Workers / Vercel / Node preset
-265	- Add server functions for auth, multiplayer WebSocket coordination, premium content gating
-266	- TanStack Start's server functions and API routes activate without restructuring the client-side app
-267	- The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
+1 ---
+2 name: BaseSkill Milestone Breakdown
+3 overview: Break the BaseSkill PRD into sequential milestones and identify which work streams within each milestone can proceed in parallel (async) versus which must be completed sequentially (sync).
+4 todos:
+5   - id: m0-design-docs
+6     content: 'Milestone 0: Author all 8+ design docs in docs/ folder (prd.md, architecture.md, data-model.md, game-engine.md, ui-ux.md, i18n.md, accessibility.md, testing-strategy.md, ci-cd.md)'
+7     status: pending
+8   - id: m1-scaffolding
+9     content: 'Milestone 1: TanStack Start + TanStack Router + React + TS strict + shadcn/ui + Tailwind v4 + ESLint + Vitest + Playwright + GitHub Actions CI/CD + static SPA output + vite-plugin-pwa + GPL v3 LICENSE'
+10     status: pending
+11   - id: m2-data-layer
+12     content: 'Milestone 2: RxDB setup (all collections + schemas), migration framework, React hooks, event bus, i18n, theme engine, speech services'
+13     status: completed
+14   - id: m3-app-shell
+15     content: 'Milestone 3: Profile picker, family sharing, app layout, dashboard, settings, offline indicator, bookmarks, recents'
+16     status: pending
+17   - id: m4-game-engine
+18     content: 'Milestone 4: Game lifecycle, game shell UI, config loader + override merging, session recorder, 7 reusable game components'
+19     status: pending
+20   - id: m5-reference-games
+21     content: 'Milestone 5: 5 reference games (Letter Tracing, Number Match, Word Builder, Read Aloud, Math Facts)'
+22     status: pending
+23   - id: m6-cloud-sync
+24     content: 'Milestone 6: OneDrive MSAL.js PKCE, Google Drive PKCE + CF Worker proxy, token management, device-aware sync, conflict resolution'
+25     status: pending
+26   - id: m7-parent-features
+27     content: 'Milestone 7: Parent settings (game overrides, session history viewer, data management, cloud sync config, TTS voice selector)'
+28     status: pending
+29   - id: m8-polish
+30     content: 'Milestone 8: Accessibility audit, offline hardening, visual regression, i18n verification, performance, analytics abstraction, PWA install prompt, SW migration testing'
+31     status: pending
+32 isProject: false
+33 ---
+34 
+35 # BaseSkill: PRD to Completion Milestone Breakdown
+36 
+37 **Meta Framework: TanStack Start** -- chosen for its Vite-native architecture, fully type-safe routing (TanStack Router), and full-stack upgrade path for future cloud/server features (auth, multiplayer, premium APIs) without a framework migration. Currently deployed as a static SPA to GitHub Pages; when server features are needed, TanStack Start's server functions and API routes activate without restructuring the app.
+38 
+39 This plan organizes the project into 8 milestones. Within each milestone, work streams are labeled **ASYNC** (can be developed in parallel by different agents/developers) or **SYNC** (must be completed before the next step starts).
+40 
+41 ---
+42 
+43 ## Milestone 0 -- Design Documents (SYNC prerequisite)
+44 
+45 Before any code is written, the 8 design docs outlined in [docs/prd-plan.md](docs/prd-plan.md) must be authored. Several can be written in parallel.
+46 
+47 **ASYNC work streams:**
+48 
+49 - `docs/prd.md` -- full PRD with user stories, feature requirements, constraints
+50 - `docs/architecture.md` -- system diagram, TanStack Start app structure, TanStack Router route tree, component tree, state management, data flow, OAuth architecture, extension points
+51 - `docs/data-model.md` -- RxDB schemas (JSON Schema), relationships, sync strategy, conflict resolution, chunking rules, token storage
+52 - `docs/game-engine.md` -- game lifecycle, session recorder spec, config schema, parent override merging logic, 5 reference game specs
+53 - `docs/ui-ux.md` -- design system, 4-6 theme definitions, core layouts, navigation, responsive strategy, encouragement system, session history viewer, data management screen
+54 - `docs/i18n.md` -- i18n setup (react-i18next or TanStack-compatible alternative), translation file structure, TTS voice selection, device-aware voice sync
+55 - `docs/accessibility.md` -- WCAG 2.1 AA checklist, screen reader, motor, cognitive, speech API fallbacks
+56 - `docs/testing-strategy.md` -- Vitest + RTL + Playwright plan, coverage targets, test data fixtures
+57 - `docs/ci-cd.md` -- GitHub Actions workflows, versioning, SW lifecycle, deploy, branch protection
+58 
+59 **SYNC dependency:** `prd.md` and `architecture.md` should be drafted first (or at least outlined) since the other docs reference decisions made there.
+60 
+61 ---
+62 
+63 ## Milestone 1 -- Project Scaffolding and CI/CD
+64 
+65 Bootstrap the repository and get a green CI pipeline on an empty app shell.
+66 
+67 **SYNC (sequential):**
+68 
+69 1. Scaffold project via `npx @tanstack/cli@latest create` (select Tailwind + ESLint options from the interactive prompts); this generates TanStack Start + TanStack Router with file-based routing pre-configured
+70 2. Configure TypeScript strict mode (`noImplicitAny`, no `any` ESLint rule) on top of the generated config
+71 3. Set up TanStack Router nested layouts for app shell / game shell / settings
+72 4. Add `shadcn/ui` on top of the Tailwind CSS setup from the CLI scaffold
+73 5. Add `LICENSE` (GPL v3)
+74 6. Configure ESLint, Prettier, `@typescript-eslint/no-explicit-any` as error
+75 7. Set up Vitest + React Testing Library
+76 8. Set up Playwright (empty E2E suite)
+77 9. GitHub Actions: lint, type-check, unit test, E2E, build, deploy to GitHub Pages
+78 10. Configure static SPA output (TanStack Start with `server.preset: 'static'` or equivalent Nitro static preset) for GitHub Pages deployment
+79 11. PWA manifest (`manifest.json`) + basic Workbox service worker via `vite-plugin-pwa` (pre-cache app shell only)
+80 12. App versioning: semver stamp in build output
+81 
+82 **Key TanStack decisions:**
+83 
+84 - Use TanStack Router's file-based routing convention (`routes/` directory)
+85 - Use TanStack Router's `beforeLoad` / `loader` for client-side data loading from RxDB
+86 - Consider TanStack Query alongside RxDB for async state management (evaluate in M2)
+87 - Static preset for now; switch to Cloudflare/Vercel/Node preset when server features are added
+88 
+89 **Deliverable:** A deployable blank PWA on GitHub Pages with passing CI, type-safe routing, and nested layout structure.
+90 
+91 ---
+92 
+93 ## Milestone 2 -- Data Layer and Core Infrastructure
+94 
+95 Set up RxDB and the foundational systems that everything else depends on.
+96 
+97 **SYNC (must complete in order):**
+98 
+99 1. RxDB database initialization and schema definitions for all collections (`profiles`, `progress`, `settings`, `game_config_overrides`, `bookmarks`, `themes`, `session_history`, `session_history_index`, `sync_meta`, `app_meta`)
+100 2. Schema migration framework (version tracking via `app_meta`)
+101 3. React hooks for reactive RxDB queries
+102 4. Evaluate TanStack Query integration -- determine if TanStack Query should wrap RxDB observables for cache management, or if RxDB's reactive queries are sufficient via custom hooks. Decision impacts all downstream data access patterns.
+103 
+104 **ASYNC (can proceed in parallel once RxDB is up):**
+105 
+106 - **Event bus / plugin hook system** -- pub/sub for app events, extension point registration
+107 - **i18n setup** -- react-i18next (or lighter alternative), `en` + `pt-BR` translation files, namespace structure (common, games, settings, encouragements); integrate with TanStack Router for locale-aware routes if needed
+108 - **Theme engine** -- load themes from RxDB `themes` collection, **two** pre-defined theme seeds for M2 (more presets later), CSS variable injection, clone-and-modify logic
+109 - **Speech services** -- TTS wrapper (`SpeechOutput`), STT wrapper (`SpeechInput`), voice enumeration, fallback handling
+110 
+111 ---
+112 
+113 ## Milestone 3 -- Profile System and App Shell UI
+114 
+115 Build the user-facing shell: navigation, profile management, and dashboard. TanStack Router's nested layouts and type-safe routes drive the structure.
+116 
+117 **SYNC (sequential):**
+118 
+119 1. **Route tree structure** -- define TanStack Router file-based routes: `_app` (root layout), `_app/index` (profile picker), `_app/dashboard` (game grid), `_app/game/$gameId` (game shell), `_app/settings` (child settings), `_app/parent` (parent settings with nested routes)
+120 2. **Profile picker / home screen** -- create profile, select profile, avatar picker, grade-level selector; use `beforeLoad` guard to redirect to profile picker if no active profile
+121 3. **Family sharing** -- quick profile switching, parent PIN gate for settings (route guard on `/parent` routes)
+122 4. **App layout shell** -- root layout with header, back button, breadcrumbs (parent view), grade-adaptive navigation (icons for Pre-K, text+icons for older)
+123 5. **Dashboard** -- game grid by subject/grade, bookmarked games row, recently played row; use route `loader` to pre-fetch game catalog + bookmarks from RxDB
+124 6. **Settings screen** -- volume, speech rate, active language, theme selector per profile
+125 7. **Offline indicator** -- `navigator.onLine` listener, banner component, last-sync timestamp
+126 
+127 **ASYNC (can start once profile + layout exist):**
+128 
+129 - **Bookmark system** -- bookmark/unbookmark games, persist to `bookmarks` collection
+130 - **Recents tracking** -- update `progress` collection with last-played timestamps, query for dashboard
+131 
+132 ---
+133 
+134 ## Milestone 4 -- Game Engine Framework
+135 
+136 Build the reusable game infrastructure (no specific games yet).
+137 
+138 **SYNC (sequential):**
+139 
+140 1. **Game lifecycle manager** -- load, instructions (TTS), play, evaluate, score, next/retry state machine
+141 2. **Game shell UI** -- consistent header, game area, controls, back/exit
+142 3. **Game config loader** -- read game JSON config, merge with parent overrides (override > grade-band > global > default)
+143 4. **Session recorder middleware** -- subscribe to event bus, write to `session_history`, automatic chunking (200 events / 50KB cap), write `session_history_index` summary on session end
+144 
+145 **ASYNC (reusable components, independent of each other):**
+146 
+147 - `DragAndDrop` -- pointer events, magnetic/snap, ghost preview, visual pulse on drop zones
+148 - `LetterTracer` -- canvas-based tracing with touch/mouse, tap-to-place alternative
+149 - `MultipleChoice` -- tap/click answer selection
+150 - `Timer` -- configurable, hideable per parent settings
+151 - `ScoreAnimation` -- confetti, stars, CSS-only reward animations
+152 - `EncouragementAnnouncer` -- contextual TTS + visual popup, triggered by game events
+153 - `ProgressBar` / `ScoreBoard` -- in-game progress display
+154 
+155 ---
+156 
+157 ## Milestone 5 -- Reference Games
+158 
+159 Implement the 5 reference games. Each game is independent and can be built in parallel.
+160 
+161 **ASYNC (all 5 are independent):**
+162 
+163 - **Letter Tracing** (Pre-K/K, Letters) -- uses `LetterTracer`, TTS for letter names
+164 - **Number Match** (Pre-K/K, Math) -- uses `DragAndDrop` with snap, object-group visuals
+165 - **Word Builder** (K-Year 2, Reading) -- uses `DragAndDrop` + TTS hints, per-language word lists
+166 - **Read Aloud** (Year 1-3, Reading) -- uses `SpeechInput` (STT), sentence display, evaluation
+167 - **Math Facts** (Year 1-4, Math) -- uses `MultipleChoice` + `Timer`, visual number line
+168 
+169 Each game should include: unit tests for game logic, integration test for full lifecycle, i18n content for `en` + `pt-BR`.
+170 
+171 ---
+172 
+173 ## Milestone 6 -- Cloud Sync and OAuth
+174 
+175 Can begin in parallel with Milestones 4-5 (data layer is ready from Milestone 2).
+176 
+177 **SYNC (sequential):**
+178 
+179 1. **OneDrive sync** -- MSAL.js PKCE flow (no backend needed), RxDB replication plugin for OneDrive
+180 2. **Google Drive sync** -- PKCE flow with Cloudflare Worker BFF proxy for token exchange, RxDB replication plugin for Google Drive
+181 3. **Token management** -- encrypted IndexedDB storage, refresh token handling
+182 4. **Device-aware sync** -- `deviceId` field on synced records, device-local voice preferences excluded from cross-device apply
+183 5. **Conflict resolution** -- last-write-wins with merge for `progress`, append-only for `session_history`
+184 
+185 **ASYNC (within this milestone):**
+186 
+187 - Cloudflare Worker OAuth proxy (separate repo, non-GPL) can be developed independently
+188 - OneDrive and Google Drive replication plugins can be developed in parallel once the replication interface is defined
+189 
+190 ---
+191 
+192 ## Milestone 7 -- Parent/Guardian Features
+193 
+194 Depends on: profiles (M3), game engine (M4), session recorder (M4), data model (M2).
+195 
+196 **ASYNC (independent screens):**
+197 
+198 - **Parent settings: game overrides UI** -- per-game, per-grade-band, and global override controls (retries, timer, always-win, difficulty)
+199 - **Parent settings: session history viewer** -- timeline view, filter by game/date/grade, expandable session detail with lazy-loaded chunks
+200 - **Parent settings: data management** -- storage usage display, separate "Clear History" / "Clear Progress" buttons, date-range picker, confirmation dialogs, cascade delete
+201 - **Parent settings: cloud sync config** -- connect/disconnect Google Drive / OneDrive, sync status, last sync timestamp
+202 - **Parent settings: TTS voice selector** -- per-language voice picker from `speechSynthesis.getVoices()`, device-aware
+203 
+204 ---
+205 
+206 ## Milestone 8 -- Polish, Accessibility, and Testing
+207 
+208 Final hardening pass. Most of this is ASYNC.
+209 
+210 **ASYNC work streams:**
+211 
+212 - **Accessibility audit** -- axe-core integration in component tests, Playwright accessibility audits on all pages, ARIA labels, focus management, keyboard navigation for all games, screen reader testing
+213 - **Offline hardening** -- E2E tests for offline/online transitions, SW cache validation, RxDB queue-and-replay verification
+214 - **Visual regression** -- Playwright screenshot baselines for all key screens across all 4-6 themes
+215 - **i18n verification** -- snapshot tests for `en` and `pt-BR` on all screens, RTL placeholder if needed
+216 - **Performance** -- Lighthouse audit, bundle analysis, lazy-load game assets, ensure CSS-only animations
+217 - **Analytics abstraction** -- define analytics interface/adapter, implement one provider (decision deferred per PRD), ensure provider is swappable
+218 - **PWA install prompt** -- custom install banner, iOS/Android handling
+219 - **SW migration testing** -- version mismatch detection, cache purge, RxDB schema migration on upgrade
+220 
+221 ---
+222 
+223 ## Dependency Graph
+224 
+225 ```mermaid
+226 graph TD
+227     M0[M0: Design Docs] --> M1[M1: Scaffolding and CICD]
+228     M1 --> M2[M2: Data Layer and Core Infra]
+229     M2 --> M3[M3: Profile System and App Shell]
+230     M2 --> M4[M4: Game Engine Framework]
+231     M2 --> M6[M6: Cloud Sync and OAuth]
+232     M3 --> M5[M5: Reference Games]
+233     M4 --> M5
+234     M3 --> M7[M7: Parent Features]
+235     M4 --> M7
+236     M6 --> M7
+237     M5 --> M8[M8: Polish and Testing]
+238     M7 --> M8
+239 ```
+240 
+241 ---
+242 
+243 ## Summary: What Can Run in Parallel
+244 
+245 | Phase | Parallel Streams                                |
+246 | ----- | ----------------------------------------------- |
+247 | M0    | Most design docs can be written concurrently    |
+248 | M2    | Event bus, i18n, theme engine, speech services  |
+249 | M3    | Bookmarks, recents (after shell exists)         |
+250 | M4    | All 7 reusable game components                  |
+251 | M5    | All 5 reference games                           |
+252 | M6    | OneDrive plugin, Google Drive plugin, CF Worker |
+253 | M7    | All 5 parent settings screens                   |
+254 | M8    | All 8 polish work streams                       |
+255 
+256 The critical path is: **M0 -> M1 -> M2 -> M4 -> M5 -> M8**, with M3, M6, and M7 as parallel branches off M2.
+257 
+258 ---
+259 
+260 ## Future: Server Upgrade Path (post-M8)
+261 
+262 When premium/server features are needed, TanStack Start enables a smooth transition:
+263 
+264 - Switch from static preset to Cloudflare Workers / Vercel / Node preset
+265 - Add server functions for auth, multiplayer WebSocket coordination, premium content gating
+266 - TanStack Start's server functions and API routes activate without restructuring the client-side app
+267 - The GPL-licensed SPA remains unchanged; server features live in separate private repos communicating over network boundaries (per PRD licensing strategy)
 268
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:16Z)**_
@@ -757,6 +760,7 @@ src/db/hooks/useRxQuery.test.tsx
 src/db/seed-themes.ts
 src/routeTree.gen.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:17Z)**_
@@ -766,106 +770,107 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:17Z)**_
  `./package.json`
 
 ```text
-1	{
-2	  "name": "base-skill",
-3	  "version": "0.1.0",
-4	  "private": true,
-5	  "type": "module",
-6	  "imports": {
-7	    "#/*": "./src/*"
-8	  },
-9	  "scripts": {
-10	    "start": "yarn dev",
-11	    "dev": "vite dev --port 3000",
-12	    "build": "vite build",
-13	    "preview": "vite preview",
-14	    "test": "vitest run",
-15	    "test:coverage": "vitest run --coverage",
-16	    "test:e2e": "playwright test",
-17	    "test:e2e:a11y": "playwright test --grep @a11y",
-18	    "typecheck": "tsc --noEmit",
-19	    "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
-20	    "lint:css": "stylelint 'src/**/*.css'",
-21	    "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
-22	    "format": "prettier --check .",
-23	    "fix": "prettier --write . && eslint --fix .",
-24	    "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
-25	    "fix:md": "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'",
-26	    "prepare": "husky"
-27	  },
-28	  "dependencies": {
-29	    "@fontsource-variable/geist": "^5.2.8",
-30	    "@tailwindcss/vite": "^4.1.18",
-31	    "@tanstack/react-devtools": "latest",
-32	    "@tanstack/react-router": "latest",
-33	    "@tanstack/react-router-devtools": "latest",
-34	    "@tanstack/react-router-ssr-query": "latest",
-35	    "@tanstack/react-start": "latest",
-36	    "@tanstack/router-plugin": "^1.132.0",
-37	    "class-variance-authority": "^0.7.1",
-38	    "clsx": "^2.1.1",
-39	    "dexie": "^4.4.2",
-40	    "eslint-plugin-unicorn": "^64.0.0",
-41	    "i18next": "^26.0.3",
-42	    "lucide-react": "^0.545.0",
-43	    "nanoid": "^5.1.7",
-44	    "next-themes": "^0.4.6",
-45	    "radix-ui": "^1.4.3",
-46	    "react": "^19.2.0",
-47	    "react-dom": "^19.2.0",
-48	    "react-i18next": "^17.0.2",
-49	    "rxdb": "^17.0.0",
-50	    "rxjs": "^7.8.2",
-51	    "shadcn": "^4.1.1",
-52	    "sonner": "^2.0.7",
-53	    "tailwind-merge": "^3.5.0",
-54	    "tailwindcss": "^4.1.18",
-55	    "tw-animate-css": "^1.4.0"
-56	  },
-57	  "devDependencies": {
-58	    "@axe-core/playwright": "^4.11.1",
-59	    "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
-60	    "@playwright/test": "^1.58.2",
-61	    "@tailwindcss/typography": "^0.5.16",
-62	    "@tanstack/devtools-vite": "latest",
-63	    "@tanstack/eslint-config": "^0.3.4",
-64	    "@testing-library/dom": "^10.4.1",
-65	    "@testing-library/jest-dom": "^6.9.1",
-66	    "@testing-library/react": "^16.3.0",
-67	    "@testing-library/user-event": "^14.6.1",
-68	    "@types/node": "^22.10.2",
-69	    "@types/react": "^19.2.0",
-70	    "@types/react-dom": "^19.2.0",
-71	    "@vitejs/plugin-react": "^5.1.4",
-72	    "@vitest/coverage-v8": "3.2.4",
-73	    "eslint": "^9.18.0",
-74	    "eslint-config-prettier": "^10.1.8",
-75	    "eslint-plugin-jsx-a11y": "^6.10.2",
-76	    "eslint-plugin-react": "^7.37.5",
-77	    "eslint-plugin-react-hooks": "^7.0.1",
-78	    "fake-indexeddb": "^6.2.5",
-79	    "husky": "^9.1.7",
-80	    "jsdom": "^28.1.0",
-81	    "knip": "^6.1.1",
-82	    "lint-staged": "^16.4.0",
-83	    "markdownlint-cli2": "^0.22.0",
-84	    "prettier": "^3.8.1",
-85	    "stylelint": "^17.6.0",
-86	    "stylelint-config-standard": "^40.0.0",
-87	    "typescript": "^5.7.2",
-88	    "vite": "^7.3.1",
-89	    "vite-plugin-pwa": "^1.2.0",
-90	    "vite-tsconfig-paths": "^5.1.4",
-91	    "vitest": "^3.0.5",
-92	    "workbox-build": "^7.4.0",
-93	    "workbox-window": "^7.4.0"
-94	  },
-95	  "engines": {
-96	    "node": ">=22.12.0"
-97	  }
-98	}
+1 {
+2   "name": "base-skill",
+3   "version": "0.1.0",
+4   "private": true,
+5   "type": "module",
+6   "imports": {
+7     "#/*": "./src/*"
+8   },
+9   "scripts": {
+10     "start": "yarn dev",
+11     "dev": "vite dev --port 3000",
+12     "build": "vite build",
+13     "preview": "vite preview",
+14     "test": "vitest run",
+15     "test:coverage": "vitest run --coverage",
+16     "test:e2e": "playwright test",
+17     "test:e2e:a11y": "playwright test --grep @a11y",
+18     "typecheck": "tsc --noEmit",
+19     "lint": "eslint . --max-warnings 0 && knip --no-config-hints",
+20     "lint:css": "stylelint 'src/**/*.css'",
+21     "lint:md": "markdownlint-cli2 '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees'",
+22     "format": "prettier --check .",
+23     "fix": "prettier --write . && eslint --fix .",
+24     "fix:css": "stylelint --fix 'src/**/*.css' && prettier --write 'src/**/*.css'",
+25     "fix:md": "markdownlint-cli2 --fix '**/*.md' '#node_modules' '#.specstory' '#.cursor' '#dist' '#worktrees' && prettier --write '**/*.md'",
+26     "prepare": "husky"
+27   },
+28   "dependencies": {
+29     "@fontsource-variable/geist": "^5.2.8",
+30     "@tailwindcss/vite": "^4.1.18",
+31     "@tanstack/react-devtools": "latest",
+32     "@tanstack/react-router": "latest",
+33     "@tanstack/react-router-devtools": "latest",
+34     "@tanstack/react-router-ssr-query": "latest",
+35     "@tanstack/react-start": "latest",
+36     "@tanstack/router-plugin": "^1.132.0",
+37     "class-variance-authority": "^0.7.1",
+38     "clsx": "^2.1.1",
+39     "dexie": "^4.4.2",
+40     "eslint-plugin-unicorn": "^64.0.0",
+41     "i18next": "^26.0.3",
+42     "lucide-react": "^0.545.0",
+43     "nanoid": "^5.1.7",
+44     "next-themes": "^0.4.6",
+45     "radix-ui": "^1.4.3",
+46     "react": "^19.2.0",
+47     "react-dom": "^19.2.0",
+48     "react-i18next": "^17.0.2",
+49     "rxdb": "^17.0.0",
+50     "rxjs": "^7.8.2",
+51     "shadcn": "^4.1.1",
+52     "sonner": "^2.0.7",
+53     "tailwind-merge": "^3.5.0",
+54     "tailwindcss": "^4.1.18",
+55     "tw-animate-css": "^1.4.0"
+56   },
+57   "devDependencies": {
+58     "@axe-core/playwright": "^4.11.1",
+59     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
+60     "@playwright/test": "^1.58.2",
+61     "@tailwindcss/typography": "^0.5.16",
+62     "@tanstack/devtools-vite": "latest",
+63     "@tanstack/eslint-config": "^0.3.4",
+64     "@testing-library/dom": "^10.4.1",
+65     "@testing-library/jest-dom": "^6.9.1",
+66     "@testing-library/react": "^16.3.0",
+67     "@testing-library/user-event": "^14.6.1",
+68     "@types/node": "^22.10.2",
+69     "@types/react": "^19.2.0",
+70     "@types/react-dom": "^19.2.0",
+71     "@vitejs/plugin-react": "^5.1.4",
+72     "@vitest/coverage-v8": "3.2.4",
+73     "eslint": "^9.18.0",
+74     "eslint-config-prettier": "^10.1.8",
+75     "eslint-plugin-jsx-a11y": "^6.10.2",
+76     "eslint-plugin-react": "^7.37.5",
+77     "eslint-plugin-react-hooks": "^7.0.1",
+78     "fake-indexeddb": "^6.2.5",
+79     "husky": "^9.1.7",
+80     "jsdom": "^28.1.0",
+81     "knip": "^6.1.1",
+82     "lint-staged": "^16.4.0",
+83     "markdownlint-cli2": "^0.22.0",
+84     "prettier": "^3.8.1",
+85     "stylelint": "^17.6.0",
+86     "stylelint-config-standard": "^40.0.0",
+87     "typescript": "^5.7.2",
+88     "vite": "^7.3.1",
+89     "vite-plugin-pwa": "^1.2.0",
+90     "vite-tsconfig-paths": "^5.1.4",
+91     "vitest": "^3.0.5",
+92     "workbox-build": "^7.4.0",
+93     "workbox-window": "^7.4.0"
+94   },
+95   "engines": {
+96     "node": ">=22.12.0"
+97   }
+98 }
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:20Z)**_
@@ -881,77 +886,78 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:21Z)**_
  `./vite.config.ts`
 
 ```text
-1	import tailwindcss from '@tailwindcss/vite';
-2	import { devtools } from '@tanstack/devtools-vite';
-3	
-4	import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-5	
-6	import viteReact from '@vitejs/plugin-react';
-7	import { defineConfig } from 'vite';
-8	import { VitePWA } from 'vite-plugin-pwa';
-9	import tsconfigPaths from 'vite-tsconfig-paths';
-10	import { version } from './package.json';
-11	
-12	const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
-13	
-14	const config = defineConfig({
-15	  base,
-16	  define: {
-17	    'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
-18	  },
-19	  plugins: [
-20	    devtools(),
-21	    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-22	    tailwindcss(),
-23	    tanstackStart({
-24	      spa: { enabled: true },
-25	      router: {
-26	        // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
-27	        routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
-28	      },
-29	    }),
-30	    viteReact(),
-31	    VitePWA({
-32	      registerType: 'autoUpdate',
-33	      strategies: 'generateSW',
-34	      injectRegister: 'auto',
-35	      workbox: {
-36	        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-37	        runtimeCaching: [
-38	          {
-39	            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-40	            handler: 'StaleWhileRevalidate',
-41	            options: {
-42	              cacheName: 'google-fonts-cache',
-43	              expiration: {
-44	                maxEntries: 10,
-45	                maxAgeSeconds: 60 * 60 * 24 * 365,
-46	              },
-47	              cacheableResponse: { statuses: [0, 200] },
-48	            },
-49	          },
-50	          {
-51	            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-52	            handler: 'CacheFirst',
-53	            options: {
-54	              cacheName: 'gstatic-fonts-cache',
-55	              expiration: {
-56	                maxEntries: 10,
-57	                maxAgeSeconds: 60 * 60 * 24 * 365,
-58	              },
-59	              cacheableResponse: { statuses: [0, 200] },
-60	            },
-61	          },
-62	        ],
-63	      },
-64	      manifest: false,
-65	    }),
-66	  ],
-67	});
-68	
-69	export default config;
+1 import tailwindcss from '@tailwindcss/vite';
+2 import { devtools } from '@tanstack/devtools-vite';
+3 
+4 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
+5 
+6 import viteReact from '@vitejs/plugin-react';
+7 import { defineConfig } from 'vite';
+8 import { VitePWA } from 'vite-plugin-pwa';
+9 import tsconfigPaths from 'vite-tsconfig-paths';
+10 import { version } from './package.json';
+11 
+12 const base = process.env['APP_BASE_URL'] ?? '/base-skill/';
+13 
+14 const config = defineConfig({
+15   base,
+16   define: {
+17     'import.meta.env.VITE_APP_VERSION': JSON.stringify(version),
+18   },
+19   plugins: [
+20     devtools(),
+21     tsconfigPaths({ projects: ['./tsconfig.json'] }),
+22     tailwindcss(),
+23     tanstackStart({
+24       spa: { enabled: true },
+25       router: {
+26         // eslint-disable-next-line unicorn/prefer-string-raw -- vite config file
+27         routeFileIgnorePattern: '(test|spec)\\.(ts|tsx)$',
+28       },
+29     }),
+30     viteReact(),
+31     VitePWA({
+32       registerType: 'autoUpdate',
+33       strategies: 'generateSW',
+34       injectRegister: 'auto',
+35       workbox: {
+36         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+37         runtimeCaching: [
+38           {
+39             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+40             handler: 'StaleWhileRevalidate',
+41             options: {
+42               cacheName: 'google-fonts-cache',
+43               expiration: {
+44                 maxEntries: 10,
+45                 maxAgeSeconds: 60 * 60 * 24 * 365,
+46               },
+47               cacheableResponse: { statuses: [0, 200] },
+48             },
+49           },
+50           {
+51             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+52             handler: 'CacheFirst',
+53             options: {
+54               cacheName: 'gstatic-fonts-cache',
+55               expiration: {
+56                 maxEntries: 10,
+57                 maxAgeSeconds: 60 * 60 * 24 * 365,
+58               },
+59               cacheableResponse: { statuses: [0, 200] },
+60             },
+61           },
+62         ],
+63       },
+64       manifest: false,
+65     }),
+66   ],
+67 });
+68 
+69 export default config;
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:22Z)**_
@@ -963,6 +969,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:22Z)**_
 ```text
 docs/superpowers/specs/2026-04-02-milestone-4-game-engine-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:25Z)**_
@@ -978,77 +985,78 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:26Z)**_
  `./src/components/GameCard.tsx`
 
 ```text
-1	import { BookmarkIcon } from 'lucide-react';
-2	import { useTranslation } from 'react-i18next';
-3	import type { GameCatalogEntry } from '@/games/registry';
-4	import { Button } from '@/components/ui/button';
-5	import {
-6	  Card,
-7	  CardContent,
-8	  CardHeader,
-9	  CardTitle,
-10	} from '@/components/ui/card';
-11	
-12	type GameCardProps = {
-13	  entry: GameCatalogEntry;
-14	  isBookmarked: boolean;
-15	  onBookmarkToggle: (gameId: string) => void;
-16	  onPlay: (gameId: string) => void;
-17	};
-18	
-19	export const GameCard = ({
-20	  entry,
-21	  isBookmarked,
-22	  onBookmarkToggle,
-23	  onPlay,
-24	}: GameCardProps) => {
-25	  const { t } = useTranslation('games');
-26	  const { t: tCommon } = useTranslation('common');
-27	
-28	  return (
-29	    <Card className="flex flex-col">
-30	      <CardHeader className="flex-1">
-31	        <div className="flex items-start justify-between gap-2">
-32	          <CardTitle className="text-base leading-snug">
-33	            {t(entry.titleKey)}
-34	          </CardTitle>
-35	          <Button
-36	            variant="ghost"
-37	            size="icon"
-38	            aria-label={
-39	              isBookmarked
-40	                ? tCommon('bookmark.remove')
-41	                : tCommon('bookmark.add')
-42	            }
-43	            onClick={() => onBookmarkToggle(entry.id)}
-44	          >
-45	            <BookmarkIcon
-46	              size={16}
-47	              className={isBookmarked ? 'fill-current' : ''}
-48	            />
-49	          </Button>
-50	        </div>
-51	        <div className="flex flex-wrap gap-1 pt-1">
-52	          {entry.levels.map((level) => (
-53	            <span
-54	              key={level}
-55	              className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium"
-56	            >
-57	              {tCommon(`levels.${level}`)}
-58	            </span>
-59	          ))}
-60	        </div>
-61	      </CardHeader>
-62	      <CardContent>
-63	        <Button className="w-full" onClick={() => onPlay(entry.id)}>
-64	          Play
-65	        </Button>
-66	      </CardContent>
-67	    </Card>
-68	  );
-69	};
+1 import { BookmarkIcon } from 'lucide-react';
+2 import { useTranslation } from 'react-i18next';
+3 import type { GameCatalogEntry } from '@/games/registry';
+4 import { Button } from '@/components/ui/button';
+5 import {
+6   Card,
+7   CardContent,
+8   CardHeader,
+9   CardTitle,
+10 } from '@/components/ui/card';
+11 
+12 type GameCardProps = {
+13   entry: GameCatalogEntry;
+14   isBookmarked: boolean;
+15   onBookmarkToggle: (gameId: string) => void;
+16   onPlay: (gameId: string) => void;
+17 };
+18 
+19 export const GameCard = ({
+20   entry,
+21   isBookmarked,
+22   onBookmarkToggle,
+23   onPlay,
+24 }: GameCardProps) => {
+25   const { t } = useTranslation('games');
+26   const { t: tCommon } = useTranslation('common');
+27 
+28   return (
+29     <Card className="flex flex-col">
+30       <CardHeader className="flex-1">
+31         <div className="flex items-start justify-between gap-2">
+32           <CardTitle className="text-base leading-snug">
+33             {t(entry.titleKey)}
+34           </CardTitle>
+35           <Button
+36             variant="ghost"
+37             size="icon"
+38             aria-label={
+39               isBookmarked
+40                 ? tCommon('bookmark.remove')
+41                 : tCommon('bookmark.add')
+42             }
+43             onClick={() => onBookmarkToggle(entry.id)}
+44           >
+45             <BookmarkIcon
+46               size={16}
+47               className={isBookmarked ? 'fill-current' : ''}
+48             />
+49           </Button>
+50         </div>
+51         <div className="flex flex-wrap gap-1 pt-1">
+52           {entry.levels.map((level) => (
+53             <span
+54               key={level}
+55               className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium"
+56             >
+57               {tCommon(`levels.${level}`)}
+58             </span>
+59           ))}
+60         </div>
+61       </CardHeader>
+62       <CardContent>
+63         <Button className="w-full" onClick={() => onPlay(entry.id)}>
+64           Play
+65         </Button>
+66       </CardContent>
+67     </Card>
+68   );
+69 };
 70
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:26Z)**_
@@ -1058,58 +1066,59 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:26Z)**_
  `./src/routes/__root.tsx`
 
 ```text
-1	import { TanStackDevtools } from '@tanstack/react-devtools';
-2	import {
-3	  HeadContent,
-4	  Scripts,
-5	  createRootRoute,
-6	} from '@tanstack/react-router';
-7	import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-8	
-9	import appCss from '../styles.css?url';
-10	
-11	/** First paint only: class + color-scheme from system preference (no localStorage). */
-12	const THEME_INIT_SCRIPT =
-13	  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-14	
-15	const RootDocument = ({ children }: { children: React.ReactNode }) => (
-16	  <html lang="en" suppressHydrationWarning>
-17	    <head>
-18	      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-19	      <HeadContent />
-20	    </head>
-21	    <body className="font-sans antialiased">
-22	      {children}
-23	      <TanStackDevtools
-24	        config={{ position: 'bottom-right' }}
-25	        plugins={[
-26	          {
-27	            name: 'Tanstack Router',
-28	            render: <TanStackRouterDevtoolsPanel />,
-29	          },
-30	        ]}
-31	      />
-32	      <Scripts />
-33	    </body>
-34	  </html>
-35	);
-36	
-37	export const Route = createRootRoute({
-38	  head: () => ({
-39	    meta: [
-40	      { charSet: 'utf8' },
-41	      {
-42	        name: 'viewport',
-43	        content: 'width=device-width, initial-scale=1',
-44	      },
-45	      { title: 'BaseSkill' },
-46	    ],
-47	    links: [{ rel: 'stylesheet', href: appCss }],
-48	  }),
-49	  shellComponent: RootDocument,
-50	});
+1 import { TanStackDevtools } from '@tanstack/react-devtools';
+2 import {
+3   HeadContent,
+4   Scripts,
+5   createRootRoute,
+6 } from '@tanstack/react-router';
+7 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
+8 
+9 import appCss from '../styles.css?url';
+10 
+11 /** First paint only: class + color-scheme from system preference (no localStorage). */
+12 const THEME_INIT_SCRIPT =
+13   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
+14 
+15 const RootDocument = ({ children }: { children: React.ReactNode }) => (
+16   <html lang="en" suppressHydrationWarning>
+17     <head>
+18       <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+19       <HeadContent />
+20     </head>
+21     <body className="font-sans antialiased">
+22       {children}
+23       <TanStackDevtools
+24         config={{ position: 'bottom-right' }}
+25         plugins={[
+26           {
+27             name: 'Tanstack Router',
+28             render: <TanStackRouterDevtoolsPanel />,
+29           },
+30         ]}
+31       />
+32       <Scripts />
+33     </body>
+34   </html>
+35 );
+36 
+37 export const Route = createRootRoute({
+38   head: () => ({
+39     meta: [
+40       { charSet: 'utf8' },
+41       {
+42         name: 'viewport',
+43         content: 'width=device-width, initial-scale=1',
+44       },
+45       { title: 'BaseSkill' },
+46     ],
+47     links: [{ rel: 'stylesheet', href: appCss }],
+48   }),
+49   shellComponent: RootDocument,
+50 });
 51
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:48Z)**_
@@ -1120,7 +1129,6 @@ Now I have a good picture of the project. Let me summarize what I've learned:
 1. **Tech stack**: TanStack Start + TanStack Router + React 19 + TypeScript strict + shadcn/ui + Tailwind v4 + Vitest + Playwright
 2. **Vite-based**: Uses Vite with `vite.config.ts` - important for Storybook integration
 3. **Component structure**: Components in `src/components/` (GameCard, GameGrid, Header, Footer, LevelRow, OfflineIndicator, ThemeToggle + shadcn ui components)
-
 
 4. **Services and utilities**: Game event bus, i18n, speech, and theme utilities in `src/lib/`, plus RxDB setup with schemas and hooks in `src/db/`
 5. **Routing**: TanStack Router with file-based routing under `src/routes/` using a `/$locale/_app/...` pattern, deployed with a `/base-skill/` base URL
@@ -1150,6 +1158,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:18:50Z)**_
 _**Agent (claude-sonnet-4-6 2026-04-01 20:18:59Z)**_
 
 Good context gathered. The project is:
+
 - TanStack Start + Router (file-based, `/$locale/_app/...`)
 - Vite 7 + React 19 + TypeScript strict
 - Tailwind v4 + shadcn/ui
@@ -1185,7 +1194,7 @@ The app is deployed to GitHub Pages at a base URL of `/base-skill/`. GitHub Page
 
 With that in mind:
 
-**Option A**: Storybook builds to `storybook-static/` as static HTML. During the GitHub Pages deploy, we can copy/move this output into a subdirectory of the build output, say `dist/docs/`. The app's `/baseskill/docs` route would then be an `<iframe>` pointing to `./docs/` (relative to the deployed app). 
+**Option A**: Storybook builds to `storybook-static/` as static HTML. During the GitHub Pages deploy, we can copy/move this output into a subdirectory of the build output, say `dist/docs/`. The app's `/baseskill/docs` route would then be an `<iframe>` pointing to `./docs/` (relative to the deployed app).
 
 This approach works on GitHub Pages since everything's static, but I need to account for Storybook's internal routing and assets - they might break when served from a sub-path. I can configure Storybook with a base URL to handle this, so the full URL would be `https://username.github.io/base-skill/docs/`. Alternatively, I could deploy Storybook separately to GitHub Pages using a different repository or branch.
 
@@ -1228,11 +1237,11 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:23:02Z)**_
 The user wants the interactive Storybook at `/docs` and wants to be able to share/bookmark specific components (which requires Storybook's own router). They're also asking about having 2 GitHub Pages in the same repo.
 
 GitHub Pages limitations:
+
 - A GitHub repository can only have ONE GitHub Pages site per repo
 - That site is served from either the `gh-pages` branch root, or the `main`/`master` branch root, or a `/docs` folder on main/master
 
 So technically you can't have 2 separate GitHub Pages sites from one repo. BUT there are ways to have multiple "apps" in the same GitHub Pages site:
-
 
 You can deploy both the main app and Storybook into the same `gh-pages` branch at different paths — main app at the root or `/base-skill/` and Storybook at `/docs/` or `/base-skill/docs/`. This means Option A (merged static output) is the way to go, serving both from the same GitHub Pages deployment at different paths like `https://user.github.io/base-skill/` for the main app and `https://user.github.io/base-skill/docs/` for Storybook.
 
@@ -1251,6 +1260,7 @@ So the practical answer is:
 - Storybook → `https://leocaseiro.github.io/base-skill/docs/`
 
 Both deploy from the same CI job into the same `gh-pages` branch:
+
 ```
 dist/               ← main app build
 dist/docs/          ← storybook-static/ copied here
@@ -1261,6 +1271,7 @@ Storybook at `/base-skill/docs/` is fully self-contained and independent — it 
 The TanStack route `/docs` in the main app would just be a redirect (or a nav link) pointing users to `/base-skill/docs/`. No iframe needed — navigating there loads Storybook directly as its own page.
 
 This means:
+
 - Full interactive Storybook experience
 - Deep linking to specific stories works
 - One CI build, one GitHub Pages deployment
@@ -1284,7 +1295,7 @@ The user is asking about whether Storybook's internal navigation (when clicking 
 Storybook uses its own internal routing. By default, Storybook 8 uses query parameters for navigation: `?path=/story/component-name--story-name`. When Storybook is built, it generates static HTML and JS. The internal navigation links are relative to wherever Storybook is served from.
 
 The key configuration needed is the `base` path in Storybook's Vite config, which tells Storybook where its assets are located. If we set this correctly, all the internal asset links (JS, CSS, etc.) will be correct.
- 
+
 As long as the base path is properly configured in Vite and the index.html is served from the correct location, Storybook's client-side routing will handle the story navigation automatically—the server doesn't need to do anything special for the `?path=` query parameter changes.
 </details></think>
 
@@ -1343,15 +1354,16 @@ B
 _**Agent (claude-sonnet-4-6 2026-04-01 20:25:33Z)**_
 
 <think><details><summary>Thought Process</summary>
-Great. Now let me think about the next clarifying question. 
+Great. Now let me think about the next clarifying question.
 
 Key things I still need to understand:
+
 1. What viewport sizes to configure for the Viewport addon (mobile, tablet, desktop? or more specific to the app's target audience - children app, so maybe tablet-focused?)
 2. Whether they want Storybook to be part of the CI pipeline (visual regression testing, etc.)
 
 Actually, the user already mentioned VR tests combined with viewport. Let me ask about the viewport/target devices since this is a children's educational app - I'd expect it to primarily target tablets and phones.
 
-Also I should ask about theming - the app has a theme engine with CSS variables. 
+Also I should ask about theming - the app has a theme engine with CSS variables.
 
 I should prioritize the viewport and device question since it directly connects to the VR testing they mentioned, and for an educational app targeting children, understanding the primary devices—likely tablets and phones—is crucial for setting up Storybook effectively. Theme switching support is also worth asking about given their CSS variable system.
 </details></think>
@@ -1380,6 +1392,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:25:54Z)**_
 Good. Now let me think about what other clarifying questions are important.
 
 I still need to know:
+
 1. Viewport configurations - since this is a children's educational app, what devices/sizes matter? Probably tablet-first, but let me ask.
 2. Whether Storybook should be part of CI (chromatic, or just the build step)
 
@@ -1407,13 +1420,13 @@ I don't want to pay for any cloud, so playwright seems to feet better
 _**Agent (claude-sonnet-4-6 2026-04-01 20:28:21Z)**_
 
 <think><details><summary>Thought Process</summary>
-Great, so we'll go with Playwright + Storybook test-runner for visual regression tests. 
+Great, so we'll go with Playwright + Storybook test-runner for visual regression tests.
 
 Now let me think about remaining questions. I think I have enough information to propose approaches. Let me think about what else is critical...
 
 Actually, one more important question: since this is a children's app and milestone 4 is about game engine, do they want stories for the game engine components (DragAndDrop, LetterTracer, MultipleChoice, Timer, ScoreAnimation, etc.) to be set up as part of this Storybook milestone, or just the existing components (GameCard, GameGrid, Header, etc.)?
 
-Actually, the user said "before we continue with milestone 4" - so they want to set up Storybook now, before implementing M4. 
+Actually, the user said "before we continue with milestone 4" - so they want to set up Storybook now, before implementing M4.
 
 Since the M4 game components don't exist yet, I should focus the Storybook setup on establishing the framework and patterns—the new components will naturally get stories as they're built out. Now I'm ready to outline the key architectural decisions: Storybook 8 with Vite integration for the builder, whether to co-locate story files with components or organize them separately, how to handle service and utility stories with MDX and provider wrappers, and setting up theme switching through a custom toolbar decorator.
 
@@ -1449,7 +1462,6 @@ Great, I have all the information I need now. Let me summarize what I know:
 4. **Story file location**: Co-located with components (`src/components/GameCard.stories.tsx`)
 5. **Autodocs**: Enabled for all UI components
 
-
 6. **Actions and controls**: For showcasing multi-variation examples
 7. **Viewport**: Set up with child-focused device sizes for both manual testing and VR scenarios
 8. **Theme switching**: Full theme switcher in the toolbar supporting light/dark modes plus custom themes
@@ -1476,6 +1488,7 @@ Actually we already settled on Option A (merged static output + redirect route).
 I think I'm overthinking this. Let me just present the 2-3 approaches clearly focused on scope/complexity:
 
 **Approach 1: Lean - Storybook essentials + manual stories**
+
 - Install Storybook 8 with essentials (actions, controls, viewport, autodocs)
 - Custom theme decorator that injects CSS variables
 - Write stories for existing components only
@@ -1484,6 +1497,7 @@ I think I'm overthinking this. Let me just present the 2-3 approaches clearly fo
 - Fast to set up, stories written by hand
 
 **Approach 2: Full (Recommended)**
+
 - Everything from Approach 1
 - PLUS: `@storybook/test-runner` + Playwright VR from day 1
 - PLUS: Interactive service demos (React wrappers with `DbProvider`, etc.)
@@ -1492,6 +1506,7 @@ I think I'm overthinking this. Let me just present the 2-3 approaches clearly fo
 - Higher setup cost but matches the user's stated vision
 
 **Approach 3: Phased**
+
 - Phase A (now): Storybook + essentials + custom theme decorator
 - Phase B (M8): Add VR automation and accessibility checks
 - Phase C (later): Interactive service demos with full provider setup
@@ -1559,7 +1574,6 @@ Great, the user has chosen Approach 2. Now I need to present the design sections
 3. **Theme decorator** - How CSS vars are injected, toolbar switcher
 4. **Service/util stories** - MDX + interactive demos, provider wrappers
 5. **Viewport configuration** - Device sizes for children's app (tablet-first)
-
 
 6. **VR testing** - test-runner + Playwright, screenshot baselines
 7. **CI integration** - GitHub Actions steps
@@ -1661,6 +1675,7 @@ export const Bookmarked: Story = { args: { isBookmarked: true } };
 ```
 
 Rules:
+
 - All component stories get `tags: ['autodocs']` — generates a docs page with prop table + live examples automatically
 - Actions wired via `argTypes` for callbacks (`onPlay`, `onBookmarkToggle`, etc.) so clicks log in the Actions panel
 - Each meaningful visual state gets its own named export (e.g. `Default`, `Bookmarked`, `Loading`, `Empty`)
@@ -2149,6 +2164,7 @@ Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `Multi
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:37:48Z)**_
@@ -2184,258 +2200,261 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:37:54Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-1	# Storybook Setup Design
-2	
-3	**Date:** 2026-04-02
-4	**Status:** Approved
-5	
-6	---
-7	
-8	## Overview
-9	
-10	Set up Storybook 8 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
-11	
-12	---
-13	
-14	## Architecture & Deployment
-15	
-16	Storybook 8 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
-17	
-18	**Config structure:**
-19	
-20	```
-21	.storybook/
-22	  main.ts               ← addon list, viteFinal sets base: '/base-skill/docs/'
-23	  preview.ts            ← global decorators (theme, i18n, providers), viewport config
-24	  preview-head.html     ← injects app CSS (styles.css)
-25	  decorators/
-26	    withTheme.tsx       ← injects CSS vars from toolbar theme selection
-27	```
-28	
-29	**Build output merging:**
-30	
-31	```
-32	dist/                   → https://leocaseiro.github.io/base-skill/
-33	dist/docs/              → https://leocaseiro.github.io/base-skill/docs/
-34	```
-35	
-36	Storybook builds to `storybook-static/`, then CI copies it to `dist/docs/` after the main app builds. One `gh-pages` branch, one deploy step, two static apps.
-37	
-38	**Development:** Storybook runs on port 6006 (`yarn storybook`) alongside the main app on port 3000 (`yarn dev`). No conflicts.
-39	
-40	**App navigation:** A "Docs" link in the app header points to `/base-skill/docs/`. No TanStack route is needed — the browser loads Storybook's own `index.html`, which handles all internal navigation via query params (`?path=/story/...`). Deep links are bookmarkable and shareable.
-41	
-42	---
-43	
-44	## Story Conventions
-45	
-46	Stories use CSF 3.0, co-located with their source file:
-47	
-48	```
-49	src/components/GameCard.tsx
-50	src/components/GameCard.stories.tsx      ← component stories
-51	
-52	src/lib/speech/SpeechOutput.ts
-53	src/lib/speech/SpeechOutput.stories.mdx ← MDX for services
-54	src/lib/speech/SpeechOutput.demo.tsx    ← interactive demo component
-55	```
-56	
-57	**Standard component story structure:**
-58	
-59	```tsx
-60	import type { Meta, StoryObj } from '@storybook/react';
-61	import { GameCard } from './GameCard';
-62	
-63	const meta: Meta<typeof GameCard> = {
-64	  component: GameCard,
-65	  tags: ['autodocs'],
-66	  args: {
-67	    isBookmarked: false,
-68	  },
-69	};
-70	export default meta;
-71	
-72	type Story = StoryObj<typeof GameCard>;
-73	
-74	export const Default: Story = { args: { ... } };
-75	export const Bookmarked: Story = { args: { isBookmarked: true } };
-76	```
-77	
-78	**Rules:**
-79	
-80	- All component stories get `tags: ['autodocs']` — auto-generates a docs page with prop table and live examples
-81	- Callbacks (`onPlay`, `onBookmarkToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
-82	- Each meaningful visual state gets its own named export (`Default`, `Bookmarked`, `Loading`, `Empty`, etc.)
-83	- shadcn/ui primitives (`button.tsx`, `card.tsx`, `input.tsx`, etc.) also get stories — they are the VR baselines for the design system
-84	
-85	---
-86	
-87	## Theme Decorator & Toolbar
-88	
-89	A global decorator in `preview.ts` calls the same `injectCssVars()` function from `src/lib/theme/css-vars.ts` that the app already uses. No duplication — theme changes in the app automatically reflect in Storybook.
-90	
-91	A "Theme" dropdown in the Storybook toolbar is populated from `src/lib/theme/default-tokens.ts`. Selecting a theme applies its CSS variables to the story wrapper element.
-92	
-93	```ts
-94	// .storybook/preview.ts
-95	export const globalTypes = {
-96	  theme: {
-97	    name: 'Theme',
-98	    toolbar: {
-99	      icon: 'paintbrush',
-100	      items: ['light', 'dark', 'high-contrast'],
-101	      dynamicTitle: true,
-102	    },
-103	  },
-104	};
-105	
-106	export const decorators = [withTheme];
-107	```
-108	
-109	The `withTheme` decorator also toggles the `<html>` class (`light`/`dark`) to match the app's `THEME_INIT_SCRIPT` behaviour, ensuring dark mode CSS rules apply correctly in stories.
-110	
-111	---
-112	
-113	## Service & Utility Stories
-114	
-115	Non-visual modules use MDX files with interactive demo components where the service can run in the browser.
-116	
-117	**Pattern for services with side effects:**
-118	
-119	```
-120	src/lib/speech/SpeechOutput.stories.mdx   ← API docs + embedded demo
-121	src/lib/speech/SpeechOutput.demo.tsx      ← minimal interactive React component
-122	```
-123	
-124	The `.demo.tsx` file is Storybook-only — not a test, not production code. It provides just enough UI to exercise the service interactively.
-125	
-126	**RxDB hooks** (`useSettings`, `useBookmarks`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
-127	
-128	**Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
-129	
-130	**Services covered in this milestone:**
-131	
-132	| Module | Story type | Interactive? |
-133	|---|---|---|
-134	| `SpeechOutput` | MDX + demo | Yes — speak button |
-135	| `SpeechInput` | MDX + demo | Yes — listen button |
-136	| `game-event-bus` | MDX + demo | Yes — emit/subscribe UI |
-137	| `useSettings` | MDX + demo | Yes — wrapped in DbProvider |
-138	| `useBookmarks` | MDX + demo | Yes — wrapped in DbProvider |
-139	| `useRxQuery` | MDX + demo | Yes — wrapped in DbProvider |
-140	| `css-vars` | MDX only | No |
-141	| `catalog-utils` | MDX only | No |
-142	| `i18n` | MDX only | No |
-143	
-144	---
-145	
-146	## Viewport Configuration
-147	
-148	Default viewport is **Tablet Landscape** — the primary device orientation for children using this app.
-149	
-150	```ts
-151	export const parameters = {
-152	  viewport: {
-153	    viewports: {
-154	      mobileSm:        { name: 'Phone S (360×640)',        styles: { width: '360px',  height: '640px'  } },
-155	      mobileLg:        { name: 'Phone L (390×844)',        styles: { width: '390px',  height: '844px'  } },
-156	      tabletPortrait:  { name: 'Tablet Portrait (768×1024)',  styles: { width: '768px',  height: '1024px' } },
-157	      tabletLandscape: { name: 'Tablet Landscape (1024×768)', styles: { width: '1024px', height: '768px'  } },
-158	      desktop:         { name: 'Desktop (1280×800)',       styles: { width: '1280px', height: '800px'  } },
-159	    },
-160	    defaultViewport: 'tabletLandscape',
-161	  },
-162	};
-163	```
-164	
-165	---
-166	
-167	## Visual Regression & Accessibility Testing
-168	
-169	**Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
-170	
-171	**VR screenshots** are captured at three viewports per story:
-172	- `mobileLg` (390×844)
-173	- `tabletPortrait` (768×1024)
-174	- `tabletLandscape` (1024×768)
-175	
-176	Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
-177	
-178	Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
-179	
-180	**Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
-181	
-182	---
-183	
-184	## CI Integration
-185	
-186	Two additions to the GitHub Actions workflow:
-187	
-188	**`storybook-build` step** (after main app build, before deploy):
-189	
-190	```yaml
-191	- name: Build Storybook
-192	  run: yarn build-storybook --output-dir storybook-static
-193	
-194	- name: Merge into dist
-195	  run: cp -r storybook-static dist/docs
-196	```
-197	
-198	**`storybook-test` step** (separate job, runs against built output):
-199	
-200	```yaml
-201	- name: Serve Storybook
-202	  run: npx http-server storybook-static --port 6006 &
-203	
-204	- name: Run Storybook tests
-205	  run: yarn test-storybook --url http://localhost:6006
-206	```
-207	
-208	**New `package.json` scripts:**
-209	
-210	```json
-211	"storybook": "storybook dev --port 6006",
-212	"build-storybook": "storybook build",
-213	"test:storybook": "test-storybook"
-214	```
-215	
-216	---
-217	
-218	## Addons
-219	
-220	| Addon | Purpose |
-221	|---|---|
-222	| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
-223	| `@storybook/addon-a11y` | Accessibility panel + CI assertions |
-224	| `@storybook/addon-themes` | Theme toolbar integration |
-225	| `@storybook/test-runner` | Playwright-based story test runner (VR + a11y CI) |
-226	
-227	---
-228	
-229	## Scope for This Milestone
-230	
-231	This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
-232	
-233	- `src/components/` — all components including shadcn/ui primitives
-234	- `src/lib/` — speech, theme, i18n, game-event-bus
-235	- `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
-236	
-237	Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
+1 # Storybook Setup Design
+2 
+3 **Date:** 2026-04-02
+4 **Status:** Approved
+5 
+6 ---
+7 
+8 ## Overview
+9 
+10 Set up Storybook 8 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
+11 
+12 ---
+13 
+14 ## Architecture & Deployment
+15 
+16 Storybook 8 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
+17 
+18 **Config structure:**
+19 
+20 ```
+21 .storybook/
+22   main.ts               ← addon list, viteFinal sets base: '/base-skill/docs/'
+23   preview.ts            ← global decorators (theme, i18n, providers), viewport config
+24   preview-head.html     ← injects app CSS (styles.css)
+25   decorators/
+26     withTheme.tsx       ← injects CSS vars from toolbar theme selection
+27 ```
+28 
+29 **Build output merging:**
+30 
+31 ```
+32 dist/                   → https://leocaseiro.github.io/base-skill/
+33 dist/docs/              → https://leocaseiro.github.io/base-skill/docs/
+34 ```
+35 
+36 Storybook builds to `storybook-static/`, then CI copies it to `dist/docs/` after the main app builds. One `gh-pages` branch, one deploy step, two static apps.
+37 
+38 **Development:** Storybook runs on port 6006 (`yarn storybook`) alongside the main app on port 3000 (`yarn dev`). No conflicts.
+39 
+40 **App navigation:** A "Docs" link in the app header points to `/base-skill/docs/`. No TanStack route is needed — the browser loads Storybook's own `index.html`, which handles all internal navigation via query params (`?path=/story/...`). Deep links are bookmarkable and shareable.
+41 
+42 ---
+43 
+44 ## Story Conventions
+45 
+46 Stories use CSF 3.0, co-located with their source file:
+47 
+48 ```
+49 src/components/GameCard.tsx
+50 src/components/GameCard.stories.tsx      ← component stories
+51 
+52 src/lib/speech/SpeechOutput.ts
+53 src/lib/speech/SpeechOutput.stories.mdx ← MDX for services
+54 src/lib/speech/SpeechOutput.demo.tsx    ← interactive demo component
+55 ```
+56 
+57 **Standard component story structure:**
+58 
+59 ```tsx
+60 import type { Meta, StoryObj } from '@storybook/react';
+61 import { GameCard } from './GameCard';
+62 
+63 const meta: Meta<typeof GameCard> = {
+64   component: GameCard,
+65   tags: ['autodocs'],
+66   args: {
+67     isBookmarked: false,
+68   },
+69 };
+70 export default meta;
+71 
+72 type Story = StoryObj<typeof GameCard>;
+73 
+74 export const Default: Story = { args: { ... } };
+75 export const Bookmarked: Story = { args: { isBookmarked: true } };
+76 ```
+77 
+78 **Rules:**
+79 
+80 - All component stories get `tags: ['autodocs']` — auto-generates a docs page with prop table and live examples
+81 - Callbacks (`onPlay`, `onBookmarkToggle`, etc.) are wired via `argTypes` as Actions so clicks log in the Actions panel
+82 - Each meaningful visual state gets its own named export (`Default`, `Bookmarked`, `Loading`, `Empty`, etc.)
+83 - shadcn/ui primitives (`button.tsx`, `card.tsx`, `input.tsx`, etc.) also get stories — they are the VR baselines for the design system
+84 
+85 ---
+86 
+87 ## Theme Decorator & Toolbar
+88 
+89 A global decorator in `preview.ts` calls the same `injectCssVars()` function from `src/lib/theme/css-vars.ts` that the app already uses. No duplication — theme changes in the app automatically reflect in Storybook.
+90 
+91 A "Theme" dropdown in the Storybook toolbar is populated from `src/lib/theme/default-tokens.ts`. Selecting a theme applies its CSS variables to the story wrapper element.
+92 
+93 ```ts
+94 // .storybook/preview.ts
+95 export const globalTypes = {
+96   theme: {
+97     name: 'Theme',
+98     toolbar: {
+99       icon: 'paintbrush',
+100       items: ['light', 'dark', 'high-contrast'],
+101       dynamicTitle: true,
+102     },
+103   },
+104 };
+105 
+106 export const decorators = [withTheme];
+107 ```
+108 
+109 The `withTheme` decorator also toggles the `<html>` class (`light`/`dark`) to match the app's `THEME_INIT_SCRIPT` behaviour, ensuring dark mode CSS rules apply correctly in stories.
+110 
+111 ---
+112 
+113 ## Service & Utility Stories
+114 
+115 Non-visual modules use MDX files with interactive demo components where the service can run in the browser.
+116 
+117 **Pattern for services with side effects:**
+118 
+119 ```
+120 src/lib/speech/SpeechOutput.stories.mdx   ← API docs + embedded demo
+121 src/lib/speech/SpeechOutput.demo.tsx      ← minimal interactive React component
+122 ```
+123 
+124 The `.demo.tsx` file is Storybook-only — not a test, not production code. It provides just enough UI to exercise the service interactively.
+125 
+126 **RxDB hooks** (`useSettings`, `useBookmarks`, `useRxQuery`) wrap their demos in a `<DbProvider>` backed by `fake-indexeddb` (already a dev dependency) so reactive state changes are visible live without touching real storage.
+127 
+128 **Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
+129 
+130 **Services covered in this milestone:**
+131 
+132 | Module | Story type | Interactive? |
+133 |---|---|---|
+134 | `SpeechOutput` | MDX + demo | Yes — speak button |
+135 | `SpeechInput` | MDX + demo | Yes — listen button |
+136 | `game-event-bus` | MDX + demo | Yes — emit/subscribe UI |
+137 | `useSettings` | MDX + demo | Yes — wrapped in DbProvider |
+138 | `useBookmarks` | MDX + demo | Yes — wrapped in DbProvider |
+139 | `useRxQuery` | MDX + demo | Yes — wrapped in DbProvider |
+140 | `css-vars` | MDX only | No |
+141 | `catalog-utils` | MDX only | No |
+142 | `i18n` | MDX only | No |
+143 
+144 ---
+145 
+146 ## Viewport Configuration
+147 
+148 Default viewport is **Tablet Landscape** — the primary device orientation for children using this app.
+149 
+150 ```ts
+151 export const parameters = {
+152   viewport: {
+153     viewports: {
+154       mobileSm:        { name: 'Phone S (360×640)',        styles: { width: '360px',  height: '640px'  } },
+155       mobileLg:        { name: 'Phone L (390×844)',        styles: { width: '390px',  height: '844px'  } },
+156       tabletPortrait:  { name: 'Tablet Portrait (768×1024)',  styles: { width: '768px',  height: '1024px' } },
+157       tabletLandscape: { name: 'Tablet Landscape (1024×768)', styles: { width: '1024px', height: '768px'  } },
+158       desktop:         { name: 'Desktop (1280×800)',       styles: { width: '1280px', height: '800px'  } },
+159     },
+160     defaultViewport: 'tabletLandscape',
+161   },
+162 };
+163 ```
+164 
+165 ---
+166 
+167 ## Visual Regression & Accessibility Testing
+168 
+169 **Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
+170 
+171 **VR screenshots** are captured at three viewports per story:
+172 - `mobileLg` (390×844)
+173 - `tabletPortrait` (768×1024)
+174 - `tabletLandscape` (1024×768)
+175 
+176 Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
+177 
+178 Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
+179 
+180 **Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
+181 
+182 ---
+183 
+184 ## CI Integration
+185 
+186 Two additions to the GitHub Actions workflow:
+187 
+188 **`storybook-build` step** (after main app build, before deploy):
+189 
+190 ```yaml
+191 - name: Build Storybook
+192   run: yarn build-storybook --output-dir storybook-static
+193 
+194 - name: Merge into dist
+195   run: cp -r storybook-static dist/docs
+196 ```
+197 
+198 **`storybook-test` step** (separate job, runs against built output):
+199 
+200 ```yaml
+201 - name: Serve Storybook
+202   run: npx http-server storybook-static --port 6006 &
+203 
+204 - name: Run Storybook tests
+205   run: yarn test-storybook --url http://localhost:6006
+206 ```
+207 
+208 **New `package.json` scripts:**
+209 
+210 ```json
+211 "storybook": "storybook dev --port 6006",
+212 "build-storybook": "storybook build",
+213 "test:storybook": "test-storybook"
+214 ```
+215 
+216 ---
+217 
+218 ## Addons
+219 
+220 | Addon | Purpose |
+221 |---|---|
+222 | `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
+223 | `@storybook/addon-a11y` | Accessibility panel + CI assertions |
+224 | `@storybook/addon-themes` | Theme toolbar integration |
+225 | `@storybook/test-runner` | Playwright-based story test runner (VR + a11y CI) |
+226 
+227 ---
+228 
+229 ## Scope for This Milestone
+230 
+231 This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
+232 
+233 - `src/components/` — all components including shadcn/ui primitives
+234 - `src/lib/` — speech, theme, i18n, game-event-bus
+235 - `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
+236 
+237 Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
 238
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:10Z)**_
 
 <think><details><summary>Thought Process</summary>
 Self-review checklist:
+
 1. **Placeholder scan**: No "TBD" or "TODO". The `args: { ... }` in the story example is intentional ellipsis in a code sample, not a placeholder - it's clear it's illustrative. Fine.
-2. **Internal consistency**: 
+2. **Internal consistency**:
    - The spec says `@storybook/addon-themes` in the Addons section but uses custom `withTheme` decorator - this is slightly ambiguous. `@storybook/addon-themes` is the addon that provides the toolbar integration, and `withTheme.tsx` is our custom decorator implementation that uses it. This is consistent.
    - The CI section has a potential issue with the copy command - if `dist/docs` doesn't exist, `cp -r storybook-static dist/docs` will create it as a directory containing the source, but if it already exists, it'll nest the contents inside. I should use `cp -r storybook-static/* dist/docs/` or ensure the directory is created first with `mkdir -p dist/docs` to be consistent.
    - There's a conflict with the no-default-export rule and Storybook's CSF format, which requires `export default meta` in story files. Since Storybook config files are framework-specific, this exception should be explicit.
    - The `preview-head.html` approach for injecting styles is incorrect - Storybook actually uses `preview.ts` for CSS imports, so I need to import the styles directly there instead.
    - I should also fix the `cp -r` command in the CI setup and clarify that `.stories.tsx`, `.stories.mdx`, and `.storybook/` config files fall under the framework config exception.
+
 </details></think>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:12Z)**_
@@ -2454,6 +2473,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:18Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:22Z)**_
@@ -2464,6 +2484,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:32Z)**_
@@ -2474,6 +2495,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:32Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:36Z)**_
@@ -2540,6 +2562,7 @@ docs/superpowers/specs/2026-04-02-storybook-setup-design.md:224:5 error MD060/ta
 docs/superpowers/specs/2026-04-02-storybook-setup-design.md:224:9 error MD060/table-column-style Table column style [Table pipe is missing space to the left for style "compact"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:44Z)**_
@@ -2557,27 +2580,28 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:46Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-130	**Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
-131	
-132	**Services covered in this milestone:**
-133	
-134	| Module | Story type | Interactive? |
-135	|---|---|---|
-136	| `SpeechOutput` | MDX + demo | Yes — speak button |
-137	| `SpeechInput` | MDX + demo | Yes — listen button |
-138	| `game-event-bus` | MDX + demo | Yes — emit/subscribe UI |
-139	| `useSettings` | MDX + demo | Yes — wrapped in DbProvider |
-140	| `useBookmarks` | MDX + demo | Yes — wrapped in DbProvider |
-141	| `useRxQuery` | MDX + demo | Yes — wrapped in DbProvider |
-142	| `css-vars` | MDX only | No |
-143	| `catalog-utils` | MDX only | No |
-144	| `i18n` | MDX only | No |
-145	
-146	---
-147	
-148	## Viewport Configuration
+130 **Pure utils** (`css-vars.ts`, `catalog-utils.ts`, `i18n`) get MDX-only documentation — no interactive demo where output is not visual.
+131 
+132 **Services covered in this milestone:**
+133 
+134 | Module | Story type | Interactive? |
+135 |---|---|---|
+136 | `SpeechOutput` | MDX + demo | Yes — speak button |
+137 | `SpeechInput` | MDX + demo | Yes — listen button |
+138 | `game-event-bus` | MDX + demo | Yes — emit/subscribe UI |
+139 | `useSettings` | MDX + demo | Yes — wrapped in DbProvider |
+140 | `useBookmarks` | MDX + demo | Yes — wrapped in DbProvider |
+141 | `useRxQuery` | MDX + demo | Yes — wrapped in DbProvider |
+142 | `css-vars` | MDX only | No |
+143 | `catalog-utils` | MDX only | No |
+144 | `i18n` | MDX only | No |
+145 
+146 ---
+147 
+148 ## Viewport Configuration
 149
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:46Z)**_
@@ -2587,22 +2611,23 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:46Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-219	
-220	## Addons
-221	
-222	| Addon | Purpose |
-223	|---|---|
-224	| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
-225	| `@storybook/addon-a11y` | Accessibility panel + CI assertions |
-226	| `@storybook/addon-themes` | Theme toolbar integration |
-227	| `@storybook/test-runner` | Playwright-based story test runner (VR + a11y CI) |
-228	
-229	---
-230	
-231	## Scope for This Milestone
-232	
-233	This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
+219 
+220 ## Addons
+221 
+222 | Addon | Purpose |
+223 |---|---|
+224 | `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
+225 | `@storybook/addon-a11y` | Accessibility panel + CI assertions |
+226 | `@storybook/addon-themes` | Theme toolbar integration |
+227 | `@storybook/test-runner` | Playwright-based story test runner (VR + a11y CI) |
+228 
+229 ---
+230 
+231 ## Scope for This Milestone
+232 
+233 This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:50Z)**_
@@ -2613,6 +2638,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:50Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:38:54Z)**_
@@ -2623,6 +2649,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:38:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:39:04Z)**_
@@ -2716,6 +2743,7 @@ Done in 3.05s.
  create mode 100644 .specstory/history/2026-04-01_13-38-29Z.md
  create mode 100644 docs/superpowers/specs/2026-04-02-storybook-setup-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:39:11Z)**_
@@ -2744,7 +2772,7 @@ Please review it and let me know if you want any changes before we move on to wr
 
 _**User (2026-04-01 20:40:07Z)**_
 
-In addition to that, I want to be able to reproduce any bugs in the playwright and VR tests. Can we add the trace viewer recording for debugging on error? https://playwright.dev/docs/trace-viewer-intro
+In addition to that, I want to be able to reproduce any bugs in the playwright and VR tests. Can we add the trace viewer recording for debugging on error? <https://playwright.dev/docs/trace-viewer-intro>
 
 ---
 
@@ -2756,8 +2784,8 @@ The user wants to add Playwright trace viewer recording for debugging on error. 
 For the Storybook test-runner, it uses Playwright under the hood. The test-runner has its own configuration mechanism. We can configure Playwright traces via the test-runner's configuration.
 
 The key options for Playwright traces:
-- `'on'` - always record
 
+- `'on'` - always record
 
 - `'off'` - never record
 - `'retain-on-failure'` - record but only keep on failure (good for CI)
@@ -2796,37 +2824,38 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:40:21Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-184	## Visual Regression & Accessibility Testing
-185	
-186	**Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
-187	
-188	**VR screenshots** are captured at three viewports per story:
-189	
-190	- `mobileLg` (390×844)
-191	- `tabletPortrait` (768×1024)
-192	- `tabletLandscape` (1024×768)
-193	
-194	Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
-195	
-196	Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
-197	
-198	**Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
-199	
-200	---
-201	
-202	## CI Integration
-203	
-204	Two additions to the GitHub Actions workflow:
-205	
-206	**`storybook-build` step** (after main app build, before deploy):
-207	
-208	```yaml
-209	- name: Build Storybook
-210	  run: yarn build-storybook --output-dir storybook-static
-211	
-212	- name: Merge into dist
-213	  run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
+184 ## Visual Regression & Accessibility Testing
+185 
+186 **Tooling:** `@storybook/test-runner` + Playwright. No cloud services.
+187 
+188 **VR screenshots** are captured at three viewports per story:
+189 
+190 - `mobileLg` (390×844)
+191 - `tabletPortrait` (768×1024)
+192 - `tabletLandscape` (1024×768)
+193 
+194 Desktop screenshots are taken only for parent-facing stories (`parent/`, `settings`).
+195 
+196 Baseline screenshots are committed to `src/**/__snapshots__/` alongside stories, consistent with the existing Playwright convention.
+197 
+198 **Accessibility:** `@storybook/addon-a11y` runs in the browser during development. In CI, `@storybook/test-runner` asserts zero `axe-core` violations per story, using the same `axe-core` library already present via `@axe-core/playwright`.
+199 
+200 ---
+201 
+202 ## CI Integration
+203 
+204 Two additions to the GitHub Actions workflow:
+205 
+206 **`storybook-build` step** (after main app build, before deploy):
+207 
+208 ```yaml
+209 - name: Build Storybook
+210   run: yarn build-storybook --output-dir storybook-static
+211 
+212 - name: Merge into dist
+213   run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:40:24Z)**_
@@ -2836,27 +2865,28 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:40:24Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-214	```
-215	
-216	**`storybook-test` step** (separate job, runs against built output):
-217	
-218	```yaml
-219	- name: Serve Storybook
-220	  run: npx http-server storybook-static --port 6006 &
-221	
-222	- name: Run Storybook tests
-223	  run: yarn test-storybook --url http://localhost:6006
-224	```
-225	
-226	**New `package.json` scripts:**
-227	
-228	```json
-229	"storybook": "storybook dev --port 6006",
-230	"build-storybook": "storybook build",
-231	"test:storybook": "test-storybook"
-232	```
+214 ```
+215 
+216 **`storybook-test` step** (separate job, runs against built output):
+217 
+218 ```yaml
+219 - name: Serve Storybook
+220   run: npx http-server storybook-static --port 6006 &
+221 
+222 - name: Run Storybook tests
+223   run: yarn test-storybook --url http://localhost:6006
+224 ```
+225 
+226 **New `package.json` scripts:**
+227 
+228 ```json
+229 "storybook": "storybook dev --port 6006",
+230 "build-storybook": "storybook build",
+231 "test:storybook": "test-storybook"
+232 ```
 233
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:40:31Z)**_
@@ -2867,6 +2897,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:40:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:40:34Z)**_
@@ -2881,6 +2912,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:40:36Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:40:45Z)**_
@@ -2967,6 +2999,7 @@ Done in 2.50s.
 [master 45d5902] docs(storybook): add Playwright trace recording for test failure debugging
  1 file changed, 16 insertions(+)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:40:54Z)**_
@@ -2997,7 +3030,6 @@ The user is suggesting using `@playwright/mcp@latest` and `@storybook/addon-mcp`
 2. `@storybook/addon-mcp` - This is a Storybook addon that exposes Storybook's component library and stories as MCP tools, allowing AI agents to interact with and generate stories.
 
 These are interesting additions that could enhance the development workflow:
-
 
 - The Storybook addon would let me browse the component catalog, generate new stories based on component props, and understand visual states
 - Playwright's MCP integration would enable browser automation for testing purposes
@@ -3046,16 +3078,18 @@ Sources:
 - [Playwright MCP Getting Started](https://playwright.dev/docs/getting-started-mcp)
 - [Storybook MCP for React](https://storybook.js.org/blog/storybook-mcp-for-react/)
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (2026-04-01 20:43:42Z)**_
 
 Research these two packages and report back what they actually do, their current status, and how they'd work together in a Storybook + Playwright setup:
 
-1. `@playwright/mcp` (npm: https://www.npmjs.com/package/@playwright/mcp) — the Playwright MCP server
-2. `@storybook/addon-mcp` (npm: https://www.npmjs.com/package/@storybook/addon-mcp) — a Storybook MCP addon
+1. `@playwright/mcp` (npm: <https://www.npmjs.com/package/@playwright/mcp>) — the Playwright MCP server
+2. `@storybook/addon-mcp` (npm: <https://www.npmjs.com/package/@storybook/addon-mcp>) — a Storybook MCP addon
 
 Specifically answer:
+
 - Are both packages real and published?
 - What MCP tools does each expose?
 - How would they be configured (in playwright.config.ts, .storybook/main.ts, or Claude's MCP config)?
@@ -3077,6 +3111,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:06Z)**_
 ```text
 Request failed with status code 403
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:08Z)**_
@@ -3088,6 +3123,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:08Z)**_
 ```text
 Request failed with status code 403
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:10Z)**_
@@ -3103,6 +3139,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:22Z)**_
 ```text
 The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  https://storybook.js.org/blog/storybook-mcp-for-react/ and https://playwright.dev/docs/getting-started-mcp
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:24Z)**_
@@ -3114,6 +3151,7 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:24Z)**_
 ```text
 The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). The user provided the following reason for the rejection:  https://storybook.js.org/blog/storybook-mcp-for-react/ and https://playwright.dev/docs/getting-started-mcp
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:25Z)**_
@@ -3162,6 +3200,7 @@ Key configuration parameters include:
 
 The documentation presents this as a production-ready tool with active development, offering "no vision models required" for LLM-based web automation across multiple supported platforms.
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:33Z)**_
@@ -3201,6 +3240,7 @@ The documentation does not explicitly mention Playwright integration or any spec
 
 Currently available for React projects in Storybook 10.3+, with support for other frameworks "coming later this year."
 ```
+
 </details></tool-use>
 
 _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:38Z)**_
@@ -3210,30 +3250,36 @@ _**Agent - sidechain (claude-haiku-4-5-20251001 2026-04-01 20:44:38Z)**_
 **Both packages are real and published.** Here's what you need to know:
 
 ### @playwright/mcp
+
 - **Status**: Production-ready with active development
 - **Tools exposed**: Browser automation (navigate, click, type, screenshots), element interaction, network mocking, dialog handling, tab management, code execution via `browser_run_code`
 - **Configuration**: Via MCP config with flags like `--headless`, `--browser`, `--port`; no Playwright config changes needed
 - **Key feature**: Uses "structured accessibility snapshots" instead of screenshots for LLM context
 
 ### @storybook/addon-mcp
+
 - **Status**: Current as of Storybook 10.3+ (React; other frameworks coming later this year)
 - **Tools exposed**: Component metadata/stories, live story preview, test execution, self-healing capabilities
 - **Configuration**: Install via `npx storybook add @storybook/addon-mcp`, then register MCP server at `http://localhost:6006/mcp`
 - **Framework note**: React-focused currently
 
 ### Integration Between Them
+
 **No direct integration mentioned.** They serve different purposes:
+
 - **Playwright MCP** = General web automation for AI agents
 - **Storybook MCP addon** = Component-specific intelligence for Storybook
 
 **How they'd work together**: Both register as separate MCP servers to Claude. An agent could use Storybook's MCP for component understanding/testing, then use Playwright's MCP for broader integration testing or cross-app workflows.
 
 ### Caveats
+
 - Storybook addon is React-specific with limited framework support
 - Both are relatively recent—expect docs and features to evolve
 - No explicit Playwright integration in Storybook addon suggests they're complementary rather than tightly coupled
 
 Sources:
+
 - [Playwright MCP Getting Started](https://playwright.dev/docs/getting-started-mcp)
 - [Storybook MCP for React](https://storybook.js.org/blog/storybook-mcp-for-react/)
 
@@ -3247,7 +3293,6 @@ Both packages are real and worth including. Let me think about how they fit:
 2. **`@playwright/mcp`** — general browser automation MCP server. Claude Code can use it to navigate Storybook in a browser, take screenshots, interact with Controls, and debug VR failures visually.
 
 These are additive to the design — they don't change any architecture decisions, they just add developer tooling. I should:
-
 
 - Add both to the spec's Addons table and create a new "MCP Developer Tooling" section
 - Ensure we're targeting Storybook 10.3+ for the addon
@@ -3272,27 +3317,28 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:00Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-1	# Storybook Setup Design
-2	
-3	**Date:** 2026-04-02
-4	**Status:** Approved
-5	
-6	---
-7	
-8	## Overview
-9	
-10	Set up Storybook 8 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
-11	
-12	---
-13	
-14	## Architecture & Deployment
-15	
-16	Storybook 8 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
-17	
-18	**Config structure:**
-19	
-20	```
+1 # Storybook Setup Design
+2 
+3 **Date:** 2026-04-02
+4 **Status:** Approved
+5 
+6 ---
+7 
+8 ## Overview
+9 
+10 Set up Storybook 8 as a fully integrated component documentation and visual regression testing tool for BaseSkill. Storybook deploys as a static site at `/base-skill/docs/` alongside the main app on GitHub Pages, sharing the same GitHub Actions deploy pipeline.
+11 
+12 ---
+13 
+14 ## Architecture & Deployment
+15 
+16 Storybook 8 uses the `@storybook/react-vite` builder. It is a fully separate static site that merges into the main app's GitHub Pages deploy artifact.
+17 
+18 **Config structure:**
+19 
+20 ```
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:04Z)**_
@@ -3302,37 +3348,38 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:04Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-220	- name: Merge into dist
-221	  run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
-222	```
-223	
-224	**`storybook-test` step** (separate job, runs against built output):
-225	
-226	```yaml
-227	- name: Serve Storybook
-228	  run: npx http-server storybook-static --port 6006 &
-229	
-230	- name: Run Storybook tests
-231	  run: yarn test-storybook --url http://localhost:6006
-232	
-233	- name: Upload Playwright traces on failure
-234	  if: failure()
-235	  uses: actions/upload-artifact@v4
-236	  with:
-237	    name: storybook-playwright-traces
-238	    path: test-results/
-239	    retention-days: 7
-240	```
-241	
-242	**New `package.json` scripts:**
-243	
-244	```json
-245	"storybook": "storybook dev --port 6006",
-246	"build-storybook": "storybook build",
-247	"test:storybook": "test-storybook"
-248	```
+220 - name: Merge into dist
+221   run: mkdir -p dist/docs && cp -r storybook-static/. dist/docs
+222 ```
+223 
+224 **`storybook-test` step** (separate job, runs against built output):
+225 
+226 ```yaml
+227 - name: Serve Storybook
+228   run: npx http-server storybook-static --port 6006 &
+229 
+230 - name: Run Storybook tests
+231   run: yarn test-storybook --url http://localhost:6006
+232 
+233 - name: Upload Playwright traces on failure
+234   if: failure()
+235   uses: actions/upload-artifact@v4
+236   with:
+237     name: storybook-playwright-traces
+238     path: test-results/
+239     retention-days: 7
+240 ```
+241 
+242 **New `package.json` scripts:**
+243 
+244 ```json
+245 "storybook": "storybook dev --port 6006",
+246 "build-storybook": "storybook build",
+247 "test:storybook": "test-storybook"
+248 ```
 249
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:07Z)**_
@@ -3342,30 +3389,31 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:07Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-250	---
-251	
-252	## Addons
-253	
-254	| Addon                         | Purpose                                                  |
-255	| ----------------------------- | -------------------------------------------------------- |
-256	| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
-257	| `@storybook/addon-a11y`       | Accessibility panel + CI assertions                      |
-258	| `@storybook/addon-themes`     | Theme toolbar integration                                |
-259	| `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)        |
-260	
-261	---
-262	
-263	## Scope for This Milestone
-264	
-265	This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
-266	
-267	- `src/components/` — all components including shadcn/ui primitives
-268	- `src/lib/` — speech, theme, i18n, game-event-bus
-269	- `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
-270	
-271	Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
+250 ---
+251 
+252 ## Addons
+253 
+254 | Addon                         | Purpose                                                  |
+255 | ----------------------------- | -------------------------------------------------------- |
+256 | `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
+257 | `@storybook/addon-a11y`       | Accessibility panel + CI assertions                      |
+258 | `@storybook/addon-themes`     | Theme toolbar integration                                |
+259 | `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)        |
+260 
+261 ---
+262 
+263 ## Scope for This Milestone
+264 
+265 This milestone establishes the framework. Stories are written for **all currently existing components and services** in `src/`:
+266 
+267 - `src/components/` — all components including shadcn/ui primitives
+268 - `src/lib/` — speech, theme, i18n, game-event-bus
+269 - `src/db/hooks/` — useSettings, useBookmarks, useRxQuery, useRxDB
+270 
+271 Stories for **M4 game engine components** (`DragAndDrop`, `LetterTracer`, `MultipleChoice`, etc.) are written as part of M4 implementation, following the conventions established here.
 272
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:11Z)**_
@@ -3376,6 +3424,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:11Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:15Z)**_
@@ -3386,6 +3435,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:31Z)**_
@@ -3396,6 +3446,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:38Z)**_
@@ -3445,6 +3496,7 @@ Summary: 1 error(s)
 docs/superpowers/specs/2026-04-02-storybook-setup-design.md:260:105 error MD060/table-column-style Table column style [Table pipe does not align with header for style "aligned"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:43Z)**_
@@ -3454,17 +3506,18 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:43Z)**_
  `./docs/superpowers/specs/2026-04-02-storybook-setup-design.md`
 
 ```text
-254	| Addon                         | Purpose                                                  |
-255	| ----------------------------- | -------------------------------------------------------- |
-256	| `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
-257	| `@storybook/addon-a11y`       | Accessibility panel + CI assertions                      |
-258	| `@storybook/addon-themes`     | Theme toolbar integration                                |
-259	| `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)        |
-260	| `@storybook/addon-mcp`        | MCP server for AI-assisted story authoring (requires Storybook 10.3+) |
-261	
-262	---
+254 | Addon                         | Purpose                                                  |
+255 | ----------------------------- | -------------------------------------------------------- |
+256 | `@storybook/addon-essentials` | Actions, Controls, Docs, Viewport, Backgrounds, Toolbars |
+257 | `@storybook/addon-a11y`       | Accessibility panel + CI assertions                      |
+258 | `@storybook/addon-themes`     | Theme toolbar integration                                |
+259 | `@storybook/test-runner`      | Playwright-based story test runner (VR + a11y CI)        |
+260 | `@storybook/addon-mcp`        | MCP server for AI-assisted story authoring (requires Storybook 10.3+) |
+261 
+262 ---
 263
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:47Z)**_
@@ -3475,6 +3528,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:45:47Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:45:53Z)**_
@@ -3524,6 +3578,7 @@ Summary: 1 error(s)
 docs/superpowers/specs/2026-04-02-storybook-setup-design.md:260:104 error MD060/table-column-style Table column style [Table pipe does not align with header for style "aligned"]
 husky - pre-commit script failed (code 1)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:46:33Z)**_
@@ -3534,7 +3589,6 @@ The markdownlint is being very strict about table alignment. The `@storybook/add
 The error is at column 104 - the pipe doesn't align. This means the columns need to be padded to the same width. Let me read the full table and fix the alignment manually.
 
 The current table:
-
 
 Generating markdown table... I'm calculating the character widths for each column to ensure proper alignment. The Purpose column needs to accommodate the longest entry at 61 characters, so I'll rebuild the table with consistent cell widths across all rows. Generating markdown table... Finishing the table with the remaining addons, making sure the Purpose column is wide enough to accommodate the longer descriptions without wrapping. Counting through the string character by character to verify the exact length. Generating markdown table... Verifying the table formatting with proper column alignment...
 </details></think>
@@ -3547,6 +3601,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:46:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-02-storybook-setup-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:46:48Z)**_
@@ -3633,6 +3688,7 @@ Done in 2.94s.
 [master b39cedd] docs(storybook): add MCP tooling and bump to Storybook 10
  1 file changed, 45 insertions(+), 8 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:46:55Z)**_
@@ -3734,6 +3790,7 @@ Storybook setup design spec approved and committed at `docs/superpowers/specs/20
 ```text
 File created successfully at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/project_storybook_spec.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:48:07Z)**_
@@ -3743,12 +3800,13 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:48:07Z)**_
  `/Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/MEMORY.md`
 
 ```text
-1	# Memory Index
-2	
-3	- [User role](user_role.md) — Senior developer building BaseSkill, strong preferences on code style
-4	- [No export default preference](feedback_no_default_export.md) — Always use named exports; export default only allowed in framework config files
+1 # Memory Index
+2 
+3 - [User role](user_role.md) — Senior developer building BaseSkill, strong preferences on code style
+4 - [No export default preference](feedback_no_default_export.md) — Always use named exports; export default only allowed in framework config files
 5
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:48:12Z)**_
@@ -3759,6 +3817,7 @@ _**Agent (claude-sonnet-4-6 2026-04-01 20:48:12Z)**_
 ```text
 The file /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/MEMORY.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-01 20:48:17Z)**_

@@ -7,6 +7,7 @@
 _**User (2026-04-11 22:08:23Z)**_
 
 <ide_selection>The user selected the lines 1 to 221 from /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/TUNER_PROMPT.md:
+
 # Phoneme Tuner — Fresh Session Prompt
 
 Copy everything below the `---` line into a new Claude Code window opened at
@@ -227,7 +228,6 @@ production `PHONEME_CONFIG` map on a different branch. **Do not** edit
 Start by running `git status` to confirm you're on the right branch, then
 propose your stack and plan in 5-10 lines before writing any code. Ask before
 installing new system-wide dependencies (pip packages inside a venv are fine).
-
 
 This may or may not be related to the current task.</ide_selection>
 
@@ -498,7 +498,7 @@ Check worktree branch state and contents
 On branch tools/phoneme-tuner
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-	TUNER_PROMPT.md
+ TUNER_PROMPT.md
 
 nothing added to commit but untracked files present (use "git add" to track)
 a69cf44 refactor(words): per-IPA phoneme sustain config + drop s loop gap
@@ -528,6 +528,7 @@ vite.config.ts
 vitest.config.ts
 yarn.lock
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:12:01Z)**_
@@ -544,6 +545,7 @@ Verify required binaries are available
 /Users/leocaseiro/.pyenv/versions/3.7.5/bin/python3
 Python 3.7.5
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:12:14Z)**_
@@ -563,6 +565,7 @@ Confirmed — on `tools/phoneme-tuner` at commit `a69cf44`, clean tree, only unt
 **Stack:** Single-file Python app using **stdlib `http.server`** (no Flask, no pip, no venv — Python 3.7.5 here is too old for modern Flask anyway, and stdlib is zero-friction). One HTML page served inline, `fetch()` JSON endpoints, `<audio>` element for playback.
 
 **Layout under `tools/phoneme-tuner/`:**
+
 - `app.py` — HTTP server, subprocess wrapper around espeak-ng + ffmpeg, GET `/`, GET `/config`, POST `/render`, POST `/save`, GET `/audio/<name>.wav`
 - `index.html` (embedded in `app.py` as a string or separate file) — IPA dropdown, 5 dial inputs, Render / Loop / Save buttons, `<audio>`
 - `initial-config.json` — starting state (fricatives, sonorants, short vowels as specified)
@@ -668,6 +671,7 @@ Create tool directory structure
 ```text
 tmp
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:18:55Z)**_
@@ -683,6 +687,7 @@ tmp/
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/.gitignore (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:20:43Z)**_
@@ -1331,6 +1336,7 @@ if __name__ == "__main__":
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:20:56Z)**_
@@ -1372,6 +1378,7 @@ persistent state — hand it to a sibling session to merge into production.
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/README.md (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:03Z)**_
@@ -1397,6 +1404,7 @@ Start tuner server in background
 ```text
 Command running in background with ID: bbw88uy1l. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/204c771b-d756-4fa8-9089-34c79a40c7f3/tasks/bbw88uy1l.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:09Z)**_
@@ -1421,6 +1429,7 @@ Traceback (most recent call last):
     raise JSONDecodeError("Expecting value", s, err.value) from None
 json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:12Z)**_
@@ -1440,6 +1449,7 @@ Read tuner server log
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:17Z)**_
@@ -1485,6 +1495,7 @@ python3.7 80554 leocaseiro    3u  IPv4 0x1d376429648a018f      0t0  TCP 127.0.0.
 leocaseiro       80554   0.0  0.0 67958644  17972   ??  S     8:21AM   0:00.08 python3 tools/phoneme-tuner/app.py
 leocaseiro       80552   0.0  0.0 442205680   3456   ??  Ss    8:21AM   0:00.01 /bin/zsh -c source /Users/leocaseiro/.claude/shell-snapshots/snapshot-zsh-1775945517122-0vw45u.sh 2>/dev/null || true && setopt NO_EXTENDED_GLOB 2>/dev/null || true && eval 'cd /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner && python3 tools/phoneme-tuner/app.py' < /dev/null && pwd -P >| /tmp/claude-90c1-cwd
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:22Z)**_
@@ -1535,6 +1546,7 @@ phonemes: 47
 --- ae ---
 {'ipa': 'æ', 'kirsh': 'a', 'cfg': {'anchor': '', 'trimDb': -40, 'stretch': 2, 'fadeMs': 10, 'loopable': True}, 'historyLength': 0, 'category': 'vowel'}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:33Z)**_
@@ -1585,6 +1597,7 @@ drwxr-xr-x@ 7 leocaseiro  staff    224 Apr 12 08:21 ..
 -rw-r--r--@ 1 leocaseiro  staff  32862 Apr 12 08:21 83878c9117.raw.wav
 -rw-r--r--@ 1 leocaseiro  staff  32896 Apr 12 08:21 83878c9117.wav
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:44Z)**_
@@ -1652,6 +1665,7 @@ s: {'anchor': '', 'trimDb': -60, 'stretch': 2, 'fadeMs': 0, 'loopable': False}
 --- final disk state ---
 s: {'anchor': '', 'trimDb': -60, 'stretch': 4, 'fadeMs': 0, 'loopable': True}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:21:56Z)**_
@@ -1699,6 +1713,7 @@ http=200 size=19698 type=audio/wav
 --- GET /audio/does-not-exist.wav ---
 {"error": "not found"}http=404
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:07Z)**_
@@ -1724,6 +1739,7 @@ Confirm sprite script is untouched on this branch
 ?? tools/
 --- sprite script untouched? ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:16Z)**_
@@ -1738,6 +1754,7 @@ Verify word:phonemes script exists in package.json
 package.json
 word:phonemes = tsx scripts/generate-phoneme-sprite.ts
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:19Z)**_
@@ -1751,6 +1768,7 @@ Run yarn word:phonemes to confirm the production pipeline still works
 ```text
 Exit code 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:22Z)**_
@@ -1765,6 +1783,7 @@ Check if node_modules is installed in this worktree
 ls: node_modules/.bin/tsx: No such file or directory
 ls: node_modules: No such file or directory
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:33Z)**_
@@ -1805,6 +1824,7 @@ drwxr-xr-x@ 42 leocaseiro  staff   1344 Apr 12 08:18 tools-phoneme-tuner
 --- sibling branch ---
 feat/word-library-explorer
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:36Z)**_
@@ -1819,6 +1839,7 @@ Run yarn word:phonemes on the sibling worktree
 --- running yarn word:phonemes ---
 (eval):1: command not found: timeout
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:42Z)**_
@@ -1861,6 +1882,7 @@ size=     134KiB time=00:00:41.26 bitrate=  26.6kbits/s speed= 455x elapsed=0:00
 Generated 45 phoneme clips → public/audio/phonemes.mp3 (41259ms)
 Done in 2.62s.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:22:50Z)**_
@@ -1915,6 +1937,7 @@ drwxr-xr-x@ 3 leocaseiro  staff     96 Apr 12 08:18 ..
 drwxr-xr-x@ 8 leocaseiro  staff    256 Apr 12 08:21 tmp
 -rw-r--r--@ 1 leocaseiro  staff   5178 Apr 12 08:21 tuned-config.json
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:23:06Z)**_
@@ -2006,6 +2029,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:31:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:32:04Z)**_
@@ -2028,6 +2052,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:32:07Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:32:16Z)**_
@@ -2038,6 +2063,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:32:16Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:32:26Z)**_
@@ -2060,6 +2086,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:32:33Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:32:38Z)**_
@@ -2074,6 +2101,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:32:42Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:32:48Z)**_
@@ -2084,6 +2112,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:32:48Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:33:05Z)**_
@@ -2115,6 +2144,7 @@ Restart tuner server
 ```text
 Command running in background with ID: bhpr88uqz. Output is being written to: /private/tmp/claude-501/-Users-leocaseiro-Sites-base-skill/204c771b-d756-4fa8-9089-34c79a40c7f3/tasks/bhpr88uqz.output
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:33:16Z)**_
@@ -2171,6 +2201,7 @@ k -> {'anchor': 'A:', 'trimDb': None, 'stretch': 0.25, 'fadeMs': 0, 'loopable': 
 p: {'anchor': 'i:', 'trimDb': None, 'stretch': 0.5, 'fadeMs': 0, 'loopable': False}
 k: {'anchor': 'A:', 'trimDb': None, 'stretch': 0.25, 'fadeMs': 0, 'loopable': False}
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:33:35Z)**_
@@ -2217,6 +2248,7 @@ Traceback (most recent call last):
     self.socket.bind(self.server_address)
 OSError: [Errno 48] Address already in use
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:34:05Z)**_
@@ -2271,6 +2303,7 @@ stretch=4 bare                      -> 'atempo=0.5,atempo=0.5'
 trim -40 + 0.5x + fade 20           -> 'silenceremove=start_periods=1:start_threshold=-40dB:stop_periods=-1:stop_threshold=-40dB,atempo=2.0,afade=t=in:st=0:d=0.02,areverse,afade=t=in:st=0:d=0.02,areverse'
 trim -60 + 0.25x                    -> 'silenceremove=start_periods=1:start_threshold=-60dB:stop_periods=-1:stop_threshold=-60dB,atempo=4.0'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:34:22Z)**_
@@ -2322,6 +2355,7 @@ p anchor=i: stretch=0.5        -> 0.391s   (83878c9117.wav)
 p anchor=i: stretch=1          -> 0.785s   (83878c9117.wav)
 p anchor=i: stretch=2          -> 1.505s   (83878c9117.wav)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:34:47Z)**_
@@ -2367,9 +2401,10 @@ _**User (2026-04-11 22:35:25Z)**_
 ~/Sites/base-skill/worktrees/tools-phoneme-tuner tools/phoneme-tuner ✗
 $ cd /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner
 python3 tools/phoneme-tuner/app.py
-# ^V??^V? http://localhost:8765
 
-phoneme-tuner listening on http://localhost:8765
+# ^V??^V? <http://localhost:8765>
+
+phoneme-tuner listening on <http://localhost:8765>
 tuned config: /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json
 Traceback (most recent call last):
   File "/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py", line 650, in <module>
@@ -2378,7 +2413,7 @@ Traceback (most recent call last):
   File "/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py", line 641, in main
     with socketserver.TCPServer(("127.0.0.1", PORT), Handler) as srv:
          ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socketserver.py", line 457, in __init__
+  File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socketserver.py", line 457, in **init**
     self.server_bind()
     ~~~~~~~~~~~~~~~~^^
   File "/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socketserver.py", line 478, in server_bind
@@ -2412,6 +2447,7 @@ Identify PID holding port 8765
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:35:41Z)**_
@@ -2426,6 +2462,7 @@ Find tuner process via ps as a fallback
       Output information may be incomplete.
 ---
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:35:49Z)**_
@@ -2516,6 +2553,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:41:03Z)**_
 ```text
 Launching skill: superpowers:systematic-debugging
 ```
+
 </details></tool-use>
 
 ---
@@ -2545,6 +2583,7 @@ If you haven't completed Phase 1, you cannot propose fixes.
 ## When to Use
 
 Use for ANY technical issue:
+
 - Test failures
 - Bugs in production
 - Unexpected behavior
@@ -2553,6 +2592,7 @@ Use for ANY technical issue:
 - Integration issues
 
 **Use this ESPECIALLY when:**
+
 - Under time pressure (emergencies make guessing tempting)
 - "Just one quick fix" seems obvious
 - You've already tried multiple fixes
@@ -2560,6 +2600,7 @@ Use for ANY technical issue:
 - You don't fully understand the issue
 
 **Don't skip when:**
+
 - Issue seems simple (simple bugs have root causes too)
 - You're in a hurry (rushing guarantees rework)
 - Manager wants it fixed NOW (systematic is faster than thrashing)
@@ -2595,6 +2636,7 @@ You MUST complete each phase before proceeding to the next.
    **WHEN system has multiple components (CI → build → signing, API → service → database):**
 
    **BEFORE proposing fixes, add diagnostic instrumentation:**
+
    ```
    For EACH component boundary:
      - Log what data enters component
@@ -2608,6 +2650,7 @@ You MUST complete each phase before proceeding to the next.
    ```
 
    **Example (multi-layer system):**
+
    ```bash
    # Layer 1: Workflow
    echo "=== Secrets available in workflow: ==="
@@ -2736,6 +2779,7 @@ You MUST complete each phase before proceeding to the next.
 ## Red Flags - STOP and Follow Process
 
 If you catch yourself thinking:
+
 - "Quick fix for now, investigate later"
 - "Just try changing X and see if it works"
 - "Add multiple changes, run tests"
@@ -2755,6 +2799,7 @@ If you catch yourself thinking:
 ## your human partner's Signals You're Doing It Wrong
 
 **Watch for these redirections:**
+
 - "Is that not happening?" - You assumed without verifying
 - "Will it show us...?" - You should have added evidence gathering
 - "Stop guessing" - You're proposing fixes without understanding
@@ -2805,17 +2850,18 @@ These techniques are part of systematic debugging and available in this director
 - **`condition-based-waiting.md`** - Replace arbitrary timeouts with condition polling
 
 **Related skills:**
+
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
 ## Real-World Impact
 
 From debugging sessions:
+
 - Systematic approach: 15-30 minutes to fix
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-
 
 ---
 
@@ -2885,6 +2931,7 @@ Exit code 1
 IPA     dur(s)    max_dB      mean_dB   
 (eval):9: bad substitution
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:41:42Z)**_
@@ -2984,6 +3031,7 @@ z     z      0.794    -          -
 ʃ     S      0.781    -          -         
 ʒ     Z      0.794    -          -
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:42:01Z)**_
@@ -3045,6 +3093,7 @@ z     -19.8      -41.2      | -3.4       -22.8
 ʃ     -15.4      -34.8      | -3.6       -22.6     
 ʒ     -19.8      -41.2      | -3.4       -22.8
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:42:48Z)**_
@@ -3144,6 +3193,7 @@ Traceback (most recent call last):
   File "<stdin>", line 12, in dur
 ValueError: could not convert string to float: 'N/A'
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 22:45:36Z)**_
@@ -3220,6 +3270,7 @@ _**Agent (claude-opus-4-6 2026-04-11 22:45:57Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (<synthetic> 2026-04-11 22:45:59Z)**_
@@ -3259,6 +3310,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:17:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:17:33Z)**_
@@ -3269,6 +3321,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:17:33Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:17:45Z)**_
@@ -3279,6 +3332,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:17:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:17:50Z)**_
@@ -3293,6 +3347,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:17:55Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:18:03Z)**_
@@ -3303,6 +3358,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:18:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:18:07Z)**_
@@ -3317,6 +3373,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:18:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:18:18Z)**_
@@ -3327,6 +3384,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:18:18Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:18:28Z)**_
@@ -3337,6 +3395,7 @@ _**Agent (claude-opus-4-6 2026-04-11 23:18:28Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:18:35Z)**_
@@ -3404,6 +3463,7 @@ crop 0-100% no fade:   ''
   no crop, no trim + 2x                    -> 1.066s
   crop 10-90, no trim + 2x                 -> 0.853s
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-11 23:19:08Z)**_
@@ -3487,7 +3547,7 @@ Yes — easy with ffmpeg's `volume` filter. A quick design question first:
 
 **Where to apply the gain matters.** Two options:
 
-1. **Pre-trim (first in chain)** — boost the raw espeak output before silenceremove sees it. This *also* fixes the "silenceremove eats quiet phonemes" problem, because now the raw signal sits well above the −60 dB floor.
+1. **Pre-trim (first in chain)** — boost the raw espeak output before silenceremove sees it. This _also_ fixes the "silenceremove eats quiet phonemes" problem, because now the raw signal sits well above the −60 dB floor.
 2. **Post-everything (last in chain)** — only affects perceived loudness, silenceremove still operates on the original quiet signal.
 
 Option 1 is strictly better for your case: a single "gain dB" dial serves both "make it louder" and "stop silenceremove from chopping it." Downside: boosting a signal that's already near 0 dBFS (like `s` with its −15 dB peak) will clip if you crank it too high — but that's per-phoneme tuning, which is exactly what you're doing.
@@ -3502,6 +3562,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:35:31Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:35:37Z)**_
@@ -3512,6 +3573,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:35:37Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:35:42Z)**_
@@ -3526,6 +3588,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:35:45Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:35:53Z)**_
@@ -3536,6 +3599,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:35:53Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:35:59Z)**_
@@ -3546,6 +3610,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:35:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:36:05Z)**_
@@ -3556,6 +3621,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:36:05Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:36:10Z)**_
@@ -3627,6 +3693,7 @@ gain +20, trim -60, 4x  : volume=20.0dB,silenceremove=start_periods=1:start_thre
   f gain=+10 dB  ->  dur=0.427s  max=-21.1    mean=-33.8
   f gain=+20 dB  ->  dur=0.427s  max=-11.1    mean=-23.8
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:36:56Z)**_
@@ -3650,7 +3717,7 @@ p bare:   +0 →  max -25.6    +12 →  max -13.6    +18 →  max  -7.6    +24 �
 f (full): +0 →  max -31.1    +10 →  max -21.1    +20 →  max -11.1
 ```
 
-**Interesting side finding on `f`:** gain moves `f`'s peak level but barely moves its duration (0.417 s → 0.427 s even at +20 dB). Meaning silenceremove's `stop_periods=-1` isn't trimming `f` because of raw threshold crossings — it's something about how atempo's internal buffering aligns with the noise envelope. Gain makes `f` *louder*, but the zap artifact is still there. So for `f` specifically, gain is an **orthogonal** fix — use it for volume, use "disable trim + stretch 2× + crop" for the zap.
+**Interesting side finding on `f`:** gain moves `f`'s peak level but barely moves its duration (0.417 s → 0.427 s even at +20 dB). Meaning silenceremove's `stop_periods=-1` isn't trimming `f` because of raw threshold crossings — it's something about how atempo's internal buffering aligns with the noise envelope. Gain makes `f` _louder_, but the zap artifact is still there. So for `f` specifically, gain is an **orthogonal** fix — use it for volume, use "disable trim + stretch 2× + crop" for the zap.
 
 ## Restart the tuner and try
 
@@ -3707,6 +3774,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:38:02Z)**_
 523:    gainDb: g,
 620:  $('gainDb').addEventListener('change', () => { autosave().then(doRender); });
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:38:09Z)**_
@@ -3741,6 +3809,7 @@ Python  99847 leocaseiro    3u  IPv4 0xced876ccb8c84aff      0t0  TCP 127.0.0.1:
 ---
 1
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:38:20Z)**_
@@ -3782,7 +3851,7 @@ I should also clarify when to use this feature: it's most useful for loopable ph
 
 _**Agent (claude-opus-4-6 2026-04-12 01:40:41Z)**_
 
-Fair — "threshold in dBFS" doesn't tell you what to *do*. Here's the practical version.
+Fair — "threshold in dBFS" doesn't tell you what to _do_. Here's the practical version.
 
 **What it does (one sentence):** it cuts silence padding off the start and end of the espeak clip. Nothing else.
 
@@ -3835,6 +3904,7 @@ _**User (2026-04-12 01:43:55Z)**_
 This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
 
 Summary:
+
 1. Primary Request and Intent:
    The user asked me to build a local-only interactive phoneme tuning tool per a detailed spec in `TUNER_PROMPT.md` located in the `worktrees/tools-phoneme-tuner` worktree. The tool lets them tune per-phoneme eSpeak-NG + ffmpeg audio settings by ear, then hand the saved JSON to a sibling session for production merge. Over multiple iterations the user added requirements:
    - Initial: "1" (proceed with building per the prompt)
@@ -3861,11 +3931,12 @@ Summary:
    - `_backfill` migration pattern for adding new config fields to existing `tuned-config.json`
 
 3. Files and Code Sections:
-   
+
    - **`/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py`** (~700 lines, single-file tuner)
      - Contains: KIRSH map (47 IPA→Kirshenbaum entries with `æ→a` and `ɒ→0` deliberate deviations), PHONEMES list, CONSONANTS/VOWELS_MONO/DIPHTHONGS sets, default_cfg, _override helper, INITIAL_OVERRIDES, _backfill, load_tuned/save_tuned, stretch_chain, probe_duration, crop_fade_chain, audio_id (md5 10-char hex), render_phoneme (two-stage), STATE dict {config, history}, phoneme_payload, INDEX_HTML string (embedded HTML/CSS/JS), Handler class (GET/POST routes), main()
-     
+
      Key functions current state:
+
      ```python
      def default_cfg(ipa):
          anchor = "E" if ipa in CONSONANTS else ""
@@ -3965,9 +4036,9 @@ Summary:
          subprocess.run(cmd, check=True, capture_output=True)
          return out.name
      ```
-     
+
      HTML dials in INDEX_HTML include: 8-preset anchor group (bare, @, E, i:, A:, O:, u:, V) in grid4 layout, Trim dB with disabled checkbox, 5-preset stretch group (0.25, 0.5, 1, 2, 4) in grid5 layout, Fade ms, Gain dB (new, line 361-362), Crop with two number inputs and "full" reset button, Loopable checkbox. Buttons: Render/Loop 5s/Undo/Reset. Keyboard: space/l/u/↑/↓.
-     
+
      HTTP routes: GET `/`, GET `/config`, GET `/audio/<file>`, POST `/update` (autosave), POST `/render`, POST `/undo`, POST `/reset`.
 
    - **`/Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/README.md`** — <20 line usage guide
@@ -4012,7 +4083,7 @@ Summary:
 
 8. Current Work:
    Immediately before this summary request, the user asked: "is -1000 too much or makes no difference? I can't hear much difference I think". This follows my previous explanation of Trim dB (silenceremove) semantics where I described: "more negative number = gentler" and "-60 = only true digital silence counts as silence. Gentle, barely cuts anything."
-   
+
    The user is asking whether pushing the threshold far beyond -60 (to -1000) has any effect, because they aren't hearing much difference between various trim settings. The practical answer involves:
    - WAV audio at 16-bit is bounded at ~-96 dBFS dynamic range, and at 24-bit ~-144 dBFS. Digital silence is -∞ but anything below the bit-depth floor is quantization noise. At -1000 dBFS the threshold is effectively "only mathematical -∞"; so below roughly -90 to -100 dB the threshold makes no practical difference — any value beyond that just matches pure zero samples.
    - For eSpeak output (16-bit PCM), thresholds below ~-90 dB all behave the same: only cut the leading/trailing samples that are literally 0 or below the quantization floor.
@@ -4020,9 +4091,9 @@ Summary:
 
 9. Optional Next Step:
    Answer the user's most recent question directly with a short explanation:
-   
+
    Direct quote of the most recent user question: "is -1000 too much or makes no difference? I can't hear much difference I think"
-   
+
    Next step: Explain that `-1000` makes no practical difference versus `-60` or `-90` because 16-bit PCM has a ~-96 dBFS noise floor — any threshold below that only ever matches pure-zero samples, so -60, -90, -1000 all behave identically in practice. The reason they can't hear a difference between trim values in general is that eSpeak output's leading/trailing padding is already digital silence (bit-exact zero), so gentle thresholds all clip the same 1-2 samples. Audible differences only appear once the threshold creeps above the actual phoneme body (≈ -50 dB for quiet fricatives, higher for loud ones). Recommend they test with a loud fricative like `s`, switching between `-60` and `-20`, where the difference becomes obvious. Also reinforce that for the use case of cleaning loop seams, `-60` is already "as gentle as useful" and going lower is wasted keystrokes.
 
 If you need specific details from before compaction (like exact code snippets, error messages, or content you generated), read the full transcript at: /Users/leocaseiro/.claude/projects/-Users-leocaseiro-Sites-base-skill/204c771b-d756-4fa8-9089-34c79a40c7f3.jsonl
@@ -4045,7 +4116,7 @@ Why you can't hear a difference between trim values at all: eSpeak's padding is 
 
 Try this to hear it: pick `s`, render at `-60`, then `-20`. At `-20` you'll lose most of the hiss. That's the full range of the dial.
 
-For your loop-seam use case, `-60` is already "as gentle as useful." Going to `-1000` is wasted keystrokes. If you want the trim *off*, use the disabled checkbox instead — it's cleaner than a sentinel value.
+For your loop-seam use case, `-60` is already "as gentle as useful." Going to `-1000` is wasted keystrokes. If you want the trim _off_, use the disabled checkbox instead — it's cleaner than a sentinel value.
 
 ---
 
@@ -4110,6 +4181,7 @@ Count lines in app.py
 ```text
      781 /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:29Z)**_
@@ -4143,6 +4215,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:29Z)**_
 543:  setRadio('stretch', resp.cfg.stretch);
 614:  document.querySelectorAll('input[name=stretch]').forEach(el => el.addEventListener('change', autosave));
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:31Z)**_
@@ -4152,67 +4225,68 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:31Z)**_
  `./worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py`
 
 ```text
-110	    ordered = {ipa: cfg[ipa] for ipa in PHONEMES if ipa in cfg}
-111	    TUNED_PATH.write_text(json.dumps(ordered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-112	
-113	
-114	def stretch_chain(cfg):
-115	    """Stage-1 chain: volume + silenceremove + atempo. Runs against raw espeak output."""
-116	    parts = []
-117	    try:
-118	        gain_db = float(cfg.get("gainDb", 0) or 0)
-119	    except (TypeError, ValueError):
-120	        gain_db = 0.0
-121	    if gain_db != 0:
-122	        parts.append("volume={g}dB".format(g=gain_db))
-123	    if cfg.get("trimDb") is not None:
-124	        db = cfg["trimDb"]
-125	        parts.append(
-126	            "silenceremove=start_periods=1:start_threshold={db}dB:"
-127	            "stop_periods=-1:stop_threshold={db}dB".format(db=db)
-128	        )
-129	    stretch = cfg.get("stretch", 1)
-130	    if stretch == 0.25:
-131	        parts.append("atempo=4.0")
-132	    elif stretch == 0.5:
-133	        parts.append("atempo=2.0")
-134	    elif stretch == 2:
-135	        parts.append("atempo=0.5")
-136	    elif stretch == 4:
-137	        parts.append("atempo=0.5")
-138	        parts.append("atempo=0.5")
-139	    return ",".join(parts)
-140	
-141	
-142	def probe_duration(wav_path):
-143	    r = subprocess.run(
-144	        ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-145	         "-of", "default=nw=1:nk=1", str(wav_path)],
-146	        capture_output=True, text=True,
-147	    )
-148	    try:
-149	        return float(r.stdout.strip())
-150	    except (ValueError, TypeError):
-151	        return 0.0
-152	
-153	
-154	def crop_fade_chain(cfg, stage1_dur):
-155	    """Stage-2 chain: atrim (crop) + afade. stage1_dur is the post-stretch duration."""
-156	    parts = []
-157	    try:
-158	        start_pct = float(cfg.get("cropStartPct", 0) or 0)
-159	    except (TypeError, ValueError):
-160	        start_pct = 0.0
-161	    try:
-162	        end_pct = float(cfg.get("cropEndPct", 100) or 100)
-163	    except (TypeError, ValueError):
-164	        end_pct = 100.0
-165	    start_pct = max(0.0, min(100.0, start_pct))
-166	    end_pct = max(start_pct, min(100.0, end_pct))
-167	
-168	    start_s = stage1_dur * start_pct / 100.0
-169	    end_s = stage1_dur * end_pct / 100.0
+110     ordered = {ipa: cfg[ipa] for ipa in PHONEMES if ipa in cfg}
+111     TUNED_PATH.write_text(json.dumps(ordered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+112 
+113 
+114 def stretch_chain(cfg):
+115     """Stage-1 chain: volume + silenceremove + atempo. Runs against raw espeak output."""
+116     parts = []
+117     try:
+118         gain_db = float(cfg.get("gainDb", 0) or 0)
+119     except (TypeError, ValueError):
+120         gain_db = 0.0
+121     if gain_db != 0:
+122         parts.append("volume={g}dB".format(g=gain_db))
+123     if cfg.get("trimDb") is not None:
+124         db = cfg["trimDb"]
+125         parts.append(
+126             "silenceremove=start_periods=1:start_threshold={db}dB:"
+127             "stop_periods=-1:stop_threshold={db}dB".format(db=db)
+128         )
+129     stretch = cfg.get("stretch", 1)
+130     if stretch == 0.25:
+131         parts.append("atempo=4.0")
+132     elif stretch == 0.5:
+133         parts.append("atempo=2.0")
+134     elif stretch == 2:
+135         parts.append("atempo=0.5")
+136     elif stretch == 4:
+137         parts.append("atempo=0.5")
+138         parts.append("atempo=0.5")
+139     return ",".join(parts)
+140 
+141 
+142 def probe_duration(wav_path):
+143     r = subprocess.run(
+144         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+145          "-of", "default=nw=1:nk=1", str(wav_path)],
+146         capture_output=True, text=True,
+147     )
+148     try:
+149         return float(r.stdout.strip())
+150     except (ValueError, TypeError):
+151         return 0.0
+152 
+153 
+154 def crop_fade_chain(cfg, stage1_dur):
+155     """Stage-2 chain: atrim (crop) + afade. stage1_dur is the post-stretch duration."""
+156     parts = []
+157     try:
+158         start_pct = float(cfg.get("cropStartPct", 0) or 0)
+159     except (TypeError, ValueError):
+160         start_pct = 0.0
+161     try:
+162         end_pct = float(cfg.get("cropEndPct", 100) or 100)
+163     except (TypeError, ValueError):
+164         end_pct = 100.0
+165     start_pct = max(0.0, min(100.0, start_pct))
+166     end_pct = max(start_pct, min(100.0, end_pct))
+167 
+168     start_s = stage1_dur * start_pct / 100.0
+169     end_s = stage1_dur * end_pct / 100.0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:34Z)**_
@@ -4222,47 +4296,48 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:34Z)**_
  `./worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py`
 
 ```text
-340	        <label class="inline"><input type="checkbox" id="trimDbNull"> disabled</label>
-341	      </div>
-342	    </div>
-343	
-344	    <div class="dial">
-345	      <label>Stretch (duration multiplier)</label>
-346	      <div class="radio-group grid5" id="stretch-group">
-347	        <label data-val="0.25"><input type="radio" name="stretch" value="0.25"><span>0.25&times;</span></label>
-348	        <label data-val="0.5"><input type="radio" name="stretch" value="0.5"><span>0.5&times;</span></label>
-349	        <label data-val="1"><input type="radio" name="stretch" value="1"><span>1&times;</span></label>
-350	        <label data-val="2"><input type="radio" name="stretch" value="2"><span>2&times;</span></label>
-351	        <label data-val="4"><input type="radio" name="stretch" value="4"><span>4&times;</span></label>
-352	      </div>
-353	    </div>
-354	
-355	    <div class="dial">
-356	      <label>Fade ms (symmetric, applied to cropped edges)</label>
-357	      <input type="number" id="fadeMs" value="0" step="1" min="0">
-358	    </div>
-359	
-360	    <div class="dial">
-361	      <label>Gain dB <span style="color:#64748b;text-transform:none;letter-spacing:0;font-size:11px;">(applied before silenceremove)</span></label>
-362	      <input type="number" id="gainDb" value="0" step="1" min="-12" max="30">
-363	    </div>
-364	
-365	    <div class="dial">
-366	      <label>Crop <span style="color:#64748b;text-transform:none;letter-spacing:0;font-size:11px;">(% of post-stretch duration)</span></label>
-367	      <div class="crop-row">
-368	        <label class="crop-handle">
-369	          <span>start</span>
-370	          <input type="number" id="cropStartPct" value="0" min="0" max="100" step="1">
-371	          <span class="unit">%</span>
-372	        </label>
-373	        <label class="crop-handle">
-374	          <span>end</span>
-375	          <input type="number" id="cropEndPct" value="100" min="0" max="100" step="1">
-376	          <span class="unit">%</span>
-377	        </label>
-378	        <button type="button" class="action" id="btn-crop-reset" style="padding:6px 10px;font-size:11px;">full</button>
-379	      </div>
+340         <label class="inline"><input type="checkbox" id="trimDbNull"> disabled</label>
+341       </div>
+342     </div>
+343 
+344     <div class="dial">
+345       <label>Stretch (duration multiplier)</label>
+346       <div class="radio-group grid5" id="stretch-group">
+347         <label data-val="0.25"><input type="radio" name="stretch" value="0.25"><span>0.25&times;</span></label>
+348         <label data-val="0.5"><input type="radio" name="stretch" value="0.5"><span>0.5&times;</span></label>
+349         <label data-val="1"><input type="radio" name="stretch" value="1"><span>1&times;</span></label>
+350         <label data-val="2"><input type="radio" name="stretch" value="2"><span>2&times;</span></label>
+351         <label data-val="4"><input type="radio" name="stretch" value="4"><span>4&times;</span></label>
+352       </div>
+353     </div>
+354 
+355     <div class="dial">
+356       <label>Fade ms (symmetric, applied to cropped edges)</label>
+357       <input type="number" id="fadeMs" value="0" step="1" min="0">
+358     </div>
+359 
+360     <div class="dial">
+361       <label>Gain dB <span style="color:#64748b;text-transform:none;letter-spacing:0;font-size:11px;">(applied before silenceremove)</span></label>
+362       <input type="number" id="gainDb" value="0" step="1" min="-12" max="30">
+363     </div>
+364 
+365     <div class="dial">
+366       <label>Crop <span style="color:#64748b;text-transform:none;letter-spacing:0;font-size:11px;">(% of post-stretch duration)</span></label>
+367       <div class="crop-row">
+368         <label class="crop-handle">
+369           <span>start</span>
+370           <input type="number" id="cropStartPct" value="0" min="0" max="100" step="1">
+371           <span class="unit">%</span>
+372         </label>
+373         <label class="crop-handle">
+374           <span>end</span>
+375           <input type="number" id="cropEndPct" value="100" min="0" max="100" step="1">
+376           <span class="unit">%</span>
+377         </label>
+378         <button type="button" class="action" id="btn-crop-reset" style="padding:6px 10px;font-size:11px;">full</button>
+379       </div>
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:37Z)**_
@@ -4272,162 +4347,163 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:37Z)**_
  `./worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py`
 
 ```text
-475	    l.classList.toggle('sel', l.dataset.val === String(value));
-476	  });
-477	}
-478	
-479	function selectPhoneme(ipa, autoRender) {
-480	  currentIpa = ipa;
-481	  document.querySelectorAll('.phoneme-btn').forEach(b => b.classList.toggle('active', b.dataset.ipa === ipa));
-482	  const p = byIpa[ipa];
-483	  $('ipa-title').textContent = p.ipa;
-484	  $('ipa-sub').textContent = 'Kirshenbaum: [[' + p.kirsh + p.cfg.anchor + ']]  \u00b7  ' + p.category;
-485	  setRadio('anchor', p.cfg.anchor);
-486	  setRadio('stretch', p.cfg.stretch);
-487	  const trimNull = p.cfg.trimDb === null;
-488	  $('trimDbNull').checked = trimNull;
-489	  $('trimDb').value = trimNull ? '-40' : p.cfg.trimDb;
-490	  $('trimDb').disabled = trimNull;
-491	  $('fadeMs').value = p.cfg.fadeMs;
-492	  $('loopable').checked = p.cfg.loopable;
-493	  $('cropStartPct').value = p.cfg.cropStartPct ?? 0;
-494	  $('cropEndPct').value = p.cfg.cropEndPct ?? 100;
-495	  $('gainDb').value = p.cfg.gainDb ?? 0;
-496	  $('hist-count').textContent = p.historyLength;
-497	  $('btn-undo').disabled = p.historyLength === 0;
-498	  $('btn-loop').disabled = !p.cfg.loopable;
-499	  $('audio').src = '';
-500	  $('status').textContent = 'ready';
-501	  if (autoRender) doRender();
-502	}
-503	
-504	function collectCfg() {
-505	  const trimNull = $('trimDbNull').checked;
-506	  const trimRaw = $('trimDb').value;
-507	  let cs = Number($('cropStartPct').value || 0);
-508	  let ce = Number($('cropEndPct').value || 100);
-509	  if (!Number.isFinite(cs)) cs = 0;
-510	  if (!Number.isFinite(ce)) ce = 100;
-511	  cs = Math.max(0, Math.min(100, cs));
-512	  ce = Math.max(cs, Math.min(100, ce));
-513	  let g = Number($('gainDb').value || 0);
-514	  if (!Number.isFinite(g)) g = 0;
-515	  return {
-516	    anchor: document.querySelector('input[name=anchor]:checked').value,
-517	    trimDb: trimNull ? null : Number(trimRaw === '' ? -40 : trimRaw),
-518	    stretch: Number(document.querySelector('input[name=stretch]:checked').value),
-519	    fadeMs: Number($('fadeMs').value || 0),
-520	    loopable: $('loopable').checked,
-521	    cropStartPct: cs,
-522	    cropEndPct: ce,
-523	    gainDb: g,
-524	  };
-525	}
-526	
-527	async function autosave() {
-528	  if (!currentIpa) return;
-529	  const cfg = collectCfg();
-530	  const resp = await fetch('/update', {
-531	    method: 'POST',
-532	    headers: {'Content-Type': 'application/json'},
-533	    body: JSON.stringify({ ipa: currentIpa, cfg }),
-534	  }).then(r => r.json());
-535	  if (resp.error) { $('status').textContent = 'error: ' + resp.error; return; }
-536	  byIpa[currentIpa] = resp;
-537	  $('hist-count').textContent = resp.historyLength;
-538	  $('btn-undo').disabled = resp.historyLength === 0;
-539	  $('btn-loop').disabled = !resp.cfg.loopable;
-540	  $('ipa-sub').textContent = 'Kirshenbaum: [[' + resp.kirsh + resp.cfg.anchor + ']]  \u00b7  ' + resp.category;
-541	  $('trimDb').disabled = resp.cfg.trimDb === null;
-542	  setRadio('anchor', resp.cfg.anchor);
-543	  setRadio('stretch', resp.cfg.stretch);
-544	  refreshListItem(currentIpa);
-545	  toast('saved');
-546	}
-547	
-548	async function doRender() {
-549	  if (!currentIpa) return;
-550	  const mySeq = ++renderSeq;
-551	  $('status').textContent = 'rendering\u2026';
-552	  try {
-553	    const r = await fetch('/render', {
-554	      method: 'POST',
-555	      headers: {'Content-Type': 'application/json'},
-556	      body: JSON.stringify({ ipa: currentIpa }),
-557	    }).then(r => r.json());
-558	    if (mySeq !== renderSeq) return;
-559	    if (r.error) { $('status').textContent = 'render error: ' + r.error; return; }
-560	    $('status').textContent = 'rendered ' + new Date().toLocaleTimeString();
-561	    const audio = $('audio');
-562	    audio.loop = false;
-563	    audio.src = r.audio;
-564	    audio.play().catch(() => {});
-565	  } catch (e) {
-566	    $('status').textContent = 'render failed: ' + e;
-567	  }
-568	}
-569	
-570	async function doLoop() {
-571	  if (!currentIpa || !byIpa[currentIpa].cfg.loopable) return;
-572	  await doRender();
-573	  const audio = $('audio');
-574	  audio.loop = true;
-575	  audio.play().catch(() => {});
-576	  clearTimeout(loopTimer);
-577	  loopTimer = setTimeout(() => {
-578	    audio.loop = false;
-579	    audio.pause();
-580	    $('status').textContent = 'loop preview ended';
-581	  }, 5000);
-582	}
-583	
-584	async function doUndo() {
-585	  if (!currentIpa) return;
-586	  const r = await fetch('/undo', {
-587	    method: 'POST',
-588	    headers: {'Content-Type': 'application/json'},
-589	    body: JSON.stringify({ ipa: currentIpa }),
-590	  }).then(r => r.json());
-591	  if (r.error) return;
-592	  byIpa[currentIpa] = r;
-593	  refreshListItem(currentIpa);
-594	  selectPhoneme(currentIpa, false);
-595	  toast('undo');
-596	}
-597	
-598	async function doReset() {
-599	  if (!currentIpa) return;
-600	  const r = await fetch('/reset', {
-601	    method: 'POST',
-602	    headers: {'Content-Type': 'application/json'},
-603	    body: JSON.stringify({ ipa: currentIpa }),
-604	  }).then(r => r.json());
-605	  if (r.error) return;
-606	  byIpa[currentIpa] = r;
-607	  refreshListItem(currentIpa);
-608	  selectPhoneme(currentIpa, false);
-609	  toast('reset');
-610	}
-611	
-612	function bindDialInputs() {
-613	  document.querySelectorAll('input[name=anchor]').forEach(el => el.addEventListener('change', autosave));
-614	  document.querySelectorAll('input[name=stretch]').forEach(el => el.addEventListener('change', autosave));
-615	  $('trimDb').addEventListener('change', autosave);
-616	  $('fadeMs').addEventListener('change', autosave);
-617	  $('loopable').addEventListener('change', autosave);
-618	  $('cropStartPct').addEventListener('change', () => { autosave().then(doRender); });
-619	  $('cropEndPct').addEventListener('change', () => { autosave().then(doRender); });
-620	  $('gainDb').addEventListener('change', () => { autosave().then(doRender); });
-621	  $('trimDbNull').addEventListener('change', () => {
-622	    $('trimDb').disabled = $('trimDbNull').checked;
-623	    autosave();
-624	  });
-625	}
-626	
-627	function bindButtons() {
-628	  $('btn-render').onclick = doRender;
-629	  $('btn-loop').onclick = doLoop;
+475     l.classList.toggle('sel', l.dataset.val === String(value));
+476   });
+477 }
+478 
+479 function selectPhoneme(ipa, autoRender) {
+480   currentIpa = ipa;
+481   document.querySelectorAll('.phoneme-btn').forEach(b => b.classList.toggle('active', b.dataset.ipa === ipa));
+482   const p = byIpa[ipa];
+483   $('ipa-title').textContent = p.ipa;
+484   $('ipa-sub').textContent = 'Kirshenbaum: [[' + p.kirsh + p.cfg.anchor + ']]  \u00b7  ' + p.category;
+485   setRadio('anchor', p.cfg.anchor);
+486   setRadio('stretch', p.cfg.stretch);
+487   const trimNull = p.cfg.trimDb === null;
+488   $('trimDbNull').checked = trimNull;
+489   $('trimDb').value = trimNull ? '-40' : p.cfg.trimDb;
+490   $('trimDb').disabled = trimNull;
+491   $('fadeMs').value = p.cfg.fadeMs;
+492   $('loopable').checked = p.cfg.loopable;
+493   $('cropStartPct').value = p.cfg.cropStartPct ?? 0;
+494   $('cropEndPct').value = p.cfg.cropEndPct ?? 100;
+495   $('gainDb').value = p.cfg.gainDb ?? 0;
+496   $('hist-count').textContent = p.historyLength;
+497   $('btn-undo').disabled = p.historyLength === 0;
+498   $('btn-loop').disabled = !p.cfg.loopable;
+499   $('audio').src = '';
+500   $('status').textContent = 'ready';
+501   if (autoRender) doRender();
+502 }
+503 
+504 function collectCfg() {
+505   const trimNull = $('trimDbNull').checked;
+506   const trimRaw = $('trimDb').value;
+507   let cs = Number($('cropStartPct').value || 0);
+508   let ce = Number($('cropEndPct').value || 100);
+509   if (!Number.isFinite(cs)) cs = 0;
+510   if (!Number.isFinite(ce)) ce = 100;
+511   cs = Math.max(0, Math.min(100, cs));
+512   ce = Math.max(cs, Math.min(100, ce));
+513   let g = Number($('gainDb').value || 0);
+514   if (!Number.isFinite(g)) g = 0;
+515   return {
+516     anchor: document.querySelector('input[name=anchor]:checked').value,
+517     trimDb: trimNull ? null : Number(trimRaw === '' ? -40 : trimRaw),
+518     stretch: Number(document.querySelector('input[name=stretch]:checked').value),
+519     fadeMs: Number($('fadeMs').value || 0),
+520     loopable: $('loopable').checked,
+521     cropStartPct: cs,
+522     cropEndPct: ce,
+523     gainDb: g,
+524   };
+525 }
+526 
+527 async function autosave() {
+528   if (!currentIpa) return;
+529   const cfg = collectCfg();
+530   const resp = await fetch('/update', {
+531     method: 'POST',
+532     headers: {'Content-Type': 'application/json'},
+533     body: JSON.stringify({ ipa: currentIpa, cfg }),
+534   }).then(r => r.json());
+535   if (resp.error) { $('status').textContent = 'error: ' + resp.error; return; }
+536   byIpa[currentIpa] = resp;
+537   $('hist-count').textContent = resp.historyLength;
+538   $('btn-undo').disabled = resp.historyLength === 0;
+539   $('btn-loop').disabled = !resp.cfg.loopable;
+540   $('ipa-sub').textContent = 'Kirshenbaum: [[' + resp.kirsh + resp.cfg.anchor + ']]  \u00b7  ' + resp.category;
+541   $('trimDb').disabled = resp.cfg.trimDb === null;
+542   setRadio('anchor', resp.cfg.anchor);
+543   setRadio('stretch', resp.cfg.stretch);
+544   refreshListItem(currentIpa);
+545   toast('saved');
+546 }
+547 
+548 async function doRender() {
+549   if (!currentIpa) return;
+550   const mySeq = ++renderSeq;
+551   $('status').textContent = 'rendering\u2026';
+552   try {
+553     const r = await fetch('/render', {
+554       method: 'POST',
+555       headers: {'Content-Type': 'application/json'},
+556       body: JSON.stringify({ ipa: currentIpa }),
+557     }).then(r => r.json());
+558     if (mySeq !== renderSeq) return;
+559     if (r.error) { $('status').textContent = 'render error: ' + r.error; return; }
+560     $('status').textContent = 'rendered ' + new Date().toLocaleTimeString();
+561     const audio = $('audio');
+562     audio.loop = false;
+563     audio.src = r.audio;
+564     audio.play().catch(() => {});
+565   } catch (e) {
+566     $('status').textContent = 'render failed: ' + e;
+567   }
+568 }
+569 
+570 async function doLoop() {
+571   if (!currentIpa || !byIpa[currentIpa].cfg.loopable) return;
+572   await doRender();
+573   const audio = $('audio');
+574   audio.loop = true;
+575   audio.play().catch(() => {});
+576   clearTimeout(loopTimer);
+577   loopTimer = setTimeout(() => {
+578     audio.loop = false;
+579     audio.pause();
+580     $('status').textContent = 'loop preview ended';
+581   }, 5000);
+582 }
+583 
+584 async function doUndo() {
+585   if (!currentIpa) return;
+586   const r = await fetch('/undo', {
+587     method: 'POST',
+588     headers: {'Content-Type': 'application/json'},
+589     body: JSON.stringify({ ipa: currentIpa }),
+590   }).then(r => r.json());
+591   if (r.error) return;
+592   byIpa[currentIpa] = r;
+593   refreshListItem(currentIpa);
+594   selectPhoneme(currentIpa, false);
+595   toast('undo');
+596 }
+597 
+598 async function doReset() {
+599   if (!currentIpa) return;
+600   const r = await fetch('/reset', {
+601     method: 'POST',
+602     headers: {'Content-Type': 'application/json'},
+603     body: JSON.stringify({ ipa: currentIpa }),
+604   }).then(r => r.json());
+605   if (r.error) return;
+606   byIpa[currentIpa] = r;
+607   refreshListItem(currentIpa);
+608   selectPhoneme(currentIpa, false);
+609   toast('reset');
+610 }
+611 
+612 function bindDialInputs() {
+613   document.querySelectorAll('input[name=anchor]').forEach(el => el.addEventListener('change', autosave));
+614   document.querySelectorAll('input[name=stretch]').forEach(el => el.addEventListener('change', autosave));
+615   $('trimDb').addEventListener('change', autosave);
+616   $('fadeMs').addEventListener('change', autosave);
+617   $('loopable').addEventListener('change', autosave);
+618   $('cropStartPct').addEventListener('change', () => { autosave().then(doRender); });
+619   $('cropEndPct').addEventListener('change', () => { autosave().then(doRender); });
+620   $('gainDb').addEventListener('change', () => { autosave().then(doRender); });
+621   $('trimDbNull').addEventListener('change', () => {
+622     $('trimDb').disabled = $('trimDbNull').checked;
+623     autosave();
+624   });
+625 }
+626 
+627 function bindButtons() {
+628   $('btn-render').onclick = doRender;
+629   $('btn-loop').onclick = doLoop;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:44Z)**_
@@ -4448,6 +4524,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:49Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:45:59Z)**_
@@ -4458,6 +4535,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:45:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:03Z)**_
@@ -4468,6 +4546,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:03Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:10Z)**_
@@ -4478,6 +4557,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:10Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:15Z)**_
@@ -4488,6 +4568,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:15Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:22Z)**_
@@ -4498,6 +4579,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:22Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:26Z)**_
@@ -4511,37 +4593,38 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:26Z)**_
  `./worktrees/tools-phoneme-tuner/tools/phoneme-tuner/app.py`
 
 ```text
-114	def stretch_chain(cfg):
-115	    """Stage-1 chain: volume + silenceremove + atempo. Runs against raw espeak output."""
-116	    parts = []
-117	    try:
-118	        gain_db = float(cfg.get("gainDb", 0) or 0)
-119	    except (TypeError, ValueError):
-120	        gain_db = 0.0
-121	    if gain_db != 0:
-122	        parts.append("volume={g}dB".format(g=gain_db))
-123	    if cfg.get("trimDb") is not None:
-124	        db = cfg["trimDb"]
-125	        parts.append(
-126	            "silenceremove=start_periods=1:start_threshold={db}dB:"
-127	            "stop_periods=-1:stop_threshold={db}dB".format(db=db)
-128	        )
-129	    try:
-130	        stretch = float(cfg.get("stretch", 1) or 1)
-131	    except (TypeError, ValueError):
-132	        stretch = 1.0
-133	    if stretch <= 0:
-134	        stretch = 1.0
-135	    if abs(stretch - 1.0) > 1e-6:
-136	        tempo = 1.0 / stretch
-137	        while tempo < 0.5 - 1e-9:
-138	            parts.append("atempo=0.5")
-139	            tempo /= 0.5
-140	        while tempo > 100.0 + 1e-9:
-141	            parts.append("atempo=100.0")
-142	            tempo /= 100.0
-143	        parts.append("atempo={t:.6f}".format(t=tempo))
+114 def stretch_chain(cfg):
+115     """Stage-1 chain: volume + silenceremove + atempo. Runs against raw espeak output."""
+116     parts = []
+117     try:
+118         gain_db = float(cfg.get("gainDb", 0) or 0)
+119     except (TypeError, ValueError):
+120         gain_db = 0.0
+121     if gain_db != 0:
+122         parts.append("volume={g}dB".format(g=gain_db))
+123     if cfg.get("trimDb") is not None:
+124         db = cfg["trimDb"]
+125         parts.append(
+126             "silenceremove=start_periods=1:start_threshold={db}dB:"
+127             "stop_periods=-1:stop_threshold={db}dB".format(db=db)
+128         )
+129     try:
+130         stretch = float(cfg.get("stretch", 1) or 1)
+131     except (TypeError, ValueError):
+132         stretch = 1.0
+133     if stretch <= 0:
+134         stretch = 1.0
+135     if abs(stretch - 1.0) > 1e-6:
+136         tempo = 1.0 / stretch
+137         while tempo < 0.5 - 1e-9:
+138             parts.append("atempo=0.5")
+139             tempo /= 0.5
+140         while tempo > 100.0 + 1e-9:
+141             parts.append("atempo=100.0")
+142             tempo /= 100.0
+143         parts.append("atempo={t:.6f}".format(t=tempo))
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:38Z)**_
@@ -4590,6 +4673,7 @@ _**Agent (claude-opus-4-6 2026-04-12 01:46:38Z)**_
 623:  document.querySelectorAll('button[data-stretch]').forEach(btn => {
 625:      $('stretch').value = btn.dataset.stretch;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 01:46:47Z)**_
@@ -4652,7 +4736,7 @@ So you asked for 2× but heard ~half the original. The multiplier is correct, it
 
 - **Want full-length stretched phoneme** → disable Trim, use **Crop** to chop unwanted edges manually.
 - **Want loop-ready + long** → keep Trim but bump the threshold more negative (`-80`, `-90`) so it only cuts true silence.
-- **Want a stretched *slice*** → leave Trim on, use Crop to pick the segment you want, then stretch.
+- **Want a stretched _slice_** → leave Trim on, use Crop to pick the segment you want, then stretch.
 
 Trim is best reserved for the final "make this loop seam tight" pass. Stretch-heavy experimentation is easier with Trim off.
 
@@ -4904,6 +4988,7 @@ Read current tuned-config.json
     "cropEndPct": 100,
     "gainDb": 0
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:28Z)**_
@@ -4920,6 +5005,7 @@ scripts/generate-phoneme-sprite.ts
 docs/AudioSprite-hover-sustain-text-to-speech.md
 .specstory/history/2026-04-06_08-56-24Z-i-don-t-understand.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:32Z)**_
@@ -4942,6 +5028,7 @@ d9fcb58 fix(words): render æ/ɒ audibly + drop schwa from sustain pipeline
 66aba48 feat(words): sustain sonorants + hover-to-blend chip loop
 9b2b2f5 feat(words): add phoneme audio sprite + per-chip playback
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:34Z)**_
@@ -4954,6 +5041,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:03:34Z)**_
 47:  s: 's',
 101:  's',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:37Z)**_
@@ -4963,271 +5051,272 @@ _**Agent (claude-opus-4-6 2026-04-12 02:03:37Z)**_
  `./scripts/generate-phoneme-sprite.ts`
 
 ```text
-1	// scripts/generate-phoneme-sprite.ts
-2	//
-3	// Generates public/audio/phonemes.mp3 + phonemes.json from the IPA phonemes
-4	// used in the AUS corpus. Uses eSpeak-NG (GPL v3 — audio output unrestricted)
-5	// as the TTS backend, feeding Kirshenbaum phoneme codes directly so every
-6	// clip is linguistically accurate rather than an "approximation map".
-7	//
-8	// Requires: espeak-ng, ffmpeg on PATH. Run: `yarn generate:phonemes`.
-9	
-10	import { execFileSync } from 'node:child_process';
-11	import {
-12	  existsSync,
-13	  mkdirSync,
-14	  readFileSync,
-15	  readdirSync,
-16	  rmSync,
-17	  writeFileSync,
-18	} from 'node:fs';
-19	import path from 'node:path';
-20	import { fileURLToPath } from 'node:url';
-21	
-22	const __dirname = path.dirname(fileURLToPath(import.meta.url));
-23	const repoRoot = path.join(__dirname, '..');
-24	const corpusDir = path.join(repoRoot, 'src/data/words/curriculum/aus');
-25	const outDir = path.join(repoRoot, 'public/audio');
-26	const tmpDir = path.join(repoRoot, '.tmp/phoneme-sprite');
-27	
-28	const GAP_SEC = 0.25;
-29	const SAMPLE_RATE = 22_050;
-30	
-31	/**
-32	 * IPA → Kirshenbaum ASCII phoneme codes for eSpeak-NG `[[...]]` input.
-33	 * Single consonants get a trailing schwa because stops are inaudible in
-34	 * isolation. Vowels and diphthongs speak alone. Clusters (ks, kw, juː) are
-35	 * multi-phoneme sequences the corpus treats as a single grapheme sound.
-36	 */
-37	const IPA_TO_KIRSH: Record<string, string> = {
-38	  // Consonants
-39	  p: 'p',
-40	  b: 'b',
-41	  t: 't',
-42	  d: 'd',
-43	  k: 'k',
-44	  g: 'g',
-45	  f: 'f',
-46	  v: 'v',
-47	  s: 's',
-48	  z: 'z',
-49	  h: 'h',
-50	  θ: 'T',
-51	  ð: 'D',
-52	  ʃ: 'S',
-53	  ʒ: 'Z',
-54	  tʃ: 'tS',
-55	  dʒ: 'dZ',
-56	  m: 'm',
-57	  n: 'n',
-58	  ŋ: 'N',
-59	  l: 'l',
-60	  r: 'r',
-61	  w: 'w',
-62	  j: 'j',
-63	  // Multi-phoneme clusters the corpus stores as one grapheme `p` value
-64	  ks: 'ks',
-65	  kw: 'kw',
-66	  juː: 'ju:',
-67	  // Short vowels
-68	  e: 'E',
-69	  æ: '&',
-70	  ɒ: 'A',
-71	  ʌ: 'V',
-72	  ʊ: 'U',
-73	  ɪ: 'I',
-74	  ə: '@',
-75	  // Long vowels
-76	  iː: 'i:',
-77	  uː: 'u:',
-78	  ɑː: 'A:',
-79	  ɔː: 'O:',
-80	  ɜː: '3:',
-81	  // Diphthongs
-82	  aɪ: 'aI',
-83	  aʊ: 'aU',
-84	  eɪ: 'eI',
-85	  oʊ: 'oU',
-86	  ɔɪ: 'OI',
-87	  eə: 'e@',
-88	  ɛə: 'e@',
-89	  ɪə: 'I@',
-90	};
-91	
-92	const CONSONANTS = new Set([
-93	  'p',
-94	  'b',
-95	  't',
-96	  'd',
-97	  'k',
-98	  'g',
-99	  'f',
-100	  'v',
-101	  's',
-102	  'z',
-103	  'h',
-104	  'θ',
-105	  'ð',
-106	  'ʃ',
-107	  'ʒ',
-108	  'tʃ',
-109	  'dʒ',
-110	  'm',
-111	  'n',
-112	  'ŋ',
-113	  'l',
-114	  'r',
-115	  'w',
-116	  'j',
-117	  'ks',
-118	  'kw',
-119	]);
-120	
-121	const buildKirshenbaumInput = (ipa: string): string => {
-122	  const code = IPA_TO_KIRSH[ipa];
-123	  if (!code) throw new Error(`No Kirshenbaum mapping for IPA "${ipa}"`);
-124	  return CONSONANTS.has(ipa) ? `[[${code}@]]` : `[[${code}]]`;
-125	};
-126	
-127	const corpusPhonemes = (): string[] => {
-128	  const seen = new Set<string>();
-129	  for (const file of readdirSync(corpusDir).filter((f) =>
-130	    f.endsWith('.json'),
-131	  )) {
-132	    const raw = readFileSync(path.join(corpusDir, file), 'utf8');
-133	    const entries = JSON.parse(raw) as Array<{
-134	      graphemes?: Array<{ p: string }>;
-135	    }>;
-136	    for (const entry of entries) {
-137	      for (const g of entry.graphemes ?? []) {
-138	        if (g.p) seen.add(g.p);
-139	      }
-140	    }
-141	  }
-142	  return [...seen].toSorted();
-143	};
-144	
-145	const probeDurationSec = (wav: string): number => {
-146	  const out = execFileSync(
-147	    'ffprobe',
-148	    [
-149	      '-v',
-150	      'error',
-151	      '-show_entries',
-152	      'format=duration',
-153	      '-of',
-154	      'default=nk=1:nw=1',
-155	      wav,
-156	    ],
-157	    { encoding: 'utf8' },
-158	  );
-159	  return Number(out.trim());
-160	};
-161	
-162	const synthesizePhoneme = (ipa: string, outWav: string): void => {
-163	  const input = buildKirshenbaumInput(ipa);
-164	  execFileSync('espeak-ng', [
-165	    '-v',
-166	    'en',
-167	    '-s',
-168	    '140',
-169	    '-w',
-170	    outWav,
-171	    input,
-172	  ]);
-173	};
-174	
-175	const main = (): void => {
-176	  if (existsSync(tmpDir))
-177	    rmSync(tmpDir, { recursive: true, force: true });
-178	  mkdirSync(tmpDir, { recursive: true });
-179	  mkdirSync(outDir, { recursive: true });
-180	
-181	  const phonemes = corpusPhonemes();
-182	  const missing = phonemes.filter((p) => !IPA_TO_KIRSH[p]);
-183	  if (missing.length > 0) {
-184	    throw new Error(
-185	      `Corpus uses IPA phonemes with no Kirshenbaum mapping: ${missing.join(', ')}`,
-186	    );
-187	  }
-188	
-189	  const silenceWav = path.join(tmpDir, 'silence.wav');
-190	  execFileSync('ffmpeg', [
-191	    '-y',
-192	    '-f',
-193	    'lavfi',
-194	    '-i',
-195	    `anullsrc=r=${SAMPLE_RATE}:cl=mono`,
-196	    '-t',
-197	    GAP_SEC.toString(),
-198	    silenceWav,
-199	  ]);
-200	
-201	  interface SpriteEntry {
-202	    start: number;
-203	    duration: number;
-204	  }
-205	  const sprite: Record<string, SpriteEntry> = {};
-206	  const concatLines: string[] = [];
-207	  let cursor = 0;
-208	
-209	  for (const [i, ipa] of phonemes.entries()) {
-210	    const safe = i.toString().padStart(3, '0');
-211	    const rawWav = path.join(tmpDir, `raw-${safe}.wav`);
-212	    const normWav = path.join(tmpDir, `norm-${safe}.wav`);
-213	    synthesizePhoneme(ipa, rawWav);
-214	    execFileSync('ffmpeg', [
-215	      '-y',
-216	      '-i',
-217	      rawWav,
-218	      '-ar',
-219	      SAMPLE_RATE.toString(),
-220	      '-ac',
-221	      '1',
-222	      normWav,
-223	    ]);
-224	    const dur = probeDurationSec(normWav);
-225	    sprite[ipa] = {
-226	      start: Math.round(cursor * 1000),
-227	      duration: Math.round(dur * 1000),
-228	    };
-229	    concatLines.push(`file '${normWav}'`, `file '${silenceWav}'`);
-230	    cursor += dur + GAP_SEC;
-231	  }
-232	
-233	  const concatList = path.join(tmpDir, 'concat.txt');
-234	  writeFileSync(concatList, concatLines.join('\n'));
-235	
-236	  const mp3Path = path.join(outDir, 'phonemes.mp3');
-237	  execFileSync('ffmpeg', [
-238	    '-y',
-239	    '-f',
-240	    'concat',
-241	    '-safe',
-242	    '0',
-243	    '-i',
-244	    concatList,
-245	    '-codec:a',
-246	    'libmp3lame',
-247	    '-qscale:a',
-248	    '6',
-249	    mp3Path,
-250	  ]);
-251	
-252	  const jsonPath = path.join(outDir, 'phonemes.json');
-253	  writeFileSync(jsonPath, JSON.stringify(sprite, null, 2) + '\n');
-254	
-255	  rmSync(tmpDir, { recursive: true, force: true });
-256	
-257	  const totalMs = Math.round(cursor * 1000);
-258	  console.log(
-259	    `Generated ${phonemes.length} phoneme clips → ${path.relative(repoRoot, mp3Path)} (${totalMs}ms)`,
-260	  );
-261	};
-262	
-263	main();
+1 // scripts/generate-phoneme-sprite.ts
+2 //
+3 // Generates public/audio/phonemes.mp3 + phonemes.json from the IPA phonemes
+4 // used in the AUS corpus. Uses eSpeak-NG (GPL v3 — audio output unrestricted)
+5 // as the TTS backend, feeding Kirshenbaum phoneme codes directly so every
+6 // clip is linguistically accurate rather than an "approximation map".
+7 //
+8 // Requires: espeak-ng, ffmpeg on PATH. Run: `yarn generate:phonemes`.
+9 
+10 import { execFileSync } from 'node:child_process';
+11 import {
+12   existsSync,
+13   mkdirSync,
+14   readFileSync,
+15   readdirSync,
+16   rmSync,
+17   writeFileSync,
+18 } from 'node:fs';
+19 import path from 'node:path';
+20 import { fileURLToPath } from 'node:url';
+21 
+22 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+23 const repoRoot = path.join(__dirname, '..');
+24 const corpusDir = path.join(repoRoot, 'src/data/words/curriculum/aus');
+25 const outDir = path.join(repoRoot, 'public/audio');
+26 const tmpDir = path.join(repoRoot, '.tmp/phoneme-sprite');
+27 
+28 const GAP_SEC = 0.25;
+29 const SAMPLE_RATE = 22_050;
+30 
+31 /**
+32  * IPA → Kirshenbaum ASCII phoneme codes for eSpeak-NG `[[...]]` input.
+33  * Single consonants get a trailing schwa because stops are inaudible in
+34  * isolation. Vowels and diphthongs speak alone. Clusters (ks, kw, juː) are
+35  * multi-phoneme sequences the corpus treats as a single grapheme sound.
+36  */
+37 const IPA_TO_KIRSH: Record<string, string> = {
+38   // Consonants
+39   p: 'p',
+40   b: 'b',
+41   t: 't',
+42   d: 'd',
+43   k: 'k',
+44   g: 'g',
+45   f: 'f',
+46   v: 'v',
+47   s: 's',
+48   z: 'z',
+49   h: 'h',
+50   θ: 'T',
+51   ð: 'D',
+52   ʃ: 'S',
+53   ʒ: 'Z',
+54   tʃ: 'tS',
+55   dʒ: 'dZ',
+56   m: 'm',
+57   n: 'n',
+58   ŋ: 'N',
+59   l: 'l',
+60   r: 'r',
+61   w: 'w',
+62   j: 'j',
+63   // Multi-phoneme clusters the corpus stores as one grapheme `p` value
+64   ks: 'ks',
+65   kw: 'kw',
+66   juː: 'ju:',
+67   // Short vowels
+68   e: 'E',
+69   æ: '&',
+70   ɒ: 'A',
+71   ʌ: 'V',
+72   ʊ: 'U',
+73   ɪ: 'I',
+74   ə: '@',
+75   // Long vowels
+76   iː: 'i:',
+77   uː: 'u:',
+78   ɑː: 'A:',
+79   ɔː: 'O:',
+80   ɜː: '3:',
+81   // Diphthongs
+82   aɪ: 'aI',
+83   aʊ: 'aU',
+84   eɪ: 'eI',
+85   oʊ: 'oU',
+86   ɔɪ: 'OI',
+87   eə: 'e@',
+88   ɛə: 'e@',
+89   ɪə: 'I@',
+90 };
+91 
+92 const CONSONANTS = new Set([
+93   'p',
+94   'b',
+95   't',
+96   'd',
+97   'k',
+98   'g',
+99   'f',
+100   'v',
+101   's',
+102   'z',
+103   'h',
+104   'θ',
+105   'ð',
+106   'ʃ',
+107   'ʒ',
+108   'tʃ',
+109   'dʒ',
+110   'm',
+111   'n',
+112   'ŋ',
+113   'l',
+114   'r',
+115   'w',
+116   'j',
+117   'ks',
+118   'kw',
+119 ]);
+120 
+121 const buildKirshenbaumInput = (ipa: string): string => {
+122   const code = IPA_TO_KIRSH[ipa];
+123   if (!code) throw new Error(`No Kirshenbaum mapping for IPA "${ipa}"`);
+124   return CONSONANTS.has(ipa) ? `[[${code}@]]` : `[[${code}]]`;
+125 };
+126 
+127 const corpusPhonemes = (): string[] => {
+128   const seen = new Set<string>();
+129   for (const file of readdirSync(corpusDir).filter((f) =>
+130     f.endsWith('.json'),
+131   )) {
+132     const raw = readFileSync(path.join(corpusDir, file), 'utf8');
+133     const entries = JSON.parse(raw) as Array<{
+134       graphemes?: Array<{ p: string }>;
+135     }>;
+136     for (const entry of entries) {
+137       for (const g of entry.graphemes ?? []) {
+138         if (g.p) seen.add(g.p);
+139       }
+140     }
+141   }
+142   return [...seen].toSorted();
+143 };
+144 
+145 const probeDurationSec = (wav: string): number => {
+146   const out = execFileSync(
+147     'ffprobe',
+148     [
+149       '-v',
+150       'error',
+151       '-show_entries',
+152       'format=duration',
+153       '-of',
+154       'default=nk=1:nw=1',
+155       wav,
+156     ],
+157     { encoding: 'utf8' },
+158   );
+159   return Number(out.trim());
+160 };
+161 
+162 const synthesizePhoneme = (ipa: string, outWav: string): void => {
+163   const input = buildKirshenbaumInput(ipa);
+164   execFileSync('espeak-ng', [
+165     '-v',
+166     'en',
+167     '-s',
+168     '140',
+169     '-w',
+170     outWav,
+171     input,
+172   ]);
+173 };
+174 
+175 const main = (): void => {
+176   if (existsSync(tmpDir))
+177     rmSync(tmpDir, { recursive: true, force: true });
+178   mkdirSync(tmpDir, { recursive: true });
+179   mkdirSync(outDir, { recursive: true });
+180 
+181   const phonemes = corpusPhonemes();
+182   const missing = phonemes.filter((p) => !IPA_TO_KIRSH[p]);
+183   if (missing.length > 0) {
+184     throw new Error(
+185       `Corpus uses IPA phonemes with no Kirshenbaum mapping: ${missing.join(', ')}`,
+186     );
+187   }
+188 
+189   const silenceWav = path.join(tmpDir, 'silence.wav');
+190   execFileSync('ffmpeg', [
+191     '-y',
+192     '-f',
+193     'lavfi',
+194     '-i',
+195     `anullsrc=r=${SAMPLE_RATE}:cl=mono`,
+196     '-t',
+197     GAP_SEC.toString(),
+198     silenceWav,
+199   ]);
+200 
+201   interface SpriteEntry {
+202     start: number;
+203     duration: number;
+204   }
+205   const sprite: Record<string, SpriteEntry> = {};
+206   const concatLines: string[] = [];
+207   let cursor = 0;
+208 
+209   for (const [i, ipa] of phonemes.entries()) {
+210     const safe = i.toString().padStart(3, '0');
+211     const rawWav = path.join(tmpDir, `raw-${safe}.wav`);
+212     const normWav = path.join(tmpDir, `norm-${safe}.wav`);
+213     synthesizePhoneme(ipa, rawWav);
+214     execFileSync('ffmpeg', [
+215       '-y',
+216       '-i',
+217       rawWav,
+218       '-ar',
+219       SAMPLE_RATE.toString(),
+220       '-ac',
+221       '1',
+222       normWav,
+223     ]);
+224     const dur = probeDurationSec(normWav);
+225     sprite[ipa] = {
+226       start: Math.round(cursor * 1000),
+227       duration: Math.round(dur * 1000),
+228     };
+229     concatLines.push(`file '${normWav}'`, `file '${silenceWav}'`);
+230     cursor += dur + GAP_SEC;
+231   }
+232 
+233   const concatList = path.join(tmpDir, 'concat.txt');
+234   writeFileSync(concatList, concatLines.join('\n'));
+235 
+236   const mp3Path = path.join(outDir, 'phonemes.mp3');
+237   execFileSync('ffmpeg', [
+238     '-y',
+239     '-f',
+240     'concat',
+241     '-safe',
+242     '0',
+243     '-i',
+244     concatList,
+245     '-codec:a',
+246     'libmp3lame',
+247     '-qscale:a',
+248     '6',
+249     mp3Path,
+250   ]);
+251 
+252   const jsonPath = path.join(outDir, 'phonemes.json');
+253   writeFileSync(jsonPath, JSON.stringify(sprite, null, 2) + '\n');
+254 
+255   rmSync(tmpDir, { recursive: true, force: true });
+256 
+257   const totalMs = Math.round(cursor * 1000);
+258   console.log(
+259     `Generated ${phonemes.length} phoneme clips → ${path.relative(repoRoot, mp3Path)} (${totalMs}ms)`,
+260   );
+261 };
+262 
+263 main();
 264
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:50Z)**_
@@ -5247,6 +5336,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:03:51Z)**_
 ```text
 No files found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:52Z)**_
@@ -5439,6 +5529,7 @@ Read rest of tuned-config.json
   }
 }
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:03:57Z)**_
@@ -5497,6 +5588,7 @@ src/data/words/core/level8.json
 yarn.lock
 b303611 feat(words): add phoneme audio sprite + per-chip playback
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:04:00Z)**_
@@ -5589,6 +5681,7 @@ index 1ca3b12..76fc39b 100644
 -  'n',
 -  'ŋ',
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:04:03Z)**_
@@ -5742,6 +5835,7 @@ const corpusPhonemes = (): string[] => {
       graphemes?: Array<{ p: string }>;
     }>;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:04:42Z)**_
@@ -5773,177 +5867,178 @@ _**Agent (claude-opus-4-6 2026-04-12 02:04:46Z)**_
  `./worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json`
 
 ```text
-100	    "gainDb": 4
-101	  },
-102	  "h": {
-103	    "anchor": "V",
-104	    "trimDb": null,
-105	    "stretch": 4,
-106	    "fadeMs": 20,
-107	    "loopable": false,
-108	    "cropStartPct": 0,
-109	    "cropEndPct": 50,
-110	    "gainDb": 0
-111	  },
-112	  "θ": {
-113	    "anchor": "",
-114	    "trimDb": -60,
-115	    "stretch": 4,
-116	    "fadeMs": 0,
-117	    "loopable": true,
-118	    "cropStartPct": 0,
-119	    "cropEndPct": 100,
-120	    "gainDb": 0
-121	  },
-122	  "ð": {
-123	    "anchor": "",
-124	    "trimDb": -60,
-125	    "stretch": 4,
-126	    "fadeMs": 0,
-127	    "loopable": true,
-128	    "cropStartPct": 0,
-129	    "cropEndPct": 100,
-130	    "gainDb": 0
-131	  },
-132	  "ʃ": {
-133	    "anchor": "",
-134	    "trimDb": -60,
-135	    "stretch": 4,
-136	    "fadeMs": 0,
-137	    "loopable": true,
-138	    "cropStartPct": 0,
-139	    "cropEndPct": 100,
-140	    "gainDb": 0
-141	  },
-142	  "ʒ": {
-143	    "anchor": "",
-144	    "trimDb": -60,
-145	    "stretch": 4,
-146	    "fadeMs": 0,
-147	    "loopable": true,
-148	    "cropStartPct": 0,
-149	    "cropEndPct": 100,
-150	    "gainDb": 0
-151	  },
-152	  "tʃ": {
-153	    "anchor": "E",
-154	    "trimDb": null,
-155	    "stretch": 1,
-156	    "fadeMs": 0,
-157	    "loopable": false,
-158	    "cropStartPct": 0,
-159	    "cropEndPct": 100,
-160	    "gainDb": 0
-161	  },
-162	  "dʒ": {
-163	    "anchor": "E",
-164	    "trimDb": null,
-165	    "stretch": 1,
-166	    "fadeMs": 0,
-167	    "loopable": false,
-168	    "cropStartPct": 0,
-169	    "cropEndPct": 100,
-170	    "gainDb": 0
-171	  },
-172	  "m": {
-173	    "anchor": "@",
-174	    "trimDb": -40,
-175	    "stretch": 2,
-176	    "fadeMs": 20,
-177	    "loopable": false,
-178	    "cropStartPct": 0,
-179	    "cropEndPct": 100,
-180	    "gainDb": 0
-181	  },
-182	  "n": {
-183	    "anchor": "i:",
-184	    "trimDb": null,
-185	    "stretch": 4,
-186	    "fadeMs": 20,
-187	    "loopable": false,
-188	    "cropStartPct": 0,
-189	    "cropEndPct": 100,
-190	    "gainDb": 0
-191	  },
-192	  "ŋ": {
-193	    "anchor": "@",
-194	    "trimDb": -40,
-195	    "stretch": 2,
-196	    "fadeMs": 20,
-197	    "loopable": false,
-198	    "cropStartPct": 0,
-199	    "cropEndPct": 100,
-200	    "gainDb": 0
-201	  },
-202	  "l": {
-203	    "anchor": "@",
-204	    "trimDb": -40,
-205	    "stretch": 2,
-206	    "fadeMs": 20,
-207	    "loopable": false,
-208	    "cropStartPct": 0,
-209	    "cropEndPct": 100,
-210	    "gainDb": 0
-211	  },
-212	  "r": {
-213	    "anchor": "A:",
-214	    "trimDb": -40,
-215	    "stretch": 4,
-216	    "fadeMs": 20,
-217	    "loopable": false,
-218	    "cropStartPct": 0,
-219	    "cropEndPct": 100,
-220	    "gainDb": 0
-221	  },
-222	  "w": {
-223	    "anchor": "E",
-224	    "trimDb": null,
-225	    "stretch": 1,
-226	    "fadeMs": 0,
-227	    "loopable": false,
-228	    "cropStartPct": 0,
-229	    "cropEndPct": 100,
-230	    "gainDb": 0
-231	  },
-232	  "j": {
-233	    "anchor": "E",
-234	    "trimDb": null,
-235	    "stretch": 1,
-236	    "fadeMs": 0,
-237	    "loopable": false,
-238	    "cropStartPct": 0,
-239	    "cropEndPct": 100,
-240	    "gainDb": 0
-241	  },
-242	  "ks": {
-243	    "anchor": "",
-244	    "trimDb": null,
-245	    "stretch": 1,
-246	    "fadeMs": 0,
-247	    "loopable": false,
-248	    "cropStartPct": 0,
-249	    "cropEndPct": 100,
-250	    "gainDb": 0
-251	  },
-252	  "kw": {
-253	    "anchor": "",
-254	    "trimDb": -40,
-255	    "stretch": 1,
-256	    "fadeMs": 0,
-257	    "loopable": false,
-258	    "cropStartPct": 0,
-259	    "cropEndPct": 100,
-260	    "gainDb": 0
-261	  },
-262	  "juː": {
-263	    "anchor": "",
-264	    "trimDb": null,
-265	    "stretch": 2,
-266	    "fadeMs": 0,
-267	    "loopable": false,
-268	    "cropStartPct": 0,
-269	    "cropEndPct": 100,
+100     "gainDb": 4
+101   },
+102   "h": {
+103     "anchor": "V",
+104     "trimDb": null,
+105     "stretch": 4,
+106     "fadeMs": 20,
+107     "loopable": false,
+108     "cropStartPct": 0,
+109     "cropEndPct": 50,
+110     "gainDb": 0
+111   },
+112   "θ": {
+113     "anchor": "",
+114     "trimDb": -60,
+115     "stretch": 4,
+116     "fadeMs": 0,
+117     "loopable": true,
+118     "cropStartPct": 0,
+119     "cropEndPct": 100,
+120     "gainDb": 0
+121   },
+122   "ð": {
+123     "anchor": "",
+124     "trimDb": -60,
+125     "stretch": 4,
+126     "fadeMs": 0,
+127     "loopable": true,
+128     "cropStartPct": 0,
+129     "cropEndPct": 100,
+130     "gainDb": 0
+131   },
+132   "ʃ": {
+133     "anchor": "",
+134     "trimDb": -60,
+135     "stretch": 4,
+136     "fadeMs": 0,
+137     "loopable": true,
+138     "cropStartPct": 0,
+139     "cropEndPct": 100,
+140     "gainDb": 0
+141   },
+142   "ʒ": {
+143     "anchor": "",
+144     "trimDb": -60,
+145     "stretch": 4,
+146     "fadeMs": 0,
+147     "loopable": true,
+148     "cropStartPct": 0,
+149     "cropEndPct": 100,
+150     "gainDb": 0
+151   },
+152   "tʃ": {
+153     "anchor": "E",
+154     "trimDb": null,
+155     "stretch": 1,
+156     "fadeMs": 0,
+157     "loopable": false,
+158     "cropStartPct": 0,
+159     "cropEndPct": 100,
+160     "gainDb": 0
+161   },
+162   "dʒ": {
+163     "anchor": "E",
+164     "trimDb": null,
+165     "stretch": 1,
+166     "fadeMs": 0,
+167     "loopable": false,
+168     "cropStartPct": 0,
+169     "cropEndPct": 100,
+170     "gainDb": 0
+171   },
+172   "m": {
+173     "anchor": "@",
+174     "trimDb": -40,
+175     "stretch": 2,
+176     "fadeMs": 20,
+177     "loopable": false,
+178     "cropStartPct": 0,
+179     "cropEndPct": 100,
+180     "gainDb": 0
+181   },
+182   "n": {
+183     "anchor": "i:",
+184     "trimDb": null,
+185     "stretch": 4,
+186     "fadeMs": 20,
+187     "loopable": false,
+188     "cropStartPct": 0,
+189     "cropEndPct": 100,
+190     "gainDb": 0
+191   },
+192   "ŋ": {
+193     "anchor": "@",
+194     "trimDb": -40,
+195     "stretch": 2,
+196     "fadeMs": 20,
+197     "loopable": false,
+198     "cropStartPct": 0,
+199     "cropEndPct": 100,
+200     "gainDb": 0
+201   },
+202   "l": {
+203     "anchor": "@",
+204     "trimDb": -40,
+205     "stretch": 2,
+206     "fadeMs": 20,
+207     "loopable": false,
+208     "cropStartPct": 0,
+209     "cropEndPct": 100,
+210     "gainDb": 0
+211   },
+212   "r": {
+213     "anchor": "A:",
+214     "trimDb": -40,
+215     "stretch": 4,
+216     "fadeMs": 20,
+217     "loopable": false,
+218     "cropStartPct": 0,
+219     "cropEndPct": 100,
+220     "gainDb": 0
+221   },
+222   "w": {
+223     "anchor": "E",
+224     "trimDb": null,
+225     "stretch": 1,
+226     "fadeMs": 0,
+227     "loopable": false,
+228     "cropStartPct": 0,
+229     "cropEndPct": 100,
+230     "gainDb": 0
+231   },
+232   "j": {
+233     "anchor": "E",
+234     "trimDb": null,
+235     "stretch": 1,
+236     "fadeMs": 0,
+237     "loopable": false,
+238     "cropStartPct": 0,
+239     "cropEndPct": 100,
+240     "gainDb": 0
+241   },
+242   "ks": {
+243     "anchor": "",
+244     "trimDb": null,
+245     "stretch": 1,
+246     "fadeMs": 0,
+247     "loopable": false,
+248     "cropStartPct": 0,
+249     "cropEndPct": 100,
+250     "gainDb": 0
+251   },
+252   "kw": {
+253     "anchor": "",
+254     "trimDb": -40,
+255     "stretch": 1,
+256     "fadeMs": 0,
+257     "loopable": false,
+258     "cropStartPct": 0,
+259     "cropEndPct": 100,
+260     "gainDb": 0
+261   },
+262   "juː": {
+263     "anchor": "",
+264     "trimDb": null,
+265     "stretch": 2,
+266     "fadeMs": 0,
+267     "loopable": false,
+268     "cropStartPct": 0,
+269     "cropEndPct": 100,
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:04:51Z)**_
@@ -5958,6 +6053,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:04:54Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:00Z)**_
@@ -5968,6 +6064,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:00Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:06Z)**_
@@ -5978,6 +6075,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:06Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:12Z)**_
@@ -5988,6 +6086,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:12Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:18Z)**_
@@ -5998,6 +6097,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:18Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:24Z)**_
@@ -6008,6 +6108,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:24Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:29Z)**_
@@ -6018,6 +6119,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:29Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:35Z)**_
@@ -6028,6 +6130,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:35Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:41Z)**_
@@ -6038,6 +6141,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:05:41Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/worktrees/tools-phoneme-tuner/tools/phoneme-tuner/tuned-config.json has been updated successfully. (file state is current in your context — no need to Read it back)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:05:59Z)**_
@@ -6094,6 +6198,7 @@ Find commits that added/removed PHONEME_CONFIG
 507137c refactor(words): per-IPA phoneme sustain config + drop s loop gap
 a69cf44 refactor(words): per-IPA phoneme sustain config + drop s loop gap
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:11:51Z)**_
@@ -6116,6 +6221,7 @@ d9fcb58 fix(words): render æ/ɒ audibly + drop schwa from sustain pipeline
 66aba48 feat(words): sustain sonorants + hover-to-blend chip loop
 9b2b2f5 feat(words): add phoneme audio sprite + per-chip playback
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:11:51Z)**_
@@ -6132,6 +6238,7 @@ Which branches contain commit 507137c
 + feat/word-library-explorer
   remotes/origin/feat/word-library-explorer
 ```
+
 </details></tool-use>
 
 _**Agent (claude-opus-4-6 2026-04-12 02:11:58Z)**_
@@ -6144,7 +6251,7 @@ _**Agent (claude-opus-4-6 2026-04-12 02:12:06Z)**_
 
 `PHONEME_CONFIG` **never reached master**. It only exists on the `feat/word-library-explorer` branch, introduced in commit `507137c` (`scripts/generate-phoneme-sprite.ts`, lines ~120–250 of that revision).
 
-Current state on master (`scripts/generate-phoneme-sprite.ts:162-173`) is the *simpler* generator — raw `[[code@]]` per consonant, no filter chain, no per-IPA config. That's why your master build sounds different: the old `PHONEME_CONFIG` tuning was committed on a feature branch that's still outstanding.
+Current state on master (`scripts/generate-phoneme-sprite.ts:162-173`) is the _simpler_ generator — raw `[[code@]]` per consonant, no filter chain, no per-IPA config. That's why your master build sounds different: the old `PHONEME_CONFIG` tuning was committed on a feature branch that's still outstanding.
 
 **To view/restore it:**
 

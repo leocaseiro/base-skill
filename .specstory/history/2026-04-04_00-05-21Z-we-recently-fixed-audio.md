@@ -21,6 +21,7 @@ The timing is now: `correct.mp3` plays → finishes → `round-complete.mp3` sta
 **Desired behaviour:** Confetti should start at the same moment `round-complete.mp3` starts playing — which is after `correct.mp3` finishes. The same applies to any other `round-complete` visual feedback.
 
 **Key files:**
+
 - [ScoreAnimation.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx) — fires confetti on `visible` prop change
 - [ScoreAnimation.test.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx) — existing tests
 - [ScoreAnimation.stories.tsx](worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx) — Storybook stories
@@ -45,6 +46,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:24Z)**_
 ```text
 Launching skill: superpowers:brainstorming
 ```
+
 </details></tool-use>
 
 ---
@@ -213,7 +215,6 @@ A question about a UI topic is not automatically a visual question. "What does p
 If they agree to the companion, read the detailed guide before proceeding:
 `skills/brainstorming/visual-companion.md`
 
-
 ---
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:28Z)**_
@@ -254,6 +255,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:29Z)**_
 ```
 
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:32Z)**_
@@ -285,82 +287,83 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:39Z)**_
  `./worktrees/feat-word-spell-number-match/src/lib/audio/AudioFeedback.ts`
 
 ```text
-1	type SoundKey =
-2	  | 'correct'
-3	  | 'wrong'
-4	  | 'round-complete'
-5	  | 'game-complete';
-6	
-7	const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-8	
-9	const SOUND_PATHS: Record<SoundKey, string> = {
-10	  correct: `${base}/sounds/correct.mp3`,
-11	  wrong: `${base}/sounds/wrong.mp3`,
-12	  'round-complete': `${base}/sounds/round-complete.mp3`,
-13	  'game-complete': `${base}/sounds/game-complete.mp3`,
-14	};
-15	
-16	let currentAudio: HTMLAudioElement | null = null;
-17	let currentResolve: (() => void) | null = null;
-18	let queueTail: Promise<void> = Promise.resolve();
-19	
-20	function playSoundInternal(
-21	  key: SoundKey,
-22	  volume: number,
-23	): Promise<void> {
-24	  currentAudio?.pause();
-25	  currentAudio = null;
-26	
-27	  const audio = new Audio(SOUND_PATHS[key]);
-28	  audio.volume = volume;
-29	  currentAudio = audio;
-30	
-31	  return new Promise<void>((resolve) => {
-32	    currentResolve = resolve;
-33	
-34	    const cleanup = () => {
-35	      if (currentResolve === resolve) currentResolve = null;
-36	      if (currentAudio === audio) currentAudio = null;
-37	      resolve();
-38	    };
-39	
-40	    audio.addEventListener('ended', cleanup, { once: true });
-41	    audio.addEventListener('error', cleanup, { once: true });
-42	
-43	    void audio.play().catch(() => {
-44	      console.error(`Failed to play sound ${key}`);
-45	      cleanup();
-46	    });
-47	  });
-48	}
-49	
-50	/**
-51	 * Plays immediately, cancelling any current audio and resetting the queue.
-52	 * Use for tile feedback (correct/wrong) where the latest sound always wins.
-53	 */
-54	export function playSound(key: SoundKey, volume = 0.8): void {
-55	  currentResolve?.();
-56	  currentResolve = null;
-57	  queueTail = playSoundInternal(key, volume);
-58	}
-59	
-60	/**
-61	 * Queues a sound to play after the current queue drains.
-62	 * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
-63	 */
-64	export function queueSound(key: SoundKey, volume = 0.8): void {
-65	  queueTail = queueTail.then(() => playSoundInternal(key, volume));
-66	}
-67	
-68	/**
-69	 * Returns a promise that resolves when all pending audio (current + queued) finishes.
-70	 * Use to delay TTS until the audio queue is empty.
-71	 */
-72	export function whenSoundEnds(): Promise<void> {
-73	  return queueTail;
-74	}
+1 type SoundKey =
+2   | 'correct'
+3   | 'wrong'
+4   | 'round-complete'
+5   | 'game-complete';
+6 
+7 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+8 
+9 const SOUND_PATHS: Record<SoundKey, string> = {
+10   correct: `${base}/sounds/correct.mp3`,
+11   wrong: `${base}/sounds/wrong.mp3`,
+12   'round-complete': `${base}/sounds/round-complete.mp3`,
+13   'game-complete': `${base}/sounds/game-complete.mp3`,
+14 };
+15 
+16 let currentAudio: HTMLAudioElement | null = null;
+17 let currentResolve: (() => void) | null = null;
+18 let queueTail: Promise<void> = Promise.resolve();
+19 
+20 function playSoundInternal(
+21   key: SoundKey,
+22   volume: number,
+23 ): Promise<void> {
+24   currentAudio?.pause();
+25   currentAudio = null;
+26 
+27   const audio = new Audio(SOUND_PATHS[key]);
+28   audio.volume = volume;
+29   currentAudio = audio;
+30 
+31   return new Promise<void>((resolve) => {
+32     currentResolve = resolve;
+33 
+34     const cleanup = () => {
+35       if (currentResolve === resolve) currentResolve = null;
+36       if (currentAudio === audio) currentAudio = null;
+37       resolve();
+38     };
+39 
+40     audio.addEventListener('ended', cleanup, { once: true });
+41     audio.addEventListener('error', cleanup, { once: true });
+42 
+43     void audio.play().catch(() => {
+44       console.error(`Failed to play sound ${key}`);
+45       cleanup();
+46     });
+47   });
+48 }
+49 
+50 /**
+51  * Plays immediately, cancelling any current audio and resetting the queue.
+52  * Use for tile feedback (correct/wrong) where the latest sound always wins.
+53  */
+54 export function playSound(key: SoundKey, volume = 0.8): void {
+55   currentResolve?.();
+56   currentResolve = null;
+57   queueTail = playSoundInternal(key, volume);
+58 }
+59 
+60 /**
+61  * Queues a sound to play after the current queue drains.
+62  * Use for phase sounds (round-complete, game-complete) so they don't cut off tile feedback.
+63  */
+64 export function queueSound(key: SoundKey, volume = 0.8): void {
+65   queueTail = queueTail.then(() => playSoundInternal(key, volume));
+66 }
+67 
+68 /**
+69  * Returns a promise that resolves when all pending audio (current + queued) finishes.
+70  * Use to delay TTS until the audio queue is empty.
+71  */
+72 export function whenSoundEnds(): Promise<void> {
+73   return queueTail;
+74 }
 75
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:40Z)**_
@@ -370,40 +373,41 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:40Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.tsx`
 
 ```text
-1	import confetti from 'canvas-confetti';
-2	import { useEffect, useRef } from 'react';
-3	
-4	interface ScoreAnimationProps {
-5	  visible: boolean;
-6	}
-7	
-8	export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
-9	  const prevRef = useRef(false);
-10	
-11	  useEffect(() => {
-12	    if (visible && !prevRef.current) {
-13	      void confetti({
-14	        particleCount: 80,
-15	        spread: 70,
-16	        origin: { y: 0.5 },
-17	        ticks: 80,
-18	      });
-19	    }
-20	    prevRef.current = visible;
-21	  }, [visible]);
-22	
-23	  if (!visible) return null;
-24	
-25	  return (
-26	    <div
-27	      aria-live="polite"
-28	      aria-label="Round complete!"
-29	      className="pointer-events-none fixed inset-0"
-30	    />
-31	  );
-32	};
+1 import confetti from 'canvas-confetti';
+2 import { useEffect, useRef } from 'react';
+3 
+4 interface ScoreAnimationProps {
+5   visible: boolean;
+6 }
+7 
+8 export const ScoreAnimation = ({ visible }: ScoreAnimationProps) => {
+9   const prevRef = useRef(false);
+10 
+11   useEffect(() => {
+12     if (visible && !prevRef.current) {
+13       void confetti({
+14         particleCount: 80,
+15         spread: 70,
+16         origin: { y: 0.5 },
+17         ticks: 80,
+18       });
+19     }
+20     prevRef.current = visible;
+21   }, [visible]);
+22 
+23   if (!visible) return null;
+24 
+25   return (
+26     <div
+27       aria-live="polite"
+28       aria-label="Round complete!"
+29       className="pointer-events-none fixed inset-0"
+30     />
+31   );
+32 };
 33
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:41Z)**_
@@ -413,30 +417,31 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:41Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.ts`
 
 ```text
-1	import { useEffect, useRef } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import type { AnswerGamePhase } from './types';
-4	import { queueSound } from '@/lib/audio/AudioFeedback';
-5	
-6	export const useGameSounds = (): void => {
-7	  const { phase } = useAnswerGameContext();
-8	  const prevPhaseRef = useRef<AnswerGamePhase>(phase);
-9	
-10	  useEffect(() => {
-11	    const prev = prevPhaseRef.current;
-12	    prevPhaseRef.current = phase;
-13	
-14	    if (phase === prev) return;
-15	
-16	    if (phase === 'round-complete') {
-17	      queueSound('round-complete');
-18	    } else if (phase === 'game-over') {
-19	      queueSound('game-complete');
-20	    }
-21	  }, [phase]);
-22	};
+1 import { useEffect, useRef } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import type { AnswerGamePhase } from './types';
+4 import { queueSound } from '@/lib/audio/AudioFeedback';
+5 
+6 export const useGameSounds = (): void => {
+7   const { phase } = useAnswerGameContext();
+8   const prevPhaseRef = useRef<AnswerGamePhase>(phase);
+9 
+10   useEffect(() => {
+11     const prev = prevPhaseRef.current;
+12     prevPhaseRef.current = phase;
+13 
+14     if (phase === prev) return;
+15 
+16     if (phase === 'round-complete') {
+17       queueSound('round-complete');
+18     } else if (phase === 'game-over') {
+19       queueSound('game-complete');
+20     }
+21   }, [phase]);
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:44Z)**_
@@ -456,29 +461,30 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:45Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.test.tsx`
 
 ```text
-1	import { render } from '@testing-library/react';
-2	import { describe, expect, it, vi } from 'vitest';
-3	import { ScoreAnimation } from './ScoreAnimation';
-4	
-5	vi.mock('canvas-confetti', () => ({
-6	  default: vi.fn(),
-7	}));
-8	
-9	describe('ScoreAnimation', () => {
-10	  it('fires confetti when visible becomes true', async () => {
-11	    const canvasConfetti = await import('canvas-confetti');
-12	    const confetti = canvasConfetti.default as unknown as ReturnType<
-13	      typeof vi.fn
-14	    >;
-15	    const { rerender } = render(<ScoreAnimation visible={false} />);
-16	    expect(confetti).not.toHaveBeenCalled();
-17	
-18	    rerender(<ScoreAnimation visible={true} />);
-19	    expect(confetti).toHaveBeenCalled();
-20	  });
-21	});
+1 import { render } from '@testing-library/react';
+2 import { describe, expect, it, vi } from 'vitest';
+3 import { ScoreAnimation } from './ScoreAnimation';
+4 
+5 vi.mock('canvas-confetti', () => ({
+6   default: vi.fn(),
+7 }));
+8 
+9 describe('ScoreAnimation', () => {
+10   it('fires confetti when visible becomes true', async () => {
+11     const canvasConfetti = await import('canvas-confetti');
+12     const confetti = canvasConfetti.default as unknown as ReturnType<
+13       typeof vi.fn
+14     >;
+15     const { rerender } = render(<ScoreAnimation visible={false} />);
+16     expect(confetti).not.toHaveBeenCalled();
+17 
+18     rerender(<ScoreAnimation visible={true} />);
+19     expect(confetti).toHaveBeenCalled();
+20   });
+21 });
 22
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:46Z)**_
@@ -488,21 +494,22 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:46Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx`
 
 ```text
-1	import { ScoreAnimation } from './ScoreAnimation';
-2	import type { Meta, StoryObj } from '@storybook/react';
-3	
-4	const meta: Meta<typeof ScoreAnimation> = {
-5	  component: ScoreAnimation,
-6	  tags: ['autodocs'],
-7	};
-8	export default meta;
-9	
-10	type Story = StoryObj<typeof ScoreAnimation>;
-11	
-12	export const Playing: Story = { args: { visible: false } };
-13	export const Complete: Story = { args: { visible: true } };
+1 import { ScoreAnimation } from './ScoreAnimation';
+2 import type { Meta, StoryObj } from '@storybook/react';
+3 
+4 const meta: Meta<typeof ScoreAnimation> = {
+5   component: ScoreAnimation,
+6   tags: ['autodocs'],
+7 };
+8 export default meta;
+9 
+10 type Story = StoryObj<typeof ScoreAnimation>;
+11 
+12 export const Playing: Story = { args: { visible: false } };
+13 export const Complete: Story = { args: { visible: true } };
 14
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:46Z)**_
@@ -521,6 +528,7 @@ worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/Number
 worktrees/feat-word-spell-number-match/src/components/answer-game/ScoreAnimation/ScoreAnimation.stories.tsx
 worktrees/feat-word-spell-number-match/src/lib/game-event-bus.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:50Z)**_
@@ -538,6 +546,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:52Z)**_
 ```text
 No matches found
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:55Z)**_
@@ -587,6 +596,7 @@ worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.
 worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.test.tsx
 worktrees/feat-word-spell-number-match/src/components/answer-game/useTileEvaluation.test.tsx
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:58Z)**_
@@ -596,48 +606,49 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:58Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/AnswerGame/AnswerGame.tsx`
 
 ```text
-1	import { AnswerGameProvider } from '../AnswerGameProvider';
-2	import type { AnswerGameConfig } from '../types';
-3	import type { ReactNode } from 'react';
-4	
-5	interface AnswerGameProps {
-6	  config: AnswerGameConfig;
-7	  children: ReactNode;
-8	}
-9	
-10	const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
-11	  <AnswerGameProvider config={config}>
-12	    <div className="flex min-h-0 w-full flex-col items-center">
-13	      {children}
-14	    </div>
-15	  </AnswerGameProvider>
-16	);
-17	
-18	const Question = ({ children }: { children?: ReactNode }) => (
-19	  <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
-20	    {children}
-21	  </div>
-22	);
-23	
-24	const Answer = ({ children }: { children?: ReactNode }) => (
-25	  <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
-26	    {children}
-27	  </div>
-28	);
-29	
-30	const Choices = ({ children }: { children?: ReactNode }) => (
-31	  <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
-32	    {children}
-33	  </div>
-34	);
-35	
-36	export const AnswerGame = Object.assign(AnswerGameRoot, {
-37	  Question,
-38	  Answer,
-39	  Choices,
-40	});
+1 import { AnswerGameProvider } from '../AnswerGameProvider';
+2 import type { AnswerGameConfig } from '../types';
+3 import type { ReactNode } from 'react';
+4 
+5 interface AnswerGameProps {
+6   config: AnswerGameConfig;
+7   children: ReactNode;
+8 }
+9 
+10 const AnswerGameRoot = ({ config, children }: AnswerGameProps) => (
+11   <AnswerGameProvider config={config}>
+12     <div className="flex min-h-0 w-full flex-col items-center">
+13       {children}
+14     </div>
+15   </AnswerGameProvider>
+16 );
+17 
+18 const Question = ({ children }: { children?: ReactNode }) => (
+19   <div className="game-question-zone flex flex-col items-center gap-4 px-4 py-6">
+20     {children}
+21   </div>
+22 );
+23 
+24 const Answer = ({ children }: { children?: ReactNode }) => (
+25   <div className="game-answer-zone flex flex-wrap justify-center gap-2 px-4 py-4">
+26     {children}
+27   </div>
+28 );
+29 
+30 const Choices = ({ children }: { children?: ReactNode }) => (
+31   <div className="game-choices-zone flex flex-wrap justify-center gap-3 px-4 py-4">
+32     {children}
+33   </div>
+34 );
+35 
+36 export const AnswerGame = Object.assign(AnswerGameRoot, {
+37   Question,
+38   Answer,
+39   Choices,
+40 });
 41
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:05:59Z)**_
@@ -647,109 +658,110 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:05:59Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useGameSounds.test.tsx`
 
 ```text
-1	import { act, renderHook } from '@testing-library/react';
-2	import { beforeEach, describe, expect, it, vi } from 'vitest';
-3	import { AnswerGameProvider } from './AnswerGameProvider';
-4	import { useAnswerGameDispatch } from './useAnswerGameDispatch';
-5	import { useGameSounds } from './useGameSounds';
-6	import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
-7	import type { ReactNode } from 'react';
-8	
-9	import { queueSound } from '@/lib/audio/AudioFeedback';
-10	
-11	vi.mock('@/lib/audio/AudioFeedback', () => ({
-12	  playSound: vi.fn(),
-13	  queueSound: vi.fn(),
-14	  whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
-15	}));
-16	
-17	vi.mock('@/lib/game-event-bus', () => ({
-18	  getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
-19	}));
-20	
-21	const baseConfig: AnswerGameConfig = {
-22	  gameId: 'test',
-23	  inputMethod: 'drag',
-24	  wrongTileBehavior: 'lock-auto-eject',
-25	  tileBankMode: 'exact',
-26	  totalRounds: 1,
-27	  ttsEnabled: false,
-28	};
-29	
-30	const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
-31	const zones: AnswerZone[] = [
-32	  {
-33	    id: 'z0',
-34	    index: 0,
-35	    expectedValue: 'A',
-36	    placedTileId: null,
-37	    isWrong: false,
-38	    isLocked: false,
-39	  },
-40	];
-41	
-42	function createWrapper(config: AnswerGameConfig) {
-43	  const Wrapper = ({ children }: { children: ReactNode }) => (
-44	    <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
-45	  );
-46	  Wrapper.displayName = 'TestWrapper';
-47	  return Wrapper;
-48	}
-49	
-50	describe('useGameSounds', () => {
-51	  beforeEach(() => vi.clearAllMocks());
-52	
-53	  it('does not play a sound on initial render', () => {
-54	    renderHook(() => useGameSounds(), {
-55	      wrapper: createWrapper(baseConfig),
-56	    });
-57	    expect(queueSound).not.toHaveBeenCalled();
-58	  });
-59	
-60	  it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
-61	    const { result } = renderHook(
-62	      () => {
-63	        const dispatch = useAnswerGameDispatch();
-64	        useGameSounds();
-65	        return dispatch;
-66	      },
-67	      { wrapper: createWrapper(baseConfig) },
-68	    );
-69	    act(() => {
-70	      result.current({ type: 'INIT_ROUND', tiles, zones });
-71	    });
-72	    vi.clearAllMocks();
-73	    act(() => {
-74	      result.current({ type: 'COMPLETE_GAME' });
-75	    });
-76	    expect(queueSound).toHaveBeenCalledWith('game-complete');
-77	  });
-78	
-79	  it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
-80	    const { result } = renderHook(
-81	      () => {
-82	        const dispatch = useAnswerGameDispatch();
-83	        useGameSounds();
-84	        return dispatch;
-85	      },
-86	      { wrapper: createWrapper(baseConfig) },
-87	    );
-88	    act(() => {
-89	      result.current({ type: 'INIT_ROUND', tiles, zones });
-90	    });
-91	    vi.clearAllMocks();
-92	    act(() => {
-93	      result.current({
-94	        type: 'PLACE_TILE',
-95	        tileId: 't1',
-96	        zoneIndex: 0,
-97	      });
-98	    });
-99	    expect(queueSound).toHaveBeenCalledWith('round-complete');
-100	  });
-101	});
+1 import { act, renderHook } from '@testing-library/react';
+2 import { beforeEach, describe, expect, it, vi } from 'vitest';
+3 import { AnswerGameProvider } from './AnswerGameProvider';
+4 import { useAnswerGameDispatch } from './useAnswerGameDispatch';
+5 import { useGameSounds } from './useGameSounds';
+6 import type { AnswerGameConfig, AnswerZone, TileItem } from './types';
+7 import type { ReactNode } from 'react';
+8 
+9 import { queueSound } from '@/lib/audio/AudioFeedback';
+10 
+11 vi.mock('@/lib/audio/AudioFeedback', () => ({
+12   playSound: vi.fn(),
+13   queueSound: vi.fn(),
+14   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
+15 }));
+16 
+17 vi.mock('@/lib/game-event-bus', () => ({
+18   getGameEventBus: () => ({ emit: vi.fn(), subscribe: vi.fn() }),
+19 }));
+20 
+21 const baseConfig: AnswerGameConfig = {
+22   gameId: 'test',
+23   inputMethod: 'drag',
+24   wrongTileBehavior: 'lock-auto-eject',
+25   tileBankMode: 'exact',
+26   totalRounds: 1,
+27   ttsEnabled: false,
+28 };
+29 
+30 const tiles: TileItem[] = [{ id: 't1', label: 'A', value: 'A' }];
+31 const zones: AnswerZone[] = [
+32   {
+33     id: 'z0',
+34     index: 0,
+35     expectedValue: 'A',
+36     placedTileId: null,
+37     isWrong: false,
+38     isLocked: false,
+39   },
+40 ];
+41 
+42 function createWrapper(config: AnswerGameConfig) {
+43   const Wrapper = ({ children }: { children: ReactNode }) => (
+44     <AnswerGameProvider config={config}>{children}</AnswerGameProvider>
+45   );
+46   Wrapper.displayName = 'TestWrapper';
+47   return Wrapper;
+48 }
+49 
+50 describe('useGameSounds', () => {
+51   beforeEach(() => vi.clearAllMocks());
+52 
+53   it('does not play a sound on initial render', () => {
+54     renderHook(() => useGameSounds(), {
+55       wrapper: createWrapper(baseConfig),
+56     });
+57     expect(queueSound).not.toHaveBeenCalled();
+58   });
+59 
+60   it('queues "game-complete" when phase transitions to game-over via COMPLETE_GAME', () => {
+61     const { result } = renderHook(
+62       () => {
+63         const dispatch = useAnswerGameDispatch();
+64         useGameSounds();
+65         return dispatch;
+66       },
+67       { wrapper: createWrapper(baseConfig) },
+68     );
+69     act(() => {
+70       result.current({ type: 'INIT_ROUND', tiles, zones });
+71     });
+72     vi.clearAllMocks();
+73     act(() => {
+74       result.current({ type: 'COMPLETE_GAME' });
+75     });
+76     expect(queueSound).toHaveBeenCalledWith('game-complete');
+77   });
+78 
+79   it('queues "round-complete" when phase transitions to round-complete via PLACE_TILE completing all zones', () => {
+80     const { result } = renderHook(
+81       () => {
+82         const dispatch = useAnswerGameDispatch();
+83         useGameSounds();
+84         return dispatch;
+85       },
+86       { wrapper: createWrapper(baseConfig) },
+87     );
+88     act(() => {
+89       result.current({ type: 'INIT_ROUND', tiles, zones });
+90     });
+91     vi.clearAllMocks();
+92     act(() => {
+93       result.current({
+94         type: 'PLACE_TILE',
+95         tileId: 't1',
+96         zoneIndex: 0,
+97       });
+98     });
+99     expect(queueSound).toHaveBeenCalledWith('round-complete');
+100   });
+101 });
 102
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:06:04Z)**_
@@ -769,30 +781,31 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:06:06Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/useRoundTTS.ts`
 
 ```text
-1	import { useEffect } from 'react';
-2	import { useAnswerGameContext } from './useAnswerGameContext';
-3	import { useGameTTS } from './useGameTTS';
-4	import { whenSoundEnds } from '@/lib/audio/AudioFeedback';
-5	
-6	export const useRoundTTS = (prompt: string): void => {
-7	  const { roundIndex, config } = useAnswerGameContext();
-8	  const { speakPrompt } = useGameTTS();
-9	
-10	  useEffect(() => {
-11	    if (!config.ttsEnabled) return;
-12	    if (!prompt) return;
-13	    let cancelled = false;
-14	    void whenSoundEnds().then(() => {
-15	      if (!cancelled) speakPrompt(prompt);
-16	    });
-17	    return () => {
-18	      cancelled = true;
-19	    };
-20	    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit speakPrompt and prompt to only re-speak on round change
-21	  }, [roundIndex, config.ttsEnabled]);
-22	};
+1 import { useEffect } from 'react';
+2 import { useAnswerGameContext } from './useAnswerGameContext';
+3 import { useGameTTS } from './useGameTTS';
+4 import { whenSoundEnds } from '@/lib/audio/AudioFeedback';
+5 
+6 export const useRoundTTS = (prompt: string): void => {
+7   const { roundIndex, config } = useAnswerGameContext();
+8   const { speakPrompt } = useGameTTS();
+9 
+10   useEffect(() => {
+11     if (!config.ttsEnabled) return;
+12     if (!prompt) return;
+13     let cancelled = false;
+14     void whenSoundEnds().then(() => {
+15       if (!cancelled) speakPrompt(prompt);
+16     });
+17     return () => {
+18       cancelled = true;
+19     };
+20     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally omit speakPrompt and prompt to only re-speak on round change
+21   }, [roundIndex, config.ttsEnabled]);
+22 };
 23
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:06:07Z)**_
@@ -802,240 +815,241 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:06:07Z)**_
  `./worktrees/feat-word-spell-number-match/src/games/number-match/NumberMatch/NumberMatch.tsx`
 
 ```text
-1	import { useNavigate, useParams } from '@tanstack/react-router';
-2	import { useEffect, useMemo, useRef, useState } from 'react';
-3	import { useTranslation } from 'react-i18next';
-4	import { buildNumeralRound } from '../build-numeral-round';
-5	import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
-6	import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
-7	import type { NumberMatchConfig } from '../types';
-8	import type {
-9	  AnswerGameConfig,
-10	  AnswerZone,
-11	  TileItem,
-12	} from '@/components/answer-game/types';
-13	import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
-14	import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
-15	import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
-16	import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
-17	import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-18	import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-19	import { useGameSounds } from '@/components/answer-game/useGameSounds';
-20	import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
-21	import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
-22	import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
-23	import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
-24	import { buildRoundOrder } from '@/games/build-round-order';
-25	
-26	interface NumberMatchProps {
-27	  config: NumberMatchConfig;
-28	}
-29	
-30	const NumberMatchSession = ({
-31	  numberMatchConfig,
-32	  roundOrder,
-33	  onRestartSession,
-34	}: {
-35	  numberMatchConfig: NumberMatchConfig;
-36	  roundOrder: readonly number[];
-37	  onRestartSession: () => void;
-38	}) => {
-39	  const { t } = useTranslation('games');
-40	  const [showInstructions, setShowInstructions] = useState(true);
-41	  const { phase, roundIndex, retryCount } = useAnswerGameContext();
-42	  const dispatch = useAnswerGameDispatch();
-43	  useGameSounds();
-44	  const navigate = useNavigate();
-45	  const { locale } = useParams({ from: '/$locale' });
-46	  const completionToken = useRef(0);
-47	
-48	  const configRoundIndex = roundOrder[roundIndex];
-49	  const round =
-50	    configRoundIndex === undefined
-51	      ? undefined
-52	      : numberMatchConfig.rounds[configRoundIndex];
-53	
-54	  useRoundTTS(String(round?.value ?? ''));
-55	
-56	  const handleHome = () => {
-57	    void navigate({ to: '/$locale', params: { locale } });
-58	  };
-59	
-60	  const handlePlayAgain = () => {
-61	    onRestartSession();
-62	  };
-63	
-64	  useEffect(() => {
-65	    if (phase !== 'round-complete') return;
-66	
-67	    const token = ++completionToken.current;
-68	    const delayMs = 750;
-69	    const timer = globalThis.setTimeout(() => {
-70	      if (completionToken.current !== token) return;
-71	
-72	      const isLastRound = roundIndex >= roundOrder.length - 1;
-73	      if (isLastRound) {
-74	        dispatch({ type: 'COMPLETE_GAME' });
-75	        return;
-76	      }
-77	
-78	      const nextConfigIndex = roundOrder[roundIndex + 1];
-79	      const nextRound =
-80	        nextConfigIndex === undefined
-81	          ? undefined
-82	          : numberMatchConfig.rounds[nextConfigIndex];
-83	      const value = nextRound?.value;
-84	      if (value === undefined) {
-85	        dispatch({ type: 'COMPLETE_GAME' });
-86	        return;
-87	      }
-88	      const { tiles, zones } = buildNumeralRound(value, {
-89	        tileBankMode: numberMatchConfig.tileBankMode,
-90	        distractorCount: numberMatchConfig.distractorCount,
-91	        range: numberMatchConfig.range,
-92	      });
-93	      dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
-94	    }, delayMs);
-95	
-96	    return () => {
-97	      globalThis.clearTimeout(timer);
-98	    };
-99	  }, [
-100	    phase,
-101	    roundIndex,
-102	    dispatch,
-103	    roundOrder,
-104	    numberMatchConfig.rounds,
-105	    numberMatchConfig.tileBankMode,
-106	    numberMatchConfig.distractorCount,
-107	    numberMatchConfig.range,
-108	  ]);
-109	
-110	  if (showInstructions) {
-111	    return (
-112	      <InstructionsOverlay
-113	        text={t('instructions.number-match')}
-114	        onStart={() => setShowInstructions(false)}
-115	        ttsEnabled={numberMatchConfig.ttsEnabled}
-116	      />
-117	    );
-118	  }
-119	
-120	  if (!round) return null;
-121	
-122	  const showTextQuestion =
-123	    numberMatchConfig.mode === 'numeral-to-group' ||
-124	    numberMatchConfig.mode === 'numeral-to-word' ||
-125	    numberMatchConfig.mode === 'word-to-numeral';
-126	
-127	  return (
-128	    <>
-129	      <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
-130	        <AnswerGame.Question>
-131	          {showTextQuestion ? (
-132	            <TextQuestion text={String(round.value)} />
-133	          ) : (
-134	            <DotGroupQuestion
-135	              count={round.value}
-136	              prompt={String(round.value)}
-137	            />
-138	          )}
-139	          <AudioButton prompt={String(round.value)} />
-140	        </AnswerGame.Question>
-141	        <AnswerGame.Answer>
-142	          <MatchingPairZones />
-143	        </AnswerGame.Answer>
-144	        <AnswerGame.Choices>
-145	          <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
-146	        </AnswerGame.Choices>
-147	      </div>
-148	      <ScoreAnimation visible={phase === 'round-complete'} />
-149	      {phase === 'game-over' ? (
-150	        <GameOverOverlay
-151	          retryCount={retryCount}
-152	          onPlayAgain={handlePlayAgain}
-153	          onHome={handleHome}
-154	        />
-155	      ) : null}
-156	    </>
-157	  );
-158	};
-159	
-160	export const NumberMatch = ({ config }: NumberMatchProps) => {
-161	  const roundsInOrder = config.roundsInOrder === true;
-162	  const [sessionEpoch, setSessionEpoch] = useState(0);
-163	
-164	  const roundOrder = useMemo(() => {
-165	    void sessionEpoch;
-166	    return buildRoundOrder(config.rounds.length, roundsInOrder);
-167	  }, [config.rounds.length, roundsInOrder, sessionEpoch]);
-168	
-169	  const firstConfigIndex = roundOrder[0];
-170	  const round0 =
-171	    firstConfigIndex === undefined
-172	      ? undefined
-173	      : config.rounds[firstConfigIndex];
-174	  const roundValue = round0?.value;
-175	
-176	  const { tiles, zones } = useMemo(() => {
-177	    if (roundValue === undefined) {
-178	      return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
-179	    }
-180	    return buildNumeralRound(roundValue, {
-181	      tileBankMode: config.tileBankMode,
-182	      distractorCount: config.distractorCount,
-183	      range: config.range,
-184	    });
-185	  }, [
-186	    roundValue,
-187	    config.tileBankMode,
-188	    config.distractorCount,
-189	    config.range,
-190	  ]);
-191	
-192	  const answerGameConfig = useMemo(
-193	    (): AnswerGameConfig => ({
-194	      gameId: config.gameId,
-195	      inputMethod: config.inputMethod,
-196	      wrongTileBehavior: config.wrongTileBehavior,
-197	      tileBankMode: config.tileBankMode,
-198	      distractorCount: config.distractorCount,
-199	      totalRounds: config.rounds.length,
-200	      roundsInOrder: config.roundsInOrder,
-201	      ttsEnabled: config.ttsEnabled,
-202	      initialTiles: tiles,
-203	      initialZones: zones,
-204	    }),
-205	    [
-206	      config.gameId,
-207	      config.inputMethod,
-208	      config.wrongTileBehavior,
-209	      config.tileBankMode,
-210	      config.distractorCount,
-211	      config.rounds.length,
-212	      config.roundsInOrder,
-213	      config.ttsEnabled,
-214	      tiles,
-215	      zones,
-216	    ],
-217	  );
-218	
-219	  if (!round0) return null;
-220	
-221	  return (
-222	    <AnswerGame config={answerGameConfig}>
-223	      <NumberMatchSession
-224	        numberMatchConfig={config}
-225	        roundOrder={roundOrder}
-226	        onRestartSession={() => {
-227	          setSessionEpoch((e) => e + 1);
-228	        }}
-229	      />
-230	    </AnswerGame>
-231	  );
-232	};
+1 import { useNavigate, useParams } from '@tanstack/react-router';
+2 import { useEffect, useMemo, useRef, useState } from 'react';
+3 import { useTranslation } from 'react-i18next';
+4 import { buildNumeralRound } from '../build-numeral-round';
+5 import { MatchingPairZones } from '../MatchingPairZones/MatchingPairZones';
+6 import { NumeralTileBank } from '../NumeralTileBank/NumeralTileBank';
+7 import type { NumberMatchConfig } from '../types';
+8 import type {
+9   AnswerGameConfig,
+10   AnswerZone,
+11   TileItem,
+12 } from '@/components/answer-game/types';
+13 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
+14 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
+15 import { InstructionsOverlay } from '@/components/answer-game/InstructionsOverlay/InstructionsOverlay';
+16 import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAnimation';
+17 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
+18 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
+19 import { useGameSounds } from '@/components/answer-game/useGameSounds';
+20 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
+21 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+22 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
+23 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
+24 import { buildRoundOrder } from '@/games/build-round-order';
+25 
+26 interface NumberMatchProps {
+27   config: NumberMatchConfig;
+28 }
+29 
+30 const NumberMatchSession = ({
+31   numberMatchConfig,
+32   roundOrder,
+33   onRestartSession,
+34 }: {
+35   numberMatchConfig: NumberMatchConfig;
+36   roundOrder: readonly number[];
+37   onRestartSession: () => void;
+38 }) => {
+39   const { t } = useTranslation('games');
+40   const [showInstructions, setShowInstructions] = useState(true);
+41   const { phase, roundIndex, retryCount } = useAnswerGameContext();
+42   const dispatch = useAnswerGameDispatch();
+43   useGameSounds();
+44   const navigate = useNavigate();
+45   const { locale } = useParams({ from: '/$locale' });
+46   const completionToken = useRef(0);
+47 
+48   const configRoundIndex = roundOrder[roundIndex];
+49   const round =
+50     configRoundIndex === undefined
+51       ? undefined
+52       : numberMatchConfig.rounds[configRoundIndex];
+53 
+54   useRoundTTS(String(round?.value ?? ''));
+55 
+56   const handleHome = () => {
+57     void navigate({ to: '/$locale', params: { locale } });
+58   };
+59 
+60   const handlePlayAgain = () => {
+61     onRestartSession();
+62   };
+63 
+64   useEffect(() => {
+65     if (phase !== 'round-complete') return;
+66 
+67     const token = ++completionToken.current;
+68     const delayMs = 750;
+69     const timer = globalThis.setTimeout(() => {
+70       if (completionToken.current !== token) return;
+71 
+72       const isLastRound = roundIndex >= roundOrder.length - 1;
+73       if (isLastRound) {
+74         dispatch({ type: 'COMPLETE_GAME' });
+75         return;
+76       }
+77 
+78       const nextConfigIndex = roundOrder[roundIndex + 1];
+79       const nextRound =
+80         nextConfigIndex === undefined
+81           ? undefined
+82           : numberMatchConfig.rounds[nextConfigIndex];
+83       const value = nextRound?.value;
+84       if (value === undefined) {
+85         dispatch({ type: 'COMPLETE_GAME' });
+86         return;
+87       }
+88       const { tiles, zones } = buildNumeralRound(value, {
+89         tileBankMode: numberMatchConfig.tileBankMode,
+90         distractorCount: numberMatchConfig.distractorCount,
+91         range: numberMatchConfig.range,
+92       });
+93       dispatch({ type: 'ADVANCE_ROUND', tiles, zones });
+94     }, delayMs);
+95 
+96     return () => {
+97       globalThis.clearTimeout(timer);
+98     };
+99   }, [
+100     phase,
+101     roundIndex,
+102     dispatch,
+103     roundOrder,
+104     numberMatchConfig.rounds,
+105     numberMatchConfig.tileBankMode,
+106     numberMatchConfig.distractorCount,
+107     numberMatchConfig.range,
+108   ]);
+109 
+110   if (showInstructions) {
+111     return (
+112       <InstructionsOverlay
+113         text={t('instructions.number-match')}
+114         onStart={() => setShowInstructions(false)}
+115         ttsEnabled={numberMatchConfig.ttsEnabled}
+116       />
+117     );
+118   }
+119 
+120   if (!round) return null;
+121 
+122   const showTextQuestion =
+123     numberMatchConfig.mode === 'numeral-to-group' ||
+124     numberMatchConfig.mode === 'numeral-to-word' ||
+125     numberMatchConfig.mode === 'word-to-numeral';
+126 
+127   return (
+128     <>
+129       <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-8 px-4 py-6">
+130         <AnswerGame.Question>
+131           {showTextQuestion ? (
+132             <TextQuestion text={String(round.value)} />
+133           ) : (
+134             <DotGroupQuestion
+135               count={round.value}
+136               prompt={String(round.value)}
+137             />
+138           )}
+139           <AudioButton prompt={String(round.value)} />
+140         </AnswerGame.Question>
+141         <AnswerGame.Answer>
+142           <MatchingPairZones />
+143         </AnswerGame.Answer>
+144         <AnswerGame.Choices>
+145           <NumeralTileBank tileStyle={numberMatchConfig.tileStyle} />
+146         </AnswerGame.Choices>
+147       </div>
+148       <ScoreAnimation visible={phase === 'round-complete'} />
+149       {phase === 'game-over' ? (
+150         <GameOverOverlay
+151           retryCount={retryCount}
+152           onPlayAgain={handlePlayAgain}
+153           onHome={handleHome}
+154         />
+155       ) : null}
+156     </>
+157   );
+158 };
+159 
+160 export const NumberMatch = ({ config }: NumberMatchProps) => {
+161   const roundsInOrder = config.roundsInOrder === true;
+162   const [sessionEpoch, setSessionEpoch] = useState(0);
+163 
+164   const roundOrder = useMemo(() => {
+165     void sessionEpoch;
+166     return buildRoundOrder(config.rounds.length, roundsInOrder);
+167   }, [config.rounds.length, roundsInOrder, sessionEpoch]);
+168 
+169   const firstConfigIndex = roundOrder[0];
+170   const round0 =
+171     firstConfigIndex === undefined
+172       ? undefined
+173       : config.rounds[firstConfigIndex];
+174   const roundValue = round0?.value;
+175 
+176   const { tiles, zones } = useMemo(() => {
+177     if (roundValue === undefined) {
+178       return { tiles: [] as TileItem[], zones: [] as AnswerZone[] };
+179     }
+180     return buildNumeralRound(roundValue, {
+181       tileBankMode: config.tileBankMode,
+182       distractorCount: config.distractorCount,
+183       range: config.range,
+184     });
+185   }, [
+186     roundValue,
+187     config.tileBankMode,
+188     config.distractorCount,
+189     config.range,
+190   ]);
+191 
+192   const answerGameConfig = useMemo(
+193     (): AnswerGameConfig => ({
+194       gameId: config.gameId,
+195       inputMethod: config.inputMethod,
+196       wrongTileBehavior: config.wrongTileBehavior,
+197       tileBankMode: config.tileBankMode,
+198       distractorCount: config.distractorCount,
+199       totalRounds: config.rounds.length,
+200       roundsInOrder: config.roundsInOrder,
+201       ttsEnabled: config.ttsEnabled,
+202       initialTiles: tiles,
+203       initialZones: zones,
+204     }),
+205     [
+206       config.gameId,
+207       config.inputMethod,
+208       config.wrongTileBehavior,
+209       config.tileBankMode,
+210       config.distractorCount,
+211       config.rounds.length,
+212       config.roundsInOrder,
+213       config.ttsEnabled,
+214       tiles,
+215       zones,
+216     ],
+217   );
+218 
+219   if (!round0) return null;
+220 
+221   return (
+222     <AnswerGame config={answerGameConfig}>
+223       <NumberMatchSession
+224         numberMatchConfig={config}
+225         roundOrder={roundOrder}
+226         onRestartSession={() => {
+227           setSessionEpoch((e) => e + 1);
+228         }}
+229       />
+230     </AnswerGame>
+231   );
+232 };
 233
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:08:23Z)**_
@@ -1044,24 +1058,26 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:08:23Z)**_
 Now I have a clear picture of the entire system. Let me synthesize:
 
 **The problem:**
+
 - `phase === 'round-complete'` becomes true immediately when a tile is placed correctly
 - `ScoreAnimation visible={phase === 'round-complete'}` fires confetti immediately when visible becomes true
 - But at this point, `correct.mp3` is still playing (it was triggered by `playSound('correct')` in `useTileEvaluation`)
 - `round-complete.mp3` is queued via `queueSound('round-complete')` in `useGameSounds`, so it won't start until `correct.mp3` finishes
 
-
 - So confetti fires while `correct.mp3` is playing, but `round-complete.mp3` hasn't started yet
 
 **The desired behavior:**
+
 - Confetti should start at the same moment `round-complete.mp3` starts - i.e., after `correct.mp3` finishes
 
 **The user noted:** "It's okay to have a transition between the rounds if that helps." This is interesting - it suggests a brief visual delay/transition is acceptable, meaning we don't need to be surgically precise. However, the core issue is still that confetti should fire when `round-complete.mp3` starts, not when `phase` changes.
 
 **The key insight:** We need to decouple the confetti trigger from the phase change and instead tie it to when the round-complete sound actually starts playing.
 
-The challenge is that `AudioFeedback` only exposes `whenSoundEnds()` for detecting when all queued audio finishes—there's no hook for when a specific sound begins. I'm considering three approaches: extending the API to return a promise that resolves when a particular sound starts, using a timing calculation based on the known duration of the correct sound, or adding a callback mechanism that fires when the round-complete sound begins playback. I'm realizing the timing is tricky—if `ScoreAnimation` waits for `whenSoundEnds()` after `round-complete.mp3` is queued, it'll wait too long. I need to capture the queue state *before* that sound is added, so the animation can fire right when the round-complete sound starts playing. more carefully.
+The challenge is that `AudioFeedback` only exposes `whenSoundEnds()` for detecting when all queued audio finishes—there's no hook for when a specific sound begins. I'm considering three approaches: extending the API to return a promise that resolves when a particular sound starts, using a timing calculation based on the known duration of the correct sound, or adding a callback mechanism that fires when the round-complete sound begins playback. I'm realizing the timing is tricky—if `ScoreAnimation` waits for `whenSoundEnds()` after `round-complete.mp3` is queued, it'll wait too long. I need to capture the queue state _before_ that sound is added, so the animation can fire right when the round-complete sound starts playing. more carefully.
 
 The sequence is:
+
 1. Tile placed correctly → `PLACE_TILE` action dispatched
 2. `useTileEvaluation` → `playSound('correct')` (resets queueTail to the correct.mp3 promise)
 3. React re-renders with `phase === 'round-complete'`
@@ -1075,10 +1091,12 @@ The issue is steps 4 and 5 happen in the same render cycle. The confetti should 
 The cleanest approach is to have `queueSound` return a promise that resolves when that specific sound begins playing, giving `ScoreAnimation` a timing signal. I could either pass this as a prop or create a dedicated hook that `ScoreAnimation` uses internally to subscribe to the phase change and get the delay timing before the round-complete sound gets queued, though that introduces a potential race condition.
 
 The most explicit and testable solution is to modify `queueSound` to return a promise that resolves when the sound starts, capture that promise in `useGameSounds` when the phase becomes `round-complete`, and pass it to `ScoreAnimation` as a prop so it can wait before firing confetti. Defining the API interface... `readyPromise?: Promise<void>` prop, delays confetti until resolved
+
 - **Pro:** Precise timing from audio system, no coupling, testable
 - **Con:** More invasive API change; props threading
 
 **Approach 2: `whenSoundEnds()` snapshot inside ScoreAnimation**
+
 - `ScoreAnimation` calls `whenSoundEnds()` when `visible` becomes true, capturing the current queue tail
 - The timing depends on React's effect ordering: if `ScoreAnimation`'s effect runs first, it captures the tail before `round-complete.mp3` is queued, so the promise resolves exactly when `round-complete.mp3` starts. ✓
 - But I need to verify the effect execution order—`useGameSounds` is called in `NumberMatchSession` before `ScoreAnimation` is rendered, so React should run the parent hook's effect before the child component's effect, which would mean `round-complete.mp3` is already queued by the time `ScoreAnimation` captures the tail.
@@ -1088,13 +1106,15 @@ The most explicit and testable solution is to modify `queueSound` to return a pr
 - In `useGameSounds`, change return type from `void` to `{ roundCompleteDelay: Promise<void> | null }`
 
 **Approach 2: New hook `useScoreAnimationReady`**
+
 - A hook that returns `{ ready: boolean }` by subscribing to `whenSoundEnds()` at the right time
 - This hook tracks when `phase` changes to `round-complete` and uses a snapshot of `whenSoundEnds()` before the sound is queued
 - Could be problematic with effect ordering unless carefully designed
 
 **Approach 3: Lift confetti trigger out of ScoreAnimation into game components**
+
 - `ScoreAnimation` only handles the visual `visible` state (aria div, etc.)  
-- Add a separate `useConfetti` hook that fires confetti based on a `Promise<void>` 
+- Add a separate `useConfetti` hook that fires confetti based on a `Promise<void>`
 - In the game components, call `useConfetti(roundCompleteDelay)` explicitly
 - This is more of a decomposition than a fix, but clean
 
@@ -1103,6 +1123,7 @@ I think the cleanest approach is the first one—making `queueSound` return a pr
 Actually, I realize there's a simpler path here. The `queueTail` variable isn't exported, but I could add a helper function that captures the current queue state before calling `queueSound`. Wait—`whenSoundEnds()` already does this! It returns the current `queueTail`. So if `useGameSounds` calls `whenSoundEnds()` before queuing the round-complete sound, it gets a promise that resolves when the previous sound finishes, and I can pass that promise downstream.
 
 Defining the return type for `useGameSounds`... I'm realizing the ref value won't trigger re-renders, so `roundCompleteReady` would only reflect the ref's current value at render time. Since `useGameSounds` runs at the top of `NumberMatchSession` and its effects execute after child components like `ScoreAnimation`, there's a timing issue where `roundCompleteReadyRef.current` might be stale when `ScoreAnimation` needs it. I think the cleanest solution is to pass the promise directly as a prop to `ScoreAnimation` instead of relying on this ref pattern. include a "round-complete start promise":
+
 - Before calling `queueSound('round-complete')`, capture `whenSoundEnds()` as `roundCompleteStart`
 - Store this in a state (to trigger a re-render)
 - Return it from `useGameSounds`
@@ -1113,6 +1134,7 @@ But using useState in `useGameSounds` just for this seems weird since it causes 
 **Option B: Move confetti timing into a dedicated hook close to where audio is orchestrated**
 
 A new hook `useConfetti(phase)` that:
+
 1. Watches for `phase === 'round-complete'` transitions
 2. Calls `whenSoundEnds()` at that point to get the "correct.mp3 end" promise
 3. Fires confetti when that promise resolves
@@ -1128,6 +1150,7 @@ This means prop-passing via a ref doesn't work perfectly - there's a one-render 
 Let me trace through the actual effect ordering more carefully. When `phase` becomes 'round-complete', React re-renders and then in the effects phase, `ScoreAnimation`'s effect runs first since it's a child component, firing confetti immediately with the current `visible` prop...
 
 Actually, I think the real issue is that I need to ensure the sound starts playing BEFORE confetti fires, not after. The simplest fix is to have `useGameSounds` return a callback that triggers both the sound AND the confetti together, eliminating the ordering dependency entirely. Modify `useGameSounds` to:
+
 1. Call `queueSound('round-complete')` which now returns a start-promise
 2. Return this start-promise as a stable ref value
 
@@ -1138,14 +1161,17 @@ But the problem is: how does `ScoreAnimation` get this promise if it only receiv
 **Move confetti out of ScoreAnimation and into a parent hook or component**
 
 `ScoreAnimation` currently does two things:
+
 1. Manages the confetti firing
 2. Renders an aria-live div when visible
 
 We could split these:
+
 - Keep `ScoreAnimation` as a pure visual component (just the aria div, no confetti logic)
 - Add a separate `useConfettiEffect` hook that fires confetti at the right time, called from `useGameSounds` or a wrapper
 
 OR: Keep everything in `ScoreAnimation` but give it a `delayUntil` prop:
+
 - `queueSound` returns start promise
 - `useGameSounds` returns this promise
 - Games pass it to `ScoreAnimation`
@@ -1179,26 +1205,30 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:09:04Z)**_
 Now I have a comprehensive picture of the architecture. Let me also check how SortNumbers and WordSpell use ScoreAnimation to see if the pattern is the same.
 
 Key observations:
+
 1. `ScoreAnimation` receives `visible={phase === 'round-complete'}` prop
 2. When `phase` transitions to `'round-complete'`, both `useGameSounds` (which calls `queueSound('round-complete')`) and `ScoreAnimation` fire at the same time
-3. The problem: `correct.mp3` is already playing when `phase` transitions. `queueSound` adds `round-complete.mp3` to the queue. 
+3. The problem: `correct.mp3` is already playing when `phase` transitions. `queueSound` adds `round-complete.mp3` to the queue.
 
 The real issue is that confetti animates the moment the phase changes, but it should wait until `round-complete.mp3` actually starts playing—after `correct.mp3` finishes. I need to decouple the confetti trigger from the phase change and instead fire it when the sound queue reaches that audio file. I need a "when sound STARTS" promise instead. I could modify `queueSound` to return a Promise that resolves when that specific sound begins playing, letting `ScoreAnimation` delay confetti until then. Alternatively, `useGameSounds` could expose a `confettiReady` signal that waits for the current queue to finish before the round-complete sound plays, then triggers the animation.
 
-Actually, I'm realizing the timing issue more clearly now — when the phase changes to `round-complete`, confetti fires immediately, but I need it to wait until the correct sound finishes and the round-complete sound starts. The key is capturing the queue tail *before* queueing the round-complete sound, then awaiting that promise to know when to fire confetti.
+Actually, I'm realizing the timing issue more clearly now — when the phase changes to `round-complete`, confetti fires immediately, but I need it to wait until the correct sound finishes and the round-complete sound starts. The key is capturing the queue tail _before_ queueing the round-complete sound, then awaiting that promise to know when to fire confetti.
 
 I could have `queueSound` return a promise that resolves when the sound starts playing, then pass that timing signal to the confetti logic. But that couples the animation component to audio concerns. A cleaner approach would be to have the sound hook manage a `confettiVisible` state internally...
 
 Still writing hook logic... I'm weighing a few approaches here. Option B would expose the timing logic through AudioFeedback directly, while Option C adds a delay prop to ScoreAnimation itself—simple but risky since hardcoded timing breaks easily. The user's comment about transitions being acceptable suggests a brief pause is fine, but I want to avoid fragile fixed delays. The cleanest path is making `queueSound` return a Promise that resolves when the sound starts, then using that in `useGameSounds` to control when confetti appears, keeping ScoreAnimation simple and dumb. the "when I start" promise)
+
 - In the game components (NumberMatch, WordSpell, SortNumbers), change `visible={phase === 'round-complete'}` to a delayed state that waits on that promise
 
 OR even simpler:
+
 - Introduce a `useDelayedVisible` hook or add a `confettiReady` return value to `useGameSounds`
 - The hook internally awaits the "sound starts" promise
 
 Let me formalize 3 approaches:
 
 **Approach 1: `queueSound` returns start-promise, `useGameSounds` returns `confettiReady`**
+
 - Change `queueSound` to return a promise that resolves when the sound starts
 - `useGameSounds` awaits the promise and returns `{ confettiReady: boolean }`  
 - Game components use `visible={confettiReady}` for `ScoreAnimation`
@@ -1206,6 +1236,7 @@ Let me formalize 3 approaches:
 - Cons: `useGameSounds` now returns state, changing its interface
 
 **Approach 2: New `useRoundCompleteReady` hook**
+
 - Extract the "wait for audio start" logic into a new hook
 - Returns `boolean` — ready when audio starts
 - `useGameSounds` stays unchanged
@@ -1214,6 +1245,7 @@ Let me formalize 3 approaches:
 - Cons: duplicate phase observation; minor coordination complexity
 
 **Approach 3: `ScoreAnimation` accepts an optional `Promise`/`delayUntil` prop**
+
 - `ScoreAnimation` takes `visible` + `delayUntil?: Promise<void>`
 - When `delayUntil` resolves, it fires confetti
 - Game components pass the sound-start promise directly to `ScoreAnimation`
@@ -1277,7 +1309,7 @@ We need confetti to fire when `round-complete.mp3` starts. There are three clean
 A new hook `useConfettiReady()` watches `phase`, calls `whenSoundEnds()` on a snapshot captured before `queueSound` is called, and returns `boolean`. `useGameSounds` is untouched.
 
 **Pros:** No changes to existing hooks.  
-**Cons:** Two hooks now both observe `phase`. Timing of the snapshot matters — must capture `queueTail` *before* `queueSound` is called. Requires either a new `AudioFeedback` export or careful ordering in the component. More fragile.
+**Cons:** Two hooks now both observe `phase`. Timing of the snapshot matters — must capture `queueTail` _before_ `queueSound` is called. Requires either a new `AudioFeedback` export or careful ordering in the component. More fragile.
 
 ---
 
@@ -1308,6 +1340,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:12:41Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user approved Approach A. Now I need to:
+
 1. Present the design in sections and get approval
 2. Write the design doc and commit
 3. Spec self-review
@@ -1337,7 +1370,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:12:47Z)**_
 
 ### Design — Section 1: `AudioFeedback.ts` changes
 
-`queueSound` gets a new return type: `Promise<void>` that resolves when the queued sound **starts** (i.e. the snapshot of `queueTail` captured *before* appending this sound).
+`queueSound` gets a new return type: `Promise<void>` that resolves when the queued sound **starts** (i.e. the snapshot of `queueTail` captured _before_ appending this sound).
 
 ```ts
 // before
@@ -1451,6 +1484,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:18:31Z)**_
 
 <think><details><summary>Thought Process</summary>
 The user approved the design. Now I need to:
+
 1. Write the design doc and commit it
 2. Run spec self-review
 3. Ask user to review spec
@@ -1486,6 +1520,7 @@ Create specs directory
 ```text
 (Bash completed with no output)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:18:58Z)**_
@@ -1583,6 +1618,7 @@ No dedicated unit tests today. The new return value is covered via the `useGameS
 ```text
 File created successfully at: /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:19:12Z)**_
@@ -2061,6 +2097,7 @@ Done in 4.56s.
  1 file changed, 83 insertions(+)
  create mode 100644 docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:19:16Z)**_
@@ -2098,6 +2135,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:19:24Z)**_
 ```text
 File unchanged since last read. The content from the earlier Read tool_result in this conversation is still current — refer to that instead of re-reading.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:19:32Z)**_
@@ -2121,6 +2159,7 @@ worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNu
 worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx:40:  useGameSounds();
 worktrees/feat-word-spell-number-match/src/games/sort-numbers/SortNumbers/SortNumbers.tsx:137:      <ScoreAnimation visible={phase === 'round-complete'} />
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:19:33Z)**_
@@ -2135,6 +2174,7 @@ worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.
 worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx:85:  useGameSounds();
 worktrees/feat-word-spell-number-match/src/games/word-spell/WordSpell/WordSpell.tsx:195:      <ScoreAnimation visible={phase === 'round-complete'} />
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:19:36Z)**_
@@ -2180,8 +2220,8 @@ The user is asking whether the design also handles the game-complete case (confe
 2. The `GameOverOverlay` handles the game-over UI, not `ScoreAnimation`
 
 Let me check what happens in the game-over phase. Looking at NumberMatch:
-- `<ScoreAnimation visible={phase === 'round-complete'} />` — only shown for round-complete
 
+- `<ScoreAnimation visible={phase === 'round-complete'} />` — only shown for round-complete
 
 - `<GameOverOverlay ... />` — game-over has its own separate overlay
 
@@ -2192,6 +2232,7 @@ The real question is whether they want confetti to also appear at game-over — 
 Let me re-check: the `useGameSounds` hook handles both phases. For game-over, `queueSound('game-complete')` is called but the return value is ignored (no confettiReady tracking). So game-complete.mp3 will queue correctly after round-complete.mp3, but there's no confetti triggered.
 
 Actually, wait - when does game-over happen? Looking at NumberMatch:
+
 - When it's the last round, the `useEffect` with `phase === 'round-complete'` dispatches `COMPLETE_GAME` after 750ms
 - `COMPLETE_GAME` triggers `phase === 'game-over'`
 - `useGameSounds` then calls `queueSound('game-complete')`
@@ -2243,106 +2284,107 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:29:39Z)**_
  `./worktrees/feat-word-spell-number-match/src/components/answer-game/GameOverOverlay/GameOverOverlay.tsx`
 
 ```text
-1	import confetti from 'canvas-confetti';
-2	import { useEffect } from 'react';
-3	
-4	interface GameOverOverlayProps {
-5	  retryCount: number;
-6	  onPlayAgain: () => void;
-7	  onHome: () => void;
-8	}
-9	
-10	const starsFromRetries = (retryCount: number): number => {
-11	  if (retryCount === 0) return 5;
-12	  if (retryCount <= 2) return 4;
-13	  if (retryCount <= 4) return 3;
-14	  if (retryCount <= 6) return 2;
-15	  return 1;
-16	};
-17	
-18	export const GameOverOverlay = ({
-19	  retryCount,
-20	  onPlayAgain,
-21	  onHome,
-22	}: GameOverOverlayProps) => {
-23	  const stars = starsFromRetries(retryCount);
-24	
-25	  useEffect(() => {
-26	    const duration = 12_000;
-27	    const end = Date.now() + duration;
-28	    let rafId: number;
-29	
-30	    const frame = () => {
-31	      void confetti({
-32	        particleCount: 3,
-33	        angle: 60,
-34	        spread: 55,
-35	        origin: { x: 0 },
-36	      });
-37	      void confetti({
-38	        particleCount: 3,
-39	        angle: 120,
-40	        spread: 55,
-41	        origin: { x: 1 },
-42	      });
-43	      if (Date.now() < end) {
-44	        rafId = requestAnimationFrame(frame);
-45	      }
-46	    };
-47	
-48	    rafId = requestAnimationFrame(frame);
-49	
-50	    return () => {
-51	      cancelAnimationFrame(rafId);
-52	      confetti.reset();
-53	    };
-54	  }, []);
-55	
-56	  return (
-57	    <div
-58	      role="dialog"
-59	      aria-label="Game complete"
-60	      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
-61	    >
-62	      <span className="animate-bounce text-8xl" aria-hidden="true">
-63	        🐨
-64	      </span>
-65	
-66	      <div
-67	        aria-label={`You scored ${stars} out of 5 stars`}
-68	        className="flex gap-2"
-69	      >
-70	        {Array.from({ length: 5 }, (_, i) => (
-71	          <span
-72	            key={i}
-73	            className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
-74	          >
-75	            ★
-76	          </span>
-77	        ))}
-78	      </div>
-79	
-80	      <div className="flex gap-4">
-81	        <button
-82	          type="button"
-83	          onClick={onPlayAgain}
-84	          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
-85	        >
-86	          Play again
-87	        </button>
-88	        <button
-89	          type="button"
-90	          onClick={onHome}
-91	          className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
-92	        >
-93	          Home
-94	        </button>
-95	      </div>
-96	    </div>
-97	  );
-98	};
+1 import confetti from 'canvas-confetti';
+2 import { useEffect } from 'react';
+3 
+4 interface GameOverOverlayProps {
+5   retryCount: number;
+6   onPlayAgain: () => void;
+7   onHome: () => void;
+8 }
+9 
+10 const starsFromRetries = (retryCount: number): number => {
+11   if (retryCount === 0) return 5;
+12   if (retryCount <= 2) return 4;
+13   if (retryCount <= 4) return 3;
+14   if (retryCount <= 6) return 2;
+15   return 1;
+16 };
+17 
+18 export const GameOverOverlay = ({
+19   retryCount,
+20   onPlayAgain,
+21   onHome,
+22 }: GameOverOverlayProps) => {
+23   const stars = starsFromRetries(retryCount);
+24 
+25   useEffect(() => {
+26     const duration = 12_000;
+27     const end = Date.now() + duration;
+28     let rafId: number;
+29 
+30     const frame = () => {
+31       void confetti({
+32         particleCount: 3,
+33         angle: 60,
+34         spread: 55,
+35         origin: { x: 0 },
+36       });
+37       void confetti({
+38         particleCount: 3,
+39         angle: 120,
+40         spread: 55,
+41         origin: { x: 1 },
+42       });
+43       if (Date.now() < end) {
+44         rafId = requestAnimationFrame(frame);
+45       }
+46     };
+47 
+48     rafId = requestAnimationFrame(frame);
+49 
+50     return () => {
+51       cancelAnimationFrame(rafId);
+52       confetti.reset();
+53     };
+54   }, []);
+55 
+56   return (
+57     <div
+58       role="dialog"
+59       aria-label="Game complete"
+60       className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+61     >
+62       <span className="animate-bounce text-8xl" aria-hidden="true">
+63         🐨
+64       </span>
+65 
+66       <div
+67         aria-label={`You scored ${stars} out of 5 stars`}
+68         className="flex gap-2"
+69       >
+70         {Array.from({ length: 5 }, (_, i) => (
+71           <span
+72             key={i}
+73             className={`text-4xl ${i < stars ? 'text-yellow-400' : 'text-muted-foreground'}`}
+74           >
+75             ★
+76           </span>
+77         ))}
+78       </div>
+79 
+80       <div className="flex gap-4">
+81         <button
+82           type="button"
+83           onClick={onPlayAgain}
+84           className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
+85         >
+86           Play again
+87         </button>
+88         <button
+89           type="button"
+90           onClick={onHome}
+91           className="rounded-xl bg-muted px-8 py-4 text-lg font-bold active:scale-95"
+92         >
+93           Home
+94         </button>
+95       </div>
+96     </div>
+97   );
+98 };
 99
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:29:40Z)**_
@@ -2366,6 +2408,7 @@ worktrees/feat-word-spell-number-match/src/components/answer-game/GameOverOverla
 worktrees/feat-word-spell-number-match/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:5:  component: GameOverOverlay,
 worktrees/feat-word-spell-number-match/src/components/answer-game/GameOverOverlay/GameOverOverlay.stories.tsx:14:type Story = StoryObj<typeof GameOverOverlay>;
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:30:39Z)**_
@@ -2374,7 +2417,6 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:30:39Z)**_
 Good. `GameOverOverlay` also fires confetti (a continuous animation via `requestAnimationFrame`). It's rendered directly when `phase === 'game-over'`, so the confetti starts immediately when the phase changes — same problem.
 
 The fix is symmetric: `useGameSounds` also returns `gameOverReady: boolean`, set to `true` when `game-complete.mp3` starts. Game components render `GameOverOverlay` when `gameOverReady` instead of when `phase === 'game-over'`.
-
 
 Now I'm updating the spec to reflect these changes.
 </details></think>
@@ -2391,6 +2433,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:30:46Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:30:59Z)**_
@@ -2401,6 +2444,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:30:59Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:31:21Z)**_
@@ -2411,6 +2455,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:31:21Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:31:27Z)**_
@@ -2421,6 +2466,7 @@ _**Agent (claude-sonnet-4-6 2026-04-04 00:31:27Z)**_
 ```text
 The file /Users/leocaseiro/Sites/base-skill/docs/superpowers/specs/2026-04-04-confetti-audio-sync-design.md has been updated successfully.
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:31:40Z)**_
@@ -2898,6 +2944,7 @@ Done in 4.86s.
 [fix/storybok-tests-ci 338995f] docs: extend confetti sync spec to cover game-over/GameOverOverlay
  1 file changed, 12 insertions(+), 8 deletions(-)
 ```
+
 </details></tool-use>
 
 _**Agent (claude-sonnet-4-6 2026-04-04 00:31:49Z)**_
