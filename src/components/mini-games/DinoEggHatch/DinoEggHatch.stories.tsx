@@ -66,7 +66,11 @@ export default meta;
 
 type Story = StoryObj<typeof DinoEggHatch>;
 
-export const Playground: Story = {};
+export const Playground: Story = {
+  args: {
+    backgroundColor: '#7e48c0',
+  },
+};
 
 export const NoThrottle: Story = {
   args: { crackThrottleMs: 0, crackMaxConcurrent: 8 },

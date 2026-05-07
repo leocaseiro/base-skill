@@ -481,7 +481,7 @@ a:hover {
   --animate-blink: blink 1s step-end infinite;
   --animate-shake: shake 300ms ease-in-out;
   --animate-pop: pop 250ms ease-out;
-  --animate-sunburst-spin: sunburst-spin 8s linear infinite;
+  --animate-sunburst-spin: sunburst-spin 11s linear infinite;
   --font-heading: var(--font-sans);
   --font-sans:
     'Andika', 'Edu NSW ACT Foundation', 'Nunito', 'Manrope', system-ui,

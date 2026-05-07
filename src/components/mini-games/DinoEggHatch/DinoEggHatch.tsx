@@ -249,7 +249,7 @@ export const DinoEggHatch = ({
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 40%, #7e48c0cc 70%)',
+            'radial-gradient(circle, rgba(0,0,0,0.7) 13%, rgba(255,255,255,0) 100%)',
         }}
         aria-hidden="true"
       />
