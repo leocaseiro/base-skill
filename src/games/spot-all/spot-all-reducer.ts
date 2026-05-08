@@ -1,5 +1,28 @@
 import type { SpotAllRound, SpotAllTile } from './types';
 
+// SpotAll reducer ↔ GameDefinition engine phase mapping.
+//
+// Reviewers repeatedly flag "SpotAll's phases look different from answer-game's."
+// They are not -- they are the same engine phases with a different reducer
+// shape underneath. This table is the answer:
+//
+//   Engine phase        | SpotAll reducer state.phase | Action that transitions in
+//   --------------------+-----------------------------+-----------------------------
+//   playing             | 'playing'                   | INIT_ROUNDS / TAP_TILE
+//   round-complete      | 'round-complete'            | TAP_TILE (last correct tap)
+//   level-complete      | (n/a -- SpotAll has no levels)
+//   game-over           | 'game-over'                  | ADVANCE_ROUND on last round
+//
+// Notable shape differences:
+//   - SpotAll's rounds are pre-built at INIT_ROUNDS and advanced by
+//     incrementing roundIndex. ADVANCE_ROUND has NO payload (unlike
+//     answer-game's ADVANCE_ROUND which carries tiles + zones).
+//   - There is no separate "next round" action; ADVANCE_ROUND routes to
+//     game-over when state.roundIndex hits state.rounds.length - 1.
+//   - There is no ADVANCE_LEVEL action; SpotAll does not model levels.
+//
+// Phase 1.b of the GameDefinition engine plan integrates this reducer
+// behind useGameEngine. See docs/superpowers/plans/2026-05-07-game-definition-engine-design.md.
 export type SpotAllPhase = 'playing' | 'round-complete' | 'game-over';
 
 export interface SpotAllState {
