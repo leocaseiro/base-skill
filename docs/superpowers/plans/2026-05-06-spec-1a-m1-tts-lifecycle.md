@@ -51,7 +51,7 @@ about user preferences.
 **Flow:**
 
 ```text
-GameDefinition.phases[x].onEnter
+XState machine state entry: [{ type: 'speak', params: { lifecycleEvent } }]
   → SideEffect { type: 'speak', lifecycleEvent }
   → executeSideEffects()
   → bus.emit({ type: 'lifecycle:speak', lifecycleEvent, gameId })
@@ -890,6 +890,16 @@ git commit -m "feat(i18n): add tts.word-spell and tts.number-match i18n keys"
 
 ## Task 7: useLifecycleTTS Hook
 
+> **Coexistence with `useGameTTS` (M1):** `useLifecycleTTS` is not a drop-in replacement for
+> `useGameTTS` in Phase 1. Use `useLifecycleTTS` for engine-driven lifecycle-event speech
+> (`round.start`, `game.prepare`, etc.) — it takes a `LifecycleEvent` key and resolves text from
+> `GameDefinition.tts`. Use `useGameTTS` for ad-hoc speech that has no lifecycle-event analogue
+> (`speakTile` for tile labels, `TextQuestion` on-click, `AudioButton` replay). Both hooks coexist
+> through Phase 1. `useGameTTS` is deprecated in M2 once all TTS paths are lifecycle-driven.
+> Note: `useLifecycleTTS.speakAuto(event)` takes a `LifecycleEvent` key — **not** raw text.
+> Passing raw text is a silent bug (lookup returns undefined, nothing is spoken). TypeScript
+> enforces this if `LifecycleEvent` is a union of string literals.
+
 **Files:**
 
 - Create: `src/lib/lifecycle-tts/useLifecycleTTS.ts`
@@ -1284,8 +1294,14 @@ useEffect(() => {
 }, []);
 ```
 
-The `useLifecycleTTS` hook subscribes to `game:prepare` via the bus and speaks the brief
-`"{{gameName}}"` copy when `autoSpeak` is true and `GameDefinition.tts['game.prepare']` is defined.
+**Design note:** `useLifecycleTTS` does NOT subscribe to `game:prepare` directly. In the
+XState-first approach, the `game.prepare` lifecycle event is emitted by the XState machine's
+initial-state entry action as a `lifecycle:speak` bus event — the same path all other lifecycle
+events use. `useLifecycleTTS`'s existing `lifecycle:speak` subscription handles it without any
+additional subscription. The `game:prepare` bus event emitted here is for other potential
+subscribers (e.g., analytics); the TTS path flows through XState → `lifecycle:speak` → hook.
+This Task 9 interim pattern (direct `game:prepare` emission) will be superseded once the
+GameDefinition engine is integrated into `GameOptionsOverlay`.
 
 - [ ] **Step 4: Add game.start speech after "Let's go"**
 
