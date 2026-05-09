@@ -18,7 +18,7 @@ A `GameDefinition<TRound>` type that makes adding a new game feel like filling o
 
 The engine is boring. The game components are fun to write.
 
-Future possibility (not Day 1): a Storybook-driven game designer where a teacher or curriculum designer composes a game definition interactively -- pick interaction mode, define phases, set TTS -- and exports a TypeScript definition literal. The abstraction becomes a design tool, not just a developer convenience.
+Future possibility (not Day 1, tracked in #351): a Storybook-driven game designer where a teacher or curriculum designer composes a game definition interactively -- pick interaction mode, define phases, set TTS -- and exports a TypeScript definition literal. The abstraction becomes a design tool, not just a developer convenience. Requires Phase 1 + Phase 2 to ship and the `GameDefinition` type to stabilise first.
 
 ## Constraints
 
@@ -104,9 +104,9 @@ The foundation. Ship as **three PRs** for manageable review:
 - **PR 1b:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family).
 - **PR 1c:** Consolidation -- TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`).
 
-#### Phase 1.b -- SpotAll integration (optional parallel track)
+#### Phase 1.b -- SpotAll integration (required for Phase 2 / SRS v1)
 
-A separate PR that can land alongside or after PR 1c, with no sequencing dependency on Phase 2. Independently reviewable.
+A separate PR that can land alongside or after PR 1c. Independently reviewable. **Phase 2 (reducer unification) depends on Phase 1.b**, so Phase 1.b must be merged before Phase 2 can start.
 
 SpotAll currently uses `useReducer` directly with no engine involvement; this PR is the **first-time engine integration** for SpotAll, not a strict migration. The reducer (`spotAllReducer`) has structurally different state from `answerGameReducer`: pre-built rounds, no-payload `ADVANCE_ROUND`, separate cooldown and tap-tracking state.
 
@@ -125,12 +125,25 @@ PR 1.b also adds a code comment to `src/games/spot-all/spot-all-reducer.ts` mapp
 
 Per `CLAUDE.md`, any change to game-state logic must update co-located `.mdx` architecture docs in the same PR. Run `/update-architecture-docs` for guided prompts.
 
-| PR     | Files to update                                                                          |
-| ------ | ---------------------------------------------------------------------------------------- |
-| PR 1a  | `src/lib/game-engine/GameEngine.flows.mdx`, `GameEngine.reference.mdx`, `debugging.mdx`  |
-| PR 1b  | `src/components/answer-game/AnswerGame/AnswerGame.flows.mdx`, `AnswerGame.reference.mdx` |
-| PR 1c  | Cross-reference cleanup across game-engine and answer-game MDX                           |
-| PR 1.b | SpotAll-specific MDX (any docs co-located with `src/games/spot-all/`)                    |
+| PR     | Files to update                                                     |
+| ------ | ------------------------------------------------------------------- |
+| PR 1a  | `GameEngine.flows.mdx`, `GameEngine.reference.mdx`, `debugging.mdx` |
+| PR 1b  | See note below                                                      |
+| PR 1c  | Cross-reference cleanup across game-engine and answer-game MDX      |
+| PR 1.b | Create SpotAll MDX (see note below)                                 |
+
+**PR 1b MDX files:**
+
+- `src/components/answer-game/AnswerGame/AnswerGame.flows.mdx`
+- `src/components/answer-game/AnswerGame/AnswerGame.reference.mdx`
+- `src/games/word-spell/WordSpell/WordSpell.flows.mdx`
+- Create `src/games/sort-numbers/SortNumbers/SortNumbers.flows.mdx` (**new** — no existing MDX
+  in `src/games/sort-numbers/`)
+
+**PR 1.b MDX files (new — no existing MDX in `src/games/spot-all/`):**
+
+- Create `src/games/spot-all/SpotAll/SpotAll.flows.mdx` documenting the engine boundary (what the
+  engine owns vs. what the reducer owns)
 
 #### Relationship to existing `lifecycle.ts` engine
 
@@ -165,6 +178,9 @@ src/lib/game-engine/
 src/lib/lifecycle-tts/
 └── types.ts                    # LifecycleEvent + EventTemplate (PR 1a; pinned contract for the TTS plan)
 
+src/types/game-events.ts        # PR 1a: extend GameEventType with celebration:start, celebration:complete,
+                                # celebration:skip. round:* members land in Phase 2 alongside SRS v1 wiring.
+
 src/games/word-spell/definition.ts      # WordSpell GameDefinition
 src/games/number-match/definition.ts    # NumberMatch GameDefinition
 src/games/sort-numbers/definition.ts    # SortNumbers GameDefinition
@@ -178,6 +194,11 @@ src/lib/game-engine/lifecycle.ts     # Superseded by useGameEngine
 ```
 
 `move-log.ts` and `replay.ts` are NOT removed -- they support undo and session resume.
+
+**Prerequisite for deleting `lifecycle.ts` in PR 1c:** `src/lib/game-engine/index.tsx` imports
+`createReducer` and `useGameLifecycle` from `lifecycle.ts` and calls `useGameLifecycle` directly.
+`GameEngineProvider` must be migrated away from both imports before the file can be deleted. If
+that migration is not complete in PR 1c, defer `lifecycle.ts` deletion to Phase 2.
 
 #### The GameDefinition type (design-wide shape)
 
@@ -208,6 +229,8 @@ type GameDefinition<TRound = unknown> = {
   //   buildRound: (ctx) => state.rounds[ctx.roundIndex]
   buildRound: (ctx: BuildRoundContext) => TRound;
 
+  // LifecycleEvent and EventTemplate are defined in src/lib/lifecycle-tts/types.ts,
+  // created in PR 1a. The TTS plan may extend this contract but cannot reshape it.
   tts?: Partial<Record<LifecycleEvent, EventTemplate>>;
 };
 
@@ -241,8 +264,9 @@ type CelebrationConfig = {
   reward?: RewardPayload;
 };
 
+// kind is string for now — typed as a closed union in #352 when the rewards system is built.
 type RewardPayload = {
-  kind: 'coin' | 'badge' | 'level-up' | 'achievement' | string;
+  kind: string;
   amount?: number;
   metadata?: Record<string, unknown>;
 };
@@ -259,6 +283,8 @@ type PhaseContext = {
 
 type BuildRoundContext = PhaseContext;
 
+// GameEvent is defined in src/types/game-events.ts.
+// LifecycleEvent is defined in src/lib/lifecycle-tts/types.ts (created in PR 1a).
 type SideEffect =
   | { type: 'emit'; event: GameEvent }
   | { type: 'speak'; lifecycleEvent: LifecycleEvent }
@@ -310,7 +336,11 @@ type UseGameEngineResult = {
 
 **Phase authority in Phase 1:** the engine is a **one-way derived view** of the reducer's phase. The reducer remains the source of truth for `state.phase`; `useGameEngine` reads it, walks the `phases` graph from the definition, and fires side effects on transitions. It does NOT write back to the reducer. (Phase 2's reducer unification re-evaluates this when a single engine reducer exists.)
 
-**Engine semantics for celebrations:** When the active phase has a `celebration` field, the engine mounts the configured mini-game overlay and emits engagement events (`celebration:start`, `celebration:complete`, `celebration:skip`) to move-log.
+**Engine semantics for celebrations:** When the active phase has a `celebration` field, the engine mounts the configured mini-game overlay and emits engagement events to move-log:
+
+- `celebration:start` — fires when the overlay mounts
+- `celebration:complete` — fires on **natural completion** (mini-game ran to its end)
+- `celebration:skip` — fires when the user dismisses early (`'play-again'` | `'go-home'` | `'timeout'`)
 
 **Phase scope:** The `phases` graph covers the round lifecycle only: `playing`, `round-complete`, `level-complete`, `game-over`. The old `game-engine/types.ts` also defines `idle`, `loading`, `instructions`, `evaluating`, `scoring`, `next-round`, and `retry`. These are NOT modeled in `GameDefinition.phases` because they are either component-managed UI states or route/shell concerns:
 
@@ -358,14 +388,23 @@ const answerGameAdapter: InteractionAdapter<AnswerGameAction> = {
       zones: roundOutput.zones,
     }),
   advanceLevel: (roundOutput, dispatch) =>
-    dispatch({ type: 'ADVANCE_LEVEL', level: roundOutput.level }),
+    dispatch({
+      type: 'ADVANCE_LEVEL',
+      tiles: roundOutput.tiles as TileItem[],
+      zones: roundOutput.zones as AnswerZone[],
+    }),
   completeGame: (dispatch) => dispatch({ type: 'COMPLETE_GAME' }),
 };
 
-// spot-all adapter -- ADVANCE_ROUND has no payload; rounds are pre-built
-// at INIT_ROUNDS and advanced by index. There is no separate "next round"
-// or "game over" action; spotAllReducer routes ADVANCE_ROUND to game-over
-// when the last round is reached.
+// spot-all adapter
+//   ADVANCE_ROUND  — "move to the next round index" (no payload; rounds are
+//                    pre-built at INIT_ROUNDS and accessed by index).
+//                    When this is the last round, spotAllReducer also sets
+//                    phase → 'game-over' internally — both transitions are
+//                    one action from the engine's perspective.
+//   COMPLETE_GAME  — "end the session" (e.g., user taps exit / time runs out).
+//                    Distinct from ADVANCE_ROUND reaching the last round;
+//                    used for explicit early exits.
 const spotAllAdapter: InteractionAdapter<SpotAllAction> = {
   advanceRound: (_roundOutput, dispatch) =>
     dispatch({ type: 'ADVANCE_ROUND' }),
@@ -410,11 +449,21 @@ Merge `answerGameReducer` and `spotAllReducer` behind a single `GameEngineReduce
 - Phase 2 **requires Phase 1.b done** -- both reducers must be engine-driven before they can be merged.
 - **SRS v1 implementation is blocked on Phase 2** (per ship cluster #343).
 
+> **Timeline risk:** The Phase 1 → Phase 1.b → Phase 2 chain means SRS v1 implementation cannot
+> start until at least 2–3 weeks after PR #350 merges (~1 week Phase 1 + Phase 1.b landing +
+> ~1 week Phase 2). If SRS v1 has a hard deadline, that deadline gates on this entire chain.
+
 **Out of scope for Phase 2:** new input modes (STT, free-form). Those land in Phase 3 on top of the unified reducer.
 
 ### Phase 3: New Interaction Modes (per-game, ongoing)
 
 As new games are added, widen the `InteractionMode` union and add interaction-specific handlers. Speech-to-Text (#309) adds `'voice-input'` with its own reducer handler. Free-form text input adds `'free-form-text'` with a separate render primitive (`<TextInputAnswer />`). Each new mode is a self-contained addition -- the engine and existing games don't change.
+
+**Scope rule:** A new interaction mode belongs in Phase 3 when it requires a new `InteractionMode`
+union member and a new render primitive sibling to `<AnswerGame />`. Extensions to existing modes
+(e.g., new slot layouts, new drag behaviours) are Phase 1 maintenance, not Phase 3 items.
+
+**Candidate Phase 3 games:** Sort by Group (#250), Math Games (#227), Speech-to-Text (#309).
 
 ### Mini-Game Celebrations
 
@@ -430,15 +479,24 @@ The engine reads `phase.celebration` and mounts the configured mini-game central
 
 - `celebration:start` -- fires when celebration mounts; payload includes `phaseId`, `miniGame`, `levelIndex`, `roundIndex`
 - `celebration:complete` -- fires on natural completion; payload includes `durationMs`
-- `celebration:skip` -- fires on user skip; payload includes `durationMs`, `skipMethod`
+- `celebration:skip` -- fires on user-initiated dismissal; payload includes `durationMs`, `skipMethod: 'play-again' | 'go-home' | 'timeout'`
 
-**Migration impact for Phase 1:** PRs 1a/1b/1c must move celebration mounting from game components (e.g., `<skin.CelebrationOverlay />` in `NumberMatch.tsx:336`, `SortNumbers.tsx`, etc.) into the engine.
+**Migration impact for Phase 1:** PRs 1a/1b/1c move celebration mounting from the 3 answer game
+components (NumberMatch, WordSpell, SortNumbers — e.g., `<skin.CelebrationOverlay />` in
+`NumberMatch.tsx:336`, `SortNumbers.tsx`, etc.) into the engine. SpotAll's celebration migration
+requires Phase 1.b (engine integration) first — it cannot land before then.
+
+**`useGameSounds` gate removal:** `useGameSounds.ts` sets `confettiReady`/`gameOverReady` booleans
+that gate skin overlay rendering by reading `phase` from `useAnswerGameContext`. Once the engine
+mounts celebrations, both paths fire simultaneously and the overlay double-mounts. For each
+migrated game in PRs 1a/1b, remove or disable the `confettiReady`/`gameOverReady` gate from
+`useGameSounds` (or the per-game sound hook) as part of the celebration migration step.
 
 **Skip mechanic:** Today's "Play Again" / "Go to Home" buttons in the celebration overlay serve as the skip path. The engine fires `celebration:skip` when those buttons are clicked. Escape-key support is optional (nice-to-have, not blocking).
 
 **Robustness:**
 
-- **Skip via buttons** fires `onComplete` just like natural completion. The engine treats them identically for transition purposes; only the `skipMethod` field on the engagement event differs (`'natural'` | `'play-again'` | `'go-home'` | `'timeout'`).
+- **Skip via buttons** fires `celebration:skip` with the appropriate `skipMethod`. Natural completion fires `celebration:complete`. Both unblock phase transitions; the engine treats them identically for lifecycle purposes.
 - **Replay-on-resume:** if a session resumes during a celebration, the engine re-mounts the celebration with the same config (idempotent).
 - **Fallback timer** via `maxDuration` prop on `CelebrationConfig.renderProps` -- if the mini-game fails to call `onComplete` within the timer, the engine fires `onComplete` with `skipMethod: 'timeout'`.
 
@@ -508,9 +566,20 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 
 2. **How does the AdvancedConfigModal work with GameDefinition?** Each game's config form fields are currently ad-hoc. Should GameDefinition declare its configurable options so the modal can render them generically? (Deferred to Phase 2 or later -- not blocking for Phase 1.)
 
+3. **What does `markResolved()` mark resolved, and who calls it?** `UseGameEngineResult` exposes `markResolved(): void` but the contract is unspecified. Does it signal round completion? Phase completion? Is it called by the render component on answer submission, or by the engine internally? Decide before implementing PR 1a's `useGameEngine` hook.
+
+4. **Celebration blocking semantics:** Two statements in the plan describe celebrations differently: (a) "no `onEnter` side-effects fire, no TTS speaks, no transitions allowed" vs. (b) "the engine pauses phase transitions until the mini-game completes." These are different constraints. Decide the authoritative rule: does celebrating block only transitions, or does it also suppress `onEnter` effects and TTS for the underlying phase?
+
+5. **Who owns the `ttsEnabled` guard for the `speak` SideEffect?** The engine fires `speak` unconditionally today. Two options: (a) `useLifecycleTTS` silently no-ops when TTS is disabled -- the engine doesn't need to know; (b) the engine checks a `ttsEnabled` context value before firing `speak`. Decide before implementing PR 1a's side-effect executor.
+
+6. **Which module resolves `speak` SideEffect → audio in Phase 1?** The plan pins `lifecycle-tts/types.ts` as the `LifecycleEvent` contract but doesn't specify which module turns a `LifecycleEvent` into actual TTS audio in PR 1a. Does PR 1a wire a stub `useLifecycleTTS`, or does `speak` remain inert until the full TTS plan ships? Decide before writing PR 1a.
+
+7. **`dynamicTransitions` null-fallthrough precedence:** The current contract says returning `null` falls through to the static `transitions` map. Clarify: is a non-null return from `dynamicTransitions` always final (short-circuits `transitions`)? Or can `transitions` also fire for the same action? Define evaluation order before implementing PR 1a's phase-transition logic.
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
+- **Note on LOC target:** The 500 LOC / 5 files figure is a directional signal, not a hard criterion. The approach is justified by game engine patterns (declarative definition + interpreter), not by line-count reduction alone. If the LOC target is missed, evaluate whether the _qualitative_ bar was met first.
 - **Functional bar:** All 4 existing games pass their full test suites after migration. SpotAll additionally has new integration tests for engine-driven lifecycle (since it had no engine integration before Phase 1.b).
 - **Visual bar:** VR tests pass on each migrated game; manual smoke test on each migrated game.
 - **SRS readiness bar (Phase 2):** SRS v1's `round:*` event subscription works against all migrated games without per-game branching.
@@ -527,6 +596,11 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 5. **Review and merge Phase 1 + 1.b** before starting Phase 2 (reducer unification, SRS v1 enabler).
 
 ## What I noticed about how you think
+
+<!-- This section was written by the AI design partner during the /office-hours session that
+produced this document. It captures design instincts and decision-making patterns observed
+during the session — kept here as a record of the reasoning culture behind the design, not
+as a formal spec section. Future readers: treat it as a design journal entry, not a requirement. -->
 
 - You said "The engine don't need to know, but we can reuse the tiles just like we do already." That's the separation-of-concerns instinct that makes good engine design. You didn't need to be taught it -- you stated it as obvious.
 - You chose the full engine rewrite over the safer options without hesitating. When you see the right abstraction, you'd rather do it once properly than iterate toward it. That's conviction, not recklessness -- you've already analyzed 4 games' source code, evaluated boardgame.io and other engines, and mapped the architecture.
