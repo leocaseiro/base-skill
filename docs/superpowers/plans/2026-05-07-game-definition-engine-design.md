@@ -560,6 +560,10 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 
 7. **AnswerGame coupling:** RESOLVED -- per-game wrappers (Option A); `<AnswerGame />` stays a shared primitive for slot games but is not canonical for all GameDefinitions. Future input modes get sibling render primitives.
 
+8. **`autoSpeak` guard ownership (formerly OQ#5):** RESOLVED -- `useLifecycleTTS` owns the `autoSpeak` guard; the engine fires `speak` side-effects unconditionally via `executeSideEffects()`; `useLifecycleTTS` decides whether to call `speak()` based on `autoSpeakRef.current`. The engine does not need to know about user TTS preferences. Consumer decides whether to speak.
+
+9. **`speak` SideEffect → audio resolution (formerly OQ#6):** RESOLVED -- `useLifecycleTTS` subscribes to `lifecycle:speak` bus events and resolves them using `GameDefinition.tts` + the verbosity resolver + `autoSpeak` guard. `executeSideEffects()` is the emitter: it processes `{ type: 'speak', lifecycleEvent }` by emitting `{ type: 'lifecycle:speak', lifecycleEvent, gameId }` on the `GameEventBus`. PR 1a wires a stub `useLifecycleTTS` that subscribes to the bus; the full TTS plan (PR #349 content, now in this PR) completes the implementation.
+
 ## Open Questions
 
 1. **Where does round data loading live?** WordSpell has resume/persist logic, library sampling, stale-draft detection for loading round content. This stays in the React component (not the definition). But the boundary between "what the component loads" and "what `buildRound` receives" needs to be clear.
@@ -570,11 +574,7 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 
 4. **Celebration blocking semantics:** Two statements in the plan describe celebrations differently: (a) "no `onEnter` side-effects fire, no TTS speaks, no transitions allowed" vs. (b) "the engine pauses phase transitions until the mini-game completes." These are different constraints. Decide the authoritative rule: does celebrating block only transitions, or does it also suppress `onEnter` effects and TTS for the underlying phase?
 
-5. **Who owns the `ttsEnabled` guard for the `speak` SideEffect?** The engine fires `speak` unconditionally today. Two options: (a) `useLifecycleTTS` silently no-ops when TTS is disabled -- the engine doesn't need to know; (b) the engine checks a `ttsEnabled` context value before firing `speak`. Decide before implementing PR 1a's side-effect executor.
-
-6. **Which module resolves `speak` SideEffect → audio in Phase 1?** The plan pins `lifecycle-tts/types.ts` as the `LifecycleEvent` contract but doesn't specify which module turns a `LifecycleEvent` into actual TTS audio in PR 1a. Does PR 1a wire a stub `useLifecycleTTS`, or does `speak` remain inert until the full TTS plan ships? Decide before writing PR 1a.
-
-7. **`dynamicTransitions` null-fallthrough precedence:** The current contract says returning `null` falls through to the static `transitions` map. Clarify: is a non-null return from `dynamicTransitions` always final (short-circuits `transitions`)? Or can `transitions` also fire for the same action? Define evaluation order before implementing PR 1a's phase-transition logic.
+5. **`dynamicTransitions` null-fallthrough precedence:** The current contract says returning `null` falls through to the static `transitions` map. Clarify: is a non-null return from `dynamicTransitions` always final (short-circuits `transitions`)? Or can `transitions` also fire for the same action? Define evaluation order before implementing PR 1a's phase-transition logic.
 
 ## Success Criteria
 
