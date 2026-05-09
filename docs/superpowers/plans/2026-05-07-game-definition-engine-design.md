@@ -25,7 +25,7 @@ Future possibility (not Day 1, tracked in #351): a Storybook-driven game designe
 - Solo developer -- implementation must be phased, not big-bang
 - React 18, TypeScript, Vitest, existing GameEventBus
 - Two WIP plans (useGameRound extraction + TTS lifecycle) are not yet shipped and can be reshaped
-- XState for the engine interpreter -- no external game framework (boardgame.io pattern abandoned)
+- XState v5 (`xstate@5` + `@xstate/react@5`) for the engine interpreter -- no external game framework (boardgame.io pattern abandoned)
 - Must preserve existing game behavior -- all 4 games pass their existing tests after migration
 - Worktree workflow: all work on branches, PRs into master
 
@@ -34,9 +34,9 @@ Future possibility (not Day 1, tracked in #351): a Storybook-driven game designe
 1. A declarative GameDefinition type will meaningfully reduce the cost of adding new games (fewer files, less cognitive load, fewer tests per game).
 2. The existing 4 games share enough lifecycle structure that a single GameDefinition shape can describe all of them without contortions.
 3. SpotAll's separate reducer can coexist with the answer-game reducer behind an interaction-mode discriminator, without the GameDefinition needing to know which reducer runs.
-4. The WIP plans should be reshaped to build on GameDefinition rather than shipped as-is, because retrofitting later is more expensive than pivoting now. (Note: this approach does not eliminate the 5th-game-validation risk -- by widening the type upfront, we still bet that not-yet-implemented games' needs match it. Phase 3 validates this; mismatches widen the type.)
+4. The WIP plans should be reshaped to build on GameDefinition rather than shipped as-is, because retrofitting later is more expensive than pivoting now. (Note: this approach does not eliminate the 5th-game-validation risk -- by widening the type upfront, we still bet that not-yet-implemented games' needs match it. Phase 3 validates this; mismatches widen the type. **"Widening" here means additive:** new `InteractionMode` union members, new optional fields on `GameDefinition`, new machine state names -- not breaking restructuring. Existing game definitions do not change when new modes ship.)
 5. Future games (including Speech-to-Text) will fit into a widened GameDefinition type -- the "design wide, implement narrow" bet.
-6. XState is the right interpreter -- `createMachine` + `useMachine` handles the phase graph, guards, invoked actors, and idle timers natively. The "no external library" constraint is revised to "no external game framework." XState's `invoke`d actors model blocking sub-states (`celebrating`, `announcing`); `guard:` replaces `dynamicTransitions`; `after:` handles idle timers.
+6. XState v5 is the right interpreter -- `setup().createMachine()` + `useMachine` handles the phase graph, guards, invoked actors, and idle timers natively. The "no external library" constraint is revised to "no external game framework." XState's `invoke`d actors model blocking sub-states (`celebrating`, `announcing`); `guard:` replaces `dynamicTransitions`; `after:` handles idle timers.
 
 ### Why this now
 
@@ -52,7 +52,7 @@ We could keep shipping new games on the existing pattern (`AnswerGameProvider` +
 
 **Post-engine target:** A new slot-based game lands in ~500 LOC across ~5 files: 1 GameDefinition, 1 render component, plus optional skin/config/levels supporting files.
 
-Validate the target by re-counting at the end of Phase 1; if missed by >2x, the engine is not paying off and Phase 2 should be reconsidered.
+Validate the target by re-counting at the end of Phase 1; if missed by >2x, investigate whether the qualitative bar was met (see Success Criteria) before drawing conclusions about Phase 2. The LOC figure is a directional signal, not a hard gate.
 
 ## Cross-Model Perspective
 
@@ -61,7 +61,7 @@ An independent Claude subagent reviewed the approach cold. Key contributions:
 - **Coolest version:** A Storybook-driven game designer where GameDefinition (pure data) becomes a visual composition tool for non-developers. Teachers could prototype game flows in Storybook.
 - **Key insight:** "The engine don't need to know" reveals the real excitement is about clean separation of concerns. The engine should be boring; game components should be fun to write.
 - **50% there:** The hand-rolled phase interpreter covers ~50% of the goal; the domain-specific layer (GameDefinition type, buildRound generics, TTS lifecycle, interaction-mode dispatch) is the other 50%.
-- **Critical reframing:** The "full engine rewrite" should be phased, not big-bang. Phase 1: GameDefinition + useGameEngine + migrate 4 games. Phase 2: unify reducers (SRS v1 enabler). Phase 3: new interaction modes as needed.
+- **Critical reframing:** The "full engine rewrite" should be phased, not big-bang. Phase 1: GameDefinition + useGameEngine + migrate 3 answer games + SpotAll (Phase 1.b). Phase 2: unify reducers (SRS v1 enabler). Phase 3: new interaction modes as needed.
 
 ## Approaches Considered
 
@@ -100,9 +100,9 @@ GameDefinition + new generic reducer + phase state machine. Unify answerGameRedu
 
 The foundation. Ship as **three PRs** for manageable review:
 
-- **PR 1a:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it.
-- **PR 1b:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family).
-- **PR 1c:** Consolidation -- TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`).
+- **PR 1a:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or the NumberMatch sound hook) — prevents celebration overlay double-mount now that the engine owns celebration mounting.
+- **PR 1b:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or per-game sound hooks) for WordSpell and SortNumbers — same gate-removal step as PR 1a, applied to each newly migrated game.
+- **PR 1c:** Consolidation -- TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`). **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. If migration is not complete, defer `lifecycle.ts` deletion to Phase 2.
 
 #### Phase 1.b -- SpotAll integration (required for Phase 2 / SRS v1)
 
@@ -168,8 +168,10 @@ The existing `src/lib/game-engine/` contains load-bearing infrastructure beyond 
 
 ```text
 src/lib/game-engine/
-├── definition-types.ts         # GameDefinition<TRound>, SideEffect, CelebrationConfig (PR 1a; merged into types.ts in PR 1c)
+├── definition-types.ts         # GameDefinition<TRound>, SideEffect, CelebrationConfig, PhaseContext (PR 1a; merged into types.ts in PR 1c)
 ├── useGameEngine.ts            # Wraps useMachine(definition.machine) + wires engine guards/actors/actions
+│                               # Also exports GameEngineContext and useGameEngineContext() so child
+│                               # components (e.g. useLifecycleTTS) can access definition.tts without prop-drilling
 ├── useGameEngine.test.ts       # Engine tests (generic, not per-game)
 ├── side-effects.ts             # XState action implementations (speak, emit, delay)
 ├── side-effects.test.ts
@@ -216,21 +218,31 @@ type GameDefinition<TRound = unknown> = {
   // (reducer unification) -- the value flows from the engine context.
   slotInteraction?: 'ordered' | 'free-swap';
 
-  // XState machine -- created with createMachine(). The engine calls
-  // useMachine(definition.machine, { provide({ guards, actors, actions }) })
-  // and wires common guards (isMidLevelRound, isLastRoundOfLevel, isLastRound),
+  // XState v5 machine -- created with setup({ types, guards, actors, actions })
+  // .createMachine(). Using setup() is required for full TypeScript inference
+  // (context shape, events, guards, actors, actions are all typed). The engine
+  // calls useMachine(definition.machine.provide({ guards, actors, actions }))
+  // and injects common guards (isMidLevelRound, isLastRoundOfLevel, isLastRound),
   // actors (celebrationActor, levelCelebrationActor, gameOverActor,
   // phonemeSequenceActor), and actions (speak, buildRound, advanceRound,
-  // advanceLevel, completeGame). Game machines reference these by name.
+  // advanceLevel, completeGame). Game machines declare these by name in setup()
+  // so TypeScript enforces their existence.
   // Required states: playing, game-over (type: 'final').
   // Optional states: round-complete, level-complete, announcing (Spec 1b).
-  machine: ReturnType<typeof createMachine>;
+  machine: AnyStateMachine; // AnyStateMachine from 'xstate'; use setup() to get typed inference
 
   // buildRound is required on the definition. The engine calls it on
   // ADVANCE_ROUND / ADVANCE_LEVEL transitions and stores the result in
   // the engine's currentRound. SpotAll's pre-built model:
   //   buildRound: (ctx) => state.rounds[ctx.roundIndex]
-  buildRound: (ctx: BuildRoundContext) => TRound;
+  // Note for SpotAll (Phase 1.b): buildRound captures state.rounds via a stable
+  // ref (rounds are set by INIT_ROUNDS at mount). INIT_ROUNDS must dispatch and
+  // resolve before the engine first calls buildRound -- ensure dispatch ordering
+  // at mount (dispatch INIT_ROUNDS, then pass the definition to useGameEngine).
+  // Synchronous by design. For games with async loading (e.g. WordSpell resume
+  // logic), the component must resolve async state before starting the engine --
+  // buildRound receives already-resolved data, never triggers async operations.
+  buildRound: (ctx: PhaseContext) => TRound;
 
   // LifecycleEvent and EventTemplate are defined in src/lib/lifecycle-tts/types.ts,
   // created in PR 1a. The TTS plan may extend this contract but cannot reshape it.
@@ -245,17 +257,6 @@ type CelebrationConfig = {
   condition?: (ctx: PhaseContext) => boolean;
   // renderProps are passed to the mini-game component (theme, duration, etc.)
   renderProps?: Record<string, unknown>;
-  // reward is a structured payload the engine surfaces independently to
-  // analytics, badges, and future gamification. Kept separate so future
-  // reward systems do not have to thread through renderProps.
-  reward?: RewardPayload;
-};
-
-// kind is string for now — typed as a closed union in #352 when the rewards system is built.
-type RewardPayload = {
-  kind: string;
-  amount?: number;
-  metadata?: Record<string, unknown>;
 };
 
 type PhaseContext = {
@@ -267,8 +268,6 @@ type PhaseContext = {
   previousPhase: string | null;
   currentPhase: string;
 };
-
-type BuildRoundContext = PhaseContext;
 
 // GameEvent is defined in src/types/game-events.ts.
 // LifecycleEvent is defined in src/lib/lifecycle-tts/types.ts (created in PR 1a).
@@ -320,7 +319,9 @@ type UseGameEngineResult = {
 
 #### useGameEngine -- phase authority and contract
 
-`useGameEngine(definition, adapter)` wraps XState's `useMachine(definition.machine, { provide({ guards, actors, actions }) })` and returns `UseGameEngineResult`. The engine provides common guards (`isMidLevelRound`, `isLastRoundOfLevel`, `isLastRound`), actors (`celebrationActor`, `levelCelebrationActor`, `gameOverActor`, `phonemeSequenceActor`), and actions (`speak`, `buildRound`, `advanceRound`, `advanceLevel`, `completeGame`). Game definitions reference these by name in their machine configs.
+**`useGameEngineContext()`:** `useGameEngine` writes `{ definition }` into a `GameEngineContext` (React Context) on each render. Child hooks that need `definition` (notably `useLifecycleTTS`, which reads `definition.tts`) call `useGameEngineContext()` rather than receiving `definition` via props. Both `GameEngineContext` and `useGameEngineContext` are named exports from `useGameEngine.ts`.
+
+`useGameEngine(definition, adapter, dispatch)` wraps XState's `useMachine(definition.machine.provide({ guards, actors, actions }))` and returns `UseGameEngineResult`. (`provide()` is a machine method in XState v5 — it is not a `useMachine` option.) The engine provides common guards (`isMidLevelRound`, `isLastRoundOfLevel`, `isLastRound`), actors (`celebrationActor`, `levelCelebrationActor`, `gameOverActor`, `phonemeSequenceActor`), and actions (`speak`, `buildRound`, `advanceRound`, `advanceLevel`, `completeGame`). Game definitions reference these by name in their machine configs.
 
 **Phase authority in Phase 1:** XState is the source of truth for `phase`. `useGameEngine` returns the current XState state node name as `phase`; game components read from `useGameEngine().phase`, not from the reducer's `state.phase`. The reducer handles game-specific state only (tiles, zones, cooldowns). Per-game migrations in PR 1a/1b replace `state.phase` reads from `useAnswerGameContext()` with `engine.phase` from `useGameEngine()`.
 
@@ -346,7 +347,12 @@ Each game wraps the engine in its own thin render component:
 
 ```tsx
 const NumberMatchGame = () => {
-  const engine = useGameEngine(numberMatchDef, answerGameAdapter);
+  const { dispatch } = useAnswerGameContext();
+  const engine = useGameEngine(
+    numberMatchDef,
+    answerGameAdapter,
+    dispatch,
+  );
   return <AnswerGame {...adaptForAnswerGame(engine)} />;
 };
 ```
@@ -364,7 +370,7 @@ Per-game wrappers cost ~30 lines of glue per game but keep `<AnswerGame />` focu
 
 #### Reducer dispatch via InteractionAdapter
 
-The engine dispatches `ADVANCE_ROUND`, `ADVANCE_LEVEL`, and `COMPLETE_GAME` internally via the `InteractionAdapter` -- these are not exposed in the phase graph's `SideEffect` type. Each game passes an adapter when calling `useGameEngine`:
+The engine dispatches `ADVANCE_ROUND`, `ADVANCE_LEVEL`, and `COMPLETE_GAME` internally via the `InteractionAdapter` -- these are not exposed in the phase graph's `SideEffect` type. Each game passes an adapter and `dispatch` when calling `useGameEngine(definition, adapter, dispatch)`. The engine receives `dispatch` as the third argument and threads it into each adapter call (e.g., `adapter.advanceRound(roundOutput, dispatch)`). This means adapters can be defined as module-level constants with `dispatch` as a parameter rather than captured via closure:
 
 ```typescript
 // answer-game adapter (WordSpell, NumberMatch, SortNumbers)
@@ -457,13 +463,13 @@ union member and a new render primitive sibling to `<AnswerGame />`. Extensions 
 
 Mini-games (DinoEggHatch PR #313, FireworksPainter PR #317 -- both in-progress) are celebration/reward components, not round-based learning games. They fire between phase transitions as rewards for completing levels or games.
 
-**Merge ordering:** PRs #313 and #317 are still in-progress. **Phase 1 lands first.** Mini-game integrations rebase onto the engine and use the new `celebration` field on `PhaseNode`. FireworksPainter (already integrated with `GameOverOverlay` today) migrates to engine-mounted celebration when Phase 1 lands.
+**Merge ordering:** PRs #313 and #317 are still in-progress. **Phase 1 lands first.** Mini-game integrations rebase onto the engine, configuring celebrations via the XState `invoke.input` of `celebrationActor`, `levelCelebrationActor`, and `gameOverActor` in their machine definition. FireworksPainter (already integrated with `GameOverOverlay` today) migrates to engine-mounted celebration when Phase 1 lands.
 
 **Engine-owned celebration sub-state:**
 
-The engine reads `phase.celebration` and mounts the configured mini-game centrally. The game render component does NOT mount mini-games -- it just receives `celebrating: CelebrationConfig | null` from `useGameEngine` so it can pause focus/z-index.
+The engine monitors invoked celebration actors and surfaces the active config as `celebrating: CelebrationConfig | null`. The game render component does NOT mount mini-games -- it just receives this value from `useGameEngine` so it can pause focus/z-index.
 
-**Why engine-owned?** Centralized engagement instrumentation. Any game opts in just by declaring `celebration` on a PhaseNode, and the engine emits these events to `move-log` (and onward to SRS):
+**Why engine-owned?** Centralized engagement instrumentation. Any game opts in by invoking a celebration actor in its XState machine, and the engine emits these events to `move-log` (and onward to SRS):
 
 - `celebration:start` -- fires when celebration mounts; payload includes `phaseId`, `miniGame`, `levelIndex`, `roundIndex`
 - `celebration:complete` -- fires on natural completion; payload includes `durationMs`
@@ -495,17 +501,31 @@ This is intentionally different from the non-blocking `delay` side-effect. Delay
 **Example -- NumberMatch XState machine:**
 
 ```typescript
-import { createMachine } from 'xstate';
+import { setup } from 'xstate';
 
 const numberMatchDef: GameDefinition<NumberMatchRound> = {
   id: 'number-match',
   interaction: 'drag-to-slot',
-  machine: createMachine({
+  machine: setup({
+    // XState v5: declare context + event types so TypeScript enforces
+    // guard/action/actor signatures. Guards, actors, and actions listed
+    // here are provided by the engine at runtime via machine.provide().
+    types: {} as {
+      context: EngineContext;
+      events:
+        | { type: 'ROUND_CORRECT' }
+        | { type: 'ROUND_ERROR' }
+        | { type: 'NEXT' };
+    },
+  }).createMachine({
     id: 'number-match',
     initial: 'playing',
     states: {
       playing: {
         entry: [
+          // game.start is the authoritative speak trigger. When integrating the
+          // engine into GameOptionsOverlay, remove the direct speakAuto('game.start')
+          // call in Task 9 Step 4 of the TTS plan to avoid double-speak.
           { type: 'speak', params: { lifecycleEvent: 'game.start' } },
         ],
         on: {
@@ -541,11 +561,11 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
       roundComplete: {
         invoke: {
           src: 'celebrationActor',
+          // XState v5: input callback receives { context } from the machine
           input: ({ context }: { context: EngineContext }) => ({
             miniGame: 'DinoEggHatch',
             condition: context.levelIndex > 0, // skip on first level
             renderProps: { theme: 'forest', maxDuration: 60000 },
-            reward: { kind: 'level-up', amount: 1 },
           }),
           onDone: 'waitingForNext',
         },
@@ -602,26 +622,83 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
   }),
   buildRound: (ctx) =>
     numberMatchLevels[ctx.levelIndex].rounds[ctx.roundIndex],
+  // EventTemplate shape matches TTS plan Task 1 (authoritative definition):
+  // { tts: { brief, full }, byGradeBand: Record<GradeBand, Verbosity>, default: Verbosity }
   tts: {
-    'game.start': {
-      preset: 'game-start',
-      copy: () => "Let's match the numbers!",
+    // game.prepare fires when GameOptionsOverlay mounts (before "Let's go").
+    // Interim: GameOptionsOverlay emits game:prepare bus event; XState engine
+    // will own this in Phase 2 once GameOptionsOverlay is engine-integrated.
+    'game.prepare': {
+      tts: { brief: 'Number Match', full: 'Number Match' },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'brief',
+        '3': 'brief',
+      },
+      default: 'brief',
     },
-    'round.correct': { preset: 'correct', copy: () => 'Well done!' },
-    'round.error': { preset: 'error', copy: () => 'Try again!' },
+    'game.start': {
+      tts: {
+        brief: 'Match the numbers!',
+        full: "Let's match the numbers!",
+      },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'full',
+        '3': 'full',
+      },
+      default: 'brief',
+    },
+    'round.correct': {
+      tts: { brief: 'Well done!', full: 'Well done!' },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'full',
+        '3': 'full',
+      },
+      default: 'brief',
+    },
+    'round.error': {
+      tts: { brief: 'Try again!', full: 'Try again!' },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'full',
+        '3': 'full',
+      },
+      default: 'brief',
+    },
     'level.complete': {
-      preset: 'level-complete',
-      copy: () => 'Amazing! Level complete!',
+      tts: {
+        brief: 'Level complete!',
+        full: 'Amazing! Level complete!',
+      },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'full',
+        '3': 'full',
+      },
+      default: 'brief',
     },
     'game.over': {
-      preset: 'game-over',
-      copy: () => 'Fantastic! Game over!',
+      tts: { brief: 'Game over!', full: 'Fantastic! Game over!' },
+      byGradeBand: {
+        K: 'brief',
+        '1': 'brief',
+        '2': 'full',
+        '3': 'full',
+      },
+      default: 'brief',
     },
   },
 };
 ```
 
-**Celebration conditions are structural only in Phase 1.** `CelebrationConfig.condition` receives `PhaseContext`, which contains round/level indices and game ID -- not score, retries, or star rating. This means Phase 1 conditions can express "celebrate on level 2+" or "celebrate on game-over" but NOT "celebrate only on 4+ stars." Performance-based celebration conditions require passing reducer state into `PhaseContext`, which couples the engine to game-specific state. That is a Phase 2 concern (after reducer unification provides a common state shape).
+**Celebration conditions are structural only in Phase 1.** `CelebrationConfig.condition` receives `PhaseContext`, which contains round/level indices and game ID -- not score, retries, or star rating. This means Phase 1 conditions can express "celebrate on level 2+" or "celebrate on game-over" but NOT "celebrate only on 4+ stars." Performance-based celebration conditions require passing reducer state into `PhaseContext`, which couples the engine to game-specific state. That is a Phase 2 concern (after reducer unification provides a common state shape). **Phase 1 conditions are provisional:** Phase 2 will widen `PhaseContext` to include reducer state (score, retries) — `CelebrationConfig.condition` functions written in Phase 1 may need updating.
 
 **Relationship to skin celebration slots:** The existing `GameSkin` interface already has `CelebrationOverlay`, `LevelCompleteOverlay`, and `RoundCompleteEffect` component slots. SpotAll uses `skin.CelebrationOverlay` today. In Phase 1, the engine takes ownership of mounting these overlays -- the skin slots become render targets the engine looks up by `miniGame` registry ID. Phase 2 may unify the skin slot system and the celebration registry.
 
@@ -723,7 +800,7 @@ stateDiagram-v2
 - **Visual bar:** VR tests pass on each migrated game; manual smoke test on each migrated game.
 - **SRS readiness bar (Phase 2):** SRS v1's `round:*` event subscription works against all migrated games without per-game branching.
 - **TTS bar:** TTS lifecycle works identically to the WIP plan's design but reads from `GameDefinition.tts` instead of a separate registry.
-- **Constraint bar:** XState is the sole engine-interpreter dependency; no external game framework (boardgame.io-style) added. XState version pinned in `package.json`.
+- **Constraint bar:** XState v5 (`xstate@5`, `@xstate/react@5`) is the sole engine-interpreter dependency; no external game framework (boardgame.io-style) added. XState version pinned in `package.json`.
 - **Mini-game bar:** Mini-game celebrations (DinoEggHatch, FireworksPainter) declare per-phase via `CelebrationConfig` without engine code changes per mini-game.
 
 ## Next Steps
@@ -732,7 +809,7 @@ stateDiagram-v2
 2. **Revise the TTS lifecycle plan** to reference `GameDefinition.tts` and the pinned `lifecycle-tts/types.ts` contract. Most of the plan survives -- only the registry module location and types-package path change.
 3. **Implement Phase 1** in a new worktree branch (PR 1a -> PR 1b -> PR 1c).
 4. **Implement Phase 1.b** in parallel or after PR 1c (SpotAll engine integration).
-5. **Review and merge Phase 1 + 1.b** before starting Phase 2 (reducer unification, SRS v1 enabler).
+5. **Review and merge Phase 1 + 1.b** before starting Phase 2 (reducer unification, SRS v1 enabler). **Go/no-go check:** before starting Phase 2, verify the qualitative bar — if any Phase 1 migration required reshaping `GameDefinition` (adding fields, changing existing types), revisit the abstraction before adding more games. CI enforces the functional and visual bars; the qualitative bar is a human judgment call.
 
 ## What I noticed about how you think
 
