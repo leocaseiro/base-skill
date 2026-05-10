@@ -1353,7 +1353,7 @@ Expected: FAIL — module not found.
 
 ```ts
 // src/games/number-match/definition.ts
-import { setup } from 'xstate';
+import { setup, assign } from 'xstate';
 import type {
   GameDefinition,
   RoundOutput,
@@ -1397,6 +1397,14 @@ const numberMatchMachine = setup({
   },
   actions: {
     speak: () => {},
+    // assign action: bumps the engine's authoritative roundIndex on the
+    // NEXT transition. Runs BEFORE buildRound so PhaseContext.roundIndex
+    // reflects the round about to be played, not the one just finished.
+    // See ce-doc-review round 3 finding F2 (resolved 2026-05-10).
+    incrementRoundIndex: assign({
+      roundIndex: ({ context }: { context: { roundIndex: number } }) =>
+        context.roundIndex + 1,
+    }),
     buildRound: () => {},
     advanceRound: () => {},
     completeGame: () => {},
@@ -1469,7 +1477,14 @@ const numberMatchMachine = setup({
           {
             target: 'playing',
             guard: 'isMidLevelRound',
-            actions: ['buildRound', 'advanceRound'],
+            // Action order: incrementRoundIndex first so PhaseContext
+            // reflects the next round before buildRound consumes it,
+            // then advanceRound dispatches ADVANCE_ROUND to the reducer.
+            actions: [
+              'incrementRoundIndex',
+              'buildRound',
+              'advanceRound',
+            ],
           },
           {
             target: 'gameOver',
@@ -2024,10 +2039,11 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
   - Fix: Either (a) keep the booleans in `useGameSounds` for PR 1a as a no-op fallback (return derived booleans) until WordSpell/SortNumbers migrate in PR 1b, OR (b) move gate-removal to PR 1b where all three games migrate together. **Verified in codebase:** `WordSpell.tsx:241`, `SortNumbers.tsx:242,246,261`.
   - **Resolution:** Applied option (b). Task 10 deferred to PR 1b; PR 1a Spec Delta 1 amended; File Structure modified-files row removed; Task 9 Step 3 retains the `useGameSounds()` call (drops only the destructuring). Design doc PR 1a/1b descriptions and Migration impact section updated to match.
 
-- **Engine `context.roundIndex` never increments** [P0, anchor 100]
+- **Engine `context.roundIndex` never increments** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 8 NumberMatch GameDefinition / Task 6 buildEngineGuards
   - Why: NumberMatch machine declares `context: { roundIndex: 0, ... }` and engine-injected guards (`isMidLevelRound`, `isLastRound`) read from `context.roundIndex`. But no `assign` action ever increments it — `buildRound` and `advanceRound` are plain actions returning values, not `assign({...})` calls. Engine context's `roundIndex` stays at 0 for the entire session. For NumberMatch with 3 rounds, `isMidLevelRound` returns `true` permanently and the machine never reaches `gameOver` from the engine's path. Game-over only works via the defense-in-depth root `GAME_OVER` handler from the bridge.
   - Fix: Add an `assign` action that increments `context.roundIndex` on the NEXT transition: `actions: ['buildRound', assign({ roundIndex: ({ context }) => context.roundIndex + 1 }), 'advanceRound']`. OR sync engine context from the reducer via the phase-bridge.
+  - **Resolution:** Applied option 1 (XState-native `assign`). Task 8: `import { setup, assign } from 'xstate'`; new `incrementRoundIndex` action defined in `setup({actions})` as `assign({ roundIndex: ({context}) => context.roundIndex + 1 })`; `waitingForNext.NEXT.[playing]` actions array now `['incrementRoundIndex', 'buildRound', 'advanceRound']` with `incrementRoundIndex` running first so PhaseContext reflects the round about to be played. Design doc samples (lines 593, 612) updated to match.
 
 - **Architecture MDX files (`GameEngine.flows.mdx`, `.reference.mdx`, `debugging.mdx`) already exist on disk** [P1, anchor 100]
   - Section: Task 11 — Architecture MDX Docs / File Structure

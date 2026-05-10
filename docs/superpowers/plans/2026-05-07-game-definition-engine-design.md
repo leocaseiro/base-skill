@@ -590,7 +590,14 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
             {
               target: 'playing',
               guard: 'isMidLevelRound',
-              actions: ['buildRound', 'advanceRound'],
+              // Action order: incrementRoundIndex runs first so PhaseContext.roundIndex
+              // reflects the round about to be played, then buildRound consumes it,
+              // then advanceRound dispatches ADVANCE_ROUND to the reducer.
+              actions: [
+                'incrementRoundIndex',
+                'buildRound',
+                'advanceRound',
+              ],
             },
             { target: 'levelComplete', guard: 'isLastRoundOfLevel' },
             { target: 'gameOver', guard: 'isLastRound' },
@@ -604,11 +611,14 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
           src: 'levelCelebrationActor',
           onDone: {
             target: 'playing',
+            // Action order: incrementLevelIndex (which also resets roundIndex to 0)
+            // runs before buildRound so PhaseContext reflects the new level's first round.
             actions: [
               {
                 type: 'speak',
                 params: { lifecycleEvent: 'level.complete' },
               },
+              'incrementLevelIndex',
               'buildRound',
               'advanceLevel',
             ],
