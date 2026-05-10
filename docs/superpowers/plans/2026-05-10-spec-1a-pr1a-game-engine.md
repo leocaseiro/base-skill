@@ -2168,6 +2168,18 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
   - Why: Plan adds `phonemeSequenceActor` to `buildEngineActors` with an immediate-resolve stub "for Spec 1b WordSpell phoneme-sequence." No PR 1a machine state invokes it. Speculative infrastructure justified only by hypothetical PR 1b reuse — exactly the "framework-ahead-of-need" smell. The stub is provided to every game's `machine.provide({actors: ...})` even when the machine doesn't declare an `actors: { phonemeSequenceActor }` in `setup()`; XState v5 silently ignores undeclared actor providers, making the dead provision invisible.
   - Fix: Remove `phonemeSequenceActor` from `buildEngineActors` in PR 1a. Add it in the PR 1b task that implements WordSpell's announce flow.
 
+### From adversarial reviewer (PR 1a plan)
+
+- **`gameOver` final state invokes a 60s timer actor before `completeGame` fires** [P2, anchor 75]
+  - Section: Task 8 numberMatchDefinition machine
+  - Why: `gameOver` is `type: 'final'` and invokes `gameOverActor` (`fromPromise` resolving after `maxDuration` 60s). Only after `onDone` does the machine call `speak('game.over')` and `completeGame`. Today's NumberMatch dispatches `COMPLETE_GAME` immediately on entering game-over phase. PR 1a inverts the timing — `completeGame` is delayed up to 60s. There is no `CELEBRATION_DONE` listener on `gameOver` to short-circuit (Spec Delta 3 only covers `roundComplete`/`levelComplete`), and final states cannot define normal event transitions in XState v5. Skin-level Play Again / Go Home buttons cannot tear down the actor cleanly.
+  - Fix: Either (a) move `completeGame` and the speak action to `entry: [...]` of `gameOver` (instead of the actor's `onDone`), OR (b) make `gameOver` non-final and add `on: { CELEBRATION_DONE: { actions: [...] } }` for early dismiss (with explicit reasoning in a Spec Delta). Confirm XState v5 actor cleanup on parent-state unmount via `@xstate/react@5`'s `useMachine`.
+
+- **`@xstate/react@^5` peer-dep against React 19 unverified** [P3, anchor 50, FYI]
+  - Section: Task 1 — Install XState v5 Dependencies
+  - Why: Plan pins to `@xstate/react@^5`. Early `@xstate/react@5.0.x` releases declared peerDependencies as `react ^16 || ^17 || ^18`. The project ships `react@^19.2.0`. `yarn add @xstate/react@^5` may resolve to an older 5.x without React 19 in peers, surfacing peer-dep warnings or (with strict resolutions) install failure. No minimum-version pin and no `useMachine` integration test in a React 19 render tree.
+  - Fix: Pin to a known-React-19-compatible minor (e.g., `@xstate/react@^5.0.5` after verifying its peer deps) and add a Task 1 verification step running `yarn why @xstate/react` and confirming no peer-dep warnings.
+
 ## Self-Review Checklist (Before Marking This Plan Complete)
 
 - [ ] Every Spec Delta is justified and shipping-friendly — none of them block PR 1b / 1c.
