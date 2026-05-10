@@ -95,30 +95,30 @@ src/components/answer-game/GameOptions/
 
 ### Modified files
 
-| File                                                             | Change                                                          |
-| ---------------------------------------------------------------- | --------------------------------------------------------------- |
-| `src/types/game-events.ts`                                       | Add `game:prepare` + `lifecycle:speak` event types + interfaces |
-| `src/components/answer-game/types.ts`                            | Replace `ttsEnabled` with `autoSpeak` + `ttsOnDemandAllowed`    |
-| `src/components/answer-game/useGameTTS.ts`                       | Split into `speakAuto` + `speakOnDemand`; keep `speakTile`      |
-| `src/components/answer-game/useGameTTS.test.tsx`                 | Update for new API                                              |
-| `src/components/answer-game/useRoundTTS.ts`                      | Update to use `autoSpeak` (stays in M1; removed in M2)          |
-| `src/components/answer-game/useRoundTTS.test.tsx`                | Update for `autoSpeak`                                          |
-| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch to lifecycle event prop, gate by `ttsOnDemandAllowed`    |
-| `src/components/questions/AudioButton/AudioButton.test.tsx`      | Update tests                                                    |
-| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route onClick through `speakOnDemand`                           |
-| `src/components/questions/ImageQuestion/ImageQuestion.tsx`       | Same                                                            |
-| `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same                                                            |
-| `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same                                                            |
-| `src/components/questions/index.ts`                              | Add `QuestionRow` export                                        |
-| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Use `QuestionRow`; pass event to AudioButton                    |
-| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Use `QuestionRow`; definition-backed instructional copy         |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | Add AudioButton via `QuestionRow`                               |
-| `src/games/spot-all/SpotAllPrompt/SpotAllPrompt.tsx`             | Consolidate `speakPrompt` into `useLifecycleTTS`                |
-| `src/components/AdvancedConfigModal.tsx`                         | Add Talkativeness preset section                                |
-| `src/lib/i18n/locales/en/games.json`                             | Add `tts.*` keys                                                |
-| `src/lib/i18n/locales/pt-BR/games.json`                          | Add `tts.*` keys (placeholder English)                          |
-| `src/routes/$locale/_app/game/$gameId.tsx`                       | Update import path                                              |
-| `src/components/answer-game/AnswerGameProvider.tsx`              | Emit `game:prepare` on panel mount path                         |
+| File                                                             | Change                                                       |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| `src/types/game-events.ts`                                       | Add `game:prepare`; `lifecycle:speak` owned by PR 1a Task 3  |
+| `src/components/answer-game/types.ts`                            | Replace `ttsEnabled` with `autoSpeak` + `ttsOnDemandAllowed` |
+| `src/components/answer-game/useGameTTS.ts`                       | Split into `speakAuto` + `speakOnDemand`; keep `speakTile`   |
+| `src/components/answer-game/useGameTTS.test.tsx`                 | Update for new API                                           |
+| `src/components/answer-game/useRoundTTS.ts`                      | Update to use `autoSpeak` (stays in M1; removed in M2)       |
+| `src/components/answer-game/useRoundTTS.test.tsx`                | Update for `autoSpeak`                                       |
+| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch to lifecycle event prop, gate by `ttsOnDemandAllowed` |
+| `src/components/questions/AudioButton/AudioButton.test.tsx`      | Update tests                                                 |
+| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route onClick through `speakOnDemand`                        |
+| `src/components/questions/ImageQuestion/ImageQuestion.tsx`       | Same                                                         |
+| `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same                                                         |
+| `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same                                                         |
+| `src/components/questions/index.ts`                              | Add `QuestionRow` export                                     |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Use `QuestionRow`; pass event to AudioButton                 |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Use `QuestionRow`; definition-backed instructional copy      |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | Add AudioButton via `QuestionRow`                            |
+| `src/games/spot-all/SpotAllPrompt/SpotAllPrompt.tsx`             | Consolidate `speakPrompt` into `useLifecycleTTS`             |
+| `src/components/AdvancedConfigModal.tsx`                         | Add Talkativeness preset section                             |
+| `src/lib/i18n/locales/en/games.json`                             | Add `tts.*` keys                                             |
+| `src/lib/i18n/locales/pt-BR/games.json`                          | Add `tts.*` keys (placeholder English)                       |
+| `src/routes/$locale/_app/game/$gameId.tsx`                       | Update import path                                           |
+| `src/components/answer-game/AnswerGameProvider.tsx`              | Emit `game:prepare` on panel mount path                      |
 
 ### Deleted files
 
@@ -179,7 +179,9 @@ git commit -m "feat(lifecycle-tts): add type foundation for TTS lifecycle system
 
 ---
 
-## Task 2: game:prepare + lifecycle:speak Bus Events
+## Task 2: game:prepare Bus Event
+
+> `lifecycle:speak` is added to `GameEventType` by PR 1a Task 3 (the GameDefinition engine plan). This task only adds `game:prepare`.
 
 **Files:**
 
@@ -215,46 +217,23 @@ describe('game:prepare event', () => {
     expect(received[0].type).toBe('game:prepare');
   });
 });
-
-describe('lifecycle:speak event', () => {
-  it('emits and receives lifecycle:speak', () => {
-    const bus = createGameEventBus();
-    const received: GameEvent[] = [];
-    bus.subscribe('lifecycle:speak', (e) => received.push(e));
-
-    const event: GameEvent = {
-      type: 'lifecycle:speak',
-      gameId: 'number-match',
-      sessionId: 'test',
-      profileId: 'test',
-      timestamp: Date.now(),
-      roundIndex: 0,
-      lifecycleEvent: 'round.start',
-    };
-    bus.emit(event);
-
-    expect(received).toHaveLength(1);
-    expect(received[0].type).toBe('lifecycle:speak');
-  });
-});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose`
-Expected: FAIL — `'game:prepare'` and `'lifecycle:speak'` are not assignable to `GameEventType`.
+Expected: FAIL — `'game:prepare'` is not assignable to `GameEventType`.
 
-- [ ] **Step 3: Add both events to the event type union**
+- [ ] **Step 3: Add `game:prepare` to the event type union**
 
-In `src/types/game-events.ts`, add both to the `GameEventType` union (after `'game:start'`):
+In `src/types/game-events.ts`, add `game:prepare` to the `GameEventType` union (after `'game:start'`). `lifecycle:speak` is already present (added by PR 1a Task 3):
 
 ```ts
 export type GameEventType =
   | 'game:start'
   | 'game:prepare'
-  | 'lifecycle:speak'
   | 'game:instructions_shown';
-// ... rest unchanged
+// ... rest unchanged (lifecycle:speak already in the union)
 ```
 
 Add the `game:prepare` interface (after `GameStartEvent`):
@@ -265,17 +244,7 @@ export interface GamePrepareEvent extends BaseGameEvent {
 }
 ```
 
-Add the `lifecycle:speak` interface (after `GamePrepareEvent`):
-
-```ts
-export interface LifecycleSpeakEvent extends BaseGameEvent {
-  type: 'lifecycle:speak';
-  // LifecycleEvent is defined in src/lib/lifecycle-tts/types.ts (PR #350 creates this)
-  lifecycleEvent: import('@/lib/lifecycle-tts/types').LifecycleEvent;
-}
-```
-
-Add both to the `GameEvent` union type.
+Add `GamePrepareEvent` to the `GameEvent` union type. (`LifecycleSpeakEvent` is already in the union, added by PR 1a Task 3.)
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -286,7 +255,7 @@ Expected: PASS
 
 ```bash
 git add src/types/game-events.ts src/lib/game-event-bus.test.ts
-git commit -m "feat(events): add game:prepare and lifecycle:speak bus event types"
+git commit -m "feat(events): add game:prepare bus event type"
 ```
 
 ---

@@ -475,10 +475,12 @@ The engine monitors invoked celebration actors and surfaces the active config as
 - `celebration:complete` -- fires on natural completion; payload includes `durationMs`
 - `celebration:skip` -- fires on user-initiated dismissal; payload includes `durationMs`, `skipMethod: 'play-again' | 'go-home' | 'timeout'`
 
-**Migration impact for Phase 1:** PRs 1a/1b/1c move celebration mounting from the 3 answer game
-components (NumberMatch, WordSpell, SortNumbers — e.g., `<skin.CelebrationOverlay />` in
-`NumberMatch.tsx:336`, `SortNumbers.tsx`, etc.) into the engine. SpotAll's celebration migration
-requires Phase 1.b (engine integration) first — it cannot land before then.
+**Migration impact for Phase 1:** PR 1a leaves celebration overlay mounting in each game
+component while the engine drives phase lifecycle (see PR 1a Spec Delta 1). PR 1c moves
+mounting from the 3 answer game components (NumberMatch, WordSpell, SortNumbers — e.g.,
+`<skin.CelebrationOverlay />` in `NumberMatch.tsx:336`, `SortNumbers.tsx`, etc.) into a
+`CelebrationHost` owned by the engine. SpotAll's celebration migration requires Phase 1.b
+(engine integration) first — it cannot land before then.
 
 **`useGameSounds` gate removal:** `useGameSounds.ts` sets `confettiReady`/`gameOverReady` booleans
 that gate skin overlay rendering by reading `phase` from `useAnswerGameContext`. Once the engine
@@ -498,7 +500,9 @@ migrated game in PRs 1a/1b, remove or disable the `confettiReady`/`gameOverReady
 
 This is intentionally different from the non-blocking `delay` side-effect. Delays don't block transitions; invoked actors do. The `celebrating` sub-state is derived from XState context -- it is not a top-level state in the machine.
 
-**Example -- NumberMatch XState machine:**
+**Example -- fully-featured machine using NumberMatch's TTS templates:**
+
+The sample below shows the **fully-featured** lifecycle (including `levelComplete` and the `announcing` Spec 1b state) so all four games' shapes are visible in one place. Per-game machines omit states they do not need: NumberMatch's actual machine in PR 1a omits `levelComplete` (no level boundaries) and `announcing` (no phoneme sequence) — see PR 1a Task 8 for the trimmed shape.
 
 ```typescript
 import { setup } from 'xstate';
@@ -583,6 +587,8 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
           ],
         },
       },
+      // levelComplete is omitted by NumberMatch's actual PR 1a machine (no level boundaries).
+      // Shown here for SortNumbers / WordSpell, which both have explicit level boundaries.
       levelComplete: {
         invoke: {
           src: 'levelCelebrationActor',
@@ -631,10 +637,11 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
     'game.prepare': {
       tts: { brief: 'Number Match', full: 'Number Match' },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'brief',
-        '3': 'brief',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'brief',
+        'year5-6': 'brief',
       },
       default: 'brief',
     },
@@ -644,30 +651,33 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
         full: "Let's match the numbers!",
       },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'full',
-        '3': 'full',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'full',
+        'year5-6': 'full',
       },
       default: 'brief',
     },
     'round.correct': {
       tts: { brief: 'Well done!', full: 'Well done!' },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'full',
-        '3': 'full',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'full',
+        'year5-6': 'full',
       },
       default: 'brief',
     },
     'round.error': {
       tts: { brief: 'Try again!', full: 'Try again!' },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'full',
-        '3': 'full',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'full',
+        'year5-6': 'full',
       },
       default: 'brief',
     },
@@ -677,20 +687,22 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
         full: 'Amazing! Level complete!',
       },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'full',
-        '3': 'full',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'full',
+        'year5-6': 'full',
       },
       default: 'brief',
     },
     'game.over': {
       tts: { brief: 'Game over!', full: 'Fantastic! Game over!' },
       byGradeBand: {
-        K: 'brief',
-        '1': 'brief',
-        '2': 'full',
-        '3': 'full',
+        'pre-k': 'brief',
+        k: 'brief',
+        'year1-2': 'brief',
+        'year3-4': 'full',
+        'year5-6': 'full',
       },
       default: 'brief',
     },
@@ -700,7 +712,7 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 
 **Celebration conditions are structural only in Phase 1.** `CelebrationConfig.condition` receives `PhaseContext`, which contains round/level indices and game ID -- not score, retries, or star rating. This means Phase 1 conditions can express "celebrate on level 2+" or "celebrate on game-over" but NOT "celebrate only on 4+ stars." Performance-based celebration conditions require passing reducer state into `PhaseContext`, which couples the engine to game-specific state. That is a Phase 2 concern (after reducer unification provides a common state shape). **Phase 1 conditions are provisional:** Phase 2 will widen `PhaseContext` to include reducer state (score, retries) — `CelebrationConfig.condition` functions written in Phase 1 may need updating.
 
-**Relationship to skin celebration slots:** The existing `GameSkin` interface already has `CelebrationOverlay`, `LevelCompleteOverlay`, and `RoundCompleteEffect` component slots. SpotAll uses `skin.CelebrationOverlay` today. In Phase 1, the engine takes ownership of mounting these overlays -- the skin slots become render targets the engine looks up by `miniGame` registry ID. Phase 2 may unify the skin slot system and the celebration registry.
+**Relationship to skin celebration slots:** The existing `GameSkin` interface already has `CelebrationOverlay`, `LevelCompleteOverlay`, and `RoundCompleteEffect` component slots. SpotAll uses `skin.CelebrationOverlay` today. In **PR 1c** (after the engine drives phase lifecycle on three answer games), the engine takes ownership of mounting these overlays -- the skin slots become render targets the engine looks up by `miniGame` registry ID. Until then (PR 1a, PR 1b), each game keeps mounting its own overlays gated by `engine.phase`. Phase 2 may unify the skin slot system and the celebration registry.
 
 ## Phase Lifecycle State Machine
 
@@ -778,7 +790,7 @@ stateDiagram-v2
 
 8. **`autoSpeak` guard ownership (formerly OQ#5):** RESOLVED -- `useLifecycleTTS` owns the `autoSpeak` guard; the engine fires `speak` side-effects unconditionally via `executeSideEffects()`; `useLifecycleTTS` decides whether to call `speak()` based on `autoSpeakRef.current`. The engine does not need to know about user TTS preferences. Consumer decides whether to speak.
 
-9. **`speak` SideEffect → audio resolution (formerly OQ#6):** RESOLVED -- `useLifecycleTTS` subscribes to `lifecycle:speak` bus events and resolves them using `GameDefinition.tts` + the verbosity resolver + `autoSpeak` guard. `executeSideEffects()` is the emitter: it processes `{ type: 'speak', lifecycleEvent }` by emitting `{ type: 'lifecycle:speak', lifecycleEvent, gameId }` on the `GameEventBus`. PR 1a wires a stub `useLifecycleTTS` that subscribes to the bus; the full TTS plan (PR #349 content, now in this PR) completes the implementation.
+9. **`speak` SideEffect → audio resolution (formerly OQ#6):** RESOLVED -- `useLifecycleTTS` subscribes to `lifecycle:speak` bus events and resolves them using `GameDefinition.tts` + the verbosity resolver + `autoSpeak` guard. `executeSideEffects()` is the emitter: it processes `{ type: 'speak', lifecycleEvent }` by emitting `{ type: 'lifecycle:speak', lifecycleEvent, gameId }` on the `GameEventBus`. PR 1a wires only the **emit side** via `executeSideEffects`; the subscriber side (`useLifecycleTTS` itself) lands with the TTS plan (`2026-05-06-spec-1a-m1-tts-lifecycle.md`, Task 7). The emit-without-subscriber state in PR 1a is a no-op — the bus records the event, no audio plays — until the TTS plan merges. (Decision changed from earlier draft of this doc, which proposed a PR 1a stub; see PR 1a Spec Delta 5.)
 
 10. **`markResolved()` contract (formerly OQ#3):** RESOLVED -- `markResolved()` is removed entirely. XState makes it unnecessary: render components call `engine.send({ type: 'NEXT' })` (or `send({ type: 'ROUND_CORRECT' })`) directly. XState handles all state transitions; no engine-specific handshake method is needed.
 
