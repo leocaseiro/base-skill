@@ -2030,3 +2030,30 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Section: Task 7 Step 3 `doSpeak`
   - Why: `if (!text || text === i18nKey) return;` is meant to swallow missing translations, but i18next returns the key as the default when missing. Tests with mocked `t()` returning input verbatim are silently suppressed. If a translator legitimately produces a string equal to the key (rare for short keys like 'tts.go'), production goes mute.
   - Fix: Use `i18n.exists(key)` before `t()`, OR pass `{ defaultValue: undefined }` and check for undefined. Don't compare returned text to the key.
+
+### From design-lens reviewer (TTS plan)
+
+- **AudioButton has no spec for in-flight / disabled / loading state** [P1, anchor 75]
+  - Section: Task 11 — AudioButton Refactor
+  - Why: When TTS is actively speaking, clicking AudioButton again may queue duplicate speech or interrupt mid-utterance. The plan only specifies render-or-null based on `ttsOnDemandAllowed`; no in-flight state. Implementer will allow double-triggering or guess at a disabled state.
+  - Fix: Add a third visual/interactive state — when `isSpeechActive()` returns true, render the button as disabled (`aria-disabled`, reduced opacity) or replace the icon with an animated waveform. Specify the chosen behavior and the button label per state.
+
+- **Talkativeness section placement in `AdvancedConfigModal` not specified** [P2, anchor 75]
+  - Section: Task 15 — Talkativeness in AdvancedConfigModal
+  - Why: Plan says "add a new section before the ConfigFormFields section" but the modal has multiple sections (voice settings, speed, etc.). Implementer must guess where Talkativeness sits relative to existing voice controls. Misplacement creates disjointed settings IA.
+  - Fix: Specify whether Talkativeness replaces, extends, or groups with existing voice settings. Provide section ordering in one sentence (e.g., "Talkativeness appears as the first item inside the existing Voice section, above Speech Rate").
+
+- **ARIA live region content + politeness level + clearing strategy left undefined** [P2, anchor 75]
+  - Section: Task 16 — ARIA Live Regions
+  - Why: Plan says the region announces "Correct!" / "Try again" but doesn't specify exact strings, i18n keys, politeness levels (`polite` vs `assertive`), or clearing between rounds. Screen reader users hear whatever the implementer guesses; if `round.celebrate` and `round.correct` both fire, two announcements may overlap.
+  - Fix: Provide a lookup table mapping each phase transition → exact aria-live string + i18n key + politeness level. At minimum: `round.correct`, `round.error`, `round.celebrate`, `level.complete`, `game.over`. Specify whether the region is cleared between rounds.
+
+- **`QuestionRow` has no accessibility spec for AudioButton focus order** [P2, anchor 75]
+  - Section: Task 10 — QuestionRow Component
+  - Why: QuestionRow places `audioSlot` before the question content in DOM order with flex layout. A keyboard user tabbing into the question area focuses the audio button before the question text — opposite of the expected reading order for non-visual users.
+  - Fix: Specify the intended keyboard tab order. If AudioButton-first is intended (read audio before content), document the rationale. Add `aria-label` or `aria-describedby` on the row container if button + content should be announced as a unit.
+
+- **Quiet/Chatty preset rationale absent — implementer cannot extend it** [P3, anchor 50, FYI]
+  - Section: Task 5 — Talkativeness Presets
+  - Why: Preset tables hard-code Verbosity per LifecycleEvent per GradeBand with no explanation of pedagogical logic. A future developer adding a new LifecycleEvent or GradeBand has no principle to follow and will guess. Also: Quiet silences `round.error` for all bands including pre-k, which may be intentional (less distraction) or oversight — no basis to tell.
+  - Fix: Add a brief design rationale note before the preset tables. One paragraph prevents silent regressions when the table is extended.
