@@ -264,7 +264,7 @@ git commit -m "feat(events): add game:prepare bus event type"
 
 ## Task 3: ttsEnabled → autoSpeak + ttsOnDemandAllowed
 
-This is the core flag split. Touch types first, then update `useGameTTS` and its consumers.
+This is the core flag split. Touch types first, then update `useGameTTS` and its consumers. Because `ttsEnabled` is persisted to RxDB (`src/db/schemas/settings.ts`, schema `version: 3`, `additionalProperties: false`), the rename **requires a schema migration**: bump to `version: 4` and add a `migrationStrategies[4]` entry that maps the old field to the two new ones. Without it, existing user databases either fail to load (RxDB version mismatch) or strip the value silently (additionalProperties rejection). `talkativeness` (introduced for the Group E fix) is also persisted on the Settings collection — handle it in the same migration so users only experience one schema bump.
 
 **Files:**
 
@@ -273,6 +273,9 @@ This is the core flag split. Touch types first, then update `useGameTTS` and its
 - Modify: `src/components/answer-game/useGameTTS.test.tsx`
 - Modify: `src/components/answer-game/useRoundTTS.ts:11`
 - Modify: `src/components/answer-game/useRoundTTS.test.tsx`
+- Modify: `src/db/schemas/settings.ts` — bump `version` 3 → 4; replace `ttsEnabled` property with `autoSpeak` + `ttsOnDemandAllowed` + `talkativeness`; update `SettingsDoc` type to match
+- Modify: `src/db/create-database.ts` — add `migrationStrategies[4]` for the `settings` collection
+- Modify: any UI/hook reading `settings.ttsEnabled` (e.g., in `useSettings` consumers) — switch to `settings.autoSpeak` / `settings.ttsOnDemandAllowed` (these are the **persisted** settings, distinct from the per-config `AnswerGameConfig` flags that mirror them)
 
 - [ ] **Step 1: Write failing test for new useGameTTS API**
 
@@ -347,6 +350,82 @@ events?: Partial<Record<LifecycleEvent, Verbosity>>;
 ```
 
 Each game's config builder (per-game `useMemo<AnswerGameConfig>` constructor in `WordSpell.tsx`, `NumberMatch.tsx`, `SortNumbers.tsx`) must populate `gradeBand` and `talkativeness` from the active profile + settings — these are no longer optional. Add a Step 3.5 in each game's integration (Task 13) that threads the values through. The grade-level → grade-band mapping lives in `src/lib/lifecycle-tts/grade-band.ts` (M1; thin pure function — adjacent file is fine).
+
+- [ ] **Step 3.5: Bump RxDB Settings schema and add migration (version 3 → 4)**
+
+`ttsEnabled` is persisted on the `settings` collection (`src/db/schemas/settings.ts:10,46`) with `additionalProperties: false`. Renaming it requires a schema bump + migration; otherwise existing user databases either fail to load with a version mismatch or silently lose the setting. `talkativeness` (introduced for the Group E fix) is also a persisted field — handle both in the same migration so users only experience one schema bump.
+
+Update `src/db/schemas/settings.ts`:
+
+```ts
+export type SettingsDoc = {
+  // ...existing fields...
+  // ttsEnabled?: boolean;            // ← REMOVE
+  autoSpeak?: boolean; // ← ADD
+  ttsOnDemandAllowed?: boolean; // ← ADD
+  talkativeness?: 'quiet' | 'default' | 'chatty'; // ← ADD
+  // ...
+};
+
+export const settingsSchema: RxJsonSchema<SettingsDoc> = {
+  version: 4, // ← BUMP from 3
+  // ...
+  properties: {
+    // ...
+    // ttsEnabled: { type: 'boolean', default: true },   // ← REMOVE
+    autoSpeak: { type: 'boolean', default: true }, // ← ADD
+    ttsOnDemandAllowed: { type: 'boolean', default: true }, // ← ADD
+    talkativeness: {
+      type: 'string',
+      enum: ['quiet', 'default', 'chatty'],
+      default: 'default',
+    }, // ← ADD
+    // ...
+  },
+  // ...
+};
+```
+
+Update `src/db/create-database.ts` `settings.migrationStrategies` to add `4`:
+
+```ts
+settings: {
+  schema: settingsSchema,
+  migrationStrategies: {
+    1: (oldDoc: Record<string, unknown>) => oldDoc,
+    2: (oldDoc: Record<string, unknown>) => oldDoc,
+    3: (oldDoc: Record<string, unknown>) => {
+      // existing v3 migration unchanged
+      const legacyVolume =
+        typeof oldDoc.volume === 'number' ? oldDoc.volume : 0.8;
+      const { volume: _removed, ...rest } = oldDoc;
+      return {
+        ...rest,
+        soundEffectsVolume: legacyVolume,
+        voiceVolume: legacyVolume,
+      };
+    },
+    4: (oldDoc: Record<string, unknown>) => {
+      // Map ttsEnabled → autoSpeak + ttsOnDemandAllowed (preserve user intent:
+      // both default to ttsEnabled's value so muted users stay muted).
+      // Default talkativeness to 'default' for migrated users.
+      const { ttsEnabled, ...rest } = oldDoc;
+      const ttsValue =
+        typeof ttsEnabled === 'boolean' ? ttsEnabled : true;
+      return {
+        ...rest,
+        autoSpeak: ttsValue,
+        ttsOnDemandAllowed: ttsValue,
+        talkativeness: 'default',
+      };
+    },
+  },
+},
+```
+
+Also update any UI / hook code that reads or writes `settings.ttsEnabled` (e.g., the toggle in the settings panel). The persisted Settings flags (`autoSpeak` / `ttsOnDemandAllowed` on `SettingsDoc`) are the user's profile-level preferences; the per-config flags on `AnswerGameConfig` mirror them at config-construction time.
+
+Add a regression test in `src/db/migrations/` (mirroring the pattern in `src/db/migrations/word-spell-multi-level.collection.test.ts`) that constructs an in-memory v3 settings document with `ttsEnabled: false`, runs the v4 migration, and asserts `{ autoSpeak: false, ttsOnDemandAllowed: false, talkativeness: 'default' }` on the result.
 
 - [ ] **Step 4: Update useGameTTS**
 
@@ -2081,10 +2160,11 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Why: The plan cites the spec for §10 (i18n keys) and §14 (M1 acceptance criteria) but the file is not in `docs/superpowers/specs/` of this worktree. Executor cannot resolve references.
   - Fix: Add a Task 0 to commit/copy the spec into this worktree's `specs/` directory before any implementation tasks, OR inline §10 + §14 content into the plan body.
 
-- **RxDB settings schema migration not addressed for `ttsEnabled` rename** [P1, anchor 100]
+- **RxDB settings schema migration not addressed for `ttsEnabled` rename** [P1, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 3 — ttsEnabled split
   - Why: `ttsEnabled` is persisted in RxDB at `src/db/schemas/settings.ts:10,46` with `additionalProperties: false` and schema `version: 3`. Renaming requires a schema migration (version bump + `migrationStrategies` entry) for existing user data — without it, the app fails to load existing user databases or silently loses the setting.
   - Fix: Add a sub-step under Task 3: bump settings schema to version 4, add `migrationStrategies[4]` mapping `ttsEnabled → { autoSpeak: ttsEnabled, ttsOnDemandAllowed: ttsEnabled }`, update `SettingsDoc` type, and update any UI that reads/writes `settings.ttsEnabled`.
+  - **Resolution:** Applied. Task 3 prose amended to call out the migration requirement; Task 3 Files list adds `src/db/schemas/settings.ts` and `src/db/create-database.ts`. New Step 3.5 prescribes the schema bump (v3 → v4), the new property declarations (`autoSpeak`, `ttsOnDemandAllowed`, `talkativeness`), and `migrationStrategies[4]` that maps `ttsEnabled → { autoSpeak, ttsOnDemandAllowed }` (both inherit the user's intent) plus `talkativeness: 'default'` (Group E rolled into the same migration). Step 3.5 also requires a regression test mirroring `src/db/migrations/word-spell-multi-level.collection.test.ts`.
 
 - **Two coexisting hooks both export `speakOnDemand` with incompatible signatures** [P2, anchor 75]
   - Section: Task 7 callout + Task 12 routing
