@@ -922,6 +922,43 @@ stateDiagram-v2
   - Why: Plan introduces `GameEngineContext` + `useGameEngineContext()` specifically so `useLifecycleTTS` can access `definition.tts` without prop-drilling. PR 1a Spec Delta 5 explicitly excludes `useLifecycleTTS` from Phase 1. Shipping a Context whose sole stated consumer is absent adds surface area (provider wrapping, tests) for no active benefit.
   - Fix: Defer `GameEngineContext` and `useGameEngineContext()` to the PR that ships `useLifecycleTTS`. In Phase 1, pass `definition` directly to any hook that needs it.
 
+#### From adversarial reviewer (design doc)
+
+- **Replay-on-resume celebration idempotency unspecified** [P1, anchor 75]
+  - Section: Mini-Game Celebrations / Robustness
+  - Why: Plan claims "if a session resumes during a celebration, the engine re-mounts the celebration with the same config (idempotent)" but the resume path is via `replayLog` from `move-log`. The log already contains a `celebration:start` event. On replay, will the engine re-emit `celebration:start` (double-counting engagement metrics into SRS) or suppress it (breaking downstream consumers)? `celebration:complete`/`skip` may not be in the log if the session was killed mid-celebration.
+  - Fix: Add an explicit replay-on-resume contract — specify whether `celebration:*` events are emitted during replay vs. only during live execution, and what happens when a session resume lands inside an in-flight celebration with no `complete`/`skip` event in the log (auto-skip with `skipMethod: 'resume'`?).
+
+- **Type contract pin lacks enforcement mechanism** [P2, anchor 75]
+  - Section: TTS lifecycle folds in / lifecycle-tts/types.ts
+  - Why: Plan states "the TTS plan may extend this contract but cannot reshape it." There is no technical mechanism described for enforcing this. "Pinned" is a social contract, not a code contract. When the TTS plan inevitably needs to evolve `EventTemplate` (e.g., for per-level TTS variants the doc admits are "provisional"), the pin breaks silently.
+  - Fix: Either (a) make `EventTemplate` shape minimal enough that extension is genuinely additive (index signature for future fields, narrow initial fields to essentials), (b) define a versioned shape with explicit migration discipline, or (c) drop the "pinned" framing and acknowledge the TTS plan can revise the contract via a coordinated PR.
+
+- **Concurrent celebration + game-over path unspecified (last round of last level)** [P2, anchor 75]
+  - Section: Mini-Game Celebrations / Phase Lifecycle
+  - Why: State diagram shows `roundComplete -> levelComplete [isLastRoundOfLevel]` and `roundComplete -> gameOver [isLastRound]` as separate guards, first-match wins. If the same round triggers both `isLastRoundOfLevel` AND `isLastRound` (single-level game ending, or final level's final round), the user gets either the level celebration OR the game-over celebration but not both — and the plan never says which. Users typically expect both.
+  - Fix: Specify guard precedence and intent: "when both `isLastRoundOfLevel` and `isLastRound` match, `isLastRound` wins (skip level-complete on the last level)" OR "`isLastRoundOfLevel` wins, then onDone of `levelComplete` checks for game-over." Add a test for the single-level-game case.
+
+- **PR 1d (SpotAll) integration tests have no enumerated baseline** [P2, anchor 75]
+  - Section: PR 1d / Success Criteria
+  - Why: SpotAll has no engine-related tests by definition. "All 4 existing games pass their existing tests after migration" is the success bar — but SpotAll's "New integration tests validate that `useGameEngine` drives SpotAll's phase transitions correctly" is the entire safety net for PR 1d, and the plan doesn't describe what those tests must cover. Without specified coverage for (a) ADVANCE_ROUND-also-sets-phase-to-game-over collapse and (b) INIT_ROUNDS ordering, PR 1d can ship green with broken behavior.
+  - Fix: Enumerate the integration test cases PR 1d must include before merge: at minimum (1) ADVANCE_ROUND on last round triggers both phase=game-over in reducer AND engine `gameOver` state, (2) INIT_ROUNDS ordering produces non-empty buildRound on first call, (3) celebration overlay mounts via engine not skin gate.
+
+- **Hidden coupling: PR 1a NumberMatch lacks levels for engine validation** [P2, anchor 75]
+  - Section: Migration order
+  - Why: PR 1a migrates NumberMatch first because it is "simplest; no level boundaries." But PR 1a is also where `useGameEngine`, `levelCelebrationActor`, `advanceLevel`, and the entire `levelComplete` state are introduced. Migrating a game without levels means PR 1a never exercises the level-complete machinery — those code paths land untested in production until PR 1b's WordSpell/SortNumbers migration. If a defect ships in PR 1a, it surfaces only in PR 1b mid-migration.
+  - Fix: Either (a) reorder so a leveled game (SortNumbers) migrates first to exercise the full state machine, OR (b) require PR 1a to include unit tests for `levelCelebrationActor` and `advanceLevel` against a synthetic GameDefinition.
+
+- **XState v5 default behavior asserted without verification** [P2, anchor 75]
+  - Section: Resolved Questions (formerly OQ#11)
+  - Why: Plan resolves three questions ("full suppression is XState default for invoked actors," "guard array first-match wins," "no custom engine rule required — this is native XState behaviour") by asserting XState v5 defaults. Failure modes if the assertion is wrong: (1) v5 invoked-actor states might process external events on their parent state by default — a `NEXT` event during celebration could fire the parent transition prematurely; (2) `entry` actions on parent states could fire while children are active.
+  - Fix: Cite the specific XState v5 documentation passages establishing the defaults for (a) blocking behavior of invoked actors on parent state events, (b) `entry` action firing during invoked-actor states, (c) guard array first-match. If docs don't state this clearly, prototype the behavior in a sandbox before pinning the contract.
+
+- **Do-nothing baseline weakly defended for Phase 2** [P3, anchor 50, FYI]
+  - Section: Why this now / Phase 2
+  - Why: Plan stakes Phase 2's value on "SRS v1 implementation is hard-blocked on Phase 2." But SRS v1 needs identical `round:*` events — solvable by a thin event-bus normalization adapter at a fraction of Phase 2's cost. The plan goes straight to reducer unification without naming or refuting the cheaper alternative. If the cheap alternative works, Phase 2 is unjustified investment, and "pattern coherence" becomes the only argument — exactly the "code health" justification the doc rejects.
+  - Fix: Add a paragraph explicitly considering and rejecting the "event normalization adapter" alternative for SRS v1 — what it would look like, why it doesn't suffice, what specific SRS feature requires reducer unification (vs just event consistency).
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
