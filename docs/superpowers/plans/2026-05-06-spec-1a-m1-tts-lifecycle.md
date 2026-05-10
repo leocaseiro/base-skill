@@ -1854,3 +1854,63 @@ Verify:
 git add -A
 git commit -m "chore: final integration fixes for Spec 1a M1"
 ```
+
+---
+
+## Deferred / Open Questions (ce-doc-review round 3, 2026-05-10)
+
+> Round 3 of `ce-doc-review` ran on 2026-05-10 across all three PR #350 docs (this TTS plan, the GameDefinition engine design, and the PR 1a plan). Cross-doc alignment findings (A1–A11) were applied in commits `ff1b8fbb2` and `e73b6ef03`. The findings below are per-doc internal issues deferred for follow-up review or implementation-time resolution.
+>
+> Format: `**Title** [severity, anchor]` followed by section, why, suggested fix, evidence quote. Anchor 75 = high confidence; 100 = airtight.
+
+### From coherence reviewer (TTS plan)
+
+- **Task 11 imports `useLifecycleTTS` before Task 7 creates it** [P1, anchor 100]
+  - Section: Task 11 — AudioButton Refactor
+  - Why: Sequential execution fails at Task 11 Step 5 because the module Task 11 imports doesn't exist until Task 7 ships.
+  - Fix: Reorder so Task 7 (useLifecycleTTS) executes immediately after Task 6 (i18n keys), before Task 8–11.
+  - Evidence: Task 11 Step 3: `const { speakOnDemand, ttsOnDemandAllowed } = useLifecycleTTS();` while Task 7 is the one that creates `src/lib/lifecycle-tts/useLifecycleTTS.ts`.
+
+- **Task 9 calls `lifecycleTTS.speakAuto(...)` without importing or initializing the hook** [P1, anchor 100]
+  - Section: Task 9 — GameOptionsOverlay Behavior, Step 4
+  - Why: The component has no prior `const lifecycleTTS = useLifecycleTTS();` declaration; the call is undefined at runtime.
+  - Fix: Add explicit instruction: import `useLifecycleTTS` at top; call `const lifecycleTTS = useLifecycleTTS();` inside the component; then `lifecycleTTS.speakAuto('game.start');`.
+  - Evidence: Task 9 Step 4: `lifecycleTTS.speakAuto('game.start');` — no prior declaration in the shown code block.
+
+- **Task 12 routes question-component speech through `useGameTTS`, contradicting the lifecycle architecture** [P0, anchor 100]
+  - Section: Task 12 — Question Components — Honor ttsOnDemandAllowed, Step 3
+  - Why: Architecture (lines 12–13) says `useLifecycleTTS` exposes `speakOnDemand` for direct calls; Task 7 explicitly notes question taps should flow through the lifecycle system. Task 12 instead uses `useGameTTS().speakOnDemand(text)`, which is the wrong hook with an incompatible signature (raw text vs LifecycleEvent literal).
+  - Fix: Change Task 12 Step 3 to `const { speakOnDemand } = useLifecycleTTS();` and pass a LifecycleEvent (e.g., `'round.start'`), not raw text.
+  - Evidence: Task 12 Step 3: `const { speakOnDemand } = useGameTTS();` and `onClick={() => speakOnDemand(text)}`.
+
+- **SpotAllPrompt hardcodes `speakOnDemand('round.start', ...)` for a custom per-target prompt** [P1, anchor 75]
+  - Section: Task 14 — SpotAllPrompt Consolidation, Step 3
+  - Why: SpotAll's prompt is "Find the X" — target-specific, not a generic round-start. Routing it through the lifecycle system with `'round.start'` will speak the wrong template (or silently fail per Task 7 note "Passing raw text is a silent bug").
+  - Fix: Either (a) add a `'spotall.prompt'` LifecycleEvent + per-game template, or (b) acknowledge SpotAll is an exception and use a hybrid local lookup for the prompt text.
+  - Evidence: Task 14 Step 3: `onClick={() => speakOnDemand('round.start', { mode: 'full' })}`.
+
+- **Task 13 doesn't verify per-game `GameDefinition.tts` setup before assuming it exists** [P2, anchor 50, FYI]
+  - Section: Task 13 — Game Integration, Step 2
+  - Why: Task 13 assumes each game's `definition.ts` already has `tts['round.start']` defined; if PR #350 ships without one, NumberMatch loses speech with no alarm bell other than the smoke test.
+  - Fix: Add a Task 13 Step 0 verification check that prints which games have which `tts.*` keys defined.
+
+- **`speakPrompt` semantics conflict between Task 3 implementation and Task 7 usage notes** [P2, anchor 75]
+  - Section: Task 3 vs Task 7 coexistence
+  - Why: Task 3 implements `speakPrompt` gated by `autoSpeak`. Task 7 says "Use useGameTTS for ad-hoc speech … TextQuestion on-click, AudioButton replay" — those are on-demand, not auto. The implementation gates the wrong flag for the documented usage.
+  - Fix: Either change `speakPrompt` to gate on `ttsOnDemandAllowed` (matching its usage) or remove `speakPrompt` and route question taps through `useLifecycleTTS().speakOnDemand`.
+  - Evidence: Task 3 Step 4: `if (!config.autoSpeak) return;` inside `speakPrompt`.
+
+- **i18n keys in Task 6 are vaguely enumerated** [P1, anchor 75]
+  - Section: Task 6 — i18n Keys, Step 3
+  - Why: "tts.word-spell.\* (all events)" is not enumerated. The LifecycleEvent union has 11 members × 2 verbosities (brief/full) × ≥3 games = ~66 keys. Without the explicit list, executors will miss keys at runtime.
+  - Fix: Inline the full key list per game in Task 6, or reference Spec 1a §10 directly with a copy of the table in this plan.
+
+- **Task 14 SpotAllPrompt risks the "silent bug" warned about in Task 7** [P1, anchor 75]
+  - Section: Task 14 Step 3
+  - Why: Hardcoded `speakOnDemand('round.start')` for SpotAll's custom prompt is the exact pattern Task 7 flags: "Passing raw text is a silent bug — lookup returns undefined, nothing is spoken."
+  - Fix: Same as the SpotAllPrompt finding above — add a custom event or use local lookup.
+
+- **GameDefinition engine API contract is not pinned in this plan** [P1, anchor 75]
+  - Section: Introduction (lines 24–27) + Task 7 (lines 1009–1011)
+  - Why: The plan assumes `useGameEngineContext()` returns `{ definition: { tts: Partial<Record<LifecycleEvent, EventTemplate>> } }` but that API shape lives in PR #350 and is not pinned here. If the API differs, Task 7 tests and Task 13 game integration fail at integration time.
+  - Fix: Add a "GameDefinition Engine API Contract" subsection to the introduction documenting the expected shape; verify against PR #350 before beginning Task 7.
