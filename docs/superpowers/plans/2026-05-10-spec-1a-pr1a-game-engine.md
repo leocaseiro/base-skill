@@ -2110,6 +2110,47 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
 
 ---
 
+## Deferred / Open Questions (ce-doc-review round 3, 2026-05-10)
+
+> Round 3 of `ce-doc-review` ran on 2026-05-10 across all three PR #350 docs. Cross-doc alignment findings (A1–A11) were applied in commits `ff1b8fbb2` and `e73b6ef03`. The findings below are per-doc internal issues deferred for follow-up review or implementation-time resolution. PR 1a's coherence reviewer findings were entirely consolidated into A2 (lifecycle:speak ownership) so coherence has no separate subsection here. Anchor 75 = high confidence; 100 = airtight.
+
+### From feasibility reviewer (PR 1a plan)
+
+- **WordSpell + SortNumbers will visually break when `useGameSounds` gate booleans are removed** [P0, anchor 100]
+  - Section: Task 10 — Remove useGameSounds Celebration Gate
+  - Why: Plan removes `confettiReady`/`levelCompleteReady`/`gameOverReady` from `useGameSounds` in PR 1a, but only NumberMatch is migrated. WordSpell.tsx and SortNumbers.tsx both consume these booleans for round-advance gating and overlay `visible=` props (e.g., `<skin.RoundCompleteEffect visible={confettiReady} />`). "Drop the destructuring" → `visible={undefined}` (always-falsy or typecheck error). PR 1a will ship a broken WordSpell + SortNumbers.
+  - Fix: Either (a) keep the booleans in `useGameSounds` for PR 1a as a no-op fallback (return derived booleans) until WordSpell/SortNumbers migrate in PR 1b, OR (b) move gate-removal to PR 1b where all three games migrate together. **Verified in codebase:** `WordSpell.tsx:241`, `SortNumbers.tsx:242,246,261`.
+
+- **Engine `context.roundIndex` never increments** [P0, anchor 100]
+  - Section: Task 8 NumberMatch GameDefinition / Task 6 buildEngineGuards
+  - Why: NumberMatch machine declares `context: { roundIndex: 0, ... }` and engine-injected guards (`isMidLevelRound`, `isLastRound`) read from `context.roundIndex`. But no `assign` action ever increments it — `buildRound` and `advanceRound` are plain actions returning values, not `assign({...})` calls. Engine context's `roundIndex` stays at 0 for the entire session. For NumberMatch with 3 rounds, `isMidLevelRound` returns `true` permanently and the machine never reaches `gameOver` from the engine's path. Game-over only works via the defense-in-depth root `GAME_OVER` handler from the bridge.
+  - Fix: Add an `assign` action that increments `context.roundIndex` on the NEXT transition: `actions: ['buildRound', assign({ roundIndex: ({ context }) => context.roundIndex + 1 }), 'advanceRound']`. OR sync engine context from the reducer via the phase-bridge.
+
+- **Architecture MDX files (`GameEngine.flows.mdx`, `.reference.mdx`, `debugging.mdx`) already exist on disk** [P1, anchor 100]
+  - Section: Task 11 — Architecture MDX Docs / File Structure
+  - Why: All three MDX files already exist with substantive content (103, 137, 276 lines respectively) covering legacy `useGameLifecycle`, `useMoveLog`, and session-recorder flows. Task 11 says "Create" them. Implementer following the plan literally will fail (file exists) or overwrite them (lose context for the legacy game-engine subsystem, which isn't deleted in PR 1a per Spec Delta 4).
+  - Fix: Change File Structure section to mark these as "Modify" not "New files." Rewrite Task 11 to instruct the implementer to read the existing file first, then append new XState-based sections without removing existing content.
+
+- **`setup({ actors: { ...: undefined as never } })` is unconventional and unverified in XState v5** [P1, anchor 75]
+  - Section: Task 8 NumberMatch GameDefinition
+  - Why: XState v5 `setup()` expects each `actors` entry to be valid actor logic (e.g., `fromPromise(...)`), not `undefined`. While `as never` may pass TypeScript via assertion, runtime behavior is undefined — XState may throw or silently produce stale logic when interpreting. The engine then calls `definition.machine.provide({ actors: buildEngineActors() })` to inject real implementations. The whole pattern depends on this working without verification.
+  - Fix: Use real placeholder actor logic in `setup()` matching the shape `provide()` will override (e.g., `fromPromise(() => Promise.resolve())`). OR import the real actor logic from `useGameEngine`. Validate the override pattern before relying on it across all definitions in PR 1b.
+
+- **`renderHook(toThrow)` test pattern unreliable in React 19** [P2, anchor 75]
+  - Section: Task 6 — useGameEngine Hook + Context
+  - Why: `expect(() => renderHook(() => useGameEngineContext())).toThrow(/GameEngineContext/);` is unreliable in React 19 — `@testing-library/react`'s `renderHook` catches errors during render and re-raises them through different paths depending on the React version. In React 19, errors thrown during render may surface via React's error reporting (console.error logged but not rethrown synchronously), so `toThrow` may not see the error.
+  - Fix: Replace with React 19 pattern: spy on `console.error` to silence, then render and inspect via `result.current` or via try/catch wrapper. OR use an error-boundary wrapper to capture the thrown error.
+
+- **Phase bridge re-fires on every engine state change** [P2, anchor 75]
+  - Section: Phase Bridge Pattern
+  - Why: Bridge effect deps are `[reducerPhase, engine]`. `useGameEngine` returns a new object via `useMemo([state, send, totalRounds])` — every machine state transition produces a new `engine` reference. Bridge re-fires on every engine transition, re-emitting events. XState ignores duplicates today, but it's wasteful and creates fragile coupling. If a future engine state defines a transition for ROUND_CORRECT, duplicate sends will trigger spurious transitions.
+  - Fix: Either (a) drop `engine` from deps and lint-disable with rationale, or (b) destructure stable `send` (`const { send } = engine`) and depend on `[reducerPhase, send]`. Add a regression test asserting the engine sees each transition event exactly once per reducer phase change.
+
+- **Test step missing for type-only Tasks 4 + 7** [P3, anchor 75]
+  - Section: Task 4 GameDefinition Types / Task 7 interaction-adapter.ts
+  - Why: Task 4 (definition-types.ts) and Task 7 (answerGameAdapter with runtime guard `isAnswerGameRoundOutput` that throws) have no test step. They rely solely on `yarn typecheck`. Task 4's `types.test-d.ts` is mentioned in File Structure but never written. Task 7's runtime guard is real logic worth testing.
+  - Fix: Add a small test file `src/lib/game-engine/interaction-adapter.test.ts` asserting `answerGameAdapter.advanceRound` throws on malformed input and dispatches the expected ADVANCE_ROUND action when given a valid output. For Task 4, ship the planned `test-d.ts` or document why type-checking via consumers is sufficient.
+
 ## Self-Review Checklist (Before Marking This Plan Complete)
 
 - [ ] Every Spec Delta is justified and shipping-friendly — none of them block PR 1b / 1c.
