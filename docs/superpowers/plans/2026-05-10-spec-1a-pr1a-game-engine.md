@@ -60,6 +60,22 @@ WordSpell + SortNumbers still use `useReducer` in PR 1a (no engine integration y
 
 ---
 
+## Composition With `useGameRound` (PR #345 spec)
+
+The merged `useGameRound` design (`docs/superpowers/specs/2026-05-03-use-game-round-design.md`) is **not implemented in PR 1a**, but Tasks 8 and 9 must remain compatible with the integration shape it prescribes — see the design doc's "Composition with `useGameRound`" subsection under Phase authority for the canonical contract.
+
+PR 1a-relevant points executors must respect when implementing Tasks 8 + 9:
+
+- **Round-advance event names**: NumberMatch's machine accepts `NEXT` (advance to next round inside a level) and `COMPLETE_GAME` (terminal). These are the events `useGameRound` will route through `engine.send` once it is wired up in PR 1b. Do **not** rename them in PR 1a.
+- **`roundIndex` source of truth**: machine context owns `roundIndex` (incremented via the `incrementRoundIndex` `assign` action on `NEXT.[playing]`). `useGameRound`'s public return value will read from `engine.context.roundIndex`, not maintain a parallel counter. Task 8's machine context shape must include `roundIndex` (already required) and Task 9 must not introduce a component-level counter.
+- **`firstActionAt` and mistake state belong in machine context**: when `useGameRound` lands, `round:first-action` and `round:mistake` will be emitted from `assign` actions on the relevant transitions (`PLACE_TILE`, `ROUND_ERROR`). PR 1a does **not** add these fields yet (they ship with the hook), but Task 8's context shape and event union should not block adding them later — leave room (no exhaustive `as const` union locks that would force a wider rewrite).
+- **`buildRound` passthrough is intentional in PR 1a** (Spec Delta #6). When PR 1b lifts round construction into the definition, `useGameRound` may inject `buildRound` directly via its `roundProvider` parameter. Task 8's `buildRound: (ctx) => ({ roundIndex: ctx.roundIndex })` stub does not preclude that — it is a no-op the engine-injected version overrides.
+- **No `useGameRound` import in NumberMatch.tsx in PR 1a**: Task 9 dispatches round-advance events via `engine.send` from the component (existing `useRoundLifecycle` / `useRoundComplete` hooks remain in their current shape). The hook is introduced in a follow-up PR alongside the WordSpell + SortNumbers migration, where the cross-game seam is needed.
+
+If during implementation any of Task 8's events or Task 9's dispatch sites would force a breaking change to the `useGameRound` integration shape above, **stop and flag to the user** — that is a sign the architectural decision needs revisiting.
+
+---
+
 ## Required Skills For Executors
 
 When the executor's diff touches files matching the patterns below, load the corresponding project skill before generating code (per `CLAUDE.md` "Before writing a plan"):
