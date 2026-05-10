@@ -1072,18 +1072,21 @@ export const useLifecycleTTS = (): UseLifecycleTTSReturn => {
 
   // Subscribe to lifecycle:speak events emitted by executeSideEffects().
   // The engine fires speak unconditionally; this hook owns the autoSpeak guard.
+  // Note on the bus contract: `bus.subscribe()` returns a `() => void` cleanup
+  // function (see `src/lib/game-event-bus.ts:25–47`). The handler always
+  // receives the full `GameEvent` discriminated union — bus subscription does
+  // NOT narrow the parameter type — so we narrow inside the handler before
+  // accessing `lifecycleEvent`.
   useEffect(() => {
     const bus = getGameEventBus();
-    const sub = bus.subscribe(
-      'lifecycle:speak',
-      ({ lifecycleEvent }) => {
-        if (!autoSpeakRef.current) return;
-        const template = ttsRef.current?.[lifecycleEvent];
-        if (!template) return;
-        resolveAndSpeak(template, lifecycleEvent);
-      },
-    );
-    return () => sub.unsubscribe();
+    const off = bus.subscribe('lifecycle:speak', (event) => {
+      if (event.type !== 'lifecycle:speak') return; // TypeScript narrowing
+      if (!autoSpeakRef.current) return;
+      const template = ttsRef.current?.[event.lifecycleEvent];
+      if (!template) return;
+      resolveAndSpeak(template, event.lifecycleEvent);
+    });
+    return () => off();
   }, [resolveAndSpeak]);
 
   const speakAuto = useCallback(
@@ -1917,15 +1920,17 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
 
 ### From feasibility reviewer (TTS plan)
 
-- **`bus.subscribe()` returns a cleanup function, NOT an object with `.unsubscribe()`** [P0, anchor 100]
+- **`bus.subscribe()` returns a cleanup function, NOT an object with `.unsubscribe()`** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 7 — useLifecycleTTS Hook, Step 3
   - Why: Verified in `src/lib/game-event-bus.ts`: `subscribe()` returns a `() => void` cleanup function. The plan's hook does `const sub = bus.subscribe(...)` then `return () => sub.unsubscribe();` — calling `.unsubscribe()` on a function will throw `TypeError` at unmount.
   - Fix: Change to `const off = bus.subscribe('lifecycle:speak', (event) => { ... }); return () => off();`. Match the pattern in `src/lib/game-event-bus.test.ts`.
+  - **Resolution:** Applied. Task 7 Step 3 hook code now uses `const off = bus.subscribe(...)` and `return () => off()`. Comment added pointing to the bus contract at `game-event-bus.ts:25–47`.
 
-- **Bus handler destructures `{ lifecycleEvent }` from the `GameEvent` union without narrowing** [P0, anchor 100]
+- **Bus handler destructures `{ lifecycleEvent }` from the `GameEvent` union without narrowing** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 7 — useLifecycleTTS Hook, Step 3
   - Why: The handler receives `GameEvent` (the discriminated union), not the narrowed `LifecycleSpeakEvent`. Destructuring `{ lifecycleEvent }` without narrowing fails TypeScript: the field isn't on most union variants.
   - Fix: Narrow first: `(event) => { if (event.type !== 'lifecycle:speak') return; const { lifecycleEvent } = event; ... }`.
+  - **Resolution:** Applied alongside F1. Handler now takes the full `event` parameter, narrows via `if (event.type !== 'lifecycle:speak') return;`, then reads `event.lifecycleEvent` after narrowing. Comment notes the bus does not narrow at the subscription level.
 
 - **Plan reads `gradeBand` and `talkativeness` via unsafe casts; neither field exists on `AnswerGameConfig`** [P0, anchor 100]
   - Section: Task 7 — useLifecycleTTS Hook, `resolveAndSpeak`
