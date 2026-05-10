@@ -1966,3 +1966,30 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Section: Task 5 — Talkativeness Presets, Step 3
   - Why: Implementation hardcodes the union `'quiet' | 'default' | 'chatty'` instead of importing `TalkativenessPreset` from `./types`. Cosmetic but encourages drift.
   - Fix: Change the function signature to `(preset: TalkativenessPreset, gradeBand: GradeBand)` and import from `./types`.
+
+### From scope-guardian reviewer (TTS plan)
+
+- **`speakAuto` duplicates bus-subscription pathway; two paths do the same job** [P1, anchor 75]
+  - Section: Task 7 — useLifecycleTTS Hook, Step 3
+  - Why: The hook exposes both a `speakAuto(event)` direct method AND a `lifecycle:speak` bus subscription. Any future gate or side-effect must be duplicated to both paths; tests must cover both. The Task 9 direct-call usage is itself flagged as temporary, suggesting only the bus path is needed.
+  - Fix: Remove `speakAuto` from `useLifecycleTTS`. Have Task 9 emit a `lifecycle:speak` bus event instead of calling `speakAuto` directly. Collapse to one path.
+
+- **Task 3 test stubs have no assertions — TDD requirement not met** [P1, anchor 100]
+  - Section: Task 3 — ttsEnabled split, Step 1
+  - Why: CLAUDE.md mandates the red-green-refactor cycle. Task 3 Step 1 provides empty test bodies (comments only). A test with no assertions cannot fail before implementation and cannot prove behavior after — it satisfies the checkbox but not the mandate.
+  - Fix: Replace empty stubs in Task 3 Step 1 with concrete test bodies — render the hook via `renderHook`, call `speakAuto` / `speakOnDemand`, assert the `speak` mock was or was not called. Pattern is already demonstrated in Tasks 11 + 12.
+
+- **Task 7 hook tests are also comment-only stubs** [P1, anchor 100]
+  - Section: Task 7 — useLifecycleTTS Hook, Step 1
+  - Why: Five of six `useLifecycleTTS` test cases are comment-only with no act/expect. Step 2's "Expected: FAIL — module not found" is the only failure mode; once the module exists, all five pass regardless of implementation correctness. No red-green signal for autoSpeak gating, bus subscription, interpolation.
+  - Fix: Write concrete assertions for the five stub tests before shipping. At minimum implement `speakAuto is gated by autoSpeak ref` and `lifecycle:speak bus event triggers speakAuto` as concrete assertions — those verify the hook's two invocation paths.
+
+- **Task 16 ARIA live region depends on undefined `phase` state source** [P1, anchor 75]
+  - Section: Task 16 — ARIA Live Regions
+  - Why: The plan prescribes updating `ariaAnnouncement` "when phase transitions to round-complete or on wrong placement" but `AnswerGameProvider.tsx` is the prescribed file with no concrete state source named. Implementer has no actionable path; risks empty region or wiring against stale state.
+  - Fix: Identify the concrete state source (XState current state, a context field, or a reducer slice) and reference it by name in Task 16 Step 3. If a new context field is required, add it to the file-modification table.
+
+- **QUIET preset is byte-for-byte identical across pre-k/k/year1-2 — possible incomplete data** [P2, anchor 50, FYI]
+  - Section: Task 5 — Talkativeness Presets, Step 3, QUIET constant
+  - Why: All three early grade bands are identical objects (every event 'off' except `round.start: 'brief'`). Either intentional and the per-band structure is over-engineered, or pre-k was meant to differ. No way to tell from the plan.
+  - Fix: Add a comment confirming the identical QUIET behavior is intentional, OR replace the three objects with a shared reference to eliminate duplication risk.
