@@ -100,16 +100,16 @@ GameDefinition + new generic reducer + phase state machine. Unify answerGameRedu
 
 The foundation. Ship as **three sequential PRs** for manageable review, then a separate **PR 1d** for SpotAll once the engine is proven on the answer-game family:
 
-| PR    | Short name                  | Scope                                                             |
-| ----- | --------------------------- | ----------------------------------------------------------------- |
-| PR 1a | **GameEngine Foundation**   | Types + `useGameEngine` + side-effects + NumberMatch migration    |
-| PR 1b | **Answer Game Migration**   | WordSpell + SortNumbers migrations (full answer-game family)      |
-| PR 1c | **Consolidation & Cleanup** | TTS fold-in, file cleanup, types consolidation, `CelebrationHost` |
-| PR 1d | **SpotAll Refactor**        | First-time engine integration for SpotAll; lands **after PR 1c**  |
+| PR    | Short name                    | Scope                                                            |
+| ----- | ----------------------------- | ---------------------------------------------------------------- |
+| PR 1a | **GameEngine Foundation**     | Engine + NumberMatch full XState migration (see narrative below) |
+| PR 1b | **Answer Game Migration**     | WordSpell + SortNumbers full XState migration                    |
+| PR 1c | **Reducer Removal & Cleanup** | Delete `answer-game-reducer.ts`, TTS fold-in, `CelebrationHost`  |
+| PR 1d | **SpotAll Refactor**          | SpotAll full XState integration (lands after PR 1c)              |
 
-- **PR 1a — GameEngine Foundation:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** NumberMatch's `useGameSounds()` call is retained; only the destructuring of the gate booleans is removed from `NumberMatch.tsx` (overlays gate on `engine.phase`). The hook itself is left untouched in PR 1a — full gate removal moves to PR 1b (see PR 1a Spec Delta 1; deferral resolves ce-doc-review round 3 feasibility F1).
-- **PR 1b — Answer Game Migration:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove the `confettiReady` / `levelCompleteReady` / `gameOverReady` gate booleans from `src/components/answer-game/useGameSounds.ts` — hook returns `void`, sound playback retained. Replace boolean reads in WordSpell.tsx and SortNumbers.tsx with `engine.phase` checks as part of those games' migrations. One removal site, three migrated consumers, no interim broken state.
-- **PR 1c — Consolidation & Cleanup:** TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`), engine takes over celebration overlay mounting via `CelebrationHost`. **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. If migration is not complete, defer `lifecycle.ts` deletion to Phase 2.
+- **PR 1a — GameEngine Foundation:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch **full state** migration (XState owns the entire NumberMatch state machine — tiles, zones, drag state, phase, retryCount, levelIndex, roundIndex). **No `useReducer` and no phase bridge for NumberMatch.** The component reads from `engine.context` and dispatches via `engine.send` for every state change. This is the canonical pattern future games adopt; PR 1a delivers it end-to-end on one game so PR 1b/1c don't have to validate two transitional patterns. Also creates `src/lib/lifecycle-tts/types.ts` — a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** NumberMatch's `useGameSounds()` call is retained for sound playback; the gate booleans are not consumed (overlays gate on `engine.phase`). The hook itself is left untouched in PR 1a — full gate removal moves to PR 1b (see PR 1a Spec Delta 1; deferral resolves ce-doc-review round 3 feasibility F1). The legacy `answer-game-reducer.ts` continues to exist in PR 1a because WordSpell + SortNumbers still use `useReducer` until they migrate; NumberMatch simply stops calling `useAnswerGameContext()` for state.
+- **PR 1b — Answer Game Migration:** WordSpell + SortNumbers full state migrations. Both games adopt the same pattern PR 1a established for NumberMatch: per-game XState machine owns tiles/zones/drag/phase/etc.; no `useReducer`; no phase bridge. After PR 1b lands, no answer-game component calls `useAnswerGameContext()` for state. **Additional task:** Remove the `confettiReady` / `levelCompleteReady` / `gameOverReady` gate booleans from `src/components/answer-game/useGameSounds.ts` (hook returns `void`, sound playback retained); WordSpell + SortNumbers' machine actions emit sound side-effects via `executeSideEffects` — `useGameSounds` becomes optional / removed in PR 1c.
+- **PR 1c — Reducer Removal & Cleanup:** Delete `src/components/answer-game/answer-game-reducer.ts` and the `useAnswerGameContext` provider/hook (or reduce them to a thin shim that reads from XState). TTS fold-in finalized; deprecated file cleanup; types consolidation (`definition-types.ts` content folded into the canonical `types.ts`); engine takes over celebration overlay mounting via `CelebrationHost`. **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. (3) Migrate `SessionRecorderGate` to read from `useGameEngineContext()` instead of the legacy lifecycle's `state.phase`.
 
 #### PR 1d — SpotAll Refactor (sequenced after PR 1c, required for Phase 2 / SRS v1)
 
@@ -330,7 +330,17 @@ type UseGameEngineResult = {
 
 `useGameEngine(definition, adapter, dispatch)` wraps XState's `useMachine(definition.machine.provide({ guards, actors, actions }))` and returns `UseGameEngineResult`. (`provide()` is a machine method in XState v5 — it is not a `useMachine` option.) The engine provides common guards (`isMidLevelRound`, `isLastRoundOfLevel`, `isLastRound`), actors (`celebrationActor`, `levelCelebrationActor`, `gameOverActor`, `phonemeSequenceActor`), and actions (`speak`, `buildRound`, `advanceRound`, `advanceLevel`, `completeGame`). Game definitions reference these by name in their machine configs.
 
-**Phase authority in Phase 1:** XState is the source of truth for `phase`. `useGameEngine` returns the current XState state node name as `phase`; game components read from `useGameEngine().phase`, not from the reducer's `state.phase`. The reducer handles game-specific state only (tiles, zones, cooldowns). Per-game migrations in PR 1a/1b replace `state.phase` reads from `useAnswerGameContext()` with `engine.phase` from `useGameEngine()`.
+**Phase authority — XState-first end state.** XState is the source of truth for **all** per-game state by the end of Phase 1, not just `phase`. Each game's machine context holds tiles, zones, drag state, retryCount, levelIndex, roundIndex, isLevelMode — the equivalent of today's `AnswerGameState`. Game components read from `engine.context` and dispatch via `engine.send`; no `useReducer` for game state.
+
+**Three phase-related layers in the codebase today (transitional state during Phase 1):**
+
+1. **Outer route lifecycle** — Source: `useGameLifecycle.state.phase` (idle / loading / instructions / playing / evaluating / scoring / next-round / retry). Purpose: route-shell on/off gate (e.g., for `SessionRecorderGate` and instruction-overlay rendering). End state: migrated off `useGameLifecycle` in PR 1c; equivalent semantics absorbed into XState or moved to route-level orchestration.
+2. **Per-game answer reducer** — Source: `useAnswerGameContext().phase` (playing / round-complete / level-complete / game-over) plus tiles/zones/drag/etc. Purpose: per-round game state, used by WordSpell + SortNumbers in PR 1a (NumberMatch migrated off in PR 1a). End state: deleted in PR 1c (`answer-game-reducer.ts` removed). Each game's XState machine owns this state by end of Phase 1.
+3. **XState engine** — Source: `engine.phase` from `useGameEngine` (camelCase: playing / roundComplete / levelComplete / gameOver / waitingForNext) plus full game-state context. Purpose: authoritative per-game state; drives transitions and side-effects. End state: sole source of truth post-PR 1c.
+
+**No phase bridge for migrated games.** PR 1a's NumberMatch component dispatches all state changes to the XState machine directly via `engine.send`. There is no `useEffect` that mirrors a reducer phase to engine events for NumberMatch — the bridge pattern earlier described in this design has been removed. WordSpell + SortNumbers continue to use `useReducer` in PR 1a (no engine integration yet); they migrate in PR 1b directly to the same pattern as NumberMatch.
+
+**SessionRecorder migration:** Today `SessionRecorderGate` reads `state.phase` from `useGameLifecycle` (the outer lifecycle layer). PR 1c migrates it to read from `useGameEngineContext()` once `GameEngineProvider` no longer depends on `useGameLifecycle`. Until then, SessionRecorder uses the outer lifecycle phase by design — this is correct for PR 1a/1b because that layer is not yet replaced. (Resolves ce-doc-review round 3 design F6.)
 
 **Engine semantics for celebrations:** When the XState machine enters a state that invokes a celebration actor, the engine mounts the configured mini-game overlay and emits engagement events to move-log:
 
@@ -338,7 +348,7 @@ type UseGameEngineResult = {
 - `celebration:complete` — fires on **natural completion** (mini-game ran to its end)
 - `celebration:skip` — fires when the user dismisses early (`'play-again'` | `'go-home'` | `'timeout'`)
 
-**Phase scope:** The XState machine covers the round lifecycle only: `playing`, `roundComplete`, `levelComplete`, `gameOver` (and optionally `announcing` — Spec 1b). XState state names are camelCase; the legacy reducer's kebab-case phase strings (`'round-complete'`, `'level-complete'`, `'game-over'`) are bridged to engine events by the per-game phase-bridge `useEffect` in PR 1a. The old `game-engine/types.ts` also defines `idle`, `loading`, `instructions`, `evaluating`, `scoring`, `next-round`, and `retry`. These are NOT modeled in the machine because they are either component-managed UI states or route/shell concerns:
+**Phase scope:** Each game's XState machine covers the round lifecycle: `playing`, `roundComplete`, `levelComplete`, `gameOver` (and optionally `announcing` — Spec 1b). XState state names are camelCase. PR 1a's NumberMatch machine emits these state-node names directly; the kebab-case strings used by the legacy `answer-game-reducer.ts` (`'round-complete'`, `'level-complete'`, `'game-over'`) are only relevant to games still using `useReducer` (WordSpell + SortNumbers in PR 1a, none after PR 1b). The old `game-engine/types.ts` also defines `idle`, `loading`, `instructions`, `evaluating`, `scoring`, `next-round`, and `retry`. These are NOT modeled in per-game machines because they are either component-managed UI states or route/shell concerns:
 
 - `instructions` -- managed by `GameShell` / route layer (the `GameOptionsOverlay`, formerly `InstructionsOverlay`, renders before the engine starts; rename lands with the TTS plan)
 - `retry` -- maps to re-entering `playing` with a retry flag in the reducer, not a separate engine phase
@@ -346,23 +356,22 @@ type UseGameEngineResult = {
 
 If a future game needs engine-managed instructions (e.g., per-round instructions that vary), the machine can add an `instructions` state then. For Phase 1, this boundary is intentional.
 
-**Context/provider integration:** `useGameEngine` does NOT replace `AnswerGameProvider` or `AnswerGameContext` in Phase 1. The game component calls both `useGameEngine(def, adapter, dispatch)` for phase lifecycle and `useAnswerGameContext()` for reducer state (tiles, zones, config). SpotAll calls `useGameEngine(def, adapter, dispatch)` for lifecycle and its own SpotAll context for state. The third arg (`dispatch`) is the local reducer's dispatch function, threaded into adapter calls so adapters can be module-level constants. In Phase 2 (reducer unification), the contexts may merge and `dispatch` may collapse into the engine.
+**Context/provider integration:** Under XState-first, `useGameEngine` is the sole state provider for migrated games. NumberMatch (PR 1a) reads tiles, zones, drag state, phase, retryCount, levelIndex, and roundIndex from `engine.context`; it does **not** call `useAnswerGameContext()` for state. WordSpell + SortNumbers continue to use `useAnswerGameContext()` until they migrate in PR 1b. SpotAll uses its own SpotAll context until PR 1d. After PR 1c the `AnswerGameProvider` / `AnswerGameContext` modules are deleted (or reduced to a thin shim). The `dispatch` parameter to `useGameEngine` exists only for non-migrated games' reducer integration during Phase 1; it is removed once all games are XState-only.
 
 #### Render primitives -- per-game wrappers
 
-Each game wraps the engine in its own thin render component:
+Each game wraps the engine in its own thin render component. After XState-first migration, the component reads state from `engine.context` and dispatches via `engine.send`:
 
 ```tsx
 const NumberMatchGame = () => {
-  const { dispatch } = useAnswerGameContext();
-  const engine = useGameEngine(
-    numberMatchDef,
-    answerGameAdapter,
-    dispatch,
-  );
+  const engine = useGameEngine(numberMatchDef);
+  // engine.context holds tiles, zones, drag state, phase, retryCount,
+  // levelIndex, roundIndex — the equivalent of today's AnswerGameState.
   return <AnswerGame {...adaptForAnswerGame(engine)} />;
 };
 ```
+
+For games not yet migrated (WordSpell + SortNumbers in PR 1a), the wrapper still calls `useAnswerGameContext()` for state and passes `dispatch` to `useGameEngine` so the adapter can route `ADVANCE_ROUND` etc. to the legacy reducer. This is a transitional shape — PR 1b removes the third `dispatch` parameter once all games are XState-only.
 
 Slot-based games (NumberMatch, SortNumbers, WordSpell) compose `<AnswerGame />`. **AnswerGame is NOT the canonical render component for all games** -- it is a shared building block for slot/bank games. Future input modes get sibling render primitives:
 
@@ -800,7 +809,7 @@ stateDiagram-v2
 
 3. **Mini-game celebrations:** RESOLVED -- The engine owns mounting the celebration overlay and emits engagement events. Games declare celebrations as XState invoked actors (`celebrationActor`, `levelCelebrationActor`, `gameOverActor`) whose `input` includes `CelebrationConfig`. This covers DinoEggHatch (#313), FireworksPainter (#317), and future celebration types.
 
-4. **Phase authority:** RESOLVED -- XState is the source of truth for `phase` from Phase 1. `useGameEngine` returns the current XState state node name as `phase`. The reducer handles game-specific state only (tiles, zones, cooldowns). Per-game migrations replace `state.phase` reads from `useAnswerGameContext()` with `engine.phase`.
+4. **Phase authority:** RESOLVED -- XState is the source of truth for **all** per-game state from Phase 1, not just `phase`. By PR 1c, `answer-game-reducer.ts` is deleted and `useAnswerGameContext` is removed (or reduced to a thin shim around `useGameEngineContext`). Each game's machine context owns tiles, zones, drag state, phase, retryCount, levelIndex, roundIndex — the equivalent of today's `AnswerGameState`. See "Phase authority — XState-first end state" section for the per-layer migration table. (Updated 2026-05-10 to commit to full reducer elimination by end of Phase 1.)
 
 5. **`buildRound` location:** RESOLVED -- required method on `GameDefinition`. The engine calls it on round/level transitions.
 
@@ -898,10 +907,11 @@ stateDiagram-v2
   - Why: `GameDefinition<TRound>` and `InteractionAdapter<TAction>` exist, but `RoundOutput = Record<string, unknown>` is intentionally opaque. The answer-game adapter writes `tiles: roundOutput.tiles` assuming the field exists, then casts on `advanceLevel`. "Adapter tests verify the contract" but doesn't explain how the adapter type-couples a game's TRound to its dispatched action payload.
   - Fix: Pin in the type design now (avoid Phase 3 churn): introduce a second generic `InteractionAdapter<TAction, TRound>`, or document the cast-site contract explicitly.
 
-- **`GameEngineProvider` reads `state.phase`; XState declared as source of truth in Phase 1** [P2, anchor 75]
+- **`GameEngineProvider` reads `state.phase`; XState declared as source of truth in Phase 1** [P2, anchor 75] — **Resolved 2026-05-10**
   - Section: Relationship to existing lifecycle.ts engine / Phase authority
   - Why: `GameEngineProvider` (kept in Phase 1) reads `state.phase` from `useGameLifecycle` and threads it into `SessionRecorderGate` for session recording. Plan declares XState the source of truth. If per-game migrations replace `state.phase` reads with `engine.phase`, the legacy reducer's `phase` becomes stale yet the recorder still logs it — incorrect session metadata during Phase 1.
   - Fix: Specify before PR 1a ships: either (a) the legacy reducer's `phase` mirrors XState's, or (b) `GameEngineProvider` reads `engine.phase` from the new engine context.
+  - **Resolution:** The "stale phase" framing conflates three different layers (outer route lifecycle / per-game answer reducer / XState engine — see the new Phase authority table). Phase 1 commits to **XState-first end state**: by PR 1c, the answer-game reducer is deleted entirely and XState owns all per-game state. Until then, three layers coexist transitionally. `SessionRecorderGate` reads from the OUTER route lifecycle layer (`useGameLifecycle.state.phase`) by design, which is correct in PR 1a/1b — that layer's purpose is recording on/off gating, not per-round phase. PR 1c migrates `SessionRecorderGate` to read from `useGameEngineContext()` once `GameEngineProvider` no longer depends on `useGameLifecycle`. Documented in design doc's "Phase authority — XState-first end state" section and "SessionRecorder migration" paragraph.
 
 - **`useGameSounds` gate removal breaks the hook's sound state machine, not just overlay gating** [P2, anchor 75] — **Resolved 2026-05-10**
   - Section: Mini-Game Celebrations / useGameSounds gate removal

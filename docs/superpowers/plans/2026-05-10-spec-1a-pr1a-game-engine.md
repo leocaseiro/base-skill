@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Land the GameEngine foundation: install `xstate@5` + `@xstate/react@5`, pin the lifecycle-tts type contract, define `GameDefinition` types, ship `useGameEngine` + `executeSideEffects`, migrate **NumberMatch** to engine-driven phases, and remove the `confettiReady`/`gameOverReady` race gate from `useGameSounds` for NumberMatch — proving the engine works on one game before PR 1b extends it to WordSpell + SortNumbers.
+**Goal:** Land the GameEngine foundation: install `xstate@5` + `@xstate/react@5`, pin the lifecycle-tts type contract, define `GameDefinition` types, ship `useGameEngine` + `executeSideEffects`, and migrate **NumberMatch** end-to-end to XState — its machine context owns the entire game state (tiles, zones, drag state, retryCount, levelIndex, roundIndex, phase). NumberMatch stops using `useReducer` for game state. PR 1b applies the same shape to WordSpell + SortNumbers; PR 1c deletes `answer-game-reducer.ts`.
 
-**Architecture:** A new `src/lib/game-engine/useGameEngine.ts` hook wraps XState v5's `useMachine(definition.machine.provide({ guards, actors, actions }))`. The engine is the source of truth for **external** phase concerns (TTS, celebration overlays, engagement events) while the existing `answer-game-reducer` keeps owning **internal** game-specific state (tiles, zones, cooldowns, drag) — a small phase-bridge `useEffect` in the per-game wrapper forwards reducer phase transitions (`round-complete`, `level-complete`, `game-over`) to the engine via `engine.send`. The engine emits `lifecycle:speak` and `celebration:*` events through the existing `GameEventBus`; PR 1a does not subscribe to `lifecycle:speak` (the TTS plan owns that), and existing `useRoundTTS` continues to drive prompt speech unchanged. Celebration overlay **mounting** stays in NumberMatch.tsx in PR 1a — PR 1c (or later) moves mounting into a `CelebrationHost` that the engine owns. Removing the `useGameSounds` gate eliminates the double-mount race today; engine-driven mounting tightens the contract later.
+**Architecture:** A new `src/lib/game-engine/useGameEngine.ts` hook wraps XState v5's `useMachine(definition.machine.provide({ guards, actors, actions }))`. Under XState-first, **the machine is the sole source of truth for per-game state** for migrated games. NumberMatch's component (`NumberMatch.tsx`) reads tiles, zones, drag state, phase, retryCount, levelIndex, and roundIndex from `engine.context`, and dispatches all state-mutating events (PLACE_TILE, EJECT_TILE, ROUND_CORRECT, NEXT, etc.) via `engine.send` — there is no `useAnswerGameContext()` for NumberMatch state, no `useReducer` dispatch, no phase bridge. The engine emits `lifecycle:speak` and `celebration:*` events through the existing `GameEventBus`; PR 1a does not subscribe to `lifecycle:speak` (the TTS plan owns that), and existing `useRoundTTS` continues to drive prompt speech unchanged. Celebration overlay **mounting** stays in NumberMatch.tsx in PR 1a (gated by `engine.phase`) — PR 1c (or later) moves mounting into a `CelebrationHost`. WordSpell + SortNumbers continue to use `useReducer` until they migrate in PR 1b.
 
 **Tech Stack:** XState v5 (`xstate@5`, `@xstate/react@5`), React 19, TypeScript, Vitest, existing `GameEventBus`.
 
@@ -12,21 +12,39 @@
 
 ---
 
+## Architectural Shift — XState-first (2026-05-10)
+
+This plan was originally framed around a **transitional phase bridge** in PR 1a: NumberMatch would keep `useReducer` (`answer-game-reducer.ts`) for tiles/zones/drag state, with a one-directional `useEffect` mirroring the reducer's `phase` to XState events. PR 1c (Phase 2) was scheduled to remove `reducer.phase` later.
+
+The design has shifted to **XState-first**: by end of Phase 1, `answer-game-reducer.ts` is deleted and XState owns **all** per-game state. PR 1a delivers the canonical pattern end-to-end on NumberMatch — no `useReducer` for game state, no phase bridge. Each subsequent PR (1b WordSpell+SortNumbers, 1d SpotAll) adopts the same shape. PR 1c performs the cleanup: deletes `answer-game-reducer.ts`, removes `useAnswerGameContext` (or reduces it to a shim), and migrates `SessionRecorderGate` off `useGameLifecycle`.
+
+Scope-impact summary (read this before reading the rest of the plan):
+
+- **NumberMatch in PR 1a**: machine context grows to include the full `AnswerGameState` equivalent (tiles, zones, drag state, retryCount, isLevelMode, levelIndex, roundIndex, phase, etc.). All 22 reducer actions become XState events with `assign` actions. The component (`NumberMatch.tsx`) reads from `engine.context` and dispatches via `engine.send` — `useAnswerGameContext()` is **not** called for state.
+- **`answer-game-reducer.ts`**: continues to exist in PR 1a because WordSpell + SortNumbers still consume it. Deleted in PR 1c.
+- **`useAnswerGameContext`**: still mounted by the wider game shell so non-migrated games keep working. NumberMatch does not consume it for state. Shimmed or removed in PR 1c.
+- **Phase bridge pattern**: removed from PR 1a entirely. The bridge `useEffect` described in earlier drafts of this plan is not used; per-game machines emit transitions directly via `engine.send` from their components.
+- **Tests**: NumberMatch's existing reducer-level tests (in `answer-game-reducer.test.ts` for cases that exercise NumberMatch-specific behavior) move to machine-level tests against `numberMatchMachine`. Reducer tests for WordSpell + SortNumbers remain until PR 1b.
+
+Tasks 8 and 9 below reflect the XState-first shape. Earlier readers familiar with the bridge pattern: that pattern is gone — Task 9 dispatches directly to the machine.
+
+---
+
 ## Spec Deltas
 
 The design doc is the binding source of truth for the GameDefinition shape; the deltas below are intentional **PR 1a scope reductions** that defer parts of the design to PR 1b/1c. None of them break the typed contract — every type from the design is created with the right shape; some fields are populated minimally in PR 1a and tightened later.
 
-1. **Celebration overlay mounting stays in NumberMatch.tsx in PR 1a; `useGameSounds` is left untouched.** The design states the engine takes ownership of mounting `<skin.CelebrationOverlay />`, `<skin.LevelCompleteOverlay />`, and `<skin.RoundCompleteEffect />` (design lines 478–481, 698–703). PR 1a only owns the **lifecycle decision** (engine drives the phase). The game component still renders skin overlays based on `engine.phase`. The double-mount race the design warns about is avoided in PR 1a because NumberMatch stops reading the `useGameSounds` gate booleans (Task 9); the booleans themselves remain on the hook so WordSpell/SortNumbers continue to render correctly until those games migrate. The full hook simplification (removing the boolean state entirely) lands in **PR 1b** alongside WordSpell + SortNumbers migrations — one removal site, three migrated consumers. Full registry-based mounting moves into a `CelebrationHost` in PR 1c (after the abstraction is validated across three games). **Why now is fine:** PR 1a only needs the engine to be the source of truth for NumberMatch's overlay gating; deferring the hook surgery to PR 1b avoids breaking WordSpell + SortNumbers in the interim.
+1. **Celebration overlay mounting stays in NumberMatch.tsx in PR 1a; `useGameSounds` is left untouched.** The design states the engine takes ownership of mounting `<skin.CelebrationOverlay />`, `<skin.LevelCompleteOverlay />`, and `<skin.RoundCompleteEffect />` (design lines 478–481, 698–703). PR 1a only owns the **lifecycle decision** (engine drives the phase via `engine.context.phase` and `engine.phase`). The game component still renders skin overlays based on `engine.phase`. The double-mount race the design warns about is avoided because NumberMatch's machine is the sole authority for `phase` — there is no second `phase` field in a reducer to race against. The full registry-based mounting moves into a `CelebrationHost` in PR 1c (after the abstraction is validated across three games). PR 1b absorbs the `useGameSounds` gate-boolean removal alongside WordSpell + SortNumbers migrations (one removal site, three migrated consumers). **Why now is fine:** PR 1a's NumberMatch reads `engine.phase` for overlay gating; deferring the hook surgery to PR 1b avoids breaking WordSpell + SortNumbers in the interim.
 
 2. **`engine.celebrating` returns `null` in PR 1a.** The `UseGameEngineResult.celebrating` field exists (typed exactly per the design) so downstream callers compile, but the implementation returns `null` for now. NumberMatch reads `engine.phase` directly to gate overlays. PR 1b populates `celebrating` from machine context after we register `celebrationActor`/`levelCelebrationActor`/`gameOverActor` with full input plumbing. **Why now is fine:** no caller in PR 1a depends on `celebrating !== null`; the field is only consumed by future engine-mounted overlays (PR 1c+).
 
 3. **Celebration actors are simple `fromPromise` timers in PR 1a, gated by external `engine.send` for early dismiss.** The design describes invoked actors with `onDone` driven by mini-game completion (design lines 469–504). PR 1a implements them as `fromPromise` actors that resolve after a `maxDuration` fallback timer **and** the parent state listens for `CELEBRATION_DONE` (a top-level event sent by the game component when the user dismisses early via Play Again / Go Home). NumberMatch already ships its skip flow through skin-level callbacks; we surface those into engine events. **Why now is fine:** matches the design's "skip via buttons fires `celebration:skip`" semantic; richer actor lifecycles can land alongside DinoEggHatch / FireworksPainter integration when those PRs rebase on the engine.
 
-4. **`reducer.phase` is not removed in PR 1a.** The design says "the reducer handles game-specific state only (tiles, zones, cooldowns)" (line 327). In PR 1a the answer-game reducer keeps `phase` because Phase 1 explicitly does not touch the reducer (line 430: "answerGameReducer and spotAllReducer are NOT touched in Phase 1"). The reducer's `phase` becomes an **internal** signal used only by the phase bridge `useEffect`; consumers read `engine.phase`. Phase 2 (reducer unification) removes `reducer.phase` entirely. **Why now is fine:** keeps blast radius contained — touching the reducer would balloon PR 1a and tangle with WordSpell/SortNumbers behavior covered by PR 1b.
+4. **`answer-game-reducer.ts` continues to exist in PR 1a (still consumed by WordSpell + SortNumbers).** Under XState-first, NumberMatch no longer uses `useReducer` for game state — its machine context owns tiles, zones, drag state, retryCount, levelIndex, roundIndex, and phase. `useAnswerGameContext()` is **not** called by NumberMatch for state. The reducer module itself stays around because WordSpell + SortNumbers still consume it; PR 1b migrates those games and PR 1c deletes the module. **Why now is fine:** the reducer's logic survives intact for non-migrated games, and migrating WordSpell + SortNumbers in the same PR as NumberMatch would balloon PR 1a's blast radius. NumberMatch's machine implements assign actions that mirror the reducer's NumberMatch-relevant cases (PLACE_TILE, EJECT_TILE, etc.) — see Task 8.
 
 5. **`useLifecycleTTS` is not created in PR 1a.** The design line 781 mentions wiring "a stub `useLifecycleTTS` that subscribes to the bus" in PR 1a. The handoff scope (2026-05-10 handoff lines 51–56) excludes the hook; the TTS plan (`2026-05-06-spec-1a-m1-tts-lifecycle.md`) owns it end-to-end. PR 1a only **emits** `lifecycle:speak` from `executeSideEffects`; with no subscriber, emissions are recorded by the bus but produce no audio — a no-op until the TTS plan ships. Existing `useRoundTTS` continues to drive prompt speech for NumberMatch with no changes. **Why now is fine:** keeps the TTS plan independently shippable and avoids a stub the TTS plan would immediately replace.
 
-6. **`buildRound` is a passthrough in PR 1a; round construction stays in the React component.** The design states `buildRound` is the engine-owned round factory called on transitions (design lines 234–245). PR 1a's NumberMatch definition implements `buildRound` as `(ctx) => ({ roundIndex: ctx.roundIndex })` — a stub — because NumberMatch's existing `buildNumeralRound` factory closure lives in `NumberMatch.tsx`. The phase bridge (Task 9) dispatches the resolved round to the reducer; the engine sees only the round index. As a side effect, `engine.currentRound` returns `{}` in PR 1a (no callers depend on it). PR 1b lifts round-construction into `definition.ts` once WordSpell + SortNumbers migrate (they share the closure shape — sentence-gap mode for WordSpell, level-aware rounds for SortNumbers — and validate the contract across three games). **Why now is fine:** PR 1a's goal is to prove the engine drives phase lifecycle on one game. Round construction is orthogonal — bringing it into the definition without three game-specific shapes to validate against would be premature.
+6. **`buildRound` is a passthrough in PR 1a; round construction stays in the React component.** The design states `buildRound` is the engine-owned round factory called on transitions (design lines 234–245). PR 1a's NumberMatch definition implements `buildRound` as `(ctx) => ({ roundIndex: ctx.roundIndex })` — a stub — because NumberMatch's existing `buildNumeralRound` factory closure lives in `NumberMatch.tsx`. After each `NEXT` transition, the component sends `ADVANCE_ROUND { tiles, zones }` (computed externally via `buildNumeralRound`) and the machine's `advanceRoundState` assign action populates context — `buildRound`'s engine-injected version is a no-op. As a side effect, `engine.currentRound` returns `{}` in PR 1a (no callers depend on it). PR 1b lifts round-construction into `definition.ts` once WordSpell + SortNumbers migrate (they share the closure shape — sentence-gap mode for WordSpell, level-aware rounds for SortNumbers — and validate the contract across three games). **Why now is fine:** PR 1a's goal is to prove the XState-first pattern end-to-end on one game. Round construction can land in the definition once we've seen what shape three games need.
 
 7. **`UseGameEngineResult.phase` is typed as `string` in PR 1a, not `GamePhase`.** The design (line 305) declares `phase: GamePhase` — a typed union. PR 1a's `definition-types.ts` widens this to `phase: string` because XState state-node names are stringly-typed and centralizing the literal union before all three answer games' state shapes are known would force premature decisions. Game components in PR 1a (NumberMatch only) read `engine.phase` against literal strings (`'playing'`, `'roundComplete'`, `'gameOver'`); typos would not be caught at compile time. **Why now is fine:** PR 1a only consumes engine.phase in NumberMatch, where the state names are local to one machine. PR 1c tightens this: once WordSpell + SortNumbers + NumberMatch are all engine-driven, define a shared `GamePhase = 'playing' | 'roundComplete' | 'levelComplete' | 'gameOver' | 'announcing' | 'waitingForNext'` union in `definition-types.ts` and update `UseGameEngineResult.phase` accordingly. Until then, treat string typos as a known risk and prefer `engine.phase === 'roundComplete' as const` patterns where possible.
 
@@ -34,25 +52,11 @@ If an executor disagrees with any of these deltas while implementing, **stop and
 
 ---
 
-## Phase Bridge Pattern (PR 1a only)
+## No Phase Bridge in PR 1a (XState-first)
 
-Since the answer-game reducer keeps `phase` in PR 1a (Spec Delta 4), per-game wrappers add a small bridge that forwards reducer transitions into engine events:
+Earlier drafts of this plan described a transitional `useEffect` bridge that mirrored `useAnswerGameContext().phase` (kebab-case reducer phase) into XState events. Under XState-first, this bridge is **gone**: NumberMatch's machine is the sole authority for phase. The component dispatches `ROUND_CORRECT`, `ROUND_ERROR`, `NEXT`, `CELEBRATION_DONE`, `GAME_OVER`, and game-state events (`PLACE_TILE`, `EJECT_TILE`, etc.) directly via `engine.send` — there is no reducer to mirror.
 
-```tsx
-const reducerPhase = useAnswerGameContext().phase;
-
-useEffect(() => {
-  if (reducerPhase === 'round-complete') {
-    engine.send({ type: 'ROUND_CORRECT' });
-  } else if (reducerPhase === 'level-complete') {
-    engine.send({ type: 'LEVEL_COMPLETE' });
-  } else if (reducerPhase === 'game-over') {
-    engine.send({ type: 'GAME_OVER' });
-  }
-}, [reducerPhase, engine]);
-```
-
-The engine then drives `playing → roundComplete → waitingForNext → playing | levelComplete | gameOver`. The reducer's `phase` is no longer read by overlays, TTS, or sounds — only by the bridge. PR 1c removes the bridge once Phase 2 unifies the reducer.
+WordSpell + SortNumbers still use `useReducer` in PR 1a (no engine integration yet); they migrate in PR 1b directly to the same XState-first pattern. There is no interim bridge for them either — they migrate from `useReducer`-only to `engine`-only in one step.
 
 ---
 
@@ -95,8 +99,9 @@ src/games/number-match/
 - `src/lib/game-engine/GameEngine.flows.mdx` — append XState phase-flow diagram + phase-bridge section alongside the existing legacy `useGameLifecycle` content. Do **not** delete the legacy sections; PR 1c removes them once `lifecycle.ts` is deleted.
 - `src/lib/game-engine/GameEngine.reference.mdx` — append `useGameEngine` API reference + `GameDefinition` shape + Spec Delta summary alongside the existing legacy `createReducer`/`useGameLifecycle` content.
 - `src/lib/game-engine/debugging.mdx` — append XState-specific troubleshooting entries alongside the existing legacy debugging guide.
-- `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDef, answerGameAdapter, dispatch)`; replace `phase` reads from `useAnswerGameContext()` with `engine.phase`; add the phase-bridge `useEffect`; replace gate-boolean destructuring with direct `engine.phase` checks for overlay rendering. The `useGameSounds()` call is retained (still drives sound playback), only the destructured boolean reads are removed.
-- `src/games/number-match/NumberMatch/NumberMatch.test.tsx` — update assertions that depended on `confettiReady`/`gameOverReady` to use phase-driven assertions.
+- `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDefinition)`; **remove** `useAnswerGameContext()` for state (machine context is the source of truth); read tiles/zones/drag state/phase/retryCount/levelIndex/roundIndex from `engine.context`; dispatch all state-mutating events via `engine.send` (PLACE_TILE, EJECT_TILE, REMOVE_TILE, SWAP_TILES, etc., plus lifecycle events ROUND_CORRECT/ROUND_ERROR/NEXT/CELEBRATION_DONE). Drop the `confettiReady`/`gameOverReady` destructuring; gate overlays on `engine.phase`. The `useGameSounds()` call is retained for sound playback (still reads phase from `useAnswerGameContext()` until WordSpell+SortNumbers migrate).
+- `src/games/number-match/NumberMatch/NumberMatch.test.tsx` — refactor assertions: replace reducer-state-shape assertions with machine-context assertions (use `useMachine` test patterns or render the component and inspect `engine.context` via test helpers). The single-mount overlay regression test stays; phase assertions become `engine.phase` reads.
+- `src/components/answer-game/answer-game-reducer.test.ts` — leave NumberMatch-specific reducer cases tested in this file (still valid for WordSpell + SortNumbers in PR 1a). PR 1b/1c migrate the WordSpell/SortNumbers cases out and delete this file alongside the reducer.
 
 ### Test files (new or extended)
 
@@ -1292,9 +1297,11 @@ git commit -m "feat(game-engine): add answerGameAdapter for AnswerGameAction red
 
 ---
 
-## Task 8: NumberMatch GameDefinition
+## Task 8: NumberMatch GameDefinition (XState-first — full state machine)
 
-Encodes NumberMatch as a `GameDefinition<NumberMatchRound>`. NumberMatch has **no level boundaries** today, so the machine is the simplest variant: `playing → roundComplete → waitingForNext → playing | gameOver`. Level handling in `buildEngineGuards` already supports the no-level case (`levelSize === totalRounds`).
+Encodes NumberMatch as a `GameDefinition<NumberMatchRound>`. Under XState-first, the machine **owns the entire game state** — tiles, zones, drag state, retryCount, levelIndex, roundIndex, isLevelMode, plus phase. Each of the 22 reducer events from `AnswerGameAction` becomes an XState event with an `assign` action that mirrors the corresponding case in `src/components/answer-game/answer-game-reducer.ts`. NumberMatch has **no level boundaries** today, so the machine's lifecycle is the simplest variant: `playing → roundComplete → waitingForNext → playing | gameOver`. Level handling in `buildEngineGuards` already supports the no-level case (`levelSize === totalRounds`).
+
+The reducer module continues to exist (consumed by WordSpell + SortNumbers in PR 1a). NumberMatch's machine actions implement the same logic as the reducer's NumberMatch-relevant cases, but live in the machine's `actions` block rather than in `useReducer`.
 
 **Files:**
 
@@ -1358,10 +1365,34 @@ import type {
   GameDefinition,
   RoundOutput,
 } from '@/lib/game-engine/definition-types';
+import type {
+  AnswerZone,
+  TileItem,
+} from '@/components/answer-game/types';
 
+/**
+ * Full state owned by the NumberMatch machine.
+ * Mirrors the relevant subset of `AnswerGameState` from the legacy reducer
+ * (`src/components/answer-game/types.ts`) plus the engine-managed
+ * `phaseContext` exposed to `buildRound` / `definition.tts` consumers.
+ *
+ * The reducer's `config` field stays out of machine context — config is
+ * passed via `useGameEngine(definition)` options at construction.
+ */
 export interface NumberMatchEngineContext {
-  roundIndex: number;
+  // Game state (was AnswerGameState in the reducer):
+  allTiles: TileItem[];
+  bankTileIds: string[];
+  zones: AnswerZone[];
+  activeSlotIndex: number;
+  dragActiveTileId: string | null;
+  dragHoverZoneIndex: number | null;
+  dragHoverBankTileId: string | null;
+  retryCount: number;
   levelIndex: number;
+  roundIndex: number;
+  isLevelMode: boolean;
+  // Engine-managed:
   lastRoundOutput: RoundOutput;
   phaseContext: {
     roundIndex: number;
@@ -1374,12 +1405,51 @@ export interface NumberMatchEngineContext {
   };
 }
 
+/**
+ * Full event union. Game-state events (PLACE_TILE, EJECT_TILE, …) come
+ * directly from the legacy `AnswerGameAction` union in
+ * `src/components/answer-game/types.ts`. Lifecycle events (ROUND_CORRECT,
+ * NEXT, CELEBRATION_DONE, GAME_OVER) drive the round/level lifecycle.
+ *
+ * The machine handles each event with an `assign` action whose body
+ * mirrors the corresponding `answer-game-reducer.ts` case. PR 1c deletes
+ * the reducer once WordSpell + SortNumbers also migrate; the assign
+ * actions then become the canonical implementation.
+ */
 type NumberMatchEvent =
+  // Game-state events (mirror AnswerGameAction):
+  | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | {
+      type: 'RESUME_ROUND';
+      draft: import('@/components/answer-game/types').AnswerGameDraftState;
+    }
+  | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
+  | {
+      type: 'TYPE_TILE';
+      tileId: string;
+      value: string;
+      zoneIndex: number;
+    }
+  | { type: 'REMOVE_TILE'; zoneIndex: number }
+  | { type: 'SWAP_TILES'; fromZoneIndex: number; toZoneIndex: number }
+  | { type: 'EJECT_TILE'; zoneIndex: number }
+  | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'COMPLETE_GAME' }
+  | { type: 'SET_DRAG_ACTIVE'; tileId: string | null }
+  | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
+  | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
+  | { type: 'SWAP_SLOT_BANK'; zoneIndex: number; bankTileId: string }
+  | { type: 'SET_ACTIVE_SLOT'; zoneIndex: number }
+  | { type: 'REJECT_TAP'; tileId: string; zoneIndex: number }
+  // Lifecycle events:
   | { type: 'ROUND_CORRECT' }
   | { type: 'ROUND_ERROR' }
   | { type: 'NEXT' }
   | { type: 'CELEBRATION_DONE'; skipMethod?: 'play-again' | 'go-home' }
   | { type: 'GAME_OVER' };
+
+// NumberMatch has no level boundaries today, so ADVANCE_LEVEL is omitted.
+// (PR 1b adds it for SortNumbers; the type union widens accordingly.)
 
 const numberMatchMachine = setup({
   types: {} as {
@@ -1396,25 +1466,132 @@ const numberMatchMachine = setup({
     gameOverActor: undefined as never,
   },
   actions: {
+    // Side-effect actions injected by useGameEngine.provide({actions}):
     speak: () => {},
-    // assign action: bumps the engine's authoritative roundIndex on the
-    // NEXT transition. Runs BEFORE buildRound so PhaseContext.roundIndex
-    // reflects the round about to be played, not the one just finished.
-    // See ce-doc-review round 3 finding F2 (resolved 2026-05-10).
+    buildRound: () => {},
+    advanceRound: () => {},
+    completeGame: () => {},
+
+    // Engine-managed assign action (added 2026-05-10 for ce-doc-review F2).
+    // Bumps roundIndex on NEXT transition; runs BEFORE buildRound so
+    // PhaseContext.roundIndex reflects the next round, not the one just finished.
     incrementRoundIndex: assign({
       roundIndex: ({ context }: { context: { roundIndex: number } }) =>
         context.roundIndex + 1,
     }),
-    buildRound: () => {},
-    advanceRound: () => {},
-    completeGame: () => {},
+
+    // Game-state assign actions (mirror answer-game-reducer.ts cases).
+    // Each handler's body follows the same logic as the corresponding
+    // reducer case in src/components/answer-game/answer-game-reducer.ts.
+    // PR 1a implements all of these for NumberMatch; PR 1c deletes the
+    // reducer once WordSpell + SortNumbers also migrate.
+    initRound: assign(({ event }) => {
+      if (event.type !== 'INIT_ROUND') return {};
+      return {
+        allTiles: event.tiles,
+        bankTileIds: event.tiles.map((t) => t.id),
+        zones: event.zones,
+        activeSlotIndex: 0,
+        dragActiveTileId: null,
+        dragHoverZoneIndex: null,
+        dragHoverBankTileId: null,
+        retryCount: 0,
+      };
+    }),
+    placeTile: assign(({ context, event }) => {
+      // Mirror reducer 'PLACE_TILE' case (retry counting,
+      // isWrong/isLocked transitions, slot advancement). Body matches
+      // the reducer line-for-line during PR 1a; PR 1c moves it here permanently.
+      return context;
+    }),
+    typeTile: assign(({ context, event }) => {
+      // Mirror reducer 'TYPE_TILE' case.
+      return context;
+    }),
+    removeTile: assign(({ context, event }) => {
+      // Mirror reducer 'REMOVE_TILE' case.
+      return context;
+    }),
+    swapTiles: assign(({ context, event }) => {
+      // Mirror reducer 'SWAP_TILES' case.
+      return context;
+    }),
+    ejectTile: assign(({ context, event }) => {
+      // Mirror reducer 'EJECT_TILE' case.
+      return context;
+    }),
+    setDragActive: assign(({ event }) =>
+      event.type === 'SET_DRAG_ACTIVE'
+        ? { dragActiveTileId: event.tileId }
+        : {},
+    ),
+    setDragHover: assign(({ event }) =>
+      event.type === 'SET_DRAG_HOVER'
+        ? { dragHoverZoneIndex: event.zoneIndex }
+        : {},
+    ),
+    setDragHoverBank: assign(({ event }) =>
+      event.type === 'SET_DRAG_HOVER_BANK'
+        ? { dragHoverBankTileId: event.tileId }
+        : {},
+    ),
+    swapSlotBank: assign(({ context, event }) => {
+      // Mirror reducer 'SWAP_SLOT_BANK' case.
+      return context;
+    }),
+    setActiveSlot: assign(({ event }) =>
+      event.type === 'SET_ACTIVE_SLOT'
+        ? { activeSlotIndex: event.zoneIndex }
+        : {},
+    ),
+    rejectTap: assign(({ context, event }) => {
+      // Mirror reducer 'REJECT_TAP' case (retryCount++, isWrong flag).
+      return context;
+    }),
+    advanceRoundState: assign(({ event }) => {
+      if (event.type !== 'ADVANCE_ROUND') return {};
+      return {
+        allTiles: event.tiles,
+        bankTileIds: event.tiles.map((t) => t.id),
+        zones: event.zones,
+        activeSlotIndex: 0,
+        dragActiveTileId: null,
+        dragHoverZoneIndex: null,
+        dragHoverBankTileId: null,
+        retryCount: 0,
+      };
+    }),
+    resumeRound: assign(({ event }) => {
+      if (event.type !== 'RESUME_ROUND') return {};
+      const { draft } = event;
+      return {
+        allTiles: draft.allTiles,
+        bankTileIds: draft.bankTileIds,
+        zones: draft.zones,
+        activeSlotIndex: draft.activeSlotIndex,
+        retryCount: draft.retryCount,
+        levelIndex: draft.levelIndex,
+        roundIndex: draft.roundIndex,
+      };
+    }),
   },
 }).createMachine({
   id: 'number-match',
   initial: 'playing',
   context: {
-    roundIndex: 0,
+    // Game state (initialized empty — INIT_ROUND populates):
+    allTiles: [],
+    bankTileIds: [],
+    zones: [],
+    activeSlotIndex: 0,
+    dragActiveTileId: null,
+    dragHoverZoneIndex: null,
+    dragHoverBankTileId: null,
+    retryCount: 0,
     levelIndex: 0,
+    roundIndex: 0,
+    isLevelMode: false,
+    // Engine-managed:
     lastRoundOutput: {} as RoundOutput,
     phaseContext: {
       roundIndex: 0,
@@ -1426,13 +1603,17 @@ const numberMatchMachine = setup({
       currentPhase: 'playing',
     },
   },
-  // Root-level handler: the phase bridge can fire GAME_OVER from any state
-  // (e.g., reducer hits game-over while engine is in roundComplete). The
-  // round-advance effect normally drives the transition through
-  // `CELEBRATION_DONE` → `NEXT` with the `isLastRound` guard; this is
-  // defense-in-depth so the engine never gets stuck.
+  // Root-level handlers: drag-state, init/resume, and GAME_OVER fallback.
+  // Drag events are valid in any state because they don't gate on phase.
+  // INIT_ROUND/RESUME_ROUND happen on mount or session resume.
+  // GAME_OVER is defense-in-depth so the engine never gets stuck.
   on: {
     GAME_OVER: '.gameOver',
+    INIT_ROUND: { actions: 'initRound' },
+    RESUME_ROUND: { actions: 'resumeRound' },
+    SET_DRAG_ACTIVE: { actions: 'setDragActive' },
+    SET_DRAG_HOVER: { actions: 'setDragHover' },
+    SET_DRAG_HOVER_BANK: { actions: 'setDragHoverBank' },
   },
   states: {
     playing: {
@@ -1440,6 +1621,17 @@ const numberMatchMachine = setup({
         { type: 'speak', params: { lifecycleEvent: 'game.start' } },
       ],
       on: {
+        // Game-state events (mirror reducer). Only fire while playing —
+        // other phases ignore them.
+        PLACE_TILE: { actions: 'placeTile' },
+        TYPE_TILE: { actions: 'typeTile' },
+        REMOVE_TILE: { actions: 'removeTile' },
+        SWAP_TILES: { actions: 'swapTiles' },
+        EJECT_TILE: { actions: 'ejectTile' },
+        SWAP_SLOT_BANK: { actions: 'swapSlotBank' },
+        SET_ACTIVE_SLOT: { actions: 'setActiveSlot' },
+        REJECT_TAP: { actions: 'rejectTap' },
+        // Lifecycle events:
         ROUND_CORRECT: {
           target: 'roundComplete',
           actions: [
@@ -1608,14 +1800,14 @@ git commit -m "feat(number-match): add GameDefinition for engine integration"
 
 ---
 
-## Task 9: Migrate `NumberMatch.tsx` To Engine-Driven Phases
+## Task 9: Migrate `NumberMatch.tsx` To Full XState (No Reducer, No Bridge)
 
-Replace `phase` reads from `useAnswerGameContext()` with `engine.phase` everywhere outside the phase bridge. Keep the existing `buildNumeralRound` factory in the React component (PR 1a punts the closure-shape generalization to PR 1b — Spec Delta 4 / Task 8 note). Remove the `confettiReady`/`gameOverReady` reads in this file; they're replaced by direct `engine.phase` checks. Existing `useRoundTTS` is **kept unchanged**.
+Under XState-first, NumberMatch's component reads **all** state from `engine.context` and dispatches **every** state change via `engine.send`. There is no `useAnswerGameContext()` for state, no `useReducer` dispatch, and no phase bridge. The existing `buildNumeralRound` factory closure stays in the React component (PR 1a's `buildRound` is a passthrough — Spec Delta 6); the component computes the next round's tiles/zones and sends them as part of an event payload. Existing `useRoundTTS` and `useGameSounds` are **kept** — they continue to read phase from `useAnswerGameContext()` until WordSpell + SortNumbers also migrate (`useGameSounds` keeps producing sound effects for non-migrated games; for NumberMatch, the call is retained for sound playback only — gate booleans are unused). PR 1b/1c remove the legacy hooks once all three games are XState-first.
 
 **Files:**
 
 - Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx:91-352` (the `NumberMatchSession` inner component)
-- Modify: `src/games/number-match/NumberMatch/NumberMatch.test.tsx` (assertions on overlay rendering)
+- Modify: `src/games/number-match/NumberMatch/NumberMatch.test.tsx` (refactor assertions: machine-context-shape replaces reducer-state-shape)
 
 - [ ] **Step 1: Write the failing test (regression — no double-mount)**
 
@@ -1662,46 +1854,95 @@ Replace the imports section (around lines 27–36) to add:
 
 ```ts
 import { useGameEngine } from '@/lib/game-engine/useGameEngine';
-import { answerGameAdapter } from '@/lib/game-engine/interaction-adapter';
 import { numberMatchDefinition } from '../definition';
 ```
 
-Inside `NumberMatchSession`, replace lines 102–110 (the `useAnswerGameContext` + `useGameSounds` block) with:
+(Note: `answerGameAdapter` is **not** imported — adapters dispatch to the legacy reducer, which NumberMatch no longer uses. WordSpell + SortNumbers will still import the adapter in PR 1a if they need it for unrelated reasons; NumberMatch does not.)
+
+Inside `NumberMatchSession`, replace the existing `useAnswerGameContext` + `useReducer`-driven state block with:
 
 ```tsx
-const {
-  phase: reducerPhase,
-  roundIndex,
-  retryCount,
-  zones,
-} = useAnswerGameContext();
-const dispatch = useAnswerGameDispatch();
+const engine = useGameEngine(numberMatchDefinition, {
+  totalRounds: roundOrder.length,
+  levelSize: roundOrder.length,
+});
 
-const engine = useGameEngine(
-  numberMatchDefinition,
-  answerGameAdapter,
-  dispatch,
-  {
-    totalRounds: roundOrder.length,
-    levelSize: roundOrder.length,
-    envelope: { roundIndex },
-  },
-);
+// Read game state directly from machine context.
+const {
+  zones,
+  retryCount,
+  roundIndex,
+  allTiles,
+  bankTileIds,
+  activeSlotIndex,
+  dragActiveTileId,
+  dragHoverZoneIndex,
+  dragHoverBankTileId,
+} = engine.context;
 ```
 
-Add the phase bridge effect immediately after the existing `useRoundTTS(...)` call (around line 118):
+The component **does not** call `useAnswerGameContext()` for state. The legacy `AnswerGameProvider` may still wrap the component for now (so non-migrated subtree hooks like `useRoundTTS`, `useGameSounds` continue to function), but NumberMatch reads its own state from `engine.context`.
+
+Wire up event dispatch helpers:
+
+```tsx
+const handlePlaceTile = useCallback(
+  (tileId: string, zoneIndex: number) =>
+    engine.send({ type: 'PLACE_TILE', tileId, zoneIndex }),
+  [engine],
+);
+const handleEjectTile = useCallback(
+  (zoneIndex: number) => engine.send({ type: 'EJECT_TILE', zoneIndex }),
+  [engine],
+);
+// ... and equivalents for REMOVE_TILE, SWAP_TILES, TYPE_TILE, SWAP_SLOT_BANK,
+// SET_ACTIVE_SLOT, REJECT_TAP, SET_DRAG_*. Pass these into AnswerGame /
+// QuestionRow children that previously consumed reducer dispatch.
+```
+
+Initialize the first round on mount via `INIT_ROUND`:
 
 ```tsx
 useEffect(() => {
-  if (reducerPhase === 'round-complete') {
-    engine.send({ type: 'ROUND_CORRECT' });
-  } else if (reducerPhase === 'game-over') {
-    engine.send({ type: 'GAME_OVER' });
-  }
-}, [reducerPhase, engine]);
+  const firstConfigIndex = roundOrder[0];
+  const firstRound =
+    firstConfigIndex === undefined
+      ? undefined
+      : numberMatchConfig.rounds[firstConfigIndex];
+  const value = firstRound?.value;
+  if (value === undefined) return;
+  const { tiles, zones } = buildNumeralRound(value, {
+    tileBankMode: numberMatchConfig.tileBankMode,
+    distractorCount: numberMatchConfig.distractorCount,
+    range: numberMatchConfig.range,
+    mode: numberMatchConfig.mode,
+    locale: numberWordsLocale,
+  });
+  engine.send({ type: 'INIT_ROUND', tiles, zones });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only init
+}, []);
 ```
 
-Replace the round-advance effect (lines 151–207) — the engine drives advancement by sequencing `CELEBRATION_DONE` (roundComplete → waitingForNext) then `NEXT` (waitingForNext → playing or gameOver, by guard). Keep the existing 750 ms delay; gate on `engine.phase === 'roundComplete'`:
+Round-completion detection (was driven by reducer-phase changes; now driven by `zones` correctness inside `engine.context`):
+
+```tsx
+useEffect(() => {
+  // Game-side check: if all zones have a placed tile and all are correct,
+  // emit ROUND_CORRECT. Mirrors the previous reducer-side check.
+  const allPlaced = zones.every((z) => z.placedTileId !== null);
+  const allCorrect = zones.every(
+    (z) =>
+      z.placedTileId !== null &&
+      z.expectedValue ===
+        allTiles.find((t) => t.id === z.placedTileId)?.value,
+  );
+  if (allPlaced && allCorrect && engine.phase === 'playing') {
+    engine.send({ type: 'ROUND_CORRECT' });
+  }
+}, [zones, allTiles, engine]);
+```
+
+Round advancement on `roundComplete` (replaces the previous bridge-driven advance, but now without a separate reducer dispatch — the next round's tiles/zones go directly through `engine.send`):
 
 ```tsx
 useEffect(() => {
@@ -1721,11 +1962,12 @@ useEffect(() => {
     const value = nextRound?.value;
 
     if (isLastRound || value === undefined) {
-      // Reducer transitions to game-over; engine traverses
-      // roundComplete → waitingForNext → gameOver via the isLastRound guard.
-      dispatch({ type: 'COMPLETE_GAME' });
+      // Drive the engine to gameOver. CELEBRATION_DONE → waitingForNext → gameOver
+      // (via isLastRound guard, once the engine context's roundIndex is at the end).
+      // The root-level GAME_OVER handler is defense-in-depth.
       engine.send({ type: 'CELEBRATION_DONE' });
       engine.send({ type: 'NEXT' });
+      engine.send({ type: 'GAME_OVER' });
       return;
     }
 
@@ -1739,17 +1981,20 @@ useEffect(() => {
         locale: numberWordsLocale,
       },
     );
-    // Reducer advances to the next round (resets tiles/zones for `playing`);
-    // engine traverses roundComplete → waitingForNext → playing via
-    // `isMidLevelRound`. XState v5 processes the two `send` calls
-    // synchronously in order — the guard sees the same `roundIndex` for
-    // routing.
-    answerGameAdapter.advanceRound(
-      { tiles: nextTiles, zones: nextZones },
-      dispatch,
-    );
+
+    // Engine traverses roundComplete → waitingForNext → playing (isMidLevelRound).
+    // The waitingForNext.NEXT actions array runs incrementRoundIndex first
+    // (so engine.context.roundIndex bumps), then buildRound + advanceRound
+    // (no-ops for NumberMatch under XState-first). Once back in `playing`,
+    // we send ADVANCE_ROUND with the new round's tiles/zones — the
+    // `advanceRoundState` assign action populates context.
     engine.send({ type: 'CELEBRATION_DONE' });
     engine.send({ type: 'NEXT' });
+    engine.send({
+      type: 'ADVANCE_ROUND',
+      tiles: nextTiles,
+      zones: nextZones,
+    });
   }, delayMs);
 
   return () => {
@@ -1758,7 +2003,6 @@ useEffect(() => {
 }, [
   engine,
   roundIndex,
-  dispatch,
   roundOrder,
   numberMatchConfig.rounds,
   numberMatchConfig.tileBankMode,
@@ -1769,7 +2013,7 @@ useEffect(() => {
 ]);
 ```
 
-Replace the overlay rendering block (lines 330–350) to gate on `engine.phase`:
+Overlay rendering — gate on `engine.phase` (camelCase), not the kebab reducer phase:
 
 ```tsx
 {
@@ -1806,7 +2050,7 @@ Replace the overlay rendering block (lines 330–350) to gate on `engine.phase`:
 
 If `RoundCompleteEffect` and `ScoreAnimation` don't accept `data-testid`, add the prop in their definitions (small change — add to the destructured props and forward to the root element).
 
-Replace the existing `useEffect` that emits `game:end` (lines 128–149) — gate it on `engine.phase === 'gameOver'` instead of `reducerPhase === 'game-over'`:
+Replace the existing `useEffect` that emits `game:end` — gate on `engine.phase === 'gameOver'`:
 
 ```tsx
 useEffect(() => {
@@ -1833,7 +2077,7 @@ useEffect(() => {
 ]);
 ```
 
-Keep the `useGameSounds()` call so sound playback continues firing on phase transitions, but drop the `confettiReady`/`gameOverReady` destructuring — overlay visibility is now gated by `engine.phase`. The full hook simplification (removing the boolean state) is **deferred to PR 1b** — see Task 10 for context.
+Keep the `useGameSounds()` call (still drives sound playback) — the gate booleans are unused for NumberMatch (overlays gate on `engine.phase`). Existing `useRoundTTS` is unchanged; PR 1b/1c may relocate it once all games are XState-first and TTS lifecycle absorbs round-prompt speech.
 
 - [ ] **Step 4: Run the new + existing test suite**
 
@@ -1940,7 +2184,7 @@ Add (do not replace) sections:
 
 Add (do not replace) sections:
 
-1. **"My XState phase isn't transitioning"** — checklist: phase bridge effect wired? `engine.send` called? Machine state list includes the target?
+1. **"My XState phase isn't transitioning"** — checklist: is the component dispatching the lifecycle event via `engine.send` (e.g., `engine.send({ type: 'ROUND_CORRECT' })`)? Does the machine state list include the target? Did `setup({ events })` declare the event type?
 2. **"My TTS doesn't speak"** — PR 1a doesn't subscribe to `lifecycle:speak`; explain that prompt TTS goes through existing `useRoundTTS`.
 3. **"Celebration overlay renders twice"** — confirm only one mount path (skin slot driven by `engine.phase`); useGameSounds gate-removal lands in PR 1b but PR 1a Task 9 already drops NumberMatch's destructured boolean reads.
 4. **"How do I add a new game with the XState engine?"** — minimal recipe pointing to the NumberMatch definition as the canonical example.
@@ -2074,10 +2318,11 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
   - Why: `expect(() => renderHook(() => useGameEngineContext())).toThrow(/GameEngineContext/);` is unreliable in React 19 — `@testing-library/react`'s `renderHook` catches errors during render and re-raises them through different paths depending on the React version. In React 19, errors thrown during render may surface via React's error reporting (console.error logged but not rethrown synchronously), so `toThrow` may not see the error.
   - Fix: Replace with React 19 pattern: spy on `console.error` to silence, then render and inspect via `result.current` or via try/catch wrapper. OR use an error-boundary wrapper to capture the thrown error.
 
-- **Phase bridge re-fires on every engine state change** [P2, anchor 75]
+- **Phase bridge re-fires on every engine state change** [P2, anchor 75] — **Obsolete 2026-05-10 (XState-first restructure)**
   - Section: Phase Bridge Pattern
   - Why: Bridge effect deps are `[reducerPhase, engine]`. `useGameEngine` returns a new object via `useMemo([state, send, totalRounds])` — every machine state transition produces a new `engine` reference. Bridge re-fires on every engine transition, re-emitting events. XState ignores duplicates today, but it's wasteful and creates fragile coupling. If a future engine state defines a transition for ROUND_CORRECT, duplicate sends will trigger spurious transitions.
   - Fix: Either (a) drop `engine` from deps and lint-disable with rationale, or (b) destructure stable `send` (`const { send } = engine`) and depend on `[reducerPhase, send]`. Add a regression test asserting the engine sees each transition event exactly once per reducer phase change.
+  - **Resolution:** No longer applicable. Under XState-first, NumberMatch has no phase bridge — the component dispatches transitions directly via `engine.send`. The bridge pattern was removed from the plan in the 2026-05-10 restructure (see "Architectural Shift — XState-first" section). The dependency-stability concern is moot.
 
 - **Test step missing for type-only Tasks 4 + 7** [P3, anchor 75]
   - Section: Task 4 GameDefinition Types / Task 7 interaction-adapter.ts
@@ -2116,12 +2361,16 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
 ## Self-Review Checklist (Before Marking This Plan Complete)
 
 - [ ] Every Spec Delta is justified and shipping-friendly — none of them block PR 1b / 1c.
-- [ ] The phase bridge `useEffect` is the only place the reducer's `phase` gets read by external code in PR 1a.
+- [ ] NumberMatch.tsx does **not** call `useAnswerGameContext()` for state — all state reads come from `engine.context`.
+- [ ] NumberMatch.tsx does **not** call `useReducer` or any dispatch for game state — all writes go through `engine.send`.
+- [ ] No phase bridge `useEffect` exists in NumberMatch.tsx (the bridge pattern is gone under XState-first).
+- [ ] `numberMatchMachine` declares all 22 events from `AnswerGameAction` (PLACE_TILE, EJECT_TILE, …) plus the lifecycle events; each has a corresponding handler/assign action.
 - [ ] `executeSideEffects` emits `lifecycle:speak` even though no subscriber exists — confirms the bus contract is the seam.
 - [ ] `useGameEngine` returns the typed `UseGameEngineResult` shape from the design doc, with `celebrating: null` flagged as Spec Delta 2.
 - [ ] `numberMatchDefinition` declares all required `tts.*` keys (`game.start`, `round.correct`, `round.error`, `game.over`, `game.prepare`).
 - [ ] The MDX docs cover phase flow, API reference, and debugging — no spec section is missing a doc anchor.
 - [ ] `useGameSounds` is unchanged in PR 1a (gate-removal deferred to PR 1b); NumberMatch retains the `useGameSounds()` call so sound playback still fires while overlay gating reads from `engine.phase`.
+- [ ] `answer-game-reducer.ts` continues to exist (still consumed by WordSpell + SortNumbers); deletion is PR 1c scope.
 - [ ] All tests are TDD-aligned — failing test first, minimal implementation, passing test, commit.
 - [ ] No file references a function or type that isn't introduced in an earlier task (forward references checked).
 - [ ] The plan itself is markdownlint + Prettier clean (`yarn fix:md` was run after writing).
