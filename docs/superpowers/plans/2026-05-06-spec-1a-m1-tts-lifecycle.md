@@ -79,6 +79,8 @@ src/lib/lifecycle-tts/
 ├── resolve.test.ts                   # Verbosity + copy chain tests
 ├── useLifecycleTTS.ts                # Hook: subscribes to bus, gates by autoSpeak/ttsOnDemandAllowed
 ├── useLifecycleTTS.test.tsx          # Hook tests
+├── useRoundContext.tsx               # RoundContext + Provider + useRoundContext hook for interpolation
+├── useRoundContext.test.tsx          # Context tests
 ├── talkativeness-presets.ts          # Quiet / Default / Chatty profiles per gradeBand
 └── talkativeness-presets.test.ts     # Preset resolution tests
 
@@ -98,7 +100,7 @@ src/components/answer-game/GameOptions/
 | File                                                             | Change                                                       |
 | ---------------------------------------------------------------- | ------------------------------------------------------------ |
 | `src/types/game-events.ts`                                       | Add `game:prepare`; `lifecycle:speak` owned by PR 1a Task 3  |
-| `src/components/answer-game/types.ts`                            | Replace `ttsEnabled` with `autoSpeak` + `ttsOnDemandAllowed` |
+| `src/components/answer-game/types.ts`                            | Replace `ttsEnabled`; add TTS fields (see Task 3 Step 3)     |
 | `src/components/answer-game/useGameTTS.ts`                       | Split into `speakAuto` + `speakOnDemand`; keep `speakTile`   |
 | `src/components/answer-game/useGameTTS.test.tsx`                 | Update for new API                                           |
 | `src/components/answer-game/useRoundTTS.ts`                      | Update to use `autoSpeak` (stays in M1; removed in M2)       |
@@ -110,9 +112,9 @@ src/components/answer-game/GameOptions/
 | `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same                                                         |
 | `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same                                                         |
 | `src/components/questions/index.ts`                              | Add `QuestionRow` export                                     |
-| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Use `QuestionRow`; pass event to AudioButton                 |
-| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Use `QuestionRow`; definition-backed instructional copy      |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | Add AudioButton via `QuestionRow`                            |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | `QuestionRow` + `RoundContextProvider` (see Task 13)         |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | `QuestionRow` + `RoundContextProvider` (see Task 13)         |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | `QuestionRow` + `RoundContextProvider` (see Task 13)         |
 | `src/games/spot-all/SpotAllPrompt/SpotAllPrompt.tsx`             | Consolidate `speakPrompt` into `useLifecycleTTS`             |
 | `src/components/AdvancedConfigModal.tsx`                         | Add Talkativeness preset section                             |
 | `src/lib/i18n/locales/en/games.json`                             | Add `tts.*` keys                                             |
@@ -310,11 +312,41 @@ ttsEnabled: boolean;
 with:
 
 ```ts
+import type {
+  GradeBand,
+  LifecycleEvent,
+  TalkativenessPreset,
+  Verbosity,
+} from '@/lib/lifecycle-tts/types';
+
+// ... inside AnswerGameConfig:
+
 /** Gates all lifecycle auto-speech (every TTS lifecycle event). */
 autoSpeak: boolean;
 /** Gates user-initiated tap-to-speak: AudioButton, question onClick. */
 ttsOnDemandAllowed: boolean;
+/**
+ * Active grade band for TTS template + talkativeness preset selection.
+ * Computed at config-construction time from `profile.gradeLevel` (the
+ * profile schema uses `'pre-k' | 'k' | '1' | ... | '6'`; the TTS module
+ * maps to bands `'pre-k' | 'k' | 'year1-2' | 'year3-4' | 'year5-6'`).
+ */
+gradeBand: GradeBand;
+/** Talkativeness preset (quiet | default | chatty). Read from `Settings.talkativeness`. */
+talkativeness: TalkativenessPreset;
+/**
+ * Optional human-readable game title for `{{gameName}}` interpolation.
+ * Defaults to `gameId` when unset.
+ */
+gameTitle?: string;
+/**
+ * Optional per-event verbosity overrides. Take precedence over the
+ * resolved gradeBand/talkativeness verbosity for the listed events.
+ */
+events?: Partial<Record<LifecycleEvent, Verbosity>>;
 ```
+
+Each game's config builder (per-game `useMemo<AnswerGameConfig>` constructor in `WordSpell.tsx`, `NumberMatch.tsx`, `SortNumbers.tsx`) must populate `gradeBand` and `talkativeness` from the active profile + settings — these are no longer optional. Add a Step 3.5 in each game's integration (Task 13) that threads the values through. The grade-level → grade-band mapping lives in `src/lib/lifecycle-tts/grade-band.ts` (M1; thin pure function — adjacent file is fine).
 
 - [ ] **Step 4: Update useGameTTS**
 
@@ -980,8 +1012,10 @@ import { getGameEventBus } from '@/lib/game-event-bus';
 import { useGameEngineContext } from '@/lib/game-engine/useGameEngine';
 import { resolveCopy, resolveVerbosity } from './resolve';
 import { getTalkativenessProfile } from './talkativeness-presets';
+import { useRoundContext } from './useRoundContext';
+import type { RoundContextValue } from './useRoundContext';
 import type { EventTemplate, LifecycleEvent, Verbosity } from './types';
-import type { GradeBand } from '@/types/game-events';
+import type { AnswerGameConfig } from '@/components/answer-game/types';
 
 type SpeakOptions = { mode?: 'brief' | 'full' };
 
@@ -1000,6 +1034,10 @@ export const useLifecycleTTS = (): UseLifecycleTTSReturn => {
   const { t, i18n } = useTranslation('games');
   // Read GameDefinition.tts from the engine context (provided by PR #350).
   const { definition } = useGameEngineContext();
+  // Round-level interpolation source. Returns {} when no provider is mounted —
+  // interpolation values fall back to empty strings; the surrounding template
+  // still speaks its non-interpolated text.
+  const round = useRoundContext();
 
   const autoSpeakRef = useRef(config.autoSpeak);
   autoSpeakRef.current = config.autoSpeak;
@@ -1038,21 +1076,15 @@ export const useLifecycleTTS = (): UseLifecycleTTSReturn => {
       event: LifecycleEvent,
       forcedVerbosity?: Verbosity,
     ) => {
-      const gradeBand: GradeBand =
-        ((config as Record<string, unknown>).gradeBand as GradeBand) ??
-        'k';
-      const talkativeness =
-        ((config as Record<string, unknown>).talkativeness as string) ??
-        'default';
+      // gradeBand + talkativeness are now typed fields on AnswerGameConfig
+      // (Task 3 Step 3 — populated from active profile + settings at config
+      // construction time; no longer optional, no unsafe casts).
+      const { gradeBand, talkativeness } = config;
       const talkProfile = getTalkativenessProfile(
-        talkativeness as 'quiet' | 'default' | 'chatty',
+        talkativeness,
         gradeBand,
       );
-      const eventOverride = (
-        (config as Record<string, unknown>).events as
-          | Record<string, Verbosity>
-          | undefined
-      )?.[event];
+      const eventOverride = config.events?.[event];
 
       const verbosity =
         forcedVerbosity ??
@@ -1064,10 +1096,10 @@ export const useLifecycleTTS = (): UseLifecycleTTSReturn => {
       const i18nKey = resolveCopy(template, verbosity);
       if (!i18nKey) return;
 
-      const interpolation = buildInterpolation(config);
+      const interpolation = buildInterpolation(config, round);
       doSpeak(i18nKey, interpolation);
     },
-    [config, doSpeak],
+    [config, doSpeak, round],
   );
 
   // Subscribe to lifecycle:speak events emitted by executeSideEffects().
@@ -1117,13 +1149,54 @@ export const useLifecycleTTS = (): UseLifecycleTTSReturn => {
 };
 
 const buildInterpolation = (
-  config: Record<string, unknown>,
+  config: AnswerGameConfig,
+  round: RoundContextValue,
 ): Record<string, unknown> => ({
-  gameName: config.gameTitle ?? config.gameId ?? '',
-  word: (config as Record<string, unknown>).currentWord ?? '',
-  count: (config as Record<string, unknown>).currentCount ?? '',
+  gameName: config.gameTitle ?? config.gameId,
+  word: round.currentWord ?? '',
+  count: round.currentCount ?? '',
 });
 ```
+
+**`useRoundContext` (new file `src/lib/lifecycle-tts/useRoundContext.tsx`):** introduces a typed React context
+exposing the round-level fields the TTS hook needs for interpolation. Each TTS-aware game wraps its UI in
+`<RoundContextProvider value={{ currentWord, currentCount, gameTitle }}>` (Task 13 step list per game).
+The context is intentionally narrow — it is the seam between game-specific round state and the lifecycle
+TTS interpolation contract.
+
+```ts
+// src/lib/lifecycle-tts/useRoundContext.tsx
+import { createContext, useContext, type ReactNode } from 'react';
+
+export interface RoundContextValue {
+  /** Current word (WordSpell, future spelling games). Empty string when not applicable. */
+  currentWord?: string;
+  /** Current numeric count (NumberMatch, SortNumbers). Empty string when not applicable. */
+  currentCount?: string | number;
+  /**
+   * Optional override for `{{gameName}}`; when omitted, `useLifecycleTTS`
+   * falls back to `config.gameTitle ?? config.gameId`. Round-level override
+   * is rare — present mostly for tests and future per-mode game titles.
+   */
+  gameTitle?: string;
+}
+
+const EMPTY: RoundContextValue = {};
+
+const RoundContext = createContext<RoundContextValue>(EMPTY);
+
+export const RoundContextProvider = ({
+  value,
+  children,
+}: {
+  value: RoundContextValue;
+  children: ReactNode;
+}) => <RoundContext.Provider value={value}>{children}</RoundContext.Provider>;
+
+export const useRoundContext = (): RoundContextValue => useContext(RoundContext);
+```
+
+The hook returns the empty object when no provider is mounted (TTS hook degrades gracefully — interpolation values are empty strings, the surrounding template still speaks its non-interpolated text). Tests can render with or without the provider depending on what they exercise.
 
 **Note to implementer:** `useGameEngineContext()` is provided by the GameDefinition engine
 (PR #350, `src/lib/game-engine/useGameEngine.ts`). It exposes `definition.tts` — a
@@ -1132,9 +1205,10 @@ the exact context API differs from `useGameEngineContext().definition`, adapt th
 accordingly. The hook reads `autoSpeak` / `ttsOnDemandAllowed` via refs so mid-round toggles take
 effect immediately without remount.
 
-The `buildInterpolation` function accesses game-specific context. The exact shape depends on how
-each game threads round data through context. Check how `useAnswerGameContext()` exposes round-level
-data and adjust accordingly.
+The `buildInterpolation` function reads game-level fields from the typed `AnswerGameConfig`
+(`gameTitle`, `gameId`) and round-level fields from `RoundContextValue` (`currentWord`, `currentCount`).
+Each TTS-aware game wraps its UI in `<RoundContextProvider value={{...}}>` populated from its own state
+(see Task 13 per-game integration steps).
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -1556,6 +1630,59 @@ for user-initiated tap-to-speak interactions."
 - Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx`
 - Modify: `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
 
+- [ ] **Step 0: Thread `gradeBand` + `talkativeness` through each game's `AnswerGameConfig` builder**
+
+In each game's `useMemo<AnswerGameConfig>(...)` constructor, populate the new required fields from the active profile + settings:
+
+```tsx
+import { useActiveProfile } from '@/db/hooks/useActiveProfile';
+import { useSettings } from '@/db/hooks/useSettings';
+import { gradeLevelToBand } from '@/lib/lifecycle-tts/grade-band';
+
+const profile = useActiveProfile();
+const { settings } = useSettings();
+
+const config = useMemo<AnswerGameConfig>(
+  () => ({
+    // ... existing fields ...
+    gradeBand: gradeLevelToBand(profile?.gradeLevel ?? 'k'),
+    talkativeness: settings.talkativeness ?? 'default',
+    // gameTitle is optional; fall back to gameId when omitted.
+  }),
+  [profile?.gradeLevel, settings.talkativeness /* other deps */],
+);
+```
+
+If `useActiveProfile` / `useSettings` hook names differ in the project, adapt the imports — the substantive contract is "read profile.gradeLevel + settings.talkativeness, map to GradeBand + TalkativenessPreset, pass into config." Without this step, every user receives grade-k presets regardless of their actual profile.
+
+- [ ] **Step 0.5: Wrap TTS-aware UI in `<RoundContextProvider>`**
+
+Inside each game's component (after the round state is available), wrap the subtree that mounts `useLifecycleTTS` callers in a `RoundContextProvider`:
+
+```tsx
+import { RoundContextProvider } from '@/lib/lifecycle-tts/useRoundContext';
+
+return (
+  <RoundContextProvider
+    value={{
+      currentWord: roundData.word, // WordSpell only
+      currentCount: roundData.count, // NumberMatch / SortNumbers as applicable
+      // gameTitle: optional override; usually omitted (config.gameTitle/gameId fallback)
+    }}
+  >
+    {/* existing render tree */}
+  </RoundContextProvider>
+);
+```
+
+Per-game specifics:
+
+- **WordSpell** — populate `currentWord` from the active round's word; `currentCount` left undefined.
+- **NumberMatch** — populate `currentCount` from the active round's value (`String(round.value)`); `currentWord` left undefined.
+- **SortNumbers** — populate `currentCount` from the relevant numeric prompt where applicable.
+
+The provider re-renders on round change so `useLifecycleTTS().resolveAndSpeak` always sees the current round's interpolation values.
+
 - [ ] **Step 1: Update WordSpell to use QuestionRow**
 
 In `WordSpell.tsx`, wrap the question display area with `<QuestionRow>`:
@@ -1932,15 +2059,17 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Fix: Narrow first: `(event) => { if (event.type !== 'lifecycle:speak') return; const { lifecycleEvent } = event; ... }`.
   - **Resolution:** Applied alongside F1. Handler now takes the full `event` parameter, narrows via `if (event.type !== 'lifecycle:speak') return;`, then reads `event.lifecycleEvent` after narrowing. Comment notes the bus does not narrow at the subscription level.
 
-- **Plan reads `gradeBand` and `talkativeness` via unsafe casts; neither field exists on `AnswerGameConfig`** [P0, anchor 100]
+- **Plan reads `gradeBand` and `talkativeness` via unsafe casts; neither field exists on `AnswerGameConfig`** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 7 — useLifecycleTTS Hook, `resolveAndSpeak`
   - Why: `(config as Record<string, unknown>).gradeBand ?? 'k'` silently defaults gradeBand to `'k'` for every user; same for `talkativeness ?? 'default'`. Verified: `src/components/answer-game/types.ts` `AnswerGameConfig` does NOT have these fields. The Talkativeness preset feature (M1 goal) is structurally non-functional for any user not in grade k.
   - Fix: Add `gradeBand?: GradeBand` and `talkativeness?: TalkativenessPreset` to `AnswerGameConfig` in Task 3; thread them from the resolved config or profile settings into every game's `useMemo<AnswerGameConfig>(...)` constructor.
+  - **Resolution:** Applied. Task 3 Step 3 amended: `AnswerGameConfig` now declares **required** `gradeBand: GradeBand` and `talkativeness: TalkativenessPreset` (plus optional `gameTitle?: string` and `events?: Partial<Record<LifecycleEvent, Verbosity>>`). Task 7 `resolveAndSpeak` reads them as typed fields (`const { gradeBand, talkativeness } = config;`) — unsafe casts removed. Task 13 Step 0 added: each game's `useMemo<AnswerGameConfig>` constructor must populate `gradeBand` from `profile.gradeLevel` (via `gradeLevelToBand` mapping in `src/lib/lifecycle-tts/grade-band.ts`) and `talkativeness` from `Settings.talkativeness`.
 
-- **`buildInterpolation` reads `currentWord`, `currentCount`, `gameTitle` — none exist on `AnswerGameConfig`** [P0, anchor 100]
+- **`buildInterpolation` reads `currentWord`, `currentCount`, `gameTitle` — none exist on `AnswerGameConfig`** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 7 — useLifecycleTTS Hook, `buildInterpolation`
   - Why: The hook reads `config.currentWord ?? ''` and `config.currentCount ?? ''` via unsafe casts. These fields aren't declared anywhere. The user hears "Spell the word ." instead of "Spell the word cat." — the central feature of M1.
   - Fix: Define the interpolation contract: introduce a `useRoundContext()` (or extend an existing context) that exposes `{ currentWord, currentCount, ... }` populated by each game; update `buildInterpolation` to read from it; add to file structure list.
+  - **Resolution:** Applied. New file `src/lib/lifecycle-tts/useRoundContext.tsx` defines `RoundContextValue { currentWord?, currentCount?, gameTitle? }` + `RoundContextProvider` + `useRoundContext()`. File structure list extended; modified-files table adds rows for NumberMatch.tsx, WordSpell.tsx, SortNumbers.tsx (each wraps TTS-aware UI in the provider). `buildInterpolation` now takes `(config: AnswerGameConfig, round: RoundContextValue)` — both typed, no casts. `useLifecycleTTS` calls `const round = useRoundContext()` and threads it into `buildInterpolation`. Task 13 Step 0.5 added: per-game integration steps describe how each game populates the provider value from its round state.
 
 - **Task 9 calls `useLifecycleTTS()` outside `GameEngineProvider` context** [P0, anchor 75]
   - Section: Task 9 Step 4
