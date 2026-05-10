@@ -61,7 +61,7 @@ An independent Claude subagent reviewed the approach cold. Key contributions:
 - **Coolest version:** A Storybook-driven game designer where GameDefinition (pure data) becomes a visual composition tool for non-developers. Teachers could prototype game flows in Storybook.
 - **Key insight:** "The engine don't need to know" reveals the real excitement is about clean separation of concerns. The engine should be boring; game components should be fun to write.
 - **50% there:** The hand-rolled phase interpreter covers ~50% of the goal; the domain-specific layer (GameDefinition type, buildRound generics, TTS lifecycle, interaction-mode dispatch) is the other 50%.
-- **Critical reframing:** The "full engine rewrite" should be phased, not big-bang. Phase 1: GameDefinition + useGameEngine + migrate 3 answer games + SpotAll (Phase 1.b). Phase 2: unify reducers (SRS v1 enabler). Phase 3: new interaction modes as needed.
+- **Critical reframing:** The "full engine rewrite" should be phased, not big-bang. Phase 1: GameDefinition + useGameEngine + migrate 3 answer games + SpotAll (PR 1d). Phase 2: unify reducers (SRS v1 enabler). Phase 3: new interaction modes as needed.
 
 ## Approaches Considered
 
@@ -98,17 +98,24 @@ GameDefinition + new generic reducer + phase state machine. Unify answerGameRedu
 
 ### Phase 1: GameDefinition + useGameEngine + Migrate 3 Answer Games (~1 week)
 
-The foundation. Ship as **three PRs** for manageable review:
+The foundation. Ship as **three sequential PRs** for manageable review, then a separate **PR 1d** for SpotAll once the engine is proven on the answer-game family:
 
-- **PR 1a:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or the NumberMatch sound hook) — prevents celebration overlay double-mount now that the engine owns celebration mounting.
-- **PR 1b:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or per-game sound hooks) for WordSpell and SortNumbers — same gate-removal step as PR 1a, applied to each newly migrated game.
-- **PR 1c:** Consolidation -- TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`). **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. If migration is not complete, defer `lifecycle.ts` deletion to Phase 2.
+| PR    | Short name                  | Scope                                                             |
+| ----- | --------------------------- | ----------------------------------------------------------------- |
+| PR 1a | **GameEngine Foundation**   | Types + `useGameEngine` + side-effects + NumberMatch migration    |
+| PR 1b | **Answer Game Migration**   | WordSpell + SortNumbers migrations (full answer-game family)      |
+| PR 1c | **Consolidation & Cleanup** | TTS fold-in, file cleanup, types consolidation, `CelebrationHost` |
+| PR 1d | **SpotAll Refactor**        | First-time engine integration for SpotAll; lands **after PR 1c**  |
 
-#### Phase 1.b -- SpotAll integration (required for Phase 2 / SRS v1)
+- **PR 1a — GameEngine Foundation:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or the NumberMatch sound hook) — prevents celebration overlay double-mount once the engine owns celebration mounting (in PR 1c).
+- **PR 1b — Answer Game Migration:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or per-game sound hooks) for WordSpell and SortNumbers — same gate-removal step as PR 1a, applied to each newly migrated game.
+- **PR 1c — Consolidation & Cleanup:** TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`), engine takes over celebration overlay mounting via `CelebrationHost`. **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. If migration is not complete, defer `lifecycle.ts` deletion to Phase 2.
 
-A separate PR that can land alongside or after PR 1c. Independently reviewable. **Phase 2 (reducer unification) depends on Phase 1.b**, so Phase 1.b must be merged before Phase 2 can start.
+#### PR 1d — SpotAll Refactor (sequenced after PR 1c, required for Phase 2 / SRS v1)
 
-SpotAll currently uses `useReducer` directly with no engine involvement; this PR is the **first-time engine integration** for SpotAll, not a strict migration. The reducer (`spotAllReducer`) has structurally different state from `answerGameReducer`: pre-built rounds, no-payload `ADVANCE_ROUND`, separate cooldown and tap-tracking state.
+A separate PR that lands **after PR 1c** — once XState + GameDefinition are stable across the three answer games. Independently reviewable. **Phase 2 (reducer unification) depends on PR 1d**, so PR 1d must be merged before Phase 2 can start.
+
+SpotAll currently uses `useReducer` directly with no engine involvement; this PR is the **first-time engine integration** for SpotAll, not a strict migration. The reducer (`spotAllReducer`) has structurally different state from `answerGameReducer`: pre-built rounds, no-payload `ADVANCE_ROUND`, separate cooldown and tap-tracking state. We hold off on touching SpotAll until the engine has been validated against three answer games (PR 1a → PR 1b → PR 1c), so SpotAll's first-time integration benefits from the abstraction's proven shape rather than driving its design.
 
 **Engine boundary for SpotAll:**
 
@@ -117,20 +124,20 @@ SpotAll currently uses `useReducer` directly with no engine involvement; this PR
 | Engine             | `state.phase`, `state.rounds[roundIndex]` (via `buildRound`)                 |
 | Reducer (internal) | `state.tappedTiles`, `state.cooldown`, `state.foundCount`, prebuilt `rounds` |
 
-PR 1.b also adds a code comment to `src/games/spot-all/spot-all-reducer.ts` mapping its action stages to engine phases (stops reviewers re-flagging the divergence question).
+PR 1d also adds a code comment to `src/games/spot-all/spot-all-reducer.ts` mapping its action stages to engine phases (stops reviewers re-flagging the divergence question).
 
-**Why this matters for Phase 2:** Phase 2 reducer unification requires SpotAll to be engine-driven first. Phase 1.b is the prerequisite that unblocks Phase 2.
+**Why this matters for Phase 2:** Phase 2 reducer unification requires SpotAll to be engine-driven first. PR 1d is the prerequisite that unblocks Phase 2.
 
 #### Architecture docs to update per PR
 
 Per `CLAUDE.md`, any change to game-state logic must update co-located `.mdx` architecture docs in the same PR. Run `/update-architecture-docs` for guided prompts.
 
-| PR     | Files to update                                                     |
-| ------ | ------------------------------------------------------------------- |
-| PR 1a  | `GameEngine.flows.mdx`, `GameEngine.reference.mdx`, `debugging.mdx` |
-| PR 1b  | See note below                                                      |
-| PR 1c  | Cross-reference cleanup across game-engine and answer-game MDX      |
-| PR 1.b | Create SpotAll MDX (see note below)                                 |
+| PR    | Short name              | Files to update                                                     |
+| ----- | ----------------------- | ------------------------------------------------------------------- |
+| PR 1a | GameEngine Foundation   | `GameEngine.flows.mdx`, `GameEngine.reference.mdx`, `debugging.mdx` |
+| PR 1b | Answer Game Migration   | See note below                                                      |
+| PR 1c | Consolidation & Cleanup | Cross-reference cleanup across game-engine and answer-game MDX      |
+| PR 1d | SpotAll Refactor        | Create SpotAll MDX (see note below)                                 |
 
 **PR 1b MDX files:**
 
@@ -140,7 +147,7 @@ Per `CLAUDE.md`, any change to game-state logic must update co-located `.mdx` ar
 - Create `src/games/sort-numbers/SortNumbers/SortNumbers.flows.mdx` (**new** — no existing MDX
   in `src/games/sort-numbers/`)
 
-**PR 1.b MDX files (new — no existing MDX in `src/games/spot-all/`):**
+**PR 1d MDX files (new — no existing MDX in `src/games/spot-all/`):**
 
 - Create `src/games/spot-all/SpotAll/SpotAll.flows.mdx` documenting the engine boundary (what the
   engine owns vs. what the reducer owns)
@@ -186,7 +193,7 @@ src/types/game-events.ts        # PR 1a: extend GameEventType with celebration:s
 src/games/word-spell/definition.ts      # WordSpell GameDefinition
 src/games/number-match/definition.ts    # NumberMatch GameDefinition
 src/games/sort-numbers/definition.ts    # SortNumbers GameDefinition
-src/games/spot-all/definition.ts        # SpotAll GameDefinition (Phase 1.b)
+src/games/spot-all/definition.ts        # SpotAll GameDefinition (PR 1d)
 ```
 
 #### Deprecated/removed files
@@ -227,15 +234,15 @@ type GameDefinition<TRound = unknown> = {
   // phonemeSequenceActor), and actions (speak, buildRound, advanceRound,
   // advanceLevel, completeGame). Game machines declare these by name in setup()
   // so TypeScript enforces their existence.
-  // Required states: playing, game-over (type: 'final').
-  // Optional states: round-complete, level-complete, announcing (Spec 1b).
+  // Required states: playing, gameOver (type: 'final').
+  // Optional states: roundComplete, levelComplete, announcing (Spec 1b).
   machine: AnyStateMachine; // AnyStateMachine from 'xstate'; use setup() to get typed inference
 
   // buildRound is required on the definition. The engine calls it on
   // ADVANCE_ROUND / ADVANCE_LEVEL transitions and stores the result in
   // the engine's currentRound. SpotAll's pre-built model:
   //   buildRound: (ctx) => state.rounds[ctx.roundIndex]
-  // Note for SpotAll (Phase 1.b): buildRound captures state.rounds via a stable
+  // Note for SpotAll (PR 1d): buildRound captures state.rounds via a stable
   // ref (rounds are set by INIT_ROUNDS at mount). INIT_ROUNDS must dispatch and
   // resolve before the engine first calls buildRound -- ensure dispatch ordering
   // at mount (dispatch INIT_ROUNDS, then pass the definition to useGameEngine).
@@ -331,15 +338,15 @@ type UseGameEngineResult = {
 - `celebration:complete` — fires on **natural completion** (mini-game ran to its end)
 - `celebration:skip` — fires when the user dismisses early (`'play-again'` | `'go-home'` | `'timeout'`)
 
-**Phase scope:** The XState machine covers the round lifecycle only: `playing`, `round-complete`, `level-complete`, `game-over` (and optionally `announcing` — Spec 1b). The old `game-engine/types.ts` also defines `idle`, `loading`, `instructions`, `evaluating`, `scoring`, `next-round`, and `retry`. These are NOT modeled in the machine because they are either component-managed UI states or route/shell concerns:
+**Phase scope:** The XState machine covers the round lifecycle only: `playing`, `roundComplete`, `levelComplete`, `gameOver` (and optionally `announcing` — Spec 1b). XState state names are camelCase; the legacy reducer's kebab-case phase strings (`'round-complete'`, `'level-complete'`, `'game-over'`) are bridged to engine events by the per-game phase-bridge `useEffect` in PR 1a. The old `game-engine/types.ts` also defines `idle`, `loading`, `instructions`, `evaluating`, `scoring`, `next-round`, and `retry`. These are NOT modeled in the machine because they are either component-managed UI states or route/shell concerns:
 
-- `instructions` -- managed by `GameShell` / route layer (the instructions overlay renders before the engine starts)
+- `instructions` -- managed by `GameShell` / route layer (the `GameOptionsOverlay`, formerly `InstructionsOverlay`, renders before the engine starts; rename lands with the TTS plan)
 - `retry` -- maps to re-entering `playing` with a retry flag in the reducer, not a separate engine phase
 - `idle`, `loading`, `evaluating`, `scoring`, `next-round` -- internal reducer states, not engine-level phase transitions
 
 If a future game needs engine-managed instructions (e.g., per-round instructions that vary), the machine can add an `instructions` state then. For Phase 1, this boundary is intentional.
 
-**Context/provider integration:** `useGameEngine` does NOT replace `AnswerGameProvider` or `AnswerGameContext` in Phase 1. The game component calls both `useGameEngine(def, adapter)` for phase lifecycle and `useAnswerGameContext()` for reducer state (tiles, zones, config). SpotAll calls `useGameEngine(def, adapter)` for lifecycle and its own SpotAll context for state. In Phase 2 (reducer unification), the contexts may merge.
+**Context/provider integration:** `useGameEngine` does NOT replace `AnswerGameProvider` or `AnswerGameContext` in Phase 1. The game component calls both `useGameEngine(def, adapter, dispatch)` for phase lifecycle and `useAnswerGameContext()` for reducer state (tiles, zones, config). SpotAll calls `useGameEngine(def, adapter, dispatch)` for lifecycle and its own SpotAll context for state. The third arg (`dispatch`) is the local reducer's dispatch function, threaded into adapter calls so adapters can be module-level constants. In Phase 2 (reducer unification), the contexts may merge and `dispatch` may collapse into the engine.
 
 #### Render primitives -- per-game wrappers
 
@@ -424,12 +431,12 @@ Per-game TTS registry entries (the `registry/word-spell.ts`, `registry/number-ma
 
 1. **NumberMatch** (PR 1a -- simplest; no level boundaries, no sentence gaps)
 2. **WordSpell** (PR 1b -- adds buildRound complexity with sentence-gap mode)
-3. **SortNumbers** (PR 1b -- adds level-complete phase and level boundaries)
-4. **SpotAll** (Phase 1.b, optional parallel -- the real test of interaction-mode discriminator. New integration tests validate that `useGameEngine` drives SpotAll's phase transitions correctly.)
+3. **SortNumbers** (PR 1b -- adds `levelComplete` state and level boundaries)
+4. **SpotAll** (PR 1d, sequenced after PR 1c — the real test of interaction-mode discriminator. New integration tests validate that `useGameEngine` drives SpotAll's phase transitions correctly. SpotAll waits until XState + GameDefinition are stable across the three answer games before its first-time engine integration.)
 
 **Key constraint:** answerGameReducer and spotAllReducer are NOT touched in Phase 1. The `interaction` field on GameDefinition tells the engine which reducer strategy to delegate to, but the reducers themselves stay as-is. This keeps the blast radius contained.
 
-### Phase 2: Reducer Unification -- SRS v1 Enabler (~1 week, after Phase 1.b)
+### Phase 2: Reducer Unification -- SRS v1 Enabler (~1 week, after PR 1d)
 
 Merge `answerGameReducer` and `spotAllReducer` behind a single `GameEngineReducer` that dispatches to interaction-specific handlers based on `def.interaction`. This is where `PLACE_TILE`, `SELECT_SLOT`, and future `VOICE_INPUT` actions get routed by the engine rather than wired per-game.
 
@@ -440,11 +447,11 @@ Merge `answerGameReducer` and `spotAllReducer` behind a single `GameEngineReduce
 
 **Sequencing:**
 
-- Phase 2 **requires Phase 1.b done** -- both reducers must be engine-driven before they can be merged.
+- Phase 2 **requires PR 1d done** -- both reducers must be engine-driven before they can be merged.
 - **SRS v1 implementation is blocked on Phase 2** (per ship cluster #343).
 
-> **Timeline risk:** The Phase 1 → Phase 1.b → Phase 2 chain means SRS v1 implementation cannot
-> start until at least 2–3 weeks after PR #350 merges (~1 week Phase 1 + Phase 1.b landing +
+> **Timeline risk:** The Phase 1 → PR 1d → Phase 2 chain means SRS v1 implementation cannot
+> start until at least 2–3 weeks after PR #350 merges (~1 week Phase 1 + PR 1d landing +
 > ~1 week Phase 2). If SRS v1 has a hard deadline, that deadline gates on this entire chain.
 
 **Out of scope for Phase 2:** new input modes (STT, free-form). Those land in Phase 3 on top of the unified reducer.
@@ -479,7 +486,7 @@ The engine monitors invoked celebration actors and surfaces the active config as
 component while the engine drives phase lifecycle (see PR 1a Spec Delta 1). PR 1c moves
 mounting from the 3 answer game components (NumberMatch, WordSpell, SortNumbers — e.g.,
 `<skin.CelebrationOverlay />` in `NumberMatch.tsx:336`, `SortNumbers.tsx`, etc.) into a
-`CelebrationHost` owned by the engine. SpotAll's celebration migration requires Phase 1.b
+`CelebrationHost` owned by the engine. SpotAll's celebration migration requires PR 1d
 (engine integration) first — it cannot land before then.
 
 **`useGameSounds` gate removal:** `useGameSounds.ts` sets `confettiReady`/`gameOverReady` booleans
@@ -710,7 +717,7 @@ const numberMatchDef: GameDefinition<NumberMatchRound> = {
 };
 ```
 
-**Celebration conditions are structural only in Phase 1.** `CelebrationConfig.condition` receives `PhaseContext`, which contains round/level indices and game ID -- not score, retries, or star rating. This means Phase 1 conditions can express "celebrate on level 2+" or "celebrate on game-over" but NOT "celebrate only on 4+ stars." Performance-based celebration conditions require passing reducer state into `PhaseContext`, which couples the engine to game-specific state. That is a Phase 2 concern (after reducer unification provides a common state shape). **Phase 1 conditions are provisional:** Phase 2 will widen `PhaseContext` to include reducer state (score, retries) — `CelebrationConfig.condition` functions written in Phase 1 may need updating.
+**Celebration conditions are structural only in Phase 1.** `CelebrationConfig.condition` receives `PhaseContext`, which contains round/level indices and game ID -- not score, retries, or star rating. This means Phase 1 conditions can express "celebrate on level 2+" or "celebrate on `gameOver`" but NOT "celebrate only on 4+ stars." Performance-based celebration conditions require passing reducer state into `PhaseContext`, which couples the engine to game-specific state. That is a Phase 2 concern (after reducer unification provides a common state shape). **Phase 1 conditions are provisional:** Phase 2 will widen `PhaseContext` to include reducer state (score, retries) — `CelebrationConfig.condition` functions written in Phase 1 may need updating.
 
 **Relationship to skin celebration slots:** The existing `GameSkin` interface already has `CelebrationOverlay`, `LevelCompleteOverlay`, and `RoundCompleteEffect` component slots. SpotAll uses `skin.CelebrationOverlay` today. In **PR 1c** (after the engine drives phase lifecycle on three answer games), the engine takes ownership of mounting these overlays -- the skin slots become render targets the engine looks up by `miniGame` registry ID. Until then (PR 1a, PR 1b), each game keeps mounting its own overlays gated by `engine.phase`. Phase 2 may unify the skin slot system and the celebration registry.
 
@@ -808,7 +815,7 @@ stateDiagram-v2
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
 - **Note on LOC target:** The 500 LOC / 5 files figure is a directional signal, not a hard criterion. The approach is justified by game engine patterns (declarative definition + interpreter), not by line-count reduction alone. If the LOC target is missed, evaluate whether the _qualitative_ bar was met first.
-- **Functional bar:** All 4 existing games pass their full test suites after migration. SpotAll additionally has new integration tests for engine-driven lifecycle (since it had no engine integration before Phase 1.b).
+- **Functional bar:** All 4 existing games pass their full test suites after migration. SpotAll additionally has new integration tests for engine-driven lifecycle (since it had no engine integration before PR 1d).
 - **Visual bar:** VR tests pass on each migrated game; manual smoke test on each migrated game.
 - **SRS readiness bar (Phase 2):** SRS v1's `round:*` event subscription works against all migrated games without per-game branching.
 - **TTS bar:** TTS lifecycle works identically to the WIP plan's design but reads from `GameDefinition.tts` instead of a separate registry.
@@ -820,7 +827,7 @@ stateDiagram-v2
 1. **Write a revised implementation plan** for Phase 1 (GameDefinition type + useGameEngine + 3-game migration). This replaces the WIP useGameRound plan at `worktrees/plans-323-257/docs/superpowers/plans/2026-05-06-use-game-round-extraction.md`.
 2. **Revise the TTS lifecycle plan** to reference `GameDefinition.tts` and the pinned `lifecycle-tts/types.ts` contract. Most of the plan survives -- only the registry module location and types-package path change.
 3. **Implement Phase 1** in a new worktree branch (PR 1a -> PR 1b -> PR 1c).
-4. **Implement Phase 1.b** in parallel or after PR 1c (SpotAll engine integration).
+4. **Implement PR 1d** after PR 1c (SpotAll engine integration; lands once XState + GameDefinition are stable across the three answer games).
 5. **Review and merge Phase 1 + 1.b** before starting Phase 2 (reducer unification, SRS v1 enabler). **Go/no-go check:** before starting Phase 2, verify the qualitative bar — if any Phase 1 migration required reshaping `GameDefinition` (adding fields, changing existing types), revisit the abstraction before adding more games. CI enforces the functional and visual bars; the qualitative bar is a human judgment call.
 
 ## What I noticed about how you think
