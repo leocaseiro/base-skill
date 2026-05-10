@@ -811,6 +811,53 @@ stateDiagram-v2
 
 2. **How does the AdvancedConfigModal work with GameDefinition?** Each game's config form fields are currently ad-hoc. Should GameDefinition declare its configurable options so the modal can render them generically? (Deferred to Phase 2 or later -- not blocking for Phase 1.)
 
+### Deferred from ce-doc-review round 3 (2026-05-10)
+
+> Round 3 of `ce-doc-review` ran on 2026-05-10 across all three PR #350 docs. Cross-doc alignment findings (A1–A11) were applied in commits `ff1b8fbb2` and `e73b6ef03`. The findings below are per-doc internal issues deferred for follow-up review or implementation-time resolution. Anchor 75 = high confidence; 100 = airtight.
+
+#### From coherence reviewer (design doc)
+
+- **`buildRound` sync contract phrasing leaves a gap with the async-resume note** [P1, anchor 100]
+  - Section: GameDefinition type, lines 234–245
+  - Why: `buildRound: (ctx) => TRound` declared synchronous; "Synchronous by design" comment. Then "the component must resolve async state before starting the engine -- buildRound receives already-resolved data, never triggers async operations." The first is a statement about `buildRound`; the second is a constraint on the caller. A careful reader needs to infer that `buildRound` is forbidden from being async, not just that I/O shouldn't happen there.
+  - Fix: Rewrite lines 242–244 to make the contract unambiguous: "`buildRound` is synchronous and must not spawn async operations. The component is responsible for resolving async state (e.g., WordSpell resume/persist logic, library sampling) before mounting the engine — `buildRound` receives fully resolved round data at call time."
+
+- **Open Question #1 is already answered elsewhere in the doc** [P2, anchor 100]
+  - Section: Open Questions, item 1
+  - Why: OQ#1 asks where round data loading lives. The buildRound contract (lines 242–244) and Config Ownership section already answer it: "the component must resolve async state before starting the engine." Listing it as Open misleads future readers.
+  - Fix: Delete OQ#1, or move it to Next Steps as a Phase 1.b verification reminder ("Verify the round-loading boundary during WordSpell/SortNumbers migration").
+
+- **Premise 4's "widening = additive" claim overstates the guarantee** [P1, anchor 75]
+  - Section: Premises, item 4
+  - Why: Premise 4 asserts widening is additive. If a future mode requires restructuring existing fields (a hybrid drag-to-slot + voice-input mode, or InteractionMode enum reorganization), the additive claim becomes false.
+  - Fix: Replace the absolute claim with a scoped one: "Widening here means additive under the current architecture: new InteractionMode union members, new optional fields, new machine state names — not breaking changes to existing types. If Phase 3 discovers a new mode that forces restructuring, that's a signal to revisit the abstraction (see Go/no-go check in Next Steps)."
+
+- **Phase 1 vs Phase 2 celebration condition capability mismatch** [P1, anchor 75]
+  - Section: Mini-Game Celebrations, lines 701–703
+  - Why: Plan says Phase 1 conditions are "provisional" and "may need updating" in Phase 2. Implementer doesn't know which condition patterns are safe now vs likely to break.
+  - Fix: Rewrite to specify safe vs unsafe patterns: "Phase 1 conditions can use round/level indices (stable in PhaseContext). Performance-based conditions (score, retries) are deferred to Phase 2. Conditions using only structural fields written in Phase 1 will remain compatible."
+
+- **PR 1c MDX file list is vague** [P2, anchor 50, FYI]
+  - Section: Architecture docs to update per PR
+  - Why: PR 1c row says "Cross-reference cleanup across game-engine and answer-game MDX" without enumerating files. Executor risks missing cleanup.
+  - Fix: Expand the PR 1c row to enumerate specific MDX files needing updates, OR add a "PR 1c removes all references to deprecated `lifecycle.ts` from all game-engine and answer-game MDX files."
+
+- **TTS plan revision sequencing relative to PR 1a is ambiguous** [P1, anchor 75]
+  - Section: PR 1a description (line 103) + TTS lifecycle folds in (lines 418–421)
+  - Why: Both passages describe the type contract pin but not whether the TTS plan revision is a blocking prerequisite or a parallel task. Coordination dependency is implicit.
+  - Fix: Clarify in line 103: "The TTS lifecycle plan must be revised to read `GameDefinition.tts` instead of a separate registry before PR 1a can be implemented. The type contract `LifecycleEvent` + `EventTemplate` is stable on PR 1a's schedule; TTS plan revision is a blocking dependency."
+  - Status: Partially mitigated by A2 (lifecycle:speak ownership) + A3 (Resolved Q #9 update). Remaining concern is sequencing prose only.
+
+- **`InteractionAdapter`'s SpotAll asymmetry (no `advanceLevel`) needs an explainer** [P1, anchor 75]
+  - Section: Reducer dispatch via InteractionAdapter, lines 372–406
+  - Why: `advanceLevel` is optional. spotAllAdapter omits it; a comment notes that ADVANCE_ROUND on the last round also sets phase → 'game-over' internally. An executor implementing a new game won't know whether to bundle logic like SpotAll or separate it like answer games.
+  - Fix: Add a note explaining the decision rule: "Games with explicit level-complete phases (answer games) implement both `advanceRound` and `advanceLevel`. Games with no separate level phases (SpotAll) omit `advanceLevel`; their adapter handles end-of-game semantics inside ADVANCE_ROUND."
+
+- **Premise 1 uses vague metric while Success Criteria reference an explicit LOC target** [P2, anchor 50, FYI]
+  - Section: Premises, item 1
+  - Why: Premise 1 says "meaningfully reduce the cost of adding new games (fewer files, less cognitive load)." Success Criteria reference a 500 LOC / 5 files target. The contrast leaves readers wondering whether Premise 1 is asserting a quantifiable reduction or a qualitative improvement.
+  - Fix: Rewrite Premise 1 to include the directional signal: "A declarative GameDefinition type will reduce the cost of adding new games: baseline ~700 LOC / ~12 files, target ~500 LOC / ~5 files. This is a directional goal; success is also measured by the qualitative bar."
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
