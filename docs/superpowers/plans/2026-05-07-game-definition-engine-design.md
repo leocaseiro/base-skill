@@ -959,6 +959,48 @@ stateDiagram-v2
   - Why: Plan stakes Phase 2's value on "SRS v1 implementation is hard-blocked on Phase 2." But SRS v1 needs identical `round:*` events — solvable by a thin event-bus normalization adapter at a fraction of Phase 2's cost. The plan goes straight to reducer unification without naming or refuting the cheaper alternative. If the cheap alternative works, Phase 2 is unjustified investment, and "pattern coherence" becomes the only argument — exactly the "code health" justification the doc rejects.
   - Fix: Add a paragraph explicitly considering and rejecting the "event normalization adapter" alternative for SRS v1 — what it would look like, why it doesn't suffice, what specific SRS feature requires reducer unification (vs just event consistency).
 
+#### From product-lens reviewer (design doc)
+
+- **6+ games premise is unproven** [P1, anchor 75]
+  - Section: Why this now / Premises
+  - Why: Entire engine investment is justified by "6+ new games planned across 3+ new interaction modes," but the document offers no evidence all (or even most) of these will actually ship. For a solo developer, planned roadmaps frequently shrink. If only 1–2 of 6 ship, the engine pays back nothing — abstraction sized for a pipeline that never materialized.
+  - Fix: Add a "minimum viable payback" section: at how many additional games does the engine break even? Identify the 1–2 next games most likely to ship and validate the type against them on paper before Phase 1.
+
+- **SRS v1 timeline opportunity cost is undersized** [P1, anchor 75]
+  - Section: Phase 2 / Timeline risk
+  - Why: Plan acknowledges SRS v1 implementation is gated on 2–3 weeks of engine work but treats it as a footnote. SRS v1 is the project's stated learning-loop differentiator. For a solo developer, 2–3 weeks is a substantial fraction of a quarter. Plan doesn't ask "is shipping SRS v1 now on the existing two-reducer special-case more valuable than blocking it for unified architecture?"
+  - Fix: Explicitly cost the alternative: estimate the SRS v1 "special-case per reducer" approach in LOC/days, compare to the engine path, and justify why the architectural unblock beats shipping the user-visible feature sooner.
+
+- **Identity drift: "boring engine" claim contradicts substantial framework surface** [P2, anchor 75]
+  - Section: What Makes This Cool / Recommended Approach
+  - Why: Doc says "the engine is boring" but the engine introduces XState v5, a bespoke `InteractionAdapter`, `CelebrationConfig` with timeout/skip/replay semantics, `GameEngineContext`, side-effect executor, lifecycle-tts contract, 7-state machine with guards and invoked actors. That's not a boring engine — it's a substantial framework. The mismatch between framing and reality suggests the project's identity is shifting from "app with games" to "game engine with apps" without that being deliberately chosen.
+  - Fix: Acknowledge explicitly: this is a meaningful identity shift toward platform/engine work. Either embrace it ("BaseSkill is becoming a game engine first") or constrain it ("the engine should not grow beyond X surface; if it does, we revisit").
+
+- **Solo-developer maintenance cost not examined** [P1, anchor 75]
+  - Section: Constraints / Recommended Approach
+  - Why: Plan lists "solo developer" as a constraint then prescribes XState v5, an InteractionAdapter contract, side-effects executor, celebration actor system, TTS lifecycle contract, 3-phase phased rollout. The maintenance surface over 12–24 months by a solo maintainer is the load-bearing question, and the document doesn't address it. Every abstraction is a long-term tax on the same person who builds it.
+  - Fix: Add a "maintenance budget" check: in 12 months with no new games shipped, what does this engine cost to keep alive (XState v6 upgrades, TS bumps, dependency drift)? Compare against the per-game wiring cost it replaces.
+
+- **LOC target framing reduces a structural decision to bookkeeping** [P2, anchor 75]
+  - Section: Measurable cost target / Success Criteria
+  - Why: Baseline 700 LOC, target 500 LOC = 28% reduction × 6 hypothetical games = 1200 LOC saved. The engine itself plus migration of 4 games is plausibly larger. Plan correctly hedges ("directional signal, not hard gate") but the qualitative bar that replaces it ("no migration required reshaping GameDefinition") is a self-fulfilling check — any reasonable abstraction passes its first 4 cases.
+  - Fix: Replace the LOC target with a payback metric: "cumulative LOC of (engine + migrations + per-game definitions for next N games) is less than (baseline LOC × N)." Identify N. If N is large or unverifiable, surface that as the real bet.
+
+- **"Design wide, implement narrow" bet under-examined** [P1, anchor 75]
+  - Section: Premises 4–5 / Phase 3
+  - Why: Plan bets that GameDefinition will widen additively for STT, voice-input, free-form text, connect-style — none of which exist or have specs. "Widening" is asserted to be additive, but for genuinely novel paradigms (voice is event-streamed, free-form is character-by-character, connect is graph-based), forcing them through "phases + buildRound + adapter" may itself be the contortion. 5th-game-validation risk is acknowledged but plan still ships the wide type before validation.
+  - Fix: Before Phase 1 commits to the InteractionMode union and adapter shape, sketch a paper GameDefinition for one genuinely-different future game (e.g., Speech-to-Text). If the sketch reveals the contract doesn't fit naturally, narrow scope to 3 answer games and defer the wide-type bet.
+
+- **Approach B dismissed without honest opportunity-cost weighing** [P2, anchor 75]
+  - Section: Approaches Considered
+  - Why: Approach B (reshape WIP plans, no SpotAll/Phase 2 unification) gets dismissed for Approach C with the only stated downside being "1–2 day pivot delay." But Approach B inherits the same 5th-game-validation risk and ships a working answer-game engine in 1 week instead of 2–3, leaving SpotAll alone and unblocking SRS v1 special-casing — which the document admits is achievable today. Plan doesn't show why Phase 1.b + Phase 2 capital buys more than completing Phase 1, validating with 1–2 actual new games, and only then unifying.
+  - Fix: Make the case for stopping at Approach B with phased SpotAll/Phase 2 work deferred until at least one new game has shipped on the engine. The "pattern coherence" argument is legitimate but cheaper to address reactively than upfront if the games pipeline is uncertain.
+
+- **Inversion: failure mode for engine investment unstated** [P2, anchor 75]
+  - Section: Success Criteria
+  - Why: Success criteria list functional, visual, SRS, TTS, constraint, mini-game bars — all execution-quality checks. None ask "what would mean this whole investment was wrong?" The natural answers (only 1–2 new games ship in next 12 months; STT requires a non-fitting abstraction; solo-dev velocity drops because engine maintenance dominates) are the ones that matter for go/no-go on Phase 2/3.
+  - Fix: Add an inversion check to the Phase 1 → Phase 2 gate: "If by end of Phase 1, fewer than X new games are concretely scoped (not aspirational), stop at Phase 1 and revisit Phase 2 in 3 months." Make Phase 2 gating depend on real pipeline pressure.
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
