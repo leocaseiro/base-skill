@@ -158,6 +158,7 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 - **RxDB as local database**: All user data persists in IndexedDB via RxDB. No network request required for gameplay.
 - **Sync on reconnect**: RxDB replication plugins queue mutations while offline and sync automatically when connectivity returns.
 - **No degraded mode**: Once a game's assets are cached, it behaves identically online and offline from the child's perspective.
+- **STT-using games are an acknowledged exception**: Games that require Speech-to-Text (e.g., Read Aloud) cannot run offline on cloud-STT browsers (Chrome, Edge, Android). On those browsers + offline, the voice-input surface renders the unsupported visual and the game is unavailable. Safari with on-device dictation (English on iOS 14.5+ / macOS 14.5+) continues to work offline. See § 5.6 and the voice-input component spec.
 
 ### 5.5 Offline/Online Indicator
 
@@ -169,7 +170,7 @@ A `LICENSE` file containing the full GPL v3 text will be added to the repository
 ### 5.6 Speech Integration
 
 - **Text-to-Speech (TTS)**: All game instructions, labels, encouragements, and UI hints are TTS-readable via the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API). TTS is enabled by default for all children. Parents can disable TTS per profile (e.g., to encourage older children to practise reading independently).
-- **Speech-to-Text (STT)**: Used for Read Aloud game and other speaking exercises. Simple animated visual indicator (e.g., animated GIF) shown during listening — no complex waveform rendering required.
+- **Speech-to-Text (STT)**: Used for Read Aloud game and other speaking exercises. The voice-input component (see `docs/superpowers/specs/2026-05-10-voice-input-component-design.md`) renders a live amplitude meter (round mic button + ring pulse + 8 vertical bars) using `AudioContext` + `AnalyserNode` for honest visual feedback during listening. Press-to-talk with automatic end-of-speech detection; optional opt-in ambient VAD nudges users when they appear to be speaking. **STT-using games require connectivity on cloud-STT browsers (Chrome, Edge, Android)** — this is an acknowledged exception to "Offline by default" (see § 5.4). No offline fallback is provided; offline + cloud-STT renders the unsupported visual.
 - **Voice selection**: Parents choose the TTS voice per language per profile from available `speechSynthesis.getVoices()`. Default voice is the browser/OS default for the profile language.
 - **Device-aware voices**: Available voices differ per device/OS. Voice preferences are tagged with the device ID. On a different device, the app falls back to the default voice if the selected voice is unavailable.
 - **STT language**: Speech recognition language matches the profile's active language setting.

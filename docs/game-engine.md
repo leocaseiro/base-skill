@@ -965,12 +965,12 @@ export interface SpeechInputProps {
 
 - Checks for `window.SpeechRecognition || window.webkitSpeechRecognition` availability
 - If unavailable, calls `onUnavailable()` — callers must provide a text input fallback
-- Shows a simple animated visual indicator (e.g., animated GIF or CSS-only pulsing icon) while listening — no complex waveform rendering required
-- Sets `recognition.lang` from the `language` prop
-- Sets `recognition.continuous = false` and `recognition.interimResults = false` for single-utterance capture
-- On result, calls `onTranscript(transcript, confidence)`
-- On error or no-match, retries once then reports empty transcript
-- Cleans up `recognition.abort()` on component unmount
+- Renders a live amplitude meter (round mic button + ring pulse + 8 vertical bars) via `AudioContext` + `AnalyserNode` for honest visual feedback during listening. See `docs/superpowers/specs/2026-05-10-voice-input-component-design.md` for the full component design. (Earlier guidance specified a simple animated indicator; the realized design ships a real-amplitude meter.)
+- Sets `recognition.lang` via the shared `getRecognitionLang()` helper (`options.lang` → `Settings.activeLanguage` → `'en-AU'`)
+- Sets `recognition.continuous = true` and `recognition.interimResults = true` for streaming with final-only word queue (per voice-input spec)
+- On turn end, calls `onTurnEnd({ words, error })` — single subscription point covering success and recoverable error paths
+- On error or no-match, surfaces typed `error.kind` to the consumer; the new component handles the inline-message + retry UX
+- Cleans up `recognition.abort()` plus full audio-graph teardown (analyser → MediaStream tracks → `AudioContext.close()`) on component unmount
 
 #### Accessibility
 
