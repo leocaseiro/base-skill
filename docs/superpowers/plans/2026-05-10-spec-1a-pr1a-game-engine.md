@@ -26,6 +26,8 @@ The design doc is the binding source of truth for the GameDefinition shape; the 
 
 5. **`useLifecycleTTS` is not created in PR 1a.** The design line 781 mentions wiring "a stub `useLifecycleTTS` that subscribes to the bus" in PR 1a. The handoff scope (2026-05-10 handoff lines 51–56) excludes the hook; the TTS plan (`2026-05-06-spec-1a-m1-tts-lifecycle.md`) owns it end-to-end. PR 1a only **emits** `lifecycle:speak` from `executeSideEffects`; with no subscriber, emissions are recorded by the bus but produce no audio — a no-op until the TTS plan ships. Existing `useRoundTTS` continues to drive prompt speech for NumberMatch with no changes. **Why now is fine:** keeps the TTS plan independently shippable and avoids a stub the TTS plan would immediately replace.
 
+6. **`buildRound` is a passthrough in PR 1a; round construction stays in the React component.** The design states `buildRound` is the engine-owned round factory called on transitions (design lines 234–245). PR 1a's NumberMatch definition implements `buildRound` as `(ctx) => ({ roundIndex: ctx.roundIndex })` — a stub — because NumberMatch's existing `buildNumeralRound` factory closure lives in `NumberMatch.tsx`. The phase bridge (Task 9) dispatches the resolved round to the reducer; the engine sees only the round index. As a side effect, `engine.currentRound` returns `{}` in PR 1a (no callers depend on it). PR 1b lifts round-construction into `definition.ts` once WordSpell + SortNumbers migrate (they share the closure shape — sentence-gap mode for WordSpell, level-aware rounds for SortNumbers — and validate the contract across three games). **Why now is fine:** PR 1a's goal is to prove the engine drives phase lifecycle on one game. Round construction is orthogonal — bringing it into the definition without three game-specific shapes to validate against would be premature.
+
 If an executor disagrees with any of these deltas while implementing, **stop and flag to the user** before deviating. The deltas are scope choices, not guesses.
 
 ---
@@ -242,9 +244,9 @@ git commit -m "feat(lifecycle-tts): pin LifecycleEvent + EventTemplate contract"
 
 ---
 
-## Task 3: Extend `GameEventType` With Celebration Events
+## Task 3: Extend `GameEventType` With Celebration + `lifecycle:speak` Events
 
-The engine emits `celebration:start | celebration:complete | celebration:skip` to drive engagement instrumentation (move-log + future SRS). PR 1a adds the type union members and interfaces; emission lands in Task 5.
+The engine emits `celebration:start | celebration:complete | celebration:skip` to drive engagement instrumentation (move-log + future SRS), and emits `lifecycle:speak` so the TTS plan's `useLifecycleTTS` (shipping after PR 1a) can subscribe to lifecycle-driven speech. PR 1a owns these type members; the TTS plan only adds `game:prepare`. PR 1a adds the type union members and interfaces; emission lands in Task 5.
 
 **Files:**
 
@@ -331,6 +333,28 @@ describe('celebration events', () => {
     ).toBe('play-again');
   });
 });
+
+describe('lifecycle:speak event', () => {
+  it('emits and receives lifecycle:speak with lifecycleEvent', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('lifecycle:speak', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'lifecycle:speak',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      lifecycleEvent: 'round.start',
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('lifecycle:speak');
+  });
+});
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -339,11 +363,11 @@ describe('celebration events', () => {
 npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose
 ```
 
-Expected: FAIL — `'celebration:start' | 'celebration:complete' | 'celebration:skip'` are not assignable to `GameEventType`.
+Expected: FAIL — `'celebration:start' | 'celebration:complete' | 'celebration:skip' | 'lifecycle:speak'` are not assignable to `GameEventType`.
 
 - [ ] **Step 3: Add the events to `src/types/game-events.ts`**
 
-Extend `GameEventType` (insert after `'game:end'`):
+Extend `GameEventType` (insert after `'game:tile-ejected'`):
 
 ```ts
 export type GameEventType =
@@ -363,7 +387,8 @@ export type GameEventType =
   | 'game:tile-ejected'
   | 'celebration:start'
   | 'celebration:complete'
-  | 'celebration:skip';
+  | 'celebration:skip'
+  | 'lifecycle:speak';
 ```
 
 Add the interfaces (after the existing event interfaces, before the `GameEvent` union):
@@ -392,9 +417,15 @@ export interface CelebrationSkipEvent extends BaseGameEvent {
   durationMs: number;
   skipMethod: 'play-again' | 'go-home' | 'timeout';
 }
+
+export interface LifecycleSpeakEvent extends BaseGameEvent {
+  type: 'lifecycle:speak';
+  // LifecycleEvent is defined in src/lib/lifecycle-tts/types.ts (created by Task 2 of this plan)
+  lifecycleEvent: import('@/lib/lifecycle-tts/types').LifecycleEvent;
+}
 ```
 
-Add the three to the `GameEvent` discriminated union next to the existing members.
+Add all four to the `GameEvent` discriminated union next to the existing members.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -409,7 +440,7 @@ Expected: PASS for both.
 
 ```bash
 git add src/types/game-events.ts src/lib/game-event-bus.test.ts
-git commit -m "feat(events): add celebration:start | complete | skip event types"
+git commit -m "feat(events): add celebration:* and lifecycle:speak event types"
 ```
 
 ---
@@ -743,7 +774,7 @@ export const executeSideEffects = (
 };
 ```
 
-Note: `lifecycle:speak` is added to `GameEventType` by the TTS plan (Task 2 there). PR 1a's `executeSideEffects` emits the event under the assumption that the bus accepts unknown event types defensively — the `getGameEventBus()` in this repo accepts any `BaseGameEvent` shape via the `subscribe<T>(type, ...)` signature. **Pre-flight check before merging PR 1a:** if the bus rejects unknown event types at runtime or compile time, add `'lifecycle:speak'` to `GameEventType` here in Task 3 and add a minimal `LifecycleSpeakEvent` interface (the TTS plan will widen it later). Confirm by running `npx vitest run src/lib/game-engine/side-effects.test.ts` — if the test fails on a type error, follow the pre-flight path.
+Note: `lifecycle:speak` and `LifecycleSpeakEvent` are added to `GameEventType` in Task 3 of this plan. The TTS plan (Task 2 there) adds only `game:prepare`; it does NOT re-add `lifecycle:speak`. PR 1a is the single owner of the type member.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -752,7 +783,7 @@ npx vitest run src/lib/game-engine/side-effects.test.ts --reporter=verbose
 yarn typecheck
 ```
 
-Expected: both PASS. If typecheck fails on `'lifecycle:speak'` not being assignable, follow the pre-flight note above and update `GameEventType` accordingly before re-running.
+Expected: both PASS. If typecheck fails on `'lifecycle:speak'` not being assignable, verify Task 3 added it to `GameEventType` and exported `LifecycleSpeakEvent` correctly.
 
 - [ ] **Step 5: Commit**
 
@@ -760,8 +791,6 @@ Expected: both PASS. If typecheck fails on `'lifecycle:speak'` not being assigna
 git add src/lib/game-engine/side-effects.ts src/lib/game-engine/side-effects.test.ts
 git commit -m "feat(game-engine): add executeSideEffects for emit | speak | delay"
 ```
-
-If you took the pre-flight path on `GameEventType`, amend the previous commit (Task 3) instead of bundling the change here — keeps the events commit self-contained.
 
 ---
 
