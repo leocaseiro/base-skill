@@ -107,8 +107,8 @@ The foundation. Ship as **three sequential PRs** for manageable review, then a s
 | PR 1c | **Consolidation & Cleanup** | TTS fold-in, file cleanup, types consolidation, `CelebrationHost` |
 | PR 1d | **SpotAll Refactor**        | First-time engine integration for SpotAll; lands **after PR 1c**  |
 
-- **PR 1a — GameEngine Foundation:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or the NumberMatch sound hook) — prevents celebration overlay double-mount once the engine owns celebration mounting (in PR 1c).
-- **PR 1b — Answer Game Migration:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove/disable the `confettiReady`/`gameOverReady` gate from `useGameSounds` (or per-game sound hooks) for WordSpell and SortNumbers — same gate-removal step as PR 1a, applied to each newly migrated game.
+- **PR 1a — GameEngine Foundation:** GameDefinition types + useGameEngine interpreter + side-effects + NumberMatch migration (proves the engine works). Also creates `src/lib/lifecycle-tts/types.ts` -- a minimal stable `LifecycleEvent` + `EventTemplate` contract that the TTS plan must respect; the TTS plan can extend the contract but cannot reshape it. **First step: `yarn add xstate@5` (new dependency; pin v5 — the plan uses `setup()` API and `AnyStateMachine` from XState v5). Also add `@xstate/react@5` for `useMachine`.** NumberMatch's `useGameSounds()` call is retained; only the destructuring of the gate booleans is removed from `NumberMatch.tsx` (overlays gate on `engine.phase`). The hook itself is left untouched in PR 1a — full gate removal moves to PR 1b (see PR 1a Spec Delta 1; deferral resolves ce-doc-review round 3 feasibility F1).
+- **PR 1b — Answer Game Migration:** WordSpell + SortNumbers migrations (validates the abstraction across the answer-game family). **Additional task:** Remove the `confettiReady` / `levelCompleteReady` / `gameOverReady` gate booleans from `src/components/answer-game/useGameSounds.ts` — hook returns `void`, sound playback retained. Replace boolean reads in WordSpell.tsx and SortNumbers.tsx with `engine.phase` checks as part of those games' migrations. One removal site, three migrated consumers, no interim broken state.
 - **PR 1c — Consolidation & Cleanup:** TTS fold-in finalized, deprecated file cleanup, types consolidation (`definition-types.ts` content folded into the canonical `types.ts`), engine takes over celebration overlay mounting via `CelebrationHost`. **Explicit tasks:** (1) Migrate `src/lib/game-engine/index.tsx` (and `GameEngineProvider`) off `useGameLifecycle` and `createReducer` imports from `lifecycle.ts` — prerequisite for deleting `lifecycle.ts`. (2) Delete `lifecycle.ts` once all imports are removed. If migration is not complete, defer `lifecycle.ts` deletion to Phase 2.
 
 #### PR 1d — SpotAll Refactor (sequenced after PR 1c, required for Phase 2 / SRS v1)
@@ -491,9 +491,12 @@ mounting from the 3 answer game components (NumberMatch, WordSpell, SortNumbers 
 
 **`useGameSounds` gate removal:** `useGameSounds.ts` sets `confettiReady`/`gameOverReady` booleans
 that gate skin overlay rendering by reading `phase` from `useAnswerGameContext`. Once the engine
-mounts celebrations, both paths fire simultaneously and the overlay double-mounts. For each
-migrated game in PRs 1a/1b, remove or disable the `confettiReady`/`gameOverReady` gate from
-`useGameSounds` (or the per-game sound hook) as part of the celebration migration step.
+mounts celebrations, both paths fire simultaneously and the overlay double-mounts. PR 1a leaves
+`useGameSounds.ts` untouched — NumberMatch stops destructuring the booleans (overlays gate on
+`engine.phase`) but the hook itself still returns them so WordSpell and SortNumbers continue to
+render until they migrate. **PR 1b** removes the boolean state from `useGameSounds.ts` (hook
+returns `void`) alongside WordSpell + SortNumbers migrations — one removal site, three migrated
+consumers. PR 1c celebration mounting consolidation (see `CelebrationHost`) lands after that.
 
 **Skip mechanic:** Today's "Play Again" / "Go to Home" buttons in the celebration overlay serve as the skip path. The engine fires `celebration:skip` when those buttons are clicked. Escape-key support is optional (nice-to-have, not blocking).
 
@@ -890,10 +893,11 @@ stateDiagram-v2
   - Why: `GameEngineProvider` (kept in Phase 1) reads `state.phase` from `useGameLifecycle` and threads it into `SessionRecorderGate` for session recording. Plan declares XState the source of truth. If per-game migrations replace `state.phase` reads with `engine.phase`, the legacy reducer's `phase` becomes stale yet the recorder still logs it — incorrect session metadata during Phase 1.
   - Fix: Specify before PR 1a ships: either (a) the legacy reducer's `phase` mirrors XState's, or (b) `GameEngineProvider` reads `engine.phase` from the new engine context.
 
-- **`useGameSounds` gate removal breaks the hook's sound state machine, not just overlay gating** [P2, anchor 75]
+- **`useGameSounds` gate removal breaks the hook's sound state machine, not just overlay gating** [P2, anchor 75] — **Resolved 2026-05-10**
   - Section: Mini-Game Celebrations / useGameSounds gate removal
   - Why: `useGameSounds.ts` does double duty: gates overlay rendering with `confettiReady`/`gameOverReady` AND fires `playSound('round-complete' | 'level-complete' | 'game-complete')` on phase transitions. "Remove or disable the gate" produces either silent celebrations (hook disabled outright) or sounds firing on the wrong transition (booleans removed but `useEffect` still tracks the now-stale `phase`).
   - Fix: Specify whether sounds migrate into the engine's celebration actor, or stay in a re-wired hook that reads `engine.phase`. Don't leave it ambiguous.
+  - **Resolution:** Sounds stay in `useGameSounds.ts` (still driven by the legacy reducer's `phase` from `useAnswerGameContext`). PR 1a does not modify the hook. PR 1b removes the boolean gate state in one shot when WordSpell + SortNumbers migrate; the sound-firing `useEffect` continues to read the same `phase` source it always has — no stale-phase concern because PR 1b doesn't change where `phase` comes from. Engine ownership of sound emission can be revisited in PR 1c or Phase 2 if needed.
 
 #### From scope-guardian reviewer (design doc)
 
