@@ -2151,6 +2151,23 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
   - Why: Task 4 (definition-types.ts) and Task 7 (answerGameAdapter with runtime guard `isAnswerGameRoundOutput` that throws) have no test step. They rely solely on `yarn typecheck`. Task 4's `types.test-d.ts` is mentioned in File Structure but never written. Task 7's runtime guard is real logic worth testing.
   - Fix: Add a small test file `src/lib/game-engine/interaction-adapter.test.ts` asserting `answerGameAdapter.advanceRound` throws on malformed input and dispatches the expected ADVANCE_ROUND action when given a valid output. For Task 4, ship the planned `test-d.ts` or document why type-checking via consumers is sufficient.
 
+### From scope-guardian reviewer (PR 1a plan)
+
+- **`LEVEL_COMPLETE` bridge branch is dead code in PR 1a** [P1, anchor 100]
+  - Section: Phase Bridge Pattern (lines 43–44) and Task 9 Step 3 bridge effect
+  - Why: Plan's stated goal is "migrate NumberMatch only." NumberMatch has no `level-complete` reducer phase — the existing `NumberMatch.tsx` has zero references to `level-complete`, and Task 8's machine has no `levelComplete` state. The phase-bridge `useEffect` in the canonical pattern (lines 40–48) includes `LEVEL_COMPLETE`, but Task 9's actual implementation omits it. Canonical pattern and PR 1a implementation diverge.
+  - Fix: Remove `LEVEL_COMPLETE` from the canonical Phase Bridge Pattern code block and explicitly note it is PR 1b scope. Or add the branch to Task 9 (engine ignores the unhandled event harmlessly, and the bridge becomes the complete reference for PR 1b).
+
+- **`isLastRoundOfLevel` guard ships in PR 1a but never exercised** [P1, anchor 75]
+  - Section: Task 6 — buildEngineGuards / Task 8 NumberMatch machine
+  - Why: Plan ships `isLastRoundOfLevel` inside `buildEngineGuards`, but NumberMatch declares `isLastRoundOfLevel: () => false` as a placeholder. No PR 1a machine state transitions on this guard, and no PR 1a test exercises it. Modulo arithmetic in `buildEngineGuards` is untested. If wrong, the bug lands silently and breaks PR 1b migrations.
+  - Fix: Either (a) add a test in `useGameEngine.test.tsx` verifying `isLastRoundOfLevel` fires at the right `roundIndex` for a given `levelSize`, OR (b) move `isLastRoundOfLevel` to PR 1b alongside the first game that uses it.
+
+- **`phonemeSequenceActor` injected with no PR 1a consumer** [P2, anchor 75]
+  - Section: Task 6 — buildEngineActors
+  - Why: Plan adds `phonemeSequenceActor` to `buildEngineActors` with an immediate-resolve stub "for Spec 1b WordSpell phoneme-sequence." No PR 1a machine state invokes it. Speculative infrastructure justified only by hypothetical PR 1b reuse — exactly the "framework-ahead-of-need" smell. The stub is provided to every game's `machine.provide({actors: ...})` even when the machine doesn't declare an `actors: { phonemeSequenceActor }` in `setup()`; XState v5 silently ignores undeclared actor providers, making the dead provision invisible.
+  - Fix: Remove `phonemeSequenceActor` from `buildEngineActors` in PR 1a. Add it in the PR 1b task that implements WordSpell's announce flow.
+
 ## Self-Review Checklist (Before Marking This Plan Complete)
 
 - [ ] Every Spec Delta is justified and shipping-friendly — none of them block PR 1b / 1c.
