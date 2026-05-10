@@ -1993,3 +1993,40 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Section: Task 5 — Talkativeness Presets, Step 3, QUIET constant
   - Why: All three early grade bands are identical objects (every event 'off' except `round.start: 'brief'`). Either intentional and the per-band structure is over-engineered, or pre-k was meant to differ. No way to tell from the plan.
   - Fix: Add a comment confirming the identical QUIET behavior is intentional, OR replace the three objects with a shared reference to eliminate duplication risk.
+
+### From adversarial reviewer (TTS plan)
+
+- **Multiple `useLifecycleTTS()` instances cause N-fold speech repetition** [P0, anchor 75]
+  - Section: Task 7 — useLifecycleTTS Hook
+  - Why: Every component that calls `useLifecycleTTS()` registers a separate `lifecycle:speak` bus subscriber. AudioButton + GameOptionsOverlay + SpotAllPrompt all use the hook → a single emit fires `speak()` once per mounted consumer. The user hears the same line twice or three times overlapping. No module-level dedup, no `isSpeechActive()` guard inside `doSpeak`.
+  - Fix: Make the bus subscription a singleton outside the hook (module-level subscriber that calls a registered handler), OR gate the subscription so only one designated consumer subscribes (e.g., AnswerGameProvider), OR add `isSpeechActive()` short-circuit + sequence-id dedup.
+
+- **Task 9's "interim" game:prepare path emits the wrong event for M1** [P0, anchor 75]
+  - Section: Task 9 Step 3 + Design note (lines 1280–1304)
+  - Why: GameOptionsOverlay emits `game:prepare` on mount, but `useLifecycleTTS` only subscribes to `lifecycle:speak`. The Design note says the XState machine will emit `lifecycle:speak` for `game.prepare` — but in M1, the GameDefinition engine is NOT integrated into GameOptionsOverlay (deferred). So in M1 the panel emits `game:prepare`, no `lifecycle:speak` ever fires for `game.prepare`, the brief game-name speech never happens, and the smoke step "verify game.prepare brief copy" fails.
+  - Fix: In Task 9 Step 3, also emit `lifecycle:speak` with `lifecycleEvent: 'game.prepare'` from the same useEffect (or have AnswerGameProvider's `game:prepare` handler synthesize it). Otherwise drop `tts.*.game-prepare.*` keys from M1 scope.
+
+- **`useRoundTTS` (kept in M1) + `lifecycle:speak round.start` emit cause double-speak** [P1, anchor 75]
+  - Section: Modified files table + Task 3 Step 5
+  - Why: `useRoundTTS` is kept in M1 and still calls `speakAuto(prompt)` on round-index change. Once Task 13 wires AudioButton with `event='round.start'` and the engine emits `lifecycle:speak` for `round.start`, both paths fire on the same round transition.
+  - Fix: In Task 3 Step 5, add an early return in `useRoundTTS` when `definition.tts?.['round.start']` exists (defer to lifecycle TTS), OR explicitly note that `lifecycle:speak` for `round.start` is NOT emitted in M1 (engine integration is M2).
+
+- **Bus subscription churns on every config change** [P2, anchor 75]
+  - Section: Task 7 Step 3
+  - Why: The bus subscription `useEffect` has `[resolveAndSpeak]` as its dep. `resolveAndSpeak` depends on `[config, doSpeak]`; `doSpeak` depends on five settings. Any settings tweak (rate slider, voice picker) recreates `resolveAndSpeak`, which unsubscribes/resubscribes. If a `lifecycle:speak` lands during the resubscribe gap, it's missed. Every active settings tweak temporarily orphans queued speech.
+  - Fix: Stabilize the subscription by storing `resolveAndSpeak` in a ref and giving the useEffect an empty dep array (subscribe once on mount). The handler reads `resolveAndSpeakRef.current` instead.
+
+- **`doSpeak` missing `isSpeechActive` guard causes stomping** [P2, anchor 75]
+  - Section: Task 7 Step 3, `doSpeak`
+  - Why: `useGameTTS.speakTile` checks `isSpeechActive()` before calling `speak()`. `useLifecycleTTS.doSpeak` does not. If two lifecycle events land within ~500ms (e.g., `round.advance` followed quickly by `round.start`), the second `speak()` interrupts the first mid-sentence. With Chatty preset on pre-k where every event speaks full, this is the default behavior, not an edge case.
+  - Fix: In `doSpeak`, guard with `if (isSpeechActive()) return;` for auto-paths; queue or replace for on-demand. Decide and document the contention policy.
+
+- **Two emit sources for `game:prepare` will conflict** [P2, anchor 75]
+  - Section: Modified files table + Task 9 Step 3
+  - Why: The modified-files table says `AnswerGameProvider.tsx` will "Emit game:prepare on panel mount path". Task 9 says `GameOptionsOverlay.tsx` emits `game:prepare` in its mount useEffect. If both are wired in M1, every panel mount fires two `game:prepare` events. Bus subscribers (analytics, future TTS) double-count.
+  - Fix: Pick one emitter (most plausible owner is `AnswerGameProvider`, sees lifecycle of all games). Remove the line from Task 9 Step 3 OR remove the row from the modified-files table.
+
+- **`text === i18nKey` heuristic produces false silence** [P2, anchor 50, FYI]
+  - Section: Task 7 Step 3 `doSpeak`
+  - Why: `if (!text || text === i18nKey) return;` is meant to swallow missing translations, but i18next returns the key as the default when missing. Tests with mocked `t()` returning input verbatim are silently suppressed. If a translator legitimately produces a string equal to the key (rare for short keys like 'tts.go'), production goes mute.
+  - Fix: Use `i18n.exists(key)` before `t()`, OR pass `{ defaultValue: undefined }` and check for undefined. Don't compare returned text to the key.
