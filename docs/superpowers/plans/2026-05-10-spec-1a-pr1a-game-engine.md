@@ -16,7 +16,7 @@
 
 The design doc is the binding source of truth for the GameDefinition shape; the deltas below are intentional **PR 1a scope reductions** that defer parts of the design to PR 1b/1c. None of them break the typed contract — every type from the design is created with the right shape; some fields are populated minimally in PR 1a and tightened later.
 
-1. **Celebration overlay mounting stays in NumberMatch.tsx in PR 1a.** The design states the engine takes ownership of mounting `<skin.CelebrationOverlay />`, `<skin.LevelCompleteOverlay />`, and `<skin.RoundCompleteEffect />` (design lines 478–481, 698–703). PR 1a only owns the **lifecycle decision** (engine drives the phase). The game component still renders skin overlays based on `engine.phase`. The double-mount race the design warns about is resolved today by removing the `useGameSounds` gate — engine + the existing skin slots become the single mount path. Full registry-based mounting moves into a `CelebrationHost` in PR 1c (after the abstraction is validated across three games). **Why now is fine:** removing the gate is the operational fix the design relies on; relocating mounting is a refactor that can rebase cleanly on three engine-driven games.
+1. **Celebration overlay mounting stays in NumberMatch.tsx in PR 1a; `useGameSounds` is left untouched.** The design states the engine takes ownership of mounting `<skin.CelebrationOverlay />`, `<skin.LevelCompleteOverlay />`, and `<skin.RoundCompleteEffect />` (design lines 478–481, 698–703). PR 1a only owns the **lifecycle decision** (engine drives the phase). The game component still renders skin overlays based on `engine.phase`. The double-mount race the design warns about is avoided in PR 1a because NumberMatch stops reading the `useGameSounds` gate booleans (Task 9); the booleans themselves remain on the hook so WordSpell/SortNumbers continue to render correctly until those games migrate. The full hook simplification (removing the boolean state entirely) lands in **PR 1b** alongside WordSpell + SortNumbers migrations — one removal site, three migrated consumers. Full registry-based mounting moves into a `CelebrationHost` in PR 1c (after the abstraction is validated across three games). **Why now is fine:** PR 1a only needs the engine to be the source of truth for NumberMatch's overlay gating; deferring the hook surgery to PR 1b avoids breaking WordSpell + SortNumbers in the interim.
 
 2. **`engine.celebrating` returns `null` in PR 1a.** The `UseGameEngineResult.celebrating` field exists (typed exactly per the design) so downstream callers compile, but the implementation returns `null` for now. NumberMatch reads `engine.phase` directly to gate overlays. PR 1b populates `celebrating` from machine context after we register `celebrationActor`/`levelCelebrationActor`/`gameOverActor` with full input plumbing. **Why now is fine:** no caller in PR 1a depends on `celebrating !== null`; the field is only consumed by future engine-mounted overlays (PR 1c+).
 
@@ -95,8 +95,7 @@ src/games/number-match/
 
 - `package.json` — add `xstate@^5` and `@xstate/react@^5` dependencies (pinned to v5 majors).
 - `src/types/game-events.ts` — add `celebration:start`, `celebration:complete`, `celebration:skip` to `GameEventType` + their event interfaces; add to the `GameEvent` discriminated union.
-- `src/components/answer-game/useGameSounds.ts` — remove `confettiReady`/`gameOverReady`/`levelCompleteReady` state and return `void`. Sound playback on phase transitions stays.
-- `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDef, answerGameAdapter, dispatch)`; replace `phase` reads from `useAnswerGameContext()` with `engine.phase`; add the phase-bridge `useEffect`; replace gate booleans with direct `engine.phase` checks for overlay rendering.
+- `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDef, answerGameAdapter, dispatch)`; replace `phase` reads from `useAnswerGameContext()` with `engine.phase`; add the phase-bridge `useEffect`; replace gate-boolean destructuring with direct `engine.phase` checks for overlay rendering. The `useGameSounds()` call is retained (still drives sound playback), only the destructured boolean reads are removed.
 - `src/games/number-match/NumberMatch/NumberMatch.test.tsx` — update assertions that depended on `confettiReady`/`gameOverReady` to use phase-driven assertions.
 
 ### Test files (new or extended)
@@ -1819,7 +1818,7 @@ useEffect(() => {
 ]);
 ```
 
-Remove the `useGameSounds` import and the `confettiReady`/`gameOverReady` destructuring entirely.
+Keep the `useGameSounds()` call so sound playback continues firing on phase transitions, but drop the `confettiReady`/`gameOverReady` destructuring — overlay visibility is now gated by `engine.phase`. The full hook simplification (removing the boolean state) is **deferred to PR 1b** — see Task 10 for context.
 
 - [ ] **Step 4: Run the new + existing test suite**
 
@@ -1854,122 +1853,25 @@ git commit -m "feat(number-match): drive phases through useGameEngine"
 
 ---
 
-## Task 10: Remove `useGameSounds` Celebration Gate
+## Task 10: Remove `useGameSounds` Celebration Gate (Deferred to PR 1b)
 
-The hook still plays sounds on phase transitions, but the `confettiReady` / `levelCompleteReady` / `gameOverReady` booleans are removed (Spec Delta 1). Sound playback stays — the Promise-resolved booleans were the gate that caused the double-mount race.
+**Status:** Deferred to PR 1b on 2026-05-10 (ce-doc-review round 3, feasibility F1).
 
-**Files:**
+**Why deferred:** the original Task 10 stripped the `confettiReady`/`levelCompleteReady`/`gameOverReady` booleans from `src/components/answer-game/useGameSounds.ts` and instructed executors to "drop the destructuring" at remaining call sites. `WordSpell.tsx` (lines 77, 129, 176, 241, 243, 245) and `SortNumbers.tsx` (lines 51, 132, 193, 242, 244, 246, 261) still read those booleans for `<skin.RoundCompleteEffect visible={confettiReady} />` and equivalent overlay gating. Removing them in PR 1a would either fail `yarn typecheck` (boolean prop receiving `undefined`) or render the celebration overlays as always-falsy on those games. The hook surgery is most safely done in PR 1b where WordSpell + SortNumbers migrate to `engine.phase` simultaneously — one removal site, three migrated consumers, no interim broken state.
 
-- Modify: `src/components/answer-game/useGameSounds.ts`
-- Modify: `src/components/answer-game/useGameSounds.test.tsx`
+**What PR 1a still does for NumberMatch:**
 
-- [ ] **Step 1: Update the test**
+- NumberMatch's Task 9 stops destructuring `confettiReady` / `gameOverReady`; overlay visibility is gated by `engine.phase` (see Spec Delta 1).
+- The `useGameSounds()` call itself is retained in `NumberMatch.tsx` so sound playback continues firing on phase transitions.
+- `useGameSounds.ts` and `useGameSounds.test.tsx` are not modified.
 
-Open `src/components/answer-game/useGameSounds.test.tsx`. Remove or replace any test asserting on `confettiReady`, `levelCompleteReady`, or `gameOverReady` return values. Add a single test that asserts the hook still triggers `playSound` on the relevant phase transitions:
+**What PR 1b absorbs (do not implement here):**
 
-```tsx
-import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { useGameSounds } from './useGameSounds';
-import * as audio from '@/lib/audio/AudioFeedback';
+- Strip the boolean state from `src/components/answer-game/useGameSounds.ts`; hook returns `void`.
+- Update `useGameSounds.test.tsx` to assert on `playSound` calls instead of boolean returns.
+- Migrate WordSpell + SortNumbers overlay gating to `engine.phase` in the same PR.
 
-vi.mock('./useAnswerGameContext');
-
-describe('useGameSounds', () => {
-  beforeEach(() =>
-    vi.spyOn(audio, 'playSound').mockImplementation(() => {}),
-  );
-
-  it('plays the round-complete sound on entry to round-complete phase', () => {
-    // Arrange the mocked useAnswerGameContext to return phase: 'round-complete'.
-    // (Use the existing mock-helper pattern in this test file.)
-
-    const { rerender } = renderHook(() => useGameSounds());
-    // ... drive phase from 'playing' → 'round-complete' via the mock ...
-    rerender();
-
-    expect(audio.playSound).toHaveBeenCalledWith('round-complete');
-  });
-});
-```
-
-Adapt the mock-helper pattern to match the existing test file (the previous test already mocked `useAnswerGameContext` — reuse that approach).
-
-- [ ] **Step 2: Run the test to verify it fails (only if you assert on the removed booleans)**
-
-```bash
-npx vitest run src/components/answer-game/useGameSounds.test.tsx --reporter=verbose
-```
-
-If the existing test file still asserts on the removed booleans, the suite fails — that's the failing test signal.
-
-- [ ] **Step 3: Strip the booleans from the hook**
-
-Replace the entire `useGameSounds` body:
-
-```ts
-// src/components/answer-game/useGameSounds.ts
-import { useEffect, useRef } from 'react';
-import { useAnswerGameContext } from './useAnswerGameContext';
-import type { AnswerGamePhase } from './types';
-import { playSound } from '@/lib/audio/AudioFeedback';
-
-export const useGameSounds = (): void => {
-  const { phase } = useAnswerGameContext();
-  const prevPhaseRef = useRef<AnswerGamePhase>(phase);
-
-  useEffect(() => {
-    const prev = prevPhaseRef.current;
-    prevPhaseRef.current = phase;
-    if (phase === prev) return;
-
-    switch (phase) {
-      case 'round-complete': {
-        playSound('round-complete');
-        break;
-      }
-      case 'level-complete': {
-        playSound('level-complete');
-        break;
-      }
-      case 'game-over': {
-        playSound('game-complete');
-        break;
-      }
-    }
-  }, [phase]);
-};
-```
-
-The hook now returns `void`. NumberMatch already removed its consumer in Task 9. Search for other consumers and remove their destructuring:
-
-```bash
-grep -rn "useGameSounds()" src/
-```
-
-If the search finds any other call site (e.g. `WordSpell.tsx` or `SortNumbers.tsx`) that destructures the booleans, update it to either drop the destructuring (preferred) or replace those reads with `engine.phase` once those games migrate in PR 1b. **Do not** leave dangling destructuring of removed properties — TypeScript will fail.
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-```bash
-npx vitest run src/components/answer-game/useGameSounds.test.tsx --reporter=verbose
-yarn typecheck
-yarn test --run
-```
-
-Expected: all PASS. If `yarn typecheck` flags WordSpell or SortNumbers consumers, fix the destructuring there (drop the booleans). PR 1b will fully migrate those games — for PR 1a we just stop reading the removed properties.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/components/answer-game/useGameSounds.ts \
-        src/components/answer-game/useGameSounds.test.tsx \
-        src/games/word-spell/WordSpell/WordSpell.tsx \
-        src/games/sort-numbers/SortNumbers/SortNumbers.tsx
-git commit -m "refactor(useGameSounds): drop confettiReady/gameOverReady gate"
-```
-
-(Only stage the files that actually changed — if WordSpell / SortNumbers don't destructure the booleans, drop them from the `git add`.)
+See PR 1b's row in the design doc's PR breakdown (`docs/superpowers/plans/2026-05-07-game-definition-engine-design.md`, line 111) for the canonical scope.
 
 ---
 
@@ -2116,10 +2018,11 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
 
 ### From feasibility reviewer (PR 1a plan)
 
-- **WordSpell + SortNumbers will visually break when `useGameSounds` gate booleans are removed** [P0, anchor 100]
+- **WordSpell + SortNumbers will visually break when `useGameSounds` gate booleans are removed** [P0, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 10 — Remove useGameSounds Celebration Gate
   - Why: Plan removes `confettiReady`/`levelCompleteReady`/`gameOverReady` from `useGameSounds` in PR 1a, but only NumberMatch is migrated. WordSpell.tsx and SortNumbers.tsx both consume these booleans for round-advance gating and overlay `visible=` props (e.g., `<skin.RoundCompleteEffect visible={confettiReady} />`). "Drop the destructuring" → `visible={undefined}` (always-falsy or typecheck error). PR 1a will ship a broken WordSpell + SortNumbers.
   - Fix: Either (a) keep the booleans in `useGameSounds` for PR 1a as a no-op fallback (return derived booleans) until WordSpell/SortNumbers migrate in PR 1b, OR (b) move gate-removal to PR 1b where all three games migrate together. **Verified in codebase:** `WordSpell.tsx:241`, `SortNumbers.tsx:242,246,261`.
+  - **Resolution:** Applied option (b). Task 10 deferred to PR 1b; PR 1a Spec Delta 1 amended; File Structure modified-files row removed; Task 9 Step 3 retains the `useGameSounds()` call (drops only the destructuring). Design doc PR 1a/1b descriptions and Migration impact section updated to match.
 
 - **Engine `context.roundIndex` never increments** [P0, anchor 100]
   - Section: Task 8 NumberMatch GameDefinition / Task 6 buildEngineGuards
@@ -2188,7 +2091,7 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
 - [ ] `useGameEngine` returns the typed `UseGameEngineResult` shape from the design doc, with `celebrating: null` flagged as Spec Delta 2.
 - [ ] `numberMatchDefinition` declares all required `tts.*` keys (`game.start`, `round.correct`, `round.error`, `game.over`, `game.prepare`).
 - [ ] The MDX docs cover phase flow, API reference, and debugging — no spec section is missing a doc anchor.
-- [ ] `useGameSounds` no longer returns the celebration gate booleans; sound playback still fires.
+- [ ] `useGameSounds` is unchanged in PR 1a (gate-removal deferred to PR 1b); NumberMatch retains the `useGameSounds()` call so sound playback still fires while overlay gating reads from `engine.phase`.
 - [ ] All tests are TDD-aligned — failing test first, minimal implementation, passing test, commit.
 - [ ] No file references a function or type that isn't introduced in an earlier task (forward references checked).
 - [ ] The plan itself is markdownlint + Prettier clean (`yarn fix:md` was run after writing).
