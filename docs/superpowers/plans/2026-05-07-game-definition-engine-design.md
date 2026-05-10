@@ -895,6 +895,33 @@ stateDiagram-v2
   - Why: `useGameSounds.ts` does double duty: gates overlay rendering with `confettiReady`/`gameOverReady` AND fires `playSound('round-complete' | 'level-complete' | 'game-complete')` on phase transitions. "Remove or disable the gate" produces either silent celebrations (hook disabled outright) or sounds firing on the wrong transition (booleans removed but `useEffect` still tracks the now-stale `phase`).
   - Fix: Specify whether sounds migrate into the engine's celebration actor, or stay in a re-wired hook that reads `engine.phase`. Don't leave it ambiguous.
 
+#### From scope-guardian reviewer (design doc)
+
+- **`phonemeSequenceActor` is shipped in every `provide()` call but only consumed by Spec 1b's `announcing` state** [P1, anchor 75]
+  - Section: Phase 1 useGameEngine contract
+  - Why: The engine unconditionally registers `phonemeSequenceActor` in `machine.provide()` even though `announcing` is Spec 1b only and not implemented in Phase 1. Dead scope clutters the engine's public contract and adds untestable test surface. Implementers will write stub actor implementations that cannot be exercised until an undefined future spec ships.
+  - Fix: Remove `phonemeSequenceActor` from the Phase 1 `provide()` call. Add it only when `announcing` (Spec 1b) is implemented. The actor name can be reserved in a comment without registering it.
+
+- **`CelebrationConfig.miniGame` registry lookup mechanism never defined** [P1, anchor 75]
+  - Section: Mini-Game Celebrations
+  - Why: Plan states "skin slots become render targets the engine looks up by miniGame registry ID" but no registry — neither location, interface, nor population mechanism — is specified anywhere in Phase 1 or Phase 2 scope. NumberMatch sample uses `'DinoEggHatch'` and `'FireworksPainter'` literals in PR 1a; type ships in PR 1a; consumer doesn't exist.
+  - Fix: For Phase 1, replace `miniGame: string` with a direct `component: ComponentType` reference in `CelebrationConfig`, OR explicitly scope the registry to PR 1c with a file path and interface. If the registry is truly Phase 2, forbid using `miniGame` string literals in Phase 1 machine configs.
+
+- **Phase 1 celebration conditions explicitly marked provisional → known double-touch** [P2, anchor 75]
+  - Section: Mini-Game Celebrations
+  - Why: Plan labels Phase 1 `CelebrationConfig.condition` functions as "provisional" and "may need updating" in Phase 2. Three game definitions written in Phase 1 will contain callbacks that are known to be incorrect for performance-based gating and will require re-editing.
+  - Fix: Either omit `CelebrationConfig.condition` from Phase 1 (ship without it; add in Phase 2) so no provisional callsites are written, OR narrow the field to `structuralCondition?: (ctx: PhaseContext) => boolean` and document that performance-based conditions need a Phase 2 field.
+
+- **`interaction-adapter.ts` is a separate file for one interface with zero current variation** [P2, anchor 50, FYI]
+  - Section: New files
+  - Why: Plan creates a separate `interaction-adapter.ts` file housing the `InteractionAdapter<TAction>` interface. Phase 1 ships two concrete instances that could live directly in per-game `definition.ts` files. A dedicated file with a single generic interface and no dynamic dispatch is abstraction in search of variation that doesn't arrive until Phase 3.
+  - Fix: Inline the `InteractionAdapter<TAction>` type into `definition-types.ts` alongside the other types. The type earns its own module when there are 3+ structurally distinct adapter implementations requiring shared documentation.
+
+- **`GameEngineContext` created for one absent consumer** [P2, anchor 75]
+  - Section: useGameEngine contract
+  - Why: Plan introduces `GameEngineContext` + `useGameEngineContext()` specifically so `useLifecycleTTS` can access `definition.tts` without prop-drilling. PR 1a Spec Delta 5 explicitly excludes `useLifecycleTTS` from Phase 1. Shipping a Context whose sole stated consumer is absent adds surface area (provider wrapping, tests) for no active benefit.
+  - Fix: Defer `GameEngineContext` and `useGameEngineContext()` to the PR that ships `useLifecycleTTS`. In Phase 1, pass `definition` directly to any hook that needs it.
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
