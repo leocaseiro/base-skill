@@ -858,6 +858,43 @@ stateDiagram-v2
   - Why: Premise 1 says "meaningfully reduce the cost of adding new games (fewer files, less cognitive load)." Success Criteria reference a 500 LOC / 5 files target. The contrast leaves readers wondering whether Premise 1 is asserting a quantifiable reduction or a qualitative improvement.
   - Fix: Rewrite Premise 1 to include the directional signal: "A declarative GameDefinition type will reduce the cost of adding new games: baseline ~700 LOC / ~12 files, target ~500 LOC / ~5 files. This is a directional goal; success is also measured by the qualitative bar."
 
+#### From feasibility reviewer (design doc)
+
+- **Constraints say React 18; codebase uses React 19** [P3, anchor 75]
+  - Section: Constraints, line 26
+  - Why: `package.json` line 65: `"react": "^19.2.0"`. The doc states React 18 as a stack constraint. Not blocking (`@xstate/react@5` works with both) but factually wrong.
+  - Fix: Update Constraints to `React 19, TypeScript, Vitest, existing GameEventBus`.
+
+- **`machine: AnyStateMachine` erases the inference benefits of `setup()`** [P2, anchor 50, FYI]
+  - Section: GameDefinition type
+  - Why: Plan motivates `setup()` for full TypeScript inference of guards/actors/actions, then types the field as `AnyStateMachine` — the maximally-erased XState type. Once a machine is assigned to that field, the inferred names are no longer enforced at the boundary.
+  - Fix: Type GameDefinition with the typed `StateMachine` generic carrying the engine's expected types, OR document that name-checking is by convention only.
+
+- **WordSpell async/sync boundary still ambiguous (intersects OQ#1)** [P2, anchor 75]
+  - Section: Open Questions / GameDefinition type
+  - Why: Plan claims `buildRound` is synchronous and "the component must resolve async state before starting the engine." But OQ#1 admits the boundary needs clarification. WordSpell's existing logic does library sampling, persisted-content reconciliation, stale-draft detection, roundOrder computation. Migrating to a definition exposing sync `buildRound: (ctx) => TRound` requires deciding whether `ctx` carries pre-resolved rounds, where `roundOrder` lives, and how stale-draft recovery surfaces.
+  - Fix: Resolve before PR 1b: enumerate which fields end up on `PhaseContext` for WordSpell, where `roundOrder` lives, and how the component's async boundary feeds the engine's sync entry.
+
+- **SpotAll INIT_ROUNDS dispatch ordering for `buildRound` ref-capture under-specified** [P2, anchor 75]
+  - Section: PR 1d (SpotAll integration) / GameDefinition type
+  - Why: The plan instructs SpotAll's `buildRound` to capture `state.rounds` via a stable ref and says "INIT_ROUNDS must dispatch and resolve before the engine first calls buildRound." But SpotAll currently dispatches INIT_ROUNDS from a `useEffect` (post-mount), and `useReducer` already initializes via `createInitialSpotAllState`. The order in which `useGameEngine` evaluates `buildRound` versus the reducer's initializer is not specified.
+  - Fix: Specify the concrete mechanism: SpotAll renders a loading splash until `rounds.length > 0`, only then mounts the GameDefinition-driven render path; or guard the engine's first `buildRound` call against empty rounds.
+
+- **`InteractionAdapter` TRound generic does not flow to RoundOutput** [P2, anchor 50, FYI]
+  - Section: Reducer dispatch via InteractionAdapter
+  - Why: `GameDefinition<TRound>` and `InteractionAdapter<TAction>` exist, but `RoundOutput = Record<string, unknown>` is intentionally opaque. The answer-game adapter writes `tiles: roundOutput.tiles` assuming the field exists, then casts on `advanceLevel`. "Adapter tests verify the contract" but doesn't explain how the adapter type-couples a game's TRound to its dispatched action payload.
+  - Fix: Pin in the type design now (avoid Phase 3 churn): introduce a second generic `InteractionAdapter<TAction, TRound>`, or document the cast-site contract explicitly.
+
+- **`GameEngineProvider` reads `state.phase`; XState declared as source of truth in Phase 1** [P2, anchor 75]
+  - Section: Relationship to existing lifecycle.ts engine / Phase authority
+  - Why: `GameEngineProvider` (kept in Phase 1) reads `state.phase` from `useGameLifecycle` and threads it into `SessionRecorderGate` for session recording. Plan declares XState the source of truth. If per-game migrations replace `state.phase` reads with `engine.phase`, the legacy reducer's `phase` becomes stale yet the recorder still logs it — incorrect session metadata during Phase 1.
+  - Fix: Specify before PR 1a ships: either (a) the legacy reducer's `phase` mirrors XState's, or (b) `GameEngineProvider` reads `engine.phase` from the new engine context.
+
+- **`useGameSounds` gate removal breaks the hook's sound state machine, not just overlay gating** [P2, anchor 75]
+  - Section: Mini-Game Celebrations / useGameSounds gate removal
+  - Why: `useGameSounds.ts` does double duty: gates overlay rendering with `confettiReady`/`gameOverReady` AND fires `playSound('round-complete' | 'level-complete' | 'game-complete')` on phase transitions. "Remove or disable the gate" produces either silent celebrations (hook disabled outright) or sounds firing on the wrong transition (booleans removed but `useEffect` still tracks the now-stale `phase`).
+  - Fix: Specify whether sounds migrate into the engine's celebration actor, or stay in a re-wired hook that reads `engine.phase`. Don't leave it ambiguous.
+
 ## Success Criteria
 
 - **Qualitative bar:** No game's migration required reshaping `GameDefinition`. If a game forces a type change to fit, the abstraction is wrong; reconsider before adding more games.
