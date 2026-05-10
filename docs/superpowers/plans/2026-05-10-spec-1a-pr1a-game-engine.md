@@ -81,10 +81,7 @@ src/lib/game-engine/
 ├── side-effects.test.ts
 ├── useGameEngine.ts                      # Hook + GameEngineContext + useGameEngineContext
 ├── useGameEngine.test.tsx
-├── interaction-adapter.ts                # answerGameAdapter (concrete adapter for AnswerGameAction)
-├── GameEngine.flows.mdx                  # Architecture: phase flow diagrams
-├── GameEngine.reference.mdx              # Architecture: API reference
-└── debugging.mdx                         # Architecture: debugging guide
+└── interaction-adapter.ts                # answerGameAdapter (concrete adapter for AnswerGameAction)
 
 src/games/number-match/
 ├── definition.ts                         # NumberMatch GameDefinition
@@ -95,6 +92,9 @@ src/games/number-match/
 
 - `package.json` — add `xstate@^5` and `@xstate/react@^5` dependencies (pinned to v5 majors).
 - `src/types/game-events.ts` — add `celebration:start`, `celebration:complete`, `celebration:skip` to `GameEventType` + their event interfaces; add to the `GameEvent` discriminated union.
+- `src/lib/game-engine/GameEngine.flows.mdx` — append XState phase-flow diagram + phase-bridge section alongside the existing legacy `useGameLifecycle` content. Do **not** delete the legacy sections; PR 1c removes them once `lifecycle.ts` is deleted.
+- `src/lib/game-engine/GameEngine.reference.mdx` — append `useGameEngine` API reference + `GameDefinition` shape + Spec Delta summary alongside the existing legacy `createReducer`/`useGameLifecycle` content.
+- `src/lib/game-engine/debugging.mdx` — append XState-specific troubleshooting entries alongside the existing legacy debugging guide.
 - `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDef, answerGameAdapter, dispatch)`; replace `phase` reads from `useAnswerGameContext()` with `engine.phase`; add the phase-bridge `useEffect`; replace gate-boolean destructuring with direct `engine.phase` checks for overlay rendering. The `useGameSounds()` call is retained (still drives sound playback), only the destructured boolean reads are removed.
 - `src/games/number-match/NumberMatch/NumberMatch.test.tsx` — update assertions that depended on `confettiReady`/`gameOverReady` to use phase-driven assertions.
 
@@ -1892,30 +1892,43 @@ See PR 1b's row in the design doc's PR breakdown (`docs/superpowers/plans/2026-0
 
 ## Task 11: Architecture MDX Docs
 
-Per `CLAUDE.md` "Architecture Documentation", any change to game-state logic must update co-located `.mdx` docs in the same PR. The design doc lists three new files for PR 1a (lines 130). Run `/update-architecture-docs` first so the docs follow the project template, then write content using the section guides below.
+Per `CLAUDE.md` "Architecture Documentation", any change to game-state logic must update co-located `.mdx` docs in the same PR. **All three target files already exist on disk** with content for the legacy `useGameLifecycle` / `createReducer` / `useMoveLog` engine (`src/lib/game-engine/GameEngine.flows.mdx` — 103 lines, `GameEngine.reference.mdx` — 137 lines, `debugging.mdx` — 276 lines). PR 1a **modifies** them — append new XState GameDefinition sections alongside the existing legacy content; PR 1c removes the legacy sections once `lifecycle.ts` is deleted.
+
+Run `/update-architecture-docs` first so the new sections follow the project template.
 
 **Files:**
 
-- Create: `src/lib/game-engine/GameEngine.flows.mdx`
-- Create: `src/lib/game-engine/GameEngine.reference.mdx`
-- Create: `src/lib/game-engine/debugging.mdx`
+- Modify: `src/lib/game-engine/GameEngine.flows.mdx` (existing — append, do not overwrite)
+- Modify: `src/lib/game-engine/GameEngine.reference.mdx` (existing — append, do not overwrite)
+- Modify: `src/lib/game-engine/debugging.mdx` (existing — append, do not overwrite)
 
 - [ ] **Step 1: Invoke the `/update-architecture-docs` skill**
 
-In the executor session, invoke the skill before writing any of the three files. It returns the canonical structure and writing guidelines for `*.flows.mdx`, `*.reference.mdx`, and `debugging.mdx` in this repo.
+In the executor session, invoke the skill before editing any of the three files. It returns the canonical structure and writing guidelines for `*.flows.mdx`, `*.reference.mdx`, and `debugging.mdx` in this repo.
 
-- [ ] **Step 2: Write `GameEngine.flows.mdx`**
+- [ ] **Step 2: Read the existing files first**
 
-Required sections (per the skill's template — adapt as the skill prescribes):
+```bash
+cat src/lib/game-engine/GameEngine.flows.mdx
+cat src/lib/game-engine/GameEngine.reference.mdx
+cat src/lib/game-engine/debugging.mdx
+```
 
-1. **Phase lifecycle diagram** — Mermaid statechart copied from the design doc lines 717–761, narrowed to the four states PR 1a ships (`playing`, `roundComplete`, `waitingForNext`, `gameOver`). Note inline that `levelComplete` and `announcing` land in PR 1b/1c (level boundaries) and Spec 1b (announcing).
+The existing content documents the legacy `useGameLifecycle` engine (idle → loading → instructions → playing → evaluating → scoring → next-round → retry). Per Spec Delta 4 the legacy reducer is **not** deleted in PR 1a, so legacy sections remain accurate for PR 1a readers. Each appended section below introduces a clearly-headed XState block — keep legacy and XState content visually separated (e.g., `## Legacy engine (lifecycle.ts)` vs `## XState engine (PR 1a foundation)`).
+
+- [ ] **Step 3: Append XState sections to `GameEngine.flows.mdx`**
+
+Add (do not replace) sections:
+
+1. **XState phase lifecycle diagram** — Mermaid statechart copied from the design doc lines 717–761, narrowed to the four states PR 1a ships (`playing`, `roundComplete`, `waitingForNext`, `gameOver`). Note inline that `levelComplete` and `announcing` land in PR 1b/1c (level boundaries) and Spec 1b (announcing).
 2. **Phase bridge pattern** — explain that the answer-game reducer keeps `phase` in PR 1a; the per-game wrapper bridges `reducer.phase → engine.send(...)`. Diagram or pseudocode.
 3. **Side-effect flow** — `XState entry/transition action → executeSideEffects → GameEventBus → (PR 1a: no subscriber for lifecycle:speak; TTS plan adds useLifecycleTTS later)`.
 4. **Celebration semantics (PR 1a scope)** — engine emits no `celebration:*` events yet (Spec Delta 3 — actors are timer-based); NumberMatch's overlay renders on `engine.phase === 'roundComplete' | 'gameOver'`. Engine-emitted `celebration:start | complete | skip` lands in PR 1b.
+5. **Coexistence note** — one paragraph explaining that the legacy lifecycle continues to drive the route shell while XState owns the per-round phase machine; PR 1c collapses the two.
 
-- [ ] **Step 3: Write `GameEngine.reference.mdx`**
+- [ ] **Step 4: Append XState sections to `GameEngine.reference.mdx`**
 
-Required sections:
+Add (do not replace) sections:
 
 1. **`useGameEngine(definition, adapter, dispatch, options?)`** — full signature, parameter table, return shape (`UseGameEngineResult`), invariants (synchronous `buildRound`, machine must include `playing` + `gameOver` states).
 2. **`GameEngineContext` + `useGameEngineContext()`** — usage pattern for child hooks (`useLifecycleTTS` will read `definition.tts`).
@@ -1923,17 +1936,17 @@ Required sections:
 4. **`GameDefinition<TRound>`** — every field, with `tts` table example pulled from `numberMatchDefinition`.
 5. **Spec Deltas (PR 1a)** — short bullet list mirroring the deltas in this plan, so future readers see the partial-implementation boundaries clearly.
 
-- [ ] **Step 4: Write `debugging.mdx`**
+- [ ] **Step 5: Append XState sections to `debugging.mdx`**
 
-Required sections:
+Add (do not replace) sections:
 
-1. **"My phase isn't transitioning"** — checklist: phase bridge effect wired? `engine.send` called? Machine state list includes the target?
+1. **"My XState phase isn't transitioning"** — checklist: phase bridge effect wired? `engine.send` called? Machine state list includes the target?
 2. **"My TTS doesn't speak"** — PR 1a doesn't subscribe to `lifecycle:speak`; explain that prompt TTS goes through existing `useRoundTTS`.
-3. **"Celebration overlay renders twice"** — confirms `useGameSounds` no longer returns the gate; confirm only one mount path (skin slot driven by `engine.phase`).
-4. **"How do I add a new game?"** — minimal recipe pointing to the NumberMatch definition as the canonical example.
+3. **"Celebration overlay renders twice"** — confirm only one mount path (skin slot driven by `engine.phase`); useGameSounds gate-removal lands in PR 1b but PR 1a Task 9 already drops NumberMatch's destructured boolean reads.
+4. **"How do I add a new game with the XState engine?"** — minimal recipe pointing to the NumberMatch definition as the canonical example.
 5. **XState devtools** — link to `@xstate/inspect` setup (or `useMachine` devtools options if that's how this project surfaces it). If devtools wiring isn't shipping in PR 1a, note "deferred to PR 1c".
 
-- [ ] **Step 5: Lint and validate the MDX**
+- [ ] **Step 6: Lint and validate the MDX**
 
 ```bash
 yarn fix:md
@@ -1941,15 +1954,15 @@ yarn lint:md
 yarn typecheck
 ```
 
-Expected: PASS — markdownlint and Prettier accept the three new files; typecheck remains green (MDX files don't affect TS).
+Expected: PASS — markdownlint and Prettier accept the modified files; typecheck remains green (MDX files don't affect TS).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/lib/game-engine/GameEngine.flows.mdx \
         src/lib/game-engine/GameEngine.reference.mdx \
         src/lib/game-engine/debugging.mdx
-git commit -m "docs(game-engine): add architecture docs for engine foundation"
+git commit -m "docs(game-engine): append XState architecture docs alongside legacy"
 ```
 
 ---
@@ -2045,10 +2058,11 @@ Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
   - Fix: Add an `assign` action that increments `context.roundIndex` on the NEXT transition: `actions: ['buildRound', assign({ roundIndex: ({ context }) => context.roundIndex + 1 }), 'advanceRound']`. OR sync engine context from the reducer via the phase-bridge.
   - **Resolution:** Applied option 1 (XState-native `assign`). Task 8: `import { setup, assign } from 'xstate'`; new `incrementRoundIndex` action defined in `setup({actions})` as `assign({ roundIndex: ({context}) => context.roundIndex + 1 })`; `waitingForNext.NEXT.[playing]` actions array now `['incrementRoundIndex', 'buildRound', 'advanceRound']` with `incrementRoundIndex` running first so PhaseContext reflects the round about to be played. Design doc samples (lines 593, 612) updated to match.
 
-- **Architecture MDX files (`GameEngine.flows.mdx`, `.reference.mdx`, `debugging.mdx`) already exist on disk** [P1, anchor 100]
+- **Architecture MDX files (`GameEngine.flows.mdx`, `.reference.mdx`, `debugging.mdx`) already exist on disk** [P1, anchor 100] — **Resolved 2026-05-10**
   - Section: Task 11 — Architecture MDX Docs / File Structure
   - Why: All three MDX files already exist with substantive content (103, 137, 276 lines respectively) covering legacy `useGameLifecycle`, `useMoveLog`, and session-recorder flows. Task 11 says "Create" them. Implementer following the plan literally will fail (file exists) or overwrite them (lose context for the legacy game-engine subsystem, which isn't deleted in PR 1a per Spec Delta 4).
   - Fix: Change File Structure section to mark these as "Modify" not "New files." Rewrite Task 11 to instruct the implementer to read the existing file first, then append new XState-based sections without removing existing content.
+  - **Resolution:** Applied. File Structure moves the three MDX files from "New files" to "Modified files" with explicit append-don't-overwrite instructions. Task 11 rewritten: prose explicitly notes the existing legacy content; new Step 2 directs the executor to read the existing files first; Steps 3–5 instruct appending XState-headed sections alongside legacy ones (visual separation `## Legacy engine (lifecycle.ts)` vs `## XState engine (PR 1a foundation)`); commit message updated to "append … alongside legacy".
 
 - **`setup({ actors: { ...: undefined as never } })` is unconventional and unverified in XState v5** [P1, anchor 75]
   - Section: Task 8 NumberMatch GameDefinition
