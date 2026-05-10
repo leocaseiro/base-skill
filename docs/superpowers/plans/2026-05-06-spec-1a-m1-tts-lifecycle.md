@@ -1914,3 +1914,55 @@ git commit -m "chore: final integration fixes for Spec 1a M1"
   - Section: Introduction (lines 24–27) + Task 7 (lines 1009–1011)
   - Why: The plan assumes `useGameEngineContext()` returns `{ definition: { tts: Partial<Record<LifecycleEvent, EventTemplate>> } }` but that API shape lives in PR #350 and is not pinned here. If the API differs, Task 7 tests and Task 13 game integration fail at integration time.
   - Fix: Add a "GameDefinition Engine API Contract" subsection to the introduction documenting the expected shape; verify against PR #350 before beginning Task 7.
+
+### From feasibility reviewer (TTS plan)
+
+- **`bus.subscribe()` returns a cleanup function, NOT an object with `.unsubscribe()`** [P0, anchor 100]
+  - Section: Task 7 — useLifecycleTTS Hook, Step 3
+  - Why: Verified in `src/lib/game-event-bus.ts`: `subscribe()` returns a `() => void` cleanup function. The plan's hook does `const sub = bus.subscribe(...)` then `return () => sub.unsubscribe();` — calling `.unsubscribe()` on a function will throw `TypeError` at unmount.
+  - Fix: Change to `const off = bus.subscribe('lifecycle:speak', (event) => { ... }); return () => off();`. Match the pattern in `src/lib/game-event-bus.test.ts`.
+
+- **Bus handler destructures `{ lifecycleEvent }` from the `GameEvent` union without narrowing** [P0, anchor 100]
+  - Section: Task 7 — useLifecycleTTS Hook, Step 3
+  - Why: The handler receives `GameEvent` (the discriminated union), not the narrowed `LifecycleSpeakEvent`. Destructuring `{ lifecycleEvent }` without narrowing fails TypeScript: the field isn't on most union variants.
+  - Fix: Narrow first: `(event) => { if (event.type !== 'lifecycle:speak') return; const { lifecycleEvent } = event; ... }`.
+
+- **Plan reads `gradeBand` and `talkativeness` via unsafe casts; neither field exists on `AnswerGameConfig`** [P0, anchor 100]
+  - Section: Task 7 — useLifecycleTTS Hook, `resolveAndSpeak`
+  - Why: `(config as Record<string, unknown>).gradeBand ?? 'k'` silently defaults gradeBand to `'k'` for every user; same for `talkativeness ?? 'default'`. Verified: `src/components/answer-game/types.ts` `AnswerGameConfig` does NOT have these fields. The Talkativeness preset feature (M1 goal) is structurally non-functional for any user not in grade k.
+  - Fix: Add `gradeBand?: GradeBand` and `talkativeness?: TalkativenessPreset` to `AnswerGameConfig` in Task 3; thread them from the resolved config or profile settings into every game's `useMemo<AnswerGameConfig>(...)` constructor.
+
+- **`buildInterpolation` reads `currentWord`, `currentCount`, `gameTitle` — none exist on `AnswerGameConfig`** [P0, anchor 100]
+  - Section: Task 7 — useLifecycleTTS Hook, `buildInterpolation`
+  - Why: The hook reads `config.currentWord ?? ''` and `config.currentCount ?? ''` via unsafe casts. These fields aren't declared anywhere. The user hears "Spell the word ." instead of "Spell the word cat." — the central feature of M1.
+  - Fix: Define the interpolation contract: introduce a `useRoundContext()` (or extend an existing context) that exposes `{ currentWord, currentCount, ... }` populated by each game; update `buildInterpolation` to read from it; add to file structure list.
+
+- **Task 9 calls `useLifecycleTTS()` outside `GameEngineProvider` context** [P0, anchor 75]
+  - Section: Task 9 Step 4
+  - Why: `useLifecycleTTS` calls `useGameEngineContext()` (per PR 1a). `GameOptionsOverlay` renders at the route level (`src/routes/$locale/_app/game/$gameId.tsx:529`), outside the engine provider. The hook will throw "must be used within GameEngineProvider" or return null.
+  - Fix: Either (a) move `lifecycleTTS.speakAuto('game.start')` into a component rendered inside `GameEngineProvider` (e.g., the game's main panel keyed on a 'just-started' phase), or (b) make `useGameEngineContext()` return a nullable fallback so the hook works outside the provider.
+
+- **Spec referenced (`2026-05-03-instructions-tts-lifecycle-design.md`) is not in this worktree** [P2, anchor 100]
+  - Section: Header — Spec field
+  - Why: The plan cites the spec for §10 (i18n keys) and §14 (M1 acceptance criteria) but the file is not in `docs/superpowers/specs/` of this worktree. Executor cannot resolve references.
+  - Fix: Add a Task 0 to commit/copy the spec into this worktree's `specs/` directory before any implementation tasks, OR inline §10 + §14 content into the plan body.
+
+- **RxDB settings schema migration not addressed for `ttsEnabled` rename** [P1, anchor 100]
+  - Section: Task 3 — ttsEnabled split
+  - Why: `ttsEnabled` is persisted in RxDB at `src/db/schemas/settings.ts:10,46` with `additionalProperties: false` and schema `version: 3`. Renaming requires a schema migration (version bump + `migrationStrategies` entry) for existing user data — without it, the app fails to load existing user databases or silently loses the setting.
+  - Fix: Add a sub-step under Task 3: bump settings schema to version 4, add `migrationStrategies[4]` mapping `ttsEnabled → { autoSpeak: ttsEnabled, ttsOnDemandAllowed: ttsEnabled }`, update `SettingsDoc` type, and update any UI that reads/writes `settings.ttsEnabled`.
+
+- **Two coexisting hooks both export `speakOnDemand` with incompatible signatures** [P2, anchor 75]
+  - Section: Task 7 callout + Task 12 routing
+  - Why: `useGameTTS.speakOnDemand(text: string)` and `useLifecycleTTS.speakOnDemand(event: LifecycleEvent)`. Autocomplete-driven import errors silently no-op (i18n lookup of raw text returns undefined).
+  - Fix: Rename `useGameTTS.speakOnDemand` → `speakRawOnDemand` so the ambient `speakOnDemand` is exclusively the lifecycle-event variant.
+
+- **Hard dependency on open PR #350 not staged in this plan's tasks** [P1, anchor 75]
+  - Section: Header — "Depends on"
+  - Why: Plan declares dependency on PR #350 but doesn't tell executors what to do if PR #350 is mid-merge. Tasks 1–6 might be runnable independently; Task 7+ hard-depend on `useGameEngineContext()`.
+  - Fix: Either mark Task 7+ as blocked until PR #350 merges, or include a stubbed `useGameEngineContext()` so earlier tasks can land independently.
+
+- **`TalkativenessPreset` defined in `types.ts` but not imported by `talkativeness-presets.ts`** [P3, anchor 50, FYI]
+  - Section: Task 5 — Talkativeness Presets, Step 3
+  - Why: Implementation hardcodes the union `'quiet' | 'default' | 'chatty'` instead of importing `TalkativenessPreset` from `./types`. Cosmetic but encourages drift.
+  - Fix: Change the function signature to `(preset: TalkativenessPreset, gradeBand: GradeBand)` and import from `./types`.
