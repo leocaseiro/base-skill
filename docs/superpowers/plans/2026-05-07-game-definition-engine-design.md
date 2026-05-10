@@ -358,6 +358,27 @@ If a future game needs engine-managed instructions (e.g., per-round instructions
 
 **Context/provider integration:** Under XState-first, `useGameEngine` is the sole state provider for migrated games. NumberMatch (PR 1a) reads tiles, zones, drag state, phase, retryCount, levelIndex, and roundIndex from `engine.context`; it does **not** call `useAnswerGameContext()` for state. WordSpell + SortNumbers continue to use `useAnswerGameContext()` until they migrate in PR 1b. SpotAll uses its own SpotAll context until PR 1d. After PR 1c the `AnswerGameProvider` / `AnswerGameContext` modules are deleted (or reduced to a thin shim). The `dispatch` parameter to `useGameEngine` exists only for non-migrated games' reducer integration during Phase 1; it is removed once all games are XState-only.
 
+#### Composition with `useGameRound` (PR #345 spec)
+
+The merged `useGameRound` design (`docs/superpowers/specs/2026-05-03-use-game-round-design.md`) is the **round-lifecycle seam** for cross-game reuse: it owns `roundIndex`, advance timing, optional `levelBoundaries`, the `roundProvider` injection point for SRS v1, and emission of the six `round:*` events (`shown`, `first-action`, `mistake`, `tts-played`, `visibility-change`, `resolved`). It is **orthogonal** to the XState-first commitment — XState owns per-game state (tiles, zones, drag, retry); `useGameRound` owns round-level lifecycle and event stream. They compose: `useGameRound` feeds the machine, the machine drives UI.
+
+The merged spec was written against the legacy reducer (it documents `dispatch({ type: 'ADVANCE_ROUND' })` from the hook into `answerGameReducer`). Under XState-first, the **integration target shifts per-game** without changing the hook's public contract:
+
+| Game                   | PR  | `useGameRound` integration                                                                                                       |
+| ---------------------- | --- | -------------------------------------------------------------------------------------------------------------------------------- |
+| NumberMatch            | 1a  | Hook's advance/complete callbacks call `engine.send({ type: 'NEXT' })` / `engine.send({ type: 'COMPLETE_GAME' })` on the machine |
+| WordSpell, SortNumbers | 1b  | Same as NumberMatch once migrated                                                                                                |
+| SpotAll                | 1d  | Hook continues to dispatch into `spot-all-reducer.ts` (separate from the shared `answer-game-reducer.ts`) until PR 1d migration  |
+
+**State location for round-level fields**:
+
+- `firstActionAt`, `selectedSlotIds`, mistake-detection state — for migrated games these live in **machine context** and are mutated via `assign` actions; for non-migrated games they remain in the relevant reducer (legacy `answer-game-reducer.ts` for WordSpell/SortNumbers in PR 1a; `spot-all-reducer.ts` for SpotAll until PR 1d).
+- `roundIndex`, `levelIndex`, `phase` — `useGameRound` exposes these as its public return value; the machine **also** holds `roundIndex` / `levelIndex` in context (incremented via the `incrementRoundIndex` / `incrementLevelIndex` `assign` actions documented above). The hook reads from the machine, not the other way round, so there is no dual source of truth.
+
+**`round:*` event emission** — the six event types, payloads, and wildcard semantics are unchanged from the merged spec. The emitter source moves from "reducer case" to "XState `assign` action" for migrated games; SpotAll's reducer continues to emit until PR 1d. Subscribers (SRS v1, `useLifecycleTTS`) see no behavioural change.
+
+**PR 1c reducer deletion is scoped to `answer-game-reducer.ts`** (the shared reducer used by WordSpell, NumberMatch, SortNumbers — all migrated by then). `spot-all-reducer.ts` is **not** deleted in PR 1c; SpotAll's bridge survives until PR 1d migrates SpotAll to its own XState machine. This avoids breaking SpotAll mid-Phase-1.
+
 #### Render primitives -- per-game wrappers
 
 Each game wraps the engine in its own thin render component. After XState-first migration, the component reads state from `engine.context` and dispatches via `engine.send`:
