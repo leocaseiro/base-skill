@@ -39,37 +39,35 @@ interface EngineEnvelope {
   roundIndex: number;
 }
 
+export interface EngineGuards {
+  isMidLevelRound: (input: {
+    context: { roundIndex: number; levelIndex: number };
+  }) => boolean;
+  isLastRoundOfLevel: (input: {
+    context: { roundIndex: number };
+  }) => boolean;
+  isLastRound: (input: { context: { roundIndex: number } }) => boolean;
+}
+
 export const buildEngineGuards = (
   totalRounds: number,
   levelSize: number,
-) => ({
-  isMidLevelRound: ({
-    context,
-  }: {
-    context: { roundIndex: number; levelIndex: number };
-  }): boolean => {
+): EngineGuards => ({
+  isMidLevelRound: ({ context }) => {
     const positionInLevel =
       (context.roundIndex + 1) % Math.max(levelSize, 1);
     return (
       positionInLevel !== 0 && context.roundIndex + 1 < totalRounds
     );
   },
-  isLastRoundOfLevel: ({
-    context,
-  }: {
-    context: { roundIndex: number };
-  }): boolean => {
+  isLastRoundOfLevel: ({ context }) => {
     const positionInLevel =
       (context.roundIndex + 1) % Math.max(levelSize, 1);
     return (
       positionInLevel === 0 && context.roundIndex + 1 < totalRounds
     );
   },
-  isLastRound: ({
-    context,
-  }: {
-    context: { roundIndex: number };
-  }): boolean => context.roundIndex + 1 >= totalRounds,
+  isLastRound: ({ context }) => context.roundIndex + 1 >= totalRounds,
 });
 
 export interface UseGameEngineOptions {
