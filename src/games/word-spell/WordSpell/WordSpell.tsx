@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { nanoid } from 'nanoid';
 import {
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -10,6 +11,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { buildSentenceGapRound } from '../build-sentence-gap-round';
+import { wordSpellDefinition } from '../definition';
 import { LetterTileBank } from '../LetterTileBank/LetterTileBank';
 import { useLibraryRounds } from '../useLibraryRounds';
 import { buildTilesAndZones } from './build-tiles-and-zones';
@@ -18,13 +20,16 @@ import {
   hasWordSpellPersistedContent,
   isDraftAlignedWithRound,
 } from './word-spell-initial-content';
+import type { WordSpellEngineContext } from '../definition';
 import type { WordSpellConfig } from '../types';
 import type {
+  AnswerGameAction,
   AnswerGameConfig,
   AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { UseGameEngineResult } from '@/lib/game-engine/definition-types';
 import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
@@ -32,16 +37,14 @@ import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAni
 import { SentenceWithGaps } from '@/components/answer-game/Slot/SentenceWithGaps';
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
-import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-import { useGameSounds } from '@/components/answer-game/useGameSounds';
 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { EmojiQuestion } from '@/components/questions/EmojiQuestion/EmojiQuestion';
 import { ImageQuestion } from '@/components/questions/ImageQuestion/ImageQuestion';
 import { useSeenWordsStore } from '@/db/hooks/useSeenWordsStore';
 import { buildRoundOrder } from '@/games/build-round-order';
-import { getGameEventBus } from '@/lib/game-event-bus';
+import { useGameEngine } from '@/lib/game-engine/useGameEngine';
 import { useGameSkin } from '@/lib/skin';
 import { DbContext } from '@/providers/DbProvider';
 
@@ -59,31 +62,36 @@ interface WordSpellProps {
   persistedContent?: Record<string, unknown> | null;
 }
 
+type WordSpellEngine = UseGameEngineResult<WordSpellEngineContext>;
+
 /** Renders prompts + progression; must sit inside `AnswerGame` / provider. */
 const WordSpellSession = ({
   wordSpellConfig,
   roundOrder,
   skin,
   onRestartSession,
+  engine,
 }: {
   wordSpellConfig: WordSpellConfig;
   roundOrder: readonly number[];
   skin: GameSkin;
   onRestartSession: () => void;
+  engine: WordSpellEngine;
 }) => {
-  const { phase, roundIndex, retryCount, zones } =
-    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
-  const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
-  const completionToken = useRef(0);
+
+  const enginePhase = engine.phase;
+  const engineRoundIndex = engine.roundIndex;
+  const retryCount = engine.retryCount;
+  const zones = engine.context.zones;
 
   const rounds = useMemo(
     () => wordSpellConfig.rounds ?? [],
     [wordSpellConfig.rounds],
   );
 
-  const configRoundIndex = roundOrder[roundIndex];
+  const configRoundIndex = roundOrder[engineRoundIndex];
   const round =
     configRoundIndex === undefined
       ? undefined
@@ -102,83 +110,46 @@ const WordSpellSession = ({
     onRestartSession();
   };
 
+  // Round-advance is driven by XState's `after: 750` and `always`
+  // transitions. When the machine settles in `waitingForNext`, compute the
+  // next round's tiles/zones and dispatch ADVANCE_ROUND via the reducer
+  // dispatch — AnswerGameProvider mirrors it to the engine via
+  // engineDispatch, so reducer and engine advance together.
   useEffect(() => {
-    if (phase !== 'game-over') return;
-    getGameEventBus().emit({
-      type: 'game:end',
-      gameId: wordSpellConfig.gameId,
-      sessionId: '',
-      profileId: '',
-      timestamp: Date.now(),
-      roundIndex,
-      finalScore: 0,
-      totalRounds: roundOrder.length,
-      correctCount: 0,
-      durationMs: 0,
-      retryCount,
-    });
+    if (enginePhase !== 'waitingForNext') return;
+    const nextConfigIndex = roundOrder[engineRoundIndex + 1];
+    const nextRound =
+      nextConfigIndex === undefined
+        ? undefined
+        : rounds[nextConfigIndex];
+    const word = nextRound?.word.trim() ?? '';
+    if (!word) return;
+    if (nextRound?.gaps && nextRound.gaps.length > 0) {
+      const { tiles: nextTiles, zones: nextZones } =
+        buildSentenceGapRound(nextRound.gaps);
+      dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: nextTiles,
+        zones: nextZones,
+      });
+    } else {
+      const { tiles: nextTiles, zones: nextZones } = buildTilesAndZones(
+        word,
+        wordSpellConfig.tileUnit,
+      );
+      dispatch({
+        type: 'ADVANCE_ROUND',
+        tiles: nextTiles,
+        zones: nextZones,
+      });
+    }
   }, [
-    phase,
-    wordSpellConfig.gameId,
-    roundIndex,
-    roundOrder.length,
-    retryCount,
-  ]);
-
-  useEffect(() => {
-    if (phase !== 'round-complete' || !confettiReady) return;
-
-    const token = ++completionToken.current;
-    const delayMs = 750;
-    const timer = globalThis.setTimeout(() => {
-      if (completionToken.current !== token) return;
-
-      const isLastRound = roundIndex >= roundOrder.length - 1;
-      if (isLastRound) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-
-      const nextConfigIndex = roundOrder[roundIndex + 1];
-      const nextRound =
-        nextConfigIndex === undefined
-          ? undefined
-          : rounds[nextConfigIndex];
-      const word = nextRound?.word.trim() ?? '';
-      if (!word) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-      if (nextRound?.gaps && nextRound.gaps.length > 0) {
-        const { tiles: nextTiles, zones: nextZones } =
-          buildSentenceGapRound(nextRound.gaps);
-        dispatch({
-          type: 'ADVANCE_ROUND',
-          tiles: nextTiles,
-          zones: nextZones,
-        });
-      } else {
-        const { tiles: nextTiles, zones: nextZones } =
-          buildTilesAndZones(word, wordSpellConfig.tileUnit);
-        dispatch({
-          type: 'ADVANCE_ROUND',
-          tiles: nextTiles,
-          zones: nextZones,
-        });
-      }
-    }, delayMs);
-
-    return () => {
-      globalThis.clearTimeout(timer);
-    };
-  }, [
-    phase,
-    confettiReady,
-    roundIndex,
-    dispatch,
+    enginePhase,
+    engineRoundIndex,
     roundOrder,
     rounds,
     wordSpellConfig.tileUnit,
+    dispatch,
   ]);
 
   if (!round) return null;
@@ -188,6 +159,9 @@ const WordSpellSession = ({
   const imageSrc = round.sceneImage ?? round.image;
   const hasImageUrl =
     wordSpellConfig.mode !== 'recall' && Boolean(imageSrc);
+
+  const showRoundComplete = enginePhase === 'roundComplete';
+  const showGameOver = enginePhase === 'gameOver';
 
   return (
     <>
@@ -238,11 +212,11 @@ const WordSpellSession = ({
         </AnswerGame.Choices>
       </div>
       {skin.RoundCompleteEffect ? (
-        <skin.RoundCompleteEffect visible={confettiReady} />
+        <skin.RoundCompleteEffect visible={showRoundComplete} />
       ) : (
-        <ScoreAnimation visible={confettiReady} />
+        <ScoreAnimation visible={showRoundComplete} />
       )}
-      {gameOverReady ? (
+      {showGameOver ? (
         skin.CelebrationOverlay ? (
           <skin.CelebrationOverlay
             retryCount={retryCount}
@@ -258,6 +232,107 @@ const WordSpellSession = ({
         )
       ) : null}
     </>
+  );
+};
+
+interface WordSpellInstanceProps {
+  config: WordSpellConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
+  roundOrder: readonly number[];
+  skin: GameSkin;
+  onRestartSession: () => void;
+  tiles: TileItem[];
+  zones: AnswerZone[];
+}
+
+/**
+ * One game session. Holds the XState engine and forwards every reducer
+ * dispatch to it via `engineDispatch`. Re-mounted (via key changes in the
+ * outer WordSpell component) when the player taps "Play again", which
+ * destroys the engine actor and starts a fresh one from round 0.
+ */
+const WordSpellInstance = ({
+  config,
+  initialState,
+  sessionId,
+  roundOrder,
+  skin,
+  onRestartSession,
+  tiles,
+  zones,
+}: WordSpellInstanceProps) => {
+  const answerGameConfig = useMemo(
+    (): AnswerGameConfig => ({
+      gameId: config.gameId,
+      inputMethod: config.inputMethod,
+      wrongTileBehavior: config.wrongTileBehavior,
+      tileBankMode: config.tileBankMode,
+      distractorCount: config.distractorCount,
+      totalRounds: roundOrder.length,
+      roundsInOrder: config.roundsInOrder,
+      ttsEnabled: config.ttsEnabled,
+      touchKeyboardInputMode: 'text',
+      initialTiles: tiles,
+      initialZones: zones,
+      slotInteraction:
+        config.mode === 'sentence-gap' ? 'free-swap' : 'ordered',
+    }),
+    [
+      config.gameId,
+      config.inputMethod,
+      config.wrongTileBehavior,
+      config.tileBankMode,
+      config.distractorCount,
+      roundOrder.length,
+      config.roundsInOrder,
+      config.ttsEnabled,
+      config.mode,
+      tiles,
+      zones,
+    ],
+  );
+
+  const engine = useGameEngine<unknown, WordSpellEngineContext>(
+    wordSpellDefinition,
+    {
+      input: {
+        totalRounds: roundOrder.length,
+        maxLevels: null,
+        wrongTileBehavior: config.wrongTileBehavior,
+      },
+      totalRounds: roundOrder.length,
+      levelSize: roundOrder.length,
+      envelope: { gameId: config.gameId },
+    },
+  );
+
+  // Stable engineDispatch that always forwards to the latest engine.send
+  // (which changes identity on every machine snapshot).
+  const engineRef = useRef(engine);
+  useEffect(() => {
+    engineRef.current = engine;
+  }, [engine]);
+  const engineDispatch = useCallback((action: AnswerGameAction) => {
+    engineRef.current.send(action as never);
+  }, []);
+
+  return (
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+      skin={skin}
+      engineDispatch={engineDispatch}
+    >
+      <WordSpellSession
+        wordSpellConfig={config}
+        roundOrder={roundOrder}
+        skin={skin}
+        onRestartSession={onRestartSession}
+        engine={engine}
+      />
+    </AnswerGame>
   );
 };
 
@@ -448,39 +523,6 @@ export const WordSpell = ({
     return buildTilesAndZones(roundWord, resolvedConfig.tileUnit);
   }, [roundWord, resolvedConfig.tileUnit, round0]);
 
-  const answerGameConfig = useMemo(
-    (): AnswerGameConfig => ({
-      gameId: resolvedConfig.gameId,
-      inputMethod: resolvedConfig.inputMethod,
-      wrongTileBehavior: resolvedConfig.wrongTileBehavior,
-      tileBankMode: resolvedConfig.tileBankMode,
-      distractorCount: resolvedConfig.distractorCount,
-      totalRounds: resolvedRounds.length,
-      roundsInOrder: resolvedConfig.roundsInOrder,
-      ttsEnabled: resolvedConfig.ttsEnabled,
-      touchKeyboardInputMode: 'text',
-      initialTiles: tiles,
-      initialZones: zones,
-      slotInteraction:
-        resolvedConfig.mode === 'sentence-gap'
-          ? 'free-swap'
-          : 'ordered',
-    }),
-    [
-      resolvedConfig.gameId,
-      resolvedConfig.inputMethod,
-      resolvedConfig.wrongTileBehavior,
-      resolvedConfig.tileBankMode,
-      resolvedConfig.distractorCount,
-      resolvedRounds.length,
-      resolvedConfig.roundsInOrder,
-      resolvedConfig.ttsEnabled,
-      resolvedConfig.mode,
-      tiles,
-      zones,
-    ],
-  );
-
   if (isLoading) {
     return (
       <div
@@ -520,24 +562,21 @@ export const WordSpell = ({
       style={skin.tokens as React.CSSProperties}
     >
       {skin.SceneBackground ? <skin.SceneBackground /> : null}
-      <AnswerGame
+      <WordSpellInstance
         key={sessionEpoch}
-        config={answerGameConfig}
+        config={resolvedConfig}
         initialState={
           sessionEpoch === 0 && !staleDraft ? initialState : undefined
         }
         sessionId={sessionId}
+        roundOrder={roundOrder}
         skin={skin}
-      >
-        <WordSpellSession
-          wordSpellConfig={resolvedConfig}
-          roundOrder={roundOrder}
-          skin={skin}
-          onRestartSession={() => {
-            setSessionEpoch((e) => e + 1);
-          }}
-        />
-      </AnswerGame>
+        onRestartSession={() => {
+          setSessionEpoch((e) => e + 1);
+        }}
+        tiles={tiles}
+        zones={zones}
+      />
     </div>
   );
 };

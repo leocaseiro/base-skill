@@ -194,6 +194,57 @@ describe('WordSpell stale-draft recovery toast', () => {
   });
 });
 
+describe('WordSpell round-complete overlay', () => {
+  // U4 coverage scope: this test verifies the engine-driven overlay
+  // invariant under physical-keyboard input (globalThis keydown →
+  // useKeyboardInput → machine). Touch-keyboard input (the primary
+  // BaseSkill platform) drives via useTouchKeyboardInput on the hidden
+  // input element and is covered by tests-e2e/word-spell.e2e.ts.
+  it('mounts the round-complete effect exactly once during the celebration window', async () => {
+    const multiRoundConfig: WordSpellConfig = {
+      gameId: 'word-spell-test',
+      component: 'WordSpell',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      mode: 'recall',
+      tileUnit: 'letter',
+      totalRounds: 3,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      rounds: [{ word: 'cat' }, { word: 'dog' }, { word: 'pig' }],
+    };
+
+    render(<WordSpell config={multiRoundConfig} />);
+
+    // Type 'c', 'a', 't' to complete round 1 — `useKeyboardInput` dispatches
+    // TYPE_TILE for each, AnswerGameProvider mirrors them to the engine,
+    // the XState machine's `always` transition fires when all zones are
+    // filled correctly. The regression we guard against is the prior
+    // `setTimeout` race re-mounting the celebration overlay.
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 't', bubbles: true }),
+      );
+    });
+
+    const overlays = await screen.findAllByRole('status', {
+      name: 'Round complete!',
+    });
+    expect(overlays).toHaveLength(1);
+  });
+});
+
 describe('WordSpell Play again', () => {
   it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
     const user = userEvent.setup();
