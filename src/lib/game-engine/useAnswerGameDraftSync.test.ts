@@ -134,6 +134,38 @@ describe('useAnswerGameDraftSync', () => {
     expect(doc?.draftState).toBeNull();
   });
 
+  it('writes null when phase is round-complete', async () => {
+    const state = makeState({ phase: 'round-complete' });
+    renderHook(() =>
+      useAnswerGameDraftSync(state, 'draft-sess-001', db),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    expect(doc?.draftState).toBeNull();
+  });
+
+  it('writes null when phase is level-complete', async () => {
+    const state = makeState({ phase: 'level-complete' });
+    renderHook(() =>
+      useAnswerGameDraftSync(state, 'draft-sess-001', db),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    expect(doc?.draftState).toBeNull();
+  });
+
   it('is a no-op when sessionId is null', async () => {
     const state = makeState();
     renderHook(() => useAnswerGameDraftSync(state, null, db));

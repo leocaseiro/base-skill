@@ -8,7 +8,12 @@ import type { BaseSkillDatabase } from '@/db/types';
 const buildDraft = (
   state: AnswerGameState,
 ): AnswerGameDraftState | null => {
-  if (state.phase === 'game-over') return null;
+  if (
+    state.phase === 'game-over' ||
+    state.phase === 'round-complete' ||
+    state.phase === 'level-complete'
+  )
+    return null;
   return {
     allTiles: state.allTiles,
     bankTileIds: state.bankTileIds,
@@ -25,7 +30,9 @@ const buildDraft = (
  * Persists AnswerGameState snapshots to session_history_index.draftState.
  * - Debounced 500 ms on every state change.
  * - Flushes immediately on visibilitychange → hidden.
- * - Writes null when phase === 'game-over' (clears draft on completion).
+ * - Writes null during celebration phases (round-complete, level-complete,
+ *   game-over) so a tab-close-then-resume during the celebration window
+ *   does not replay the celebration on the next mount.
  * - No-op when sessionId or db is null.
  */
 export const useAnswerGameDraftSync = (
