@@ -116,3 +116,108 @@ describe('SortNumbers machine — INIT_ROUND + level flags', () => {
     expect(context().isLevelMode).toBe(false);
   });
 });
+
+describe('SortNumbers machine — levelComplete', () => {
+  it('after roundComplete on last round of level (not last round), advances to levelComplete', () => {
+    vi.useFakeTimers();
+    const { actor, mocks } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    // Round 2 (last of level 1 with levelSize: 2):
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+    const levelCompleteCalls = mocks.playSound.mock.calls.filter(
+      (call) => call[1]?.sound === 'level-complete',
+    );
+    expect(levelCompleteCalls).toHaveLength(1);
+  });
+
+  it('ADVANCE_LEVEL from levelComplete increments levelIndex and returns to playing with reset round state', () => {
+    vi.useFakeTimers();
+    const { actor, context } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+
+    const playRound = () => {
+      actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    };
+
+    playRound();
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    playRound();
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+
+    const nextLevelTiles = [
+      tile('t4', '4'),
+      tile('t5', '5'),
+      tile('t6', '6'),
+    ];
+    const nextLevelZones = [slot(0, '4'), slot(1, '5'), slot(2, '6')];
+    actor.send({
+      type: 'ADVANCE_LEVEL',
+      tiles: nextLevelTiles,
+      zones: nextLevelZones,
+    });
+    expect(actor.getSnapshot().value).toBe('playing');
+    expect(context().levelIndex).toBe(1);
+    expect(context().roundIndex).toBe(0);
+    expect(context().retryCount).toBe(0);
+  });
+
+  it('COMPLETE_GAME from levelComplete jumps to gameOver', () => {
+    vi.useFakeTimers();
+    const { actor } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const playRound = () => {
+      actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    };
+    playRound();
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    playRound();
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+
+    actor.send({ type: 'COMPLETE_GAME' });
+    expect(actor.getSnapshot().value).toBe('gameOver');
+  });
+});
