@@ -1,0 +1,1 @@
+const o=n=>{let l=5381;for(let t=0;t<n.length;t++)l=(Math.imul(l,33)^(n.codePointAt(t)??0))>>>0;let e=l;return()=>{e=e+1831565813>>>0;let t=Math.imul(e^e>>>15,1|e);return t=t+Math.imul(t^t>>>7,61|t)^t,((t^t>>>14)>>>0)/4294967296}};export{o as s};
