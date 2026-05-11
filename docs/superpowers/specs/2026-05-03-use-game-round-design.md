@@ -389,3 +389,125 @@ Per-game adoption (#260, #261, #262) follows as separate issues.
   cleanup issue.
 - **`useGameRound` Storybook story** — a `LifecycleEventExplorer` story
   is deferred to Spec 1a M2 (`LifecycleTTSExplorer.stories.tsx`).
+
+---
+
+## Spec Delta — XState engine handle (2026-05-11)
+
+This delta extends the merged spec above. It is appended rather than
+edited inline so the change history is visible: the original spec
+documents the reducer-coupled integration; this delta documents how
+games migrated to XState integrate with the same hook.
+
+### Why this delta exists
+
+The merged spec (above) was written when every game owned its state via
+`answer-game-reducer.ts`. The `useGameRound` hook internally dispatched
+`ADVANCE_ROUND` / `COMPLETE_GAME` to that reducer (see §State ownership,
+lines 122–127), and the hook owned `roundIndex` and `phase` as its
+public return value.
+
+The project has since committed to **XState-first** for per-game state
+(see `docs/superpowers/plans/2026-05-07-game-definition-engine-design.md`
+§Phase authority). For migrated games, the per-game state machine — not
+the reducer — owns tiles, zones, drag state, retryCount, `roundIndex`,
+`levelIndex`, and phase. The legacy reducer continues to exist only for
+games not yet migrated.
+
+The hook's contract therefore needs one optional addition so callers can
+say _"dispatch to this engine instead of the reducer"_ without breaking
+the existing reducer-coupled path. This delta specifies that addition.
+
+### API change — optional `engine` parameter
+
+Extend `UseGameRoundOptions<TRound>` with a single optional field:
+
+```ts
+type UseGameRoundOptions<TRound> = {
+  rounds: TRound[];
+  advanceDelayMs?: number; // default 750
+  levelBoundaries?: number[]; // optional; SortNumbers uses this
+  roundProvider?: RoundProvider<TRound>; // optional; SRS v1 injects this
+  // NEW (Spec Delta 2026-05-11): when provided, the hook reads roundIndex
+  // and phase from the engine and dispatches `NEXT` / `COMPLETE_GAME`
+  // events to it instead of `ADVANCE_ROUND` / `COMPLETE_GAME` actions to
+  // a reducer. Omit for games that still use the legacy reducer path
+  // (SpotAll until PR 1d).
+  engine?: UseGameEngineResult;
+};
+```
+
+`UseGameEngineResult` is the public contract returned by `useGameEngine`
+(see `src/lib/game-engine/definition-types.ts`). It exposes `phase`,
+`context`, and `send` — everything the hook needs to read state from
+and dispatch events to a per-game machine.
+
+The hook's public return value (`UseGameRoundReturn<TRound>`) is
+unchanged.
+
+### Behavioural changes when `engine` is provided
+
+Two paths exist for each concern: **reducer path** (existing, `engine` omitted) and **engine path** (new, `engine` provided).
+
+- **`roundIndex` ownership.** Reducer path: hook owns its own counter. Engine path: hook reads `engine.context.roundIndex` — single source of truth, no dual counter.
+- **`phase` exposed by hook.** Reducer path: `'playing' | 'round-complete' | 'level-complete' | 'game-over'`, hook-owned. Engine path: same kebab-case enum, derived from `engine.phase` via the translation table below. The hook's public return type does not change — callers see the same enum whether the underlying state lives in a reducer or a machine.
+- **`currentRound`.** Reducer path: `rounds[hook.roundIndex]` from the hook's internal counter. Engine path: `rounds[engine.context.roundIndex]`. Falls back to `rounds[0]` defensively if `engine.context.roundIndex` is undefined (transitional state).
+- **`round:resolved` emission.** Both paths: the hook emits it inside `markResolved`. Single emission point regardless of dispatch target. The machine does not also emit it.
+- **`levelIndex` ownership.** Reducer path: hook owns its own counter (if `levelBoundaries` provided). Engine path: hook reads `engine.context.levelIndex`. Same single-source rule as `roundIndex`.
+- **Advance-timing authority.** Reducer path: hook owns the `advanceDelayMs` timer; after the delay, it dispatches `{ type: 'ADVANCE_ROUND', ... }` to the supplied reducer. Engine path: the **machine** owns the timer via its own `after: { N: ... }` transition out of `roundComplete`. The hook does not dispatch an advance event — the machine handles routing to the next state (or to `gameOver` via its guards). The hook's `advanceDelayMs` option is informational under the engine path; the authoritative delay is the machine's `after:` value. Games that need a non-default delay configure it in the machine, not the hook.
+- **Early dismiss.** Both paths: when the game wants to short-circuit the wait (e.g., user taps "Skip"), the hook exposes a `dismiss()` method. Reducer path: the hook fires its `advanceDelayMs` timer immediately. Engine path: the hook calls `engine.send({ type: 'CELEBRATION_DONE' })` so the machine's early-dismiss handler runs. PR 1b adds `dismiss()` to the public return — it is not part of this delta.
+
+### Phase translation table
+
+`engine.phase` is camelCase (`'playing' | 'roundComplete' | 'levelComplete' | 'gameOver' | 'waitingForNext'`); the hook's public `phase` return is kebab-case for backward compatibility with existing subscribers. The hook maps as follows:
+
+- `'playing'` → `'playing'`
+- `'roundComplete'` → `'round-complete'`
+- `'levelComplete'` → `'level-complete'`
+- `'gameOver'` → `'game-over'`
+- `'waitingForNext'` → `'round-complete'` (treated as continuation of the post-round wait)
+
+The hook does the mapping internally so consumers (SRS, `useLifecycleTTS`)
+see no change.
+
+### `round:resolved` emission rule
+
+The hook is the sole emitter of `round:resolved`. This holds regardless
+of dispatch target. Concretely:
+
+- When a game calls `markResolved(outcome)`, the hook emits
+  `round:resolved` immediately (with the outcome payload).
+- The machine does **not** also emit `round:resolved` from a transition
+  action.
+
+This single-emitter rule prevents duplicate events for engine-driven
+games and keeps the contract identical for SRS/TTS subscribers across
+the reducer and engine paths.
+
+### Backward compatibility
+
+- Callers that omit `engine` get the exact behaviour described in the
+  merged spec above. No code change required for SpotAll (which keeps
+  using `spot-all-reducer.ts` until PR 1d).
+- Callers that pass `engine` get the engine-coupled behaviour described
+  in this delta.
+- Public return type is unchanged; consumers (`useSrsRecording`,
+  `useLifecycleTTS`) see the same `phase` kebab-case enum either way.
+
+### Per-game migration guidance
+
+- **NumberMatch (PR 1b):** Pass `engine`. The game's machine is already XState-first as of PR 1a. PR 1a wires advance directly via `engine.send`; PR 1b adopts the hook and routes through it.
+- **WordSpell (PR 1b):** Pass `engine`, alongside the WordSpell XState migration in PR 1b.
+- **SortNumbers (PR 1b):** Pass `engine`, alongside the SortNumbers XState migration in PR 1b.
+- **SpotAll (PR 1d):** Omit `engine`. SpotAll keeps its `spot-all-reducer.ts` dispatch path until PR 1d migrates SpotAll to its own XState machine.
+
+### Out of scope for this delta
+
+- Removing the reducer dispatch path. The hook continues to support the
+  reducer path for SpotAll until PR 1d. Cleanup of that branch belongs
+  in PR 1d or later.
+- Centralising the kebab-camel phase translation as a shared utility.
+  The mapping is small enough to live inline in `useGameRound`. If a
+  second consumer needs the same mapping, extract it then.
+- Adding new return-value fields. The shape of `UseGameRoundReturn`
+  does not change in this delta.
