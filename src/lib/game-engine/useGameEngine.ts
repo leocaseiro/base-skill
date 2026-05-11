@@ -39,7 +39,10 @@ interface EngineEnvelope {
   roundIndex: number;
 }
 
-const buildEngineGuards = (totalRounds: number, levelSize: number) => ({
+export const buildEngineGuards = (
+  totalRounds: number,
+  levelSize: number,
+) => ({
   isMidLevelRound: ({
     context,
   }: {
