@@ -268,9 +268,137 @@ Existing test suites:
 | ---------------------------- | --------------------------------------------------------- |
 | Current AnswerGame state     | React DevTools → `AnswerGameStateContext.Provider`        |
 | Current GameEngine state     | React DevTools → `GameStateContext.Provider`              |
+| Current XState phase         | Subscribe to the actor (§7 below) or inspect via DevTools |
 | Dispatched actions (trace)   | Temporary logging wrapper around `useReducer`             |
 | Route params and loader data | TanStack Router DevTools panel (bottom-right)             |
 | Game events (evaluate, etc.) | `getGameEventBus().subscribe('game:*', console.log)`      |
 | Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
 | Sound playback               | `HTMLAudioElement.prototype.play` monkey-patch            |
 | TTS utterances               | Filter browser console to `[TTS]`                         |
+
+---
+
+## XState engine (PR 1a foundation)
+
+The XState machine introduced in PR 1a runs **alongside** the legacy
+reducers above. The reducer drives Slot/NumeralTileBank rendering; the
+XState machine drives lifecycle (`playing` / `roundComplete` /
+`waitingForNext` / `gameOver`), the 750 ms celebration delay, and
+`game:end` emission. The dispatch bridge (`engineDispatch` on
+`AnswerGameProvider`) keeps the two in sync.
+
+### 7. My XState phase isn't transitioning
+
+Checklist:
+
+1. **Is the game wired with `engineDispatch`?** Search the game
+   component for `<AnswerGame ... engineDispatch={...}>`. Without it,
+   reducer dispatches (`PLACE_TILE`, `TYPE_TILE`, etc.) never reach
+   the engine.
+2. **Did `INIT_ROUND` fire?** The wrapped dispatch in
+   `AnswerGameProvider` mirrors the mount-time `INIT_ROUND`. Open
+   React DevTools → `AnswerGameStateContext.Provider`, confirm `zones`
+   is populated, and then check the engine.
+3. **Does the machine state declare the event?** A `TYPE_TILE` event
+   sent before `INIT_ROUND` is silently dropped (no handler in the
+   initial `playing` state until `assign` populates context).
+4. **Is the event a typed-disjunction member?** XState v5 narrows
+   discriminated unions in `assign` actions. An `assign(({ event }) => { if (event.type !== 'X') return {}; ... })`
+   pattern is required; the `if` guards both the runtime type and the
+   type narrowing.
+5. **Did a guard return `false`?** `playing.always` has
+   `[{ guard: 'allFilledCorrectly', target: 'roundComplete' }]`.
+   `allFilledCorrectly` returns `false` when any zone has
+   `placedTileId === null` OR `isWrong === true`. Inspect
+   `engine.context.zones` to confirm.
+
+To inspect engine state in the console while the game is running:
+
+```ts
+// Temporary — add to NumberMatchSession, remove before committing
+useEffect(() => {
+  (window as any).__engine = engine;
+}, [engine]);
+
+// Then in console:
+__engine.phase; // → 'playing' | 'roundComplete' | 'waitingForNext' | 'gameOver'
+__engine.context.zones; // → AnswerZone[]
+__engine.context.retryCount;
+__engine.send({ type: 'CELEBRATION_DONE' }); // skip the 750ms wait
+```
+
+### 8. My TTS doesn't speak
+
+PR 1a wires the `speak` action through `executeSideEffects` →
+`GameEventBus` as `lifecycle:speak`, **but there is no subscriber**
+for `lifecycle:speak` in PR 1a — the consumer (`useLifecycleTTS`)
+lands in a follow-up task. Prompt TTS (per-round question reading)
+goes through `useRoundTTS` unchanged.
+
+To trace lifecycle:speak emissions while debugging:
+
+```js
+const unsub = getGameEventBus().subscribe('lifecycle:speak', (e) =>
+  console.log('[lifecycle:speak]', e),
+);
+// unsub() to stop
+```
+
+### 9. My celebration overlay renders twice
+
+The overlay is gated on `engine.phase` (camelCase: `'roundComplete'`
+or `'gameOver'`), not on the reducer's `phase` (kebab-case). With the
+XState `always` transition firing atomically when zones become fully
+correct, the overlay mounts once and stays mounted through the
+750 ms `after`. The double-mount race that existed with the prior
+`setTimeout`-based round-advance is closed.
+
+Checklist if you see a double-mount in dev:
+
+1. Confirm the game component reads `engine.phase`, not
+   `useAnswerGameContext().phase`. The reducer's kebab-case `phase`
+   may transition independently (e.g., `'round-complete'` →
+   `'game-over'` on the same tile placement for last-round
+   completion).
+2. Confirm overlays are conditionally rendered on `engine.phase`,
+   not on a derived `setState`-driven flag. The prior `useGameSounds`
+   pattern with a microtask-deferred `confettiReady`/`gameOverReady`
+   is no longer used in NumberMatch.
+3. Confirm only one game component is mounted — e.g., a stale Storybook
+   story decorator or React strict-mode double-render.
+
+### 10. How do I add a new game with the XState engine?
+
+The canonical example for PR 1a is NumberMatch:
+
+- `src/games/number-match/definition.ts` — `numberMatchDefinition:
+GameDefinition<NumberMatchRound>` with the full machine, the
+  `setup({ types, guards, actions })` block, and the 17 inline
+  `assign` actions.
+- `src/games/number-match/definition.test.ts` — machine-level
+  behaviour tests using `createActor + send + getSnapshot + waitFor`.
+- `src/games/number-match/NumberMatch/NumberMatch.tsx` — component
+  using `useGameEngine(numberMatchDefinition, { input, totalRounds, levelSize, envelope })`
+  with `engineDispatch` passed to `<AnswerGame>` to bridge reducer
+  dispatches to the engine.
+
+Recipe for a new game:
+
+1. Author a `GameDefinition` with the events your game needs. Declare
+   placeholder guards/actions in `setup` matching the engine's
+   injected shape (`speak`, `playSound`, `completeGame`).
+2. Write machine-level tests using XState's `createActor + send + getSnapshot`
+   patterns.
+3. In your game component, call `useGameEngine(definition, options)`
+   and pass `engine.send` (wrapped via `useRef` for stable identity)
+   as `engineDispatch` to `<AnswerGame>`.
+4. Gate overlays on `engine.phase === 'roundComplete' | 'gameOver'`.
+5. Add a session-epoch keyed inner component if Play Again should
+   reset the engine actor.
+
+### 11. XState devtools
+
+Wiring `@statelyai/inspect` (or `@xstate/inspect`) is **deferred to
+PR 1c**. For PR 1a, debug via React DevTools, console subscriptions
+(`__engine` pattern above), and machine-level tests in
+`definition.test.ts`.
