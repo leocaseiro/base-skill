@@ -6,7 +6,7 @@ import type {
 } from '@/components/answer-game/types';
 import type { GameDefinition } from '@/lib/game-engine/definition-types';
 
-interface NumberMatchEngineContext {
+export interface NumberMatchEngineContext {
   allTiles: TileItem[];
   bankTileIds: string[];
   zones: AnswerZone[];

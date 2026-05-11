@@ -89,10 +89,10 @@ const readContextField = <T>(
   return fallback;
 };
 
-export const useGameEngine = <TRound>(
+export const useGameEngine = <TRound, TContext = unknown>(
   definition: GameDefinition<TRound>,
   options?: UseGameEngineOptions,
-): UseGameEngineResult => {
+): UseGameEngineResult<TContext> => {
   const envelope: EngineEnvelope = useMemo(
     () => ({
       gameId: definition.id,
@@ -140,12 +140,18 @@ export const useGameEngine = <TRound>(
             'retryCount',
             0,
           );
+          const roundIndexFromCtx = readContextField<number>(
+            context,
+            'roundIndex',
+            envelope.roundIndex,
+          );
           executeSideEffects(
             [
               {
                 type: 'emit',
                 event: {
                   ...envelope,
+                  roundIndex: roundIndexFromCtx,
                   timestamp: Date.now(),
                   type: 'game:end',
                   finalScore: 0,
@@ -174,7 +180,7 @@ export const useGameEngine = <TRound>(
     options?.input === undefined ? undefined : { input: options.input };
   const [state, send] = useMachine(machineWithImpls, useMachineOptions);
 
-  return useMemo<UseGameEngineResult>(() => {
+  return useMemo<UseGameEngineResult<TContext>>(() => {
     const totalRounds = readContextField<number>(
       state.context,
       'totalRounds',
@@ -190,6 +196,11 @@ export const useGameEngine = <TRound>(
       'levelIndex',
       0,
     );
+    const retryCount = readContextField<number>(
+      state.context,
+      'retryCount',
+      0,
+    );
     const currentRound = readContextField<RoundOutput>(
       state.context,
       'lastRoundOutput',
@@ -200,10 +211,12 @@ export const useGameEngine = <TRound>(
         typeof state.value === 'string'
           ? state.value
           : (Object.keys(state.value)[0] ?? 'unknown'),
+      context: state.context as TContext,
       currentRound,
       roundIndex,
       levelIndex,
       totalRounds,
+      retryCount,
       isLastRound: roundIndex + 1 >= totalRounds,
       send: (event) => send(event as never),
       // PR 1a Spec Delta 2: PR 1b populates from context.activeCelebration.
