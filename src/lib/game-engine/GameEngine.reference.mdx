@@ -135,3 +135,176 @@ interface AnswerGameDraftState {
 
 Fields excluded from draft: `config` (reconstructed from game config), `dragActiveTileId`
 (transient), `dragHoverZoneIndex`, `dragHoverBankTileId` (transient).
+
+---
+
+## XState engine (PR 1a foundation)
+
+PR 1a introduces a per-game XState machine alongside the legacy
+`GameEngineProvider` above. The XState machine owns the per-round
+lifecycle (phase transitions, round-advance timing, `game:end`
+emission) and sits inside the `playing` state of the legacy lifecycle.
+The two coexist until PR 1c.
+
+Source: `src/lib/game-engine/useGameEngine.ts`,
+`src/lib/game-engine/definition-types.ts`,
+`src/lib/game-engine/side-effects.ts`.
+
+### `useGameEngine(definition, options?)`
+
+```ts
+const engine = useGameEngine<TRound, TContext>(
+  definition,
+  options?,
+): UseGameEngineResult<TContext>;
+```
+
+`options`:
+
+| Field         | Type                      | Description                                                                                                                 |
+| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                 | Populates the machine's initial context via XState v5's `setup({ types: { input } })` + `useMachine(machine, { input })`    |
+| `envelope`    | `Partial<EngineEnvelope>` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
+| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
+| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+
+`UseGameEngineResult<TContext>`:
+
+| Field          | Type                                | Description                                                                                                        |
+| -------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `phase`        | `string`                            | Current state value (camelCase: `playing`, `roundComplete`, `waitingForNext`, `gameOver`, …)                       |
+| `context`      | `TContext`                          | The machine's full context. Cast at consume time via the generic (e.g., `NumberMatchEngineContext`)                |
+| `currentRound` | `RoundOutput`                       | Reads `context.lastRoundOutput` if present                                                                         |
+| `roundIndex`   | `number`                            | Reads `context.roundIndex`                                                                                         |
+| `levelIndex`   | `number`                            | Reads `context.levelIndex`                                                                                         |
+| `totalRounds`  | `number`                            | Reads `context.totalRounds`                                                                                        |
+| `retryCount`   | `number`                            | Reads `context.retryCount`                                                                                         |
+| `isLastRound`  | `boolean`                           | `roundIndex + 1 >= totalRounds`                                                                                    |
+| `send`         | `(event: GameMachineEvent) => void` | Cast to the machine's `send`. Send any event the machine declares (cast via `as never` at the call site if needed) |
+| `celebrating`  | `CelebrationConfig \| null`         | Always `null` in PR 1a; PR 1b populates from `context.activeCelebration`                                           |
+
+The hook wraps `definition.machine.provide({ guards, actions })` in
+`useMemo` so the machine is stable across renders. `useMachine`
+returns a stable `send`; the wrapper around it is recreated on every
+machine state change but always reaches the same underlying actor.
+
+### Engine-injected guards and actions
+
+`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
+for the placeholder guards declared in each game's `setup({ guards })`:
+
+```ts
+isMidLevelRound: ({ context }) =>
+  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &&
+  context.roundIndex + 1 < totalRounds;
+isLastRoundOfLevel: ({ context }) =>
+  (context.roundIndex + 1) % max(levelSize, 1) === 0 &&
+  context.roundIndex + 1 < totalRounds;
+isLastRound: ({ context }) => context.roundIndex + 1 >= totalRounds;
+```
+
+Engine-injected actions (overridden by `useGameEngine.provide`):
+
+| Action         | Params                | Side effect                                                                                                                                   |
+| -------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `speak`        | `{ lifecycleEvent }`  | Emits `lifecycle:speak` via `executeSideEffects`                                                                                              |
+| `emit`         | `{ event }`           | Emits an arbitrary `GameEvent` via `executeSideEffects`                                                                                       |
+| `completeGame` | —                     | Emits `game:end` with `gameId`/`sessionId`/`profileId` from envelope and `roundIndex`/`totalRounds`/`retryCount` from current machine context |
+| `playSound`    | `{ sound: SoundKey }` | Calls `AudioFeedback.playSound(params.sound)`                                                                                                 |
+
+In-definition guards (real bodies, not overridden) live on the game
+definition itself. `numberMatchDefinition` declares `allFilledCorrectly`
+and `canEject`; PR 1b games declare their own predicates as needed.
+
+### `GameEngineContext` + `useGameEngineContext()`
+
+```ts
+const GameEngineContext: React.Context<GameEngineContextValue | null>;
+const useGameEngineContext = <TRound>(): GameEngineContextValue<TRound>;
+```
+
+`GameEngineContextValue` is
+`{ definition: GameDefinition<TRound>, engine: UseGameEngineResult }`.
+
+Wrap a tree in `<GameEngineContext.Provider value={{ definition, engine }}>`
+to expose the engine to descendants (e.g., a future `useLifecycleTTS`
+that reads `definition.tts`). NumberMatch in PR 1a does not use this
+context — the engine is passed to `NumberMatchSession` as a prop.
+PR 1b uses the context when `useGameRound` adopts the engine.
+
+### `GameDefinition<TRound>`
+
+```ts
+interface GameDefinition<TRound = unknown> {
+  id: string;
+  interaction: 'drag-to-slot' | 'tap-select';
+  slotInteraction?: 'ordered' | 'free-swap';
+  machine: AnyStateMachine;
+  buildRound: (ctx: PhaseContext) => TRound;
+  tts?: Partial<Record<LifecycleEvent, EventTemplate>>;
+}
+```
+
+PR 1a Spec Delta: `buildRound` is a passthrough for NumberMatch
+(`(ctx) => ({ roundIndex: ctx.roundIndex })`). Round construction
+stays in the React component (`buildNumeralRound`) for PR 1a; PR 1b
+lifts it into `definition.ts` once WordSpell + SortNumbers migrate.
+
+### `executeSideEffects`
+
+```ts
+const executeSideEffects = (
+  effects: SideEffect[],
+  envelope: { gameId; sessionId; profileId; roundIndex },
+  onDelayDone?: () => void,
+): { cancel: () => void };
+```
+
+`SideEffect` is
+`{ type: 'emit'; event } | { type: 'speak'; lifecycleEvent } | { type: 'delay'; ms }`.
+Used by `useGameEngine`'s injected actions; not called directly by game
+components.
+
+### Dispatch bridge — `AnswerGameProvider.engineDispatch`
+
+XState-first games pass `engine.send` (wrapped in a stable callback)
+to `AnswerGameProvider` via the `engineDispatch` prop (or to
+`<AnswerGame engineDispatch={...} />` which forwards through). The
+provider mirrors every reducer dispatch — including its own internal
+`INIT_ROUND`/`RESUME_ROUND` mount effect — so the engine receives the
+seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
+`AnswerGame.reference.mdx` Context API section for details.
+
+### PR 1a Spec Deltas (vs the original PR 1a plan)
+
+1. `useGameEngine` signature simplified — dropped `adapter` and
+   `dispatch` params. NumberMatch dispatches through `engine.send`
+   (mirrored from the answer-game reducer via the `engineDispatch`
+   prop on `AnswerGameProvider`). No reducer adapter used.
+2. `celebrating: null` placeholder; PR 1b populates from
+   `context.activeCelebration`.
+3. Dropped speculative engine actors (`celebrationActor`,
+   `levelCelebrationActor`, `gameOverActor`, `phonemeSequenceActor`).
+   NumberMatch uses XState's built-in `after: { 750: ... }` instead.
+4. `InteractionAdapter<TAction>` and `answerGameAdapter` not created
+   (no PR 1a consumer).
+5. Dropped engine actions with no PR 1a caller (`advanceRound`,
+   `advanceLevel`, `buildRound`). Kept `speak`, `emit`,
+   `completeGame`, `playSound`.
+6. `buildEngineGuards` + `EngineGuards` type exported so
+   game-definition tests can `createActor(machine.provide({ guards: buildEngineGuards(…) }))`
+   with real bodies instead of `setup` placeholders.
+7. `useGameEngine` exposes `context: TContext` and `retryCount: number`
+   on the result. Needed by NumberMatch's component to destructure
+   `zones` / `retryCount` from engine state.
+8. `completeGame` emits `game:end` with `roundIndex` from machine
+   context (not `envelope.roundIndex`, which is fixed at engine
+   creation time). Behavioral parity with the prior `useEffect`-based
+   emission.
+9. Dispatch-bridge is implemented as `engineDispatch` on
+   `AnswerGameProvider` (not a context-override component in the
+   game). `KeyboardInputAdapter` is a sibling of children inside
+   `AnswerGameProvider`, so a child-side bridge can't intercept its
+   dispatches.
+10. NumberMatch's engine is held by an inner `NumberMatchInstance`
+    keyed by `sessionEpoch` so the actor remounts on Play Again.
