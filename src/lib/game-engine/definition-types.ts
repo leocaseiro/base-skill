@@ -47,12 +47,14 @@ export type GameMachineEvent =
   | { type: 'NEXT' }
   | { type: 'CELEBRATION_DONE'; skipMethod?: 'play-again' | 'go-home' };
 
-export interface UseGameEngineResult {
+export interface UseGameEngineResult<TContext = unknown> {
   phase: string;
+  context: TContext;
   currentRound: RoundOutput;
   roundIndex: number;
   levelIndex: number;
   totalRounds: number;
+  retryCount: number;
   isLastRound: boolean;
   send: (event: GameMachineEvent) => void;
   celebrating: CelebrationConfig | null;

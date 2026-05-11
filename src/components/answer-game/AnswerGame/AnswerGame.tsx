@@ -1,6 +1,10 @@
 import { AnswerGameProvider } from '../AnswerGameProvider';
 import { ProgressHUDRoot } from '../ProgressHUD/ProgressHUDRoot';
-import type { AnswerGameConfig, AnswerGameDraftState } from '../types';
+import type {
+  AnswerGameAction,
+  AnswerGameConfig,
+  AnswerGameDraftState,
+} from '../types';
 import type { GameSkin } from '@/lib/skin';
 import type { ReactNode } from 'react';
 
@@ -15,6 +19,12 @@ interface AnswerGameProps {
    * here.
    */
   skin?: GameSkin;
+  /**
+   * PR 1a XState-first seam: forwarded to AnswerGameProvider so every
+   * reducer dispatch is mirrored to the game's XState machine. See
+   * AnswerGameProvider for details.
+   */
+  engineDispatch?: (action: AnswerGameAction) => void;
   children: ReactNode;
 }
 
@@ -23,12 +33,14 @@ const AnswerGameRoot = ({
   initialState,
   sessionId,
   skin,
+  engineDispatch,
   children,
 }: AnswerGameProps) => (
   <AnswerGameProvider
     config={config}
     initialState={initialState}
     sessionId={sessionId}
+    engineDispatch={engineDispatch}
   >
     <div className="flex min-h-0 w-full flex-col items-center">
       <ProgressHUDRoot skin={skin} />
