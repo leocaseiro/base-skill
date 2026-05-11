@@ -308,3 +308,60 @@ seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
    dispatches.
 10. NumberMatch's engine is held by an inner `NumberMatchInstance`
     keyed by `sessionEpoch` so the actor remounts on Play Again.
+
+### Per-game machine contexts (PR 1b)
+
+#### `WordSpellEngineContext`
+
+Identical field set to `NumberMatchEngineContext` (see
+`src/games/number-match/definition.ts`). Per Spec Delta 3, WordSpell
+does **not** carry `firstActionAt` or `selectedSlotIds` — PR 1b-bis
+introduces them when the timestamp write and Set toggle land.
+
+| Field                 | Type                                             | Notes                                              |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                    |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                  |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked` |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                   |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                               |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                               |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                     |
+| `retryCount`          | `number`                                         | Wrong placements this round                        |
+| `roundIndex`          | `number`                                         | 0-based current round                              |
+| `levelIndex`          | `number`                                         | Always `0` at runtime — WordSpell never advances   |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                         |
+| `maxLevels`           | `number \| null`                                 | Always `null` — WordSpell has no level mode        |
+| `wrongTileBehavior`   | `'reject' \| 'lock-manual' \| 'lock-auto-eject'` | Defaults to `'lock-auto-eject'`                    |
+| `isLevelMode`         | `boolean`                                        | Always `false` for WordSpell                       |
+
+#### `SortNumbersEngineContext`
+
+Same field set as `WordSpellEngineContext`, with two semantic
+differences:
+
+- `levelIndex` is read at runtime — the machine increments it via the
+  `ADVANCE_LEVEL` handler and `LevelCompleteOverlay` reads it for the
+  level title.
+- `roundIndex` accumulates across level boundaries (see
+  `GameEngine.flows.mdx` §5c). The engine guards
+  (`isLastRound: roundIndex + 1 >= totalRounds`) only fire correctly
+  with cumulative `roundIndex`. The reducer mirror still resets
+  `roundIndex` per level for HUD display until PR 1c.
+
+| Field                 | Type                                             | Notes                                                |
+| --------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                      |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                    |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked`   |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                     |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                                 |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                                 |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                       |
+| `retryCount`          | `number`                                         | Wrong placements this round                          |
+| `roundIndex`          | `number`                                         | Cumulative across level boundaries (engine semantic) |
+| `levelIndex`          | `number`                                         | 0-based current level                                |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                           |
+| `maxLevels`           | `number \| null`                                 | From `useGameEngine` input                           |
+| `wrongTileBehavior`   | `'reject' \| 'lock-manual' \| 'lock-auto-eject'` | Defaults to `'lock-auto-eject'`                      |
+| `isLevelMode`         | `boolean`                                        | `true` when the config declares a level mode         |
