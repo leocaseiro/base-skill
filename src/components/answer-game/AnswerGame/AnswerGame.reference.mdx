@@ -119,6 +119,36 @@ export const useAnswerGameContext = (): AnswerGameState
 export const useAnswerGameDispatch = (): Dispatch<AnswerGameAction>
 ```
 
+### Provider props
+
+```tsx
+<AnswerGameProvider
+  config={AnswerGameConfig}
+  initialState={AnswerGameDraftState | undefined}
+  sessionId={string | undefined}
+  engineDispatch={(action) => void | undefined}
+>
+  {children}
+</AnswerGameProvider>
+```
+
+PR 1a adds the optional `engineDispatch` prop. When set, every reducer
+dispatch — including the provider's own mount-effect `INIT_ROUND` /
+`RESUME_ROUND` plus every `PLACE_TILE` / `TYPE_TILE` / etc. from
+`Slot`, `NumeralTileBank`, `useKeyboardInput`, and `useTouchKeyboardInput`
+— is mirrored to `engineDispatch`. XState-first games (NumberMatch in
+PR 1a; WordSpell + SortNumbers in PR 1b; SpotAll in PR 1d) pass their
+`useGameEngine(...).send` (wrapped in a stable callback via `useRef`)
+so the per-game XState machine receives the same events as the reducer.
+PR 1c removes the reducer; until then, both run in parallel and the
+dispatch bridge keeps them in sync.
+
+The wrapped dispatch is built with `useCallback` (empty deps) and reads
+the latest `engineDispatch` via a `useRef`, so its identity is stable
+even when the engine's `send` is recreated on each machine state
+transition. Stable dispatch identity prevents the mount-effect from
+re-firing `INIT_ROUND`/`RESUME_ROUND` when the engine changes.
+
 ### Consumers of the state context
 
 - `ProgressHUDRoot` (`ProgressHUD/ProgressHUDRoot.tsx`) reads `config`,

@@ -1,4 +1,4 @@
-type SoundKey =
+export type SoundKey =
   | 'correct'
   | 'wrong'
   | 'round-complete'

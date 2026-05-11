@@ -105,6 +105,45 @@ describe('NumberMatch', () => {
   });
 });
 
+describe('NumberMatch round-complete overlay', () => {
+  it('mounts the round-complete effect exactly once during the celebration window', async () => {
+    const multiRoundConfig: NumberMatchConfig = {
+      gameId: 'number-match-test',
+      component: 'NumberMatch',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 3,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      mode: 'numeral-to-group',
+      tileStyle: 'dots',
+      range: { min: 1, max: 5 },
+      rounds: [{ value: 1 }, { value: 2 }, { value: 3 }],
+    };
+
+    render(<NumberMatch config={multiRoundConfig} />);
+
+    // Type '1' to complete round 1 — `useKeyboardInput` dispatches TYPE_TILE,
+    // AnswerGameProvider mirrors it to the engine, the XState machine's
+    // `always` transition fires when the only zone is filled correctly.
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: '1', bubbles: true }),
+      );
+    });
+
+    // The XState `roundComplete` state's entry mounts the celebration
+    // overlay. Wait for it to appear and assert single-mount in the same
+    // step — the regression we guard against is the prior `setTimeout`
+    // race re-mounting the effect.
+    const overlays = await screen.findAllByRole('status', {
+      name: 'Round complete!',
+    });
+    expect(overlays).toHaveLength(1);
+  });
+});
+
 describe('NumberMatch Play again', () => {
   it('resets the game to round 1 after game-over with roundsInOrder: true', async () => {
     const user = userEvent.setup();

@@ -45,3 +45,100 @@ describe('TypedGameEventBus', () => {
     expect(seen).toEqual([]);
   });
 });
+
+describe('celebration events', () => {
+  it('emits and receives celebration:start', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:start', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:start',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(received[0]?.type).toBe('celebration:start');
+  });
+
+  it('emits and receives celebration:complete with durationMs', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:complete', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:complete',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+      durationMs: 12_000,
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(
+      (received[0] as GameEvent & { durationMs: number }).durationMs,
+    ).toBe(12_000);
+  });
+
+  it('emits and receives celebration:skip with skipMethod', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:skip', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:skip',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+      durationMs: 1500,
+      skipMethod: 'play-again',
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(
+      (received[0] as GameEvent & { skipMethod: string }).skipMethod,
+    ).toBe('play-again');
+  });
+});
+
+describe('lifecycle:speak event', () => {
+  it('emits and receives lifecycle:speak with lifecycleEvent', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('lifecycle:speak', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'lifecycle:speak',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      lifecycleEvent: 'round.start',
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(received[0]?.type).toBe('lifecycle:speak');
+  });
+});

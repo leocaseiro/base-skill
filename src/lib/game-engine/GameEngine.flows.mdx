@@ -101,3 +101,123 @@ sequenceDiagram
     Provider-->>Provider: reset round to 0
   end
 ```
+
+---
+
+## XState engine (PR 1a foundation)
+
+PR 1a introduces a per-game XState machine that owns the round-level
+lifecycle (`playing` / `roundComplete` / `waitingForNext` / `gameOver`).
+The legacy `lifecycle.ts` reducer above continues to drive the outer
+session shell; the two coexist until PR 1c collapses them. The XState
+machine is created by `useGameEngine(definition, options?)` and consumed
+by the per-game component (NumberMatch is the canonical example for
+PR 1a; WordSpell + SortNumbers migrate in PR 1b, SpotAll in PR 1d).
+
+### 5. Per-round phase machine (NumberMatch as the canonical example)
+
+```mermaid
+stateDiagram-v2
+  [*] --> playing
+
+  playing --> playing : PLACE_TILE / TYPE_TILE / REMOVE_TILE / SWAP_TILES / EJECT_TILE / SWAP_SLOT_BANK / SET_ACTIVE_SLOT / REJECT_TAP
+  playing --> roundComplete : always [allFilledCorrectly]
+
+  roundComplete --> gameOver : after 750ms [isLastRound]
+  roundComplete --> waitingForNext : after 750ms
+  roundComplete --> gameOver : CELEBRATION_DONE [isLastRound]
+  roundComplete --> waitingForNext : CELEBRATION_DONE
+
+  waitingForNext --> playing : ADVANCE_ROUND
+```
+
+- Round-complete detection is atomic: each game-state `assign` action
+  mutates `context.zones`, XState re-evaluates `playing.always`, and the
+  machine transitions to `roundComplete` in the same step. No React
+  `useEffect` race window.
+- `gameOver` is a regular state (not `type: 'final'`) so root-level
+  handlers (`INIT_ROUND`, `RESUME_ROUND`) keep firing for defense in
+  depth. "Play Again" works via parent re-mount; the machine never
+  models RESTART.
+- `levelComplete` is not in PR 1a's NumberMatch slice. PR 1b adds it
+  alongside WordSpell + SortNumbers when they introduce level mode.
+
+### 6. Side-effect flow
+
+```mermaid
+sequenceDiagram
+  participant Machine as XState machine
+  participant Engine as useGameEngine
+  participant Effects as executeSideEffects
+  participant Bus as GameEventBus
+  participant Subscribers as Subscribers
+  participant Audio as AudioFeedback
+
+  Machine->>Engine: entry action — { type: 'playSound', params: { sound: 'round-complete' } }
+  Engine->>Audio: playSound(params.sound)
+
+  Machine->>Engine: entry action — { type: 'speak', params: { lifecycleEvent: 'game.over' } }
+  Engine->>Effects: executeSideEffects([{ type: 'speak', lifecycleEvent: 'game.over' }], envelope)
+  Effects->>Bus: emit({ type: 'lifecycle:speak', ...envelope, lifecycleEvent: 'game.over' })
+  Bus->>Subscribers: notify
+
+  Machine->>Engine: entry action — completeGame
+  Engine->>Effects: executeSideEffects([{ type: 'emit', event: { type: 'game:end', ... } }], envelope)
+  Effects->>Bus: emit(game:end event)
+```
+
+PR 1a has no subscriber for `lifecycle:speak` — `useLifecycleTTS`
+lands in a follow-up task. The bus is the seam, so subscribers can be
+added without touching the machine. Prompt TTS (`useRoundTTS`) is
+unchanged from the legacy flow.
+
+### 7. Dispatch bridge (AnswerGameProvider engineDispatch prop)
+
+```mermaid
+sequenceDiagram
+  participant Component as Game Component
+  participant Slot as Slot / NumeralTileBank / KeyboardInputAdapter
+  participant Provider as AnswerGameProvider
+  participant Reducer as answerGameReducer
+  participant Engine as XState machine
+
+  Component->>Provider: engineDispatch={engine.send}
+  Slot->>Provider: dispatch(PLACE_TILE)
+  Provider->>Reducer: rawDispatch(PLACE_TILE)
+  Provider->>Engine: engineDispatch(PLACE_TILE)
+  Engine-->>Engine: assign zones, evaluate `always`, transition if all zones correct
+
+  Note over Provider: Wrapped dispatch fires for INTERNAL\n  INIT_ROUND/RESUME_ROUND too, so engine\n  receives the initial round seed without\n  any explicit useEffect in the game component.
+```
+
+`useGameEngine` lives in the game component (e.g., `NumberMatch.tsx`).
+`engine.send` is wrapped in a stable callback via `useRef` and passed
+as `engineDispatch`. `AnswerGameProvider` wraps its `rawDispatch` with
+a `useCallback` (empty deps; stable identity) that mirrors every
+action to the latest `engineDispatch`. Internal dispatches
+(`INIT_ROUND` from the mount effect, `RESUME_ROUND` from session
+drafts) route through the same wrapped dispatch.
+
+### 8. Celebration semantics (PR 1a scope)
+
+PR 1a does **not** emit `celebration:start | complete | skip` events
+from the engine; the overlay is rendered by the game component gated
+on `engine.phase`:
+
+- `engine.phase === 'roundComplete'` → render
+  `<skin.RoundCompleteEffect />` or fallback `<ScoreAnimation />`
+- `engine.phase === 'gameOver'` → render `<skin.CelebrationOverlay />`
+  or fallback `<GameOverOverlay />`
+
+PR 1b adds engine-emitted `celebration:*` events alongside `useGameRound`
+adoption.
+
+### 9. Coexistence note
+
+The legacy `lifecycle.ts` reducer continues to drive the outer game
+session shell (`idle → loading → instructions → playing → …`) until
+PR 1c. The XState machine owns the per-round phase machine inside
+`playing`. Two reducers run in parallel: the answer-game reducer for
+tile positions (Slot/NumeralTileBank rendering) and the XState machine
+for lifecycle/phase (overlay gating, round-advance timing,
+`game:end` emission). The dispatch bridge (§7) keeps them in sync.
