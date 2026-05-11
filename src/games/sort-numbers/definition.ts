@@ -527,6 +527,14 @@ const sortNumbersMachine = setup({
     incrementLevelIndex: assign(({ context }) => ({
       levelIndex: context.levelIndex + 1,
     })),
+    // Plan deviation (see Spec Delta note below):
+    // `advanceLevelState` does NOT reset `roundIndex` to 0. The engine
+    // guards (`isLastRound: roundIndex + 1 >= totalRounds`) only work
+    // when `roundIndex` accumulates across level boundaries. The reducer
+    // resets roundIndex on ADVANCE_LEVEL (legacy semantics, kept until
+    // PR 1c removes the reducer); the engine intentionally diverges so
+    // `isLastRound` fires correctly on the last round of the last level.
+    // The HUD reads reducer state, which still resets per level.
     advanceLevelState: assign(({ event }) => {
       if (event.type !== 'ADVANCE_LEVEL') return {};
       return {
@@ -538,7 +546,6 @@ const sortNumbersMachine = setup({
         dragHoverZoneIndex: null,
         dragHoverBankTileId: null,
         retryCount: 0,
-        roundIndex: 0,
       } satisfies Partial<SortNumbersEngineContext>;
     }),
   },
@@ -614,7 +621,11 @@ const sortNumbersMachine = setup({
       ],
       on: {
         ADVANCE_LEVEL: {
-          actions: ['incrementLevelIndex', 'advanceLevelState'],
+          actions: [
+            'incrementRoundIndex',
+            'incrementLevelIndex',
+            'advanceLevelState',
+          ],
           target: 'playing',
         },
       },
