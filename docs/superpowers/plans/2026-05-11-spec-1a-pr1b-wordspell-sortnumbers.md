@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Migrate **WordSpell** and **SortNumbers** end-to-end to XState-first by mirroring NumberMatch's PR 1a pattern. Add the `levelComplete` machine state for SortNumbers' level progression. Drop `useGameSounds` from both games and gate overlays directly on `engine.phase`. Populate `firstActionAt`/`selectedSlotIds` placeholder fields in both new machines (shape parity with NumberMatch). Append WordSpell + SortNumbers sections to the engine architecture MDX. **Do not** delete `answer-game-reducer.ts` (PR 1c owns that).
+**Goal:** Migrate **WordSpell** and **SortNumbers** end-to-end to XState-first by mirroring NumberMatch's PR 1a pattern. Add the `levelComplete` machine state for SortNumbers' level progression. Drop `useGameSounds` from both games and gate overlays directly on `engine.phase`. Append WordSpell + SortNumbers sections to the engine architecture MDX. **Do not** delete `answer-game-reducer.ts` (PR 1c owns that). **Do not** add `firstActionAt`/`selectedSlotIds` to the new machine contexts (Spec Delta 3 — PR 1b-bis introduces them with real semantics).
 
 **Architecture:** Per-game XState machine context owns all per-game state (tiles, zones, drag, retryCount, roundIndex, levelIndex, phase). The game component lifts the engine into an inner `<Game>Instance` keyed by `sessionEpoch` so "Play again" remounts the actor cleanly. `<AnswerGameProvider engineDispatch={...} />` continues to mirror reducer actions into the machine until PR 1c removes the reducer.
 
@@ -18,17 +18,27 @@ The handoff prompt described a broader scope than PR 1b can land in one PR. The 
 
 1. **`useGameRound` adoption is deferred to PR 1b-bis.** The hook does not exist in the codebase yet; only the spec + 2026-05-11 Spec Delta are written. Building it (with reducer + engine dual paths per Spec Delta) is itself ~1–2 days. PR 1b ships the XState foundation that PR 1b-bis can then adopt without further game-component surgery. **Why now is fine:** WordSpell and SortNumbers already have working round-advance `useEffect`s; rewriting them twice (once for engine direct, again for `useGameRound`) is churn. PR 1b uses the same engine-direct pattern as NumberMatch in PR 1a.
 
-2. **`round:first-action`, `round:mistake`, `round:resolved` event emission is deferred to PR 1b-bis.** The `round:*` event types do not exist in `src/types/game-events.ts`. The `GameEventBus` wildcard support for `round:*` is also unbuilt. PR 1b populates the context fields (`firstActionAt`, `selectedSlotIds`) so the shape is ready for PR 1b-bis to wire emission. **Why now is fine:** no current subscriber (SRS, lifecycle TTS) consumes these events; they only matter when `useGameRound` + the bus changes land. Populating the context shape now keeps PR 1b-bis a pure wiring PR.
+2. **`round:first-action`, `round:mistake`, `round:resolved` event emission is deferred to PR 1b-bis.** The `round:*` event types do not exist in `src/types/game-events.ts`. The `GameEventBus` wildcard support for `round:*` is also unbuilt. PR 1b-bis introduces both the supporting context fields (see Spec Delta 3) AND the event emission in a single PR. **Why now is fine:** no current subscriber (SRS, lifecycle TTS) consumes these events; they only matter when `useGameRound` + the bus changes land.
 
-3. **`firstActionAt` and `selectedSlotIds` are placeholder fields in PR 1b (reset on init/advance only, no timestamp write).** NumberMatch's PR 1a machine already initialises them to `null` / `new Set()` and resets them on `INIT_ROUND` / `ADVANCE_ROUND`. WordSpell and SortNumbers do the same. The actual `firstActionAt: Date.now()` write on first interaction and `selectedSlotIds` toggle on `SELECT_SLOT` land in PR 1b-bis alongside the event emission. **Why now is fine:** zero call sites read these fields today; the contract is "field exists with correct type and reset cadence."
+3. **`firstActionAt` and `selectedSlotIds` are NOT added to WordSpell or SortNumbers in PR 1b.** PR 1b-bis introduces them in all three definitions alongside the real `firstActionAt: Date.now()` write and the `selectedSlotIds` toggle on `SELECT_SLOT`. NumberMatch's PR 1a machine already carries them as placeholders; WordSpell and SortNumbers do **not** add them now because shape parity without consumers buys nothing for PR 1b. **Why now is fine:** definition files are net-new in this PR — PR 1b-bis introduces the fields when it ships their real semantics, with zero migration cost. Adding them now would bake assign-action branches, TypeScript surface, and test assertions into a contract before any consumer exists.
 
 4. **`buildRound` stays a passthrough in WordSpell + SortNumbers definitions (Spec Delta 6 from PR 1a continues).** Round construction stays in the React component (`buildSentenceGapRound`, `buildTilesAndZones`, `buildSortRound`). The component dispatches `ADVANCE_ROUND { tiles, zones }` and the machine's `advanceRoundState` assign action populates context. PR 1c lifts round construction into definition.ts once all three games are migrated. **Why now is fine:** matches the proven NumberMatch pattern; lifting now would need three game-specific closure shapes converged in one PR.
 
 5. **`useGameSounds` deletion is absorbed in PR 1b** (PR 1a Spec Delta 1 deferred this here). After migration, no game consumes `useGameSounds`, so `useGameSounds.ts` + `useGameSounds.test.tsx` are deleted. **Why now is fine:** the gate-boolean pattern was a workaround for reducer-driven phase races; XState machines fire `playSound` declaratively from `entry: [...]` actions and overlays gate on `engine.phase` — both replace the hook completely.
 
-6. **`answer-game-reducer.ts` is not deleted.** PR 1c owns reducer deletion. PR 1b keeps the reducer in place because the `engineDispatch` bridge requires `useReducer` to still run inside `AnswerGameProvider`. `Slot`, `LetterTileBank`, `SortNumbersTileBank`, and `useTouchKeyboardInput` still read reducer state via `AnswerGameStateContext`. The migrated games read primary state from `engine.context`, but the surrounding answer-game primitives keep their reducer-backed reads until PR 1c.
+6. **`answer-game-reducer.ts` is not deleted.** PR 1c owns reducer deletion. PR 1b keeps the reducer in place because the `engineDispatch` bridge requires `useReducer` to still run inside `AnswerGameProvider`. The following components/hooks continue to read reducer state via `useAnswerGameContext()` and **must stay in lockstep with the engine via the dispatch mirror** until PR 1c migrates them:
+   - `Slot/Slot.tsx`, `Slot/useSlotBehavior.ts` — zone reads
+   - `LetterTileBank/LetterTileBank.tsx`, `SortNumbersTileBank/SortNumbersTileBank.tsx`, `NumeralTileBank/NumeralTileBank.tsx` — bank reads
+   - `useTouchKeyboardInput.ts`, `useKeyboardInput.ts`, `HiddenKeyboardInput.tsx` — input handlers, with `HiddenKeyboardInput` reading kebab-case `phase` to gate auto-focus
+   - `ProgressHUD/ProgressHUDRoot.tsx` — reads `{ phase, roundIndex, levelIndex, isLevelMode }` from the reducer; HUD stays reducer-driven until PR 1c
+   - `useRoundTTS.ts`, `useGameTTS.ts`, `useTileEvaluation.ts`, `useAutoNextSlot.ts`, `useSlotTileDrag.ts`, `useDraggableTile.ts`, `useFreeSwap.ts` — answer-game primitives
+   - `AudioButton.tsx` — reads `config`
+
+   The migrated games (`NumberMatch.tsx`, `WordSpell.tsx`, `SortNumbers.tsx`) read primary state from `engine.context`. Every other reader stays reducer-backed in PR 1b. **Reducer-phase strings remain kebab-case (`'round-complete'`, `'game-over'`); engine-phase strings are camelCase (`'roundComplete'`, `'gameOver'`).** Anyone removing the reducer's phase mirror before PR 1c will silently break the HUD and the hidden-keyboard auto-focus during celebration windows.
 
 7. **WordSpell's `slotInteraction` stays mode-driven (`'free-swap' | 'ordered'`).** The current logic — `mode === 'sentence-gap' ? 'free-swap' : 'ordered'` — is preserved in the migrated component. The machine itself does not branch on slotInteraction; the value is forwarded to `AnswerGameConfig` so existing `Slot` rendering keeps working.
+
+8. **SortNumbers `roundAdvanceDelay` overrides are silently dropped in PR 1b.** The current SortNumbers code uses `resolveTiming('roundAdvanceDelay', skin, sortNumbersConfig.timing)` — which honors **two** override paths: (a) skin tokens via `GameSkin.timing.roundAdvanceDelay` and (b) per-config `AnswerGameConfig.timing.roundAdvanceDelay`. The XState machine hardcodes `after: 750` and ignores both. PR 1c will wire timing through `useGameEngine` options; until then, both override surfaces stop working. **Why now is fine:** Task 9 Step 1 audits `src/lib/skin` **and** all `timing:` use across `src` for active overrides; if none exist in production code today, the regression is silent. If any exist, surface to the user before continuing.
 
 ---
 
@@ -114,7 +124,7 @@ yarn test --run src/games/number-match/definition.test.ts
 yarn typecheck
 ```
 
-Expected: all NumberMatch machine tests pass (29 tests in the canonical reference file), typecheck clean. If anything fails, stop and ask — you cannot distinguish your bugs from a broken baseline.
+Expected: all NumberMatch machine tests pass (33 tests in the canonical reference file), typecheck clean. If anything fails, stop and ask — you cannot distinguish your bugs from a broken baseline.
 
 ---
 
@@ -127,7 +137,7 @@ Expected: all NumberMatch machine tests pass (29 tests in the canonical referenc
 
 Mirror NumberMatch's `definition.ts` shape (1:1 except for the WordSpell-specific concerns documented below).
 
-**WordSpell-specific context fields:** none new beyond NumberMatch. WordSpell shares all the same context fields (`allTiles`, `bankTileIds`, `zones`, `activeSlotIndex`, `dragActiveTileId`, `dragHoverZoneIndex`, `dragHoverBankTileId`, `retryCount`, `roundIndex`, `levelIndex`, `totalRounds`, `maxLevels`, `wrongTileBehavior`, `isLevelMode`, `firstActionAt`, `selectedSlotIds`). The differences are:
+**WordSpell-specific context fields:** none new beyond NumberMatch (minus `firstActionAt`/`selectedSlotIds` per Spec Delta 3). WordSpell carries (`allTiles`, `bankTileIds`, `zones`, `activeSlotIndex`, `dragActiveTileId`, `dragHoverZoneIndex`, `dragHoverBankTileId`, `retryCount`, `roundIndex`, `levelIndex`, `totalRounds`, `maxLevels`, `wrongTileBehavior`, `isLevelMode`). The differences are:
 
 - `levelIndex` and `maxLevels` are present but unused at runtime (`maxLevels: null` always).
 - `isLevelMode` is always `false`.
@@ -244,9 +254,6 @@ describe('WordSpell machine — happy path', () => {
     expect(snap.value).toBe('playing');
     expect(context().roundIndex).toBe(0);
     expect(context().bankTileIds).toEqual(['t1', 't2', 't3']);
-    expect(context().firstActionAt).toBeNull();
-    expect(context().selectedSlotIds).toBeInstanceOf(Set);
-    expect((context().selectedSlotIds as Set<string>).size).toBe(0);
   });
 });
 ```
@@ -285,8 +292,9 @@ export interface WordSpellEngineContext {
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
   isLevelMode: boolean;
-  firstActionAt: number | null;
-  selectedSlotIds: Set<string>;
+  // NOTE (Spec Delta 3): firstActionAt and selectedSlotIds are introduced
+  // in PR 1b-bis alongside the timestamp write and selectedSlotIds toggle.
+  // PR 1b does not include them.
 }
 
 interface WordSpellInput {
@@ -388,8 +396,6 @@ const wordSpellMachine = setup({
         dragHoverBankTileId: null,
         retryCount: 0,
         roundIndex: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
       } satisfies Partial<WordSpellEngineContext>;
     }),
 
@@ -428,8 +434,6 @@ const wordSpellMachine = setup({
     maxLevels: input.maxLevels,
     wrongTileBehavior: input.wrongTileBehavior,
     isLevelMode: input.maxLevels !== null,
-    firstActionAt: null,
-    selectedSlotIds: new Set<string>(),
   }),
   on: {
     INIT_ROUND: { actions: 'initRound' },
@@ -461,6 +465,8 @@ const wordSpellMachine = setup({
         { type: 'playSound', params: { sound: 'round-complete' } },
       ],
       after: {
+        // TODO(PR 1c): wire from useGameEngine options to restore
+        // skin.timing.roundAdvanceDelay and config.timing.roundAdvanceDelay overrides.
         750: [
           { guard: 'isLastRound', target: 'gameOver' },
           { target: 'waitingForNext' },
@@ -518,6 +524,69 @@ git commit -m "feat(word-spell): scaffold XState machine skeleton
 PR 1b U1: introduces wordSpellMachine + wordSpellDefinition mirroring
 NumberMatch's PR 1a shape. Assign actions are stubs in this commit;
 Task 2 fills them in."
+```
+
+---
+
+## Task 1a: Exclude Celebration Phases From Draft Persistence
+
+**Files:**
+
+- Modify: `src/components/answer-game/useAnswerGameDraftSync.ts`
+- Modify: `src/components/answer-game/useAnswerGameDraftSync.test.tsx` (or co-located test)
+
+**Why this task exists:** The reducer persists `phase` into the draft. `useAnswerGameDraftSync` currently excludes only `phase === 'game-over'` from persistence. Under the XState migration, if a user closes the tab during the 750 ms celebration window after completing a round, the reducer's `RESUME_ROUND` restores `phase: 'round-complete'` (kebab-case) while the engine's `resumeRound` ignores phase and starts in `playing`. The engine's `playing.always` guard catches `allFilledCorrectly` and re-fires the celebration sound + 750 ms after-timer — the user replays the celebration they already finished. Same path applies to `'level-complete'` resume in SortNumbers.
+
+The fix is symmetric with the existing `'game-over'` exclusion and lands in PR 1b because it's a regression introduced by the engine's `always` guard.
+
+- [ ] **Step 1: Write the failing test — celebration drafts are not persisted.**
+
+```ts
+it('does not persist the draft while phase is round-complete', () => {
+  // Render the hook with state{ phase: 'round-complete', ... } and
+  // assert no write fires to the persistence layer (mock the writer).
+});
+
+it('does not persist the draft while phase is level-complete', () => {
+  // Same shape with phase: 'level-complete'.
+});
+```
+
+- [ ] **Step 2: Update `useAnswerGameDraftSync` to skip persistence during celebration phases.**
+
+Extend the existing exclusion:
+
+```ts
+// Before:
+if (phase === 'game-over') return;
+
+// After:
+if (
+  phase === 'game-over' ||
+  phase === 'round-complete' ||
+  phase === 'level-complete'
+)
+  return;
+```
+
+- [ ] **Step 3: Run the tests — confirm green.**
+
+```bash
+yarn test --run src/components/answer-game/useAnswerGameDraftSync
+```
+
+- [ ] **Step 4: Commit.**
+
+```bash
+git add src/components/answer-game/useAnswerGameDraftSync.ts src/components/answer-game/useAnswerGameDraftSync.test.tsx
+git commit -m "fix(answer-game): exclude celebration phases from draft persistence
+
+PR 1b U1a: extends the existing 'game-over' exclusion in
+useAnswerGameDraftSync to also skip persistence during 'round-complete'
+and 'level-complete'. Without this, a tab close during the 750ms
+celebration window would persist phase='round-complete', and on resume
+the engine's playing.always guard would re-trigger the celebration
+sound + after-timer, replaying the round the user already finished."
 ```
 
 ---
@@ -643,8 +712,6 @@ describe('WordSpell machine — happy path', () => {
     expect(context().roundIndex).toBe(1);
     expect(context().allTiles).toEqual(nextTiles);
     expect(context().retryCount).toBe(0);
-    expect((context().selectedSlotIds as Set<string>).size).toBe(0);
-    expect(context().firstActionAt).toBeNull();
   });
 });
 
@@ -733,7 +800,7 @@ Replace every stub in `wordSpellMachine` with the corresponding body from `src/g
 - `incrementRoundIndex` (lines 509–511)
 - `advanceRoundState` (lines 513–527)
 
-Replace the type annotation `Partial<NumberMatchEngineContext>` with `Partial<WordSpellEngineContext>` in every `satisfies` clause.
+Replace the type annotation `Partial<NumberMatchEngineContext>` with `Partial<WordSpellEngineContext>` in every `satisfies` clause. **Strip any `firstActionAt: null` and `selectedSlotIds: new Set<string>()` lines from `advanceRoundState`** (per Spec Delta 3 — these fields don't exist on `WordSpellEngineContext`).
 
 - [ ] **Step 4: Run the tests — confirm green.**
 
@@ -1108,23 +1175,9 @@ Expected: clean. Any TS errors mean the engineDispatch type or context casts don
 yarn test --run src/games/word-spell/WordSpell/WordSpell.test.tsx
 ```
 
-Expected: most existing tests still pass because they assert DOM structure (slots, tiles) that hasn't changed. Tests that asserted reducer-derived `phase` strings (kebab-case) will fail — Task 5 updates them.
+Expected: most existing tests still pass because they assert DOM structure (slots, tiles) that hasn't changed. Tests that asserted reducer-derived `phase` strings (kebab-case) will fail — Task 5 updates them in the same commit.
 
-- [ ] **Step 4: Commit (allowing failures in WordSpell.test.tsx).**
-
-```bash
-git add src/games/word-spell/WordSpell/WordSpell.tsx
-git commit -m "feat(word-spell): refactor component to XState engine
-
-PR 1b U4: lifts WordSpellInstance keyed by sessionEpoch; engine drives
-phase, retryCount, zones via engine.context. Drops useGameSounds() —
-overlays gate on engine.phase camelCase ('roundComplete' / 'gameOver').
-Round-advance effect watches engine.phase === 'waitingForNext' and
-dispatches ADVANCE_ROUND via reducer (mirrored to engine via
-engineDispatch). game:end emit moves into engine.completeGame action.
-
-WordSpell.test.tsx assertions are updated in U5."
-```
+- [ ] **Step 4: Do NOT commit yet.** Tasks 4 and 5 land as **one commit** so the branch never sits in CI-red state between U4 (refactor) and U5 (assertion updates). CLAUDE.md mandates red-green-refactor: commits land green or not at all. Proceed to Task 5 to update the failing assertions, then commit at the end of Task 5.
 
 ---
 
@@ -1142,6 +1195,11 @@ Append a new describe block:
 
 ```ts
 describe('WordSpell round-complete overlay', () => {
+  // U4 coverage scope: this test verifies the engine-driven overlay
+  // invariant under physical-keyboard input (globalThis keydown →
+  // useKeyboardInput → machine). Touch-keyboard input (the primary
+  // BaseSkill platform) drives via useTouchKeyboardInput on the hidden
+  // input element and is covered by tests-e2e/word-spell.e2e.ts.
   it('mounts the round-complete effect exactly once during the celebration window', async () => {
     const config: WordSpellConfig = {
       gameId: 'word-spell-test',
@@ -1209,16 +1267,24 @@ yarn test --run src/games/word-spell/WordSpell/WordSpell.test.tsx
 
 Expected: all PASS.
 
-- [ ] **Step 5: Commit.**
+- [ ] **Step 5: Commit Tasks 4 + 5 together as one green commit.**
 
 ```bash
-git add src/games/word-spell/WordSpell/WordSpell.test.tsx
-git commit -m "test(word-spell): port assertions to engine-driven DOM + add U4
+git add src/games/word-spell/WordSpell/WordSpell.tsx src/games/word-spell/WordSpell/WordSpell.test.tsx
+git commit -m "feat(word-spell): refactor component to XState engine + port tests
 
-PR 1b U5: rewrites reducer-state assertions in WordSpell.test.tsx
-to DOM-driven engine queries. Adds U4 single-mount regression
-mirroring NumberMatch — proves the round-complete overlay mounts
-exactly once during the celebration window."
+PR 1b U4+U5 (single commit): lifts WordSpellInstance keyed by
+sessionEpoch; engine drives phase, retryCount, zones via engine.context.
+Drops useGameSounds() — overlays gate on engine.phase camelCase
+('roundComplete' / 'gameOver'). Round-advance effect watches
+engine.phase === 'waitingForNext' and dispatches ADVANCE_ROUND via
+reducer (mirrored to engine via engineDispatch). game:end emit moves
+into engine.completeGame action.
+
+WordSpell.test.tsx assertions migrated to DOM-driven engine queries.
+Adds U4 single-mount regression mirroring NumberMatch — proves the
+round-complete overlay mounts exactly once during the celebration
+window."
 ```
 
 ---
@@ -1364,7 +1430,6 @@ describe('SortNumbers machine — INIT_ROUND + level flags', () => {
     expect(snap.value).toBe('playing');
     expect(context().levelIndex).toBe(0);
     expect(context().isLevelMode).toBe(true);
-    expect(context().firstActionAt).toBeNull();
   });
 
   it('maxLevels: null leaves isLevelMode false', () => {
@@ -1408,8 +1473,8 @@ export interface SortNumbersEngineContext {
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
   isLevelMode: boolean;
-  firstActionAt: number | null;
-  selectedSlotIds: Set<string>;
+  // NOTE (Spec Delta 3): firstActionAt and selectedSlotIds land in PR 1b-bis
+  // alongside the timestamp write and selectedSlotIds toggle.
 }
 
 interface SortNumbersInput {
@@ -1512,8 +1577,6 @@ const sortNumbersMachine = setup({
         dragHoverBankTileId: null,
         retryCount: 0,
         roundIndex: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
       } satisfies Partial<SortNumbersEngineContext>;
     }),
 
@@ -1550,8 +1613,6 @@ const sortNumbersMachine = setup({
         dragHoverBankTileId: null,
         retryCount: 0,
         roundIndex: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
       } satisfies Partial<SortNumbersEngineContext>;
     }),
   },
@@ -1573,8 +1634,6 @@ const sortNumbersMachine = setup({
     maxLevels: input.maxLevels,
     wrongTileBehavior: input.wrongTileBehavior,
     isLevelMode: input.maxLevels !== null,
-    firstActionAt: null,
-    selectedSlotIds: new Set<string>(),
   }),
   on: {
     INIT_ROUND: { actions: 'initRound' },
@@ -1607,6 +1666,8 @@ const sortNumbersMachine = setup({
         { type: 'playSound', params: { sound: 'round-complete' } },
       ],
       after: {
+        // TODO(PR 1c): wire from useGameEngine options to restore
+        // skin.timing.roundAdvanceDelay and config.timing.roundAdvanceDelay overrides.
         750: [
           { guard: 'isLastRound', target: 'gameOver' },
           { guard: 'isLastRoundOfLevel', target: 'levelComplete' },
@@ -1692,7 +1753,7 @@ them from NumberMatch."
 
 - [ ] **Step 1: Port assign-action bodies from NumberMatch.**
 
-Same as Task 2: copy `resumeRound`, `placeTile`, `typeTile`, `removeTile`, `swapTiles`, `ejectTile`, `swapSlotBank`, `setActiveSlot`, `rejectTap`, `selectSlot`, `setDragActive`, `setDragHover`, `setDragHoverBank`, `incrementRoundIndex`, `advanceRoundState` from `src/games/number-match/definition.ts`. Replace `Partial<NumberMatchEngineContext>` with `Partial<SortNumbersEngineContext>` in `satisfies` clauses.
+Same as Task 2: copy `resumeRound`, `placeTile`, `typeTile`, `removeTile`, `swapTiles`, `ejectTile`, `swapSlotBank`, `setActiveSlot`, `rejectTap`, `selectSlot`, `setDragActive`, `setDragHover`, `setDragHoverBank`, `incrementRoundIndex`, `advanceRoundState` from `src/games/number-match/definition.ts`. Replace `Partial<NumberMatchEngineContext>` with `Partial<SortNumbersEngineContext>` in `satisfies` clauses. **Strip any `firstActionAt: null` and `selectedSlotIds: new Set<string>()` lines from `advanceRoundState`** (per Spec Delta 3 — these fields don't exist on `SortNumbersEngineContext`).
 
 - [ ] **Step 2: Add machine tests covering levelComplete and ADVANCE_LEVEL.**
 
@@ -1770,7 +1831,6 @@ describe('SortNumbers machine — levelComplete', () => {
     expect(context().levelIndex).toBe(1);
     expect(context().roundIndex).toBe(0);
     expect(context().retryCount).toBe(0);
-    expect(context().firstActionAt).toBeNull();
   });
 
   it('COMPLETE_GAME from levelComplete jumps to gameOver', () => {
@@ -1994,6 +2054,34 @@ describe('SortNumbers machine — error / no-op paths', () => {
     expect(actor.getSnapshot().value).toBe('playing');
     expect(context().levelIndex).toBe(before.levelIndex);
   });
+
+  it('ADVANCE_LEVEL while in roundComplete (celebration window) is ignored', () => {
+    // Race: user clicks "Next level" during the 750ms after-timer
+    // before the machine has reached levelComplete. The reducer mirror
+    // dispatches ADVANCE_LEVEL via engineDispatch; the engine must
+    // ignore it because the handler is scoped to levelComplete.
+    const { actor, context } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    // Complete round 1.
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    expect(actor.getSnapshot().value).toBe('roundComplete');
+    const before = context();
+    // Try to advance level while still in roundComplete.
+    actor.send({
+      type: 'ADVANCE_LEVEL',
+      tiles: [tile('tX', 'X')],
+      zones: [slot(0, 'X')],
+    });
+    expect(actor.getSnapshot().value).toBe('roundComplete');
+    expect(context().levelIndex).toBe(before.levelIndex);
+  });
 });
 ```
 
@@ -2123,13 +2211,23 @@ Apply the same structural refactor as Task 4, with SortNumbers-specific addition
 9. Drop the manual `game:end` `useEffect` (line 108–129 of current SortNumbers.tsx) — engine's `completeGame` action handles it.
 10. Preserve `useGameSkin`'s `resolveTiming('roundAdvanceDelay', ...)` timer config — but note the actual timing is now machine-owned (`after: 750`). The component reads the value for parity but the machine's transition fires first. **Open question:** if `resolveTiming` returns something ≠ 750, the machine's hardcoded 750 wins. Document this as a known gap and target it in PR 1b-bis or PR 1c. For now, audit which skins override `roundAdvanceDelay` — if any do, capture as Open Question.
 
-- [ ] **Step 1: Audit `resolveTiming('roundAdvanceDelay', ...)` overrides.**
+- [ ] **Step 1: Audit `resolveTiming('roundAdvanceDelay', ...)` overrides — both skin tokens AND per-config `timing.roundAdvanceDelay`.**
 
 ```bash
+# Skin-level overrides
 grep -rn "roundAdvanceDelay" /Users/leocaseiro/Sites/base-skill/worktrees/feat-spec-1a-pr1b-wordspell-sortnumbers/src/lib/skin 2>/dev/null
+# Per-config overrides (AnswerGameConfig.timing.roundAdvanceDelay)
+grep -rn "roundAdvanceDelay" /Users/leocaseiro/Sites/base-skill/worktrees/feat-spec-1a-pr1b-wordspell-sortnumbers/src --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v "src/lib/skin" | grep -v test
 ```
 
-If any skin overrides the default 750, document the divergence in this task's commit message and surface to the user before continuing.
+If any skin OR config sets `roundAdvanceDelay` to a non-default value, surface to the user before continuing — per **Spec Delta 8**, both override paths stop working when the machine takes over the timer. When the hardcoded `after: 750` lands in the machine code (Task 6 Step 3 and the WordSpell machine in Task 1 Step 3), add an inline comment:
+
+```ts
+after: {
+  // TODO(PR 1c): wire from useGameEngine options to restore
+  // skin.timing.roundAdvanceDelay and config.timing.roundAdvanceDelay overrides.
+  750: [
+```
 
 - [ ] **Step 2: Refactor `SortNumbersSession` to consume engine state.**
 
@@ -2215,6 +2313,40 @@ useEffect(() => {
 - [ ] **Step 4: Keep `handleNextLevel` and `handleDone` essentially unchanged — they already dispatch `ADVANCE_LEVEL` / `COMPLETE_GAME` via the reducer. Verify the dispatches are still mirrored by `engineDispatch` after the wrap.**
 
 The existing `handleNextLevel` body (lines 78–102 of current SortNumbers.tsx) is preserved verbatim. It calls `dispatch({ type: 'ADVANCE_LEVEL', ... })`, which goes through the reducer and (via `engineDispatch` provided by the new `SortNumbersInstance`) the engine. No code change needed beyond the wrapping component restructure.
+
+- [ ] **Step 4a: Gate the `LevelCompleteOverlay`'s "Next level" button on `engine.phase === 'levelComplete'` to prevent reducer-engine UI race.**
+
+If the user clicks "Next level" while the engine is still in `roundComplete` (the 750 ms after-timer hasn't fired), the reducer advances `levelIndex` synchronously and the engine's `ADVANCE_LEVEL` handler (scoped to `levelComplete`) ignores the event. `ProgressHUD` jumps to level 2 while `SortNumbersSession`'s engine-driven overlay still renders round-complete.
+
+In the overlay render gate from Step 6, the `onNextLevel` handler is the same `handleNextLevel` ref — but expose disabled state to the overlay so it cannot fire until the machine has transitioned:
+
+```tsx
+// In SortNumbersSession's render:
+{
+  showLevelComplete ? (
+    skin.LevelCompleteOverlay ? (
+      <skin.LevelCompleteOverlay
+        level={levelIndex + 1}
+        onNextLevel={handleNextLevel}
+        onDone={handleDone}
+        // showLevelComplete already equals engine.phase === 'levelComplete';
+        // pass nextLevelEnabled so the button is only clickable from the
+        // canonical state. Skin overlays should honor this prop.
+        nextLevelEnabled={showLevelComplete}
+      />
+    ) : (
+      <LevelCompleteOverlay
+        level={levelIndex + 1}
+        onNextLevel={handleNextLevel}
+        onDone={handleDone}
+        nextLevelEnabled={showLevelComplete}
+      />
+    )
+  ) : null;
+}
+```
+
+The render condition `showLevelComplete ? ... : null` already gates whether the overlay mounts; `nextLevelEnabled` is belt-and-suspenders so a skin override that renders early (e.g., during a fade-in animation) still can't dispatch ADVANCE_LEVEL prematurely. If `LevelCompleteOverlay`'s prop signature doesn't accept `nextLevelEnabled` today, add it (the existing skin contract is in `src/lib/skin/level-complete-overlay-types.ts` or equivalent).
 
 - [ ] **Step 5: Drop the manual `game:end` emit useEffect (lines 108–129 of current SortNumbers.tsx).**
 
@@ -2441,6 +2573,9 @@ const baseConfig: SortNumbersConfig = {
   ttsEnabled: false,
   direction: 'ascending',
   range: { min: 1, max: 9 },
+  quantity: 3,
+  skip: { mode: 'consecutive' },
+  distractors: { source: 'random', count: 0 },
   rounds: [{ sequence: [1, 2, 3] }],
 };
 
@@ -2460,6 +2595,11 @@ describe('SortNumbers basic rendering', () => {
 });
 
 describe('SortNumbers round-complete overlay', () => {
+  // U4 coverage scope: this test verifies the engine-driven overlay
+  // invariant under physical-keyboard input via the `inputMethod: 'type'`
+  // shim. Touch-keyboard input (the primary BaseSkill platform) drives
+  // via useTouchKeyboardInput and is covered by
+  // tests-e2e/sort-numbers.e2e.ts.
   it('mounts the round-complete effect exactly once during the celebration window', async () => {
     const config: SortNumbersConfig = {
       ...baseConfig,
@@ -2577,7 +2717,7 @@ After Tasks 4 and 9, no production code imports `useGameSounds`. The hook become
 - [ ] **Step 1: Confirm no production imports remain.**
 
 ```bash
-grep -rn "useGameSounds" /Users/leocaseiro/Sites/base-skill/worktrees/feat-spec-1a-pr1b-wordspell-sortnumbers/src --include="*.ts" --include="*.tsx" 2>/dev/null | grep -v useGameSounds.ts | grep -v useGameSounds.test.tsx
+grep -rn "useGameSounds" /Users/leocaseiro/Sites/base-skill/worktrees/feat-spec-1a-pr1b-wordspell-sortnumbers/src --include="*.ts" --include="*.tsx" --include="*.mdx" --include="*.md" 2>/dev/null | grep -v useGameSounds.ts | grep -v useGameSounds.test.tsx
 ```
 
 Expected: no output. If anything appears, stop and fix the leftover import before deleting.
@@ -2715,26 +2855,34 @@ yarn lint:md
 
 Expected: all clean. Fix any failures.
 
-- [ ] **Step 2: Run VR tests (requires Docker).**
+- [ ] **Step 2: Run VR tests with per-image review (requires Docker).**
 
 ```bash
 yarn test:vr
 ```
 
-If Docker is not running, ask the user to start it. The VR check is required before push because WordSpell and SortNumbers overlay timing may have shifted subtly.
+If Docker is not running, ask the user to start it. The VR check is required before push because the migration changes overlay-mount timing (~150ms shift: the old `useGameSounds` ready window vs. the engine's `always` guard firing synchronously when zones complete).
 
-If VR diffs appear and are intentional:
+**Do NOT run `yarn test:vr:update` blanketly if diffs appear.** Real bugs (e.g., a missed `key` prop on the inner `<Instance>` producing a transient double-mount flash) can land in the same diff window as the legitimate timing shift; bulk-updating baselines would merge the bug. Instead:
+
+1. List which screenshots changed (the VR runner prints diff image paths on failure).
+2. For each diff PNG, Read the image and verify the change is consistent with the U4 single-mount assertion (the overlay appears once, not twice) and the NumberMatch PR 1a baseline shape (already in `tests-vr/__screenshots__`).
+3. Capture per-image rationale (one sentence per changed screenshot) for the baseline-update commit message.
+
+Only after the per-image audit:
 
 ```bash
 yarn test:vr:update
-```
-
-Commit the new snapshots:
-
-```bash
 git add tests-vr/__screenshots__
-git commit -m "test(vr): refresh baselines for PR 1b XState migration"
+git commit -m "test(vr): refresh baselines for PR 1b XState migration
+
+Per-image rationale (one line each):
+- <screenshot-name>: timing shift only, overlay still mounts once.
+- <screenshot-name>: matches NumberMatch PR 1a baseline shape.
+- ..."
 ```
+
+If any diff cannot be explained by the timing shift or NumberMatch parity, **stop** and treat as a bug to investigate, not a baseline to update.
 
 - [ ] **Step 3: Push the branch.**
 
@@ -2751,8 +2899,13 @@ gh pr create --base master --title "feat(game-engine): PR 1b — WordSpell + Sor
 - Migrates **WordSpell** and **SortNumbers** to the XState-first pattern proven on NumberMatch in PR 1a (#355).
 - Adds the `levelComplete` machine state for SortNumbers' level progression.
 - Drops `useGameSounds` from both games (and deletes the hook — no consumers remain).
-- Populates `firstActionAt` / `selectedSlotIds` placeholder fields in both new machine contexts (shape parity with NumberMatch).
+- Excludes `'round-complete'` and `'level-complete'` from draft persistence to prevent celebration replay on resume (U1a).
+- Gates `LevelCompleteOverlay`'s `Next level` on `engine.phase === 'levelComplete'` to close the reducer/engine UI race.
 - Appends WordSpell + SortNumbers sections to the GameEngine architecture MDX.
+
+## Known regressions (documented as Spec Deltas)
+
+- **Spec Delta 8:** `roundAdvanceDelay` overrides (both skin tokens and `AnswerGameConfig.timing.roundAdvanceDelay`) are silently dropped — the XState machine hardcodes `after: 750`. Audit (Task 9 Step 1) confirms no production override; PR 1c wires timing through `useGameEngine` options.
 
 ## Deferred to PR 1b-bis
 
@@ -2760,6 +2913,7 @@ gh pr create --base master --title "feat(game-engine): PR 1b — WordSpell + Sor
 - Adding `round:*` event types to `src/types/game-events.ts` + wildcard support in `GameEventBus`.
 - Emitting `round:first-action` / `round:mistake` / `round:resolved` from machine assign actions.
 - Adopting `useGameRound` in NumberMatch / WordSpell / SortNumbers.
+- Introducing `firstActionAt` / `selectedSlotIds` on WordSpell + SortNumbers contexts alongside their real semantics (timestamp write + Set toggle).
 
 These are tracked separately because each depends on the next; bundling them with PR 1b would balloon scope past one reviewable PR.
 
@@ -2774,6 +2928,7 @@ These are tracked separately because each depends on the next; bundling them wit
 - [x] VR snapshots match (or updated baselines committed with a documented reason)
 - [ ] Manual smoke: WordSpell happy path on a multi-round library config
 - [ ] Manual smoke: SortNumbers level progression on a `levelMode`-enabled config
+- [ ] Manual smoke (touch): WordSpell + SortNumbers on a touch device, confirm round-complete overlay flashes exactly once per round (U4's keyboard-only coverage doesn't guard the touch path)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
@@ -2788,8 +2943,8 @@ EOF
 
 1. **`useGameRound` adoption (PR 1b-bis).** Build the hook with both reducer and engine paths per the 2026-05-11 Spec Delta. Migrate all three answer games. Wire SRS + lifecycle-TTS subscribers.
 2. **`round:*` event types + wildcard (PR 1b-bis).** Extend `src/types/game-events.ts` with the 6 event types from spec §5. Update `GameEventBus.emit`/`subscribe` to support `'round:*'` wildcard.
-3. **`firstActionAt` and `selectedSlotIds` real population (PR 1b-bis).** Wire timestamp write on first `PLACE_TILE` / `TYPE_TILE` / `SELECT_SLOT`, and `selectedSlotIds` toggle on `SELECT_SLOT`. Emit `round:first-action` / `round:mistake` / `round:resolved` from assign actions.
-4. **SortNumbers `roundAdvanceDelay` skin override.** If any skin overrides the default 750 ms, the machine's hardcoded `after: 750` ignores it. Audit + capture as an issue or fix in PR 1c.
+3. **`firstActionAt` and `selectedSlotIds` introduction (PR 1b-bis).** Add the two fields to `WordSpellEngineContext` and `SortNumbersEngineContext`, wire timestamp write on first `PLACE_TILE` / `TYPE_TILE` / `SELECT_SLOT`, and `selectedSlotIds` toggle on `SELECT_SLOT`. Emit `round:first-action` / `round:mistake` / `round:resolved` from assign actions. NumberMatch's PR 1a placeholders may stay or be removed; PR 1b-bis is the natural seam.
+4. **SortNumbers `roundAdvanceDelay` overrides (both skin tokens and `AnswerGameConfig.timing.roundAdvanceDelay`).** The machine's hardcoded `after: 750` ignores both override paths — documented as **Spec Delta 8**. PR 1c wires timing through `useGameEngine` options to restore the overrides.
 5. **`buildRound` lift into definition.ts (PR 1c).** Round construction stays in components in PR 1b (Spec Delta 4). PR 1c centralises it.
 6. **`answer-game-reducer.ts` deletion (PR 1c).** Reducer continues to exist in PR 1b because `Slot`, `LetterTileBank`, `SortNumbersTileBank`, and `useTouchKeyboardInput` still subscribe to `AnswerGameStateContext`. PR 1c migrates those readers off the reducer and deletes it.
 7. **SpotAll (PR 1d).** Stays on its own reducer (`spot-all-reducer.ts`) until a separate PR migrates it.
