@@ -1,3 +1,5 @@
+import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
+
 /** Aligned with docs/game-engine.md §3 (expand in M4 as needed). */
 export type GradeBand =
   | 'pre-k'
@@ -20,7 +22,11 @@ export type GameEventType =
   | 'game:level-advance'
   | 'game:drag-start'
   | 'game:drag-over-zone'
-  | 'game:tile-ejected';
+  | 'game:tile-ejected'
+  | 'celebration:start'
+  | 'celebration:complete'
+  | 'celebration:skip'
+  | 'lifecycle:speak';
 
 export interface BaseGameEvent {
   type: GameEventType;
@@ -114,6 +120,35 @@ export interface GameTileEjectedEvent extends BaseGameEvent {
   tileId: string | null;
 }
 
+export interface CelebrationStartEvent extends BaseGameEvent {
+  type: 'celebration:start';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+}
+
+export interface CelebrationCompleteEvent extends BaseGameEvent {
+  type: 'celebration:complete';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+  durationMs: number;
+}
+
+export interface CelebrationSkipEvent extends BaseGameEvent {
+  type: 'celebration:skip';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+  durationMs: number;
+  skipMethod: 'play-again' | 'go-home' | 'timeout';
+}
+
+export interface LifecycleSpeakEvent extends BaseGameEvent {
+  type: 'lifecycle:speak';
+  lifecycleEvent: LifecycleEvent;
+}
+
 export type GameEvent =
   | GameStartEvent
   | GameInstructionsShownEvent
@@ -128,7 +163,11 @@ export type GameEvent =
   | GameLevelAdvanceEvent
   | GameDragStartEvent
   | GameDragOverZoneEvent
-  | GameTileEjectedEvent;
+  | GameTileEjectedEvent
+  | CelebrationStartEvent
+  | CelebrationCompleteEvent
+  | CelebrationSkipEvent
+  | LifecycleSpeakEvent;
 
 export interface GameEventBus {
   emit: (event: GameEvent) => void;

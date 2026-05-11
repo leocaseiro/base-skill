@@ -1,8 +1,10 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useReducer,
+  useRef,
 } from 'react';
 import {
   answerGameReducer,
@@ -61,6 +63,15 @@ interface AnswerGameProviderProps {
   initialState?: AnswerGameDraftState;
   /** Session ID used by useAnswerGameDraftSync to find the RxDB document. */
   sessionId?: string;
+  /**
+   * PR 1a XState-first seam: when provided, every dispatch (both internal
+   * INIT_ROUND/RESUME_ROUND and external PLACE_TILE/etc. from Slot,
+   * NumeralTileBank, keyboard input) is mirrored to this callback so the
+   * game's XState machine stays in sync with the reducer. PR 1c removes the
+   * reducer; PR 1b/PR 1d add this prop to WordSpell + SortNumbers +
+   * SpotAll.
+   */
+  engineDispatch?: (action: AnswerGameAction) => void;
   children: ReactNode;
 }
 
@@ -77,14 +88,31 @@ export const AnswerGameProvider = ({
   config,
   initialState,
   sessionId,
+  engineDispatch,
   children,
 }: AnswerGameProviderProps) => {
-  const [state, dispatch] = useReducer(
+  const [state, rawDispatch] = useReducer(
     answerGameReducer,
     initialState
       ? buildStateFromDraft(config, initialState)
       : makeInitialState(config),
   );
+
+  // Stable ref to the latest engineDispatch so the wrapped dispatch keeps
+  // a constant identity even when the engine's `send` is recreated each
+  // state transition. Stable dispatch prevents the mount effect below from
+  // re-firing INIT_ROUND/RESUME_ROUND when the engine changes.
+  const engineDispatchRef = useRef<
+    ((action: AnswerGameAction) => void) | undefined
+  >(undefined);
+  useEffect(() => {
+    engineDispatchRef.current = engineDispatch;
+  }, [engineDispatch]);
+
+  const dispatch = useCallback((action: AnswerGameAction) => {
+    rawDispatch(action);
+    engineDispatchRef.current?.(action);
+  }, []);
 
   // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
   const dbCtx = useContext(DbContext);
@@ -96,6 +124,9 @@ export const AnswerGameProvider = ({
     // progress (roundIndex, retryCount, levelIndex); `INIT_ROUND` starts
     // fresh. Both paths keep all round-state mutation inside the reducer
     // rather than relying on `useReducer`'s one-shot initial snapshot.
+    // The dispatch is wrapped to mirror to engineDispatch (when provided),
+    // so XState-first games receive INIT_ROUND/RESUME_ROUND alongside the
+    // reducer.
     if (initialState) {
       dispatch({ type: 'RESUME_ROUND', draft: initialState });
       return;
@@ -110,6 +141,7 @@ export const AnswerGameProvider = ({
     config.initialTiles,
     config.initialZones,
     initialState,
+    dispatch,
   ]);
 
   const usesTyping = config.inputMethod !== 'drag';

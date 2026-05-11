@@ -1,6 +1,13 @@
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { buildNumeralRound } from '../build-numeral-round';
+import { numberMatchDefinition } from '../definition';
 import {
   toCardinalText,
   toOrdinalNumber,
@@ -10,13 +17,16 @@ import {
   DominoTile,
   NumeralTileBank,
 } from '../NumeralTileBank/NumeralTileBank';
+import type { NumberMatchEngineContext } from '../definition';
 import type { NumberMatchConfig, NumberMatchMode } from '../types';
 import type {
+  AnswerGameAction,
   AnswerGameConfig,
   AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { UseGameEngineResult } from '@/lib/game-engine/definition-types';
 import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
@@ -24,15 +34,13 @@ import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAni
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-import { useGameSounds } from '@/components/answer-game/useGameSounds';
 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 import { DotGroupQuestion } from '@/components/questions/DotGroupQuestion/DotGroupQuestion';
 import { TextQuestion } from '@/components/questions/TextQuestion/TextQuestion';
 import { buildRoundOrder } from '@/games/build-round-order';
-import { getGameEventBus } from '@/lib/game-event-bus';
+import { useGameEngine } from '@/lib/game-engine/useGameEngine';
 import { useGameSkin } from '@/lib/skin';
 
 type NumberWordsLocale = 'en' | 'pt-BR';
@@ -88,34 +96,81 @@ interface NumberMatchProps {
   seed?: string;
 }
 
+type NumberMatchEngine = UseGameEngineResult<NumberMatchEngineContext>;
+
 const NumberMatchSession = ({
   numberMatchConfig,
   roundOrder,
   skin,
   onRestartSession,
+  engine,
 }: {
   numberMatchConfig: NumberMatchConfig;
   roundOrder: readonly number[];
   skin: GameSkin;
   onRestartSession: () => void;
+  engine: NumberMatchEngine;
 }) => {
-  const { phase, roundIndex, retryCount, zones } =
-    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
-  const { confettiReady, gameOverReady } = useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
   const numberWordsLocale: NumberWordsLocale =
     locale === 'pt-BR' ? 'pt-BR' : 'en';
-  const completionToken = useRef(0);
 
-  const configRoundIndex = roundOrder[roundIndex];
+  const enginePhase = engine.phase;
+  const engineRoundIndex = engine.roundIndex;
+  const retryCount = engine.retryCount;
+  const zones = engine.context.zones;
+
+  const configRoundIndex = roundOrder[engineRoundIndex];
   const round =
     configRoundIndex === undefined
       ? undefined
       : numberMatchConfig.rounds[configRoundIndex];
 
   useRoundTTS(String(round?.value ?? ''));
+
+  // Round-advance is driven by XState's `after: 750` and `always`
+  // transitions. When the machine settles in `waitingForNext`, compute the
+  // next round's tiles/zones and dispatch ADVANCE_ROUND via the reducer
+  // dispatch — AnswerGameProvider mirrors it to the engine via
+  // engineDispatch, so reducer and engine advance together.
+  useEffect(() => {
+    if (enginePhase !== 'waitingForNext') return;
+    const nextConfigIndex = roundOrder[engineRoundIndex + 1];
+    const nextRound =
+      nextConfigIndex === undefined
+        ? undefined
+        : numberMatchConfig.rounds[nextConfigIndex];
+    const value = nextRound?.value;
+    if (value === undefined) return;
+    const { tiles: nextTiles, zones: nextZones } = buildNumeralRound(
+      value,
+      {
+        tileBankMode: numberMatchConfig.tileBankMode,
+        distractorCount: numberMatchConfig.distractorCount,
+        range: numberMatchConfig.range,
+        mode: numberMatchConfig.mode,
+        locale: numberWordsLocale,
+      },
+    );
+    dispatch({
+      type: 'ADVANCE_ROUND',
+      tiles: nextTiles,
+      zones: nextZones,
+    });
+  }, [
+    enginePhase,
+    engineRoundIndex,
+    roundOrder,
+    numberMatchConfig.rounds,
+    numberMatchConfig.tileBankMode,
+    numberMatchConfig.distractorCount,
+    numberMatchConfig.range,
+    numberMatchConfig.mode,
+    numberWordsLocale,
+    dispatch,
+  ]);
 
   const handleHome = () => {
     void navigate({ to: '/$locale', params: { locale } });
@@ -124,87 +179,6 @@ const NumberMatchSession = ({
   const handlePlayAgain = () => {
     onRestartSession();
   };
-
-  useEffect(() => {
-    if (phase !== 'game-over') return;
-    getGameEventBus().emit({
-      type: 'game:end',
-      gameId: numberMatchConfig.gameId,
-      sessionId: '',
-      profileId: '',
-      timestamp: Date.now(),
-      roundIndex,
-      finalScore: 0,
-      totalRounds: roundOrder.length,
-      correctCount: 0,
-      durationMs: 0,
-      retryCount,
-    });
-  }, [
-    phase,
-    numberMatchConfig.gameId,
-    roundIndex,
-    roundOrder.length,
-    retryCount,
-  ]);
-
-  useEffect(() => {
-    if (phase !== 'round-complete' || !confettiReady) return;
-
-    const token = ++completionToken.current;
-    const delayMs = 750;
-    const timer = globalThis.setTimeout(() => {
-      if (completionToken.current !== token) return;
-
-      const isLastRound = roundIndex >= roundOrder.length - 1;
-      if (isLastRound) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-
-      const nextConfigIndex = roundOrder[roundIndex + 1];
-      const nextRound =
-        nextConfigIndex === undefined
-          ? undefined
-          : numberMatchConfig.rounds[nextConfigIndex];
-      const value = nextRound?.value;
-      if (value === undefined) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-      const { tiles: nextTiles, zones: nextZones } = buildNumeralRound(
-        value,
-        {
-          tileBankMode: numberMatchConfig.tileBankMode,
-          distractorCount: numberMatchConfig.distractorCount,
-          range: numberMatchConfig.range,
-          mode: numberMatchConfig.mode,
-          locale: numberWordsLocale,
-        },
-      );
-      dispatch({
-        type: 'ADVANCE_ROUND',
-        tiles: nextTiles,
-        zones: nextZones,
-      });
-    }, delayMs);
-
-    return () => {
-      globalThis.clearTimeout(timer);
-    };
-  }, [
-    phase,
-    confettiReady,
-    roundIndex,
-    dispatch,
-    roundOrder,
-    numberMatchConfig.rounds,
-    numberMatchConfig.tileBankMode,
-    numberMatchConfig.distractorCount,
-    numberMatchConfig.range,
-    numberMatchConfig.mode,
-    numberWordsLocale,
-  ]);
 
   if (!round) return null;
 
@@ -229,6 +203,9 @@ const NumberMatchSession = ({
       ? String(round.value)
       : questionText;
 
+  const showRoundComplete = enginePhase === 'roundComplete';
+  const showGameOver = enginePhase === 'gameOver';
+
   return (
     <>
       <div className="flex w-full max-w-4xl flex-col items-center justify-center gap-8 px-4 py-6">
@@ -237,7 +214,7 @@ const NumberMatchSession = ({
             <DotGroupQuestion
               // Remount per round so per-dot count state fully resets,
               // even when two consecutive rounds share the same value.
-              key={`round-${roundIndex}`}
+              key={`round-${engineRoundIndex}`}
               count={round.value}
               prompt={String(round.value)}
             />
@@ -328,11 +305,11 @@ const NumberMatchSession = ({
         </AnswerGame.Choices>
       </div>
       {skin.RoundCompleteEffect ? (
-        <skin.RoundCompleteEffect visible={confettiReady} />
+        <skin.RoundCompleteEffect visible={showRoundComplete} />
       ) : (
-        <ScoreAnimation visible={confettiReady} />
+        <ScoreAnimation visible={showRoundComplete} />
       )}
-      {gameOverReady ? (
+      {showGameOver ? (
         skin.CelebrationOverlay ? (
           <skin.CelebrationOverlay
             retryCount={retryCount}
@@ -351,24 +328,31 @@ const NumberMatchSession = ({
   );
 };
 
-export const NumberMatch = ({
+interface NumberMatchInstanceProps {
+  config: NumberMatchConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
+  roundOrder: readonly number[];
+  skin: GameSkin;
+  onRestartSession: () => void;
+  numberWordsLocale: NumberWordsLocale;
+}
+
+/**
+ * One game session. Holds the XState engine and forwards every reducer
+ * dispatch to it via `engineDispatch`. Re-mounted (via key changes in the
+ * outer NumberMatch component) when the player taps "Play again", which
+ * destroys the engine actor and starts a fresh one from round 0.
+ */
+const NumberMatchInstance = ({
   config,
   initialState,
   sessionId,
-  seed,
-}: NumberMatchProps) => {
-  const skin = useGameSkin('number-match', config.skin);
-  const roundsInOrder = config.roundsInOrder === true;
-  const [sessionEpoch, setSessionEpoch] = useState(0);
-  const { locale } = useParams({ from: '/$locale' });
-  const numberWordsLocale: NumberWordsLocale =
-    locale === 'pt-BR' ? 'pt-BR' : 'en';
-
-  const roundOrder = useMemo(() => {
-    void sessionEpoch;
-    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
-  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
-
+  roundOrder,
+  skin,
+  onRestartSession,
+  numberWordsLocale,
+}: NumberMatchInstanceProps) => {
   const firstConfigIndex = roundOrder[0];
   const round0 =
     firstConfigIndex === undefined
@@ -424,7 +408,68 @@ export const NumberMatch = ({
     ],
   );
 
+  const engine = useGameEngine<unknown, NumberMatchEngineContext>(
+    numberMatchDefinition,
+    {
+      input: {
+        totalRounds: roundOrder.length,
+        maxLevels: null,
+        wrongTileBehavior: config.wrongTileBehavior,
+      },
+      totalRounds: roundOrder.length,
+      levelSize: roundOrder.length,
+      envelope: { gameId: config.gameId },
+    },
+  );
+
+  // Stable engineDispatch that always forwards to the latest engine.send
+  // (which changes identity on every machine snapshot).
+  const engineRef = useRef(engine);
+  useEffect(() => {
+    engineRef.current = engine;
+  }, [engine]);
+  const engineDispatch = useCallback((action: AnswerGameAction) => {
+    engineRef.current.send(action as never);
+  }, []);
+
   if (!round0) return null;
+
+  return (
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+      skin={skin}
+      engineDispatch={engineDispatch}
+    >
+      <NumberMatchSession
+        numberMatchConfig={config}
+        roundOrder={roundOrder}
+        skin={skin}
+        onRestartSession={onRestartSession}
+        engine={engine}
+      />
+    </AnswerGame>
+  );
+};
+
+export const NumberMatch = ({
+  config,
+  initialState,
+  sessionId,
+  seed,
+}: NumberMatchProps) => {
+  const skin = useGameSkin('number-match', config.skin);
+  const roundsInOrder = config.roundsInOrder === true;
+  const [sessionEpoch, setSessionEpoch] = useState(0);
+  const { locale } = useParams({ from: '/$locale' });
+  const numberWordsLocale: NumberWordsLocale =
+    locale === 'pt-BR' ? 'pt-BR' : 'en';
+
+  const roundOrder = useMemo(() => {
+    void sessionEpoch;
+    return buildRoundOrder(config.rounds.length, roundsInOrder, seed);
+  }, [config.rounds.length, roundsInOrder, seed, sessionEpoch]);
 
   return (
     <div
@@ -432,22 +477,18 @@ export const NumberMatch = ({
       style={skin.tokens as React.CSSProperties}
     >
       {skin.SceneBackground ? <skin.SceneBackground /> : null}
-      <AnswerGame
+      <NumberMatchInstance
         key={sessionEpoch}
-        config={answerGameConfig}
+        config={config}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        roundOrder={roundOrder}
         skin={skin}
-      >
-        <NumberMatchSession
-          numberMatchConfig={config}
-          roundOrder={roundOrder}
-          skin={skin}
-          onRestartSession={() => {
-            setSessionEpoch((e) => e + 1);
-          }}
-        />
-      </AnswerGame>
+        onRestartSession={() => {
+          setSessionEpoch((e) => e + 1);
+        }}
+        numberWordsLocale={numberWordsLocale}
+      />
     </div>
   );
 };
