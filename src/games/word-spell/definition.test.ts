@@ -271,3 +271,99 @@ describe('WordSpell machine — edge cases', () => {
     expect(zones()[1]?.isWrong).toBe(false);
   });
 });
+
+describe('WordSpell machine — error / no-op paths', () => {
+  it('PLACE_TILE with unknown tileId is a no-op', () => {
+    const { actor, context } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const before = context();
+    actor.send({
+      type: 'PLACE_TILE',
+      tileId: 'nonexistent',
+      zoneIndex: 0,
+    });
+    expect(context().zones).toEqual(before.zones);
+    expect(context().bankTileIds).toEqual(before.bankTileIds);
+  });
+
+  it('PLACE_TILE with out-of-range zoneIndex is a no-op', () => {
+    const { actor, context } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const before = context();
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 99 });
+    expect(context().zones).toEqual(before.zones);
+  });
+
+  it('ADVANCE_ROUND while in playing is ignored', () => {
+    const { actor, context } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const before = context();
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: [tile('tX', 'X')],
+      zones: [slot(0, 'X')],
+    });
+    expect(actor.getSnapshot().value).toBe('playing');
+    expect(context().roundIndex).toBe(before.roundIndex);
+  });
+
+  it('drag events during roundComplete do not mutate context', () => {
+    const { actor, context } = startActor({ totalRounds: 3 });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    expect(actor.getSnapshot().value).toBe('roundComplete');
+    const dragBefore = context().dragActiveTileId;
+    actor.send({ type: 'SET_DRAG_ACTIVE', tileId: 'sneaky' });
+    expect(context().dragActiveTileId).toBe(dragBefore);
+  });
+});
+
+describe('WordSpell machine — integration', () => {
+  it('completes a full three-round game ending in gameOver', () => {
+    vi.useFakeTimers();
+    const { actor, mocks } = startActor({ totalRounds: 3 });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+
+    const playThrough = () => {
+      actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    };
+
+    playThrough();
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    playThrough();
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    playThrough();
+    vi.advanceTimersByTime(751);
+
+    expect(actor.getSnapshot().value).toBe('gameOver');
+    expect(mocks.completeGame).toHaveBeenCalledTimes(1);
+  });
+
+  it('root-level GAME_OVER handler is defense-in-depth', () => {
+    const { actor } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    expect(actor.getSnapshot().value).toBe('playing');
+    actor.send({ type: 'GAME_OVER' });
+    expect(actor.getSnapshot().value).toBe('gameOver');
+  });
+});
