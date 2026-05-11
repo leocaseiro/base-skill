@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.1s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.6s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -18756,6 +18756,36 @@ export const useAnswerGameContext = (): AnswerGameState
 export const useAnswerGameDispatch = (): Dispatch&lt;AnswerGameAction&gt;
 ```
 
+### Provider props
+
+```tsx
+&lt;AnswerGameProvider
+  config={AnswerGameConfig}
+  initialState={AnswerGameDraftState | undefined}
+  sessionId={string | undefined}
+  engineDispatch={(action) =&gt; void | undefined}
+&gt;
+  {children}
+&lt;/AnswerGameProvider&gt;
+```
+
+PR 1a adds the optional `engineDispatch` prop. When set, every reducer
+dispatch — including the provider&#39;s own mount-effect `INIT_ROUND` /
+`RESUME_ROUND` plus every `PLACE_TILE` / `TYPE_TILE` / etc. from
+`Slot`, `NumeralTileBank`, `useKeyboardInput`, and `useTouchKeyboardInput`
+— is mirrored to `engineDispatch`. XState-first games (NumberMatch in
+PR 1a; WordSpell + SortNumbers in PR 1b; SpotAll in PR 1d) pass their
+`useGameEngine(...).send` (wrapped in a stable callback via `useRef`)
+so the per-game XState machine receives the same events as the reducer.
+PR 1c removes the reducer; until then, both run in parallel and the
+dispatch bridge keeps them in sync.
+
+The wrapped dispatch is built with `useCallback` (empty deps) and reads
+the latest `engineDispatch` via a `useRef`, so its identity is stable
+even when the engine&#39;s `send` is recreated on each machine state
+transition. Stable dispatch identity prevents the mount-effect from
+re-firing `INIT_ROUND`/`RESUME_ROUND` when the engine changes.
+
 ### Consumers of the state context
 
 - `ProgressHUDRoot` (`ProgressHUD/ProgressHUDRoot.tsx`) reads `config`,
@@ -19649,6 +19679,126 @@ sequenceDiagram
     Provider--&gt;&gt;Provider: reset round to 0
   end
 ```
+
+---
+
+## XState engine (PR 1a foundation)
+
+PR 1a introduces a per-game XState machine that owns the round-level
+lifecycle (`playing` / `roundComplete` / `waitingForNext` / `gameOver`).
+The legacy `lifecycle.ts` reducer above continues to drive the outer
+session shell; the two coexist until PR 1c collapses them. The XState
+machine is created by `useGameEngine(definition, options?)` and consumed
+by the per-game component (NumberMatch is the canonical example for
+PR 1a; WordSpell + SortNumbers migrate in PR 1b, SpotAll in PR 1d).
+
+### 5. Per-round phase machine (NumberMatch as the canonical example)
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; playing
+
+  playing --&gt; playing : PLACE_TILE / TYPE_TILE / REMOVE_TILE / SWAP_TILES / EJECT_TILE / SWAP_SLOT_BANK / SET_ACTIVE_SLOT / REJECT_TAP
+  playing --&gt; roundComplete : always [allFilledCorrectly]
+
+  roundComplete --&gt; gameOver : after 750ms [isLastRound]
+  roundComplete --&gt; waitingForNext : after 750ms
+  roundComplete --&gt; gameOver : CELEBRATION_DONE [isLastRound]
+  roundComplete --&gt; waitingForNext : CELEBRATION_DONE
+
+  waitingForNext --&gt; playing : ADVANCE_ROUND
+```
+
+- Round-complete detection is atomic: each game-state `assign` action
+  mutates `context.zones`, XState re-evaluates `playing.always`, and the
+  machine transitions to `roundComplete` in the same step. No React
+  `useEffect` race window.
+- `gameOver` is a regular state (not `type: &#39;final&#39;`) so root-level
+  handlers (`INIT_ROUND`, `RESUME_ROUND`) keep firing for defense in
+  depth. &quot;Play Again&quot; works via parent re-mount; the machine never
+  models RESTART.
+- `levelComplete` is not in PR 1a&#39;s NumberMatch slice. PR 1b adds it
+  alongside WordSpell + SortNumbers when they introduce level mode.
+
+### 6. Side-effect flow
+
+```mermaid
+sequenceDiagram
+  participant Machine as XState machine
+  participant Engine as useGameEngine
+  participant Effects as executeSideEffects
+  participant Bus as GameEventBus
+  participant Subscribers as Subscribers
+  participant Audio as AudioFeedback
+
+  Machine-&gt;&gt;Engine: entry action — { type: &#39;playSound&#39;, params: { sound: &#39;round-complete&#39; } }
+  Engine-&gt;&gt;Audio: playSound(params.sound)
+
+  Machine-&gt;&gt;Engine: entry action — { type: &#39;speak&#39;, params: { lifecycleEvent: &#39;game.over&#39; } }
+  Engine-&gt;&gt;Effects: executeSideEffects([{ type: &#39;speak&#39;, lifecycleEvent: &#39;game.over&#39; }], envelope)
+  Effects-&gt;&gt;Bus: emit({ type: &#39;lifecycle:speak&#39;, ...envelope, lifecycleEvent: &#39;game.over&#39; })
+  Bus-&gt;&gt;Subscribers: notify
+
+  Machine-&gt;&gt;Engine: entry action — completeGame
+  Engine-&gt;&gt;Effects: executeSideEffects([{ type: &#39;emit&#39;, event: { type: &#39;game:end&#39;, ... } }], envelope)
+  Effects-&gt;&gt;Bus: emit(game:end event)
+```
+
+PR 1a has no subscriber for `lifecycle:speak` — `useLifecycleTTS`
+lands in a follow-up task. The bus is the seam, so subscribers can be
+added without touching the machine. Prompt TTS (`useRoundTTS`) is
+unchanged from the legacy flow.
+
+### 7. Dispatch bridge (AnswerGameProvider engineDispatch prop)
+
+```mermaid
+sequenceDiagram
+  participant Component as Game Component
+  participant Slot as Slot / NumeralTileBank / KeyboardInputAdapter
+  participant Provider as AnswerGameProvider
+  participant Reducer as answerGameReducer
+  participant Engine as XState machine
+
+  Component-&gt;&gt;Provider: engineDispatch={engine.send}
+  Slot-&gt;&gt;Provider: dispatch(PLACE_TILE)
+  Provider-&gt;&gt;Reducer: rawDispatch(PLACE_TILE)
+  Provider-&gt;&gt;Engine: engineDispatch(PLACE_TILE)
+  Engine--&gt;&gt;Engine: assign zones, evaluate `always`, transition if all zones correct
+
+  Note over Provider: Wrapped dispatch fires for INTERNAL\n  INIT_ROUND/RESUME_ROUND too, so engine\n  receives the initial round seed without\n  any explicit useEffect in the game component.
+```
+
+`useGameEngine` lives in the game component (e.g., `NumberMatch.tsx`).
+`engine.send` is wrapped in a stable callback via `useRef` and passed
+as `engineDispatch`. `AnswerGameProvider` wraps its `rawDispatch` with
+a `useCallback` (empty deps; stable identity) that mirrors every
+action to the latest `engineDispatch`. Internal dispatches
+(`INIT_ROUND` from the mount effect, `RESUME_ROUND` from session
+drafts) route through the same wrapped dispatch.
+
+### 8. Celebration semantics (PR 1a scope)
+
+PR 1a does **not** emit `celebration:start | complete | skip` events
+from the engine; the overlay is rendered by the game component gated
+on `engine.phase`:
+
+- `engine.phase === &#39;roundComplete&#39;` → render
+  `&lt;skin.RoundCompleteEffect /&gt;` or fallback `&lt;ScoreAnimation /&gt;`
+- `engine.phase === &#39;gameOver&#39;` → render `&lt;skin.CelebrationOverlay /&gt;`
+  or fallback `&lt;GameOverOverlay /&gt;`
+
+PR 1b adds engine-emitted `celebration:*` events alongside `useGameRound`
+adoption.
+
+### 9. Coexistence note
+
+The legacy `lifecycle.ts` reducer continues to drive the outer game
+session shell (`idle → loading → instructions → playing → …`) until
+PR 1c. The XState machine owns the per-round phase machine inside
+`playing`. Two reducers run in parallel: the answer-game reducer for
+tile positions (Slot/NumeralTileBank rendering) and the XState machine
+for lifecycle/phase (overlay gating, round-advance timing,
+`game:end` emission). The dispatch bridge (§7) keeps them in sync.
 </code></pre>
           </div>
         </div>
@@ -19816,6 +19966,179 @@ interface AnswerGameDraftState {
 
 Fields excluded from draft: `config` (reconstructed from game config), `dragActiveTileId`
 (transient), `dragHoverZoneIndex`, `dragHoverBankTileId` (transient).
+
+---
+
+## XState engine (PR 1a foundation)
+
+PR 1a introduces a per-game XState machine alongside the legacy
+`GameEngineProvider` above. The XState machine owns the per-round
+lifecycle (phase transitions, round-advance timing, `game:end`
+emission) and sits inside the `playing` state of the legacy lifecycle.
+The two coexist until PR 1c.
+
+Source: `src/lib/game-engine/useGameEngine.ts`,
+`src/lib/game-engine/definition-types.ts`,
+`src/lib/game-engine/side-effects.ts`.
+
+### `useGameEngine(definition, options?)`
+
+```ts
+const engine = useGameEngine&lt;TRound, TContext&gt;(
+  definition,
+  options?,
+): UseGameEngineResult&lt;TContext&gt;;
+```
+
+`options`:
+
+| Field         | Type                      | Description                                                                                                                 |
+| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                 | Populates the machine&#39;s initial context via XState v5&#39;s `setup({ types: { input } })` + `useMachine(machine, { input })`    |
+| `envelope`    | `Partial&lt;EngineEnvelope&gt;` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
+| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
+| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+
+`UseGameEngineResult&lt;TContext&gt;`:
+
+| Field          | Type                                | Description                                                                                                        |
+| -------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `phase`        | `string`                            | Current state value (camelCase: `playing`, `roundComplete`, `waitingForNext`, `gameOver`, …)                       |
+| `context`      | `TContext`                          | The machine&#39;s full context. Cast at consume time via the generic (e.g., `NumberMatchEngineContext`)                |
+| `currentRound` | `RoundOutput`                       | Reads `context.lastRoundOutput` if present                                                                         |
+| `roundIndex`   | `number`                            | Reads `context.roundIndex`                                                                                         |
+| `levelIndex`   | `number`                            | Reads `context.levelIndex`                                                                                         |
+| `totalRounds`  | `number`                            | Reads `context.totalRounds`                                                                                        |
+| `retryCount`   | `number`                            | Reads `context.retryCount`                                                                                         |
+| `isLastRound`  | `boolean`                           | `roundIndex + 1 &gt;= totalRounds`                                                                                    |
+| `send`         | `(event: GameMachineEvent) =&gt; void` | Cast to the machine&#39;s `send`. Send any event the machine declares (cast via `as never` at the call site if needed) |
+| `celebrating`  | `CelebrationConfig \| null`         | Always `null` in PR 1a; PR 1b populates from `context.activeCelebration`                                           |
+
+The hook wraps `definition.machine.provide({ guards, actions })` in
+`useMemo` so the machine is stable across renders. `useMachine`
+returns a stable `send`; the wrapper around it is recreated on every
+machine state change but always reaches the same underlying actor.
+
+### Engine-injected guards and actions
+
+`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
+for the placeholder guards declared in each game&#39;s `setup({ guards })`:
+
+```ts
+isMidLevelRound: ({ context }) =&gt;
+  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &amp;&amp;
+  context.roundIndex + 1 &lt; totalRounds;
+isLastRoundOfLevel: ({ context }) =&gt;
+  (context.roundIndex + 1) % max(levelSize, 1) === 0 &amp;&amp;
+  context.roundIndex + 1 &lt; totalRounds;
+isLastRound: ({ context }) =&gt; context.roundIndex + 1 &gt;= totalRounds;
+```
+
+Engine-injected actions (overridden by `useGameEngine.provide`):
+
+| Action         | Params                | Side effect                                                                                                                                   |
+| -------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `speak`        | `{ lifecycleEvent }`  | Emits `lifecycle:speak` via `executeSideEffects`                                                                                              |
+| `emit`         | `{ event }`           | Emits an arbitrary `GameEvent` via `executeSideEffects`                                                                                       |
+| `completeGame` | —                     | Emits `game:end` with `gameId`/`sessionId`/`profileId` from envelope and `roundIndex`/`totalRounds`/`retryCount` from current machine context |
+| `playSound`    | `{ sound: SoundKey }` | Calls `AudioFeedback.playSound(params.sound)`                                                                                                 |
+
+In-definition guards (real bodies, not overridden) live on the game
+definition itself. `numberMatchDefinition` declares `allFilledCorrectly`
+and `canEject`; PR 1b games declare their own predicates as needed.
+
+### `GameEngineContext` + `useGameEngineContext()`
+
+```ts
+const GameEngineContext: React.Context&lt;GameEngineContextValue | null&gt;;
+const useGameEngineContext = &lt;TRound&gt;(): GameEngineContextValue&lt;TRound&gt;;
+```
+
+`GameEngineContextValue` is
+`{ definition: GameDefinition&lt;TRound&gt;, engine: UseGameEngineResult }`.
+
+Wrap a tree in `&lt;GameEngineContext.Provider value={{ definition, engine }}&gt;`
+to expose the engine to descendants (e.g., a future `useLifecycleTTS`
+that reads `definition.tts`). NumberMatch in PR 1a does not use this
+context — the engine is passed to `NumberMatchSession` as a prop.
+PR 1b uses the context when `useGameRound` adopts the engine.
+
+### `GameDefinition&lt;TRound&gt;`
+
+```ts
+interface GameDefinition&lt;TRound = unknown&gt; {
+  id: string;
+  interaction: &#39;drag-to-slot&#39; | &#39;tap-select&#39;;
+  slotInteraction?: &#39;ordered&#39; | &#39;free-swap&#39;;
+  machine: AnyStateMachine;
+  buildRound: (ctx: PhaseContext) =&gt; TRound;
+  tts?: Partial&lt;Record&lt;LifecycleEvent, EventTemplate&gt;&gt;;
+}
+```
+
+PR 1a Spec Delta: `buildRound` is a passthrough for NumberMatch
+(`(ctx) =&gt; ({ roundIndex: ctx.roundIndex })`). Round construction
+stays in the React component (`buildNumeralRound`) for PR 1a; PR 1b
+lifts it into `definition.ts` once WordSpell + SortNumbers migrate.
+
+### `executeSideEffects`
+
+```ts
+const executeSideEffects = (
+  effects: SideEffect[],
+  envelope: { gameId; sessionId; profileId; roundIndex },
+  onDelayDone?: () =&gt; void,
+): { cancel: () =&gt; void };
+```
+
+`SideEffect` is
+`{ type: &#39;emit&#39;; event } | { type: &#39;speak&#39;; lifecycleEvent } | { type: &#39;delay&#39;; ms }`.
+Used by `useGameEngine`&#39;s injected actions; not called directly by game
+components.
+
+### Dispatch bridge — `AnswerGameProvider.engineDispatch`
+
+XState-first games pass `engine.send` (wrapped in a stable callback)
+to `AnswerGameProvider` via the `engineDispatch` prop (or to
+`&lt;AnswerGame engineDispatch={...} /&gt;` which forwards through). The
+provider mirrors every reducer dispatch — including its own internal
+`INIT_ROUND`/`RESUME_ROUND` mount effect — so the engine receives the
+seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
+`AnswerGame.reference.mdx` Context API section for details.
+
+### PR 1a Spec Deltas (vs the original PR 1a plan)
+
+1. `useGameEngine` signature simplified — dropped `adapter` and
+   `dispatch` params. NumberMatch dispatches through `engine.send`
+   (mirrored from the answer-game reducer via the `engineDispatch`
+   prop on `AnswerGameProvider`). No reducer adapter used.
+2. `celebrating: null` placeholder; PR 1b populates from
+   `context.activeCelebration`.
+3. Dropped speculative engine actors (`celebrationActor`,
+   `levelCelebrationActor`, `gameOverActor`, `phonemeSequenceActor`).
+   NumberMatch uses XState&#39;s built-in `after: { 750: ... }` instead.
+4. `InteractionAdapter&lt;TAction&gt;` and `answerGameAdapter` not created
+   (no PR 1a consumer).
+5. Dropped engine actions with no PR 1a caller (`advanceRound`,
+   `advanceLevel`, `buildRound`). Kept `speak`, `emit`,
+   `completeGame`, `playSound`.
+6. `buildEngineGuards` + `EngineGuards` type exported so
+   game-definition tests can `createActor(machine.provide({ guards: buildEngineGuards(…) }))`
+   with real bodies instead of `setup` placeholders.
+7. `useGameEngine` exposes `context: TContext` and `retryCount: number`
+   on the result. Needed by NumberMatch&#39;s component to destructure
+   `zones` / `retryCount` from engine state.
+8. `completeGame` emits `game:end` with `roundIndex` from machine
+   context (not `envelope.roundIndex`, which is fixed at engine
+   creation time). Behavioral parity with the prior `useEffect`-based
+   emission.
+9. Dispatch-bridge is implemented as `engineDispatch` on
+   `AnswerGameProvider` (not a context-override component in the
+   game). `KeyboardInputAdapter` is a sibling of children inside
+   `AnswerGameProvider`, so a child-side bridge can&#39;t intercept its
+   dispatches.
+10. NumberMatch&#39;s engine is held by an inner `NumberMatchInstance`
+    keyed by `sessionEpoch` so the actor remounts on Play Again.
 </code></pre>
           </div>
         </div>
@@ -20116,12 +20439,140 @@ Existing test suites:
 | ---------------------------- | --------------------------------------------------------- |
 | Current AnswerGame state     | React DevTools → `AnswerGameStateContext.Provider`        |
 | Current GameEngine state     | React DevTools → `GameStateContext.Provider`              |
+| Current XState phase         | Subscribe to the actor (§7 below) or inspect via DevTools |
 | Dispatched actions (trace)   | Temporary logging wrapper around `useReducer`             |
 | Route params and loader data | TanStack Router DevTools panel (bottom-right)             |
 | Game events (evaluate, etc.) | `getGameEventBus().subscribe(&#39;game:*&#39;, console.log)`      |
 | Persisted sessions and moves | RxDB queries via `window.__db` or IndexedDB direct access |
 | Sound playback               | `HTMLAudioElement.prototype.play` monkey-patch            |
 | TTS utterances               | Filter browser console to `[TTS]`                         |
+
+---
+
+## XState engine (PR 1a foundation)
+
+The XState machine introduced in PR 1a runs **alongside** the legacy
+reducers above. The reducer drives Slot/NumeralTileBank rendering; the
+XState machine drives lifecycle (`playing` / `roundComplete` /
+`waitingForNext` / `gameOver`), the 750 ms celebration delay, and
+`game:end` emission. The dispatch bridge (`engineDispatch` on
+`AnswerGameProvider`) keeps the two in sync.
+
+### 7. My XState phase isn&#39;t transitioning
+
+Checklist:
+
+1. **Is the game wired with `engineDispatch`?** Search the game
+   component for `&lt;AnswerGame ... engineDispatch={...}&gt;`. Without it,
+   reducer dispatches (`PLACE_TILE`, `TYPE_TILE`, etc.) never reach
+   the engine.
+2. **Did `INIT_ROUND` fire?** The wrapped dispatch in
+   `AnswerGameProvider` mirrors the mount-time `INIT_ROUND`. Open
+   React DevTools → `AnswerGameStateContext.Provider`, confirm `zones`
+   is populated, and then check the engine.
+3. **Does the machine state declare the event?** A `TYPE_TILE` event
+   sent before `INIT_ROUND` is silently dropped (no handler in the
+   initial `playing` state until `assign` populates context).
+4. **Is the event a typed-disjunction member?** XState v5 narrows
+   discriminated unions in `assign` actions. An `assign(({ event }) =&gt; { if (event.type !== &#39;X&#39;) return {}; ... })`
+   pattern is required; the `if` guards both the runtime type and the
+   type narrowing.
+5. **Did a guard return `false`?** `playing.always` has
+   `[{ guard: &#39;allFilledCorrectly&#39;, target: &#39;roundComplete&#39; }]`.
+   `allFilledCorrectly` returns `false` when any zone has
+   `placedTileId === null` OR `isWrong === true`. Inspect
+   `engine.context.zones` to confirm.
+
+To inspect engine state in the console while the game is running:
+
+```ts
+// Temporary — add to NumberMatchSession, remove before committing
+useEffect(() =&gt; {
+  (window as any).__engine = engine;
+}, [engine]);
+
+// Then in console:
+__engine.phase; // → &#39;playing&#39; | &#39;roundComplete&#39; | &#39;waitingForNext&#39; | &#39;gameOver&#39;
+__engine.context.zones; // → AnswerZone[]
+__engine.context.retryCount;
+__engine.send({ type: &#39;CELEBRATION_DONE&#39; }); // skip the 750ms wait
+```
+
+### 8. My TTS doesn&#39;t speak
+
+PR 1a wires the `speak` action through `executeSideEffects` →
+`GameEventBus` as `lifecycle:speak`, **but there is no subscriber**
+for `lifecycle:speak` in PR 1a — the consumer (`useLifecycleTTS`)
+lands in a follow-up task. Prompt TTS (per-round question reading)
+goes through `useRoundTTS` unchanged.
+
+To trace lifecycle:speak emissions while debugging:
+
+```js
+const unsub = getGameEventBus().subscribe(&#39;lifecycle:speak&#39;, (e) =&gt;
+  console.log(&#39;[lifecycle:speak]&#39;, e),
+);
+// unsub() to stop
+```
+
+### 9. My celebration overlay renders twice
+
+The overlay is gated on `engine.phase` (camelCase: `&#39;roundComplete&#39;`
+or `&#39;gameOver&#39;`), not on the reducer&#39;s `phase` (kebab-case). With the
+XState `always` transition firing atomically when zones become fully
+correct, the overlay mounts once and stays mounted through the
+750 ms `after`. The double-mount race that existed with the prior
+`setTimeout`-based round-advance is closed.
+
+Checklist if you see a double-mount in dev:
+
+1. Confirm the game component reads `engine.phase`, not
+   `useAnswerGameContext().phase`. The reducer&#39;s kebab-case `phase`
+   may transition independently (e.g., `&#39;round-complete&#39;` →
+   `&#39;game-over&#39;` on the same tile placement for last-round
+   completion).
+2. Confirm overlays are conditionally rendered on `engine.phase`,
+   not on a derived `setState`-driven flag. The prior `useGameSounds`
+   pattern with a microtask-deferred `confettiReady`/`gameOverReady`
+   is no longer used in NumberMatch.
+3. Confirm only one game component is mounted — e.g., a stale Storybook
+   story decorator or React strict-mode double-render.
+
+### 10. How do I add a new game with the XState engine?
+
+The canonical example for PR 1a is NumberMatch:
+
+- `src/games/number-match/definition.ts` — `numberMatchDefinition:
+GameDefinition&lt;NumberMatchRound&gt;` with the full machine, the
+  `setup({ types, guards, actions })` block, and the 17 inline
+  `assign` actions.
+- `src/games/number-match/definition.test.ts` — machine-level
+  behaviour tests using `createActor + send + getSnapshot + waitFor`.
+- `src/games/number-match/NumberMatch/NumberMatch.tsx` — component
+  using `useGameEngine(numberMatchDefinition, { input, totalRounds, levelSize, envelope })`
+  with `engineDispatch` passed to `&lt;AnswerGame&gt;` to bridge reducer
+  dispatches to the engine.
+
+Recipe for a new game:
+
+1. Author a `GameDefinition` with the events your game needs. Declare
+   placeholder guards/actions in `setup` matching the engine&#39;s
+   injected shape (`speak`, `playSound`, `completeGame`).
+2. Write machine-level tests using XState&#39;s `createActor + send + getSnapshot`
+   patterns.
+3. In your game component, call `useGameEngine(definition, options)`
+   and pass `engine.send` (wrapped via `useRef` for stable identity)
+   as `engineDispatch` to `&lt;AnswerGame&gt;`.
+4. Gate overlays on `engine.phase === &#39;roundComplete&#39; | &#39;gameOver&#39;`.
+5. Add a session-epoch keyed inner component if Play Again should
+   reset the engine actor.
+
+### 11. XState devtools
+
+Wiring `@statelyai/inspect` (or `@xstate/inspect`) is **deferred to
+PR 1c**. For PR 1a, debug via React DevTools, console subscriptions
+(`__engine` pattern above), and machine-level tests in
+`definition.test.ts`.
 </code></pre>
           </div>
         </div>
