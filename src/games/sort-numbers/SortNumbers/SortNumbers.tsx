@@ -1,15 +1,25 @@
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { buildSortRound } from '../build-sort-round';
+import { sortNumbersDefinition } from '../definition';
 import { SortNumbersTileBank } from '../SortNumbersTileBank/SortNumbersTileBank';
+import type { SortNumbersEngineContext } from '../definition';
 import type { SortNumbersConfig } from '../types';
 import type {
+  AnswerGameAction,
   AnswerGameConfig,
   AnswerGameDraftState,
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
+import type { UseGameEngineResult } from '@/lib/game-engine/definition-types';
 import type { GameSkin } from '@/lib/skin';
 import { AnswerGame } from '@/components/answer-game/AnswerGame/AnswerGame';
 import { GameOverOverlay } from '@/components/answer-game/GameOverOverlay/GameOverOverlay';
@@ -18,13 +28,12 @@ import { ScoreAnimation } from '@/components/answer-game/ScoreAnimation/ScoreAni
 import { Slot } from '@/components/answer-game/Slot/Slot';
 import { SlotRow } from '@/components/answer-game/Slot/SlotRow';
 import { getNumericTileFontClass } from '@/components/answer-game/tile-font';
-import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useAnswerGameDispatch } from '@/components/answer-game/useAnswerGameDispatch';
-import { useGameSounds } from '@/components/answer-game/useGameSounds';
 import { useRoundTTS } from '@/components/answer-game/useRoundTTS';
 import { buildRoundOrder } from '@/games/build-round-order';
+import { useGameEngine } from '@/lib/game-engine/useGameEngine';
 import { getGameEventBus } from '@/lib/game-event-bus';
-import { resolveTiming, useGameSkin } from '@/lib/skin';
+import { useGameSkin } from '@/lib/skin';
 
 interface SortNumbersProps {
   config: SortNumbersConfig;
@@ -33,26 +42,34 @@ interface SortNumbersProps {
   seed?: string;
 }
 
+type SortNumbersEngine = UseGameEngineResult<SortNumbersEngineContext>;
+
 const SortNumbersSession = ({
   sortNumbersConfig,
   roundOrder,
   skin,
   onRestartSession,
+  engine,
 }: {
   sortNumbersConfig: SortNumbersConfig;
   roundOrder: readonly number[];
   skin: GameSkin;
   onRestartSession: () => void;
+  engine: SortNumbersEngine;
 }) => {
   const { t } = useTranslation('games');
-  const { phase, roundIndex, retryCount, zones, levelIndex } =
-    useAnswerGameContext();
   const dispatch = useAnswerGameDispatch();
-  const { confettiReady, levelCompleteReady, gameOverReady } =
-    useGameSounds();
   const navigate = useNavigate();
   const { locale } = useParams({ from: '/$locale' });
-  const completionToken = useRef(0);
+
+  const phase = engine.phase;
+  const roundIndex = engine.roundIndex;
+  const retryCount = engine.retryCount;
+  const levelIndex = engine.context.levelIndex;
+  const zones = engine.context.zones;
+  const showRoundComplete = phase === 'roundComplete';
+  const showLevelComplete = phase === 'levelComplete';
+  const showGameOver = phase === 'gameOver';
 
   const configRoundIndex = roundOrder[roundIndex];
   const round =
@@ -105,103 +122,55 @@ const SortNumbersSession = ({
     dispatch({ type: 'COMPLETE_GAME' });
   };
 
+  // Round-advance is driven by XState's `after: 750` and `always`
+  // transitions. When the machine settles in `waitingForNext`, compute
+  // the next round's tiles/zones and dispatch ADVANCE_ROUND via the
+  // reducer dispatch — AnswerGameProvider mirrors it to the engine via
+  // engineDispatch, so reducer and engine advance together.
   useEffect(() => {
-    if (phase !== 'game-over') return;
+    if (engine.phase !== 'waitingForNext') return;
+    const nextConfigIndex = roundOrder[engine.roundIndex + 1];
+    const nextRound =
+      nextConfigIndex === undefined
+        ? undefined
+        : sortNumbersConfig.rounds[nextConfigIndex];
+    if (!nextRound) return;
+    const distractor =
+      sortNumbersConfig.tileBankMode === 'distractors'
+        ? {
+            config: sortNumbersConfig.distractors,
+            range: sortNumbersConfig.range,
+          }
+        : undefined;
+    const { tiles: nextTiles, zones: nextZones } = buildSortRound(
+      nextRound.sequence,
+      sortNumbersConfig.direction,
+      distractor,
+    );
+    dispatch({
+      type: 'ADVANCE_ROUND',
+      tiles: nextTiles,
+      zones: nextZones,
+    });
     getGameEventBus().emit({
-      type: 'game:end',
+      type: 'game:round-advance',
       gameId: sortNumbersConfig.gameId,
       sessionId: '',
       profileId: '',
       timestamp: Date.now(),
-      roundIndex,
-      finalScore: 0,
-      totalRounds: roundOrder.length,
-      correctCount: 0,
-      durationMs: 0,
-      retryCount,
+      roundIndex: engine.roundIndex + 1,
     });
   }, [
-    phase,
-    sortNumbersConfig.gameId,
-    roundIndex,
-    roundOrder.length,
-    retryCount,
-  ]);
-
-  useEffect(() => {
-    if (phase !== 'round-complete' || !confettiReady) return;
-
-    const token = ++completionToken.current;
-    const delayMs = resolveTiming(
-      'roundAdvanceDelay',
-      skin,
-      sortNumbersConfig.timing,
-    );
-    const timer = globalThis.setTimeout(() => {
-      if (completionToken.current !== token) return;
-
-      const isLastRound = roundIndex >= roundOrder.length - 1;
-      if (isLastRound) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-
-      const nextConfigIndex = roundOrder[roundIndex + 1];
-      const nextRound =
-        nextConfigIndex === undefined
-          ? undefined
-          : sortNumbersConfig.rounds[nextConfigIndex];
-
-      if (!nextRound) {
-        dispatch({ type: 'COMPLETE_GAME' });
-        return;
-      }
-
-      const distractor =
-        sortNumbersConfig.tileBankMode === 'distractors'
-          ? {
-              config: sortNumbersConfig.distractors,
-              range: sortNumbersConfig.range,
-            }
-          : undefined;
-
-      const { tiles: nextTiles, zones: nextZones } = buildSortRound(
-        nextRound.sequence,
-        sortNumbersConfig.direction,
-        distractor,
-      );
-      dispatch({
-        type: 'ADVANCE_ROUND',
-        tiles: nextTiles,
-        zones: nextZones,
-      });
-      getGameEventBus().emit({
-        type: 'game:round-advance',
-        gameId: sortNumbersConfig.gameId,
-        sessionId: '',
-        profileId: '',
-        timestamp: Date.now(),
-        roundIndex: roundIndex + 1,
-      });
-    }, delayMs);
-
-    return () => {
-      globalThis.clearTimeout(timer);
-    };
-  }, [
-    phase,
-    confettiReady,
-    roundIndex,
+    engine.phase,
+    engine.roundIndex,
     dispatch,
     roundOrder,
-    skin,
     sortNumbersConfig.gameId,
     sortNumbersConfig.rounds,
     sortNumbersConfig.direction,
     sortNumbersConfig.tileBankMode,
     sortNumbersConfig.distractors,
     sortNumbersConfig.range,
-    sortNumbersConfig.timing,
   ]);
 
   if (!round) return null;
@@ -239,26 +208,28 @@ const SortNumbersSession = ({
         </AnswerGame.Choices>
       </div>
       {skin.RoundCompleteEffect ? (
-        <skin.RoundCompleteEffect visible={confettiReady} />
+        <skin.RoundCompleteEffect visible={showRoundComplete} />
       ) : (
-        <ScoreAnimation visible={confettiReady} />
+        <ScoreAnimation visible={showRoundComplete} />
       )}
-      {levelCompleteReady ? (
+      {showLevelComplete ? (
         skin.LevelCompleteOverlay ? (
           <skin.LevelCompleteOverlay
             level={levelIndex + 1}
             onNextLevel={handleNextLevel}
             onDone={handleDone}
+            nextLevelEnabled={showLevelComplete}
           />
         ) : (
           <LevelCompleteOverlay
             level={levelIndex + 1}
             onNextLevel={handleNextLevel}
             onDone={handleDone}
+            nextLevelEnabled={showLevelComplete}
           />
         )
       ) : null}
-      {gameOverReady ? (
+      {showGameOver ? (
         skin.CelebrationOverlay ? (
           <skin.CelebrationOverlay
             retryCount={retryCount}
@@ -274,6 +245,111 @@ const SortNumbersSession = ({
         )
       ) : null}
     </>
+  );
+};
+
+interface SortNumbersInstanceProps {
+  config: SortNumbersConfig;
+  initialState?: AnswerGameDraftState;
+  sessionId?: string;
+  roundOrder: readonly number[];
+  skin: GameSkin;
+  onRestartSession: () => void;
+  tiles: TileItem[];
+  zones: AnswerZone[];
+}
+
+/**
+ * One game session. Holds the XState engine and forwards every reducer
+ * dispatch to it via `engineDispatch`. Re-mounted (via key changes in the
+ * outer SortNumbers component) when the player taps "Play again", which
+ * destroys the engine actor and starts a fresh one from round 0.
+ */
+const SortNumbersInstance = ({
+  config,
+  initialState,
+  sessionId,
+  roundOrder,
+  skin,
+  onRestartSession,
+  tiles,
+  zones,
+}: SortNumbersInstanceProps) => {
+  const answerGameConfig = useMemo<AnswerGameConfig>(
+    () => ({
+      gameId: config.gameId,
+      inputMethod: config.inputMethod,
+      wrongTileBehavior: config.wrongTileBehavior,
+      tileBankMode: config.tileBankMode,
+      totalRounds: config.rounds.length,
+      roundsInOrder: config.roundsInOrder,
+      ttsEnabled: config.ttsEnabled,
+      touchKeyboardInputMode: 'numeric',
+      initialTiles: tiles,
+      initialZones: zones,
+      slotInteraction: 'free-swap' as const,
+      levelMode: config.levelMode,
+      hud: config.hud,
+    }),
+    [
+      config.gameId,
+      config.inputMethod,
+      config.wrongTileBehavior,
+      config.tileBankMode,
+      config.rounds.length,
+      config.roundsInOrder,
+      config.ttsEnabled,
+      config.levelMode,
+      config.hud,
+      tiles,
+      zones,
+    ],
+  );
+
+  const engine = useGameEngine<unknown, SortNumbersEngineContext>(
+    sortNumbersDefinition,
+    {
+      input: {
+        totalRounds: config.rounds.length,
+        maxLevels: config.levelMode?.maxLevels ?? null,
+        wrongTileBehavior: config.wrongTileBehavior,
+      },
+      totalRounds: config.rounds.length,
+      levelSize:
+        config.levelMode?.maxLevels !== undefined &&
+        config.levelMode.maxLevels > 0
+          ? Math.ceil(config.rounds.length / config.levelMode.maxLevels)
+          : config.rounds.length,
+      envelope: { gameId: config.gameId },
+    },
+  );
+
+  // Stable engineDispatch that always forwards to the latest engine.send
+  // (which changes identity on every machine snapshot).
+  const engineRef = useRef(engine);
+  useEffect(() => {
+    engineRef.current = engine;
+  }, [engine]);
+  const engineDispatch = useCallback((action: AnswerGameAction) => {
+    engineRef.current.send(action as never);
+  }, []);
+
+  return (
+    <AnswerGame
+      config={answerGameConfig}
+      initialState={initialState}
+      sessionId={sessionId}
+      skin={skin}
+      engineDispatch={engineDispatch}
+    >
+      <SortNumbersSession
+        sortNumbersConfig={config}
+        roundOrder={roundOrder}
+        skin={skin}
+        onRestartSession={onRestartSession}
+        engine={engine}
+      />
+    </AnswerGame>
   );
 };
 
@@ -319,37 +395,6 @@ export const SortNumbers = ({
     config.range,
   ]);
 
-  const answerGameConfig = useMemo(
-    (): AnswerGameConfig => ({
-      gameId: config.gameId,
-      inputMethod: config.inputMethod,
-      wrongTileBehavior: config.wrongTileBehavior,
-      tileBankMode: config.tileBankMode,
-      totalRounds: config.rounds.length,
-      roundsInOrder: config.roundsInOrder,
-      ttsEnabled: config.ttsEnabled,
-      touchKeyboardInputMode: 'numeric',
-      initialTiles: tiles,
-      initialZones: zones,
-      slotInteraction: 'free-swap' as const,
-      levelMode: config.levelMode,
-      hud: config.hud,
-    }),
-    [
-      config.gameId,
-      config.inputMethod,
-      config.wrongTileBehavior,
-      config.tileBankMode,
-      config.rounds.length,
-      config.roundsInOrder,
-      config.ttsEnabled,
-      config.levelMode,
-      config.hud,
-      tiles,
-      zones,
-    ],
-  );
-
   if (!round0) return null;
 
   return (
@@ -358,22 +403,19 @@ export const SortNumbers = ({
       style={skin.tokens as React.CSSProperties}
     >
       {skin.SceneBackground ? <skin.SceneBackground /> : null}
-      <AnswerGame
+      <SortNumbersInstance
         key={sessionEpoch}
-        config={answerGameConfig}
+        config={config}
         initialState={sessionEpoch === 0 ? initialState : undefined}
         sessionId={sessionId}
+        roundOrder={roundOrder}
         skin={skin}
-      >
-        <SortNumbersSession
-          sortNumbersConfig={config}
-          roundOrder={roundOrder}
-          skin={skin}
-          onRestartSession={() => {
-            setSessionEpoch((e) => e + 1);
-          }}
-        />
-      </AnswerGame>
+        onRestartSession={() => {
+          setSessionEpoch((e) => e + 1);
+        }}
+        tiles={tiles}
+        zones={zones}
+      />
     </div>
   );
 };

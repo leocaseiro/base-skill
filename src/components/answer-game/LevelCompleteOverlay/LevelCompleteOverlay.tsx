@@ -5,12 +5,24 @@ interface LevelCompleteOverlayProps {
   level: number;
   onNextLevel: () => void;
   onDone: () => void;
+  /**
+   * Belt-and-suspenders gate from the XState engine phase
+   * (`engine.phase === 'levelComplete'`). The overlay's own render
+   * condition already keys on this, but skin overrides that animate in
+   * (fade/scale) may briefly render the button before the canonical
+   * state; setting `disabled` here prevents premature ADVANCE_LEVEL
+   * dispatch during the 750 ms roundComplete after-timer.
+   *
+   * Defaults to `true` for backward-compat with non-XState callers.
+   */
+  nextLevelEnabled?: boolean;
 }
 
 export const LevelCompleteOverlay = ({
   level,
   onNextLevel,
   onDone,
+  nextLevelEnabled = true,
 }: LevelCompleteOverlayProps) => {
   useEffect(() => {
     void confetti({
@@ -43,7 +55,8 @@ export const LevelCompleteOverlay = ({
         <button
           type="button"
           onClick={onNextLevel}
-          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95"
+          disabled={!nextLevelEnabled}
+          className="rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next Level
         </button>
