@@ -248,7 +248,7 @@ describe('WordSpell StrictMode round-advance guard', () => {
   // ADVANCE_ROUND dispatches in dev, double-incrementing the engine's
   // roundIndex. With the guard the second invocation is short-circuited.
   it('round-advance dispatches once under StrictMode double-mount', () => {
-    const config: WordSpellConfig = {
+    const strictModeConfig: WordSpellConfig = {
       gameId: 'word-spell-test',
       component: 'WordSpell',
       inputMethod: 'type',
@@ -265,7 +265,7 @@ describe('WordSpell StrictMode round-advance guard', () => {
     expect(() =>
       render(
         <StrictMode>
-          <WordSpell config={config} />
+          <WordSpell config={strictModeConfig} />
         </StrictMode>,
       ),
     ).not.toThrow();
