@@ -37,6 +37,7 @@ interface StartActorOptions {
   totalRounds?: number;
   maxLevels?: number | null;
   levelSize?: number;
+  isLevelMode?: boolean;
   wrongTileBehavior?: 'reject' | 'lock-manual' | 'lock-auto-eject';
 }
 
@@ -57,7 +58,11 @@ const liveActors: Actor<AnyStateMachine>[] = [];
 const startActor = (options: StartActorOptions = {}): StartedActor => {
   const totalRounds = options.totalRounds ?? 3;
   const levelSize = options.levelSize ?? totalRounds;
-  const guards = buildEngineGuards(totalRounds, levelSize);
+  const maxLevels = options.maxLevels ?? null;
+  const guards = buildEngineGuards(totalRounds, levelSize, {
+    isLevelMode: options.isLevelMode ?? maxLevels !== null,
+    maxLevels,
+  });
   const mocks = {
     playSound: vi.fn(),
     speak: vi.fn(),
@@ -199,6 +204,69 @@ describe('SortNumbers machine — levelComplete', () => {
     // ADVANCE_ROUND in this test).
     expect(context().roundIndex).toBe(2);
     expect(context().retryCount).toBe(0);
+  });
+
+  it('endless level mode (simple-config shape) reaches levelComplete, not gameOver, after the only round', () => {
+    // Regression for PR #357 manual smoke (handoff 2026-05-12):
+    // `resolveSimpleConfig` ships `totalRounds: 1`, `levelMode` defined,
+    // and no `maxLevels`. Pre-fix the engine guard `isLastRound` fired
+    // (1+1>=1) and the actor went to `gameOver`, so the user saw the
+    // `Game complete` overlay instead of `Level 1 Complete`. After the
+    // fix, `isLastRound` is suppressed in endless level mode and
+    // `isLastRoundOfLevel` fires at every levelSize boundary, so the
+    // actor reaches `levelComplete` and the user can advance.
+    vi.useFakeTimers();
+    const { actor } = startActor({
+      totalRounds: 1,
+      isLevelMode: true,
+      maxLevels: null,
+      levelSize: 1,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    expect(actor.getSnapshot().value).toBe('roundComplete');
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+  });
+
+  it('endless level mode continues advancing levels across multiple ADVANCE_LEVEL events', () => {
+    vi.useFakeTimers();
+    const { actor, context } = startActor({
+      totalRounds: 1,
+      isLevelMode: true,
+      maxLevels: null,
+      levelSize: 1,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+
+    const playOnlyRound = () => {
+      actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+      actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    };
+
+    // Level 1
+    playOnlyRound();
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+    actor.send({
+      type: 'ADVANCE_LEVEL',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    expect(actor.getSnapshot().value).toBe('playing');
+    expect(context().levelIndex).toBe(1);
+
+    // Level 2 — same shape; the engine must reach levelComplete again
+    // rather than gameOver. This is the loop the simple-config user
+    // expects.
+    playOnlyRound();
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
   });
 
   it('COMPLETE_GAME from levelComplete jumps to gameOver', () => {

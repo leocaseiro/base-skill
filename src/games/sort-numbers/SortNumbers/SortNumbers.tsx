@@ -76,6 +76,12 @@ const SortNumbersSession = ({
     configRoundIndex === undefined
       ? undefined
       : sortNumbersConfig.rounds[configRoundIndex];
+  // In endless level mode the engine's `roundIndex` accumulates across
+  // levels, so it can index past `roundOrder.length`. The engine's
+  // `context.zones` is authoritative for what to render — it's reset on
+  // every ADVANCE_LEVEL — so we don't gate on `round` when level mode
+  // is active.
+  const isLevelMode = sortNumbersConfig.levelMode !== undefined;
 
   const directionLabel =
     sortNumbersConfig.direction === 'ascending'
@@ -173,7 +179,8 @@ const SortNumbersSession = ({
     sortNumbersConfig.range,
   ]);
 
-  if (!round) return null;
+  if (!round && !isLevelMode) return null;
+  if (zones.length === 0) return null;
 
   return (
     <>
@@ -320,6 +327,13 @@ const SortNumbersInstance = ({
         config.levelMode.maxLevels > 0
           ? Math.ceil(config.rounds.length / config.levelMode.maxLevels)
           : config.rounds.length,
+      // PR 1b regression fix (handoff 2026-05-12): endless level mode
+      // (simple-config: `levelMode` defined, no `maxLevels`) must not
+      // transition the engine to `gameOver` after the last configured
+      // round. The guards in `useGameEngine.buildEngineGuards` need both
+      // signals to disambiguate "endless levels" from "no level mode".
+      isLevelMode: config.levelMode !== undefined,
+      maxLevels: config.levelMode?.maxLevels ?? null,
       envelope: { gameId: config.gameId },
     },
   );
