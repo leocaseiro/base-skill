@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { getRegisteredSkins } from './registry';
 import type { GameSkin } from './game-skin';
 import type { GameSkinIdMap } from './registry';
@@ -36,6 +36,19 @@ export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
   const skin =
     registered.find((s) => s.id === skinId) ?? registered[0]!;
 
+  const stageRef = useRef<HTMLDivElement>(null);
+  const requestFullscreen = () => {
+    const target = stageRef.current?.querySelector(
+      '.game-container',
+    ) as HTMLElement | null;
+    if (!target) return;
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+    } else {
+      void target.requestFullscreen();
+    }
+  };
+
   const bus = getGameEventBus();
   const emit = (type: string, extra: Record<string, unknown>) => {
     bus.emit({
@@ -69,6 +82,15 @@ export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
             ))}
           </select>
         </label>
+
+        <button
+          type="button"
+          onClick={requestFullscreen}
+          className="rounded border px-2 py-1 text-sm"
+          aria-label="Toggle fullscreen"
+        >
+          Fullscreen
+        </button>
 
         <span className="mx-2 h-5 w-px bg-border" aria-hidden="true" />
 
@@ -149,7 +171,9 @@ export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
         </button>
       </div>
 
-      <div className="skin-harness-stage p-4">{children({ skin })}</div>
+      <div ref={stageRef} className="skin-harness-stage p-4">
+        {children({ skin })}
+      </div>
     </div>
   );
 };
