@@ -19842,6 +19842,17 @@ The reducer mirror still resets `roundIndex` per level for HUD
 display; PR 1c collapses the reducer and the HUD will then compute
 per-level round from `engine.roundIndex % levelSize`.
 
+**Endless vs finite level mode.** The component must pass both
+`isLevelMode: config.levelMode !== undefined` AND
+`maxLevels: config.levelMode?.maxLevels ?? null` to `useGameEngine`.
+With `maxLevels === null` (endless), the guards suppress `isLastRound`
+and let `isLastRoundOfLevel` fire on every `levelSize` boundary — so
+the only way to reach `gameOver` is an explicit `COMPLETE_GAME`
+(e.g., &quot;I&#39;m Done&quot; button on the level-complete overlay). Simple-config
+ships exactly this shape: `totalRounds: 1`, `levelMode` defined,
+no cap. See `GameEngine.reference.mdx → Engine-injected guards` for
+the guard bodies.
+
 ### 6. Side-effect flow
 
 ```mermaid
@@ -20114,12 +20125,14 @@ const engine = useGameEngine&lt;TRound, TContext&gt;(
 
 `options`:
 
-| Field         | Type                      | Description                                                                                                                 |
-| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `input`       | `unknown`                 | Populates the machine&#39;s initial context via XState v5&#39;s `setup({ types: { input } })` + `useMachine(machine, { input })`    |
-| `envelope`    | `Partial&lt;EngineEnvelope&gt;` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
-| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
-| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+| Field         | Type                          | Description                                                                                                                                                                                                       |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                     | Populates the machine&#39;s initial context via XState v5&#39;s `setup({ types: { input } })` + `useMachine(machine, { input })`                                                                                          |
+| `envelope`    | `Partial&lt;EngineEnvelope&gt;`     | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook                                                                                       |
+| `totalRounds` | `number`                      | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                                                                                                         |
+| `levelSize`   | `number`                      | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                                                                                                                   |
+| `isLevelMode` | `boolean \| undefined`        | Set `true` whenever a `levelMode` block exists on the config — even without `maxLevels`. Enables endless level mode in the guards. Defaults to `false` (no level mode) so NumberMatch / WordSpell stay unaffected |
+| `maxLevels`   | `number \| null \| undefined` | `null` = endless levels, `number` = finite. Pair with `isLevelMode: true`. Defaults to `null`                                                                                                                     |
 
 `UseGameEngineResult&lt;TContext&gt;`:
 
@@ -20143,18 +20156,38 @@ machine state change but always reaches the same underlying actor.
 
 ### Engine-injected guards and actions
 
-`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
-for the placeholder guards declared in each game&#39;s `setup({ guards })`:
+`buildEngineGuards(totalRounds, levelSize, { isLevelMode, maxLevels })`
+returns the runtime bodies for the placeholder guards declared in each
+game&#39;s `setup({ guards })`. The third argument carries level-mode
+context the engine can&#39;t derive from `totalRounds` alone:
 
 ```ts
-isMidLevelRound: ({ context }) =&gt;
-  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &amp;&amp;
-  context.roundIndex + 1 &lt; totalRounds;
-isLastRoundOfLevel: ({ context }) =&gt;
-  (context.roundIndex + 1) % max(levelSize, 1) === 0 &amp;&amp;
-  context.roundIndex + 1 &lt; totalRounds;
-isLastRound: ({ context }) =&gt; context.roundIndex + 1 &gt;= totalRounds;
+const isEndless = isLevelMode === true &amp;&amp; maxLevels === null;
+
+isMidLevelRound: ({ context }) =&gt; {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel === 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 &lt; totalRounds;
+};
+isLastRoundOfLevel: ({ context }) =&gt; {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel !== 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 &lt; totalRounds;
+};
+isLastRound: ({ context }) =&gt; {
+  if (isEndless) return false;
+  return context.roundIndex + 1 &gt;= totalRounds;
+};
 ```
+
+The `isEndless` branch keeps `gameOver` reachable only via explicit
+`COMPLETE_GAME` / `GAME_OVER` events (e.g., user taps &quot;I&#39;m Done&quot; on
+the level-complete overlay). Without it, the engine would treat
+`roundIndex + 1 &gt;= totalRounds` as &quot;game&#39;s over&quot; even when
+`levelMode.generateNextLevel` is ready to produce another level —
+the regression `e2e/sortnumbers-level-advance.spec.ts` pins this.
 
 Engine-injected actions (overridden by `useGameEngine.provide`):
 
