@@ -2,10 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createActor } from 'xstate';
 import { sortNumbersDefinition } from './definition';
 import type {
+  SortNumbersEngineContext,
+  sortNumbersMachine,
+} from './definition';
+import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
-import type { Actor, AnyStateMachine } from 'xstate';
+import type { Actor } from 'xstate';
 import { buildEngineGuards } from '@/lib/game-engine/useGameEngine';
 
 const tile = (id: string, value: string): TileItem => ({
@@ -42,18 +46,20 @@ interface StartActorOptions {
 }
 
 interface StartedActor {
-  actor: Actor<AnyStateMachine>;
+  // (review #26) Typed against the concrete machine instead of AnyStateMachine.
+  actor: Actor<typeof sortNumbersMachine>;
   mocks: {
     playSound: ReturnType<typeof vi.fn>;
     speak: ReturnType<typeof vi.fn>;
     completeGame: ReturnType<typeof vi.fn>;
     emit: ReturnType<typeof vi.fn>;
   };
-  context: () => Record<string, unknown>;
+  // (review #25) Strongly-typed engine context for autocomplete + safety.
+  context: () => SortNumbersEngineContext;
   zones: () => AnswerZone[];
 }
 
-const liveActors: Actor<AnyStateMachine>[] = [];
+const liveActors: Actor<typeof sortNumbersMachine>[] = [];
 
 const startActor = (options: StartActorOptions = {}): StartedActor => {
   const totalRounds = options.totalRounds ?? 3;
@@ -69,8 +75,11 @@ const startActor = (options: StartActorOptions = {}): StartedActor => {
     completeGame: vi.fn(),
     emit: vi.fn(),
   };
-  const actor = createActor(
-    sortNumbersDefinition.machine.provide({ guards, actions: mocks }),
+  const actor: Actor<typeof sortNumbersMachine> = createActor(
+    sortNumbersDefinition.machine.provide({
+      guards,
+      actions: mocks,
+    }) as typeof sortNumbersMachine,
     {
       input: {
         totalRounds,
@@ -79,16 +88,14 @@ const startActor = (options: StartActorOptions = {}): StartedActor => {
           options.wrongTileBehavior ?? 'lock-auto-eject',
       },
     },
-  ) as Actor<AnyStateMachine>;
+  );
   actor.start();
   liveActors.push(actor);
   return {
     actor,
     mocks,
-    context: () =>
-      actor.getSnapshot().context as Record<string, unknown>,
-    zones: () =>
-      (actor.getSnapshot().context as { zones: AnswerZone[] }).zones,
+    context: () => actor.getSnapshot().context,
+    zones: () => actor.getSnapshot().context.zones,
   };
 };
 
@@ -322,11 +329,9 @@ describe('SortNumbers machine — happy path', () => {
     });
     expect(zones()[0]?.placedTileId).toBe('typed-z0');
     expect(zones()[0]?.isWrong).toBe(false);
-    expect(
-      (context().allTiles as TileItem[]).some(
-        (t) => t.id === 'typed-z0',
-      ),
-    ).toBe(true);
+    expect(context().allTiles.some((t) => t.id === 'typed-z0')).toBe(
+      true,
+    );
   });
 
   it('REMOVE_TILE on placed slot returns real tile to bank and clears slot', () => {

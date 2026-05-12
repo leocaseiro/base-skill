@@ -2,10 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createActor } from 'xstate';
 import { wordSpellDefinition } from './definition';
 import type {
+  WordSpellEngineContext,
+  wordSpellMachine,
+} from './definition';
+import type {
   AnswerZone,
   TileItem,
 } from '@/components/answer-game/types';
-import type { Actor, AnyStateMachine } from 'xstate';
+import type { Actor } from 'xstate';
 import { buildEngineGuards } from '@/lib/game-engine/useGameEngine';
 
 const tile = (id: string, value: string): TileItem => ({
@@ -40,17 +44,19 @@ interface StartActorOptions {
 }
 
 interface StartedActor {
-  actor: Actor<AnyStateMachine>;
+  // (review #26) Typed against the concrete machine instead of AnyStateMachine.
+  actor: Actor<typeof wordSpellMachine>;
   mocks: {
     playSound: ReturnType<typeof vi.fn>;
     speak: ReturnType<typeof vi.fn>;
     completeGame: ReturnType<typeof vi.fn>;
   };
-  context: () => Record<string, unknown>;
+  // (review #25) Strongly-typed engine context for autocomplete + safety.
+  context: () => WordSpellEngineContext;
   zones: () => AnswerZone[];
 }
 
-const liveActors: Actor<AnyStateMachine>[] = [];
+const liveActors: Actor<typeof wordSpellMachine>[] = [];
 
 const startActor = (options: StartActorOptions = {}): StartedActor => {
   const totalRounds = options.totalRounds ?? 3;
@@ -60,11 +66,11 @@ const startActor = (options: StartActorOptions = {}): StartedActor => {
     speak: vi.fn(),
     completeGame: vi.fn(),
   };
-  const actor = createActor(
+  const actor: Actor<typeof wordSpellMachine> = createActor(
     wordSpellDefinition.machine.provide({
       guards,
       actions: mocks,
-    }),
+    }) as typeof wordSpellMachine,
     {
       input: {
         totalRounds,
@@ -73,16 +79,14 @@ const startActor = (options: StartActorOptions = {}): StartedActor => {
           options.wrongTileBehavior ?? 'lock-auto-eject',
       },
     },
-  ) as Actor<AnyStateMachine>;
+  );
   actor.start();
   liveActors.push(actor);
   return {
     actor,
     mocks,
-    context: () =>
-      actor.getSnapshot().context as Record<string, unknown>,
-    zones: () =>
-      (actor.getSnapshot().context as { zones: AnswerZone[] }).zones,
+    context: () => actor.getSnapshot().context,
+    zones: () => actor.getSnapshot().context.zones,
   };
 };
 
@@ -129,11 +133,9 @@ describe('WordSpell machine — happy path', () => {
     });
     expect(zones()[0]?.placedTileId).toBe('typed-z0');
     expect(zones()[0]?.isWrong).toBe(false);
-    expect(
-      (context().allTiles as TileItem[]).some(
-        (t) => t.id === 'typed-z0',
-      ),
-    ).toBe(true);
+    expect(context().allTiles.some((t) => t.id === 'typed-z0')).toBe(
+      true,
+    );
   });
 
   it('REMOVE_TILE on placed slot returns real tile to bank and clears slot', () => {
