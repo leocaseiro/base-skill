@@ -58,6 +58,19 @@ export const triggerEjectReturn = (
     buttonCs.boxShadow === 'none'
       ? '0 4px 16px rgba(0,0,0,0.18)'
       : buttonCs.boxShadow;
+  // Effective parent transform scale (e.g. cave-dragon container scales its
+  // descendants via transform: scale(...) so layout dimensions and visual
+  // dimensions diverge). The ghost is appended to document.body and inherits
+  // none of that transform, so the cloned letter renders at its raw layout
+  // font-size — which looks too big on small screens and too small on big
+  // screens. Compensate by scaling the ghost's font-size back to match the
+  // source's effective visual size.
+  const visualScale =
+    sourceEl.offsetWidth > 0
+      ? sourceRect.width / sourceEl.offsetWidth
+      : 1;
+  const sourceFontSizePx = Number.parseFloat(buttonCs.fontSize) || 0;
+  const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
 
   // Fresh div — no inherited classes that could break fixed positioning.
   const ghost = document.createElement('div');
@@ -68,6 +81,7 @@ export const triggerEjectReturn = (
     left: ${sourceRect.left}px;
     width: ${sourceRect.width}px;
     height: ${sourceRect.height}px;
+    font-size: ${ghostFontSize};
     border-radius: ${borderRadius};
     display: flex;
     align-items: center;
