@@ -137,6 +137,91 @@ describe('SortNumbers round-complete overlay', () => {
   });
 });
 
+describe('SortNumbers Next Level button gating (review #10)', () => {
+  // Verifies the level-complete overlay's "Next Level" button is gated
+  // by `nextLevelEnabled={engine.phase === 'levelComplete'}`. The button
+  // mounts during `roundComplete` only after the 750ms after-timer; we
+  // assert the button is not interactable until the engine reaches
+  // `levelComplete`.
+  it('"Next Level" button is enabled only in levelComplete phase', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const generateNextLevel = vi.fn().mockReturnValue({
+        tiles: [
+          { id: 'a', label: '4', value: '4' },
+          { id: 'b', label: '5', value: '5' },
+          { id: 'c', label: '6', value: '6' },
+        ],
+        zones: [
+          {
+            id: 'z0',
+            index: 0,
+            expectedValue: '4',
+            placedTileId: null,
+            isWrong: false,
+            isLocked: false,
+          },
+          {
+            id: 'z1',
+            index: 1,
+            expectedValue: '5',
+            placedTileId: null,
+            isWrong: false,
+            isLocked: false,
+          },
+          {
+            id: 'z2',
+            index: 2,
+            expectedValue: '6',
+            placedTileId: null,
+            isWrong: false,
+            isLocked: false,
+          },
+        ],
+      });
+
+      const levelConfig: SortNumbersConfig = {
+        ...baseConfig,
+        inputMethod: 'type',
+        totalRounds: 1,
+        rounds: [{ sequence: [1, 2, 3] }],
+        levelMode: { generateNextLevel },
+      };
+
+      render(<SortNumbers config={levelConfig} />);
+
+      act(() => {
+        globalThis.dispatchEvent(
+          new KeyboardEvent('keydown', { key: '1', bubbles: true }),
+        );
+      });
+      act(() => {
+        globalThis.dispatchEvent(
+          new KeyboardEvent('keydown', { key: '2', bubbles: true }),
+        );
+      });
+      act(() => {
+        globalThis.dispatchEvent(
+          new KeyboardEvent('keydown', { key: '3', bubbles: true }),
+        );
+      });
+
+      // Allow the 750 ms after-timer to fire so the engine moves to
+      // `levelComplete` and the overlay renders the enabled button.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(751);
+      });
+
+      const button = await screen.findByRole('button', {
+        name: /next level/i,
+      });
+      expect(button).not.toBeDisabled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
 describe('SortNumbers StrictMode round-advance guard', () => {
   // (review #5) StrictMode mounts effects twice in dev. Without the
   // `advancedRoundRef` guard the round-advance effect would fire two

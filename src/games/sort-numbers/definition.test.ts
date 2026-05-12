@@ -349,6 +349,49 @@ describe('SortNumbers machine — happy path', () => {
     expect(actor.getSnapshot().value).toBe('roundComplete');
   });
 
+  it('RESUME_ROUND restores draft fields and keeps machine in playing (review #11)', () => {
+    const { actor, context } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const draft = {
+      allTiles: [tile('t1', '1'), tile('t2', '2')],
+      bankTileIds: ['t2'],
+      zones: [slot(0, '1', { placedTileId: 't1' }), slot(1, '2')],
+      activeSlotIndex: 1,
+      phase: 'playing' as const,
+      roundIndex: 2,
+      retryCount: 1,
+      levelIndex: 0,
+    };
+    actor.send({ type: 'RESUME_ROUND', draft });
+    expect(actor.getSnapshot().value).toBe('playing');
+    expect(context().roundIndex).toBe(2);
+    expect(context().retryCount).toBe(1);
+    expect(context().activeSlotIndex).toBe(1);
+    expect(context().dragActiveTileId).toBeNull();
+  });
+
+  it('canEject blocks EJECT_TILE when zone is correct (not wrong, not locked) (review #14)', () => {
+    const { actor, zones } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    expect(zones()[0]?.isWrong).toBe(false);
+    expect(zones()[0]?.isLocked).toBe(false);
+    actor.send({ type: 'EJECT_TILE', zoneIndex: 0 });
+    expect(zones()[0]?.placedTileId).toBe('t1');
+    expect(zones()[0]?.isWrong).toBe(false);
+  });
+
+  it('REMOVE_TILE on an empty slot is a no-op (review #33)', () => {
+    const { actor, context } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    const before = context();
+    actor.send({ type: 'REMOVE_TILE', zoneIndex: 0 });
+    expect(context().zones).toEqual(before.zones);
+  });
+
   it('after 750ms in roundComplete on last round (no levels), advances to gameOver', () => {
     vi.useFakeTimers();
     const { actor, mocks } = startActor({
