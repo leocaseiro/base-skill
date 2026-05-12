@@ -255,6 +255,8 @@ export const useGameEngine = <TRound, TContext = unknown>(
       totalRounds,
       retryCount,
       isLastRound: roundIndex + 1 >= totalRounds,
+      // TODO(PR 1c): remove `as never` when UseGameEngineResult<TContext,TEvent>
+      // is typed and the per-game event union flows through. (review #24)
       send: (event) => send(event as never),
       // PR 1a Spec Delta 2: PR 1b populates from context.activeCelebration.
       celebrating: null as CelebrationConfig | null,

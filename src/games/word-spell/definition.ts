@@ -63,6 +63,7 @@ type WordSpellEvent =
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
   | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'COMPLETE_GAME' }
   | {
       type: 'CELEBRATION_DONE';
       skipMethod?: 'play-again' | 'go-home';
@@ -553,14 +554,21 @@ const wordSpellMachine = setup({
     isLevelMode: input.maxLevels !== null,
   }),
   on: {
-    // Root-level GAME_OVER is defense-in-depth: any state can fall through
-    // to gameOver. INIT_ROUND / RESUME_ROUND used to live here too, but a
-    // stray dispatch from celebration phases (`roundComplete` /
-    // `waitingForNext` / `gameOver`) would silently reset `roundIndex` to
-    // 0. Scope them to `playing` instead — the AnswerGameProvider mount
-    // effect only fires once when the machine is in its initial `playing`
-    // state, so the legitimate paths still work. (review #2)
+    // Root-level GAME_OVER / COMPLETE_GAME are defense-in-depth: any
+    // state can fall through to gameOver. INIT_ROUND / RESUME_ROUND used
+    // to live here too, but a stray dispatch from celebration phases
+    // (`roundComplete` / `waitingForNext` / `gameOver`) would silently
+    // reset `roundIndex` to 0. Scope them to `playing` instead — the
+    // AnswerGameProvider mount effect only fires once when the machine
+    // is in its initial `playing` state, so the legitimate paths still
+    // work. (review #2)
+    //
+    // COMPLETE_GAME mirrors SortNumbers's contract so the reducer's
+    // bail-out path can route every game uniformly. WordSpell currently
+    // has no in-game caller (no levelMode UI) but accepting the event is
+    // cheap and matches the project-wide expectation. (review #35)
     GAME_OVER: { target: '.gameOver' },
+    COMPLETE_GAME: { target: '.gameOver' },
   },
   states: {
     playing: {

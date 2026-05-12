@@ -435,6 +435,15 @@ describe('WordSpell machine — integration', () => {
     expect(actor.getSnapshot().value).toBe('gameOver');
   });
 
+  it('root-level COMPLETE_GAME handler routes any state to gameOver (review #35)', () => {
+    const { actor } = startActor();
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    expect(actor.getSnapshot().value).toBe('playing');
+    actor.send({ type: 'COMPLETE_GAME' });
+    expect(actor.getSnapshot().value).toBe('gameOver');
+  });
+
   it('INIT_ROUND from gameOver is ignored — does not reset roundIndex (review #2)', () => {
     const { actor, context } = startActor({ totalRounds: 1 });
     const round = buildRound();
