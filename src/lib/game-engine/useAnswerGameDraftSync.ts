@@ -100,6 +100,11 @@ export const useAnswerGameDraftSync = (
 
   // Immediate flush on tab hidden
   useEffect(() => {
+    // (review #22) Cancellation token mirrors the pattern used by
+    // WordSpell's initialContent write. If the component unmounts while
+    // a flush is in flight, the second async hop (after the RxDB findOne
+    // await) must not call incrementalPatch on a torn-down document.
+    const cancellation = { cancelled: false as boolean };
     const flush = async () => {
       if (document.visibilityState !== 'hidden') return;
       const {
@@ -112,7 +117,7 @@ export const useAnswerGameDraftSync = (
 
       try {
         const doc = await d.session_history_index.findOne(sid).exec();
-        if (!doc) return;
+        if (cancellation.cancelled || !doc) return;
 
         const draft = buildDraft(s, eri);
         await doc.incrementalPatch({
@@ -134,7 +139,9 @@ export const useAnswerGameDraftSync = (
     };
 
     document.addEventListener('visibilitychange', flush);
-    return () =>
+    return () => {
+      cancellation.cancelled = true;
       document.removeEventListener('visibilitychange', flush);
+    };
   }, []);
 };
