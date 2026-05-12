@@ -8,11 +8,16 @@ const sceneStyles = `
   isolation: isolate;
   overflow: hidden;
   width: 100%;
-  max-width: 2738px;
+  max-width: min(2738px, calc(100dvh * 2738 / 1536));
   min-width: 667px;
   margin-inline: auto;
   aspect-ratio: 2738 / 1536;
   container-type: inline-size;
+}
+.skin-cave-dragon:fullscreen {
+  width: min(100vw, calc(100vh * 2738 / 1536));
+  max-width: none;
+  margin: auto;
 }
 .skin-cave-dragon > .cave-dragon-scene {
   position: absolute;
