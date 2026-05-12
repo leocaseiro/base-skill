@@ -52,12 +52,14 @@ export const triggerEjectReturn = (
   const { borderRadius } = globalThis.getComputedStyle(sourceEl);
   // Inherit the live tile background + shadow so skinned tiles (e.g. transparent
   // stone tiles) don't flash their classic-default white card mid-flight.
+  // No fallback shadow — when the source has none (e.g. cave-dragon's
+  // transparent stone), a default rect shadow would trace the ghost's
+  // rounded-rect outline and look like a phantom square mid-flight.
+  // Skinned tiles that want lift during drag should apply filter:
+  // drop-shadow on their decoration so it follows the actual shape.
   const buttonCs = globalThis.getComputedStyle(el);
   const ghostBg = buttonCs.background;
-  const ghostShadow =
-    buttonCs.boxShadow === 'none'
-      ? '0 4px 16px rgba(0,0,0,0.18)'
-      : buttonCs.boxShadow;
+  const ghostShadow = buttonCs.boxShadow;
   // Effective parent transform scale (e.g. cave-dragon container scales its
   // descendants via transform: scale(...) so layout dimensions and visual
   // dimensions diverge). The ghost is appended to document.body and inherits

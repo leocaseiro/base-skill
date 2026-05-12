@@ -114,7 +114,9 @@ const sceneStyles = `
 }
 /* .cave-dragon-stone is intentionally unscoped — the eject-ghost is appended to
    document.body via slot-animations.ts, outside .skin-cave-dragon. The class
-   name is unique enough not to clash. */
+   name is unique enough not to clash. drop-shadow filter follows the stone
+   outline (not a rectangle), so dragged ghosts get a clean "picked up" lift
+   without leaking a phantom rounded-rect shadow. */
 .cave-dragon-stone {
   position: absolute;
   inset: 0;
@@ -123,6 +125,7 @@ const sceneStyles = `
   z-index: -1;
   pointer-events: none;
   display: block;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
 
 /* ── Slot/bank-hole stone outline ─────────────────────────────── */

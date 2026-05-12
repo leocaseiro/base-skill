@@ -33,10 +33,11 @@ const buildGhost = (
   const sourceFontSizePx = Number.parseFloat(sourceCs.fontSize) || 0;
   const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
   const ghostBg = sourceCs.background;
-  const ghostShadow =
-    sourceCs.boxShadow === 'none'
-      ? '0 12px 32px rgba(0,0,0,0.3)'
-      : sourceCs.boxShadow;
+  // No fallback shadow — when the source has none (e.g. cave-dragon's
+  // transparent stone), a default rect shadow would draw a phantom square
+  // around the ghost. Skinned tiles that want drag-lift should apply
+  // filter: drop-shadow on their decoration so depth follows the shape.
+  const ghostShadow = sourceCs.boxShadow;
 
   const el = document.createElement('div');
   el.innerHTML = sourceEl.innerHTML;
