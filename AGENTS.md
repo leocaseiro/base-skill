@@ -39,6 +39,15 @@ See [CLAUDE.md → Before writing a plan](./CLAUDE.md#before-writing-a-plan) for
 - **Multiple commits in one PR are expected and preferred.** Reviewers can follow the story; you or the user can **cherry-pick** or **revert** a single commit without unpicking everything.
 - If the user asks for “baby step” commits, treat that as the default for the rest of the branch.
 
+## Static assets in `public/`
+
+Resolve `public/`-served URLs against `import.meta.env.BASE_URL`, not a
+hardcoded `/`. The same code runs in dev (`BASE_URL=/`), the main app
+prod build (`BASE_URL=/base-skill/`), and the Storybook PR preview
+(`BASE_URL=./`, deployed under `/base-skill/pr/<n>/docs/`). A hardcoded
+`/skins/foo.png` 404s on the Storybook preview. Full table + worked
+example in [CLAUDE.md → Static assets in `public/`](./CLAUDE.md#static-assets-in-public).
+
 ## Where to look next
 
 - [CLAUDE.md](./CLAUDE.md) — React/ESLint expectations, TDD, markdown, CI buckets, VR tests.
