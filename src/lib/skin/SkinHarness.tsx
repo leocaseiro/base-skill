@@ -12,6 +12,8 @@ export interface SkinHarnessProps<TGame extends keyof GameSkinIdMap> {
   }) => ReactNode;
 }
 
+const STORAGE_KEY_PREFIX = 'skin-harness:selected-skin:';
+
 export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
   gameId,
   children,
@@ -20,7 +22,17 @@ export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
     () => getRegisteredSkins(gameId),
     [gameId],
   );
-  const [skinId, setSkinId] = useState<string>(registered[0]!.id);
+  const storageKey = `${STORAGE_KEY_PREFIX}${gameId}`;
+  const [skinId, setSkinIdState] = useState<string>(() => {
+    const stored = globalThis.localStorage.getItem(storageKey);
+    if (stored && registered.some((s) => s.id === stored))
+      return stored;
+    return registered[0]!.id;
+  });
+  const setSkinId = (next: string) => {
+    setSkinIdState(next);
+    globalThis.localStorage.setItem(storageKey, next);
+  };
   const skin =
     registered.find((s) => s.id === skinId) ?? registered[0]!;
 
