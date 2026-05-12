@@ -548,8 +548,13 @@ const numberMatchMachine = setup({
     selectedSlotIds: new Set<string>(),
   }),
   on: {
-    INIT_ROUND: { actions: 'initRound' },
-    RESUME_ROUND: { actions: 'resumeRound' },
+    // Root-level GAME_OVER is defense-in-depth: any state can fall through
+    // to gameOver. INIT_ROUND / RESUME_ROUND used to live here too, but a
+    // stray dispatch from celebration phases (`roundComplete` /
+    // `waitingForNext` / `gameOver`) would silently reset `roundIndex` to
+    // 0. Scope them to `playing` instead — the AnswerGameProvider mount
+    // effect only fires once when the machine is in its initial `playing`
+    // state, so the legitimate paths still work. (review #2)
     GAME_OVER: { target: '.gameOver' },
   },
   states: {
@@ -558,6 +563,8 @@ const numberMatchMachine = setup({
         { guard: 'allFilledCorrectly', target: 'roundComplete' },
       ],
       on: {
+        INIT_ROUND: { actions: 'initRound' },
+        RESUME_ROUND: { actions: 'resumeRound' },
         PLACE_TILE: { actions: 'placeTile' },
         TYPE_TILE: { actions: 'typeTile' },
         REMOVE_TILE: { actions: 'removeTile' },

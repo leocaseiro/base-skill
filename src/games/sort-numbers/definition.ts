@@ -569,8 +569,14 @@ const sortNumbersMachine = setup({
     isLevelMode: input.maxLevels !== null,
   }),
   on: {
-    INIT_ROUND: { actions: 'initRound' },
-    RESUME_ROUND: { actions: 'resumeRound' },
+    // Root-level GAME_OVER / COMPLETE_GAME are defense-in-depth: any
+    // state can fall through to gameOver. INIT_ROUND / RESUME_ROUND used
+    // to live here too, but a stray dispatch from celebration phases
+    // (`roundComplete` / `waitingForNext` / `levelComplete` / `gameOver`)
+    // would silently reset `roundIndex` to 0. Scope them to `playing`
+    // instead — the AnswerGameProvider mount effect only fires once when
+    // the machine is in its initial `playing` state, so the legitimate
+    // paths still work. (review #2)
     GAME_OVER: { target: '.gameOver' },
     COMPLETE_GAME: { target: '.gameOver' },
   },
@@ -580,6 +586,8 @@ const sortNumbersMachine = setup({
         { guard: 'allFilledCorrectly', target: 'roundComplete' },
       ],
       on: {
+        INIT_ROUND: { actions: 'initRound' },
+        RESUME_ROUND: { actions: 'resumeRound' },
         PLACE_TILE: { actions: 'placeTile' },
         TYPE_TILE: { actions: 'typeTile' },
         REMOVE_TILE: { actions: 'removeTile' },
