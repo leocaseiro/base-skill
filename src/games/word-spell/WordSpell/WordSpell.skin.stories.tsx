@@ -1,10 +1,13 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { caveDragonSkin } from '../skins/cave-dragon-skin';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
-import { SkinHarness } from '@/lib/skin';
+import { SkinHarness, registerSkin } from '@/lib/skin';
+
+registerSkin('word-spell', caveDragonSkin);
 
 const fiveRoundConfig: WordSpellConfig = {
   gameId: 'word-spell',
