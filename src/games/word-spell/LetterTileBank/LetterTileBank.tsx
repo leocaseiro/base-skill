@@ -1,10 +1,17 @@
 import type { TileItem } from '@/components/answer-game/types';
+import type { GameSkin } from '@/lib/skin';
 import { tileStyle } from '@/components/answer-game/styles';
 import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
 import { useBankDropTarget } from '@/components/answer-game/useBankDropTarget';
 import { useDraggableTile } from '@/components/answer-game/useDraggableTile';
 
-const LetterTile = ({ tile }: { tile: TileItem }) => {
+const LetterTile = ({
+  tile,
+  skin,
+}: {
+  tile: TileItem;
+  skin?: GameSkin;
+}) => {
   const {
     ref,
     handleClick,
@@ -28,11 +35,16 @@ const LetterTile = ({ tile }: { tile: TileItem }) => {
       onPointerCancel={onPointerCancel}
     >
       {tile.label}
+      {skin?.tileDecoration?.(tile)}
     </button>
   );
 };
 
-export const LetterTileBank = () => {
+interface LetterTileBankProps {
+  skin?: GameSkin;
+}
+
+export const LetterTileBank = ({ skin }: LetterTileBankProps) => {
   const {
     allTiles,
     bankTileIds,
@@ -93,7 +105,7 @@ export const LetterTileBank = () => {
                   className={`absolute inset-0${isDragging ? ' opacity-30 pointer-events-none' : ''}`}
                   aria-hidden={isDragging || undefined}
                 >
-                  <LetterTile tile={tile} />
+                  <LetterTile tile={tile} skin={skin} />
                 </div>
                 {isHoverTarget && (
                   <div
