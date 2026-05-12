@@ -3,8 +3,6 @@ import type { GameSkin, GameSkinTileSnapshot } from '@/lib/skin';
 const ASSET_BASE = '/skins/word-spell/cave-dragon';
 
 const sceneStyles = `
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap');
-
 .skin-cave-dragon {
   position: relative;
   isolation: isolate;
@@ -68,9 +66,9 @@ const sceneStyles = `
 }
 .cave-dragon-scene__dragon {
   position: absolute;
-  left: 4%;
-  top: 22%;
-  width: 22%;
+  left: 10%;
+  top: 4%;
+  width: 14%;
   height: 38%;
   background-image: url('${ASSET_BASE}/dragon.png');
   background-repeat: no-repeat;
@@ -90,20 +88,25 @@ const sceneStyles = `
 }
 
 /* ── Stone tile override ──────────────────────────────────────── */
+/* Paint reset for every stone-styled button (bank tile + slot's placed tile). */
 .skin-cave-dragon [aria-label^="Letter "],
 .skin-cave-dragon [aria-label^="Number "],
 .skin-cave-dragon [data-zone-index] button {
-  position: relative;
   background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
   text-shadow:
     0 1px 0 rgba(255, 240, 200, 0.4),
     0 -1px 0 rgba(0, 0, 0, 0.3) !important;
-  font-family: 'Cinzel', 'Fredoka', serif !important;
-  font-weight: 700 !important;
   color: #3a200c !important;
-  z-index: 0;
+  isolation: isolate;
+}
+/* Bank-tile buttons are statically positioned by default — mark them relative
+   so the absolute stone child sizes against the tile, not the bank container.
+   Slot buttons keep their existing absolute inset-0 position. */
+.skin-cave-dragon [aria-label^="Letter "],
+.skin-cave-dragon [aria-label^="Number "] {
+  position: relative;
 }
 .skin-cave-dragon .cave-dragon-stone {
   position: absolute;
@@ -313,7 +316,13 @@ const tileDecoration = (_tile: GameSkinTileSnapshot) => (
 export const caveDragonSkin: GameSkin = {
   id: 'cave-dragon',
   name: 'Cave & Dragon',
-  tokens: {},
+  tokens: {
+    '--skin-bank-hole-bg': 'transparent',
+    '--skin-bank-hole-shadow': 'none',
+    '--skin-slot-bg': 'transparent',
+    '--skin-correct-bg': 'transparent',
+    '--skin-wrong-bg': 'transparent',
+  },
   SceneBackground,
   tileDecoration,
 };
