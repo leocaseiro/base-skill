@@ -120,7 +120,10 @@ export const useSlotTileDrag = ({
               fontFamily: computed.fontFamily,
               fontWeight: computed.fontWeight,
               boxSizing: 'border-box',
-              transform: 'scale(1.08)',
+              // No scale(1.08) lift — it compounds with parent transforms
+              // (e.g. cave-dragon's stage scale) and makes the ghost
+              // noticeably bigger than the source. Skins that want depth
+              // should apply filter: drop-shadow on the tile decoration.
               pointerEvents: 'none',
             });
             container.append(ghost);
