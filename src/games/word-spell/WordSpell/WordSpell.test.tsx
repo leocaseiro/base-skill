@@ -132,14 +132,10 @@ describe('WordSpell', () => {
   });
 });
 
-describe('WordSpell library levels recall', () => {
-  it('generates a new sampleSeed when the session restarts', async () => {
-    // Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
-    // This smoke test exists only to pin the component compiles with
-    // the new hook signature.
-    expect(true).toBe(true);
-  });
-});
+// Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
+// (review #37) the vacuous `expect(true).toBe(true)` smoke that lived
+// here was removed; compile-time pinning is implicitly enforced by the
+// component's strong-typed imports above.
 
 describe('WordSpell stale-draft recovery toast', () => {
   const staleInitialState: AnswerGameDraftState = {
