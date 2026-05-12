@@ -1,5 +1,6 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
@@ -242,6 +243,60 @@ describe('WordSpell round-complete overlay', () => {
       name: 'Round complete!',
     });
     expect(overlays).toHaveLength(1);
+  });
+});
+
+describe('WordSpell StrictMode round-advance guard', () => {
+  // (review #6) StrictMode mounts effects twice in dev. Without the
+  // `advancedRoundRef` guard the round-advance effect would fire two
+  // ADVANCE_ROUND dispatches in dev, double-incrementing the engine's
+  // roundIndex. With the guard the second invocation is short-circuited.
+  it('round-advance dispatches once under StrictMode double-mount', () => {
+    const config: WordSpellConfig = {
+      gameId: 'word-spell-test',
+      component: 'WordSpell',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      mode: 'recall',
+      tileUnit: 'letter',
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      rounds: [{ word: 'cat' }, { word: 'dog' }],
+    };
+
+    expect(() =>
+      render(
+        <StrictMode>
+          <WordSpell config={config} />
+        </StrictMode>,
+      ),
+    ).not.toThrow();
+
+    // Complete round 1.
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 't', bubbles: true }),
+      );
+    });
+
+    // If the guard mis-fired, the engine would have advanced past round 2
+    // and surfaced the game-over overlay. Asserting it is NOT present
+    // confirms we stayed within the 2-round bounds.
+    expect(
+      screen.queryByRole('dialog', { name: 'Game complete' }),
+    ).not.toBeInTheDocument();
   });
 });
 
