@@ -532,8 +532,8 @@ Task 2 fills them in."
 
 **Files:**
 
-- Modify: `src/components/answer-game/useAnswerGameDraftSync.ts`
-- Modify: `src/components/answer-game/useAnswerGameDraftSync.test.tsx` (or co-located test)
+- Modify: `src/lib/game-engine/useAnswerGameDraftSync.ts`
+- Modify: `src/lib/game-engine/useAnswerGameDraftSync.test.ts` (or co-located test)
 
 **Why this task exists:** The reducer persists `phase` into the draft. `useAnswerGameDraftSync` currently excludes only `phase === 'game-over'` from persistence. Under the XState migration, if a user closes the tab during the 750 ms celebration window after completing a round, the reducer's `RESUME_ROUND` restores `phase: 'round-complete'` (kebab-case) while the engine's `resumeRound` ignores phase and starts in `playing`. The engine's `playing.always` guard catches `allFilledCorrectly` and re-fires the celebration sound + 750 ms after-timer — the user replays the celebration they already finished. Same path applies to `'level-complete'` resume in SortNumbers.
 
@@ -572,13 +572,13 @@ if (
 - [ ] **Step 3: Run the tests — confirm green.**
 
 ```bash
-yarn test --run src/components/answer-game/useAnswerGameDraftSync
+yarn test --run src/lib/game-engine/useAnswerGameDraftSync
 ```
 
 - [ ] **Step 4: Commit.**
 
 ```bash
-git add src/components/answer-game/useAnswerGameDraftSync.ts src/components/answer-game/useAnswerGameDraftSync.test.tsx
+git add src/lib/game-engine/useAnswerGameDraftSync.ts src/lib/game-engine/useAnswerGameDraftSync.test.ts
 git commit -m "fix(answer-game): exclude celebration phases from draft persistence
 
 PR 1b U1a: extends the existing 'game-over' exclusion in
