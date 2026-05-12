@@ -91,7 +91,8 @@ const sceneStyles = `
 
 /* ── Stone tile override ──────────────────────────────────────── */
 .skin-cave-dragon [aria-label^="Letter "],
-.skin-cave-dragon [aria-label^="Number "] {
+.skin-cave-dragon [aria-label^="Number "],
+.skin-cave-dragon [data-zone-index] button {
   position: relative;
   background: transparent !important;
   box-shadow: none !important;
