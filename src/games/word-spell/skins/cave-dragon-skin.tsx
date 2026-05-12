@@ -4,7 +4,11 @@ import type {
   GameSkinZoneSnapshot,
 } from '@/lib/skin';
 
-const ASSET_BASE = '/skins/word-spell/cave-dragon';
+// Resolve against Vite's BASE_URL so the same paths work in dev (`/`),
+// the main app build (`/base-skill/`), and the Storybook build deployed
+// under `/base-skill/pr/<n>/docs/`. Hardcoding an absolute path broke the
+// PR-preview deploy where the iframe lives below the domain root.
+const ASSET_BASE = `${import.meta.env.BASE_URL}skins/word-spell/cave-dragon`;
 
 const sceneStyles = `
 .skin-cave-dragon {
