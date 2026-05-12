@@ -182,6 +182,17 @@ The reducer mirror still resets `roundIndex` per level for HUD
 display; PR 1c collapses the reducer and the HUD will then compute
 per-level round from `engine.roundIndex % levelSize`.
 
+**Endless vs finite level mode.** The component must pass both
+`isLevelMode: config.levelMode !== undefined` AND
+`maxLevels: config.levelMode?.maxLevels ?? null` to `useGameEngine`.
+With `maxLevels === null` (endless), the guards suppress `isLastRound`
+and let `isLastRoundOfLevel` fire on every `levelSize` boundary — so
+the only way to reach `gameOver` is an explicit `COMPLETE_GAME`
+(e.g., "I'm Done" button on the level-complete overlay). Simple-config
+ships exactly this shape: `totalRounds: 1`, `levelMode` defined,
+no cap. See `GameEngine.reference.mdx → Engine-injected guards` for
+the guard bodies.
+
 ### 6. Side-effect flow
 
 ```mermaid

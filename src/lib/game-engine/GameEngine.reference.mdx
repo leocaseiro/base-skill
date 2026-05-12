@@ -161,12 +161,14 @@ const engine = useGameEngine<TRound, TContext>(
 
 `options`:
 
-| Field         | Type                      | Description                                                                                                                 |
-| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `input`       | `unknown`                 | Populates the machine's initial context via XState v5's `setup({ types: { input } })` + `useMachine(machine, { input })`    |
-| `envelope`    | `Partial<EngineEnvelope>` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
-| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
-| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+| Field         | Type                          | Description                                                                                                                                                                                                       |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                     | Populates the machine's initial context via XState v5's `setup({ types: { input } })` + `useMachine(machine, { input })`                                                                                          |
+| `envelope`    | `Partial<EngineEnvelope>`     | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook                                                                                       |
+| `totalRounds` | `number`                      | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                                                                                                         |
+| `levelSize`   | `number`                      | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                                                                                                                   |
+| `isLevelMode` | `boolean \| undefined`        | Set `true` whenever a `levelMode` block exists on the config — even without `maxLevels`. Enables endless level mode in the guards. Defaults to `false` (no level mode) so NumberMatch / WordSpell stay unaffected |
+| `maxLevels`   | `number \| null \| undefined` | `null` = endless levels, `number` = finite. Pair with `isLevelMode: true`. Defaults to `null`                                                                                                                     |
 
 `UseGameEngineResult<TContext>`:
 
@@ -190,18 +192,38 @@ machine state change but always reaches the same underlying actor.
 
 ### Engine-injected guards and actions
 
-`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
-for the placeholder guards declared in each game's `setup({ guards })`:
+`buildEngineGuards(totalRounds, levelSize, { isLevelMode, maxLevels })`
+returns the runtime bodies for the placeholder guards declared in each
+game's `setup({ guards })`. The third argument carries level-mode
+context the engine can't derive from `totalRounds` alone:
 
 ```ts
-isMidLevelRound: ({ context }) =>
-  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &&
-  context.roundIndex + 1 < totalRounds;
-isLastRoundOfLevel: ({ context }) =>
-  (context.roundIndex + 1) % max(levelSize, 1) === 0 &&
-  context.roundIndex + 1 < totalRounds;
-isLastRound: ({ context }) => context.roundIndex + 1 >= totalRounds;
+const isEndless = isLevelMode === true && maxLevels === null;
+
+isMidLevelRound: ({ context }) => {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel === 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 < totalRounds;
+};
+isLastRoundOfLevel: ({ context }) => {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel !== 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 < totalRounds;
+};
+isLastRound: ({ context }) => {
+  if (isEndless) return false;
+  return context.roundIndex + 1 >= totalRounds;
+};
 ```
+
+The `isEndless` branch keeps `gameOver` reachable only via explicit
+`COMPLETE_GAME` / `GAME_OVER` events (e.g., user taps "I'm Done" on
+the level-complete overlay). Without it, the engine would treat
+`roundIndex + 1 >= totalRounds` as "game's over" even when
+`levelMode.generateNextLevel` is ready to produce another level —
+the regression `e2e/sortnumbers-level-advance.spec.ts` pins this.
 
 Engine-injected actions (overridden by `useGameEngine.provide`):
 
