@@ -72,6 +72,14 @@ interface AnswerGameProviderProps {
    * SpotAll.
    */
   engineDispatch?: (action: AnswerGameAction) => void;
+  /**
+   * The engine's accumulated `roundIndex` snapshot. In SortNumbers level
+   * mode the engine's counter grows across level boundaries while the
+   * reducer's roundIndex resets per level; persisting both lets the
+   * resume path reconstruct the engine's view. Optional; falls back to
+   * reducer-derived `state.roundIndex` when omitted. (review #3)
+   */
+  engineRoundIndex?: number;
   children: ReactNode;
 }
 
@@ -89,6 +97,7 @@ export const AnswerGameProvider = ({
   initialState,
   sessionId,
   engineDispatch,
+  engineRoundIndex,
   children,
 }: AnswerGameProviderProps) => {
   const [state, rawDispatch] = useReducer(
@@ -116,7 +125,12 @@ export const AnswerGameProvider = ({
 
   // Mount draft sync — no-op if sessionId/db is absent (unit tests, Storybook)
   const dbCtx = useContext(DbContext);
-  useAnswerGameDraftSync(state, sessionId ?? null, dbCtx?.db ?? null);
+  useAnswerGameDraftSync(
+    state,
+    sessionId ?? null,
+    dbCtx?.db ?? null,
+    engineRoundIndex,
+  );
 
   useEffect(() => {
     // Hardened round init: route through the reducer on every mount AND

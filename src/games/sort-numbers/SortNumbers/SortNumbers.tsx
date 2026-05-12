@@ -355,6 +355,7 @@ const SortNumbersInstance = ({
       sessionId={sessionId}
       skin={skin}
       engineDispatch={engineDispatch}
+      engineRoundIndex={engine.roundIndex}
     >
       <SortNumbersSession
         sortNumbersConfig={config}

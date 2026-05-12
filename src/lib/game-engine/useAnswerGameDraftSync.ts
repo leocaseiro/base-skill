@@ -7,6 +7,7 @@ import type { BaseSkillDatabase } from '@/db/types';
 
 const buildDraft = (
   state: AnswerGameState,
+  engineRoundIndex?: number,
 ): AnswerGameDraftState | null => {
   if (
     state.phase === 'game-over' ||
@@ -14,7 +15,7 @@ const buildDraft = (
     state.phase === 'level-complete'
   )
     return null;
-  return {
+  const draft: AnswerGameDraftState = {
     allTiles: state.allTiles,
     bankTileIds: state.bankTileIds,
     zones: state.zones,
@@ -24,6 +25,10 @@ const buildDraft = (
     retryCount: state.retryCount,
     levelIndex: state.levelIndex,
   };
+  if (engineRoundIndex !== undefined) {
+    draft.engineRoundIndex = engineRoundIndex;
+  }
+  return draft;
 };
 
 /**
@@ -34,16 +39,21 @@ const buildDraft = (
  *   game-over) so a tab-close-then-resume during the celebration window
  *   does not replay the celebration on the next mount.
  * - No-op when sessionId or db is null.
+ * - When `engineRoundIndex` is provided, persists the engine's accumulated
+ *   roundIndex separately from the reducer's per-level value. This unblocks
+ *   correct resume in SortNumbers level mode where the two diverge.
+ *   (review #3)
  */
 export const useAnswerGameDraftSync = (
   state: AnswerGameState,
   sessionId: string | null,
   db: BaseSkillDatabase | null,
+  engineRoundIndex?: number,
 ): void => {
   // Refs so event-listener callbacks always read the latest values
-  const latestRef = useRef({ state, sessionId, db });
+  const latestRef = useRef({ state, sessionId, db, engineRoundIndex });
   useLayoutEffect(() => {
-    latestRef.current = { state, sessionId, db };
+    latestRef.current = { state, sessionId, db, engineRoundIndex };
   });
 
   // Debounced write: resets on every state/sessionId/db change
@@ -51,14 +61,19 @@ export const useAnswerGameDraftSync = (
     if (!sessionId || !db) return;
 
     const timer = setTimeout(async () => {
-      const { state: s, db: d, sessionId: sid } = latestRef.current;
+      const {
+        state: s,
+        db: d,
+        sessionId: sid,
+        engineRoundIndex: eri,
+      } = latestRef.current;
       if (!d || !sid) return;
 
       try {
         const doc = await d.session_history_index.findOne(sid).exec();
         if (!doc) return;
 
-        const draft = buildDraft(s);
+        const draft = buildDraft(s, eri);
         await doc.incrementalPatch({
           draftState: draft as unknown as Record<
             string,
@@ -81,20 +96,25 @@ export const useAnswerGameDraftSync = (
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [state, sessionId, db]);
+  }, [state, sessionId, db, engineRoundIndex]);
 
   // Immediate flush on tab hidden
   useEffect(() => {
     const flush = async () => {
       if (document.visibilityState !== 'hidden') return;
-      const { state: s, db: d, sessionId: sid } = latestRef.current;
+      const {
+        state: s,
+        db: d,
+        sessionId: sid,
+        engineRoundIndex: eri,
+      } = latestRef.current;
       if (!d || !sid) return;
 
       try {
         const doc = await d.session_history_index.findOne(sid).exec();
         if (!doc) return;
 
-        const draft = buildDraft(s);
+        const draft = buildDraft(s, eri);
         await doc.incrementalPatch({
           draftState: draft as unknown as Record<
             string,

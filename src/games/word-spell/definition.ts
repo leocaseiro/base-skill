@@ -133,12 +133,18 @@ const wordSpellMachine = setup({
     resumeRound: assign(({ event }) => {
       if (event.type !== 'RESUME_ROUND') return {};
       const { draft } = event;
+      // (review #3) Prefer engine's accumulated roundIndex when present.
+      // WordSpell has no level mode today so the two values match, but
+      // mirroring the SortNumbers contract keeps the resume path uniform
+      // and forward-compatible.
+      const accumulatedRoundIndex =
+        draft.engineRoundIndex ?? draft.roundIndex;
       return {
         allTiles: draft.allTiles,
         bankTileIds: draft.bankTileIds,
         zones: draft.zones,
         activeSlotIndex: draft.activeSlotIndex,
-        roundIndex: draft.roundIndex,
+        roundIndex: accumulatedRoundIndex,
         retryCount: draft.retryCount,
         levelIndex: draft.levelIndex,
         dragActiveTileId: null,

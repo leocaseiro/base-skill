@@ -134,12 +134,19 @@ const sortNumbersMachine = setup({
     resumeRound: assign(({ event }) => {
       if (event.type !== 'RESUME_ROUND') return {};
       const { draft } = event;
+      // (review #3) Prefer the engine's accumulated roundIndex when the
+      // draft writer persisted it. In SortNumbers level mode the engine
+      // counter grows across levels while the reducer resets per level;
+      // without this preference the `isLastRound` guard fires on the
+      // wrong round after a mid-game resume.
+      const accumulatedRoundIndex =
+        draft.engineRoundIndex ?? draft.roundIndex;
       return {
         allTiles: draft.allTiles,
         bankTileIds: draft.bankTileIds,
         zones: draft.zones,
         activeSlotIndex: draft.activeSlotIndex,
-        roundIndex: draft.roundIndex,
+        roundIndex: accumulatedRoundIndex,
         retryCount: draft.retryCount,
         levelIndex: draft.levelIndex,
         dragActiveTileId: null,
