@@ -98,12 +98,28 @@ const SortNumbersSession = ({
     onRestartSession();
   };
 
+  // (review #4) Single-flight guard for "Next level". A user double-tap
+  // (or a skin overlay animation that re-fires onNextLevel synchronously)
+  // would otherwise dispatch ADVANCE_LEVEL twice — the first transitions
+  // to `playing`, the second is ignored by the engine but the reducer
+  // mirror would still bump levelIndex twice and emit a duplicate
+  // `game:level-advance`. The ref is set on first dispatch and cleared
+  // when the machine leaves `levelComplete`.
+  const advancingLevelRef = useRef(false);
+  useEffect(() => {
+    if (phase !== 'levelComplete') {
+      advancingLevelRef.current = false;
+    }
+  }, [phase]);
+
   const handleNextLevel = () => {
+    if (advancingLevelRef.current) return;
     const generateNextLevel =
       sortNumbersConfig.levelMode?.generateNextLevel;
     if (!generateNextLevel) return;
 
     const nextLevel = generateNextLevel(levelIndex);
+    advancingLevelRef.current = true;
     if (nextLevel) {
       dispatch({
         type: 'ADVANCE_LEVEL',
@@ -133,8 +149,19 @@ const SortNumbersSession = ({
   // the next round's tiles/zones and dispatch ADVANCE_ROUND via the
   // reducer dispatch — AnswerGameProvider mirrors it to the engine via
   // engineDispatch, so reducer and engine advance together.
+  //
+  // (review #5) `advancedRef` guards against StrictMode's double-mount of
+  // effects firing two ADVANCE_ROUND dispatches in dev. Once we dispatch
+  // for the current `engine.roundIndex` we mark the ref true; cleanup
+  // resets it so the next entry into `waitingForNext` (with a fresh
+  // roundIndex) re-arms the dispatch.
+  const advancedRoundRef = useRef(false);
   useEffect(() => {
-    if (engine.phase !== 'waitingForNext') return;
+    if (engine.phase !== 'waitingForNext') {
+      advancedRoundRef.current = false;
+      return;
+    }
+    if (advancedRoundRef.current) return;
     const nextConfigIndex = roundOrder[engine.roundIndex + 1];
     const nextRound =
       nextConfigIndex === undefined
@@ -153,6 +180,7 @@ const SortNumbersSession = ({
       sortNumbersConfig.direction,
       distractor,
     );
+    advancedRoundRef.current = true;
     dispatch({
       type: 'ADVANCE_ROUND',
       tiles: nextTiles,
@@ -166,6 +194,11 @@ const SortNumbersSession = ({
       timestamp: Date.now(),
       roundIndex: engine.roundIndex + 1,
     });
+    return () => {
+      // Reset on cleanup so the next StrictMode re-mount or the next
+      // waitingForNext entry rearms cleanly.
+      advancedRoundRef.current = false;
+    };
   }, [
     engine.phase,
     engine.roundIndex,

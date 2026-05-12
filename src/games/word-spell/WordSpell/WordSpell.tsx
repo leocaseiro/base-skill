@@ -114,8 +114,19 @@ const WordSpellSession = ({
   // next round's tiles/zones and dispatch ADVANCE_ROUND via the reducer
   // dispatch — AnswerGameProvider mirrors it to the engine via
   // engineDispatch, so reducer and engine advance together.
+  //
+  // (review #6) `advancedRef` guards against StrictMode's double-mount of
+  // effects firing two ADVANCE_ROUND dispatches in dev. Once we dispatch
+  // for the current `engineRoundIndex` we mark the ref true; cleanup
+  // resets it so the next entry into `waitingForNext` (with a fresh
+  // roundIndex) re-arms the dispatch. Mirrors SortNumbers handling.
+  const advancedRoundRef = useRef(false);
   useEffect(() => {
-    if (enginePhase !== 'waitingForNext') return;
+    if (enginePhase !== 'waitingForNext') {
+      advancedRoundRef.current = false;
+      return;
+    }
+    if (advancedRoundRef.current) return;
     const nextConfigIndex = roundOrder[engineRoundIndex + 1];
     const nextRound =
       nextConfigIndex === undefined
@@ -123,6 +134,7 @@ const WordSpellSession = ({
         : rounds[nextConfigIndex];
     const word = nextRound?.word.trim() ?? '';
     if (!word) return;
+    advancedRoundRef.current = true;
     if (nextRound?.gaps && nextRound.gaps.length > 0) {
       const { tiles: nextTiles, zones: nextZones } =
         buildSentenceGapRound(nextRound.gaps);
@@ -142,6 +154,9 @@ const WordSpellSession = ({
         zones: nextZones,
       });
     }
+    return () => {
+      advancedRoundRef.current = false;
+    };
   }, [
     enginePhase,
     engineRoundIndex,
