@@ -1,5 +1,4 @@
 import { useNavigate } from '@tanstack/react-router';
-import { nanoid } from 'nanoid';
 import {
   useCallback,
   useContext,
@@ -347,10 +346,14 @@ export const WordSpell = ({
   const skin = useGameSkin('word-spell', config.skin);
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const seenWordsStore = useSeenWordsStore();
-  const sampleSeed = useMemo(() => {
-    void sessionEpoch;
-    return nanoid();
-  }, [sessionEpoch]);
+  // Derive the sampler seed from the route's `seed` so a deterministic
+  // ?seed= URL param (used by VR + debug repro) produces stable rounds.
+  // The sessionEpoch suffix keeps "Play again" sampling a fresh round
+  // without breaking determinism per session.
+  const sampleSeed = useMemo(
+    () => `${seed}-epoch-${sessionEpoch}`,
+    [seed, sessionEpoch],
+  );
 
   // On resume, the persisted `initialContent` is authoritative over the live
   // library sampler + seed-driven `buildRoundOrder`. If the source word pool
