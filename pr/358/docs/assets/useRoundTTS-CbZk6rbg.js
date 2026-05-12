@@ -1,1 +1,0 @@
-import{r as s}from"./iframe-DCQ0GVPO.js";import{a}from"./AnswerGameProvider-DbjkJaXh.js";import{u}from"./useGameTTS-wWZlW61I.js";import{w as f}from"./AudioFeedback--m-fHcTR.js";const l=e=>{const{roundIndex:n,config:t}=a(),{speakPrompt:o}=u();s.useEffect(()=>{if(!t.ttsEnabled||!e)return;let r=!1;return f().then(()=>{r||o(e)}),()=>{r=!0}},[n,t.ttsEnabled])};export{l as u};
