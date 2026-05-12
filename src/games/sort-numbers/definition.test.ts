@@ -573,6 +573,55 @@ describe('SortNumbers machine — integration', () => {
     expect(context().roundIndex).toBe(before.roundIndex);
   });
 
+  it('RESUME_ROUND prefers engineRoundIndex over draft.roundIndex (review #3)', () => {
+    const { actor, context } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({
+      type: 'RESUME_ROUND',
+      draft: {
+        allTiles: round.tiles,
+        bankTileIds: round.tiles.map((t) => t.id),
+        zones: round.zones,
+        activeSlotIndex: 0,
+        phase: 'playing' as const,
+        // Reducer's per-level counter — 0 because we just started level 1.
+        roundIndex: 0,
+        retryCount: 0,
+        levelIndex: 1,
+        // Engine's accumulated counter — 2 because we've completed two
+        // rounds (the second was the last round of level 1).
+        engineRoundIndex: 2,
+      },
+    });
+    expect(context().roundIndex).toBe(2);
+    expect(context().levelIndex).toBe(1);
+  });
+
+  it('RESUME_ROUND falls back to draft.roundIndex when engineRoundIndex is undefined (review #3)', () => {
+    const { actor, context } = startActor({ totalRounds: 3 });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({
+      type: 'RESUME_ROUND',
+      draft: {
+        allTiles: round.tiles,
+        bankTileIds: round.tiles.map((t) => t.id),
+        zones: round.zones,
+        activeSlotIndex: 0,
+        phase: 'playing' as const,
+        roundIndex: 1,
+        retryCount: 0,
+        levelIndex: 0,
+      },
+    });
+    expect(context().roundIndex).toBe(1);
+  });
+
   it('RESUME_ROUND from levelComplete is ignored — celebration window is sealed (review #2)', () => {
     vi.useFakeTimers();
     const { actor, context } = startActor({

@@ -323,6 +323,7 @@ const WordSpellInstance = ({
       sessionId={sessionId}
       skin={skin}
       engineDispatch={engineDispatch}
+      engineRoundIndex={engine.roundIndex}
     >
       <WordSpellSession
         wordSpellConfig={config}
