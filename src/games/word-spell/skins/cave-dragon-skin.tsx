@@ -27,27 +27,21 @@ const sceneStyles = `
   background-position: top center;
   background-size: auto 100%;
 }
-.cave-dragon-scene__bg-left {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 32%;
-  background-image: url('${ASSET_BASE}/bg-left.png');
-  background-repeat: no-repeat;
-  background-position: top left;
-  background-size: cover;
-}
+.cave-dragon-scene__bg-left,
 .cave-dragon-scene__bg-right {
   position: absolute;
   top: 0;
-  right: 0;
   bottom: 0;
-  width: 32%;
-  background-image: url('${ASSET_BASE}/bg-right.png');
-  background-repeat: no-repeat;
-  background-position: top right;
-  background-size: cover;
+  height: 100%;
+  width: auto;
+  display: block;
+  user-select: none;
+}
+.cave-dragon-scene__bg-left {
+  left: 0;
+}
+.cave-dragon-scene__bg-right {
+  right: 0;
 }
 .cave-dragon-scene__cliff-left {
   position: absolute;
@@ -101,8 +95,16 @@ const SceneBackground = () => (
     <style>{sceneStyles}</style>
     <div className="cave-dragon-scene" aria-hidden="true">
       <div className="cave-dragon-scene__bg-middle" />
-      <div className="cave-dragon-scene__bg-left" />
-      <div className="cave-dragon-scene__bg-right" />
+      <img
+        className="cave-dragon-scene__bg-left"
+        src={`${ASSET_BASE}/bg-left.png`}
+        alt=""
+      />
+      <img
+        className="cave-dragon-scene__bg-right"
+        src={`${ASSET_BASE}/bg-right.png`}
+        alt=""
+      />
       <div className="cave-dragon-scene__cliff-left" />
       <div className="cave-dragon-scene__cliff-right" />
       <div className="cave-dragon-scene__dragon" />
