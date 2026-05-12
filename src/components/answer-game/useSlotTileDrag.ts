@@ -85,6 +85,15 @@ export const useSlotTileDrag = ({
             // doesn't depend on ancestor CSS vars or `rounded-[inherit]`.
             const rect = element.getBoundingClientRect();
             const computed = getComputedStyle(element);
+            // The source's parent may be transformed (e.g. cave-dragon
+            // scales its UI). Compensate font-size so the ghost letter
+            // matches the source's visual size, not its raw layout size.
+            const layoutWidth = element.offsetWidth;
+            const visualScale =
+              layoutWidth > 0 ? rect.width / layoutWidth : 1;
+            const sourceFontSizePx =
+              Number.parseFloat(computed.fontSize) || 0;
+            const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
             const ghost = document.createElement('div');
             ghost.innerHTML = element.innerHTML;
             // border-radius shorthand can serialize to '' when set via
@@ -101,14 +110,15 @@ export const useSlotTileDrag = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: computed.backgroundColor,
-              backgroundImage: computed.backgroundImage,
+              // Inherit the live tile background so skinned tiles (e.g.
+              // cave-dragon's transparent stone) don't render with a
+              // default-card backdrop mid-drag.
+              background: computed.background,
               color: computed.color,
               borderRadius: radius,
-              fontSize: computed.fontSize,
+              fontSize: ghostFontSize,
               fontFamily: computed.fontFamily,
               fontWeight: computed.fontWeight,
-              border: '1px solid rgba(0,0,0,0.15)',
               boxSizing: 'border-box',
               transform: 'scale(1.08)',
               pointerEvents: 'none',
