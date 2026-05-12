@@ -125,7 +125,7 @@ const sceneStyles = `
   display: block;
 }
 
-/* ── Empty slot + bank-hole stone outline ─────────────────────── */
+/* ── Slot/bank-hole stone outline ─────────────────────────────── */
 .skin-cave-dragon .cave-dragon-stone-outline {
   position: absolute;
   inset: 0;
@@ -133,9 +133,20 @@ const sceneStyles = `
   height: 100%;
   pointer-events: none;
   display: block;
+  z-index: 2;
+  overflow: visible;
+}
+.skin-cave-dragon .cave-dragon-stone-outline--empty {
+  color: rgba(58, 32, 12, 0.55);
+}
+.skin-cave-dragon .cave-dragon-stone-outline--correct {
+  color: var(--bs-primary);
+}
+.skin-cave-dragon .cave-dragon-stone-outline--wrong {
+  color: var(--destructive);
 }
 .skin-cave-dragon [data-tile-bank-hole] {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='4' stroke-dasharray='8 4' stroke-linejoin='round' opacity='0.5'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='12' stroke-dasharray='12 6' stroke-linejoin='round' opacity='0.55'/%3E%3C/svg%3E") !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-color: transparent !important;
@@ -299,17 +310,6 @@ const SceneBackground = () => (
             opacity="0.55"
           />
         </symbol>
-        <symbol id="cd-stoneTileOutline" viewBox="0 0 200 200">
-          <path
-            d="M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z"
-            fill="none"
-            stroke="#3a200c"
-            strokeWidth="4"
-            strokeDasharray="8 4"
-            strokeLinejoin="round"
-            opacity="0.5"
-          />
-        </symbol>
       </defs>
     </svg>
 
@@ -352,16 +352,31 @@ const tileDecoration = (_tile: GameSkinTileSnapshot) => (
   </svg>
 );
 
+const STONE_OUTLINE_PATH =
+  'M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z';
+
 const slotDecoration = (zone: GameSkinZoneSnapshot) => {
-  if (zone.placedTileId !== null) return null;
+  const empty = zone.placedTileId === null;
+  const stateClass = empty
+    ? 'cave-dragon-stone-outline--empty'
+    : zone.isWrong
+      ? 'cave-dragon-stone-outline--wrong'
+      : 'cave-dragon-stone-outline--correct';
   return (
     <svg
-      className="cave-dragon-stone-outline"
+      className={`cave-dragon-stone-outline ${stateClass}`}
       viewBox="0 0 200 200"
       aria-hidden="true"
       focusable="false"
     >
-      <use href="#cd-stoneTileOutline" />
+      <path
+        d={STONE_OUTLINE_PATH}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={empty ? 12 : 20}
+        strokeLinejoin="round"
+        strokeDasharray={empty ? '12 6' : undefined}
+      />
     </svg>
   );
 };
@@ -375,7 +390,13 @@ export const caveDragonSkin: GameSkin = {
     '--skin-slot-bg': 'transparent',
     '--skin-slot-border': 'transparent',
     '--skin-correct-bg': 'transparent',
+    '--skin-correct-border': 'transparent',
     '--skin-wrong-bg': 'transparent',
+    '--skin-wrong-border': 'transparent',
+    // Drag-over preview indicator: drop the rectangular pulse-ring; the
+    // empty-state stone outline already provides the hover affordance.
+    '--skin-hover-border-color': 'transparent',
+    '--skin-hover-border-style': 'none',
     '--skin-question-audio-bg': '#f7d168',
     '--skin-question-audio-fg': '#000000',
   },
