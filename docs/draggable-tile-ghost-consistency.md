@@ -19,32 +19,40 @@ the skin tokens or the parent's effective transform scale.
 
 ## Symptoms today
 
-1. **Square chrome visible during drag** even when the skin renders the
-   resting tile as a non-rectangular shape (e.g. cave-dragon's stone tablet).
-   Each ghost defaults to `background: var(--card)` or similar.
-2. **Inconsistent visible size** when the parent has `transform: scale(N)`:
-   the ghost is sized to `getBoundingClientRect()` (post-transform) but
-   inherits no transform itself, so children sized in `font-size` / `em`
-   render too big on small screens, too small on big ones.
-3. **`transform: scale(1.08)` lift** is hardcoded in two of the three —
-   harmless on classic skin but compounds the size mismatch when the
-   parent already scales.
+**Updated:** all three ghosts now read `getComputedStyle(source).background`
+and apply `font-size = sourceFontSize × visualScale` (commits `38c7fbe8d`,
+`46cb06194`, and the bank-drag/HUD pass). That removes the white-card flash
+and font-size mismatch for the cave-dragon skin and any future skin.
+
+What still needs work:
+
+1. **`transform: scale(1.08)` lift** is hardcoded in two of the three —
+   harmless on classic skin but compounds with the source's own scale
+   when the parent already transforms. A skin-aware lift would either
+   live as a token or be dropped in favour of the existing shadow.
+2. **No single helper.** The three call sites duplicate the same pattern
+   (snapshot bg, snapshot shadow, compute visual scale, clone innerHTML,
+   apply ghost styles). A shared `buildSkinAwareGhost(source)` helper
+   would mean future skins or drag pathways only have to be tested once.
+3. **No VR coverage** — a regression on the ghost is currently invisible
+   to CI. See the "Suggested VR shots" below.
 
 ## What "fixed" looks like
 
 - **One** ghost-builder helper in `answer-game/` that all three call sites
   use, accepting the source element + drag context.
 - Reads `getComputedStyle(source).background` for skinned-tile transparency
-  to pass through.
+  to pass through. ✅ All three call sites do this now.
 - Computes `visualScale = sourceRect.width / sourceEl.offsetWidth` and
-  applies it to the ghost's `font-size` (already done in
-  `slot-animations.ts`, missing in the other two).
+  applies it to the ghost's `font-size`. ✅ All three call sites do this now.
 - Clones the source's `innerHTML` so the skin's tile decoration (e.g. the
   cave-dragon stone SVG) flies along with the letter. Requires the skin's
   decoration CSS to be globally scoped, not nested under `.skin-<id>` —
   see the `.cave-dragon-stone` class in `cave-dragon-skin.tsx` for the
-  pattern.
-- VR coverage per ghost type so a skin regression is caught before merge.
+  pattern. ✅ useTouchDrag now clones innerHTML; the other two already did.
+- ⏳ Pull the duplicated logic into a shared helper.
+- ⏳ Drop or token-ize the hardcoded `transform: scale(1.08)` lift.
+- ⏳ VR coverage per ghost type so a skin regression is caught before merge.
 
 ## Suggested VR shots
 
