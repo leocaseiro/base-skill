@@ -78,7 +78,7 @@ const baseConfig: WordSpellConfig = {
   tileBankMode: 'exact',
   totalRounds: 2,
   roundsInOrder: true,
-  ttsEnabled: false,
+  ttsEnabled: true,
   tileUnit: 'letter',
   mode: 'recall',
   rounds: [{ word: 'cat' }, { word: 'dog' }],
