@@ -50,6 +50,14 @@ export const triggerEjectReturn = (
   const sourceEl = el.parentElement ?? el;
   const sourceRect = sourceEl.getBoundingClientRect();
   const { borderRadius } = globalThis.getComputedStyle(sourceEl);
+  // Inherit the live tile background + shadow so skinned tiles (e.g. transparent
+  // stone tiles) don't flash their classic-default white card mid-flight.
+  const buttonCs = globalThis.getComputedStyle(el);
+  const ghostBg = buttonCs.background;
+  const ghostShadow =
+    buttonCs.boxShadow === 'none'
+      ? '0 4px 16px rgba(0,0,0,0.18)'
+      : buttonCs.boxShadow;
 
   // Fresh div — no inherited classes that could break fixed positioning.
   const ghost = document.createElement('div');
@@ -64,8 +72,8 @@ export const triggerEjectReturn = (
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--card);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    background: ${ghostBg};
+    box-shadow: ${ghostShadow};
     z-index: 9999;
     pointer-events: none;
     margin: 0;
