@@ -18,8 +18,33 @@ const buildGhost = (
   const rect = sourceEl.getBoundingClientRect();
   const halfW = rect.width / 2;
   const halfH = rect.height / 2;
+  // Mirror the source's live look so skinned tiles (e.g. cave-dragon's
+  // transparent stone tablet) don't flash a default white card mid-drag.
+  // Clone the source's innerHTML so any tile decoration (SVG stone, etc.)
+  // flies along with the letter.
+  const sourceCs = getComputedStyle(sourceEl);
+  // The source's parent may be transformed (e.g. cave-dragon scales its UI
+  // via transform: scale(...)). The ghost is on document.body and inherits
+  // none of that, so its font-size needs to be scaled to the source's
+  // visual font-size, not its raw layout font-size.
+  const sourceLayoutWidth = sourceEl.offsetWidth;
+  const visualScale =
+    sourceLayoutWidth > 0 ? rect.width / sourceLayoutWidth : 1;
+  const sourceFontSizePx = Number.parseFloat(sourceCs.fontSize) || 0;
+  const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
+  const ghostBg = sourceCs.background;
+  const ghostShadow =
+    sourceCs.boxShadow === 'none'
+      ? '0 12px 32px rgba(0,0,0,0.3)'
+      : sourceCs.boxShadow;
+
   const el = document.createElement('div');
-  el.textContent = label;
+  el.innerHTML = sourceEl.innerHTML;
+  // Fallback when the source has no innerHTML (defensive — should not happen
+  // for the bank-tile button which always renders the letter).
+  if (el.innerHTML.trim() === '') {
+    el.textContent = label;
+  }
   el.setAttribute('aria-hidden', 'true');
   Object.assign(el.style, {
     position: 'fixed',
@@ -30,12 +55,13 @@ const buildGhost = (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '12px',
-    background: 'var(--card, #fff)',
-    color: 'var(--card-foreground, #000)',
-    fontSize: getComputedStyle(sourceEl).fontSize,
-    fontWeight: 'bold',
-    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+    borderRadius: sourceCs.borderRadius || '12px',
+    background: ghostBg,
+    color: sourceCs.color,
+    fontSize: ghostFontSize,
+    fontFamily: sourceCs.fontFamily,
+    fontWeight: sourceCs.fontWeight,
+    boxShadow: ghostShadow,
     pointerEvents: 'none',
     zIndex: '9999',
     opacity: '0.95',
