@@ -1,4 +1,8 @@
-import type { GameSkin, GameSkinTileSnapshot } from '@/lib/skin';
+import type {
+  GameSkin,
+  GameSkinTileSnapshot,
+  GameSkinZoneSnapshot,
+} from '@/lib/skin';
 
 const ASSET_BASE = '/skins/word-spell/cave-dragon';
 
@@ -108,7 +112,10 @@ const sceneStyles = `
 .skin-cave-dragon [aria-label^="Number "] {
   position: relative;
 }
-.skin-cave-dragon .cave-dragon-stone {
+/* .cave-dragon-stone is intentionally unscoped — the eject-ghost is appended to
+   document.body via slot-animations.ts, outside .skin-cave-dragon. The class
+   name is unique enough not to clash. */
+.cave-dragon-stone {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -116,6 +123,27 @@ const sceneStyles = `
   z-index: -1;
   pointer-events: none;
   display: block;
+}
+
+/* ── Empty slot + bank-hole stone outline ─────────────────────── */
+.skin-cave-dragon .cave-dragon-stone-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+}
+.skin-cave-dragon [data-tile-bank-hole] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='4' stroke-dasharray='8 4' stroke-linejoin='round' opacity='0.5'/%3E%3C/svg%3E") !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+}
+
+/* ── Audio button — sandstone with carved drop shadow ─────────── */
+.skin-cave-dragon button[aria-label="Hear the question"] {
+  filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, 0.4));
 }
 `;
 
@@ -271,6 +299,17 @@ const SceneBackground = () => (
             opacity="0.55"
           />
         </symbol>
+        <symbol id="cd-stoneTileOutline" viewBox="0 0 200 200">
+          <path
+            d="M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z"
+            fill="none"
+            stroke="#3a200c"
+            strokeWidth="4"
+            strokeDasharray="8 4"
+            strokeLinejoin="round"
+            opacity="0.5"
+          />
+        </symbol>
       </defs>
     </svg>
 
@@ -313,6 +352,20 @@ const tileDecoration = (_tile: GameSkinTileSnapshot) => (
   </svg>
 );
 
+const slotDecoration = (zone: GameSkinZoneSnapshot) => {
+  if (zone.placedTileId !== null) return null;
+  return (
+    <svg
+      className="cave-dragon-stone-outline"
+      viewBox="0 0 200 200"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <use href="#cd-stoneTileOutline" />
+    </svg>
+  );
+};
+
 export const caveDragonSkin: GameSkin = {
   id: 'cave-dragon',
   name: 'Cave & Dragon',
@@ -320,9 +373,13 @@ export const caveDragonSkin: GameSkin = {
     '--skin-bank-hole-bg': 'transparent',
     '--skin-bank-hole-shadow': 'none',
     '--skin-slot-bg': 'transparent',
+    '--skin-slot-border': 'transparent',
     '--skin-correct-bg': 'transparent',
     '--skin-wrong-bg': 'transparent',
+    '--skin-question-audio-bg': '#f7d168',
+    '--skin-question-audio-fg': '#000000',
   },
   SceneBackground,
   tileDecoration,
+  slotDecoration,
 };
