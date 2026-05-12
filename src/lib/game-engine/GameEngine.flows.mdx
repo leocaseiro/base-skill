@@ -82,6 +82,14 @@ sequenceDiagram
 `useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
 restores exactly where the player left off.
 
+> **Celebration phases are excluded from persistence (U1a).**
+> `buildDraft` returns `null` for `game-over`, `round-complete`, and
+> `level-complete` phases. A tab-close-then-resume during the 750 ms
+> celebration window therefore does not replay the celebration on the
+> next mount — the draft is cleared, and `RESUME_ROUND` is not
+> dispatched. See `useAnswerGameDraftSync.ts` for the source of truth.
+> (review #15)
+
 ```mermaid
 sequenceDiagram
   participant Provider as AnswerGameProvider

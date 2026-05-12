@@ -101,13 +101,15 @@ sequenceDiagram
   Component->>Component: buildSortRound(nextLevelIndex)
   Component->>Reducer: ADVANCE_LEVEL { tiles, zones }
   Reducer-->>Engine: mirrored — incrementRoundIndex +\n  incrementLevelIndex + advanceLevelState
-  Engine->>Bus: emit game:level-advance
+  Component->>Bus: emit game:level-advance
   Engine-->>Engine: transition → playing
 ```
 
 The `game:level-advance` event continues to fire — preserved from the
-pre-PR-1b implementation. The emit now lives on the engine's
-`ADVANCE_LEVEL` handler rather than the component's `handleNextLevel`.
+pre-PR-1b implementation. The emit lives in `handleNextLevel` in the
+component (review #8) — the original plan to move it onto the engine's
+`ADVANCE_LEVEL` handler is deferred to PR 1b-bis. Until then the
+component is the canonical emit site.
 
 ---
 
