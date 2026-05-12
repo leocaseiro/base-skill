@@ -556,4 +556,63 @@ describe('SortNumbers machine — integration', () => {
     actor.send({ type: 'GAME_OVER' });
     expect(actor.getSnapshot().value).toBe('gameOver');
   });
+
+  it('INIT_ROUND from gameOver is ignored — does not reset roundIndex (review #2)', () => {
+    const { actor, context } = startActor({ totalRounds: 1 });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    actor.send({ type: 'CELEBRATION_DONE' });
+    expect(actor.getSnapshot().value).toBe('gameOver');
+
+    const before = context();
+    actor.send(initEvent(round.tiles, round.zones));
+    expect(actor.getSnapshot().value).toBe('gameOver');
+    expect(context().roundIndex).toBe(before.roundIndex);
+  });
+
+  it('RESUME_ROUND from levelComplete is ignored — celebration window is sealed (review #2)', () => {
+    vi.useFakeTimers();
+    const { actor, context } = startActor({
+      totalRounds: 4,
+      maxLevels: 2,
+      levelSize: 2,
+    });
+    const round = buildRound();
+    actor.send(initEvent(round.tiles, round.zones));
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    vi.advanceTimersByTime(751);
+    actor.send({
+      type: 'ADVANCE_ROUND',
+      tiles: round.tiles,
+      zones: round.zones,
+    });
+    actor.send({ type: 'PLACE_TILE', tileId: 't1', zoneIndex: 0 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't2', zoneIndex: 1 });
+    actor.send({ type: 'PLACE_TILE', tileId: 't3', zoneIndex: 2 });
+    vi.advanceTimersByTime(751);
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+
+    const before = context();
+    actor.send({
+      type: 'RESUME_ROUND',
+      draft: {
+        allTiles: [],
+        bankTileIds: [],
+        zones: [],
+        activeSlotIndex: 0,
+        phase: 'playing' as const,
+        roundIndex: 99,
+        retryCount: 99,
+        levelIndex: 99,
+      },
+    });
+    expect(actor.getSnapshot().value).toBe('levelComplete');
+    expect(context().roundIndex).toBe(before.roundIndex);
+    expect(context().levelIndex).toBe(before.levelIndex);
+  });
 });
