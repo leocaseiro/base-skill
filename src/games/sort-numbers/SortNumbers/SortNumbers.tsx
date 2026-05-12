@@ -167,7 +167,19 @@ const SortNumbersSession = ({
       nextConfigIndex === undefined
         ? undefined
         : sortNumbersConfig.rounds[nextConfigIndex];
-    if (!nextRound) return;
+    if (!nextRound) {
+      // (review #18) Endless-mode bail-out. When `isLevelMode` is true
+      // but the roundOrder is exhausted (level-mode config with a finite
+      // round list), the machine settles in waitingForNext with nothing
+      // to advance to. Without this dispatch the user is stuck — the
+      // overlay never appears. COMPLETE_GAME jumps to gameOver via the
+      // root-level handler.
+      if (isLevelMode) {
+        advancedRoundRef.current = true;
+        dispatch({ type: 'COMPLETE_GAME' });
+      }
+      return;
+    }
     const distractor =
       sortNumbersConfig.tileBankMode === 'distractors'
         ? {
@@ -204,6 +216,7 @@ const SortNumbersSession = ({
     engine.roundIndex,
     dispatch,
     roundOrder,
+    isLevelMode,
     sortNumbersConfig.gameId,
     sortNumbersConfig.rounds,
     sortNumbersConfig.direction,
