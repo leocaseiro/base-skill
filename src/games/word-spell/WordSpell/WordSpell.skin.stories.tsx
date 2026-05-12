@@ -1,5 +1,6 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { caveDragonSkin } from '../skins/cave-dragon-skin';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 import type { AnswerGameDraftState } from '@/components/answer-game/types';
@@ -29,6 +30,7 @@ const demoSkin: GameSkin = {
 };
 
 registerSkin('word-spell', demoSkin);
+registerSkin('word-spell', caveDragonSkin);
 
 const fiveRoundConfig: WordSpellConfig = {
   gameId: 'word-spell',
