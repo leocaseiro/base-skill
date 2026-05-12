@@ -10,6 +10,24 @@ import type {
 // PR-preview deploy where the iframe lives below the domain root.
 const ASSET_BASE = `${import.meta.env.BASE_URL}skins/word-spell/cave-dragon`;
 
+// Hand-distributed bubble positions across the 1200-unit viewBox so the
+// rises look organic but the seed is stable (no SSR/random mismatch).
+const LAVA_BUBBLES = [
+  { cx: 60, r: 6, delay: 0, duration: 2.4 },
+  { cx: 140, r: 4, delay: 1.4, duration: 2.8 },
+  { cx: 230, r: 8, delay: 2.6, duration: 3.2 },
+  { cx: 320, r: 5, delay: 0.8, duration: 2.6 },
+  { cx: 410, r: 7, delay: 1.9, duration: 3 },
+  { cx: 500, r: 6, delay: 3.1, duration: 2.4 },
+  { cx: 590, r: 9, delay: 0.4, duration: 3.4 },
+  { cx: 680, r: 5, delay: 2.1, duration: 2.6 },
+  { cx: 770, r: 7, delay: 1, duration: 2.8 },
+  { cx: 860, r: 4, delay: 3.6, duration: 2.4 },
+  { cx: 950, r: 8, delay: 0.9, duration: 3 },
+  { cx: 1040, r: 6, delay: 2.3, duration: 2.8 },
+  { cx: 1130, r: 5, delay: 1.5, duration: 2.6 },
+];
+
 const sceneStyles = `
 .skin-cave-dragon {
   position: relative;
@@ -83,16 +101,51 @@ const sceneStyles = `
   background-position: bottom center;
   background-size: contain;
 }
-.cave-dragon-scene__lava {
+.cave-dragon-scene__lava-svg {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100%;
   height: 32%;
-  background-image: url('${ASSET_BASE}/lava-floor-tile.svg');
-  background-repeat: repeat-x;
-  background-position: bottom left;
-  background-size: auto 100%;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+.cd-lava-wave {
+  animation: cd-lava-wave-bob 2.6s ease-in-out infinite alternate;
+}
+@keyframes cd-lava-wave-bob {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: translateY(6px);
+  }
+}
+.cd-lava-bubble {
+  animation-name: cd-lava-bubble-rise;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+@keyframes cd-lava-bubble-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0.75;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-180px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cd-lava-wave,
+  .cd-lava-bubble {
+    animation: none;
+  }
 }
 
 /* ── Stone tile override ──────────────────────────────────────── */
@@ -343,7 +396,54 @@ const SceneBackground = () => (
         alt=""
       />
       <div className="cave-dragon-scene__dragon" />
-      <div className="cave-dragon-scene__lava" />
+      <svg
+        className="cave-dragon-scene__lava-svg"
+        viewBox="0 0 1200 300"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <defs>
+          <linearGradient id="cd-lava-grad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#FF4500" />
+            <stop offset="40%" stopColor="#FF8C00" />
+            <stop offset="100%" stopColor="#8B0000" />
+          </linearGradient>
+        </defs>
+        {/* Static base — covers the full lava area so the bobbing wave
+            never exposes a gap below itself. */}
+        <rect
+          x="0"
+          y="20"
+          width="1200"
+          height="280"
+          fill="url(#cd-lava-grad)"
+        />
+        {/* Animated wave silhouette on top of the base. */}
+        <path
+          className="cd-lava-wave"
+          d="M0,40 Q150,20 300,40 T600,40 T900,40 T1200,40 V90 H0 Z"
+          fill="url(#cd-lava-grad)"
+        />
+        {/* Rising bubbles. cx is hand-distributed across the viewBox to
+            avoid SSR random mismatch; delay + duration vary so the rises
+            aren't synchronised. */}
+        {LAVA_BUBBLES.map((b) => (
+          <circle
+            key={b.cx}
+            className="cd-lava-bubble"
+            cx={b.cx}
+            cy={250}
+            r={b.r}
+            fill="#FFD700"
+            opacity="0.75"
+            style={{
+              animationDelay: `${b.delay}s`,
+              animationDuration: `${b.duration}s`,
+            }}
+          />
+        ))}
+      </svg>
     </div>
   </>
 );
