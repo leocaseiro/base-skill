@@ -80,11 +80,8 @@ const baseConfig: WordSpellConfig = {
   roundsInOrder: true,
   ttsEnabled: false,
   tileUnit: 'letter',
-  mode: 'picture',
-  rounds: [
-    { word: 'cat', image: 'https://placehold.co/160?text=cat' },
-    { word: 'dog', image: 'https://placehold.co/160?text=dog' },
-  ],
+  mode: 'recall',
+  rounds: [{ word: 'cat' }, { word: 'dog' }],
 };
 
 const WordSpellWithHarness = ({

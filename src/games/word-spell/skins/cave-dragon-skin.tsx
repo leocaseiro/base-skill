@@ -7,6 +7,12 @@ const sceneStyles = `
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  width: 100%;
+  max-width: 2738px;
+  min-width: 667px;
+  margin-inline: auto;
+  aspect-ratio: 2738 / 1536;
+  container-type: inline-size;
 }
 .skin-cave-dragon > .cave-dragon-scene {
   position: absolute;
@@ -18,6 +24,8 @@ const sceneStyles = `
 .skin-cave-dragon > *:not(.cave-dragon-scene) {
   position: relative;
   z-index: 1;
+  transform: scale(calc(100cqi / 962px));
+  transform-origin: top center;
 }
 .cave-dragon-scene__bg-middle {
   position: absolute;
@@ -28,7 +36,9 @@ const sceneStyles = `
   background-size: auto 100%;
 }
 .cave-dragon-scene__bg-left,
-.cave-dragon-scene__bg-right {
+.cave-dragon-scene__bg-right,
+.cave-dragon-scene__cliff-left,
+.cave-dragon-scene__cliff-right {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -36,34 +46,17 @@ const sceneStyles = `
   width: auto;
   display: block;
   user-select: none;
+  pointer-events: none;
 }
-.cave-dragon-scene__bg-left {
+.cave-dragon-scene__bg-left,
+.cave-dragon-scene__cliff-left {
   left: 0;
 }
 .cave-dragon-scene__bg-right {
   right: 0;
 }
-.cave-dragon-scene__cliff-left {
-  position: absolute;
-  left: 0;
-  top: 38%;
-  width: 28%;
-  height: 32%;
-  background-image: url('${ASSET_BASE}/cliff-left.png');
-  background-repeat: no-repeat;
-  background-position: bottom left;
-  background-size: contain;
-}
 .cave-dragon-scene__cliff-right {
-  position: absolute;
   right: 0;
-  top: 38%;
-  width: 28%;
-  height: 32%;
-  background-image: url('${ASSET_BASE}/cliff-left.png');
-  background-repeat: no-repeat;
-  background-position: bottom right;
-  background-size: contain;
   transform: scaleX(-1);
 }
 .cave-dragon-scene__dragon {
@@ -105,8 +98,16 @@ const SceneBackground = () => (
         src={`${ASSET_BASE}/bg-right.png`}
         alt=""
       />
-      <div className="cave-dragon-scene__cliff-left" />
-      <div className="cave-dragon-scene__cliff-right" />
+      <img
+        className="cave-dragon-scene__cliff-left"
+        src={`${ASSET_BASE}/cliff-left.png`}
+        alt=""
+      />
+      <img
+        className="cave-dragon-scene__cliff-right"
+        src={`${ASSET_BASE}/cliff-left.png`}
+        alt=""
+      />
       <div className="cave-dragon-scene__dragon" />
       <div className="cave-dragon-scene__lava" />
     </div>
