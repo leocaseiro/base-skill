@@ -5,6 +5,8 @@ import type {
   TileItem,
 } from '@/components/answer-game/types';
 import type { GameDefinition } from '@/lib/game-engine/definition-types';
+import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
+import type { GameEvent } from '@/types/game-events';
 
 export interface WordSpellEngineContext {
   allTiles: TileItem[];
@@ -110,10 +112,13 @@ const wordSpellMachine = setup({
   },
   actions: {
     // Engine-injected action placeholders (overridden by useGameEngine.provide).
-    speak: (_, _params: { lifecycleEvent: string }) => {},
+    // (review #27/#28) Tightened placeholder types so callers receive
+    // strongly-typed `lifecycleEvent` / `event` payloads and the
+    // useGameEngine override drops the redundant cast.
+    speak: (_, _params: { lifecycleEvent: LifecycleEvent }) => {},
     playSound: (_, _params: { sound: string }) => {},
     completeGame: () => {},
-    emit: (_, _params: { event: unknown }) => {},
+    emit: (_, _params: { event: GameEvent }) => {},
 
     initRound: assign(({ event }) => {
       if (event.type !== 'INIT_ROUND') return {};
@@ -615,6 +620,10 @@ const wordSpellMachine = setup({
     },
   },
 });
+
+// (review #26) Exported for tests so they can cast to
+// `Actor<typeof wordSpellMachine>` instead of `Actor<AnyStateMachine>`.
+export { wordSpellMachine };
 
 export const wordSpellDefinition: GameDefinition = {
   id: 'word-spell',

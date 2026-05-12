@@ -147,17 +147,15 @@ export const useGameEngine = <TRound, TContext = unknown>(
         maxLevels: options?.maxLevels,
       }),
       actions: {
-        speak: (_, params) => {
-          const typed = params as { lifecycleEvent: LifecycleEvent };
+        speak: (_, params: { lifecycleEvent: LifecycleEvent }) => {
           executeSideEffects(
-            [{ type: 'speak', lifecycleEvent: typed.lifecycleEvent }],
+            [{ type: 'speak', lifecycleEvent: params.lifecycleEvent }],
             envelope,
           );
         },
-        emit: (_, params) => {
-          const typed = params as { event: GameEvent };
+        emit: (_, params: { event: GameEvent }) => {
           executeSideEffects(
-            [{ type: 'emit', event: typed.event }],
+            [{ type: 'emit', event: params.event }],
             envelope,
           );
         },
