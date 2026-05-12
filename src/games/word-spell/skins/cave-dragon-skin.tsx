@@ -399,6 +399,13 @@ export const caveDragonSkin: GameSkin = {
     '--skin-hover-border-style': 'none',
     '--skin-question-audio-bg': '#f7d168',
     '--skin-question-audio-fg': '#000000',
+    // HUD tokens — cave palette: dark amethyst dots with a gold "current"
+    // ring, white fraction label/separator/level text against the cave bg.
+    '--skin-hud-dot-fill': '#2E1954',
+    '--skin-hud-dot-current-border': '#F6C562',
+    '--skin-hud-fraction-color': '#ffffff',
+    '--skin-hud-fraction-sep-color': '#ffffff',
+    '--skin-hud-level-color': '#ffffff',
   },
   SceneBackground,
   tileDecoration,
