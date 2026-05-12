@@ -426,24 +426,37 @@ export const WordSpell = ({
 
     const cancellation = { isCancelled: false as boolean };
     void (async () => {
-      const doc = await db.session_history_index
-        .findOne(sessionId)
-        .exec();
+      try {
+        const doc = await db.session_history_index
+          .findOne(sessionId)
+          .exec();
 
-      if (cancellation.isCancelled || !doc) return;
+        if (cancellation.isCancelled || !doc) return;
 
-      const patch = buildWordSpellInitialContent({
-        rounds: resolvedRounds,
-        roundOrder,
-        tileUnit: resolvedConfig.tileUnit,
-        mode: resolvedConfig.mode,
-      });
-      await doc.incrementalPatch({
-        initialContent: {
-          ...doc.initialContent,
-          ...patch,
-        },
-      });
+        const patch = buildWordSpellInitialContent({
+          rounds: resolvedRounds,
+          roundOrder,
+          tileUnit: resolvedConfig.tileUnit,
+          mode: resolvedConfig.mode,
+        });
+        await doc.incrementalPatch({
+          initialContent: {
+            ...doc.initialContent,
+            ...patch,
+          },
+        });
+      } catch (error) {
+        // Initial-content persistence is best-effort: if the write
+        // fails (closed DB, quota, navigation race) the live session
+        // still plays correctly. Resume support degrades to the
+        // stale-draft recovery path.
+        if (import.meta.env.DEV) {
+          console.warn(
+            '[WordSpell] persisting initialContent failed',
+            error,
+          );
+        }
+      }
     })();
 
     return () => {
@@ -497,13 +510,24 @@ export const WordSpell = ({
     if (!staleDraft || !db || !sessionId) return;
     const cancellation = { isCancelled: false as boolean };
     void (async () => {
-      const doc = await db.session_history_index
-        .findOne(sessionId)
-        .exec();
+      try {
+        const doc = await db.session_history_index
+          .findOne(sessionId)
+          .exec();
 
-      if (cancellation.isCancelled || !doc) return;
-      if (doc.draftState == null) return;
-      await doc.incrementalPatch({ draftState: null });
+        if (cancellation.isCancelled || !doc) return;
+        if (doc.draftState == null) return;
+        await doc.incrementalPatch({ draftState: null });
+      } catch (error) {
+        // Stale-draft cleanup is best-effort. If the patch fails the
+        // next stale detection on next mount will retry.
+        if (import.meta.env.DEV) {
+          console.warn(
+            '[WordSpell] clearing stale draftState failed',
+            error,
+          );
+        }
+      }
     })();
     return () => {
       cancellation.isCancelled = true;

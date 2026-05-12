@@ -54,13 +54,30 @@ export const useAnswerGameDraftSync = (
       const { state: s, db: d, sessionId: sid } = latestRef.current;
       if (!d || !sid) return;
 
-      const doc = await d.session_history_index.findOne(sid).exec();
-      if (!doc) return;
+      try {
+        const doc = await d.session_history_index.findOne(sid).exec();
+        if (!doc) return;
 
-      const draft = buildDraft(s);
-      await doc.incrementalPatch({
-        draftState: draft as unknown as Record<string, unknown> | null,
-      });
+        const draft = buildDraft(s);
+        await doc.incrementalPatch({
+          draftState: draft as unknown as Record<
+            string,
+            unknown
+          > | null,
+        });
+      } catch (error) {
+        // Persistence is best-effort: a closed RxDB collection, quota
+        // failure, or race during navigation must not crash the React
+        // tree. Log to console in dev so regressions are visible; in
+        // production the failure is silently dropped — the next state
+        // change will retry.
+        if (import.meta.env.DEV) {
+          console.warn(
+            '[useAnswerGameDraftSync] debounced draft write failed',
+            error,
+          );
+        }
+      }
     }, 500);
 
     return () => clearTimeout(timer);
@@ -73,13 +90,27 @@ export const useAnswerGameDraftSync = (
       const { state: s, db: d, sessionId: sid } = latestRef.current;
       if (!d || !sid) return;
 
-      const doc = await d.session_history_index.findOne(sid).exec();
-      if (!doc) return;
+      try {
+        const doc = await d.session_history_index.findOne(sid).exec();
+        if (!doc) return;
 
-      const draft = buildDraft(s);
-      await doc.incrementalPatch({
-        draftState: draft as unknown as Record<string, unknown> | null,
-      });
+        const draft = buildDraft(s);
+        await doc.incrementalPatch({
+          draftState: draft as unknown as Record<
+            string,
+            unknown
+          > | null,
+        });
+      } catch (error) {
+        // Best-effort flush on tab hide. Throwing here would surface as
+        // an unhandled rejection during page unload; absorb instead.
+        if (import.meta.env.DEV) {
+          console.warn(
+            '[useAnswerGameDraftSync] visibility flush failed',
+            error,
+          );
+        }
+      }
     };
 
     document.addEventListener('visibilitychange', flush);
