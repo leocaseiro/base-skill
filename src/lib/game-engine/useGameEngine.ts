@@ -49,32 +49,61 @@ export interface EngineGuards {
   isLastRound: (input: { context: { roundIndex: number } }) => boolean;
 }
 
+export interface BuildEngineGuardsConfig {
+  /**
+   * True when the surrounding config defines a `levelMode` block, even if
+   * `maxLevels` is absent. Required to distinguish "endless level mode"
+   * (e.g. SortNumbers simple-config: every round IS a level, generated on
+   * demand by `levelMode.generateNextLevel`) from "no level mode"
+   * (NumberMatch / WordSpell today). Without this signal, `maxLevels: null`
+   * is ambiguous between the two — and the engine wrongly transitions to
+   * `gameOver` after the last configured round in endless mode.
+   */
+  isLevelMode?: boolean;
+  /** `null` means "no cap" (endless), `number` means finite levels. */
+  maxLevels?: number | null;
+}
+
 export const buildEngineGuards = (
   totalRounds: number,
   levelSize: number,
-): EngineGuards => ({
-  isMidLevelRound: ({ context }) => {
-    const positionInLevel =
-      (context.roundIndex + 1) % Math.max(levelSize, 1);
-    return (
-      positionInLevel !== 0 && context.roundIndex + 1 < totalRounds
-    );
-  },
-  isLastRoundOfLevel: ({ context }) => {
-    const positionInLevel =
-      (context.roundIndex + 1) % Math.max(levelSize, 1);
-    return (
-      positionInLevel === 0 && context.roundIndex + 1 < totalRounds
-    );
-  },
-  isLastRound: ({ context }) => context.roundIndex + 1 >= totalRounds,
-});
+  config: BuildEngineGuardsConfig = {},
+): EngineGuards => {
+  const isLevelMode = config.isLevelMode ?? false;
+  const maxLevels = config.maxLevels ?? null;
+  const isEndlessLevelMode = isLevelMode && maxLevels === null;
+
+  return {
+    isMidLevelRound: ({ context }) => {
+      const positionInLevel =
+        (context.roundIndex + 1) % Math.max(levelSize, 1);
+      if (positionInLevel === 0) return false;
+      if (isEndlessLevelMode) return true;
+      return context.roundIndex + 1 < totalRounds;
+    },
+    isLastRoundOfLevel: ({ context }) => {
+      const positionInLevel =
+        (context.roundIndex + 1) % Math.max(levelSize, 1);
+      if (positionInLevel !== 0) return false;
+      if (isEndlessLevelMode) return true;
+      return context.roundIndex + 1 < totalRounds;
+    },
+    isLastRound: ({ context }) => {
+      if (isEndlessLevelMode) return false;
+      return context.roundIndex + 1 >= totalRounds;
+    },
+  };
+};
 
 export interface UseGameEngineOptions {
   input?: unknown;
   envelope?: Partial<EngineEnvelope>;
   totalRounds?: number;
   levelSize?: number;
+  /** See `BuildEngineGuardsConfig.isLevelMode`. */
+  isLevelMode?: boolean;
+  /** See `BuildEngineGuardsConfig.maxLevels`. */
+  maxLevels?: number | null;
 }
 
 const readContextField = <T>(
@@ -113,7 +142,10 @@ export const useGameEngine = <TRound, TContext = unknown>(
     const levelSize = options?.levelSize ?? totalRounds;
 
     return definition.machine.provide({
-      guards: buildEngineGuards(totalRounds, levelSize),
+      guards: buildEngineGuards(totalRounds, levelSize, {
+        isLevelMode: options?.isLevelMode,
+        maxLevels: options?.maxLevels,
+      }),
       actions: {
         speak: (_, params) => {
           const typed = params as { lifecycleEvent: LifecycleEvent };
@@ -174,7 +206,14 @@ export const useGameEngine = <TRound, TContext = unknown>(
     // adapter + dispatch dropped per PR 1a Spec Delta — XState-first means
     // no caller routes through a reducer in PR 1a. Memo on the inputs that
     // actually drive the machine.
-  }, [definition, options?.totalRounds, options?.levelSize, envelope]);
+  }, [
+    definition,
+    options?.totalRounds,
+    options?.levelSize,
+    options?.isLevelMode,
+    options?.maxLevels,
+    envelope,
+  ]);
 
   const useMachineOptions =
     options?.input === undefined ? undefined : { input: options.input };
