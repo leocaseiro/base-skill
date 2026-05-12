@@ -628,9 +628,9 @@ export { wordSpellMachine };
 export const wordSpellDefinition: GameDefinition = {
   id: 'word-spell',
   interaction: 'drag-to-slot',
-  // PR 1a Spec Delta 6 continues: passthrough; round construction stays in
-  // the React component (buildSentenceGapRound / buildTilesAndZones in
-  // WordSpell.tsx). PR 1c lifts it into definition.ts.
+  // PR 1b Spec Delta 4: passthrough; round construction stays in the React
+  // component (buildSentenceGapRound / buildTilesAndZones in WordSpell.tsx).
+  // PR 1c lifts it into definition.ts.
   buildRound: (ctx) => ({ roundIndex: ctx.roundIndex }),
   machine: wordSpellMachine,
 };
