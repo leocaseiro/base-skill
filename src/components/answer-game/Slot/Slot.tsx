@@ -200,6 +200,11 @@ export const Slot = ({
               ) : (
                 children(renderProps)
               )}
+              {skin?.tileDecoration?.({
+                id: zone?.placedTileId ?? '',
+                label: label ?? '',
+                value: label ?? '',
+              })}
             </button>
             {showCursor ? (
               <span
