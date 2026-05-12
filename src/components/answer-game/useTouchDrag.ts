@@ -71,7 +71,11 @@ const buildGhost = (
     zIndex: '9999',
     opacity: '0.95',
     userSelect: 'none',
-    transform: 'scale(1.08)',
+    // No scale(1.08) lift — it compounds with parent transforms (e.g.
+    // cave-dragon's scale on the stage) and makes the ghost noticeably
+    // bigger than the source. Skins that want depth should apply
+    // filter: drop-shadow on their tile decoration so the lift follows
+    // the actual shape, not a hidden bounding rect.
   });
   document.body.append(el);
   return { el, halfW, halfH };
