@@ -49,17 +49,23 @@ export const triggerEjectReturn = (
   // Slot element gives us correct size + border-radius (button has size-full %).
   const sourceEl = el.parentElement ?? el;
   const sourceRect = sourceEl.getBoundingClientRect();
-  const { borderRadius } = globalThis.getComputedStyle(sourceEl);
+  const sourceCs = globalThis.getComputedStyle(sourceEl);
+  // jsdom returns empty for unstyled elements; cssText drops declarations
+  // with empty values, so fall back to '0' which is valid CSS.
+  const borderRadius = sourceCs.borderRadius || '0';
   // Inherit the live tile background + shadow so skinned tiles (e.g. transparent
   // stone tiles) don't flash their classic-default white card mid-flight.
-  // No fallback shadow — when the source has none (e.g. cave-dragon's
-  // transparent stone), a default rect shadow would trace the ghost's
-  // rounded-rect outline and look like a phantom square mid-flight.
-  // Skinned tiles that want lift during drag should apply filter:
-  // drop-shadow on their decoration so it follows the actual shape.
+  // No fallback shadow when source has one — when source has none (e.g.
+  // cave-dragon's transparent stone), a default rect shadow would trace the
+  // ghost's rounded-rect outline and look like a phantom square. Skinned
+  // tiles that want lift during drag should apply filter: drop-shadow on
+  // their decoration so it follows the actual shape. Empty-string fallbacks
+  // are needed because jsdom returns '' from getComputedStyle on detached/
+  // unstyled elements, and an empty value in cssText would silently drop the
+  // whole declaration block (breaking the position: fixed lookup tests do).
   const buttonCs = globalThis.getComputedStyle(el);
-  const ghostBg = buttonCs.background;
-  const ghostShadow = buttonCs.boxShadow;
+  const ghostBg = buttonCs.background || 'transparent';
+  const ghostShadow = buttonCs.boxShadow || 'none';
   // Effective parent transform scale (e.g. cave-dragon container scales its
   // descendants via transform: scale(...) so layout dimensions and visual
   // dimensions diverge). The ghost is appended to document.body and inherits
@@ -72,28 +78,31 @@ export const triggerEjectReturn = (
       ? sourceRect.width / sourceEl.offsetWidth
       : 1;
   const sourceFontSizePx = Number.parseFloat(buttonCs.fontSize) || 0;
-  const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
+  const ghostFontSize = `${sourceFontSizePx * visualScale || 0}px`;
 
   // Fresh div — no inherited classes that could break fixed positioning.
+  // Set properties one by one (not via cssText) so a single bad value
+  // doesn't drop the whole declaration block — jsdom in particular can
+  // serialize getComputedStyle results in ways that break cssText parsing.
   const ghost = document.createElement('div');
   ghost.innerHTML = el.innerHTML;
-  ghost.style.cssText = `
-    position: fixed;
-    top: ${sourceRect.top}px;
-    left: ${sourceRect.left}px;
-    width: ${sourceRect.width}px;
-    height: ${sourceRect.height}px;
-    font-size: ${ghostFontSize};
-    border-radius: ${borderRadius};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: ${ghostBg};
-    box-shadow: ${ghostShadow};
-    z-index: 9999;
-    pointer-events: none;
-    margin: 0;
-  `;
+  Object.assign(ghost.style, {
+    position: 'fixed',
+    top: `${sourceRect.top}px`,
+    left: `${sourceRect.left}px`,
+    width: `${sourceRect.width}px`,
+    height: `${sourceRect.height}px`,
+    fontSize: ghostFontSize,
+    borderRadius,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: ghostBg,
+    boxShadow: ghostShadow,
+    zIndex: '9999',
+    pointerEvents: 'none',
+    margin: '0',
+  });
   document.body.append(ghost);
 
   // Hide the original so only the ghost is visible during the flight.

@@ -32,12 +32,16 @@ const buildGhost = (
     sourceLayoutWidth > 0 ? rect.width / sourceLayoutWidth : 1;
   const sourceFontSizePx = Number.parseFloat(sourceCs.fontSize) || 0;
   const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
-  const ghostBg = sourceCs.background;
-  // No fallback shadow — when the source has none (e.g. cave-dragon's
-  // transparent stone), a default rect shadow would draw a phantom square
-  // around the ghost. Skinned tiles that want drag-lift should apply
-  // filter: drop-shadow on their decoration so depth follows the shape.
-  const ghostShadow = sourceCs.boxShadow;
+  // Empty-string fallbacks are needed because jsdom returns '' from
+  // getComputedStyle on unstyled elements; empty values in cssText silently
+  // drop the whole declaration block.
+  const ghostBg = sourceCs.background || 'transparent';
+  // No fallback shadow when source has one — when source has none (e.g.
+  // cave-dragon's transparent stone), a default rect shadow would draw a
+  // phantom square around the ghost. Skinned tiles that want drag-lift
+  // should apply filter: drop-shadow on their decoration so depth follows
+  // the shape.
+  const ghostShadow = sourceCs.boxShadow || 'none';
 
   const el = document.createElement('div');
   el.innerHTML = sourceEl.innerHTML;
