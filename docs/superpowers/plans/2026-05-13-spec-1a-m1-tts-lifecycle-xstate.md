@@ -60,7 +60,7 @@ These three deltas reduce M1 scope and align the implementation with what the en
 Tap-to-speak path (AudioButton, question onClick):
 [ <AudioButton event="round.start" /> ]
    const { speakOnDemand } = useLifecycleTTS()
-   onClick: speakOnDemand('round.start', { mode: 'full' })
+   onClick: speakOnDemand('round.start')
    if !ttsOnDemandAllowed: return
    resolve + interpolate + speak (always 'full' mode)
 ```
@@ -97,36 +97,36 @@ src/components/answer-game/GameOptions/
 
 <!-- markdownlint-disable MD060 -->
 
-| File                                                             | Change                                                                                                                                                                                                       |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/types/game-events.ts`                                       | Add `game:prepare` to `GameEventType` union + `GamePrepareEvent` interface. (`lifecycle:speak` already exists at line 29.)                                                                                    |
-| `src/components/answer-game/types.ts`                            | Split `ttsEnabled: boolean` (line 17) into `autoSpeak: boolean` + `ttsOnDemandAllowed: boolean`; add `gradeBand: GradeBand` and `talkativeness: TalkativenessPreset`.                                         |
-| `src/games/spot-all/types.ts`                                    | Same split for `SpotAllConfig.ttsEnabled`. (SpotAll's `speakPrompt` consolidation is deferred per Spec Delta 1 — only the type changes here so the config blob stays consistent.)                             |
-| `src/components/answer-game/useGameTTS.ts`                       | Replace `speakPrompt` with `speakAuto` (gated by `autoSpeak`) and `speakOnDemand` (gated by `ttsOnDemandAllowed`); `speakTile` stays as-is but switches its gate from `ttsEnabled` to `autoSpeak`.            |
-| `src/components/answer-game/useGameTTS.test.tsx`                 | Update tests for new API; verify gate ref-read works after toggle.                                                                                                                                            |
-| `src/components/answer-game/useRoundTTS.ts`                      | **DELETE.** All three XState games drive round-start speech via `entry: [speak({ lifecycleEvent: 'round.start' })]` on the machine's `playing` state. No callers remain after Tasks 9, 10, 11.                |
-| `src/components/answer-game/useRoundTTS.test.tsx`                | **DELETE** alongside the source file.                                                                                                                                                                         |
-| `src/games/number-match/definition.ts`                           | Add `tts:` block (matches `Partial<Record<LifecycleEvent, EventTemplate>>` from `definition-types.ts:39`); add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to `playing` state.   |
-| `src/games/word-spell/definition.ts`                             | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                       |
-| `src/games/sort-numbers/definition.ts`                           | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                       |
-| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Replace stacked numeral + question siblings with `<QuestionRow>`; pass `event="round.start"` to AudioButton.                                                                                                  |
-| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Same — `<QuestionRow>` wrap; pass `event` prop.                                                                                                                                                               |
-| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | **Add AudioButton** (currently has none) via `<QuestionRow>`; pass `event="round.start"`.                                                                                                                     |
-| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch `prompt: string` prop to `event: LifecycleEvent`; gate by `ttsOnDemandAllowed`; call `useLifecycleTTS().speakOnDemand(event, { mode: 'full' })`.                                                       |
-| `src/components/questions/AudioButton/AudioButton.test.tsx`      | Update tests for new prop API + gate.                                                                                                                                                                         |
-| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route `onClick` speech through `useLifecycleTTS().speakOnDemand`; honor `ttsOnDemandAllowed`.                                                                                                                 |
-| `src/components/questions/ImageQuestion/ImageQuestion.tsx`       | Same.                                                                                                                                                                                                         |
-| `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same.                                                                                                                                                                                                         |
-| `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same.                                                                                                                                                                                                         |
-| `src/components/questions/index.ts`                              | Add `QuestionRow` export.                                                                                                                                                                                     |
+| File                                                             | Change                                                                                                                                                                                                         |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/types/game-events.ts`                                       | Add `game:prepare` to `GameEventType` union + `GamePrepareEvent` interface. (`lifecycle:speak` already exists at line 29.)                                                                                     |
+| `src/components/answer-game/types.ts`                            | Split `ttsEnabled: boolean` (line 17) into `autoSpeak: boolean` + `ttsOnDemandAllowed: boolean`; add `gradeBand: GradeBand` and `talkativeness: TalkativenessPreset`.                                          |
+| `src/games/spot-all/types.ts`                                    | Same split for `SpotAllConfig.ttsEnabled`. (SpotAll's `speakPrompt` consolidation is deferred per Spec Delta 1 — only the type changes here so the config blob stays consistent.)                              |
+| `src/components/answer-game/useGameTTS.ts`                       | Replace `speakPrompt` with `speakAuto` (gated by `autoSpeak`) and `speakOnDemand` (gated by `ttsOnDemandAllowed`); `speakTile` stays as-is but switches its gate from `ttsEnabled` to `autoSpeak`.             |
+| `src/components/answer-game/useGameTTS.test.tsx`                 | Update tests for new API; verify gate ref-read works after toggle.                                                                                                                                             |
+| `src/components/answer-game/useRoundTTS.ts`                      | **DELETE.** All three XState games drive round-start speech via `entry: [speak({ lifecycleEvent: 'round.start' })]` on the machine's `playing` state. No callers remain after Tasks 9, 10, 11.                 |
+| `src/components/answer-game/useRoundTTS.test.tsx`                | **DELETE** alongside the source file.                                                                                                                                                                          |
+| `src/games/number-match/definition.ts`                           | Add `tts:` block (matches `Partial<Record<LifecycleEvent, EventTemplate>>` from `definition-types.ts:39`); add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to `playing` state.     |
+| `src/games/word-spell/definition.ts`                             | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                        |
+| `src/games/sort-numbers/definition.ts`                           | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                        |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Replace stacked numeral + question siblings with `<QuestionRow>`; pass `event="round.start"` to AudioButton.                                                                                                   |
+| `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Same — `<QuestionRow>` wrap; pass `event` prop.                                                                                                                                                                |
+| `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | **Add AudioButton** (currently has none) via `<QuestionRow>`; pass `event="round.start"`.                                                                                                                      |
+| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch `prompt: string` prop to `event: LifecycleEvent`; gate by `ttsOnDemandAllowed`; call `useLifecycleTTS().speakOnDemand(event)` (mode is always full for on-demand — fixed inside the hook).              |
+| `src/components/questions/AudioButton/AudioButton.test.tsx`      | Update tests for new prop API + gate.                                                                                                                                                                          |
+| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route `onClick` speech through `useLifecycleTTS().speakOnDemand`; honor `ttsOnDemandAllowed`.                                                                                                                  |
+| `src/components/questions/ImageQuestion/ImageQuestion.tsx`       | Same.                                                                                                                                                                                                          |
+| `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same.                                                                                                                                                                                                          |
+| `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same.                                                                                                                                                                                                          |
+| `src/components/questions/index.ts`                              | Add `QuestionRow` export.                                                                                                                                                                                      |
 | `src/components/AdvancedConfigModal.tsx`                         | Add "Voice & Instructions" section with single Talkativeness preset radio (Quiet / Default / Chatty); read/write `config.talkativeness`.                                                                       |
-| `src/components/AdvancedConfigModal.test.tsx`                    | Add test that selecting a preset writes `talkativeness` to config draft.                                                                                                                                      |
+| `src/components/AdvancedConfigModal.test.tsx`                    | Add test that selecting a preset writes `talkativeness` to config draft.                                                                                                                                       |
 | `src/lib/i18n/locales/en/games.json`                             | Add `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*` keys (events: `game-prepare`, `game-start`, `round-start`, `round-error`, `round-correct`, `round-advance`, `level-complete`, `game-over`). |
-| `src/lib/i18n/locales/pt-BR/games.json`                          | Mirror keys (placeholder English values; Portuguese translations follow-up).                                                                                                                                  |
-| `src/routes/$locale/_app/game/$gameId.tsx`                       | Update `InstructionsOverlay` import + JSX to `GameOptionsOverlay`.                                                                                                                                            |
-| `src/components/answer-game/AnswerGameProvider.tsx`              | (No change needed in M1 — `game:prepare` is emitted by `GameOptionsOverlay` on mount, not the provider. M2 may centralise this.)                                                                              |
-| `src/components/answer-game/GameEngine.flows.mdx`                | Document new TTS data flow (Task 19).                                                                                                                                                                         |
-| `src/components/answer-game/GameEngine.reference.mdx`            | Document `useLifecycleTTS` hook + `GameDefinition.tts` field + how to add TTS to a new game (Task 19).                                                                                                        |
+| `src/lib/i18n/locales/pt-BR/games.json`                          | Mirror keys (placeholder English values; Portuguese translations follow-up).                                                                                                                                   |
+| `src/routes/$locale/_app/game/$gameId.tsx`                       | Update `InstructionsOverlay` import + JSX to `GameOptionsOverlay`.                                                                                                                                             |
+| `src/components/answer-game/AnswerGameProvider.tsx`              | (No change needed in M1 — `game:prepare` is emitted by `GameOptionsOverlay` on mount, not the provider. M2 may centralise this.)                                                                               |
+| `src/components/answer-game/GameEngine.flows.mdx`                | Document new TTS data flow (Task 19).                                                                                                                                                                          |
+| `src/components/answer-game/GameEngine.reference.mdx`            | Document `useLifecycleTTS` hook + `GameDefinition.tts` field + how to add TTS to a new game (Task 19).                                                                                                         |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -145,10 +145,10 @@ src/components/answer-game/InstructionsOverlay/
 
 <!-- markdownlint-disable MD060 -->
 
-| File                                                  | Reason                                                                                                                                |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/components/answer-game/useRoundTTS.ts`           | Replaced by `useLifecycleTTS` + per-game machine `entry: [speak]` actions. No remaining callers after Tasks 9–11 wire the machines.    |
-| `src/components/answer-game/useRoundTTS.test.tsx`     | Same.                                                                                                                                  |
+| File                                              | Reason                                                                                                                              |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `src/components/answer-game/useRoundTTS.ts`       | Replaced by `useLifecycleTTS` + per-game machine `entry: [speak]` actions. No remaining callers after Tasks 9–11 wire the machines. |
+| `src/components/answer-game/useRoundTTS.test.tsx` | Same.                                                                                                                               |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -202,7 +202,9 @@ export type EventTemplate = {
   default: Verbosity;
 };
 
-export type GameTTSConfig = Partial<Record<LifecycleEvent, EventTemplate>>;
+export type GameTTSConfig = Partial<
+  Record<LifecycleEvent, EventTemplate>
+>;
 ```
 
 - [ ] **Step 2: Verify typecheck**
@@ -236,9 +238,9 @@ import { resolvePresetVerbosity } from './talkativeness-presets';
 
 describe('resolvePresetVerbosity', () => {
   it('Default at pre-k speaks round.start full', () => {
-    expect(resolvePresetVerbosity('default', 'pre-k', 'round.start')).toBe(
-      'full',
-    );
+    expect(
+      resolvePresetVerbosity('default', 'pre-k', 'round.start'),
+    ).toBe('full');
   });
 
   it('Quiet at year3-4 turns round.correct off', () => {
@@ -673,7 +675,7 @@ git commit -m "feat(events): add game:prepare bus event"
 
 ## Task 5: Split `ttsEnabled` → `autoSpeak` + `ttsOnDemandAllowed` + `gradeBand` + `talkativeness`
 
-This is the load-bearing config refactor. Plan it in three sub-steps: types, callers, defaults/migration. All in one task because the type change cascades through ~159 call sites and must compile clean at task end.
+This is the load-bearing config refactor. Plan it in three sub-steps: types, callers, defaults/migration. All in one task because the type change cascades through **164 references across 85 files** (verified via `rg --count-matches ttsEnabled src/`) and must compile clean at task end.
 
 **Files:**
 
@@ -686,7 +688,7 @@ This is the load-bearing config refactor. Plan it in three sub-steps: types, cal
 
 Run: `rg --count-matches ttsEnabled src/ | sort -rn -t: -k2 | head -25`
 
-Capture the file list. This drives Step 4. Expected: ~150–160 references across config types, hook gates, button rendering, question onClick handlers, and test fixtures.
+Capture the file list. This drives Step 4. Expected: **164 references across 85 files** (verified via `rg --count-matches ttsEnabled src/` on origin/master HEAD `694797af9`). The full file set spans config types, hook gates, button rendering, question onClick handlers, test fixtures, story files, per-game `ConfigField` arrays, `src/lib/config-tags.ts`, and the RxDB schema at `src/db/schemas/settings.ts`.
 
 - [ ] **Step 2: Write failing test that pins the new config shape**
 
@@ -742,21 +744,21 @@ Also run: `yarn typecheck` — expect failures across the codebase from the inve
 In `src/components/answer-game/types.ts`, replace line 17:
 
 ```ts
-  /** Whether TTS is enabled for this profile */
-  ttsEnabled: boolean;
+/** Whether TTS is enabled for this profile */
+ttsEnabled: boolean;
 ```
 
 with:
 
 ```ts
-  /** Gates all lifecycle auto-speech (every TTS lifecycle event). */
-  autoSpeak: boolean;
-  /** Gates user-initiated tap-to-speak: AudioButton, question onClick. */
-  ttsOnDemandAllowed: boolean;
-  /** Grade band — selects per-event verbosity from the registry. */
-  gradeBand: GradeBand;
-  /** Talkativeness preset — overrides registry verbosity. */
-  talkativeness: TalkativenessPreset;
+/** Gates all lifecycle auto-speech (every TTS lifecycle event). */
+autoSpeak: boolean;
+/** Gates user-initiated tap-to-speak: AudioButton, question onClick. */
+ttsOnDemandAllowed: boolean;
+/** Grade band — selects per-event verbosity from the registry. */
+gradeBand: GradeBand;
+/** Talkativeness preset — overrides registry verbosity. */
+talkativeness: TalkativenessPreset;
 ```
 
 Add imports at the top of the file:
@@ -774,15 +776,15 @@ Use this classification when migrating each `ttsEnabled` reference. Don't grep-r
 
 <!-- markdownlint-disable MD060 -->
 
-| Pattern in caller                                  | Replaces `ttsEnabled` with   |
-| -------------------------------------------------- | ---------------------------- |
-| `if (!ttsEnabled) return` inside a useEffect that auto-speaks on mount or round change | `autoSpeak`         |
-| `if (!ttsEnabled) return null` inside AudioButton / question onClick branches | `ttsOnDemandAllowed` |
-| `disabled={!ttsEnabled}` on a button or input that drives on-demand speech    | `ttsOnDemandAllowed` |
-| Default config construction (e.g. `{ ttsEnabled: true }`) | `{ autoSpeak: true, ttsOnDemandAllowed: true, gradeBand: 'k', talkativeness: 'default' }` |
-| Test fixture / mock config                         | Same as default config construction |
-| Form value binding (`ConfigFormFields`, `useConfigDraft`) | Bind the two new boolean fields + add `talkativeness` select + `gradeBand` select |
-| Legacy migration path (RxDB `customGame.config` load) | Map `{ ttsEnabled: false }` → `{ autoSpeak: false, ttsOnDemandAllowed: false }`; map missing `gradeBand` → `'k'`; missing `talkativeness` → `'default'` |
+| Pattern in caller                                                                      | Replaces `ttsEnabled` with                                                                                                                              |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `if (!ttsEnabled) return` inside a useEffect that auto-speaks on mount or round change | `autoSpeak`                                                                                                                                             |
+| `if (!ttsEnabled) return null` inside AudioButton / question onClick branches          | `ttsOnDemandAllowed`                                                                                                                                    |
+| `disabled={!ttsEnabled}` on a button or input that drives on-demand speech             | `ttsOnDemandAllowed`                                                                                                                                    |
+| Default config construction (e.g. `{ ttsEnabled: true }`)                              | `{ autoSpeak: true, ttsOnDemandAllowed: true, gradeBand: 'k', talkativeness: 'default' }`                                                               |
+| Test fixture / mock config                                                             | Same as default config construction                                                                                                                     |
+| Form value binding (`ConfigFormFields`, `useConfigDraft`)                              | Bind the two new boolean fields + add `talkativeness` select + `gradeBand` select                                                                       |
+| Legacy migration path (RxDB `customGame.config` load)                                  | Map `{ ttsEnabled: false }` → `{ autoSpeak: false, ttsOnDemandAllowed: false }`; map missing `gradeBand` → `'k'`; missing `talkativeness` → `'default'` |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -1010,16 +1012,14 @@ import { speak as speakMock } from '@/lib/speech/SpeechOutput';
 
 // Minimal test-only AnswerGameContext provider — pass through the bits the
 // hook reads (gameId, config flags, currentRound for interpolation).
-const makeWrapper = (
-  contextValue: {
-    autoSpeak: boolean;
-    ttsOnDemandAllowed: boolean;
-    gradeBand: 'k';
-    talkativeness: 'default';
-    gameId: 'word-spell';
-    tts: GameTTSConfig;
-  },
-) => {
+const makeWrapper = (contextValue: {
+  autoSpeak: boolean;
+  ttsOnDemandAllowed: boolean;
+  gradeBand: 'k';
+  talkativeness: 'default';
+  gameId: 'word-spell';
+  tts: GameTTSConfig;
+}) => {
   return ({ children }: { children: ReactNode }) => (
     <TestAnswerGameContext value={contextValue}>
       {children}
@@ -1157,8 +1157,7 @@ const buildInterpolationContext = (
     gameName: ctx.config.gameId,
     word: (round as { word?: string }).word ?? '',
     count: (round as { value?: number }).value ?? 0,
-    direction:
-      (round as { direction?: string }).direction ?? '',
+    direction: (round as { direction?: string }).direction ?? '',
     from: (round as { from?: number }).from ?? 0,
     to: (round as { to?: number }).to ?? 0,
     step: (round as { step?: number }).step ?? 1,
@@ -1179,8 +1178,7 @@ export const useLifecycleTTS = (): LifecycleTTS => {
   const speakResolved = useCallback(
     (event: LifecycleEvent, modeOverride?: 'full') => {
       const current = ctxRef.current;
-      const ttsConfig =
-        current.gameDefinition?.tts ?? undefined;
+      const ttsConfig = current.gameDefinition?.tts ?? undefined;
 
       const verbosity =
         modeOverride ??
@@ -1198,10 +1196,7 @@ export const useLifecycleTTS = (): LifecycleTTS => {
       });
       if (!key) return;
 
-      const interpolated = t(
-        key,
-        buildInterpolationContext(current),
-      );
+      const interpolated = t(key, buildInterpolationContext(current));
       const opts = {
         rate: settingsRef.current.speechRate ?? 1,
         volume: settingsRef.current.voiceVolume ?? 0.8,
@@ -1216,15 +1211,12 @@ export const useLifecycleTTS = (): LifecycleTTS => {
   // Subscribe once; the handler reads fresh state from refs.
   useEffect(() => {
     const bus = getGameEventBus();
-    const unsub = bus.subscribe(
-      'lifecycle:speak',
-      (e) => {
-        const current = ctxRef.current;
-        if (!current.config.autoSpeak) return;
-        const { lifecycleEvent } = e as LifecycleSpeakEvent;
-        speakResolved(lifecycleEvent);
-      },
-    );
+    const unsub = bus.subscribe('lifecycle:speak', (e) => {
+      const current = ctxRef.current;
+      if (!current.config.autoSpeak) return;
+      const { lifecycleEvent } = e as LifecycleSpeakEvent;
+      speakResolved(lifecycleEvent);
+    });
     return unsub;
   }, [speakResolved]);
 
@@ -1370,9 +1362,9 @@ describe('NumberMatch machine — TTS entry actions', () => {
   it('definition.tts has a round.start template', () => {
     expect(numberMatchDefinition.tts).toBeDefined();
     expect(numberMatchDefinition.tts?.['round.start']).toBeDefined();
-    expect(
-      numberMatchDefinition.tts?.['round.start']?.tts.full,
-    ).toBe('tts.number-match.round-start.full');
+    expect(numberMatchDefinition.tts?.['round.start']?.tts.full).toBe(
+      'tts.number-match.round-start.full',
+    );
   });
 });
 ```
@@ -1520,6 +1512,10 @@ Also add `speak` entries at the appropriate transitions for the other events the
 - `roundComplete` state (already has `playSound`): also add `{ type: 'speak', params: { lifecycleEvent: 'round.correct' } }`.
 - Optional: track `round.error` via an `assign` + `entry`-like pattern on `placeTile` actions — defer to M2 if the wiring is non-trivial; M1's must-haves are `round.start` (fixes the "5" bug) + `game.over` (already present at line 624).
 
+- [ ] **Step 4b: Remove the legacy `useRoundTTS` caller from NumberMatch**
+
+The machine now drives round-start speech via the `entry: [speak]` action; the legacy `useRoundTTS(String(round?.value ?? ''))` call at `src/games/number-match/NumberMatch/NumberMatch.tsx:131` and its import at line 38 must be removed in the SAME commit as the machine wiring to avoid double-speech (machine emit + legacy hook would both fire). Run `rg useRoundTTS src/games/number-match/` to verify zero callers remain after the edit.
+
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `npx vitest run src/games/number-match/definition.test.ts src/games/number-match/NumberMatch/NumberMatch.test.tsx --reporter=verbose`
@@ -1532,8 +1528,8 @@ Run dev server (`yarn dev`), open NumberMatch in a browser, play one round with 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/games/number-match/definition.ts src/games/number-match/definition.test.ts
-git commit -m "fix(number-match): replace bare-numeral readout with registry-backed round.start template — fixes #229 'speak the answer' bug"
+git add src/games/number-match/definition.ts src/games/number-match/definition.test.ts src/games/number-match/NumberMatch/NumberMatch.tsx
+git commit -m "fix(number-match): replace bare-numeral readout with registry-backed round.start template; remove legacy useRoundTTS caller — fixes #229 'speak the answer' bug"
 ```
 
 ---
@@ -1585,9 +1581,9 @@ describe('WordSpell machine — TTS entry actions', () => {
   });
 
   it('definition.tts has a round.start template using {{word}}', () => {
-    expect(
-      wordSpellDefinition.tts?.['round.start']?.tts.full,
-    ).toBe('tts.word-spell.round-start.full');
+    expect(wordSpellDefinition.tts?.['round.start']?.tts.full).toBe(
+      'tts.word-spell.round-start.full',
+    );
   });
 });
 ```
@@ -1601,6 +1597,10 @@ Expected: FAIL.
 
 Add the `wordSpellTTS` constant before the exported definition (same structure as Task 9 but with `word-spell` i18n keys), and add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to the `playing` state. Use the WordSpell template values from spec §6.2 as a starting point.
 
+- [ ] **Step 3b: Remove the legacy `useRoundTTS` caller from WordSpell**
+
+Remove `useRoundTTS(round?.word ?? '')` at `src/games/word-spell/WordSpell/WordSpell.tsx:99` and its import at line 40 in the SAME commit as the machine wiring to avoid double-speech. Run `rg useRoundTTS src/games/word-spell/` to verify zero callers remain.
+
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/games/word-spell/ --reporter=verbose`
@@ -1609,8 +1609,8 @@ Expected: PASS — TTS entries fire; existing WordSpell tests unaffected.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/games/word-spell/definition.ts src/games/word-spell/definition.test.ts
-git commit -m "feat(word-spell): add TTS registry + round.start speak entry to machine"
+git add src/games/word-spell/definition.ts src/games/word-spell/definition.test.ts src/games/word-spell/WordSpell/WordSpell.tsx
+git commit -m "feat(word-spell): add TTS registry + round.start speak entry to machine; remove legacy useRoundTTS caller"
 ```
 
 ---
@@ -1630,10 +1630,14 @@ By the end of this task, all three XState-migrated games drive round-start speec
 
 Same shape as Task 9/10 but with SortNumbers template values (uses `{{direction}}`, `{{from}}`, `{{to}}`, `{{step}}` per spec §6.5). Reference SortNumbers' `round.start` template from spec §10.
 
+- [ ] **Step 1b: Remove the legacy `useRoundTTS` caller from SortNumbers**
+
+Remove `useRoundTTS(directionLabel)` at `src/games/sort-numbers/SortNumbers/SortNumbers.tsx:91` and its import at line 32. This is the final caller — after this edit, `rg useRoundTTS src/games/` should return zero matches across all three migrated games.
+
 - [ ] **Step 2: Confirm no other code references useRoundTTS**
 
 Run: `rg useRoundTTS src/`
-Expected: only `useRoundTTS.ts` / `.test.tsx` themselves should match. If any caller still imports it, migrate to `useLifecycleTTS` (the auto-speak path is now machine-driven; tap-to-speak goes through AudioButton in Task 13).
+Expected: only `useRoundTTS.ts` / `.test.tsx` themselves should match (callers in NumberMatch/WordSpell/SortNumbers were removed in Tasks 9 Step 4b, 10 Step 3b, and 11 Step 1b respectively). If any caller still imports it, migrate to `useLifecycleTTS` (the auto-speak path is now machine-driven; tap-to-speak goes through AudioButton in Task 13).
 
 - [ ] **Step 3: Delete useRoundTTS**
 
@@ -1649,8 +1653,8 @@ Expected: PASS — no references to `useRoundTTS` left; all SortNumbers tests pa
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/games/sort-numbers/definition.ts src/games/sort-numbers/definition.test.ts
-git commit -m "feat(sort-numbers): add TTS registry + round.start speak entry; remove useRoundTTS"
+git add src/games/sort-numbers/definition.ts src/games/sort-numbers/definition.test.ts src/games/sort-numbers/SortNumbers/SortNumbers.tsx
+git commit -m "feat(sort-numbers): add TTS registry + round.start speak entry; remove legacy useRoundTTS caller + module"
 ```
 
 ---
@@ -1696,8 +1700,8 @@ describe('QuestionRow', () => {
         audio={<button>A</button>}
         content={
           <span>
-            Sort these numbers in ascending order from one hundred to five
-            hundred, skipping by ten.
+            Sort these numbers in ascending order from one hundred to
+            five hundred, skipping by ten.
           </span>
         }
       />,
@@ -1827,9 +1831,7 @@ describe('AudioButton', () => {
 
   it('returns null when ttsOnDemandAllowed is false', () => {
     renderWithCtx({ ttsOnDemandAllowed: false });
-    expect(
-      screen.queryByRole('button', { name: /hear/i }),
-    ).toBeNull();
+    expect(screen.queryByRole('button', { name: /hear/i })).toBeNull();
   });
 
   it('calls speakOnDemand with the lifecycle event when clicked', () => {
@@ -1841,7 +1843,9 @@ describe('AudioButton', () => {
 
 const renderWithCtx = (overrides: { ttsOnDemandAllowed: boolean }) =>
   render(
-    <TestAnswerGameProvider config={{ ttsOnDemandAllowed: overrides.ttsOnDemandAllowed }}>
+    <TestAnswerGameProvider
+      config={{ ttsOnDemandAllowed: overrides.ttsOnDemandAllowed }}
+    >
       <AudioButton event="round.start" />
     </TestAnswerGameProvider>,
   );
@@ -1920,7 +1924,7 @@ git commit -m "feat(audio-button): switch from prompt prop to lifecycle event + 
 - Modify: `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx`
 - Modify: each component's `.test.tsx` file
 
-Each of the four question components today reads `config.ttsEnabled` for its onClick speech. Task 5 already migrated those reads to `autoSpeak`/`ttsOnDemandAllowed`. This task is the targeted re-classification: onClick speech is *on-demand*, so the right gate is `ttsOnDemandAllowed`. Also routes the speech call through `useLifecycleTTS.speakOnDemand` for SRS observability parity (the `round:tts-played` emission lands in M2 — for M1 just use the same code path).
+Each of the four question components today reads `config.ttsEnabled` for its onClick speech. Task 5 already migrated those reads to `autoSpeak`/`ttsOnDemandAllowed`. This task is the targeted re-classification: onClick speech is _on-demand_, so the right gate is `ttsOnDemandAllowed`. Also routes the speech call through `useLifecycleTTS.speakOnDemand` for SRS observability parity (the `round:tts-played` emission lands in M2 — for M1 just use the same code path).
 
 - [ ] **Step 1: Write the failing test (per question component)**
 
@@ -2016,7 +2020,9 @@ For each game, add a test that asserts an AudioButton is rendered when `ttsOnDem
 ```tsx
 it('renders an inline AudioButton when ttsOnDemandAllowed is true', () => {
   render(<SortNumbersWithCfg ttsOnDemandAllowed />);
-  expect(screen.getByRole('button', { name: /hear/i })).toBeInTheDocument();
+  expect(
+    screen.getByRole('button', { name: /hear/i }),
+  ).toBeInTheDocument();
 });
 ```
 
@@ -2036,7 +2042,7 @@ import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 <QuestionRow
   audio={<AudioButton event="round.start" />}
   content={/* existing question content */}
-/>
+/>;
 ```
 
 Remove any pre-existing standalone AudioButton wiring that passed `prompt` strings — `event` carries everything now.
@@ -2109,7 +2115,9 @@ describe('GameOptionsOverlay (renamed from InstructionsOverlay)', () => {
     const unsub = getGameEventBus().subscribe('game:prepare', (e) =>
       received.push(e.gameId),
     );
-    render(<GameOptionsOverlay text="How to play …" gameId="word-spell" />);
+    render(
+      <GameOptionsOverlay text="How to play …" gameId="word-spell" />,
+    );
     expect(received).toEqual(['word-spell']);
     unsub();
   });
@@ -2147,7 +2155,7 @@ useEffect(() => {
 
 - [ ] **Step 5: Update the route**
 
-In `src/routes/$locale/_app/game/$gameId.tsx`, replace `InstructionsOverlay` import + JSX with `GameOptionsOverlay`.
+In `src/routes/$locale/_app/game/$gameId.tsx`, replace the `InstructionsOverlay` import at line 24 AND each of the four `<InstructionsOverlay />` JSX usages at lines 529, 676, 822, 964 (one per game: word-spell, number-match, sort-numbers, spot-all) with `<GameOptionsOverlay />`. Drop the legacy `ttsEnabled` prop from each call site (replaced by the autoSpeak/ttsOnDemandAllowed split landed in Task 5).
 
 - [ ] **Step 6: Run tests + typecheck**
 
@@ -2186,9 +2194,7 @@ it('renders the Talkativeness preset with Quiet/Default/Chatty', () => {
   expect(
     screen.getByRole('radio', { name: /quiet/i }),
   ).toBeInTheDocument();
-  expect(
-    screen.getByRole('radio', { name: /default/i }),
-  ).toBeChecked();
+  expect(screen.getByRole('radio', { name: /default/i })).toBeChecked();
   expect(
     screen.getByRole('radio', { name: /chatty/i }),
   ).toBeInTheDocument();
@@ -2214,7 +2220,9 @@ In `AdvancedConfigModal.tsx`, add a new section:
 
 ```tsx
 <section aria-labelledby="voice-instructions-heading">
-  <h3 id="voice-instructions-heading">{t('config.voiceAndInstructions.heading')}</h3>
+  <h3 id="voice-instructions-heading">
+    {t('config.voiceAndInstructions.heading')}
+  </h3>
   <fieldset>
     <legend>{t('config.voiceAndInstructions.talkativeness')}</legend>
     {(['quiet', 'default', 'chatty'] as const).map((preset) => (
@@ -2224,7 +2232,9 @@ In `AdvancedConfigModal.tsx`, add a new section:
           name="talkativeness"
           value={preset}
           checked={config.talkativeness === preset}
-          onChange={() => onChange({ ...config, talkativeness: preset })}
+          onChange={() =>
+            onChange({ ...config, talkativeness: preset })
+          }
         />
         {t(`config.voiceAndInstructions.preset.${preset}`)}
       </label>
@@ -2267,94 +2277,94 @@ Add to `src/lib/i18n/locales/en/games.json`:
     "word-spell": {
       "game-prepare": {
         "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level."
+        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
       },
       "game-start": {
         "brief": "Let's spell.",
-        "full": "Let's spell some words. Drag the tiles to spell each word."
+        "full": "Let's spell some words. Drag the tiles to spell each word.",
       },
       "round-start": {
         "brief": "{{word}}",
-        "full": "Spell the word {{word}}."
+        "full": "Spell the word {{word}}.",
       },
       "round-error": {
         "brief": "Try again.",
-        "full": "Try again. The word is {{word}}."
+        "full": "Try again. The word is {{word}}.",
       },
       "round-correct": {
         "brief": "Yes!",
-        "full": "Yes — {{word}}!"
+        "full": "Yes — {{word}}!",
       },
       "level-complete": {
         "brief": "Level complete.",
-        "full": "Level complete. You spelled {{count}} words."
+        "full": "Level complete. You spelled {{count}} words.",
       },
       "game-over": {
         "brief": "Done.",
-        "full": "Game over. You spelled {{count}} words."
-      }
+        "full": "Game over. You spelled {{count}} words.",
+      },
     },
     "number-match": {
       "game-prepare": {
         "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level."
+        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
       },
       "game-start": {
         "brief": "Let's match.",
-        "full": "Let's match numbers. Find the matching number for the dots."
+        "full": "Let's match numbers. Find the matching number for the dots.",
       },
       "round-start": {
         "brief": "Find {{count}}.",
-        "full": "Find the matching number for {{count}}."
+        "full": "Find the matching number for {{count}}.",
       },
       "round-error": {
         "brief": "Try again.",
-        "full": "Try again. Count the dots."
+        "full": "Try again. Count the dots.",
       },
       "round-correct": {
         "brief": "Yes!",
-        "full": "Yes — that's {{count}}!"
+        "full": "Yes — that's {{count}}!",
       },
       "level-complete": {
         "brief": "Level complete.",
-        "full": "Level complete."
+        "full": "Level complete.",
       },
       "game-over": {
         "brief": "Done.",
-        "full": "Game over. Great job!"
-      }
+        "full": "Game over. Great job!",
+      },
     },
     "sort-numbers": {
       "game-prepare": {
         "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level."
+        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
       },
       "game-start": {
         "brief": "Let's sort.",
-        "full": "Let's sort numbers. Drag them into the right order."
+        "full": "Let's sort numbers. Drag them into the right order.",
       },
       "round-start": {
         "brief": "{{direction}} from {{from}} to {{to}}.",
-        "full": "Sort these numbers in {{direction}} order, skip by {{step}}."
+        "full": "Sort these numbers in {{direction}} order, skip by {{step}}.",
       },
       "round-error": {
         "brief": "Not quite.",
-        "full": "That's not in {{direction}} order yet. Try again."
+        "full": "That's not in {{direction}} order yet. Try again.",
       },
       "round-correct": {
         "brief": "Yes!",
-        "full": "Yes — sorted!"
+        "full": "Yes — sorted!",
       },
       "level-complete": {
         "brief": "Level complete.",
-        "full": "Level complete."
+        "full": "Level complete.",
       },
       "game-over": {
         "brief": "Done.",
-        "full": "Game over. Great job!"
-      }
-    }
-  }
+        "full": "Game over. Great job!",
+      },
+    },
+  },
 }
 ```
 
@@ -2370,10 +2380,10 @@ Also add the Voice & Instructions form labels under an existing `config` key (or
       "preset": {
         "quiet": "Quiet",
         "default": "Default",
-        "chatty": "Chatty"
-      }
-    }
-  }
+        "chatty": "Chatty",
+      },
+    },
+  },
 }
 ```
 
@@ -2411,6 +2421,8 @@ git commit -m "i18n: add tts.* keys for word-spell, number-match, sort-numbers +
 
 - Modify: `src/components/answer-game/GameEngine.flows.mdx`
 - Modify: `src/components/answer-game/GameEngine.reference.mdx`
+- Modify: `src/lib/game-engine/GameEngine.flows.mdx` (references `useRoundTTS` — must update post-Task 11 deletion)
+- Modify: `src/lib/game-engine/debugging.mdx` (references `useRoundTTS` in the TTS-over-sound-effects debugging row and the speech-queue prose)
 
 This task is gated by CLAUDE.md's architecture-docs policy: "When modifying game state logic — any file in `src/components/answer-game/`, `src/lib/game-engine/`, or any file matching `*reducer*`, `*dispatch*`, `*Behavior*`, `*Drag*` — update the co-located `.mdx` docs in the same PR." Tasks 5, 6, 7, 8, 11, 16 all touch those directories.
 
@@ -2461,7 +2473,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.full` ("Find the matching number for {{count}}.").
 - [ ] `ttsEnabled` removed; `autoSpeak` + `ttsOnDemandAllowed` + `gradeBand` + `talkativeness` added to `AnswerGameConfig`; migration maps legacy `ttsEnabled: false` → `autoSpeak: false, ttsOnDemandAllowed: false`.
 - [ ] `AudioButton` renders when `ttsOnDemandAllowed: true`; always speaks the resolved `full` copy for its `event` prop.
-- [ ] All four question components (TextQuestion, ImageQuestion, EmojiQuestion, DotGroupQuestion) honor `ttsOnDemandAllowed` via `useLifecycleTTS.speakOnDemand`.
+- [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) honor `ttsOnDemandAllowed` via `useLifecycleTTS.speakOnDemand`. (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
 - [ ] `<QuestionRow>` renders inline (icon left, content right) on all breakpoints; AudioButton ≥ 44×44 px; content wraps to extra lines.
 - [ ] WordSpell, NumberMatch, SortNumbers each have an inline AudioButton via `<QuestionRow>`.
 - [ ] **SpotAll deferred per Spec Delta 1** — tracked in a follow-up issue gated on PR 1d (#368).
@@ -2484,4 +2496,62 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 
 ---
 
-**Status:** Plan ready for execution. Pick `superpowers:subagent-driven-development` (recommended — fresh subagent per task) or `superpowers:executing-plans` (inline batch).
+**Status:** Plan ready for execution. Pick `superpowers:subagent-driven-development` (recommended — fresh subagent per task) or `superpowers:executing-plans` (inline batch). **Read the Deferred / Open Questions section below before starting — three P0 architectural calls await resolution at execution time.**
+
+---
+
+## Deferred / Open Questions
+
+### From 2026-05-13 ce-doc-review
+
+A multi-persona review (coherence, feasibility, product-lens, design-lens, scope-guardian, adversarial) surfaced findings that were deferred during the review pass. They require resolution during execution or in a follow-up review. The reviewer that surfaced each finding is noted in parentheses. Convergent findings (multiple reviewers flagged the same concern) are marked with a count.
+
+#### P0 — implementation blockers (must resolve before or during execution)
+
+- **P0 — `useLifecycleTTS` reads `gameDefinition` + `currentRound` from a context that doesn't expose them** (coherence + scope-guardian + feasibility + adversarial — 4-way). Task 7's hook reads `current.gameDefinition?.tts` and `current.currentRound`. `AnswerGameState` (`src/components/answer-game/types.ts:81-99`) has neither. The plan's "Pick option 1" note is prose, not a concrete sub-step; option 2's premise is false (`src/games/registry.ts` only has metadata). **Resolution at execution:** pick one of (a) mount `useLifecycleTTS` inside each game component where `gameDefinition` and `round` are in scope (recommended — avoids context surgery + sidesteps PR 1c divergence), (b) thread `gameDefinition` through `AnswerGameProvider` and update ~12 call sites. Commit the choice as a Spec Delta in the implementation PR.
+- **P0 — `{{count}}` / `{{word}}` / `{{direction}}` interpolation reads `currentRound` but no machine populates `lastRoundOutput`** (adversarial). The headline NumberMatch "speak the answer" fix would render `"Find the matching number for 0"` instead of `"...for five"` — same shape as the bug it's meant to fix. Verified: `numberMatchMachine.context` (definition.ts:543-560) has no `lastRoundOutput`; round data lives in `NumberMatch.tsx:127` (`roundOrder[engineRoundIndex]`). **Resolution at execution:** if P0 above picks "mount in game component", interpolation reads `round` from the same closure that already computes it — no extra change. If P0 picks "thread through context", each of the three machines must add `assign({ lastRoundOutput: <derived> })` on `INIT_ROUND` / `ADVANCE_ROUND`.
+- **P0 — Task 1 is misframed as "create types.ts"; file already exists on origin/master** (scope-guardian + adversarial — 2-way). `src/lib/lifecycle-tts/types.ts` was committed at `a653cf284` as a forward-reference pin. Contains `LifecycleEvent`, `Verbosity`, `TalkativenessPreset`, `EventTemplate` — **missing `GameTTSConfig`** that Tasks 3 and 7 import. **Resolution at execution:** restructure Task 1 as "verify-and-extend": read existing file, add single missing export `export type GameTTSConfig = Partial<Record<LifecycleEvent, EventTemplate>>`, typecheck, commit `feat(lifecycle-tts): add GameTTSConfig type for per-game registry blocks`.
+
+#### P1 — implementability gaps (resolve during execution, document choice in PR)
+
+- **P1 — `entry: [speak({lifecycleEvent: 'round.start'})]` on `playing` state fires on initial entry BEFORE `INIT_ROUND` populates the round** (adversarial). The machine starts in `playing` (definition.ts:542); the speak action fires the moment `actor.start()` runs, before `AnswerGameProvider`'s mount effect dispatches `INIT_ROUND`. Round 0's speech misfires with empty context. Subsequent rounds work (waitingForNext → playing re-fires entry after ADVANCE_ROUND populates zones). **Resolution:** either gate the `speak` entry on a `hasRound` guard (`always: [{ guard: 'hasRound', target: 'playing' }]`), introduce an `idle` initial state that transitions to `playing` on first `INIT_ROUND`, or runtime-check the round is ready inside the speak action provider. Add an explicit test for round 0 timing.
+- **P1 — RxDB `Settings.ttsEnabled` schema migration missing** (adversarial). `src/db/schemas/settings.ts:46` declares `ttsEnabled: boolean` at schema version 3 with `additionalProperties: false`. Removing the field requires bumping `version` to 4 and adding a `migrationStrategies` entry — otherwise existing users' IndexedDB documents fail to load. Task 5's per-file checklist doesn't list `src/db/schemas/settings.ts` or `src/db/hooks/useSettings.ts`. **Resolution:** add explicit sub-task to Task 5 bumping schema version + migrationStrategies splitting `ttsEnabled` into `autoSpeak` + `ttsOnDemandAllowed` (or keeping the legacy field with `@deprecated` JSDoc + read-only consumer). Also clarify the relationship: is `Settings.ttsEnabled` the source of truth that `AnswerGameConfig.ttsEnabled` inherits, or independent?
+- **P1 — `AdvancedConfigModal.onChange` is `Partial<Draft>`; Task 17 prescribes spread-the-whole-config** (feasibility). Actual signature is `(patch: Partial<Draft>) => void` (`src/components/AdvancedConfigModal.tsx:40`). All existing call sites pass single-key patches. Plan's `onChange({ ...config, talkativeness: preset })` uses a `config` variable not in scope (modal works against `Draft`, not `AnswerGameConfig`) and spreads incorrectly. **Resolution:** replace Task 17's onChange snippet with `onChange({ config: { ...value.config, talkativeness: preset } })` and confirm `Draft.config` is the right home OR extend `Draft` with a top-level `talkativeness` field.
+- **P1 — `gradeBand` is added as a required field on `AnswerGameConfig` but no form input writes it** (scope-guardian). The plan adds `gradeBand: GradeBand` to the config type and defaults to `'k'` in the migration table. No UI in M1 lets the user set it. Verbosity resolution (spec §5.1) uses `gradeBand` as the discriminator — so older kids (year3-4, year5-6) get the wrong verbosity by default. **Resolution:** make `gradeBand` optional with a default inferred from the active profile's grade setting (if exists) or default to `'pre-k'` (safest — always speaks). Add an explicit note in Out-of-Scope: gradeBand write path deferred to the Profile grade feature.
+- **P1 — `sessionId` / `profileId` props missing on `GameOptionsOverlay`** (design-lens + feasibility — 2-way). Task 16 Step 4 emits `game:prepare` with required `BaseGameEvent` envelope fields (`gameId, sessionId, profileId, timestamp, roundIndex`). Current `InstructionsOverlay` props (lines 87-114) have neither `sessionId` nor `profileId`. Caller at four sites in `$gameId.tsx` (lines 529, 676, 822, 964) doesn't pass them. `profileId` is hardcoded as `'default'` inside `savePlayedDraft` callbacks (lines 1228+). **Resolution:** add `sessionId: string` and `profileId: string` to `GameOptionsOverlayProps`; thread from the four route call sites; document `profileId = 'default'` as a temporary default until parent-PIN profiles ship.
+- **P1 — Per-game `ConfigField` descriptors + `src/lib/config-tags.ts` not in Task 5 checklist** (design-lens + adversarial — 2-way). Each of `number-match/types.ts:138`, `sort-numbers/types.ts:168`, `word-spell/types.ts:124`, `spot-all/types.ts` exports a `*ConfigFields: ConfigField[]` array containing `{ type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' }`. `src/lib/config-tags.ts:10` has `['ttsEnabled', (v) => (v === true ? 'TTS on' : null)]` and `src/lib/config-tags.test.ts` has 5 references. None listed in Task 5's per-file checklist. **Resolution:** add to the checklist: per-game `types.ts` ConfigField arrays (replace `ttsEnabled` checkbox with `autoSpeak` + `ttsOnDemandAllowed` checkboxes + `talkativeness` select, or remove the checkbox in favor of the AdvancedConfigModal Talkativeness preset); `src/lib/config-tags.ts` + `.test.ts` (map both new fields, or remove the tag).
+- **P1 — Task 5 commit size: single `git add -A` for 164 references across 85 files** (scope-guardian + feasibility — 2-way). Plan's Step 5 says "small commits per file or per logical group" but Step 7 says `git add -A`. Contradicts CLAUDE.md baby-step convention and the user's `feedback_commit_as_checkpoint` preference. **Resolution:** split Task 5 into sub-commits — (5a) types + `AnswerGameConfig`/`SpotAllConfig`, (5b) hook gates (`useGameTTS`, `useDraggableTile`), (5c) component gates (AudioButton + four question components), (5d) game runtime (NumberMatch/WordSpell/SortNumbers/SpotAll), (5e) `AdvancedConfigModal` + `ConfigFormFields`, (5f) stories + tests.
+- **P1 — `AudioButton` has no specified visual state while TTS is actively speaking** (design-lens). Plan prescribes button shape + aria-label, no in-progress indicator. Pre-K/K children spam-tap when speech synthesis startup-lags, triggering interrupted overlapping speech. **Resolution:** add `speaking` state to AudioButton: read `isSpeechActive()` (already exported from `SpeechOutput.ts`) and reflect as CSS state or `aria-pressed='true'`. Document the three visual states: idle, speaking, disabled (hidden when `ttsOnDemandAllowed: false`).
+- **P1 — SpotAll cross-game UX inconsistency during the M1 → PR 1d window** (product-lens). M1 ships TTS for 3 games; SpotAll continues to auto-speak the prompt on target change via its legacy `useEffect` (SpotAllPrompt.tsx:29-39). Families using the same Talkativeness preset get different chattiness across the catalog. **Resolution:** add an explicit acceptance criterion calling out the inconsistency window: "SpotAll continues to auto-speak the prompt on target change during the M1 → PR 1d window. Track in #-TBD; PR 1d must close the gap before M2 ships." Open the follow-up tracking issue before this PR merges.
+- **P1 — SpotAllPrompt prop migration underspecified (autoSpeak vs ttsOnDemandAllowed split silently picked)** (product-lens). SpotAllPrompt currently reads a single `ttsEnabled` prop and gates BOTH the auto-speak `useEffect` (line 30) AND the conditional render of the tap-to-speak button (line 46). Task 5 only says "existing reducer/form continues to read these flags, just under their new names." **Resolution:** add to Task 5 Step 5 — SpotAllPrompt's `useEffect` auto-speak gate → `autoSpeak`; conditional button render at line 46 → `ttsOnDemandAllowed`; update SpotAll.tsx caller at line 158 to pass both new props.
+- **P1 — Tasks 9-11 `playing` state entry should be tested for repeated fire on round-advance** (scope-guardian). `playing` is the machine's initial state AND the target of `target: 'playing'` after each round advance. The `entry: [speak]` action fires on every round (intentional, matches spec §4 "round.start fires on each roundIndex change"), but Tasks 9-11 tests only assert speak fires on `actor.start()`. **Resolution:** add a test assertion to each of Tasks 9, 10, 11: after advancing to round 2 (fire `ADVANCE_ROUND` or equivalent), confirm `speakSpy` is called again with `{ lifecycleEvent: 'round.start' }`. Also clarify in the task prose that the playing-state entry is intentionally per-round.
+- **P1 — Spec Delta 1 (SpotAll deferred) contradicts Task 5 modifying SpotAll/types.ts** (coherence). Plan says SpotAll is deferred; Task 5 lists `src/games/spot-all/types.ts` as modified. Either SpotAll is in M1 (contradicts Spec Delta) or only its type changes are in scope (clarify). **Resolution:** add a note to Task 5: SpotAll's `types.ts` config-shape changes land in M1 to keep the unified TTS contract consistent; SpotAll's component wiring (AudioButton + speakPrompt consolidation) is deferred to PR 1d (#368).
+
+#### P2 — quality / scope decisions (~12 — execution-time triage)
+
+- **P2 — ARIA live region deferred to M2 contradicts spec §14 M1 acceptance criterion** (product-lens + design-lens — 2-way). Spec §14 line 863 lists `ARIA live region announces round outcomes independently of TTS` as an M1 criterion. Plan demotes to M2 without flagging as Spec Delta. Users with `autoSpeak: false` (Quiet preset, classroom no-audio) get no round-outcome announcement. Resolution: either promote to Spec Delta 4 with explicit acknowledgement OR add a minimal `<div role="status" aria-live="polite">` wrapper around round outcomes in the three game components.
+- **P2 — Talkativeness "Default" preset semantics ambiguous in parent-facing UI** (product-lens). Default profile is empty (falls through to per-game registry). Parents see Default as a third opinionated mode but it varies per game. Resolution: add helper text `"Default uses each game's recommended verbosity for your child's grade level. Quiet reduces speech; Chatty increases it."` Add the i18n key in Task 18.
+- **P2 — Per-game `definition.ts` placement (Spec Delta 2) makes cross-game tuning harder** (product-lens). Spec §13.2's `LifecycleTTSExplorer` (deferred to M2) reads from 3-4 scattered definition files instead of one registry directory. Resolution: add a sentence to Spec Delta 2 documenting the trade-off explicitly: "per-game definition.ts files become large and mix machine code with copy templates; cross-game review via LifecycleTTSExplorer in M2 will read from import statements. Acceptable because game-designer tuning is expected to be low-frequency once defaults are validated."
+- **P2 — pt-BR English placeholders ship to a real locale without a tracked follow-up** (product-lens). Task 18 Step 2 says English-as-placeholder pt-BR values, "open an issue and reference it in the commit." Historically becomes "never tracked." Resolution: pre-create the i18n translation tracking issue before opening the implementation PR; reference it in the PR body's Follow-ups section.
+- **P2 — `useLifecycleTTS` mounted for SpotAll has no defined behavior during M1 → PR 1d gap** (product-lens). If P0 above picks "thread through AnswerGameContext", the hook reads `current.gameDefinition?.tts` for SpotAll — but SpotAll has no `definition.ts` in M1. Plan doesn't specify what `gameDefinition` resolves to for SpotAll. Resolution: if mount-in-game-component (recommended P0 resolution), SpotAll is naturally excluded — no fix needed. If thread-through-context, accept `gameDefinition: GameDefinition | null` and short-circuit on null; PR 1d removes the null branch.
+- **P2 — `gradeBand` and `talkativeness` have no UI surface in Game Options panel** (design-lens). `autoSpeak` defaults to true so OOTB works, but a parent finding the audio too chatty must discover the Talkativeness preset inside AdvancedConfigModal. Plan never describes the navigation path. Resolution: specify in Task 17 where in AdvancedConfigModal the "Voice & Instructions" section appears (top, bottom, after difficulty?), and confirm the existing gear icon in GameOptionsOverlay is the intended entry point.
+- **P2 — QuestionRow stacked-layout trigger ("exceeds 3 lines on mobile") not implementable without measurement** (design-lens). Spec §9.2 says stacked layout only when single-line wrap exceeds 3 lines. CSS flex-wrap alone doesn't count visual lines. Resolution: pick (a) CSS-only via breakpoint threshold (specify the value) or (b) JS-measured via ResizeObserver. Task 12 should commit to one.
+- **P2 — Talkativeness presets include events deferred to M2 (round.idle, round.celebrate, round.advance)** (scope-guardian). M1's stated goal is minimum viable copy fix. Plan ships full preset tables for events whose bus wiring is deferred. Resolution: trim preset tables to only the events that have `definition.tts` entries + active bus wiring in M1 (game.prepare, game.start, round.start, round.error, round.correct, level.complete, game.over).
+- **P2 — Test snippets reference undefined helpers (TestAnswerGameProvider, emitLifecycleSpeak, makeWrapper)** (adversarial). Tasks 6/7/13/14 use helpers that don't exist; plan has a parenthetical "create inline if not present." Resolution: front-load Task 6.5 — create `src/lib/lifecycle-tts/test-utils.tsx` exporting the shared helpers; subsequent tests import from there. Or rewrite snippets to use existing `<AnswerGameProvider config={...}>` patterns.
+- **P2 — `AnswerGameProvider` PR 1c divergence risk** (feasibility). Provider still uses `useReducer(answerGameReducer)`; PR 1c (#363) deletes the reducer. Task 7-8 wiring assumes the reducer-based context shape. Resolution: declare an ordering dependency in the PR — either M1 lands before PR 1c (and Task 7-8 explicitly notes a follow-up rebase) or M1 rebases on PR 1c first (and Task 7-8 specifies the post-1c surface, likely `useGameEngineContext()`).
+- **P2 — Task 8 mount point ambiguous between `AnswerGameProvider` and route component** (coherence). Task 8 line 1272 says "OR" but Step 2 hard-codes the choice. Resolution: matches P0 above — pick the mount strategy explicitly (recommended: mount inside each game component per P0 resolution, which makes Task 8 unnecessary).
+- **P2 — Task 14 hard-codes `speakOnDemand('round.start')` for question onClick without spec justification** (coherence). Spec doesn't prescribe which lifecycle event a question click maps to. Resolution: clarify in Task 14 Step 3 — either justify why `round.start` is correct as a re-prompt, define a new `round.explain` event, or add a comment explaining the choice.
+
+#### FYI observations (5 — no action required, anchor 50)
+
+- **FYI** — Bus singleton subscriber risk in tests/Storybook (feasibility). Multiple AnswerGameProvider renders without bus reset → multiple subscribers. Add `__resetBus` helper or `beforeEach` to test setup.
+- **FYI** — `useLifecycleTTS` useEffect deps include `i18n.language` → subscription churns on language change (feasibility). Refactor to read `t`/`i18n.language` from refs to keep subscription stable.
+- **FYI** — `ctxRef.current` stale-read window during synchronous XState transition (adversarial). Speech may interpolate previous round's data. Web Speech cancel-on-new masks most cases in M1; M2 queue policy handles fully.
+- **FYI** — Inversion: NumberMatch fix may feel partial to SpotAll-heavy users (product-lens). M1 ships speak-the-answer fix on NumberMatch only; SpotAll's prompt continues to auto-speak. Bound the user-visible win in the PR description.
+- **FYI** — Task 7 "Pick option 1" advisory tone too soft (coherence). Resolved by the P0 architectural decision above — once "mount in game component" is committed, the soft advisory disappears.
+
+### Review provenance
+
+- Reviewers: ce-coherence-reviewer (7 findings), ce-feasibility-reviewer (11), ce-product-lens-reviewer (8), ce-design-lens-reviewer (6), ce-scope-guardian-reviewer (6), ce-adversarial-document-reviewer (12).
+- Total raw findings: 50. After cross-persona dedup + merging: ~32 unique. Applied silently (safe_auto at anchor 100): 5. Applied via walk-through (P0-1 — caller removal in Tasks 9-11): 1. Deferred to this section: ~26 actionable + 5 FYI.
+- Critical convergences: (1) `gameDefinition` / `currentRound` context wiring (4-way), (2) Task 5 ttsEnabled scope (3-way: 164 refs / 85 files / `git add -A` violation), (3) SpotAll scope underspecification (multi-way), (4) `sessionId` / `profileId` props missing (2-way), (5) per-game `ConfigField` descriptors gap (2-way), (6) ARIA live region defer (2-way), (7) `types.ts` exists / `GameTTSConfig` missing (2-way, verified).
