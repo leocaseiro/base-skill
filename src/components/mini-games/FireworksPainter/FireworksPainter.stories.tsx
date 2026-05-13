@@ -1,9 +1,9 @@
 import { Maximize, Menu, X } from 'lucide-react';
 import { fn } from 'storybook/test';
 
-import { GameOverOverlay } from './GameOverOverlay';
+import { FireworksPainter } from './FireworksPainter';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 const ICON_BUTTON_CLASS =
   'pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border';
@@ -39,29 +39,9 @@ const GameChromeDecorator = ({ children }: { children: ReactNode }) => (
   </>
 );
 
-interface StoryArgs {
-  stars: number;
-  onPlayAgain: () => void;
-  onHome: () => void;
-  // Raw GameOverOverlay prop shadowed by `stars`; declared here only
-  // to hide the react-docgen-inferred row from the Controls panel.
-  retryCount?: never;
-}
-
-// Maps the user-facing `stars` control back to the `retryCount` the
-// component actually accepts. Mirrors the starsFromRetries() thresholds in
-// GameOverOverlay.tsx.
-const retryCountForStars = (stars: number): number => {
-  if (stars >= 5) return 0;
-  if (stars === 4) return 1;
-  if (stars === 3) return 3;
-  if (stars === 2) return 5;
-  return 7;
-};
-
-const meta: Meta<StoryArgs> = {
-  component: GameOverOverlay as unknown as ComponentType<StoryArgs>,
-  title: 'AnswerGame/GameOverOverlay',
+const meta: Meta<typeof FireworksPainter> = {
+  component: FireworksPainter,
+  title: 'MiniGames/FireworksPainter',
   tags: ['autodocs'],
   decorators: [
     (Story) => (
@@ -70,27 +50,21 @@ const meta: Meta<StoryArgs> = {
       </GameChromeDecorator>
     ),
   ],
-  args: {
-    stars: 5,
-    onPlayAgain: fn(),
-    onHome: fn(),
-  },
   argTypes: {
-    stars: { control: { type: 'range', min: 1, max: 5, step: 1 } },
-    onPlayAgain: { table: { disable: true } },
-    onHome: { table: { disable: true } },
-    retryCount: { table: { disable: true } },
+    duration: {
+      control: { type: 'range', min: 5, max: 30, step: 1 },
+    },
+    showHandHint: { control: 'boolean' },
+    onComplete: { table: { disable: true } },
   },
-  render: ({ stars, onPlayAgain, onHome }) => (
-    <GameOverOverlay
-      retryCount={retryCountForStars(stars)}
-      onPlayAgain={onPlayAgain}
-      onHome={onHome}
-    />
-  ),
+  args: {
+    duration: 10,
+    showHandHint: true,
+    onComplete: fn(),
+  },
 };
 export default meta;
 
-type Story = StoryObj<StoryArgs>;
+type Story = StoryObj<typeof FireworksPainter>;
 
 export const Playground: Story = {};
