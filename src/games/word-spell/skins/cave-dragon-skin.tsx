@@ -3,6 +3,7 @@ import type {
   GameSkinTileSnapshot,
   GameSkinZoneSnapshot,
 } from '@/lib/skin';
+import type { CSSProperties } from 'react';
 
 // Resolve against Vite's BASE_URL so the same paths work in dev (`/`),
 // the main app build (`/base-skill/`), and the Storybook build deployed
@@ -10,22 +11,115 @@ import type {
 // PR-preview deploy where the iframe lives below the domain root.
 const ASSET_BASE = `${import.meta.env.BASE_URL}skins/word-spell/cave-dragon`;
 
-// Hand-distributed bubble positions across the 1200-unit viewBox so the
-// rises look organic but the seed is stable (no SSR/random mismatch).
+// Hand-distributed bubble positions across the stage width (in cqw units, so
+// each bubble's horizontal slot and pixel-size both scale with the cave
+// container). Stable seed — no SSR/random mismatch. Each bubble carries its
+// own rise height (cqw) so the rises stagger vertically as well as in time.
 const LAVA_BUBBLES = [
-  { cx: 60, r: 6, delay: 0, duration: 2.4 },
-  { cx: 140, r: 4, delay: 1.4, duration: 2.8 },
-  { cx: 230, r: 8, delay: 2.6, duration: 3.2 },
-  { cx: 320, r: 5, delay: 0.8, duration: 2.6 },
-  { cx: 410, r: 7, delay: 1.9, duration: 3 },
-  { cx: 500, r: 6, delay: 3.1, duration: 2.4 },
-  { cx: 590, r: 9, delay: 0.4, duration: 3.4 },
-  { cx: 680, r: 5, delay: 2.1, duration: 2.6 },
-  { cx: 770, r: 7, delay: 1, duration: 2.8 },
-  { cx: 860, r: 4, delay: 3.6, duration: 2.4 },
-  { cx: 950, r: 8, delay: 0.9, duration: 3 },
-  { cx: 1040, r: 6, delay: 2.3, duration: 2.8 },
-  { cx: 1130, r: 5, delay: 1.5, duration: 2.6 },
+  {
+    left: 5,
+    startBottom: 55,
+    size: 1.1,
+    delay: 0,
+    duration: 4.2,
+    rise: 24,
+  },
+  {
+    left: 11.5,
+    startBottom: 42,
+    size: 0.8,
+    delay: 1.4,
+    duration: 4.8,
+    rise: 28,
+  },
+  {
+    left: 19,
+    startBottom: 60,
+    size: 1.5,
+    delay: 2.6,
+    duration: 5.4,
+    rise: 30,
+  },
+  {
+    left: 27,
+    startBottom: 38,
+    size: 1,
+    delay: 0.8,
+    duration: 4.4,
+    rise: 26,
+  },
+  {
+    left: 34,
+    startBottom: 65,
+    size: 1.3,
+    delay: 1.9,
+    duration: 4.8,
+    rise: 27,
+  },
+  {
+    left: 42,
+    startBottom: 48,
+    size: 1.1,
+    delay: 3.1,
+    duration: 4,
+    rise: 25,
+  },
+  {
+    left: 49,
+    startBottom: 70,
+    size: 1.7,
+    delay: 0.4,
+    duration: 5.6,
+    rise: 32,
+  },
+  {
+    left: 57,
+    startBottom: 35,
+    size: 1,
+    delay: 2.1,
+    duration: 4.2,
+    rise: 26,
+  },
+  {
+    left: 65,
+    startBottom: 58,
+    size: 1.3,
+    delay: 1,
+    duration: 4.6,
+    rise: 29,
+  },
+  {
+    left: 73,
+    startBottom: 45,
+    size: 0.8,
+    delay: 3.6,
+    duration: 4,
+    rise: 24,
+  },
+  {
+    left: 80,
+    startBottom: 62,
+    size: 1.5,
+    delay: 0.9,
+    duration: 5,
+    rise: 30,
+  },
+  {
+    left: 87,
+    startBottom: 50,
+    size: 1.1,
+    delay: 2.3,
+    duration: 4.4,
+    rise: 26,
+  },
+  {
+    left: 94,
+    startBottom: 40,
+    size: 1,
+    delay: 1.5,
+    duration: 4.2,
+    rise: 25,
+  },
 ];
 
 const sceneStyles = `
@@ -101,19 +195,41 @@ const sceneStyles = `
   background-position: bottom center;
   background-size: contain;
 }
-.cave-dragon-scene__lava-svg {
+/* ── Lava floor ───────────────────────────────────────────────── */
+/* Base = one continuous y-gradient (yellow surface → deep red trench).
+   Above it sits the 5-layer wave silhouette tile from
+   lava-floor-tile.svg at reduced opacity so the layers read as wave
+   shapes over the gradient rather than as discrete color bands.
+   overflow: visible so bubbles can rise out of the lava band into the
+   cave above. */
+.cave-dragon-scene__lava {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
   height: 32%;
-  display: block;
-  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #fff48a 0%,
+    #ffc234 18%,
+    #ff8c00 38%,
+    #ff4500 62%,
+    #931c08 84%,
+    #4a0c06 100%
+  );
   overflow: visible;
+  pointer-events: none;
 }
-.cd-lava-wave {
+.cave-dragon-scene__lava-waves {
+  position: absolute;
+  inset: 0;
+  background-image: url('${ASSET_BASE}/lava-floor-tile.svg');
+  background-repeat: repeat-x;
+  background-position: bottom left;
+  background-size: auto 100%;
+  opacity: 0.7;
   animation: cd-lava-wave-bob 2.6s ease-in-out infinite alternate;
+  will-change: transform;
 }
 @keyframes cd-lava-wave-bob {
   from {
@@ -123,27 +239,38 @@ const sceneStyles = `
     transform: translateY(6px);
   }
 }
-.cd-lava-bubble {
+.cave-dragon-scene__lava-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ffe072 0%,
+    #ff9a3c 55%,
+    #c84410 100%
+  );
+  pointer-events: none;
   animation-name: cd-lava-bubble-rise;
   animation-iteration-count: infinite;
   animation-timing-function: ease-out;
+  will-change: transform, opacity;
 }
 @keyframes cd-lava-bubble-rise {
   0% {
     transform: translateY(0);
-    opacity: 0.75;
+    opacity: 0.85;
   }
   85% {
-    opacity: 0.4;
+    transform: translateY(calc(var(--cd-bubble-rise, 22cqw) * -0.88));
+    opacity: 0.78;
   }
   100% {
-    transform: translateY(-180px);
+    transform: translateY(calc(var(--cd-bubble-rise, 22cqw) * -1));
     opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cd-lava-wave,
-  .cd-lava-bubble {
+  .cave-dragon-scene__lava-waves,
+  .cave-dragon-scene__lava-bubble {
     animation: none;
   }
 }
@@ -396,54 +523,35 @@ const SceneBackground = () => (
         alt=""
       />
       <div className="cave-dragon-scene__dragon" />
-      <svg
-        className="cave-dragon-scene__lava-svg"
-        viewBox="0 0 1200 300"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <defs>
-          <linearGradient id="cd-lava-grad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#FF4500" />
-            <stop offset="40%" stopColor="#FF8C00" />
-            <stop offset="100%" stopColor="#8B0000" />
-          </linearGradient>
-        </defs>
-        {/* Static base — covers the full lava area so the bobbing wave
-            never exposes a gap below itself. */}
-        <rect
-          x="0"
-          y="20"
-          width="1200"
-          height="280"
-          fill="url(#cd-lava-grad)"
-        />
-        {/* Animated wave silhouette on top of the base. */}
-        <path
-          className="cd-lava-wave"
-          d="M0,40 Q150,20 300,40 T600,40 T900,40 T1200,40 V90 H0 Z"
-          fill="url(#cd-lava-grad)"
-        />
-        {/* Rising bubbles. cx is hand-distributed across the viewBox to
-            avoid SSR random mismatch; delay + duration vary so the rises
-            aren't synchronised. */}
-        {LAVA_BUBBLES.map((b) => (
-          <circle
-            key={b.cx}
-            className="cd-lava-bubble"
-            cx={b.cx}
-            cy={250}
-            r={b.r}
-            fill="#FFD700"
-            opacity="0.75"
-            style={{
-              animationDelay: `${b.delay}s`,
-              animationDuration: `${b.duration}s`,
-            }}
+      <div className="cave-dragon-scene__lava" aria-hidden="true">
+        {/* Wave silhouette layer — the same 5-band tile from
+            lava-floor-tile.svg, repeated horizontally over the gradient
+            at reduced opacity so the wave shapes read as silhouettes
+            rather than as opaque color bands. */}
+        <div className="cave-dragon-scene__lava-waves" />
+        {/* Rising bubbles. Plain HTML divs so they stay perfectly round
+            at every viewport (no SVG aspect-ratio math) and can rise
+            past the lava band into the cave above via overflow: visible
+            on the parent. left/size/rise all use cqw so the layout
+            scales with the stage container. */}
+        {LAVA_BUBBLES.map((b, i) => (
+          <div
+            key={i}
+            className="cave-dragon-scene__lava-bubble"
+            style={
+              {
+                left: `${b.left}cqw`,
+                bottom: `${b.startBottom}%`,
+                width: `${b.size}cqw`,
+                height: `${b.size}cqw`,
+                animationDelay: `${b.delay}s`,
+                animationDuration: `${b.duration}s`,
+                '--cd-bubble-rise': `${b.rise}cqw`,
+              } as CSSProperties
+            }
           />
         ))}
-      </svg>
+      </div>
     </div>
   </>
 );
