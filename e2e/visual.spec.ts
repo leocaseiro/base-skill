@@ -513,6 +513,61 @@ const seedTheFloorIsLava = async (page: Page): Promise<void> => {
     .waitFor({ state: 'visible' });
 };
 
+// Functional regression for two bugs spotted on the live PR preview:
+//   1. The .game-container.skin-dragon-cave box was constrained by
+//      GameShell's padding so it never spanned the full viewport.
+//   2. As a downstream effect, the 100cqi/962px scale on every child of
+//      .skin-dragon-cave produced a smaller-than-natural scale at common
+//      viewports, shrinking the HUD audio button and round-progress dots.
+// Both assertions must FAIL on the broken layout and PASS after the
+// skin-scoped CSS fix in dragon-cave-skin.tsx (position: fixed; inset: 0
+// with width/height min() clamping to preserve the 2738:1536 cliff
+// aspect-ratio via letterbox/pillarbox).
+test('dragon-cave: container fills viewport + HUD scales up', async ({
+  page,
+}) => {
+  const viewport = { width: 1024, height: 768 };
+  await page.setViewportSize(viewport);
+  await seedTheFloorIsLava(page);
+  await page.goto(
+    `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+  );
+  await startGame(page);
+  const container = page.locator('.game-container.skin-dragon-cave');
+  await container.waitFor({ state: 'visible' });
+
+  // Bug 2 regression: cave is fixed-positioned so it breaks out of
+  // GameShell's padded content area (was `position: relative`).
+  await expect(container).toHaveCSS('position', 'fixed');
+
+  // Bug 2 regression — empirical: container actually spans the full
+  // viewport width on a 1024-wide window (pre-fix it was 992px = 1024
+  // minus GameShell's 16px-each-side padding).
+  const containerBox = await container.boundingBox();
+  expect(containerBox, 'container should be visible').not.toBeNull();
+  expect(
+    containerBox!.width,
+    'cave container should span the full viewport width',
+  ).toBeGreaterThanOrEqual(viewport.width);
+
+  // Bug 1 regression: with the container now wider than 962px, the
+  // 100cqi/962px transform-scale on the audio button (intrinsic 56px =
+  // size-14) must exceed natural size on a 1024-wide viewport. Pre-fix
+  // the container was 992px so scale was 1.03 (56 -> 57.7); post-fix
+  // it's 1024px so scale is 1.065 (56 -> 59.6). A >= 58 floor brackets
+  // the regression cleanly without flaking on browser sub-pixel rounding.
+  const audioBtn = page.getByRole('button', {
+    name: /hear the question/i,
+  });
+  await audioBtn.waitFor({ state: 'visible' });
+  const btnBox = await audioBtn.boundingBox();
+  expect(btnBox, 'audio button should be visible').not.toBeNull();
+  expect(
+    btnBox!.height,
+    'HUD audio button should render at least at intrinsic 56px (scale >= 1) on a 1024-wide viewport once the cave fills it',
+  ).toBeGreaterThanOrEqual(58);
+});
+
 for (const vp of DRAGON_CAVE_VIEWPORTS) {
   test(`@visual dragon-cave scene at ${vp.name}`, async ({ page }) => {
     await page.setViewportSize({ width: vp.width, height: vp.height });
