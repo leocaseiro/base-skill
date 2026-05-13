@@ -136,7 +136,31 @@ export default meta;
 
 type Story = StoryObj<typeof WordSpellWithHarness>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    config: {
+      gameId: 'word-spell',
+      component: 'WordSpell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: true,
+      tileUnit: 'letter',
+      mode: 'recall',
+
+      rounds: [
+        {
+          word: 'spin',
+        },
+        {
+          word: 'nap',
+        },
+      ],
+    },
+  },
+};
 
 export const HUD_Round2Of5: Story = {
   args: {
