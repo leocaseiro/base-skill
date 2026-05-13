@@ -5,16 +5,23 @@
 // Pattern precedent: per-game `InstructionsOverlay` stories (PR #141).
 import { useState } from 'react';
 import { fn } from 'storybook/test';
+import { dragonCaveSkin } from './skins/dragon-cave-skin';
 import { wordSpellConfigFields } from './types';
 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm/WordSpellSimpleConfigForm';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { JSX } from 'react';
+import type { ComponentType, JSX } from 'react';
 import { ConfigFormFields } from '@/components/ConfigFormFields';
 import { getAdvancedHeaderRenderer } from '@/games/config-fields-registry';
+import {
+  __resetSkinRegistryForTests,
+  registerSkin,
+} from '@/lib/skin/registry';
 
 type Mode = 'simple' | 'advanced';
 
 type Scenario = 'picture' | 'scramble' | 'sentence-gap';
+
+type SkinsRegistered = 'classic-only' | 'classic+dragon-cave';
 
 const scenarios: Record<Scenario, Record<string, unknown>> = {
   picture: {
@@ -62,6 +69,13 @@ type HarnessProps = {
   onChange: (config: Record<string, unknown>) => void;
 };
 
+interface StoryArgs {
+  mode: Mode;
+  scenario: Scenario;
+  skinsRegistered: SkinsRegistered;
+  onChange: (config: Record<string, unknown>) => void;
+}
+
 // Match `AdvancedConfigModal`: render the per-game advanced header above the
 // generic field list. WordSpell's header is `WordSpellLibrarySource`.
 const AdvancedHeader = getAdvancedHeaderRenderer('word-spell');
@@ -102,13 +116,19 @@ const WordSpellConfigFormHarness = ({
   );
 };
 
-const meta: Meta<typeof WordSpellConfigFormHarness> = {
+const meta: Meta<StoryArgs> = {
   title: 'Games/WordSpell/ConfigForm',
-  component: WordSpellConfigFormHarness,
+  // Double cast: StoryArgs adds `skinsRegistered` (a registry preset, not a
+  // harness prop), so its shape isn't 1:1 with the harness component. The
+  // render function fully controls how StoryArgs maps to harness props;
+  // `component` is only used for autodocs.
+  component:
+    WordSpellConfigFormHarness as unknown as ComponentType<StoryArgs>,
   tags: ['autodocs'],
   args: {
     mode: 'advanced',
     scenario: 'picture',
+    skinsRegistered: 'classic+dragon-cave',
     onChange: fn(),
   },
   argTypes: {
@@ -129,11 +149,32 @@ const meta: Meta<typeof WordSpellConfigFormHarness> = {
         'Advanced-mode preset covering meaningful WordSpell modes: picture (letters), scramble (letters with distractors), sentence-gap (word tiles).',
       if: { arg: 'mode', eq: 'advanced' },
     },
+    skinsRegistered: {
+      control: { type: 'radio' },
+      options: [
+        'classic-only',
+        'classic+dragon-cave',
+      ] satisfies SkinsRegistered[],
+      description:
+        'Skin registry preset. `classic-only` hides the Skin radio in both simple and advanced forms; `classic+dragon-cave` shows it.',
+    },
     onChange: { table: { disable: true } },
   },
-  render: ({ mode, scenario, onChange }) => (
+  decorators: [
+    (Story, ctx) => {
+      __resetSkinRegistryForTests();
+      if (ctx.args.skinsRegistered === 'classic+dragon-cave') {
+        registerSkin('word-spell', dragonCaveSkin);
+      }
+      return <Story />;
+    },
+  ],
+  render: ({ mode, scenario, skinsRegistered, onChange }) => (
     <WordSpellConfigFormHarness
-      key={`${mode}:${scenario}`}
+      // Include skinsRegistered in the key so the harness remounts when
+      // the registry decorator changes — guaranteeing the radio's
+      // visibility refreshes immediately.
+      key={`${mode}:${scenario}:${skinsRegistered}`}
       mode={mode}
       scenario={scenario}
       onChange={onChange}
@@ -142,6 +183,6 @@ const meta: Meta<typeof WordSpellConfigFormHarness> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof WordSpellConfigFormHarness>;
+type Story = StoryObj<StoryArgs>;
 
 export const Playground: Story = {};
