@@ -225,12 +225,12 @@ Filter the browser console to `[TTS]` to see only speech events.
 
 Both reducers are pure functions and can be tested without React:
 
-{/_ NOTE: this snippet relies on answer-game-reducer, which is removed in PR 1c.
-The XState-first engine replaces it (see §5 above and §9 for the
-overlay invariant). For new tests, drive `wordSpellMachine` /
-`sortNumbersMachine` / `numberMatchMachine` directly via
-`createActor(...)` (see `definition.test.ts` files for the canonical
-pattern). Kept here as a historical reference until PR 1c lands. (review #19) _/}
+> **Note:** this snippet relies on `answer-game-reducer`, which is removed in
+> PR 1c. The XState-first engine replaces it (see §5 above and §9 for the
+> overlay invariant). For new tests, drive `wordSpellMachine` /
+> `sortNumbersMachine` / `numberMatchMachine` directly via `createActor(...)`
+> — see the `definition.test.ts` files for the canonical pattern. Kept here
+> as a historical reference until PR 1c lands.
 
 ```ts
 import {
