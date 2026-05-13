@@ -228,33 +228,66 @@ const sceneStyles = `
   display: block;
 }
 .cd-wave {
-  will-change: transform;
+  will-change: d;
   animation-iteration-count: infinite;
   animation-direction: alternate;
   animation-timing-function: ease-in-out;
-  animation-name: cd-wave-bob;
 }
+/* Each layer morphs its d-attribute between two subtly different
+   wave shapes (peaks/troughs swap horizontal positions, wave-line
+   shifts ±10–15 viewBox units vertically). Combined with
+   animation-direction: alternate, the wave undulates back and forth
+   instead of just sliding rigidly. Different durations + negative
+   delays so the four layers desync. */
 .cd-wave-1 {
-  animation-duration: 9s;
+  animation-name: cd-wave-morph-1;
+  animation-duration: 5s;
 }
 .cd-wave-2 {
-  animation-duration: 11s;
-  animation-delay: -3s;
-}
-.cd-wave-3 {
-  animation-duration: 8s;
+  animation-name: cd-wave-morph-2;
+  animation-duration: 6s;
   animation-delay: -1.5s;
 }
-.cd-wave-4 {
-  animation-duration: 12s;
-  animation-delay: -4s;
+.cd-wave-3 {
+  animation-name: cd-wave-morph-3;
+  animation-duration: 4.5s;
+  animation-delay: -1s;
 }
-@keyframes cd-wave-bob {
+.cd-wave-4 {
+  animation-name: cd-wave-morph-4;
+  animation-duration: 6.5s;
+  animation-delay: -2s;
+}
+@keyframes cd-wave-morph-1 {
   from {
-    transform: translateY(-8px);
+    d: path('M 0,600 L 0,80 C 240,60 480,100 720,80 C 960,60 1200,100 1440,80 L 1440,600 Z');
   }
   to {
-    transform: translateY(8px);
+    d: path('M 0,600 L 0,92 C 240,112 480,72 720,92 C 960,112 1200,72 1440,92 L 1440,600 Z');
+  }
+}
+@keyframes cd-wave-morph-2 {
+  from {
+    d: path('M 0,600 L 0,220 C 240,240 480,200 720,220 C 960,240 1200,200 1440,220 L 1440,600 Z');
+  }
+  to {
+    d: path('M 0,600 L 0,232 C 240,212 480,252 720,232 C 960,212 1200,252 1440,232 L 1440,600 Z');
+  }
+}
+@keyframes cd-wave-morph-3 {
+  from {
+    d: path('M 0,600 L 0,360 C 240,340 480,380 720,360 C 960,340 1200,380 1440,360 L 1440,600 Z');
+  }
+  to {
+    d: path('M 0,600 L 0,372 C 240,392 480,352 720,372 C 960,392 1200,352 1440,372 L 1440,600 Z');
+  }
+}
+@keyframes cd-wave-morph-4 {
+  from {
+    d: path('M 0,600 L 0,500 C 240,520 480,480 720,500 C 960,520 1200,480 1440,500 L 1440,600 Z');
+  }
+  to {
+    d: path('M 0,600 L 0,510 C 240,490 480,530 720,510 C 960,490 1200,530 1440,510 L 1440,600 Z');
   }
 }
 .cave-dragon-scene__lava-bubble {
