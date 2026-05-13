@@ -85,7 +85,7 @@ export const useSlotTileDrag = ({
             // doesn't depend on ancestor CSS vars or `rounded-[inherit]`.
             const rect = element.getBoundingClientRect();
             const computed = getComputedStyle(element);
-            // The source's parent may be transformed (e.g. cave-dragon
+            // The source's parent may be transformed (e.g. dragon-cave
             // scales its UI). Compensate font-size so the ghost letter
             // matches the source's visual size, not its raw layout size.
             const layoutWidth = element.offsetWidth;
@@ -111,7 +111,7 @@ export const useSlotTileDrag = ({
               alignItems: 'center',
               justifyContent: 'center',
               // Inherit the live tile background so skinned tiles (e.g.
-              // cave-dragon's transparent stone) don't render with a
+              // dragon-cave's transparent stone) don't render with a
               // default-card backdrop mid-drag.
               background: computed.background,
               color: computed.color,
@@ -121,7 +121,7 @@ export const useSlotTileDrag = ({
               fontWeight: computed.fontWeight,
               boxSizing: 'border-box',
               // No scale(1.08) lift — it compounds with parent transforms
-              // (e.g. cave-dragon's stage scale) and makes the ghost
+              // (e.g. dragon-cave's stage scale) and makes the ghost
               // noticeably bigger than the source. Skins that want depth
               // should apply filter: drop-shadow on the tile decoration.
               pointerEvents: 'none',

@@ -14,7 +14,7 @@ import type { CSSProperties } from 'react';
 // the main app build (`/base-skill/`), and the Storybook build deployed
 // under `/base-skill/pr/<n>/docs/`. Hardcoding an absolute path broke the
 // PR-preview deploy where the iframe lives below the domain root.
-const ASSET_BASE = `${import.meta.env.BASE_URL}skins/word-spell/cave-dragon`;
+const ASSET_BASE = `${import.meta.env.BASE_URL}skins/word-spell/dragon-cave`;
 
 // Hand-distributed bubble positions across the stage width (in cqw units, so
 // each bubble's horizontal slot and pixel-size both scale with the cave
@@ -191,7 +191,7 @@ const LavaWaveGradients = (
 );
 
 const sceneStyles = `
-.skin-cave-dragon {
+.skin-dragon-cave {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -202,25 +202,25 @@ const sceneStyles = `
   aspect-ratio: 2738 / 1536;
   container-type: inline-size;
 }
-.skin-cave-dragon:fullscreen {
+.skin-dragon-cave:fullscreen {
   width: min(100vw, calc(100vh * 2738 / 1536));
   max-width: none;
   margin: auto;
 }
-.skin-cave-dragon > .cave-dragon-scene {
+.skin-dragon-cave > .dragon-cave-scene {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
 }
-.skin-cave-dragon > *:not(.cave-dragon-scene) {
+.skin-dragon-cave > *:not(.dragon-cave-scene) {
   position: relative;
   z-index: 1;
   transform: scale(calc(100cqi / 962px));
   transform-origin: top center;
 }
-.cave-dragon-scene__bg-middle {
+.dragon-cave-scene__bg-middle {
   position: absolute;
   inset: 0;
   background-image: url('${ASSET_BASE}/bg-middle.png');
@@ -228,10 +228,10 @@ const sceneStyles = `
   background-position: top center;
   background-size: auto 100%;
 }
-.cave-dragon-scene__bg-left,
-.cave-dragon-scene__bg-right,
-.cave-dragon-scene__cliff-left,
-.cave-dragon-scene__cliff-right {
+.dragon-cave-scene__bg-left,
+.dragon-cave-scene__bg-right,
+.dragon-cave-scene__cliff-left,
+.dragon-cave-scene__cliff-right {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -241,18 +241,18 @@ const sceneStyles = `
   user-select: none;
   pointer-events: none;
 }
-.cave-dragon-scene__bg-left,
-.cave-dragon-scene__cliff-left {
+.dragon-cave-scene__bg-left,
+.dragon-cave-scene__cliff-left {
   left: 0;
 }
-.cave-dragon-scene__bg-right {
+.dragon-cave-scene__bg-right {
   right: 0;
 }
-.cave-dragon-scene__cliff-right {
+.dragon-cave-scene__cliff-right {
   right: 0;
   transform: scaleX(-1);
 }
-.cave-dragon-scene__dragon {
+.dragon-cave-scene__dragon {
   position: absolute;
   left: 10%;
   top: 4%;
@@ -268,7 +268,7 @@ const sceneStyles = `
    gradient on the div (which previously left a flat strip above the
    topmost wave). overflow: visible so bubbles can rise past the
    lava band into the cave above. */
-.cave-dragon-scene__lava {
+.dragon-cave-scene__lava {
   position: absolute;
   left: 0;
   right: 0;
@@ -277,7 +277,7 @@ const sceneStyles = `
   overflow: visible;
   pointer-events: none;
 }
-.cave-dragon-scene__lava-waves {
+.dragon-cave-scene__lava-waves {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -362,7 +362,7 @@ const sceneStyles = `
     d: path('M 0,600 L 0,450 C 88.97,457.72 177.93,465.44 239,461 C 300.07,456.56 333.23,439.97 401,449 C 468.77,458.03 571.13,492.69 645,491 C 718.87,489.31 764.23,451.26 827,440 C 889.77,428.74 969.94,444.28 1034,449 C 1098.06,453.72 1146.02,447.64 1211,446 C 1275.98,444.36 1357.99,447.18 1440,450 L 1440,600 L 0,600 Z');
   }
 }
-.cave-dragon-scene__lava-bubble {
+.dragon-cave-scene__lava-bubble {
   position: absolute;
   border-radius: 50%;
   background: radial-gradient(
@@ -393,16 +393,16 @@ const sceneStyles = `
 }
 @media (prefers-reduced-motion: reduce) {
   .cd-wave,
-  .cave-dragon-scene__lava-bubble {
+  .dragon-cave-scene__lava-bubble {
     animation: none;
   }
 }
 
 /* ── Stone tile override ──────────────────────────────────────── */
 /* Paint reset for every stone-styled button (bank tile + slot's placed tile). */
-.skin-cave-dragon [aria-label^="Letter "],
-.skin-cave-dragon [aria-label^="Number "],
-.skin-cave-dragon [data-zone-index] button {
+.skin-dragon-cave [aria-label^="Letter "],
+.skin-dragon-cave [aria-label^="Number "],
+.skin-dragon-cave [data-zone-index] button {
   background: transparent !important;
   box-shadow: none !important;
   border: 0 !important;
@@ -415,16 +415,16 @@ const sceneStyles = `
 /* Bank-tile buttons are statically positioned by default — mark them relative
    so the absolute stone child sizes against the tile, not the bank container.
    Slot buttons keep their existing absolute inset-0 position. */
-.skin-cave-dragon [aria-label^="Letter "],
-.skin-cave-dragon [aria-label^="Number "] {
+.skin-dragon-cave [aria-label^="Letter "],
+.skin-dragon-cave [aria-label^="Number "] {
   position: relative;
 }
-/* .cave-dragon-stone is intentionally unscoped — the eject-ghost is appended to
-   document.body via slot-animations.ts, outside .skin-cave-dragon. The class
+/* .dragon-cave-stone is intentionally unscoped — the eject-ghost is appended to
+   document.body via slot-animations.ts, outside .skin-dragon-cave. The class
    name is unique enough not to clash. drop-shadow filter follows the stone
    outline (not a rectangle), so dragged ghosts get a clean "picked up" lift
    without leaking a phantom rounded-rect shadow. */
-.cave-dragon-stone {
+.dragon-cave-stone {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -436,7 +436,7 @@ const sceneStyles = `
 }
 
 /* ── Slot/bank-hole stone outline ─────────────────────────────── */
-.skin-cave-dragon .cave-dragon-stone-outline {
+.skin-dragon-cave .dragon-cave-stone-outline {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -446,16 +446,16 @@ const sceneStyles = `
   z-index: 2;
   overflow: visible;
 }
-.skin-cave-dragon .cave-dragon-stone-outline--empty {
+.skin-dragon-cave .dragon-cave-stone-outline--empty {
   color: rgba(58, 32, 12, 0.55);
 }
-.skin-cave-dragon .cave-dragon-stone-outline--correct {
+.skin-dragon-cave .dragon-cave-stone-outline--correct {
   color: var(--bs-primary);
 }
-.skin-cave-dragon .cave-dragon-stone-outline--wrong {
+.skin-dragon-cave .dragon-cave-stone-outline--wrong {
   color: var(--destructive);
 }
-.skin-cave-dragon [data-tile-bank-hole] {
+.skin-dragon-cave [data-tile-bank-hole] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='12' stroke-dasharray='12 6' stroke-linejoin='round' opacity='0.55'/%3E%3C/svg%3E") !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
@@ -463,7 +463,7 @@ const sceneStyles = `
 }
 
 /* ── Audio button — sandstone with carved drop shadow ─────────── */
-.skin-cave-dragon button[aria-label="Hear the question"] {
+.skin-dragon-cave button[aria-label="Hear the question"] {
   filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, 0.4));
 }
 `;
@@ -623,30 +623,30 @@ const SceneBackground = () => (
       </defs>
     </svg>
 
-    <div className="cave-dragon-scene" aria-hidden="true">
-      <div className="cave-dragon-scene__bg-middle" />
+    <div className="dragon-cave-scene" aria-hidden="true">
+      <div className="dragon-cave-scene__bg-middle" />
       <img
-        className="cave-dragon-scene__bg-left"
+        className="dragon-cave-scene__bg-left"
         src={`${ASSET_BASE}/bg-left.png`}
         alt=""
       />
       <img
-        className="cave-dragon-scene__bg-right"
+        className="dragon-cave-scene__bg-right"
         src={`${ASSET_BASE}/bg-right.png`}
         alt=""
       />
       <img
-        className="cave-dragon-scene__cliff-left"
+        className="dragon-cave-scene__cliff-left"
         src={`${ASSET_BASE}/cliff-left.png`}
         alt=""
       />
       <img
-        className="cave-dragon-scene__cliff-right"
+        className="dragon-cave-scene__cliff-right"
         src={`${ASSET_BASE}/cliff-left.png`}
         alt=""
       />
-      <div className="cave-dragon-scene__dragon" />
-      <div className="cave-dragon-scene__lava" aria-hidden="true">
+      <div className="dragon-cave-scene__dragon" />
+      <div className="dragon-cave-scene__lava" aria-hidden="true">
         {/* Five inline SVG wave layers stacked top → bottom. Waves 2-5
             copy the path-d shapes verbatim from
             base-skill-resources/waves.html. Wave 1 is a new top layer
@@ -656,7 +656,7 @@ const SceneBackground = () => (
             gradient is fully graduated across the visible strip
             instead of showing a narrow slice of a tall gradient. */}
         <svg
-          className="cave-dragon-scene__lava-waves"
+          className="dragon-cave-scene__lava-waves"
           viewBox="0 0 1440 600"
           preserveAspectRatio="none"
           aria-hidden="true"
@@ -697,7 +697,7 @@ const SceneBackground = () => (
         {LAVA_BUBBLES.map((b) => (
           <div
             key={`${b.left}-${b.delay}`}
-            className="cave-dragon-scene__lava-bubble"
+            className="dragon-cave-scene__lava-bubble"
             style={
               {
                 left: `${b.left}cqw`,
@@ -718,7 +718,7 @@ const SceneBackground = () => (
 
 const tileDecoration = (_tile: GameSkinTileSnapshot) => (
   <svg
-    className="cave-dragon-stone"
+    className="dragon-cave-stone"
     viewBox="0 0 200 200"
     aria-hidden="true"
     focusable="false"
@@ -733,13 +733,13 @@ const STONE_OUTLINE_PATH =
 const slotDecoration = (zone: GameSkinZoneSnapshot) => {
   const empty = zone.placedTileId === null;
   const stateClass = empty
-    ? 'cave-dragon-stone-outline--empty'
+    ? 'dragon-cave-stone-outline--empty'
     : zone.isWrong
-      ? 'cave-dragon-stone-outline--wrong'
-      : 'cave-dragon-stone-outline--correct';
+      ? 'dragon-cave-stone-outline--wrong'
+      : 'dragon-cave-stone-outline--correct';
   return (
     <svg
-      className={`cave-dragon-stone-outline ${stateClass}`}
+      className={`dragon-cave-stone-outline ${stateClass}`}
       viewBox="0 0 200 200"
       aria-hidden="true"
       focusable="false"
@@ -756,9 +756,9 @@ const slotDecoration = (zone: GameSkinZoneSnapshot) => {
   );
 };
 
-export const caveDragonSkin: GameSkin = {
-  id: 'cave-dragon',
-  name: 'Cave & Dragon',
+export const dragonCaveSkin: GameSkin & { id: 'dragon-cave' } = {
+  id: 'dragon-cave',
+  name: 'Dragon Cave',
   tokens: {
     '--skin-bank-hole-bg': 'transparent',
     '--skin-bank-hole-shadow': 'none',
