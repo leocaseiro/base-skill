@@ -1,3 +1,8 @@
+/* eslint-disable react/jsx-max-depth -- The scene tree contains an
+ * inline SVG with <defs> → <linearGradient> → <stop> nesting, which
+ * is intrinsic to the SVG document model. The rule still flags the
+ * hoisted gradient constants because it inlines references, so the
+ * cleanest stance is a single file-level disable. */
 import type {
   GameSkin,
   GameSkinTileSnapshot,
@@ -121,6 +126,69 @@ const LAVA_BUBBLES = [
     rise: 14,
   },
 ];
+
+// Hoisted out of SceneBackground's JSX so the nested
+// svg → defs → linearGradient → stop chain doesn't trip
+// react/jsx-max-depth on the rest of the scene tree.
+const LavaWaveGradients = (
+  <>
+    <linearGradient
+      id="cd-wave-grad-1"
+      gradientUnits="userSpaceOnUse"
+      x1="0"
+      y1="28"
+      x2="0"
+      y2="90"
+    >
+      <stop offset="0%" stopColor="#fff48a" />
+      <stop offset="100%" stopColor="#ffd060" />
+    </linearGradient>
+    <linearGradient
+      id="cd-wave-grad-2"
+      gradientUnits="userSpaceOnUse"
+      x1="0"
+      y1="90"
+      x2="0"
+      y2="210"
+    >
+      <stop offset="0%" stopColor="#ffa844" />
+      <stop offset="100%" stopColor="#ff7800" />
+    </linearGradient>
+    <linearGradient
+      id="cd-wave-grad-3"
+      gradientUnits="userSpaceOnUse"
+      x1="0"
+      y1="210"
+      x2="0"
+      y2="330"
+    >
+      <stop offset="0%" stopColor="#ff6700" />
+      <stop offset="100%" stopColor="#ff3300" />
+    </linearGradient>
+    <linearGradient
+      id="cd-wave-grad-4"
+      gradientUnits="userSpaceOnUse"
+      x1="0"
+      y1="330"
+      x2="0"
+      y2="450"
+    >
+      <stop offset="0%" stopColor="#c12810" />
+      <stop offset="100%" stopColor="#7a1a0a" />
+    </linearGradient>
+    <linearGradient
+      id="cd-wave-grad-5"
+      gradientUnits="userSpaceOnUse"
+      x1="0"
+      y1="450"
+      x2="0"
+      y2="600"
+    >
+      <stop offset="0%" stopColor="#5e1208" />
+      <stop offset="100%" stopColor="#2a0a04" />
+    </linearGradient>
+  </>
+);
 
 const sceneStyles = `
 .skin-cave-dragon {
@@ -594,63 +662,7 @@ const SceneBackground = () => (
           aria-hidden="true"
           focusable="false"
         >
-          <defs>
-            <linearGradient
-              id="cd-wave-grad-1"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              y1="28"
-              x2="0"
-              y2="90"
-            >
-              <stop offset="0%" stopColor="#fff48a" />
-              <stop offset="100%" stopColor="#ffd060" />
-            </linearGradient>
-            <linearGradient
-              id="cd-wave-grad-2"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              y1="90"
-              x2="0"
-              y2="210"
-            >
-              <stop offset="0%" stopColor="#ffa844" />
-              <stop offset="100%" stopColor="#ff7800" />
-            </linearGradient>
-            <linearGradient
-              id="cd-wave-grad-3"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              y1="210"
-              x2="0"
-              y2="330"
-            >
-              <stop offset="0%" stopColor="#ff6700" />
-              <stop offset="100%" stopColor="#ff3300" />
-            </linearGradient>
-            <linearGradient
-              id="cd-wave-grad-4"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              y1="330"
-              x2="0"
-              y2="450"
-            >
-              <stop offset="0%" stopColor="#c12810" />
-              <stop offset="100%" stopColor="#7a1a0a" />
-            </linearGradient>
-            <linearGradient
-              id="cd-wave-grad-5"
-              gradientUnits="userSpaceOnUse"
-              x1="0"
-              y1="450"
-              x2="0"
-              y2="600"
-            >
-              <stop offset="0%" stopColor="#5e1208" />
-              <stop offset="100%" stopColor="#2a0a04" />
-            </linearGradient>
-          </defs>
+          <defs>{LavaWaveGradients}</defs>
           <path
             className="cd-wave cd-wave-1"
             d="M 0,600 L 0,28 C 80,14 175,46 260,30 C 345,14 430,46 515,28 C 600,12 690,44 775,28 C 860,12 945,44 1035,30 C 1120,16 1210,42 1300,28 C 1370,18 1410,34 1440,28 L 1440,600 L 0,600 Z"
@@ -682,9 +694,9 @@ const SceneBackground = () => (
             past the lava band into the cave above via overflow: visible
             on the parent. left/size/rise all use cqw so the layout
             scales with the stage container. */}
-        {LAVA_BUBBLES.map((b, i) => (
+        {LAVA_BUBBLES.map((b) => (
           <div
-            key={i}
+            key={`${b.left}-${b.delay}`}
             className="cave-dragon-scene__lava-bubble"
             style={
               {
