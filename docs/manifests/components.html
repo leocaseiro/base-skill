@@ -576,7 +576,7 @@
 <header>
   <div class="wrap">
     <h1>Manifest Debugger</h1>
-    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">31/55 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">55/55 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">6/162 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">17 docs ok</a></div>
+    <div class="summary"><a class="filter-pill all" data-k="all" href="#filter-all">All</a><a class="filter-pill err" data-k="errors" href="#filter-errors">31/55 prop type errors</a><a class="filter-pill info" data-k="infos" href="#filter-infos">55/55 infos</a><a class="filter-pill err" data-k="story-errors" href="#filter-story-errors">6/162 story errors</a><a class="filter-pill ok" data-k="docs" href="#filter-docs">18 docs ok</a></div>
   </div>
 </header>
 <main>
@@ -5556,7 +5556,7 @@ export const Default: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> LevelCompleteOverlay</h2>
       <div class="badges">
-        <label for="c-26-answergame-levelcompleteoverlay-props" class="badge ok as-toggle">3 prop types</label>
+        <label for="c-26-answergame-levelcompleteoverlay-props" class="badge ok as-toggle">4 prop types</label>
         <label for="c-26-answergame-levelcompleteoverlay-info" class="badge info as-toggle">1 info</label>
         <label for="c-26-answergame-levelcompleteoverlay-stories" class="badge ok as-toggle">1 story</label>
         
@@ -5590,11 +5590,23 @@ export const Default: Story = {};
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">3 prop types</span>
+              <span class="badge ok">4 prop types</span>
             </div>
             <pre><code>Component: src/components/answer-game/LevelCompleteOverlay/LevelCompleteOverlay.tsx::LevelCompleteOverlay</code></pre>
             <pre><code>Props:</code></pre>
             <pre><code>level: number
+
+/**
+ * Belt-and-suspenders gate from the XState engine phase
+ * (`engine.phase === &#39;levelComplete&#39;`). The overlay&#39;s own render
+ * condition already keys on this, but skin overrides that animate in
+ * (fade/scale) may briefly render the button before the canonical
+ * state; setting `disabled` here prevents premature ADVANCE_LEVEL
+ * dispatch during the 750 ms roundComplete after-timer.
+ * 
+ * Defaults to `true` for backward-compat with non-XState callers.
+ */
+nextLevelEnabled?: boolean = true
 
 onDone: () =&gt; void
 
@@ -19146,10 +19158,196 @@ to their configs.
   aria-label="Docs">
   <div class="head">
     <div class="title">
+      <h2><span class="status-dot dot-ok"></span> Games/SortNumbers/Flows</h2>
+      <div class="badges">
+        
+        <label for="doc-7-games-sortnumbers-flows-docs-content" class="badge ok as-toggle">view content</label>
+      </div>
+    </div>
+    <div class="meta" title="./src/games/sort-numbers/SortNumbers/SortNumbers.flows.mdx">games-sortnumbers-flows--docs · ./src/games/sort-numbers/SortNumbers/SortNumbers.flows.mdx</div>
+    
+  </div>
+
+  <!-- Hidden toggles must be siblings BEFORE .panels -->
+  
+  <input id="doc-7-games-sortnumbers-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+
+  <div class="panels">
+    
+    
+        <div class="panel panel-content">
+          <div class="mdx-content">
+            <pre><code>import { Meta } from &#39;@storybook/blocks&#39;;
+
+&lt;Meta title=&quot;Games/SortNumbers/Flows&quot; /&gt;
+
+# SortNumbers — End-to-End Flows
+
+&gt; Source: `src/games/sort-numbers/`
+&gt;
+&gt; SortNumbers migrated to the XState-first engine in PR 1b alongside
+&gt; the new `levelComplete` machine state. The canonical per-round phase
+&gt; machine is documented in
+&gt; `src/lib/game-engine/GameEngine.flows.mdx` §5 (NumberMatch) and §5c
+&gt; (SortNumbers, including `levelComplete`). This file covers
+&gt; SortNumbers-specific flows: numeral-ordering evaluation and the
+&gt; level-progression `ADVANCE_LEVEL` cycle. Update this file when
+&gt; SortNumbers progression logic, audio timing, or level-advance
+&gt; behaviour changes.
+
+---
+
+## 1. Per-round phase machine (with levelComplete)
+
+Identical to NumberMatch&#39;s phase machine plus a `levelComplete` state
+and an `ADVANCE_LEVEL` event. See `GameEngine.flows.mdx` §5c for the
+canonical diagram and event list.
+
+SortNumbers-specific notes:
+
+- `isLevelMode` is `true` when the config declares a level mode.
+- `roundIndex` accumulates across level boundaries in the engine
+  context. The reducer mirror still resets `roundIndex` per level for
+  HUD display. PR 1c will collapse the reducer; the HUD will then
+  compute per-level round from `engine.roundIndex % levelSize`.
+- The `after(750)` transition out of `roundComplete` chooses
+  `gameOver` (last round), `levelComplete` (last round of a non-final
+  level), or `waitingForNext` (otherwise). Guards `isLastRound` /
+  `isLastRoundOfLevel` are injected by `useGameEngine`.
+- Round and level construction (`buildSortRound`) stays in
+  `SortNumbers.tsx` per Spec Delta 4. The component dispatches
+  `INIT_ROUND` / `ADVANCE_ROUND` / `ADVANCE_LEVEL` with the
+  precomputed tiles + zones.
+
+---
+
+## 2. Correct tile placement
+
+Same flow as WordSpell — synchronous evaluation in
+`useTileEvaluation` mirrored to the engine via `engineDispatch`. See
+`WordSpell.flows.mdx` §2 for the diagram. The only SortNumbers-specific
+detail is that tile values are numeric strings and zones are ordered.
+
+---
+
+## 3. Round complete → next round
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; playing
+  playing --&gt; roundComplete : always(allFilledCorrectly)
+  roundComplete --&gt; gameOver : after(750) [isLastRound]
+  roundComplete --&gt; levelComplete : after(750) [isLastRoundOfLevel]
+  roundComplete --&gt; waitingForNext : after(750)
+  waitingForNext --&gt; playing : ADVANCE_ROUND
+```
+
+Round-advance is component-driven: a `useEffect` watches
+`engine.phase === &#39;waitingForNext&#39;`, builds the next round via
+`buildSortRound`, and dispatches `ADVANCE_ROUND { tiles, zones }`.
+
+---
+
+## 4. Level complete → next level
+
+When the after-timer fires `levelComplete`, the
+`LevelCompleteOverlay` mounts. Its &quot;Next level&quot; button is gated by a
+new `nextLevelEnabled` prop wired to
+`engine.phase === &#39;levelComplete&#39;`. This closes a reducer-mirror race:
+the 750 ms after-timer advances reducer state synchronously while the
+engine remains in `roundComplete` until the timer fires. Without the
+prop gate, clicking during the race window would dispatch
+`ADVANCE_LEVEL` to a machine that ignores it.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Engine as SortNumbers machine
+  participant Audio as AudioFeedback
+  participant Component as SortNumbersSession
+  participant Overlay as LevelCompleteOverlay
+  participant Reducer as answerGameReducer
+  participant Bus as GameEventBus
+
+  Engine--&gt;&gt;Engine: roundComplete + isLastRoundOfLevel → levelComplete
+  Engine-&gt;&gt;Audio: entry — playSound(&#39;level-complete&#39;)
+
+  Note over Engine: phase === &#39;levelComplete&#39;
+  Engine--&gt;&gt;Overlay: showLevelComplete = true,\n  nextLevelEnabled = true
+
+  User-&gt;&gt;Overlay: click Next Level
+  Overlay-&gt;&gt;Component: onNextLevel()
+  Component-&gt;&gt;Component: buildSortRound(nextLevelIndex)
+  Component-&gt;&gt;Reducer: ADVANCE_LEVEL { tiles, zones }
+  Reducer--&gt;&gt;Engine: mirrored — incrementRoundIndex +\n  incrementLevelIndex + advanceLevelState
+  Component-&gt;&gt;Bus: emit game:level-advance
+  Engine--&gt;&gt;Engine: transition → playing
+```
+
+The `game:level-advance` event continues to fire — preserved from the
+pre-PR-1b implementation. The emit lives in `handleNextLevel` in the
+component (review #8) — the original plan to move it onto the engine&#39;s
+`ADVANCE_LEVEL` handler is deferred to PR 1b-bis. Until then the
+component is the canonical emit site.
+
+---
+
+## 5. Game complete
+
+```mermaid
+sequenceDiagram
+  participant Engine as SortNumbers machine
+  participant Audio as AudioFeedback
+  participant Bus as GameEventBus
+  participant Overlay as GameOverOverlay
+
+  Engine--&gt;&gt;Engine: roundComplete + isLastRound → gameOver
+  Engine-&gt;&gt;Audio: entry — playSound(&#39;game-complete&#39;)
+  Engine-&gt;&gt;Bus: completeGame — emit(&#39;game:end&#39;, envelope)
+```
+
+`isLastRound` fires when `roundIndex + 1 &gt;= totalRounds`. Because the
+engine accumulates `roundIndex` across level boundaries, the guard
+fires correctly on the final round of the final level. The reducer
+mirror&#39;s per-level reset is not consulted by the guard.
+
+---
+
+## 6. Full session lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; loading : SortNumbers mounts (sessionEpoch=0)
+  loading --&gt; playing : INIT_ROUND (fresh) or\nRESUME_ROUND (draft)
+  playing --&gt; roundComplete : always(allFilledCorrectly)
+  roundComplete --&gt; gameOver : after(750) [isLastRound]
+  roundComplete --&gt; levelComplete : after(750) [isLastRoundOfLevel]
+  roundComplete --&gt; waitingForNext : after(750)
+  levelComplete --&gt; playing : ADVANCE_LEVEL
+  waitingForNext --&gt; playing : ADVANCE_ROUND
+  gameOver --&gt; loading : Play Again (sessionEpoch++)
+  gameOver --&gt; [*] : Home
+```
+
+&gt; Mid-celebration tab-close + resume no longer replays the celebration:
+&gt; `useAnswerGameDraftSync.buildDraft` returns `null` during
+&gt; `round-complete` / `level-complete` / `game-over` reducer phases. See
+&gt; `GameEngine.flows.mdx` §4 (Draft State Sync).
+</code></pre>
+          </div>
+        </div>
+  </div>
+</article>
+<article
+  class="card is-doc no-doc-error"
+  role="listitem"
+  aria-label="Docs">
+  <div class="head">
+    <div class="title">
       <h2><span class="status-dot dot-ok"></span> Games/WordSpell/Flows</h2>
       <div class="badges">
         
-        <label for="doc-7-games-wordspell-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-8-games-wordspell-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/games/word-spell/WordSpell/WordSpell.flows.mdx">games-wordspell-flows--docs · ./src/games/word-spell/WordSpell/WordSpell.flows.mdx</div>
@@ -19158,7 +19356,7 @@ to their configs.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-7-games-wordspell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-8-games-wordspell-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -19173,16 +19371,42 @@ to their configs.
 
 &gt; Source: `src/games/word-spell/`
 &gt;
-&gt; These diagrams show the full lifecycle of a WordSpell session, including sound
-&gt; effects, TTS, and UI feedback at each step. Update this file when the
-&gt; WordSpell progression logic or sound timing changes.
+&gt; WordSpell migrated to the XState-first engine in PR 1b. The canonical
+&gt; per-round phase machine is documented in
+&gt; `src/lib/game-engine/GameEngine.flows.mdx` §5 (NumberMatch) and §5b
+&gt; (WordSpell). This file covers WordSpell-specific flows: letter-to-slot
+&gt; evaluation, wrong-tile-behavior modes, and the sentence-gap free-swap
+&gt; mode. Update this file when WordSpell progression logic, audio timing,
+&gt; or sentence-gap interaction changes.
 
 ---
 
-## 1. Correct Tile Placement
+## 1. Per-round phase machine
 
-User places the right letter in a slot. Sound fires **before** the reducer
-dispatch so feedback is instant.
+Identical to NumberMatch — same states (`playing`, `roundComplete`,
+`waitingForNext`, `gameOver`), same events. See
+`GameEngine.flows.mdx` §5b for the diagram and full event list.
+
+WordSpell-specific notes:
+
+- `isLevelMode` is always `false`; `levelIndex` is unused at runtime
+  and the machine never enters `levelComplete`.
+- `slotInteraction` is mode-driven: `&#39;sentence-gap&#39;` →
+  `&#39;free-swap&#39;`; every other mode → `&#39;ordered&#39;`. The machine itself
+  does not branch on the value — it is forwarded to
+  `AnswerGameConfig` so `Slot` rendering and `useSlotBehavior` handle
+  the swap UX.
+- Round construction (`buildSentenceGapRound` and
+  `buildTilesAndZones`) stays in `WordSpell.tsx` per Spec Delta 4.
+  The component dispatches `INIT_ROUND` / `ADVANCE_ROUND` with the
+  precomputed tiles + zones.
+
+---
+
+## 2. Correct tile placement
+
+Synchronous evaluation in `useTileEvaluation` — the audio fires
+before the dispatch so feedback feels instant.
 
 ```mermaid
 sequenceDiagram
@@ -19190,33 +19414,34 @@ sequenceDiagram
   participant TE as useTileEvaluation
   participant Audio as AudioFeedback
   participant Reducer as answerGameReducer
+  participant Engine as WordSpell machine
   participant Bus as GameEventBus
-  participant Slot as useSlotBehavior (effect)
+  participant Slot as useSlotBehavior
 
   User-&gt;&gt;TE: click bank tile / press key
   TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✓
   TE-&gt;&gt;Audio: playSound(&#39;correct&#39;, 0.8)
-  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
   TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
-  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
-  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false
+  Reducer--&gt;&gt;Engine: mirrored via engineDispatch
+  Engine--&gt;&gt;Engine: assign placeTile + always(allFilledCorrectly)
   TE-&gt;&gt;Bus: emit game:evaluate { correct: true }
 
   alt all zones now correct
-    Reducer--&gt;&gt;Slot: phase → &#39;round-complete&#39;
-    Slot-&gt;&gt;Slot: triggerPop animation on each slot
+    Engine--&gt;&gt;Engine: transition → roundComplete
+    Engine-&gt;&gt;Audio: entry — playSound(&#39;round-complete&#39;)
   else some zones still empty
-    Reducer--&gt;&gt;Reducer: phase stays &#39;playing&#39;
-    Note over TE: useAutoNextSlot advances cursor to next empty slot
+    Engine--&gt;&gt;Engine: stays in playing
+    Note over TE: useAutoNextSlot advances the cursor
   end
 ```
 
 ---
 
-## 2. Wrong Tile Placement (lock-auto-eject)
+## 3. Wrong tile placement (lock-auto-eject default)
 
-WordSpell defaults to `wrongTileBehavior: &#39;lock-auto-eject&#39;`. The tile is
-placed, marked wrong, shaken, and automatically ejected.
+WordSpell defaults to `wrongTileBehavior: &#39;lock-auto-eject&#39;`. The tile
+is marked wrong, shaken, and automatically ejected after a short
+delay.
 
 ```mermaid
 sequenceDiagram
@@ -19224,28 +19449,22 @@ sequenceDiagram
   participant TE as useTileEvaluation
   participant Audio as AudioFeedback
   participant Reducer as answerGameReducer
-  participant Bus as GameEventBus
-  participant Slot as useSlotBehavior (effect)
+  participant Engine as WordSpell machine
+  participant Slot as useSlotBehavior
 
   User-&gt;&gt;TE: click bank tile / press key
   TE-&gt;&gt;TE: tile.value === zone.expectedValue? ✗
   TE-&gt;&gt;Audio: playSound(&#39;wrong&#39;, 0.8)
-  Audio--&gt;&gt;Audio: interrupts current audio, plays immediately
   TE-&gt;&gt;Reducer: PLACE_TILE { tileId, zoneIndex }
-  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = tileId
-  Reducer--&gt;&gt;Reducer: zones[i].isWrong = true, isLocked = true
-  Reducer--&gt;&gt;Reducer: retryCount++
-  TE-&gt;&gt;Bus: emit game:evaluate { correct: false }
+  Reducer--&gt;&gt;Engine: mirrored — zones[i] isWrong+isLocked, retryCount++
 
-  Reducer--&gt;&gt;Slot: isWrong = true detected
-  Slot-&gt;&gt;Slot: triggerShake animation (immediate)
+  Reducer--&gt;&gt;Slot: isWrong detected
+  Slot-&gt;&gt;Slot: triggerShake (immediate)
   Slot-&gt;&gt;Slot: wait 350 ms
-  Slot-&gt;&gt;Slot: triggerEjectReturn animation
+  Slot-&gt;&gt;Slot: triggerEjectReturn
   Slot-&gt;&gt;Slot: wait 1000 ms
-  Slot-&gt;&gt;Reducer: EJECT_TILE { zoneIndex }
-  Reducer--&gt;&gt;Reducer: zones[i].placedTileId = null
-  Reducer--&gt;&gt;Reducer: zones[i].isWrong = false, isLocked = false
-  Reducer--&gt;&gt;Reducer: tile id returned to bankTileIds
+  Slot-&gt;&gt;Reducer: EJECT_TILE
+  Reducer--&gt;&gt;Engine: mirrored — clears zone, returns to bank
 ```
 
 ### Other wrong-tile modes
@@ -19257,156 +19476,102 @@ sequenceDiagram
 
 ---
 
-## 3. Round Complete → Next Round
+## 4. Round complete → next round
 
-When all zones are filled correctly, the round-complete phase triggers a
-cascade: phase sound → confetti → delay → advance to next round → TTS
-announces the new word.
-
-```mermaid
-sequenceDiagram
-  participant Reducer as answerGameReducer
-  participant GS as useGameSounds
-  participant Audio as AudioFeedback
-  participant UI as ScoreAnimation (confetti)
-  participant WS as WordSpellSession (effect)
-  participant TTS as useRoundTTS
-
-  Note over Reducer: last PLACE_TILE made all zones correct
-  Reducer--&gt;&gt;GS: phase = &#39;round-complete&#39;
-
-  GS-&gt;&gt;Audio: playSound(&#39;round-complete&#39;)
-  Audio--&gt;&gt;Audio: interrupts queue, plays immediately
-  GS-&gt;&gt;GS: await microtask
-  GS--&gt;&gt;UI: confettiReady = true
-  UI-&gt;&gt;UI: render confetti burst
-
-  WS-&gt;&gt;WS: phase === &#39;round-complete&#39; &amp;&amp; confettiReady
-  WS-&gt;&gt;WS: start 750 ms timer
-
-  Note over WS: timer fires
-
-  alt more rounds remain
-    WS-&gt;&gt;WS: build next round tiles/zones
-    WS-&gt;&gt;Reducer: ADVANCE_ROUND { tiles, zones }
-    Reducer--&gt;&gt;Reducer: roundIndex++, zones/bankTileIds reset
-    Reducer--&gt;&gt;GS: phase = &#39;playing&#39;
-    GS--&gt;&gt;UI: confettiReady = false
-
-    TTS-&gt;&gt;Audio: whenSoundEnds()
-    Audio--&gt;&gt;TTS: queue drained
-    TTS-&gt;&gt;TTS: speak(nextWord) via Web Speech API
-  else last round
-    WS-&gt;&gt;Reducer: COMPLETE_GAME
-    Note over Reducer: see §4 Game Complete
-  end
-```
-
-### Timing breakdown
-
-| Offset   | Event                                                 |
-| -------- | ----------------------------------------------------- |
-| 0 ms     | Reducer sets `phase = &#39;round-complete&#39;`               |
-| ~0 ms    | `playSound(&#39;round-complete&#39;)` fires                   |
-| ~1 ms    | `confettiReady` flag set (microtask)                  |
-| ~1 ms    | Confetti animation starts rendering                   |
-| 750 ms   | Timer fires → `ADVANCE_ROUND` or `COMPLETE_GAME`      |
-| ~750+ ms | `whenSoundEnds()` resolves → TTS speaks the next word |
-
----
-
-## 4. Game Complete
-
-Dispatched when the last round finishes or when no more rounds exist.
-
-```mermaid
-sequenceDiagram
-  participant WS as WordSpellSession
-  participant Reducer as answerGameReducer
-  participant GS as useGameSounds
-  participant Audio as AudioFeedback
-  participant Overlay as GameOverOverlay
-
-  WS-&gt;&gt;Reducer: COMPLETE_GAME
-  Reducer--&gt;&gt;Reducer: phase = &#39;game-over&#39;
-  Reducer--&gt;&gt;GS: phase change detected
-
-  GS-&gt;&gt;Audio: playSound(&#39;game-complete&#39;)
-  GS-&gt;&gt;GS: await microtask
-  GS--&gt;&gt;Overlay: gameOverReady = true
-  Overlay-&gt;&gt;Overlay: render game-over screen
-  Overlay-&gt;&gt;Overlay: show retryCount, Play Again, Home buttons
-
-  alt user taps Play Again
-    Overlay-&gt;&gt;WS: onRestartSession()
-    WS-&gt;&gt;WS: setSessionEpoch(e + 1)
-    Note over WS: AnswerGame remounts with key={epoch}, fresh round order
-  else user taps Home
-    Overlay-&gt;&gt;WS: navigate(&#39;/$locale&#39;)
-  end
-```
-
----
-
-## 5. Full Session Lifecycle (state diagram)
+The engine drives this entirely. No more `useGameSounds`, no
+microtask-deferred `confettiReady` flag — the machine fires sounds
+from `entry` actions and the overlay gates on
+`engine.phase === &#39;roundComplete&#39;`.
 
 ```mermaid
 stateDiagram-v2
-  [*] --&gt; loading : WordSpell mounts
-  loading --&gt; playing : fresh session →\nINIT_ROUND dispatched
-  loading --&gt; playing : resumed session →\nRESUME_ROUND dispatched\n(preserves roundIndex,\nretryCount, levelIndex)
-  loading --&gt; playing : stale-draft safety net →\ndraft discarded,\nINIT_ROUND dispatched
-
-  playing --&gt; round_complete : all zones correct
-  playing --&gt; playing : wrong tile placed\n(auto-eject returns tile)
-
-  round_complete --&gt; playing : ADVANCE_ROUND\n(more rounds, 750 ms delay)
-  round_complete --&gt; game_over : COMPLETE_GAME\n(last round)
-
-  game_over --&gt; loading : Play Again\n(sessionEpoch++)
-  game_over --&gt; [*] : Home
+  [*] --&gt; playing
+  playing --&gt; roundComplete : always(allFilledCorrectly)
+  roundComplete --&gt; gameOver : after(750) [isLastRound]
+  roundComplete --&gt; waitingForNext : after(750)
+  waitingForNext --&gt; playing : ADVANCE_ROUND
 ```
 
-&gt; See `AnswerGame.flows.mdx` §9 for the full mount-effect decision tree
-&gt; (`RESUME_ROUND` vs `INIT_ROUND`). The stale-draft safety net lives in
-&gt; `WordSpell.tsx:435-474` — it detects a draft whose letters can&#39;t align
-&gt; with the current round and null-patches `draftState` before the provider
-&gt; sees it, so the resume path falls back to `INIT_ROUND`.
+Round-advance is component-driven: a `useEffect` watches
+`engine.phase === &#39;waitingForNext&#39;`, builds the next round&#39;s tiles +
+zones via `buildSentenceGapRound` / `buildTilesAndZones`, and
+dispatches `ADVANCE_ROUND { tiles, zones }` via the reducer (mirrored
+to engine).
 
 ---
 
-## 6. Sound and TTS Pipeline
+## 5. Game complete
 
-All game sounds flow through `AudioFeedback.ts`. TTS waits for the audio
-queue to drain before speaking.
+Triggered by the `after(750)` transition out of `roundComplete` when
+`isLastRound` is true.
 
 ```mermaid
-flowchart LR
-  subgraph &quot;Tile feedback (instant)&quot;
-    A[&quot;useTileEvaluation&quot;] --&gt;|&quot;playSound(&#39;correct&#39;/&#39;wrong&#39;)&quot;| B[&quot;AudioFeedback\n(interrupts queue)&quot;]
-  end
+sequenceDiagram
+  participant Engine as WordSpell machine
+  participant Audio as AudioFeedback
+  participant Bus as GameEventBus
+  participant Overlay as GameOverOverlay
 
-  subgraph &quot;Phase sounds (on transition)&quot;
-    C[&quot;useGameSounds&quot;] --&gt;|&quot;playSound(&#39;round-complete&#39;)\nplaySound(&#39;level-complete&#39;)\nplaySound(&#39;game-complete&#39;)&quot;| B
-  end
+  Engine--&gt;&gt;Engine: roundComplete + isLastRound → gameOver
+  Engine-&gt;&gt;Audio: entry — playSound(&#39;game-complete&#39;)
+  Engine-&gt;&gt;Bus: completeGame — emit(&#39;game:end&#39;, envelope)
 
-  subgraph &quot;TTS (after sounds)&quot;
-    D[&quot;useRoundTTS&quot;] --&gt;|&quot;whenSoundEnds()&quot;| B
-    B --&gt;|&quot;queue drained&quot;| E[&quot;useGameTTS.speakPrompt()\nWeb Speech API&quot;]
+  Note over Engine: phase === &#39;gameOver&#39;
+  Engine--&gt;&gt;Overlay: WordSpellInstance renders\n  &lt;GameOverOverlay /&gt; gated on engine.phase
+
+  alt user taps Play Again
+    Overlay-&gt;&gt;WordSpellInstance: onRestartSession()
+    WordSpellInstance-&gt;&gt;WordSpellInstance: setSessionEpoch(e + 1)
+    Note over WordSpellInstance: actor remounts via key={sessionEpoch}
+  else user taps Home
+    Overlay-&gt;&gt;WordSpellInstance: navigate(&#39;/$locale&#39;)
   end
 ```
 
-### AudioFeedback API
+---
 
-| Function          | Behavior                                            | Use case                  |
-| ----------------- | --------------------------------------------------- | ------------------------- |
-| `playSound()`     | Interrupts current audio + resets queue             | Tile correct/wrong sounds |
-| `queueSound()`    | Appends to queue; resolves when sound **starts**    | Phase transition sounds   |
-| `whenSoundEnds()` | Resolves when entire queue (current + pending) ends | TTS delay                 |
+## 6. Sentence-gap free-swap mode
 
-&gt; **Note:** `useGameSounds` currently uses `playSound()` (interrupt), not
-&gt; `queueSound()`. This means a rapid correct tile + round-complete can cut off
-&gt; the tile sound. This is intentional — the phase sound takes priority.
+In `sentence-gap` mode WordSpell uses
+`slotInteraction: &#39;free-swap&#39;` — the user can rearrange tiles between
+filled slots without clearing them first.
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant Slot as Slot (drag handler)
+  participant Reducer as answerGameReducer
+  participant Engine as WordSpell machine
+
+  User-&gt;&gt;Slot: drag tile from zone A → zone B (both filled)
+  Slot-&gt;&gt;Reducer: SWAP_TILES { fromZoneIndex, toZoneIndex }
+  Reducer--&gt;&gt;Engine: mirrored — swap tile ids between zones
+  Note over Engine: always(allFilledCorrectly) re-evaluates
+```
+
+For ordered modes (single-word, etc.), drops onto a filled zone are
+rejected by `Slot`&#39;s drop handler — `SWAP_TILES` never fires.
+
+---
+
+## 7. Full session lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --&gt; loading : WordSpell mounts (sessionEpoch=0)
+  loading --&gt; playing : INIT_ROUND (fresh) or\nRESUME_ROUND (draft)
+  playing --&gt; roundComplete : always(allFilledCorrectly)
+  roundComplete --&gt; gameOver : after(750) [isLastRound]
+  roundComplete --&gt; waitingForNext : after(750)
+  waitingForNext --&gt; playing : ADVANCE_ROUND
+  gameOver --&gt; loading : Play Again (sessionEpoch++)
+  gameOver --&gt; [*] : Home
+```
+
+&gt; Mid-celebration tab-close + resume no longer replays the celebration:
+&gt; `useAnswerGameDraftSync.buildDraft` returns `null` during
+&gt; `round-complete` / `level-complete` / `game-over` reducer phases. See
+&gt; `GameEngine.flows.mdx` §4 (Draft State Sync).
 </code></pre>
           </div>
         </div>
@@ -19421,7 +19586,7 @@ flowchart LR
       <h2><span class="status-dot dot-ok"></span> Library/Distractors</h2>
       <div class="badges">
         
-        <label for="doc-8-library-distractors-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-9-library-distractors-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/distractors/distractors.mdx">library-distractors--docs · ./src/lib/distractors/distractors.mdx</div>
@@ -19430,7 +19595,7 @@ flowchart LR
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-8-library-distractors-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-9-library-distractors-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -19479,7 +19644,7 @@ Future sources tracked in [#259](https://github.com/leocaseiro/base-skill/issues
       <h2><span class="status-dot dot-ok"></span> GameEngine/Flows</h2>
       <div class="badges">
         
-        <label for="doc-9-gameengine-flows-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-10-gameengine-flows-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-engine/GameEngine.flows.mdx">gameengine-flows--docs · ./src/lib/game-engine/GameEngine.flows.mdx</div>
@@ -19488,7 +19653,7 @@ Future sources tracked in [#259](https://github.com/leocaseiro/base-skill/issues
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-9-gameengine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-10-gameengine-flows-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -19579,6 +19744,14 @@ sequenceDiagram
 `useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
 restores exactly where the player left off.
 
+&gt; **Celebration phases are excluded from persistence (U1a).**
+&gt; `buildDraft` returns `null` for `game-over`, `round-complete`, and
+&gt; `level-complete` phases. A tab-close-then-resume during the 750 ms
+&gt; celebration window therefore does not replay the celebration on the
+&gt; next mount — the draft is cleared, and `RESUME_ROUND` is not
+&gt; dispatched. See `useAnswerGameDraftSync.ts` for the source of truth.
+&gt; (review #15)
+
 ```mermaid
 sequenceDiagram
   participant Provider as AnswerGameProvider
@@ -19638,6 +19811,57 @@ stateDiagram-v2
   models RESTART.
 - `levelComplete` is not in PR 1a&#39;s NumberMatch slice. PR 1b adds it
   alongside WordSpell + SortNumbers when they introduce level mode.
+
+### 5b. WordSpell phase machine
+
+Identical to NumberMatch&#39;s machine (same states, same events). The
+context shape adds no WordSpell-specific fields — every field is
+shared with NumberMatch. Round construction (`buildSentenceGapRound`,
+`buildTilesAndZones`) stays in `WordSpell.tsx` per Spec Delta 4. At
+runtime `isLevelMode` is always `false` and `levelIndex` is unused —
+the machine never enters `levelComplete`.
+
+### 5c. SortNumbers phase machine (with levelComplete)
+
+Adds a `levelComplete` state and an `ADVANCE_LEVEL` event:
+
+```text
+playing
+↓ always(allFilledCorrectly)
+roundComplete
+↓ after(750)
+  - isLastRound → gameOver
+  - isLastRoundOfLevel → levelComplete
+  - otherwise → waitingForNext
+
+levelComplete
+↓ ADVANCE_LEVEL → incrementLevelIndex + advanceLevelState → playing
+
+waitingForNext
+↓ ADVANCE_ROUND → incrementRoundIndex + advanceRoundState → playing
+```
+
+Level progression is component-driven: `SortNumbersSession` builds the
+next level&#39;s tiles + zones via `buildSortRound(nextLevelIndex)` and
+dispatches `ADVANCE_LEVEL { tiles, zones }` via the reducer (mirrored
+to engine). The engine&#39;s `ADVANCE_LEVEL` handler runs
+`incrementRoundIndex` + `incrementLevelIndex` + `advanceLevelState` —
+so the engine&#39;s `roundIndex` accumulates across level boundaries,
+keeping `isLastRound` correct on the final round of the final level.
+The reducer mirror still resets `roundIndex` per level for HUD
+display; PR 1c collapses the reducer and the HUD will then compute
+per-level round from `engine.roundIndex % levelSize`.
+
+**Endless vs finite level mode.** The component must pass both
+`isLevelMode: config.levelMode !== undefined` AND
+`maxLevels: config.levelMode?.maxLevels ?? null` to `useGameEngine`.
+With `maxLevels === null` (endless), the guards suppress `isLastRound`
+and let `isLastRoundOfLevel` fire on every `levelSize` boundary — so
+the only way to reach `gameOver` is an explicit `COMPLETE_GAME`
+(e.g., &quot;I&#39;m Done&quot; button on the level-complete overlay). Simple-config
+ships exactly this shape: `totalRounds: 1`, `levelMode` defined,
+no cap. See `GameEngine.reference.mdx → Engine-injected guards` for
+the guard bodies.
 
 ### 6. Side-effect flow
 
@@ -19732,7 +19956,7 @@ for lifecycle/phase (overlay gating, round-advance timing,
       <h2><span class="status-dot dot-ok"></span> GameEngine/Reference</h2>
       <div class="badges">
         
-        <label for="doc-10-gameengine-reference-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-11-gameengine-reference-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-engine/GameEngine.reference.mdx">gameengine-reference--docs · ./src/lib/game-engine/GameEngine.reference.mdx</div>
@@ -19741,7 +19965,7 @@ for lifecycle/phase (overlay gating, round-advance timing,
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-10-gameengine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-11-gameengine-reference-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -19911,12 +20135,14 @@ const engine = useGameEngine&lt;TRound, TContext&gt;(
 
 `options`:
 
-| Field         | Type                      | Description                                                                                                                 |
-| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `input`       | `unknown`                 | Populates the machine&#39;s initial context via XState v5&#39;s `setup({ types: { input } })` + `useMachine(machine, { input })`    |
-| `envelope`    | `Partial&lt;EngineEnvelope&gt;` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
-| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
-| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+| Field         | Type                          | Description                                                                                                                                                                                                       |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                     | Populates the machine&#39;s initial context via XState v5&#39;s `setup({ types: { input } })` + `useMachine(machine, { input })`                                                                                          |
+| `envelope`    | `Partial&lt;EngineEnvelope&gt;`     | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook                                                                                       |
+| `totalRounds` | `number`                      | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                                                                                                         |
+| `levelSize`   | `number`                      | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                                                                                                                   |
+| `isLevelMode` | `boolean \| undefined`        | Set `true` whenever a `levelMode` block exists on the config — even without `maxLevels`. Enables endless level mode in the guards. Defaults to `false` (no level mode) so NumberMatch / WordSpell stay unaffected |
+| `maxLevels`   | `number \| null \| undefined` | `null` = endless levels, `number` = finite. Pair with `isLevelMode: true`. Defaults to `null`                                                                                                                     |
 
 `UseGameEngineResult&lt;TContext&gt;`:
 
@@ -19940,18 +20166,38 @@ machine state change but always reaches the same underlying actor.
 
 ### Engine-injected guards and actions
 
-`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
-for the placeholder guards declared in each game&#39;s `setup({ guards })`:
+`buildEngineGuards(totalRounds, levelSize, { isLevelMode, maxLevels })`
+returns the runtime bodies for the placeholder guards declared in each
+game&#39;s `setup({ guards })`. The third argument carries level-mode
+context the engine can&#39;t derive from `totalRounds` alone:
 
 ```ts
-isMidLevelRound: ({ context }) =&gt;
-  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &amp;&amp;
-  context.roundIndex + 1 &lt; totalRounds;
-isLastRoundOfLevel: ({ context }) =&gt;
-  (context.roundIndex + 1) % max(levelSize, 1) === 0 &amp;&amp;
-  context.roundIndex + 1 &lt; totalRounds;
-isLastRound: ({ context }) =&gt; context.roundIndex + 1 &gt;= totalRounds;
+const isEndless = isLevelMode === true &amp;&amp; maxLevels === null;
+
+isMidLevelRound: ({ context }) =&gt; {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel === 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 &lt; totalRounds;
+};
+isLastRoundOfLevel: ({ context }) =&gt; {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel !== 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 &lt; totalRounds;
+};
+isLastRound: ({ context }) =&gt; {
+  if (isEndless) return false;
+  return context.roundIndex + 1 &gt;= totalRounds;
+};
 ```
+
+The `isEndless` branch keeps `gameOver` reachable only via explicit
+`COMPLETE_GAME` / `GAME_OVER` events (e.g., user taps &quot;I&#39;m Done&quot; on
+the level-complete overlay). Without it, the engine would treat
+`roundIndex + 1 &gt;= totalRounds` as &quot;game&#39;s over&quot; even when
+`levelMode.generateNextLevel` is ready to produce another level —
+the regression `e2e/sortnumbers-level-advance.spec.ts` pins this.
 
 Engine-injected actions (overridden by `useGameEngine.provide`):
 
@@ -20058,6 +20304,63 @@ seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
    dispatches.
 10. NumberMatch&#39;s engine is held by an inner `NumberMatchInstance`
     keyed by `sessionEpoch` so the actor remounts on Play Again.
+
+### Per-game machine contexts (PR 1b)
+
+#### `WordSpellEngineContext`
+
+Identical field set to `NumberMatchEngineContext` (see
+`src/games/number-match/definition.ts`). Per Spec Delta 3, WordSpell
+does **not** carry `firstActionAt` or `selectedSlotIds` — PR 1b-bis
+introduces them when the timestamp write and Set toggle land.
+
+| Field                 | Type                                             | Notes                                              |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                    |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                  |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked` |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                   |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                               |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                               |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                     |
+| `retryCount`          | `number`                                         | Wrong placements this round                        |
+| `roundIndex`          | `number`                                         | 0-based current round                              |
+| `levelIndex`          | `number`                                         | Always `0` at runtime — WordSpell never advances   |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                         |
+| `maxLevels`           | `number \| null`                                 | Always `null` — WordSpell has no level mode        |
+| `wrongTileBehavior`   | `&#39;reject&#39; \| &#39;lock-manual&#39; \| &#39;lock-auto-eject&#39;` | Defaults to `&#39;lock-auto-eject&#39;`                    |
+| `isLevelMode`         | `boolean`                                        | Always `false` for WordSpell                       |
+
+#### `SortNumbersEngineContext`
+
+Same field set as `WordSpellEngineContext`, with two semantic
+differences:
+
+- `levelIndex` is read at runtime — the machine increments it via the
+  `ADVANCE_LEVEL` handler and `LevelCompleteOverlay` reads it for the
+  level title.
+- `roundIndex` accumulates across level boundaries (see
+  `GameEngine.flows.mdx` §5c). The engine guards
+  (`isLastRound: roundIndex + 1 &gt;= totalRounds`) only fire correctly
+  with cumulative `roundIndex`. The reducer mirror still resets
+  `roundIndex` per level for HUD display until PR 1c.
+
+| Field                 | Type                                             | Notes                                                |
+| --------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                      |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                    |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked`   |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                     |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                                 |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                                 |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                       |
+| `retryCount`          | `number`                                         | Wrong placements this round                          |
+| `roundIndex`          | `number`                                         | Cumulative across level boundaries (engine semantic) |
+| `levelIndex`          | `number`                                         | 0-based current level                                |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                           |
+| `maxLevels`           | `number \| null`                                 | From `useGameEngine` input                           |
+| `wrongTileBehavior`   | `&#39;reject&#39; \| &#39;lock-manual&#39; \| &#39;lock-auto-eject&#39;` | Defaults to `&#39;lock-auto-eject&#39;`                      |
+| `isLevelMode`         | `boolean`                                        | `true` when the config declares a level mode         |
 </code></pre>
           </div>
         </div>
@@ -20072,7 +20375,7 @@ seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
       <h2><span class="status-dot dot-ok"></span> GameEngine/Debugging</h2>
       <div class="badges">
         
-        <label for="doc-11-gameengine-debugging-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-12-gameengine-debugging-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-engine/debugging.mdx">gameengine-debugging--docs · ./src/lib/game-engine/debugging.mdx</div>
@@ -20081,7 +20384,7 @@ seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-11-gameengine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-12-gameengine-debugging-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -20315,6 +20618,13 @@ Filter the browser console to `[TTS]` to see only speech events.
 
 Both reducers are pure functions and can be tested without React:
 
+&gt; **Note:** this snippet relies on `answer-game-reducer`, which is removed in
+&gt; PR 1c. The XState-first engine replaces it (see §5 above and §9 for the
+&gt; overlay invariant). For new tests, drive `wordSpellMachine` /
+&gt; `sortNumbersMachine` / `numberMatchMachine` directly via `createActor(...)`
+&gt; — see the `definition.test.ts` files for the canonical pattern. Kept here
+&gt; as a historical reference until PR 1c lands.
+
 ```ts
 import {
   answerGameReducer,
@@ -20453,7 +20763,8 @@ Checklist if you see a double-mount in dev:
 2. Confirm overlays are conditionally rendered on `engine.phase`,
    not on a derived `setState`-driven flag. The prior `useGameSounds`
    pattern with a microtask-deferred `confettiReady`/`gameOverReady`
-   is no longer used in NumberMatch.
+   was removed in PR 1b — sounds now fire from machine `entry`
+   actions and overlays gate directly on `engine.phase`.
 3. Confirm only one game component is mounted — e.g., a stale Storybook
    story decorator or React strict-mode double-render.
 
@@ -20506,7 +20817,7 @@ PR 1c**. For PR 1a, debug via React DevTools, console subscriptions
       <h2><span class="status-dot dot-ok"></span> Services/GameEventBus</h2>
       <div class="badges">
         
-        <label for="doc-12-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-13-services-gameeventbus-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/game-event-bus.mdx">services-gameeventbus--docs · ./src/lib/game-event-bus.mdx</div>
@@ -20515,7 +20826,7 @@ PR 1c**. For PR 1a, debug via React DevTools, console subscriptions
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-12-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-13-services-gameeventbus-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -20562,7 +20873,7 @@ A typed pub/sub event bus for coordinating game engine events.
       <h2><span class="status-dot dot-ok"></span> Utils/i18n</h2>
       <div class="badges">
         
-        <label for="doc-13-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-14-utils-i18n-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/i18n/i18n.mdx">utils-i18n--docs · ./src/lib/i18n/i18n.mdx</div>
@@ -20571,7 +20882,7 @@ A typed pub/sub event bus for coordinating game engine events.
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-13-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-14-utils-i18n-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -20630,7 +20941,7 @@ they do not read the locale from i18next config at runtime — the router render
       <h2><span class="status-dot dot-ok"></span> Services/SpeechInput</h2>
       <div class="badges">
         
-        <label for="doc-14-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-15-services-speechinput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechInput.mdx">services-speechinput--docs · ./src/lib/speech/SpeechInput.mdx</div>
@@ -20639,7 +20950,7 @@ they do not read the locale from i18next config at runtime — the router render
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-14-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-15-services-speechinput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -20681,7 +20992,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
       <h2><span class="status-dot dot-ok"></span> Services/SpeechOutput</h2>
       <div class="badges">
         
-        <label for="doc-15-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-16-services-speechoutput-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/speech/SpeechOutput.mdx">services-speechoutput--docs · ./src/lib/speech/SpeechOutput.mdx</div>
@@ -20690,7 +21001,7 @@ Wraps the browser&#39;s `SpeechRecognition` / `webkitSpeechRecognition` API. Ret
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-15-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-16-services-speechoutput-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
@@ -20733,7 +21044,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
       <h2><span class="status-dot dot-ok"></span> Theme/CSS Variables</h2>
       <div class="badges">
         
-        <label for="doc-16-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
+        <label for="doc-17-theme-css-variables-docs-content" class="badge ok as-toggle">view content</label>
       </div>
     </div>
     <div class="meta" title="./src/lib/theme/css-vars.mdx">theme-css-variables--docs · ./src/lib/theme/css-vars.mdx</div>
@@ -20742,7 +21053,7 @@ Wraps the browser&#39;s `SpeechSynthesis` API. Gracefully degrades when the API 
 
   <!-- Hidden toggles must be siblings BEFORE .panels -->
   
-  <input id="doc-16-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
+  <input id="doc-17-theme-css-variables-docs-content" class="tg tg-content" type="checkbox" hidden />
 
   <div class="panels">
     
