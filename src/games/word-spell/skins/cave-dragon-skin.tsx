@@ -233,61 +233,65 @@ const sceneStyles = `
   animation-direction: alternate;
   animation-timing-function: ease-in-out;
 }
-/* Each layer morphs its d-attribute between two subtly different
-   wave shapes (peaks/troughs swap horizontal positions, wave-line
-   shifts ±10–15 viewBox units vertically). Combined with
-   animation-direction: alternate, the wave undulates back and forth
-   instead of just sliding rigidly. Different durations + negative
-   delays so the four layers desync. */
+/* Each layer morphs its d-attribute between two visibly different
+   wave shapes — peaks/troughs swap places AND the wave-line shifts
+   ±15 viewBox units vertically. Combined with animation-direction:
+   alternate, the wave undulates rather than slides rigidly. Larger
+   bezier amplitude (±40 around the wave-line) makes the curves
+   actually read as waves at the rendered scale. Different durations
+   + negative delays so the four layers desync. */
 .cd-wave-1 {
   animation-name: cd-wave-morph-1;
-  animation-duration: 5s;
+  animation-duration: 2.6s;
 }
 .cd-wave-2 {
   animation-name: cd-wave-morph-2;
-  animation-duration: 6s;
-  animation-delay: -1.5s;
+  animation-duration: 3.4s;
+  animation-delay: -1s;
 }
 .cd-wave-3 {
   animation-name: cd-wave-morph-3;
-  animation-duration: 4.5s;
-  animation-delay: -1s;
+  animation-duration: 2.8s;
+  animation-delay: -0.7s;
 }
 .cd-wave-4 {
   animation-name: cd-wave-morph-4;
-  animation-duration: 6.5s;
-  animation-delay: -2s;
+  animation-duration: 3.8s;
+  animation-delay: -1.5s;
 }
+/* Each keyframe pair inverts the bezier peaks/troughs (peak y →
+   trough y and vice versa) so the visible wave silhouette moves
+   horizontally as well as bobbing vertically. */
 @keyframes cd-wave-morph-1 {
   from {
-    d: path('M 0,600 L 0,80 C 240,60 480,100 720,80 C 960,60 1200,100 1440,80 L 1440,600 Z');
+    d: path('M 0,600 L 0,80 C 200,35 400,125 600,80 C 800,35 1000,125 1200,80 C 1320,55 1400,105 1440,80 L 1440,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,92 C 240,112 480,72 720,92 C 960,112 1200,72 1440,92 L 1440,600 Z');
+    d: path('M 0,600 L 0,95 C 200,140 400,50 600,95 C 800,140 1000,50 1200,95 C 1320,120 1400,70 1440,95 L 1440,600 Z');
   }
 }
 @keyframes cd-wave-morph-2 {
   from {
-    d: path('M 0,600 L 0,220 C 240,240 480,200 720,220 C 960,240 1200,200 1440,220 L 1440,600 Z');
+    d: path('M 0,600 L 0,220 C 200,255 400,185 600,220 C 800,255 1000,185 1200,220 C 1320,200 1400,240 1440,220 L 1440,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,232 C 240,212 480,252 720,232 C 960,212 1200,252 1440,232 L 1440,600 Z');
+    d: path('M 0,600 L 0,235 C 200,200 400,270 600,235 C 800,200 1000,270 1200,235 C 1320,255 1400,215 1440,235 L 1440,600 Z');
   }
 }
 @keyframes cd-wave-morph-3 {
   from {
-    d: path('M 0,600 L 0,360 C 240,340 480,380 720,360 C 960,340 1200,380 1440,360 L 1440,600 Z');
+    d: path('M 0,600 L 0,360 C 200,335 400,385 600,360 C 800,335 1000,385 1200,360 C 1320,345 1400,375 1440,360 L 1440,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,372 C 240,392 480,352 720,372 C 960,392 1200,352 1440,372 L 1440,600 Z');
+    d: path('M 0,600 L 0,373 C 200,398 400,348 600,373 C 800,398 1000,348 1200,373 C 1320,388 1400,358 1440,373 L 1440,600 Z');
   }
 }
 @keyframes cd-wave-morph-4 {
   from {
-    d: path('M 0,600 L 0,500 C 240,520 480,480 720,500 C 960,520 1200,480 1440,500 L 1440,600 Z');
+    d: path('M 0,600 L 0,500 C 200,478 400,522 600,500 C 800,478 1000,522 1200,500 C 1320,488 1400,512 1440,500 L 1440,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,510 C 240,490 480,530 720,510 C 960,490 1200,530 1440,510 L 1440,600 Z');
+    d: path('M 0,600 L 0,512 C 200,534 400,490 600,512 C 800,534 1000,490 1200,512 C 1320,524 1400,500 1440,512 L 1440,600 Z');
   }
 }
 .cave-dragon-scene__lava-bubble {
@@ -638,22 +642,22 @@ const SceneBackground = () => (
           </defs>
           <path
             className="cd-wave cd-wave-1"
-            d="M 0,600 L 0,80 C 240,60 480,100 720,80 C 960,60 1200,100 1440,80 L 1440,600 Z"
+            d="M 0,600 L 0,80 C 200,35 400,125 600,80 C 800,35 1000,125 1200,80 C 1320,55 1400,105 1440,80 L 1440,600 Z"
             fill="url(#cd-wave-grad-1)"
           />
           <path
             className="cd-wave cd-wave-2"
-            d="M 0,600 L 0,220 C 240,240 480,200 720,220 C 960,240 1200,200 1440,220 L 1440,600 Z"
+            d="M 0,600 L 0,220 C 200,255 400,185 600,220 C 800,255 1000,185 1200,220 C 1320,200 1400,240 1440,220 L 1440,600 Z"
             fill="url(#cd-wave-grad-2)"
           />
           <path
             className="cd-wave cd-wave-3"
-            d="M 0,600 L 0,360 C 240,340 480,380 720,360 C 960,340 1200,380 1440,360 L 1440,600 Z"
+            d="M 0,600 L 0,360 C 200,335 400,385 600,360 C 800,335 1000,385 1200,360 C 1320,345 1400,375 1440,360 L 1440,600 Z"
             fill="url(#cd-wave-grad-3)"
           />
           <path
             className="cd-wave cd-wave-4"
-            d="M 0,600 L 0,500 C 240,520 480,480 720,500 C 960,520 1200,480 1440,500 L 1440,600 Z"
+            d="M 0,600 L 0,500 C 200,478 400,522 600,500 C 800,478 1000,522 1200,500 C 1320,488 1400,512 1440,500 L 1440,600 Z"
             fill="url(#cd-wave-grad-4)"
           />
         </svg>
