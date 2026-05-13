@@ -1,6 +1,8 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { ConfigField } from '@/lib/config-fields';
 
+export type NumberMatchSkinId = 'classic';
+
 export type NumberMatchSimpleConfig = {
   configMode: 'simple';
   from: 'numeral' | 'group' | 'word' | 'ordinal';
@@ -35,6 +37,8 @@ export interface NumberMatchConfig extends AnswerGameConfig {
   tileStyle: 'dots' | 'objects' | 'fingers';
   range: { min: number; max: number };
   rounds: NumberMatchRound[];
+  /** Narrowed skin id for NumberMatch. */
+  skin?: NumberMatchSkinId;
 }
 
 export const numberMatchConfigFields: ConfigField[] = [
