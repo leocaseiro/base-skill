@@ -6,6 +6,8 @@ import type {
 } from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
 
+export type WordSpellSkinId = 'classic' | 'dragon-cave';
+
 export type WordSpellSimpleConfig = {
   configMode: 'simple';
   selectedUnits: LevelGraphemeUnit[];
@@ -53,6 +55,8 @@ export interface WordSpellConfig extends AnswerGameConfig {
   rounds?: WordSpellRound[];
   /** Library-driven rounds. Resolved at WordSpell mount time. */
   source?: WordSpellSource;
+  /** Narrowed skin id for WordSpell. */
+  skin?: WordSpellSkinId;
 }
 
 export const wordSpellConfigFields: ConfigField[] = [
