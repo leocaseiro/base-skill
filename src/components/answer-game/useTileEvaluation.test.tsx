@@ -162,7 +162,21 @@ describe('useTileEvaluation', () => {
 
   it('skips default sound when skin.suppressDefaultSounds is true', () => {
     __resetSkinRegistryForTests();
-    registerSkin('test', {
+    // Cast: this test registers under a fictional 'test' gameId that
+    // isn't part of GameSkinIdMap. The registry's runtime is permissive
+    // (Map<string, …>); the call-site narrowing is enforced for real
+    // games and covered by registry.test.ts.
+    (
+      registerSkin as unknown as (
+        gameId: string,
+        skin: {
+          id: string;
+          name: string;
+          tokens: Record<string, string>;
+          suppressDefaultSounds?: boolean;
+        },
+      ) => void
+    )('test', {
       id: 'silent',
       name: 'Silent',
       tokens: {},
