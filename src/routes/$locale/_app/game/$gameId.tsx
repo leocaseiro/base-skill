@@ -79,11 +79,11 @@ interface GameRouteLoaderData {
   persistedContent: Record<string, unknown> | null;
 }
 
-const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
+export const DEFAULT_RECALL_CONFIG: WordSpellConfig = {
   gameId: 'word-spell',
   component: 'WordSpell',
   inputMethod: 'drag',
-  wrongTileBehavior: 'lock-manual',
+  wrongTileBehavior: 'lock-auto-eject',
   tileBankMode: 'exact',
   totalRounds: 4,
   roundsInOrder: false,
