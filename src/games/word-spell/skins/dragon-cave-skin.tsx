@@ -192,16 +192,31 @@ const LavaWaveGradients = (
 
 const sceneStyles = `
 .skin-dragon-cave {
-  position: relative;
+  /* Break out of GameShell's padded content area so the cave fills the
+     entire viewport (Bug 2 on PR #375). width/height min() clamps
+     preserve the cliff art's 2738:1536 aspect ratio via letterbox or
+     pillarbox depending on viewport shape — the cave centers itself via
+     margin: auto in the residual space. Once the box reliably exceeds
+     962px wide on common landscape viewports, the 100cqi/962px scale on
+     HUD/UI children produces >= 1 scale and Bug 1 (tiny HUD) resolves
+     as a consequence. */
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(100vw, calc(100vh * 2738 / 1536));
+  height: min(100vh, calc(100vw * 1536 / 2738));
+  max-width: none;
+  min-width: 0;
   isolation: isolate;
   overflow: hidden;
-  width: 100%;
-  max-width: min(2738px, calc(100dvh * 2738 / 1536));
-  min-width: 667px;
-  margin-inline: auto;
   aspect-ratio: 2738 / 1536;
   container-type: inline-size;
 }
+/* Pre-fix the :fullscreen rule was needed because the default rule
+   constrained the box; now the default rule already does what
+   :fullscreen used to do. Left as a documented no-op duplicate — the
+   browser still ships the same styles whether the element is in
+   fullscreen mode or not, which is the intent. */
 .skin-dragon-cave:fullscreen {
   width: min(100vw, calc(100vh * 2738 / 1536));
   max-width: none;
