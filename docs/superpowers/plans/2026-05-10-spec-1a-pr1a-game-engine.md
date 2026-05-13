@@ -1,0 +1,1602 @@
+# PR 1a — GameEngine Foundation Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Land the GameEngine foundation: install `xstate@5` + `@xstate/react@5`, pin the lifecycle-tts type contract, define `GameDefinition` types, ship `useGameEngine` + `executeSideEffects`, and migrate **NumberMatch** end-to-end to XState — its machine context owns the entire game state (tiles, zones, drag state, retryCount, levelIndex, roundIndex, phase). NumberMatch stops using `useReducer` for game state. PR 1b applies the same shape to WordSpell + SortNumbers; PR 1c deletes `answer-game-reducer.ts`.
+
+**Architecture:** A new `src/lib/game-engine/useGameEngine.ts` hook wraps XState v5's `useMachine(definition.machine.provide({ guards, actors, actions }))`. Under XState-first, **the machine is the sole source of truth for per-game state** for migrated games. NumberMatch's component (`NumberMatch.tsx`) reads tiles, zones, drag state, phase, retryCount, levelIndex, and roundIndex from `engine.context`, and dispatches all state-mutating events (PLACE_TILE, EJECT_TILE, ROUND_CORRECT, NEXT, etc.) via `engine.send` — there is no `useAnswerGameContext()` for NumberMatch state, no `useReducer` dispatch, no phase bridge. The engine emits `lifecycle:speak` and `celebration:*` events through the existing `GameEventBus`; PR 1a does not subscribe to `lifecycle:speak` (the TTS plan owns that), and existing `useRoundTTS` continues to drive prompt speech unchanged. Celebration overlay **mounting** stays in NumberMatch.tsx in PR 1a (gated by `engine.phase`) — PR 1c (or later) moves mounting into a `CelebrationHost`. WordSpell + SortNumbers continue to use `useReducer` until they migrate in PR 1b.
+
+**Tech Stack:** XState v5 (`xstate@5`, `@xstate/react@5`), React 19, TypeScript, Vitest, existing `GameEventBus`.
+
+**Spec:** `docs/superpowers/plans/2026-05-07-game-definition-engine-design.md` (lines 95–204 for PR 1a scope, lines 205–318 for the GameDefinition type, lines 461–504 for celebration semantics, lines 502–699 for the NumberMatch machine sample).
+
+---
+
+## Architectural Shift — XState-first (2026-05-10)
+
+This plan was originally framed around a **transitional phase bridge** in PR 1a: NumberMatch would keep `useReducer` (`answer-game-reducer.ts`) for tiles/zones/drag state, with a one-directional `useEffect` mirroring the reducer's `phase` to XState events. PR 1c (Phase 2) was scheduled to remove `reducer.phase` later.
+
+The design has shifted to **XState-first**: by end of Phase 1, `answer-game-reducer.ts` is deleted and XState owns **all** per-game state. PR 1a delivers the canonical pattern end-to-end on NumberMatch — no `useReducer` for game state, no phase bridge. Each subsequent PR (1b WordSpell+SortNumbers, 1d SpotAll) adopts the same shape. PR 1c performs the cleanup: deletes `answer-game-reducer.ts`, removes `useAnswerGameContext` (or reduces it to a shim), and migrates `SessionRecorderGate` off `useGameLifecycle`.
+
+Scope-impact summary (read this before reading the rest of the plan):
+
+- **NumberMatch in PR 1a**: machine context grows to include the full `AnswerGameState` equivalent (tiles, zones, drag state, retryCount, isLevelMode, levelIndex, roundIndex, phase, etc.). All 22 reducer actions become XState events with `assign` actions. The component (`NumberMatch.tsx`) reads from `engine.context` and dispatches via `engine.send` — `useAnswerGameContext()` is **not** called for state.
+- **`answer-game-reducer.ts`**: continues to exist in PR 1a because WordSpell + SortNumbers still consume it. Deleted in PR 1c.
+- **`useAnswerGameContext`**: still mounted by the wider game shell so non-migrated games keep working. NumberMatch does not consume it for state. Shimmed or removed in PR 1c.
+- **Phase bridge pattern**: removed from PR 1a entirely. The bridge `useEffect` described in earlier drafts of this plan is not used; per-game machines emit transitions directly via `engine.send` from their components.
+- **Tests**: NumberMatch's existing reducer-level tests (in `answer-game-reducer.test.ts` for cases that exercise NumberMatch-specific behavior) move to machine-level tests against `numberMatchMachine`. Reducer tests for WordSpell + SortNumbers remain until PR 1b.
+
+Tasks 8 and 9 below reflect the XState-first shape. Earlier readers familiar with the bridge pattern: that pattern is gone — Task 9 dispatches directly to the machine.
+
+---
+
+## Spec Deltas
+
+The design doc is the binding source of truth for the GameDefinition shape; the deltas below are intentional **PR 1a scope reductions** that defer parts of the design to PR 1b/1c. None of them break the typed contract — every type from the design is created with the right shape; some fields are populated minimally in PR 1a and tightened later.
+
+1. **Celebration overlay mounting stays in NumberMatch.tsx in PR 1a; `useGameSounds` is left untouched.** The design states the engine takes ownership of mounting `<skin.CelebrationOverlay />`, `<skin.LevelCompleteOverlay />`, and `<skin.RoundCompleteEffect />` (design lines 478–481, 698–703). PR 1a only owns the **lifecycle decision** (engine drives the phase via `engine.context.phase` and `engine.phase`). The game component still renders skin overlays based on `engine.phase`. The double-mount race the design warns about is avoided because NumberMatch's machine is the sole authority for `phase` — there is no second `phase` field in a reducer to race against. The full registry-based mounting moves into a `CelebrationHost` in PR 1c (after the abstraction is validated across three games). PR 1b absorbs the `useGameSounds` gate-boolean removal alongside WordSpell + SortNumbers migrations (one removal site, three migrated consumers). **Why now is fine:** PR 1a's NumberMatch reads `engine.phase` for overlay gating; deferring the hook surgery to PR 1b avoids breaking WordSpell + SortNumbers in the interim.
+
+2. **`engine.celebrating` returns `null` in PR 1a.** The `UseGameEngineResult.celebrating` field exists (typed exactly per the design) so downstream callers compile, but the implementation returns `null` for now. NumberMatch reads `engine.phase` directly to gate overlays. PR 1b populates `celebrating` from machine context after we register `celebrationActor`/`levelCelebrationActor`/`gameOverActor` with full input plumbing. **Why now is fine:** no caller in PR 1a depends on `celebrating !== null`; the field is only consumed by future engine-mounted overlays (PR 1c+).
+
+3. **Celebration actors are simple `fromPromise` timers in PR 1a, gated by external `engine.send` for early dismiss.** The design describes invoked actors with `onDone` driven by mini-game completion (design lines 469–504). PR 1a implements them as `fromPromise` actors that resolve after a `maxDuration` fallback timer **and** the parent state listens for `CELEBRATION_DONE` (a top-level event sent by the game component when the user dismisses early via Play Again / Go Home). NumberMatch already ships its skip flow through skin-level callbacks; we surface those into engine events. **Why now is fine:** matches the design's "skip via buttons fires `celebration:skip`" semantic; richer actor lifecycles can land alongside DinoEggHatch / FireworksPainter integration when those PRs rebase on the engine.
+
+4. **`answer-game-reducer.ts` continues to exist in PR 1a (still consumed by WordSpell + SortNumbers).** Under XState-first, NumberMatch no longer uses `useReducer` for game state — its machine context owns tiles, zones, drag state, retryCount, levelIndex, roundIndex, and phase. `useAnswerGameContext()` is **not** called by NumberMatch for state. The reducer module itself stays around because WordSpell + SortNumbers still consume it; PR 1b migrates those games and PR 1c deletes the module. **Why now is fine:** the reducer's logic survives intact for non-migrated games, and migrating WordSpell + SortNumbers in the same PR as NumberMatch would balloon PR 1a's blast radius. NumberMatch's machine implements assign actions that mirror the reducer's NumberMatch-relevant cases (PLACE_TILE, EJECT_TILE, etc.) — see Task 8.
+
+5. **`useLifecycleTTS` is not created in PR 1a.** The design line 781 mentions wiring "a stub `useLifecycleTTS` that subscribes to the bus" in PR 1a. The handoff scope (2026-05-10 handoff lines 51–56) excludes the hook; the TTS plan (`2026-05-06-spec-1a-m1-tts-lifecycle.md`) owns it end-to-end. PR 1a only **emits** `lifecycle:speak` from `executeSideEffects`; with no subscriber, emissions are recorded by the bus but produce no audio — a no-op until the TTS plan ships. Existing `useRoundTTS` continues to drive prompt speech for NumberMatch with no changes. **Why now is fine:** keeps the TTS plan independently shippable and avoids a stub the TTS plan would immediately replace.
+
+6. **`buildRound` is a passthrough in PR 1a; round construction stays in the React component.** The design states `buildRound` is the engine-owned round factory called on transitions (design lines 234–245). PR 1a's NumberMatch definition implements `buildRound` as `(ctx) => ({ roundIndex: ctx.roundIndex })` — a stub — because NumberMatch's existing `buildNumeralRound` factory closure lives in `NumberMatch.tsx`. After each `NEXT` transition, the component sends `ADVANCE_ROUND { tiles, zones }` (computed externally via `buildNumeralRound`) and the machine's `advanceRoundState` assign action populates context — `buildRound`'s engine-injected version is a no-op. As a side effect, `engine.currentRound` returns `{}` in PR 1a (no callers depend on it). PR 1b lifts round-construction into `definition.ts` once WordSpell + SortNumbers migrate (they share the closure shape — sentence-gap mode for WordSpell, level-aware rounds for SortNumbers — and validate the contract across three games). **Why now is fine:** PR 1a's goal is to prove the XState-first pattern end-to-end on one game. Round construction can land in the definition once we've seen what shape three games need.
+
+7. **`UseGameEngineResult.phase` is typed as `string` in PR 1a, not `GamePhase`.** The design (line 305) declares `phase: GamePhase` — a typed union. PR 1a's `definition-types.ts` widens this to `phase: string` because XState state-node names are stringly-typed and centralizing the literal union before all three answer games' state shapes are known would force premature decisions. Game components in PR 1a (NumberMatch only) read `engine.phase` against literal strings (`'playing'`, `'roundComplete'`, `'gameOver'`); typos would not be caught at compile time. **Why now is fine:** PR 1a only consumes engine.phase in NumberMatch, where the state names are local to one machine. PR 1c tightens this: once WordSpell + SortNumbers + NumberMatch are all engine-driven, define a shared `GamePhase = 'playing' | 'roundComplete' | 'levelComplete' | 'gameOver' | 'announcing' | 'waitingForNext'` union in `definition-types.ts` and update `UseGameEngineResult.phase` accordingly. Until then, treat string typos as a known risk and prefer `engine.phase === 'roundComplete' as const` patterns where possible.
+
+If an executor disagrees with any of these deltas while implementing, **stop and flag to the user** before deviating. The deltas are scope choices, not guesses.
+
+---
+
+## No Phase Bridge in PR 1a (XState-first)
+
+Earlier drafts of this plan described a transitional `useEffect` bridge that mirrored `useAnswerGameContext().phase` (kebab-case reducer phase) into XState events. Under XState-first, this bridge is **gone**: NumberMatch's machine is the sole authority for phase. The component dispatches `ROUND_CORRECT`, `ROUND_ERROR`, `NEXT`, `CELEBRATION_DONE`, `GAME_OVER`, and game-state events (`PLACE_TILE`, `EJECT_TILE`, etc.) directly via `engine.send` — there is no reducer to mirror.
+
+WordSpell + SortNumbers still use `useReducer` in PR 1a (no engine integration yet); they migrate in PR 1b directly to the same XState-first pattern. There is no interim bridge for them either — they migrate from `useReducer`-only to `engine`-only in one step.
+
+---
+
+## Composition With `useGameRound` (PR #345 spec)
+
+The merged `useGameRound` design (`docs/superpowers/specs/2026-05-03-use-game-round-design.md`) is **not implemented in PR 1a**, but Tasks 8 and 9 must remain compatible with the integration shape it prescribes — see the design doc's "Composition with `useGameRound`" subsection under Phase authority for the canonical contract.
+
+PR 1a-relevant points executors must respect when implementing Tasks 8 + 9:
+
+- **Round-advance event names**: NumberMatch's machine accepts `NEXT` (advance to next round inside a level) and `COMPLETE_GAME` (terminal). These are the events `useGameRound` will route through `engine.send` once it is wired up in PR 1b. Do **not** rename them in PR 1a.
+- **`roundIndex` source of truth**: machine context owns `roundIndex` (incremented via the `incrementRoundIndex` `assign` action on `NEXT.[playing]`). `useGameRound`'s public return value will read from `engine.context.roundIndex`, not maintain a parallel counter. Task 8's machine context shape must include `roundIndex` (already required) and Task 9 must not introduce a component-level counter.
+- **`firstActionAt` and mistake state belong in machine context**: when `useGameRound` lands, `round:first-action` and `round:mistake` will be emitted from `assign` actions on the relevant transitions (`PLACE_TILE`, `ROUND_ERROR`). PR 1a does **not** add these fields yet (they ship with the hook), but Task 8's context shape and event union should not block adding them later — leave room (no exhaustive `as const` union locks that would force a wider rewrite).
+- **`buildRound` passthrough is intentional in PR 1a** (Spec Delta #6). When PR 1b lifts round construction into the definition, `useGameRound` may inject `buildRound` directly via its `roundProvider` parameter. Task 8's `buildRound: (ctx) => ({ roundIndex: ctx.roundIndex })` stub does not preclude that — it is a no-op the engine-injected version overrides.
+- **No `useGameRound` import in NumberMatch.tsx in PR 1a**: Task 9 dispatches round-advance events via `engine.send` from the component (existing `useRoundLifecycle` / `useRoundComplete` hooks remain in their current shape). The hook is introduced in a follow-up PR alongside the WordSpell + SortNumbers migration, where the cross-game seam is needed.
+
+If during implementation any of Task 8's events or Task 9's dispatch sites would force a breaking change to the `useGameRound` integration shape above, **stop and flag to the user** — that is a sign the architectural decision needs revisiting.
+
+---
+
+## Required Skills For Executors
+
+When the executor's diff touches files matching the patterns below, load the corresponding project skill before generating code (per `CLAUDE.md` "Before writing a plan"):
+
+- `*.md` (this plan, while editing it) — **Markdown Authoring** rules from `CLAUDE.md`.
+- `src/lib/game-engine/GameEngine.flows.mdx`, `*.reference.mdx`, `debugging.mdx` — **`update-architecture-docs`** skill.
+
+This plan does **not** create `*.stories.tsx`, `tests-vr/**`, or `tests-e2e/**` files, so `write-storybook` and `write-e2e-vr-tests` are not required.
+
+---
+
+## File Structure
+
+### New files
+
+```text
+src/lib/lifecycle-tts/
+└── types.ts                              # LifecycleEvent + EventTemplate (pinned contract)
+
+src/lib/game-engine/
+├── definition-types.ts                   # GameDefinition, InteractionAdapter, SideEffect, CelebrationConfig, PhaseContext, RoundOutput, UseGameEngineResult, GameMachineEvent
+├── side-effects.ts                       # executeSideEffects(effects)
+├── side-effects.test.ts
+├── useGameEngine.ts                      # Hook + GameEngineContext + useGameEngineContext
+├── useGameEngine.test.tsx
+└── interaction-adapter.ts                # answerGameAdapter (concrete adapter for AnswerGameAction)
+
+src/games/number-match/
+├── definition.ts                         # NumberMatch GameDefinition
+└── definition.test.ts
+```
+
+### Modified files
+
+- `package.json` — add `xstate@^5` and `@xstate/react@^5` dependencies (pinned to v5 majors).
+- `src/types/game-events.ts` — add `celebration:start`, `celebration:complete`, `celebration:skip` to `GameEventType` + their event interfaces; add to the `GameEvent` discriminated union.
+- `src/lib/game-engine/GameEngine.flows.mdx` — append XState phase-flow diagram + phase-bridge section alongside the existing legacy `useGameLifecycle` content. Do **not** delete the legacy sections; PR 1c removes them once `lifecycle.ts` is deleted.
+- `src/lib/game-engine/GameEngine.reference.mdx` — append `useGameEngine` API reference + `GameDefinition` shape + Spec Delta summary alongside the existing legacy `createReducer`/`useGameLifecycle` content.
+- `src/lib/game-engine/debugging.mdx` — append XState-specific troubleshooting entries alongside the existing legacy debugging guide.
+- `src/games/number-match/NumberMatch/NumberMatch.tsx` — wire `useGameEngine(numberMatchDefinition)`; **remove** `useAnswerGameContext()` for state (machine context is the source of truth); read tiles/zones/drag state/phase/retryCount/levelIndex/roundIndex from `engine.context`; dispatch all state-mutating events via `engine.send` (PLACE_TILE, EJECT_TILE, REMOVE_TILE, SWAP_TILES, etc., plus lifecycle events ROUND_CORRECT/ROUND_ERROR/NEXT/CELEBRATION_DONE). Drop the `confettiReady`/`gameOverReady` destructuring; gate overlays on `engine.phase`. The `useGameSounds()` call is retained for sound playback (still reads phase from `useAnswerGameContext()` until WordSpell+SortNumbers migrate).
+- `src/games/number-match/NumberMatch/NumberMatch.test.tsx` — refactor assertions: replace reducer-state-shape assertions with machine-context assertions (use `useMachine` test patterns or render the component and inspect `engine.context` via test helpers). The single-mount overlay regression test stays; phase assertions become `engine.phase` reads.
+- `src/components/answer-game/answer-game-reducer.test.ts` — leave NumberMatch-specific reducer cases tested in this file (still valid for WordSpell + SortNumbers in PR 1a). PR 1b/1c migrate the WordSpell/SortNumbers cases out and delete this file alongside the reducer.
+
+### Test files (new or extended)
+
+```text
+src/lib/lifecycle-tts/types.test-d.ts     # Type-only tests via vitest expect-type or `// @ts-expect-error` lines
+src/lib/game-engine/side-effects.test.ts  # Bus emission for emit / speak / delay
+src/lib/game-engine/useGameEngine.test.tsx # State transitions, send, context
+src/games/number-match/definition.test.ts  # buildRound + tts shape conform to types
+src/lib/game-event-bus.test.ts             # Append celebration:* event tests (file already exists)
+```
+
+### Deleted files
+
+None in PR 1a. `src/lib/game-engine/lifecycle.ts` is **not** deleted (PR 1c handles it after `GameEngineProvider` migrates off it).
+
+---
+
+## Task 0: Worktree And Branch
+
+**Files:** none — git plumbing.
+
+- [ ] **Step 1: From the project root, create the implementation worktree**
+
+```bash
+cd /Users/leocaseiro/Sites/base-skill
+git fetch origin master
+git worktree add ./worktrees/feat-spec-1a-pr1a-game-engine -b feat/spec-1a-pr1a-game-engine origin/master
+cd ./worktrees/feat-spec-1a-pr1a-game-engine
+yarn install
+```
+
+The branch name mirrors the plan filename (`spec-1a-pr1a-game-engine`), and the worktree lives at `./worktrees/feat-spec-1a-pr1a-game-engine` per `CLAUDE.md` worktree convention.
+
+- [ ] **Step 2: Verify the worktree is clean and on the new branch**
+
+```bash
+git status
+git branch --show-current
+```
+
+Expected: clean tree on `feat/spec-1a-pr1a-game-engine`.
+
+- [ ] **Step 3: Sanity-check the toolchain**
+
+```bash
+yarn typecheck
+yarn test --run src/lib/game-engine
+```
+
+Expected: typecheck PASS; existing engine tests PASS.
+
+---
+
+## Task 1: Install XState v5 Dependencies
+
+**Files:**
+
+- Modify: `package.json` (dependencies)
+- Modify: `yarn.lock` (auto)
+
+- [ ] **Step 1: Add `xstate@5` and `@xstate/react@5` as runtime dependencies**
+
+```bash
+yarn add xstate@^5 @xstate/react@^5
+```
+
+- [ ] **Step 2: Verify both are pinned to v5 majors**
+
+```bash
+node -e "const p=require('./package.json');console.log('xstate', p.dependencies.xstate);console.log('@xstate/react', p.dependencies['@xstate/react']);"
+```
+
+Expected: both lines start with `^5.`.
+
+- [ ] **Step 3: Confirm install succeeded and types resolve**
+
+```bash
+yarn typecheck
+```
+
+Expected: PASS — no new type errors. (Adding the dep does not yet introduce imports.)
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add package.json yarn.lock
+git commit -m "feat(deps): add xstate@5 + @xstate/react@5 for game engine"
+```
+
+---
+
+## Task 2: Lifecycle TTS Type Contract Pin
+
+PR 1a creates the minimal `LifecycleEvent` + `EventTemplate` shape that the TTS plan must respect. The TTS plan (`docs/superpowers/plans/2026-05-06-spec-1a-m1-tts-lifecycle.md` Task 1) imports from this file.
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/types.ts`
+
+- [ ] **Step 1: Write the type file**
+
+```ts
+// src/lib/lifecycle-tts/types.ts
+import type { GradeBand } from '@/types/game-events';
+
+export type LifecycleEvent =
+  | 'game.prepare'
+  | 'game.start'
+  | 'game.resume'
+  | 'game.over'
+  | 'round.start'
+  | 'round.idle'
+  | 'round.error'
+  | 'round.correct'
+  | 'round.celebrate'
+  | 'round.advance'
+  | 'level.complete';
+
+export type Verbosity = 'off' | 'brief' | 'full';
+
+export type TalkativenessPreset = 'quiet' | 'default' | 'chatty';
+
+export type EventTemplate = {
+  tts: { brief: string; full: string };
+  byGradeBand: Record<GradeBand, Verbosity>;
+  default: Verbosity;
+};
+```
+
+The shape is the TTS plan Task 1's contract verbatim — keeping the two plans in lockstep.
+
+- [ ] **Step 2: Run typecheck**
+
+```bash
+yarn typecheck
+```
+
+Expected: PASS — no errors. The file is referenced by no one yet (downstream usage in Task 4 + Task 7).
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/types.ts
+git commit -m "feat(lifecycle-tts): pin LifecycleEvent + EventTemplate contract"
+```
+
+---
+
+## Task 3: Extend `GameEventType` With Celebration + `lifecycle:speak` Events
+
+The engine emits `celebration:start | celebration:complete | celebration:skip` to drive engagement instrumentation (move-log + future SRS), and emits `lifecycle:speak` so the TTS plan's `useLifecycleTTS` (shipping after PR 1a) can subscribe to lifecycle-driven speech. PR 1a owns these type members; the TTS plan only adds `game:prepare`. PR 1a adds the type union members and interfaces; emission lands in Task 5.
+
+**Files:**
+
+- Modify: `src/types/game-events.ts:9-23` (`GameEventType` union)
+- Modify: `src/types/game-events.ts` (interfaces + `GameEvent` union)
+- Modify: `src/lib/game-event-bus.test.ts` (extend tests)
+
+- [ ] **Step 1: Write failing tests for the three events**
+
+Append to `src/lib/game-event-bus.test.ts`:
+
+```ts
+describe('celebration events', () => {
+  it('emits and receives celebration:start', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:start', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:start',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('celebration:start');
+  });
+
+  it('emits and receives celebration:complete with durationMs', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:complete', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:complete',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+      durationMs: 12_000,
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(
+      (received[0] as GameEvent & { durationMs: number }).durationMs,
+    ).toBe(12_000);
+  });
+
+  it('emits and receives celebration:skip with skipMethod', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('celebration:skip', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'celebration:skip',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      miniGame: 'DinoEggHatch',
+      phaseId: 'roundComplete',
+      levelIndex: 0,
+      durationMs: 1_500,
+      skipMethod: 'play-again',
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(
+      (received[0] as GameEvent & { skipMethod: string }).skipMethod,
+    ).toBe('play-again');
+  });
+});
+
+describe('lifecycle:speak event', () => {
+  it('emits and receives lifecycle:speak with lifecycleEvent', () => {
+    const bus = createGameEventBus();
+    const received: GameEvent[] = [];
+    bus.subscribe('lifecycle:speak', (e) => received.push(e));
+
+    const event: GameEvent = {
+      type: 'lifecycle:speak',
+      gameId: 'number-match',
+      sessionId: 'test-session',
+      profileId: 'test-profile',
+      timestamp: Date.now(),
+      roundIndex: 0,
+      lifecycleEvent: 'round.start',
+    };
+    bus.emit(event);
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('lifecycle:speak');
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+```bash
+npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose
+```
+
+Expected: FAIL — `'celebration:start' | 'celebration:complete' | 'celebration:skip' | 'lifecycle:speak'` are not assignable to `GameEventType`.
+
+- [ ] **Step 3: Add the events to `src/types/game-events.ts`**
+
+Extend `GameEventType` (insert after `'game:tile-ejected'`):
+
+```ts
+export type GameEventType =
+  | 'game:start'
+  | 'game:instructions_shown'
+  | 'game:action'
+  | 'game:evaluate'
+  | 'game:score'
+  | 'game:hint'
+  | 'game:retry'
+  | 'game:time_up'
+  | 'game:end'
+  | 'game:round-advance'
+  | 'game:level-advance'
+  | 'game:drag-start'
+  | 'game:drag-over-zone'
+  | 'game:tile-ejected'
+  | 'celebration:start'
+  | 'celebration:complete'
+  | 'celebration:skip'
+  | 'lifecycle:speak';
+```
+
+Add the interfaces (after the existing event interfaces, before the `GameEvent` union):
+
+```ts
+export interface CelebrationStartEvent extends BaseGameEvent {
+  type: 'celebration:start';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+}
+
+export interface CelebrationCompleteEvent extends BaseGameEvent {
+  type: 'celebration:complete';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+  durationMs: number;
+}
+
+export interface CelebrationSkipEvent extends BaseGameEvent {
+  type: 'celebration:skip';
+  miniGame: string;
+  phaseId: 'roundComplete' | 'levelComplete' | 'gameOver';
+  levelIndex: number;
+  durationMs: number;
+  skipMethod: 'play-again' | 'go-home' | 'timeout';
+}
+
+export interface LifecycleSpeakEvent extends BaseGameEvent {
+  type: 'lifecycle:speak';
+  // LifecycleEvent is defined in src/lib/lifecycle-tts/types.ts (created by Task 2 of this plan)
+  lifecycleEvent: import('@/lib/lifecycle-tts/types').LifecycleEvent;
+}
+```
+
+Add all four to the `GameEvent` discriminated union next to the existing members.
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+```bash
+npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose
+yarn typecheck
+```
+
+Expected: PASS for both.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/types/game-events.ts src/lib/game-event-bus.test.ts
+git commit -m "feat(events): add celebration:* and lifecycle:speak event types"
+```
+
+---
+
+## Task 4: GameDefinition Types
+
+Create the typed surface the engine consumes. `definition-types.ts` is created in PR 1a and merged into `src/lib/game-engine/types.ts` in PR 1c (per design line 165). Keeping it separate now avoids churn against the existing types file and makes the consolidation diff in PR 1c reviewable.
+
+**Files:**
+
+- Create: `src/lib/game-engine/definition-types.ts`
+
+- [ ] **Step 1: Write the file**
+
+```ts
+// src/lib/game-engine/definition-types.ts
+import type { Dispatch } from 'react';
+import type { AnyStateMachine } from 'xstate';
+import type { GameEvent } from '@/types/game-events';
+import type {
+  EventTemplate,
+  LifecycleEvent,
+} from '@/lib/lifecycle-tts/types';
+
+/**
+ * Phase 1 narrows this union to the modes ready to ship. Future modes
+ * (voice-input #309, keyboard-input #286, connect #228, free-form-text)
+ * widen this union additively as they ship.
+ */
+export type InteractionMode = 'drag-to-slot' | 'tap-select';
+
+/**
+ * `RoundOutput` is intentionally opaque to the engine. The engine passes it
+ * through to the render component without inspection — each game's adapter
+ * casts to its concrete shape.
+ */
+export type RoundOutput = Record<string, unknown>;
+
+export interface PhaseContext {
+  roundIndex: number;
+  levelIndex: number;
+  totalRounds: number;
+  isLastRound: boolean;
+  gameId: string;
+  previousPhase: string | null;
+  currentPhase: string;
+}
+
+/**
+ * Mini-game celebrations (DinoEggHatch, FireworksPainter, etc.)
+ * shown before a phase's normal UI. The engine pauses phase
+ * transitions until the mini-game completes, is skipped, or times out.
+ */
+export interface CelebrationConfig {
+  miniGame: string;
+  condition?: (ctx: PhaseContext) => boolean;
+  renderProps?: Record<string, unknown>;
+}
+
+/**
+ * Side effects emitted by the engine during state transitions. Resolved by
+ * `executeSideEffects` (Task 5) — `speak` and `emit` go to the GameEventBus,
+ * `delay` schedules a tracked timeout.
+ */
+export type SideEffect =
+  | { type: 'emit'; event: GameEvent }
+  | { type: 'speak'; lifecycleEvent: LifecycleEvent }
+  | { type: 'delay'; ms: number };
+
+/**
+ * Bridges a GameDefinition to a game-specific reducer. Each adapter method
+ * receives `dispatch` as a parameter so adapters can be defined as
+ * module-level constants without closing over a per-render dispatch ref.
+ */
+export interface InteractionAdapter<TAction> {
+  advanceRound: (
+    roundOutput: RoundOutput,
+    dispatch: Dispatch<TAction>,
+  ) => void;
+  /**
+   * Optional — covers games with explicit level boundaries (NumberMatch,
+   * SortNumbers, WordSpell). Games without levels omit this.
+   */
+  advanceLevel?: (
+    roundOutput: RoundOutput,
+    dispatch: Dispatch<TAction>,
+  ) => void;
+  completeGame: (dispatch: Dispatch<TAction>) => void;
+}
+
+export interface GameDefinition<TRound = unknown> {
+  id: string;
+  interaction: InteractionMode;
+  /**
+   * Canonical here. `AnswerGameConfig.slotInteraction` is deprecated in
+   * Phase 2 (reducer unification) — the value flows from the engine context.
+   */
+  slotInteraction?: 'ordered' | 'free-swap';
+  /**
+   * XState v5 machine — must be created with
+   * `setup({ types, guards, actors, actions }).createMachine()`. The engine
+   * calls `definition.machine.provide({ guards, actors, actions })` at
+   * runtime to inject implementations.
+   *
+   * Required states: `playing`, `gameOver` (type: 'final').
+   * Optional states: `roundComplete`, `levelComplete`, `announcing` (Spec 1b).
+   */
+  machine: AnyStateMachine;
+  /**
+   * Required. Synchronous by design — async loaders must resolve before
+   * starting the engine. The engine calls `buildRound` on round/level
+   * transitions and stores the result in machine context.
+   */
+  buildRound: (ctx: PhaseContext) => TRound;
+  /**
+   * `LifecycleEvent` and `EventTemplate` are pinned by
+   * `src/lib/lifecycle-tts/types.ts`. The TTS plan extends — never reshapes —
+   * this contract.
+   */
+  tts?: Partial<Record<LifecycleEvent, EventTemplate>>;
+}
+
+/**
+ * Top-level events the game component can send to the engine.
+ * The machine adds game-specific events via `setup({ types: { events } })`.
+ */
+export type GameMachineEvent =
+  | { type: 'ROUND_CORRECT' }
+  | { type: 'ROUND_ERROR' }
+  | { type: 'LEVEL_COMPLETE' }
+  | { type: 'GAME_OVER' }
+  | { type: 'NEXT' }
+  | { type: 'CELEBRATION_DONE'; skipMethod?: 'play-again' | 'go-home' };
+
+/**
+ * Public contract returned by `useGameEngine`.
+ *
+ * `phase` is the current XState state node name (e.g. `playing`,
+ * `roundComplete`). `celebrating` returns `null` in PR 1a (Spec Delta 2);
+ * PR 1b populates it from machine context once celebration actors fully
+ * own their own input.
+ */
+export interface UseGameEngineResult {
+  phase: string;
+  currentRound: RoundOutput;
+  roundIndex: number;
+  levelIndex: number;
+  totalRounds: number;
+  isLastRound: boolean;
+  send: (event: GameMachineEvent) => void;
+  celebrating: CelebrationConfig | null;
+}
+```
+
+- [ ] **Step 2: Verify typecheck**
+
+```bash
+yarn typecheck
+```
+
+Expected: PASS.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/game-engine/definition-types.ts
+git commit -m "feat(game-engine): add GameDefinition type surface"
+```
+
+---
+
+## Task 5: `executeSideEffects`
+
+The engine's actions call `executeSideEffects` to emit on the bus. PR 1a does not subscribe to `lifecycle:speak` (TTS plan owns that). `delay` is implemented as a tracked timeout so the engine can clean up on unmount via the hook (Task 6 wires the cleanup ref).
+
+**Files:**
+
+- Create: `src/lib/game-engine/side-effects.ts`
+- Create: `src/lib/game-engine/side-effects.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/game-engine/side-effects.test.ts
+import { describe, expect, it, vi } from 'vitest';
+import { executeSideEffects } from './side-effects';
+import type { SideEffect } from './definition-types';
+import { getGameEventBus } from '@/lib/game-event-bus';
+
+const baseEnvelope = {
+  gameId: 'number-match',
+  sessionId: 'test-session',
+  profileId: 'test-profile',
+  timestamp: 0,
+  roundIndex: 0,
+};
+
+describe('executeSideEffects', () => {
+  it('emits a lifecycle:speak event for { type: "speak" }', () => {
+    const bus = getGameEventBus();
+    const received: { type: string }[] = [];
+    const unsub = bus.subscribe('lifecycle:speak', (e) =>
+      received.push(e),
+    );
+
+    executeSideEffects(
+      [{ type: 'speak', lifecycleEvent: 'round.correct' }],
+      { ...baseEnvelope },
+    );
+
+    expect(received).toHaveLength(1);
+    expect(received[0].type).toBe('lifecycle:speak');
+    unsub();
+  });
+
+  it('emits the inner event for { type: "emit" }', () => {
+    const bus = getGameEventBus();
+    const received: { type: string }[] = [];
+    const unsub = bus.subscribe('celebration:start', (e) =>
+      received.push(e),
+    );
+
+    executeSideEffects(
+      [
+        {
+          type: 'emit',
+          event: {
+            ...baseEnvelope,
+            type: 'celebration:start',
+            miniGame: 'DinoEggHatch',
+            phaseId: 'roundComplete',
+            levelIndex: 0,
+          },
+        },
+      ],
+      { ...baseEnvelope },
+    );
+
+    expect(received).toHaveLength(1);
+    unsub();
+  });
+
+  it('schedules and clears a delay via setTimeout', () => {
+    vi.useFakeTimers();
+    const cb = vi.fn();
+    const handle = executeSideEffects(
+      [{ type: 'delay', ms: 1000 }],
+      { ...baseEnvelope },
+      cb,
+    );
+
+    vi.advanceTimersByTime(999);
+    expect(cb).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(2);
+    expect(cb).toHaveBeenCalledTimes(1);
+
+    handle.cancel();
+    vi.useRealTimers();
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+```bash
+npx vitest run src/lib/game-engine/side-effects.test.ts --reporter=verbose
+```
+
+Expected: FAIL — `executeSideEffects` is not defined.
+
+- [ ] **Step 3: Implement `executeSideEffects`**
+
+```ts
+// src/lib/game-engine/side-effects.ts
+import type { SideEffect } from './definition-types';
+import type { BaseGameEvent } from '@/types/game-events';
+import { getGameEventBus } from '@/lib/game-event-bus';
+
+export interface ExecuteHandle {
+  cancel: () => void;
+}
+
+/**
+ * Process side effects from XState actions. `speak` and `emit` fire on the
+ * `GameEventBus`; `delay` schedules a tracked timeout that fires `onDelayDone`
+ * if provided. Returned handle lets callers cancel pending delays on unmount.
+ */
+export const executeSideEffects = (
+  effects: SideEffect[],
+  envelope: Pick<
+    BaseGameEvent,
+    'gameId' | 'sessionId' | 'profileId' | 'roundIndex'
+  >,
+  onDelayDone?: () => void,
+): ExecuteHandle => {
+  const bus = getGameEventBus();
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+
+  for (const effect of effects) {
+    switch (effect.type) {
+      case 'emit': {
+        bus.emit(effect.event);
+        break;
+      }
+      case 'speak': {
+        bus.emit({
+          ...envelope,
+          timestamp: Date.now(),
+          type: 'lifecycle:speak',
+          lifecycleEvent: effect.lifecycleEvent,
+        });
+        break;
+      }
+      case 'delay': {
+        const t = setTimeout(() => {
+          timers.delete(t);
+          onDelayDone?.();
+        }, effect.ms);
+        timers.add(t);
+        break;
+      }
+    }
+  }
+
+  return {
+    cancel: () => {
+      for (const t of timers) clearTimeout(t);
+      timers.clear();
+    },
+  };
+};
+```
+
+Note: `lifecycle:speak` and `LifecycleSpeakEvent` are added to `GameEventType` in Task 3 of this plan. The TTS plan (Task 2 there) adds only `game:prepare`; it does NOT re-add `lifecycle:speak`. PR 1a is the single owner of the type member.
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+```bash
+npx vitest run src/lib/game-engine/side-effects.test.ts --reporter=verbose
+yarn typecheck
+```
+
+Expected: both PASS. If typecheck fails on `'lifecycle:speak'` not being assignable, verify Task 3 added it to `GameEventType` and exported `LifecycleSpeakEvent` correctly.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/game-engine/side-effects.ts src/lib/game-engine/side-effects.test.ts
+git commit -m "feat(game-engine): add executeSideEffects for emit | speak | delay"
+```
+
+---
+
+## Task 6: `useGameEngine` Hook + Context
+
+The engine wraps `useMachine(definition.machine.provide({...}))`, exposes a typed `UseGameEngineResult`, and writes `{ definition }` into a React context so child hooks (notably `useLifecycleTTS` in the TTS plan) can read `definition.tts` without prop drilling. PR 1a ships:
+
+- The hook + context + `useGameEngineContext()`
+- Engine-provided guards (`isMidLevelRound`, `isLastRoundOfLevel`, `isLastRound`)
+- Engine-provided actions (`speak`, `emit`, `buildRound`, `advanceRound`, `advanceLevel`, `completeGame`)
+- Engine-provided actors as `fromPromise` timers (`celebrationActor`, `levelCelebrationActor`, `gameOverActor`)
+
+**Files:**
+
+- Create: `src/lib/game-engine/useGameEngine.ts`
+- Create: `src/lib/game-engine/useGameEngine.test.tsx`
+
+- [ ] **Step 1: Write the failing test**
+
+```tsx
+// src/lib/game-engine/useGameEngine.test.tsx
+import { describe, expect, it, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { setup } from 'xstate';
+import {
+  GameEngineContext,
+  useGameEngine,
+  useGameEngineContext,
+} from './useGameEngine';
+import type {
+  GameDefinition,
+  InteractionAdapter,
+} from './definition-types';
+
+interface TestRound {
+  prompt: string;
+}
+
+interface AdapterAction {
+  type: 'ADVANCE_ROUND' | 'ADVANCE_LEVEL' | 'COMPLETE_GAME';
+}
+
+const buildTestDefinition = (): GameDefinition<TestRound> => ({
+  id: 'test-game',
+  interaction: 'drag-to-slot',
+  buildRound: (ctx) => ({
+    prompt: `round-${ctx.roundIndex}`,
+  }),
+  machine: setup({
+    types: {} as {
+      context: { roundIndex: number; levelIndex: number };
+      events:
+        | { type: 'ROUND_CORRECT' }
+        | { type: 'ROUND_ERROR' }
+        | { type: 'NEXT' }
+        | { type: 'GAME_OVER' };
+    },
+  }).createMachine({
+    id: 'test-game',
+    initial: 'playing',
+    context: { roundIndex: 0, levelIndex: 0 },
+    states: {
+      playing: {
+        on: {
+          ROUND_CORRECT: 'roundComplete',
+          GAME_OVER: 'gameOver',
+        },
+      },
+      roundComplete: {
+        on: {
+          NEXT: 'playing',
+        },
+      },
+      gameOver: { type: 'final' },
+    },
+  }),
+});
+
+const noopAdapter: InteractionAdapter<AdapterAction> = {
+  advanceRound: vi.fn(),
+  advanceLevel: vi.fn(),
+  completeGame: vi.fn(),
+};
+
+describe('useGameEngine', () => {
+  it('starts in `playing` state', () => {
+    const def = buildTestDefinition();
+    const dispatch = vi.fn();
+    const { result } = renderHook(() =>
+      useGameEngine(def, noopAdapter, dispatch),
+    );
+    expect(result.current.phase).toBe('playing');
+  });
+
+  it('transitions on `send`', () => {
+    const def = buildTestDefinition();
+    const dispatch = vi.fn();
+    const { result } = renderHook(() =>
+      useGameEngine(def, noopAdapter, dispatch),
+    );
+
+    act(() => {
+      result.current.send({ type: 'ROUND_CORRECT' });
+    });
+    expect(result.current.phase).toBe('roundComplete');
+
+    act(() => {
+      result.current.send({ type: 'NEXT' });
+    });
+    expect(result.current.phase).toBe('playing');
+  });
+
+  it('exposes definition through GameEngineContext', () => {
+    const def = buildTestDefinition();
+    const dispatch = vi.fn();
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => {
+      const engine = useGameEngine(def, noopAdapter, dispatch);
+      return (
+        <GameEngineContext.Provider value={{ definition: def, engine }}>
+          {children}
+        </GameEngineContext.Provider>
+      );
+    };
+
+    const { result } = renderHook(() => useGameEngineContext(), {
+      wrapper,
+    });
+    expect(result.current.definition.id).toBe('test-game');
+  });
+
+  it('returns `celebrating: null` in PR 1a (Spec Delta)', () => {
+    const def = buildTestDefinition();
+    const { result } = renderHook(() =>
+      useGameEngine(def, noopAdapter, vi.fn()),
+    );
+    expect(result.current.celebrating).toBeNull();
+  });
+
+  it('throws when `useGameEngineContext` is called outside provider', () => {
+    expect(() => renderHook(() => useGameEngineContext())).toThrow(
+      /GameEngineContext/,
+    );
+  });
+});
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+```bash
+npx vitest run src/lib/game-engine/useGameEngine.test.tsx --reporter=verbose
+```
+
+Expected: FAIL — module not found.
+
+- [ ] **Step 3: Implement the hook**
+
+```tsx
+// src/lib/game-engine/useGameEngine.ts
+import { useMachine } from '@xstate/react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  type Dispatch,
+} from 'react';
+import { fromPromise } from 'xstate';
+import { executeSideEffects } from './side-effects';
+import type {
+  CelebrationConfig,
+  GameDefinition,
+  GameMachineEvent,
+  InteractionAdapter,
+  PhaseContext,
+  RoundOutput,
+  UseGameEngineResult,
+} from './definition-types';
+
+interface GameEngineContextValue<TRound = unknown> {
+  definition: GameDefinition<TRound>;
+  engine: UseGameEngineResult;
+}
+
+export const GameEngineContext =
+  createContext<GameEngineContextValue | null>(null);
+
+export const useGameEngineContext = <
+  TRound,
+>(): GameEngineContextValue<TRound> => {
+  const ctx = useContext(GameEngineContext);
+  if (!ctx) {
+    throw new Error(
+      'useGameEngineContext must be used within GameEngineContext.Provider',
+    );
+  }
+  return ctx as GameEngineContextValue<TRound>;
+};
+
+const DEFAULT_MAX_DURATION_MS = 60_000;
+
+const buildEngineActors = () => ({
+  /**
+   * `fromPromise` actors that resolve after `maxDuration` (PR 1a Spec Delta 3).
+   * Parent state listens for `CELEBRATION_DONE` to short-circuit when the
+   * user dismisses early.
+   */
+  celebrationActor: fromPromise<
+    void,
+    { renderProps?: { maxDuration?: number } }
+  >(
+    ({ input }) =>
+      new Promise<void>((resolve) => {
+        const ms =
+          input?.renderProps?.maxDuration ?? DEFAULT_MAX_DURATION_MS;
+        setTimeout(resolve, ms);
+      }),
+  ),
+  levelCelebrationActor: fromPromise<
+    void,
+    { renderProps?: { maxDuration?: number } }
+  >(
+    ({ input }) =>
+      new Promise<void>((resolve) => {
+        const ms =
+          input?.renderProps?.maxDuration ?? DEFAULT_MAX_DURATION_MS;
+        setTimeout(resolve, ms);
+      }),
+  ),
+  gameOverActor: fromPromise<
+    void,
+    { renderProps?: { maxDuration?: number } }
+  >(
+    ({ input }) =>
+      new Promise<void>((resolve) => {
+        const ms =
+          input?.renderProps?.maxDuration ?? DEFAULT_MAX_DURATION_MS;
+        setTimeout(resolve, ms);
+      }),
+  ),
+  /**
+   * Placeholder for Spec 1b WordSpell phoneme-sequence announce flow.
+   * Resolves immediately in PR 1a — Spec 1b implements the full sequence.
+   */
+  phonemeSequenceActor: fromPromise<void, unknown>(() =>
+    Promise.resolve(),
+  ),
+});
+
+const buildEngineGuards = (totalRounds: number, levelSize: number) => ({
+  isMidLevelRound: ({
+    context,
+  }: {
+    context: { roundIndex: number; levelIndex: number };
+  }): boolean => {
+    const positionInLevel =
+      (context.roundIndex + 1) % Math.max(levelSize, 1);
+    return (
+      positionInLevel !== 0 && context.roundIndex + 1 < totalRounds
+    );
+  },
+  isLastRoundOfLevel: ({
+    context,
+  }: {
+    context: { roundIndex: number };
+  }): boolean => {
+    const positionInLevel =
+      (context.roundIndex + 1) % Math.max(levelSize, 1);
+    return (
+      positionInLevel === 0 && context.roundIndex + 1 < totalRounds
+    );
+  },
+  isLastRound: ({
+    context,
+  }: {
+    context: { roundIndex: number };
+  }): boolean => context.roundIndex + 1 >= totalRounds,
+});
+
+interface EngineEnvelope {
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  roundIndex: number;
+}
+
+export const useGameEngine = <TRound, TAction>(
+  definition: GameDefinition<TRound>,
+  adapter: InteractionAdapter<TAction>,
+  dispatch: Dispatch<TAction>,
+  options?: {
+    totalRounds?: number;
+    levelSize?: number;
+    envelope?: Partial<EngineEnvelope>;
+  },
+): UseGameEngineResult => {
+  const totalRounds = options?.totalRounds ?? 0;
+  const levelSize = options?.levelSize ?? totalRounds;
+  const envelope: EngineEnvelope = useMemo(
+    () => ({
+      gameId: definition.id,
+      sessionId: options?.envelope?.sessionId ?? '',
+      profileId: options?.envelope?.profileId ?? '',
+      roundIndex: options?.envelope?.roundIndex ?? 0,
+    }),
+    [
+      definition.id,
+      options?.envelope?.sessionId,
+      options?.envelope?.profileId,
+      options?.envelope?.roundIndex,
+    ],
+  );
+
+  const machineWithImpls = useMemo(() => {
+    return definition.machine.provide({
+      guards: buildEngineGuards(totalRounds, levelSize),
+      actors: buildEngineActors(),
+      actions: {
+        speak: (
+          _,
+          params: { lifecycleEvent: PhaseContext['currentPhase'] },
+        ) =>
+          executeSideEffects(
+            [
+              {
+                type: 'speak',
+                lifecycleEvent:
+                  params.lifecycleEvent as never as import('@/lib/lifecycle-tts/types').LifecycleEvent, // narrowed by definition.tts at call sites
+              },
+            ],
+            envelope,
+          ),
+        emit: (
+          _,
+          params: { event: import('@/types/game-events').GameEvent },
+        ) =>
+          executeSideEffects(
+            [{ type: 'emit', event: params.event }],
+            envelope,
+          ),
+        buildRound: ({
+          context,
+        }: {
+          context: { phaseContext: PhaseContext };
+        }) => {
+          const round = definition.buildRound(context.phaseContext);
+          return round as RoundOutput;
+        },
+        advanceRound: ({
+          context,
+        }: {
+          context: { lastRoundOutput: RoundOutput };
+        }) => adapter.advanceRound(context.lastRoundOutput, dispatch),
+        advanceLevel: ({
+          context,
+        }: {
+          context: { lastRoundOutput: RoundOutput };
+        }) => adapter.advanceLevel?.(context.lastRoundOutput, dispatch),
+        completeGame: () => adapter.completeGame(dispatch),
+      },
+    });
+    // adapter + dispatch are stable across renders for module-level adapters;
+    // definition + envelope are the meaningful inputs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition, totalRounds, levelSize, envelope]);
+
+  const [state, send] = useMachine(machineWithImpls);
+
+  return useMemo<UseGameEngineResult>(
+    () => ({
+      phase:
+        typeof state.value === 'string'
+          ? state.value
+          : (Object.keys(state.value)[0] ?? 'unknown'),
+      currentRound:
+        ((state.context as Record<string, unknown>)
+          .lastRoundOutput as RoundOutput) ?? ({} as RoundOutput),
+      roundIndex:
+        ((state.context as Record<string, unknown>)
+          .roundIndex as number) ?? 0,
+      levelIndex:
+        ((state.context as Record<string, unknown>)
+          .levelIndex as number) ?? 0,
+      totalRounds,
+      isLastRound:
+        (((state.context as Record<string, unknown>)
+          .roundIndex as number) ?? 0) +
+          1 >=
+        totalRounds,
+      send: (event) => send(event as never),
+      // Spec Delta 2: PR 1a always returns null. PR 1b reads context.activeCelebration.
+      celebrating: null as CelebrationConfig | null,
+    }),
+    [state, send, totalRounds],
+  );
+};
+```
+
+The hook deliberately keeps `state.context` typing loose (`Record<string, unknown>` casts) — game definitions choose their own context shape via `setup({ types: { context } })`. The `definition.tts` typed shape is unaffected; the `context` casts only relate to `roundIndex`/`levelIndex`/`lastRoundOutput` access. PR 1c folds this into the canonical `types.ts` and tightens the access pattern.
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+```bash
+npx vitest run src/lib/game-engine/useGameEngine.test.tsx --reporter=verbose
+yarn typecheck
+```
+
+Expected: PASS for all five test cases.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/game-engine/useGameEngine.ts src/lib/game-engine/useGameEngine.test.tsx
+git commit -m "feat(game-engine): add useGameEngine hook + GameEngineContext"
+```
+
+---
+
+## Task 7: `interaction-adapter.ts` With `answerGameAdapter`
+
+NumberMatch (and PR 1b's WordSpell + SortNumbers) all dispatch into the same `AnswerGameAction` reducer, so the adapter is shared.
+
+**Files:**
+
+- Create: `src/lib/game-engine/interaction-adapter.ts`
+
+- [ ] **Step 1: Write the file**
+
+```ts
+// src/lib/game-engine/interaction-adapter.ts
+import type { AnswerGameAction } from '@/components/answer-game/types';
+import type {
+  AnswerZone,
+  TileItem,
+} from '@/components/answer-game/types';
+import type {
+  InteractionAdapter,
+  RoundOutput,
+} from './definition-types';
+
+interface AnswerGameRoundOutput extends RoundOutput {
+  tiles: TileItem[];
+  zones: AnswerZone[];
+}
+
+const isAnswerGameRoundOutput = (
+  output: RoundOutput,
+): output is AnswerGameRoundOutput =>
+  Array.isArray((output as AnswerGameRoundOutput).tiles) &&
+  Array.isArray((output as AnswerGameRoundOutput).zones);
+
+export const answerGameAdapter: InteractionAdapter<AnswerGameAction> = {
+  advanceRound: (roundOutput, dispatch) => {
+    if (!isAnswerGameRoundOutput(roundOutput)) {
+      throw new Error(
+        'answerGameAdapter.advanceRound: roundOutput is missing { tiles, zones }',
+      );
+    }
+    dispatch({
+      type: 'ADVANCE_ROUND',
+      tiles: roundOutput.tiles,
+      zones: roundOutput.zones,
+    });
+  },
+  advanceLevel: (roundOutput, dispatch) => {
+    if (!isAnswerGameRoundOutput(roundOutput)) {
+      throw new Error(
+        'answerGameAdapter.advanceLevel: roundOutput is missing { tiles, zones }',
+      );
+    }
+    dispatch({
+      type: 'ADVANCE_LEVEL',
+      tiles: roundOutput.tiles,
+      zones: roundOutput.zones,
+    });
+  },
+  completeGame: (dispatch) => {
+    dispatch({ type: 'COMPLETE_GAME' });
+  },
+};
+```
+
+The runtime guard turns "engine handed me an opaque `RoundOutput`" into a typed `AnswerGameAction` payload, with a clear failure message if a future game definition forgets to return `{ tiles, zones }` from `buildRound`. WordSpell + SortNumbers reuse this adapter unchanged in PR 1b.
+
+- [ ] **Step 2: Run typecheck**
+
+```bash
+yarn typecheck
+```
+
+Expected: PASS.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/game-engine/interaction-adapter.ts
+git commit -m "feat(game-engine): add answerGameAdapter for AnswerGameAction reducer"
+```
+
+---
+
+## Task 8 + Task 9 — NumberMatch XState Implementation (superseded 2026-05-11)
+
+The original Tasks 8 and 9 of this plan were superseded on 2026-05-11 after an adversarial + feasibility review found four critical defects (round-advance broken, `gameOver` `type: 'final'` blocks restart, 22 stub `assign` actions, `useGameRound` × XState seam asserted-not-designed). The full NumberMatch slice — definition, machine-level tests, and component refactor — is now specified in a focused standalone plan:
+
+> **See: [`docs/superpowers/plans/2026-05-11-number-match-xstate-implementation-plan.md`](./2026-05-11-number-match-xstate-implementation-plan.md)** — the implementation-ready specification for NumberMatch as the canonical XState-first game.
+
+Executors implementing this PR follow Tasks 0–7 of this plan, then switch to the NumberMatch plan for the game-specific work, then return here for Tasks 10–12.
+
+### Why this slice was extracted
+
+- The NumberMatch slice has a different concern (one game's state machine) than the engine foundation (generic infrastructure). Splitting them lets PR 1b/1d executors read the NumberMatch plan as a canonical pattern reference without wading through the engine plumbing.
+- The previous Tasks 8 + 9 were specified before the ce-doc-review surfaced the four critical defects. Rewriting them in place would have buried the rewrite in a 2400-line document; extraction makes the canonical pattern discoverable.
+- The Spec Delta on `useGameRound` (XState engine handle, dated 2026-05-11) is appended to the merged spec at `docs/superpowers/specs/2026-05-03-use-game-round-design.md` — that's where the contract evolution belongs, not in this plan.
+- The archived review (`docs/superpowers/reviews/archive/2026-05-10-pr1a-tasks-8-9-adversarial-feasibility.md`) and archived handoff (`.claude/handoffs/archive/2026-05-10-pr350-tasks-8-9-replan.md`) preserve the failure mode and decision trail.
+
+### What still lives in this plan
+
+- Tasks 0–7: engine foundation (XState install, types, `executeSideEffects`, `useGameEngine`, `interaction-adapter.ts`).
+- Tasks 10–12: post-NumberMatch cleanup (deferred `useGameSounds` gate removal, MDX docs, final verification + PR steps).
+- Spec Deltas 1–7 above remain authoritative for the engine foundation. The NumberMatch plan operates within those deltas.
+
+### Coordination point for Task 6
+
+The NumberMatch plan adds one new named action to the engine's `useGameEngine.provide({ actions })` block: `playSound: (_, params) => playSound(params.sound)`. Wire it into Task 6's actions block during implementation; placeholder typing matches the `speak` action's parameterised shape.
+
+## Task 10: Remove `useGameSounds` Celebration Gate (Deferred to PR 1b)
+
+**Status:** Deferred to PR 1b on 2026-05-10 (ce-doc-review round 3, feasibility F1).
+
+**Why deferred:** the original Task 10 stripped the `confettiReady`/`levelCompleteReady`/`gameOverReady` booleans from `src/components/answer-game/useGameSounds.ts` and instructed executors to "drop the destructuring" at remaining call sites. `WordSpell.tsx` (lines 77, 129, 176, 241, 243, 245) and `SortNumbers.tsx` (lines 51, 132, 193, 242, 244, 246, 261) still read those booleans for `<skin.RoundCompleteEffect visible={confettiReady} />` and equivalent overlay gating. Removing them in PR 1a would either fail `yarn typecheck` (boolean prop receiving `undefined`) or render the celebration overlays as always-falsy on those games. The hook surgery is most safely done in PR 1b where WordSpell + SortNumbers migrate to `engine.phase` simultaneously — one removal site, three migrated consumers, no interim broken state.
+
+**What PR 1a still does for NumberMatch:**
+
+- NumberMatch's Task 9 stops destructuring `confettiReady` / `gameOverReady`; overlay visibility is gated by `engine.phase` (see Spec Delta 1).
+- The `useGameSounds()` call itself is retained in `NumberMatch.tsx` so sound playback continues firing on phase transitions.
+- `useGameSounds.ts` and `useGameSounds.test.tsx` are not modified.
+
+**What PR 1b absorbs (do not implement here):**
+
+- Strip the boolean state from `src/components/answer-game/useGameSounds.ts`; hook returns `void`.
+- Update `useGameSounds.test.tsx` to assert on `playSound` calls instead of boolean returns.
+- Migrate WordSpell + SortNumbers overlay gating to `engine.phase` in the same PR.
+
+See PR 1b's row in the design doc's PR breakdown (`docs/superpowers/plans/2026-05-07-game-definition-engine-design.md`, line 111) for the canonical scope.
+
+---
+
+## Task 11: Architecture MDX Docs
+
+Per `CLAUDE.md` "Architecture Documentation", any change to game-state logic must update co-located `.mdx` docs in the same PR. **All three target files already exist on disk** with content for the legacy `useGameLifecycle` / `createReducer` / `useMoveLog` engine (`src/lib/game-engine/GameEngine.flows.mdx` — 103 lines, `GameEngine.reference.mdx` — 137 lines, `debugging.mdx` — 276 lines). PR 1a **modifies** them — append new XState GameDefinition sections alongside the existing legacy content; PR 1c removes the legacy sections once `lifecycle.ts` is deleted.
+
+Run `/update-architecture-docs` first so the new sections follow the project template.
+
+**Files:**
+
+- Modify: `src/lib/game-engine/GameEngine.flows.mdx` (existing — append, do not overwrite)
+- Modify: `src/lib/game-engine/GameEngine.reference.mdx` (existing — append, do not overwrite)
+- Modify: `src/lib/game-engine/debugging.mdx` (existing — append, do not overwrite)
+
+- [ ] **Step 1: Invoke the `/update-architecture-docs` skill**
+
+In the executor session, invoke the skill before editing any of the three files. It returns the canonical structure and writing guidelines for `*.flows.mdx`, `*.reference.mdx`, and `debugging.mdx` in this repo.
+
+- [ ] **Step 2: Read the existing files first**
+
+```bash
+cat src/lib/game-engine/GameEngine.flows.mdx
+cat src/lib/game-engine/GameEngine.reference.mdx
+cat src/lib/game-engine/debugging.mdx
+```
+
+The existing content documents the legacy `useGameLifecycle` engine (idle → loading → instructions → playing → evaluating → scoring → next-round → retry). Per Spec Delta 4 the legacy reducer is **not** deleted in PR 1a, so legacy sections remain accurate for PR 1a readers. Each appended section below introduces a clearly-headed XState block — keep legacy and XState content visually separated (e.g., `## Legacy engine (lifecycle.ts)` vs `## XState engine (PR 1a foundation)`).
+
+- [ ] **Step 3: Append XState sections to `GameEngine.flows.mdx`**
+
+Add (do not replace) sections:
+
+1. **XState phase lifecycle diagram** — Mermaid statechart copied from the design doc lines 717–761, narrowed to the four states PR 1a ships (`playing`, `roundComplete`, `waitingForNext`, `gameOver`). Note inline that `levelComplete` and `announcing` land in PR 1b/1c (level boundaries) and Spec 1b (announcing).
+2. **Phase bridge pattern** — explain that the answer-game reducer keeps `phase` in PR 1a; the per-game wrapper bridges `reducer.phase → engine.send(...)`. Diagram or pseudocode.
+3. **Side-effect flow** — `XState entry/transition action → executeSideEffects → GameEventBus → (PR 1a: no subscriber for lifecycle:speak; TTS plan adds useLifecycleTTS later)`.
+4. **Celebration semantics (PR 1a scope)** — engine emits no `celebration:*` events yet (Spec Delta 3 — actors are timer-based); NumberMatch's overlay renders on `engine.phase === 'roundComplete' | 'gameOver'`. Engine-emitted `celebration:start | complete | skip` lands in PR 1b.
+5. **Coexistence note** — one paragraph explaining that the legacy lifecycle continues to drive the route shell while XState owns the per-round phase machine; PR 1c collapses the two.
+
+- [ ] **Step 4: Append XState sections to `GameEngine.reference.mdx`**
+
+Add (do not replace) sections:
+
+1. **`useGameEngine(definition, adapter, dispatch, options?)`** — full signature, parameter table, return shape (`UseGameEngineResult`), invariants (synchronous `buildRound`, machine must include `playing` + `gameOver` states).
+2. **`GameEngineContext` + `useGameEngineContext()`** — usage pattern for child hooks (`useLifecycleTTS` will read `definition.tts`).
+3. **`InteractionAdapter<TAction>`** — interface, `answerGameAdapter` example, runtime guard semantics.
+4. **`GameDefinition<TRound>`** — every field, with `tts` table example pulled from `numberMatchDefinition`.
+5. **Spec Deltas (PR 1a)** — short bullet list mirroring the deltas in this plan, so future readers see the partial-implementation boundaries clearly.
+
+- [ ] **Step 5: Append XState sections to `debugging.mdx`**
+
+Add (do not replace) sections:
+
+1. **"My XState phase isn't transitioning"** — checklist: is the component dispatching the lifecycle event via `engine.send` (e.g., `engine.send({ type: 'ROUND_CORRECT' })`)? Does the machine state list include the target? Did `setup({ events })` declare the event type?
+2. **"My TTS doesn't speak"** — PR 1a doesn't subscribe to `lifecycle:speak`; explain that prompt TTS goes through existing `useRoundTTS`.
+3. **"Celebration overlay renders twice"** — confirm only one mount path (skin slot driven by `engine.phase`); useGameSounds gate-removal lands in PR 1b but PR 1a Task 9 already drops NumberMatch's destructured boolean reads.
+4. **"How do I add a new game with the XState engine?"** — minimal recipe pointing to the NumberMatch definition as the canonical example.
+5. **XState devtools** — link to `@xstate/inspect` setup (or `useMachine` devtools options if that's how this project surfaces it). If devtools wiring isn't shipping in PR 1a, note "deferred to PR 1c".
+
+- [ ] **Step 6: Lint and validate the MDX**
+
+```bash
+yarn fix:md
+yarn lint:md
+yarn typecheck
+```
+
+Expected: PASS — markdownlint and Prettier accept the modified files; typecheck remains green (MDX files don't affect TS).
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/lib/game-engine/GameEngine.flows.mdx \
+        src/lib/game-engine/GameEngine.reference.mdx \
+        src/lib/game-engine/debugging.mdx
+git commit -m "docs(game-engine): append XState architecture docs alongside legacy"
+```
+
+---
+
+## Task 12: Final Verification, Plan Markdown Lint, Push, And PR
+
+- [ ] **Step 1: Run the full check suite (matching CI)**
+
+```bash
+yarn typecheck
+yarn test --run
+yarn lint
+yarn lint:md
+yarn lint:css
+```
+
+Expected: all PASS. If `yarn lint` flags `eslint-plugin-unicorn` or React rules (`react/function-component-definition`), fix in place — CLAUDE.md mandates `const` components.
+
+- [ ] **Step 2: Run VR tests (Docker)**
+
+NumberMatch has VR coverage. Confirm baselines still match.
+
+```bash
+yarn test:vr
+```
+
+If diffs are produced and they're intentional (overlay timing changed), update baselines:
+
+```bash
+yarn test:vr:update
+```
+
+If Docker isn't running, use `SKIP_VR=1` for the push but document the reason in the PR description.
+
+- [ ] **Step 3: Run the markdown auto-fix on this plan file**
+
+This plan was edited by an agent. Per `CLAUDE.md` Markdown Authoring rules:
+
+```bash
+yarn fix:md
+yarn lint:md
+npx prettier --check docs/superpowers/plans/2026-05-10-spec-1a-pr1a-game-engine.md
+```
+
+Expected: PASS for both. (Note: this step is run in the **plan-writing worktree** — `worktrees/docs-game-definition-design` — not the implementation worktree, since the plan file lives there.)
+
+- [ ] **Step 4: Push the implementation branch**
+
+```bash
+git push -u origin feat/spec-1a-pr1a-game-engine
+```
+
+If pre-push hooks complain about specific buckets (e.g. VR), use the appropriate `SKIP_*` flag and document in the PR description.
+
+- [ ] **Step 5: Open the PR against `master`**
+
+PR title:
+
+```text
+feat(game-engine): PR 1a — engine foundation + NumberMatch migration
+```
+
+PR body should:
+
+1. Link `docs/superpowers/plans/2026-05-10-spec-1a-pr1a-game-engine.md`.
+2. Link the design doc `docs/superpowers/plans/2026-05-07-game-definition-engine-design.md`.
+3. Quote the five Spec Deltas verbatim from this plan.
+4. List the touched files (matches the File Structure section).
+5. Manual smoke checklist: complete a NumberMatch session end-to-end, verify single-mount overlay, verify game-over overlay, restart works.
+6. Note any `SKIP_*` flags used and why.
+
+- [ ] **Step 6: Update PR #350 description (the design-doc PR)**
+
+Add a one-line cross-link: "Implementation begins in #<new-PR-number> (PR 1a)."
+
+---
+
+## Deferred / Open Questions (ce-doc-review round 3, 2026-05-10)
+
+> Round 3 of `ce-doc-review` ran on 2026-05-10 across all three PR #350 docs. Cross-doc alignment findings (A1–A11) were applied in commits `ff1b8fbb2` and `e73b6ef03`. The findings below are per-doc internal issues deferred for follow-up review or implementation-time resolution. PR 1a's coherence reviewer findings were entirely consolidated into A2 (lifecycle:speak ownership) so coherence has no separate subsection here. Anchor 75 = high confidence; 100 = airtight.
+
+### From feasibility reviewer (PR 1a plan)
+
+- **WordSpell + SortNumbers will visually break when `useGameSounds` gate booleans are removed** [P0, anchor 100] — **Resolved 2026-05-10**
+  - Section: Task 10 — Remove useGameSounds Celebration Gate
+  - Why: Plan removes `confettiReady`/`levelCompleteReady`/`gameOverReady` from `useGameSounds` in PR 1a, but only NumberMatch is migrated. WordSpell.tsx and SortNumbers.tsx both consume these booleans for round-advance gating and overlay `visible=` props (e.g., `<skin.RoundCompleteEffect visible={confettiReady} />`). "Drop the destructuring" → `visible={undefined}` (always-falsy or typecheck error). PR 1a will ship a broken WordSpell + SortNumbers.
+  - Fix: Either (a) keep the booleans in `useGameSounds` for PR 1a as a no-op fallback (return derived booleans) until WordSpell/SortNumbers migrate in PR 1b, OR (b) move gate-removal to PR 1b where all three games migrate together. **Verified in codebase:** `WordSpell.tsx:241`, `SortNumbers.tsx:242,246,261`.
+  - **Resolution:** Applied option (b). Task 10 deferred to PR 1b; PR 1a Spec Delta 1 amended; File Structure modified-files row removed; Task 9 Step 3 retains the `useGameSounds()` call (drops only the destructuring). Design doc PR 1a/1b descriptions and Migration impact section updated to match.
+
+- **Engine `context.roundIndex` never increments** [P0, anchor 100] — **Resolved 2026-05-10**
+  - Section: Task 8 NumberMatch GameDefinition / Task 6 buildEngineGuards
+  - Why: NumberMatch machine declares `context: { roundIndex: 0, ... }` and engine-injected guards (`isMidLevelRound`, `isLastRound`) read from `context.roundIndex`. But no `assign` action ever increments it — `buildRound` and `advanceRound` are plain actions returning values, not `assign({...})` calls. Engine context's `roundIndex` stays at 0 for the entire session. For NumberMatch with 3 rounds, `isMidLevelRound` returns `true` permanently and the machine never reaches `gameOver` from the engine's path. Game-over only works via the defense-in-depth root `GAME_OVER` handler from the bridge.
+  - Fix: Add an `assign` action that increments `context.roundIndex` on the NEXT transition: `actions: ['buildRound', assign({ roundIndex: ({ context }) => context.roundIndex + 1 }), 'advanceRound']`. OR sync engine context from the reducer via the phase-bridge.
+  - **Resolution:** Applied option 1 (XState-native `assign`). Task 8: `import { setup, assign } from 'xstate'`; new `incrementRoundIndex` action defined in `setup({actions})` as `assign({ roundIndex: ({context}) => context.roundIndex + 1 })`; `waitingForNext.NEXT.[playing]` actions array now `['incrementRoundIndex', 'buildRound', 'advanceRound']` with `incrementRoundIndex` running first so PhaseContext reflects the round about to be played. Design doc samples (lines 593, 612) updated to match.
+
+- **Architecture MDX files (`GameEngine.flows.mdx`, `.reference.mdx`, `debugging.mdx`) already exist on disk** [P1, anchor 100] — **Resolved 2026-05-10**
+  - Section: Task 11 — Architecture MDX Docs / File Structure
+  - Why: All three MDX files already exist with substantive content (103, 137, 276 lines respectively) covering legacy `useGameLifecycle`, `useMoveLog`, and session-recorder flows. Task 11 says "Create" them. Implementer following the plan literally will fail (file exists) or overwrite them (lose context for the legacy game-engine subsystem, which isn't deleted in PR 1a per Spec Delta 4).
+  - Fix: Change File Structure section to mark these as "Modify" not "New files." Rewrite Task 11 to instruct the implementer to read the existing file first, then append new XState-based sections without removing existing content.
+  - **Resolution:** Applied. File Structure moves the three MDX files from "New files" to "Modified files" with explicit append-don't-overwrite instructions. Task 11 rewritten: prose explicitly notes the existing legacy content; new Step 2 directs the executor to read the existing files first; Steps 3–5 instruct appending XState-headed sections alongside legacy ones (visual separation `## Legacy engine (lifecycle.ts)` vs `## XState engine (PR 1a foundation)`); commit message updated to "append … alongside legacy".
+
+- **`setup({ actors: { ...: undefined as never } })` is unconventional and unverified in XState v5** [P1, anchor 75]
+  - Section: Task 8 NumberMatch GameDefinition
+  - Why: XState v5 `setup()` expects each `actors` entry to be valid actor logic (e.g., `fromPromise(...)`), not `undefined`. While `as never` may pass TypeScript via assertion, runtime behavior is undefined — XState may throw or silently produce stale logic when interpreting. The engine then calls `definition.machine.provide({ actors: buildEngineActors() })` to inject real implementations. The whole pattern depends on this working without verification.
+  - Fix: Use real placeholder actor logic in `setup()` matching the shape `provide()` will override (e.g., `fromPromise(() => Promise.resolve())`). OR import the real actor logic from `useGameEngine`. Validate the override pattern before relying on it across all definitions in PR 1b.
+
+- **`renderHook(toThrow)` test pattern unreliable in React 19** [P2, anchor 75]
+  - Section: Task 6 — useGameEngine Hook + Context
+  - Why: `expect(() => renderHook(() => useGameEngineContext())).toThrow(/GameEngineContext/);` is unreliable in React 19 — `@testing-library/react`'s `renderHook` catches errors during render and re-raises them through different paths depending on the React version. In React 19, errors thrown during render may surface via React's error reporting (console.error logged but not rethrown synchronously), so `toThrow` may not see the error.
+  - Fix: Replace with React 19 pattern: spy on `console.error` to silence, then render and inspect via `result.current` or via try/catch wrapper. OR use an error-boundary wrapper to capture the thrown error.
+
+- **Phase bridge re-fires on every engine state change** [P2, anchor 75] — **Obsolete 2026-05-10 (XState-first restructure)**
+  - Section: Phase Bridge Pattern
+  - Why: Bridge effect deps are `[reducerPhase, engine]`. `useGameEngine` returns a new object via `useMemo([state, send, totalRounds])` — every machine state transition produces a new `engine` reference. Bridge re-fires on every engine transition, re-emitting events. XState ignores duplicates today, but it's wasteful and creates fragile coupling. If a future engine state defines a transition for ROUND_CORRECT, duplicate sends will trigger spurious transitions.
+  - Fix: Either (a) drop `engine` from deps and lint-disable with rationale, or (b) destructure stable `send` (`const { send } = engine`) and depend on `[reducerPhase, send]`. Add a regression test asserting the engine sees each transition event exactly once per reducer phase change.
+  - **Resolution:** No longer applicable. Under XState-first, NumberMatch has no phase bridge — the component dispatches transitions directly via `engine.send`. The bridge pattern was removed from the plan in the 2026-05-10 restructure (see "Architectural Shift — XState-first" section). The dependency-stability concern is moot.
+
+- **Test step missing for type-only Tasks 4 + 7** [P3, anchor 75]
+  - Section: Task 4 GameDefinition Types / Task 7 interaction-adapter.ts
+  - Why: Task 4 (definition-types.ts) and Task 7 (answerGameAdapter with runtime guard `isAnswerGameRoundOutput` that throws) have no test step. They rely solely on `yarn typecheck`. Task 4's `types.test-d.ts` is mentioned in File Structure but never written. Task 7's runtime guard is real logic worth testing.
+  - Fix: Add a small test file `src/lib/game-engine/interaction-adapter.test.ts` asserting `answerGameAdapter.advanceRound` throws on malformed input and dispatches the expected ADVANCE_ROUND action when given a valid output. For Task 4, ship the planned `test-d.ts` or document why type-checking via consumers is sufficient.
+
+### From scope-guardian reviewer (PR 1a plan)
+
+- **`LEVEL_COMPLETE` bridge branch is dead code in PR 1a** [P1, anchor 100]
+  - Section: Phase Bridge Pattern (lines 43–44) and Task 9 Step 3 bridge effect
+  - Why: Plan's stated goal is "migrate NumberMatch only." NumberMatch has no `level-complete` reducer phase — the existing `NumberMatch.tsx` has zero references to `level-complete`, and Task 8's machine has no `levelComplete` state. The phase-bridge `useEffect` in the canonical pattern (lines 40–48) includes `LEVEL_COMPLETE`, but Task 9's actual implementation omits it. Canonical pattern and PR 1a implementation diverge.
+  - Fix: Remove `LEVEL_COMPLETE` from the canonical Phase Bridge Pattern code block and explicitly note it is PR 1b scope. Or add the branch to Task 9 (engine ignores the unhandled event harmlessly, and the bridge becomes the complete reference for PR 1b).
+
+- **`isLastRoundOfLevel` guard ships in PR 1a but never exercised** [P1, anchor 75]
+  - Section: Task 6 — buildEngineGuards / Task 8 NumberMatch machine
+  - Why: Plan ships `isLastRoundOfLevel` inside `buildEngineGuards`, but NumberMatch declares `isLastRoundOfLevel: () => false` as a placeholder. No PR 1a machine state transitions on this guard, and no PR 1a test exercises it. Modulo arithmetic in `buildEngineGuards` is untested. If wrong, the bug lands silently and breaks PR 1b migrations.
+  - Fix: Either (a) add a test in `useGameEngine.test.tsx` verifying `isLastRoundOfLevel` fires at the right `roundIndex` for a given `levelSize`, OR (b) move `isLastRoundOfLevel` to PR 1b alongside the first game that uses it.
+
+- **`phonemeSequenceActor` injected with no PR 1a consumer** [P2, anchor 75]
+  - Section: Task 6 — buildEngineActors
+  - Why: Plan adds `phonemeSequenceActor` to `buildEngineActors` with an immediate-resolve stub "for Spec 1b WordSpell phoneme-sequence." No PR 1a machine state invokes it. Speculative infrastructure justified only by hypothetical PR 1b reuse — exactly the "framework-ahead-of-need" smell. The stub is provided to every game's `machine.provide({actors: ...})` even when the machine doesn't declare an `actors: { phonemeSequenceActor }` in `setup()`; XState v5 silently ignores undeclared actor providers, making the dead provision invisible.
+  - Fix: Remove `phonemeSequenceActor` from `buildEngineActors` in PR 1a. Add it in the PR 1b task that implements WordSpell's announce flow.
+
+### From adversarial reviewer (PR 1a plan)
+
+- **`gameOver` final state invokes a 60s timer actor before `completeGame` fires** [P2, anchor 75]
+  - Section: Task 8 numberMatchDefinition machine
+  - Why: `gameOver` is `type: 'final'` and invokes `gameOverActor` (`fromPromise` resolving after `maxDuration` 60s). Only after `onDone` does the machine call `speak('game.over')` and `completeGame`. Today's NumberMatch dispatches `COMPLETE_GAME` immediately on entering game-over phase. PR 1a inverts the timing — `completeGame` is delayed up to 60s. There is no `CELEBRATION_DONE` listener on `gameOver` to short-circuit (Spec Delta 3 only covers `roundComplete`/`levelComplete`), and final states cannot define normal event transitions in XState v5. Skin-level Play Again / Go Home buttons cannot tear down the actor cleanly.
+  - Fix: Either (a) move `completeGame` and the speak action to `entry: [...]` of `gameOver` (instead of the actor's `onDone`), OR (b) make `gameOver` non-final and add `on: { CELEBRATION_DONE: { actions: [...] } }` for early dismiss (with explicit reasoning in a Spec Delta). Confirm XState v5 actor cleanup on parent-state unmount via `@xstate/react@5`'s `useMachine`.
+
+- **`@xstate/react@^5` peer-dep against React 19 unverified** [P3, anchor 50, FYI]
+  - Section: Task 1 — Install XState v5 Dependencies
+  - Why: Plan pins to `@xstate/react@^5`. Early `@xstate/react@5.0.x` releases declared peerDependencies as `react ^16 || ^17 || ^18`. The project ships `react@^19.2.0`. `yarn add @xstate/react@^5` may resolve to an older 5.x without React 19 in peers, surfacing peer-dep warnings or (with strict resolutions) install failure. No minimum-version pin and no `useMachine` integration test in a React 19 render tree.
+  - Fix: Pin to a known-React-19-compatible minor (e.g., `@xstate/react@^5.0.5` after verifying its peer deps) and add a Task 1 verification step running `yarn why @xstate/react` and confirming no peer-dep warnings.
+
+## Self-Review Checklist (Before Marking This Plan Complete)
+
+- [ ] Every Spec Delta is justified and shipping-friendly — none of them block PR 1b / 1c.
+- [ ] NumberMatch.tsx does **not** call `useAnswerGameContext()` for state — all state reads come from `engine.context`.
+- [ ] NumberMatch.tsx does **not** call `useReducer` or any dispatch for game state — all writes go through `engine.send`.
+- [ ] No phase bridge `useEffect` exists in NumberMatch.tsx (the bridge pattern is gone under XState-first).
+- [ ] `numberMatchMachine` declares all 22 events from `AnswerGameAction` (PLACE_TILE, EJECT_TILE, …) plus the lifecycle events; each has a corresponding handler/assign action.
+- [ ] `executeSideEffects` emits `lifecycle:speak` even though no subscriber exists — confirms the bus contract is the seam.
+- [ ] `useGameEngine` returns the typed `UseGameEngineResult` shape from the design doc, with `celebrating: null` flagged as Spec Delta 2.
+- [ ] `numberMatchDefinition` declares all required `tts.*` keys (`game.start`, `round.correct`, `round.error`, `game.over`, `game.prepare`).
+- [ ] The MDX docs cover phase flow, API reference, and debugging — no spec section is missing a doc anchor.
+- [ ] `useGameSounds` is unchanged in PR 1a (gate-removal deferred to PR 1b); NumberMatch retains the `useGameSounds()` call so sound playback still fires while overlay gating reads from `engine.phase`.
+- [ ] `answer-game-reducer.ts` continues to exist (still consumed by WordSpell + SortNumbers); deletion is PR 1c scope.
+- [ ] All tests are TDD-aligned — failing test first, minimal implementation, passing test, commit.
+- [ ] No file references a function or type that isn't introduced in an earlier task (forward references checked).
+- [ ] The plan itself is markdownlint + Prettier clean (`yarn fix:md` was run after writing).
