@@ -56,7 +56,7 @@ export const triggerEjectReturn = (
   // Inherit the live tile background + shadow so skinned tiles (e.g. transparent
   // stone tiles) don't flash their classic-default white card mid-flight.
   // No fallback shadow when source has one — when source has none (e.g.
-  // cave-dragon's transparent stone), a default rect shadow would trace the
+  // dragon-cave's transparent stone), a default rect shadow would trace the
   // ghost's rounded-rect outline and look like a phantom square. Skinned
   // tiles that want lift during drag should apply filter: drop-shadow on
   // their decoration so it follows the actual shape. Empty-string fallbacks
@@ -66,7 +66,7 @@ export const triggerEjectReturn = (
   const buttonCs = globalThis.getComputedStyle(el);
   const ghostBg = buttonCs.background || 'transparent';
   const ghostShadow = buttonCs.boxShadow || 'none';
-  // Effective parent transform scale (e.g. cave-dragon container scales its
+  // Effective parent transform scale (e.g. dragon-cave container scales its
   // descendants via transform: scale(...) so layout dimensions and visual
   // dimensions diverge). The ghost is appended to document.body and inherits
   // none of that transform, so the cloned letter renders at its raw layout
