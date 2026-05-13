@@ -10748,7 +10748,31 @@ export default meta;
 
 type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    config: {
+      gameId: &#39;word-spell&#39;,
+      component: &#39;WordSpell&#39;,
+      inputMethod: &#39;drag&#39;,
+      wrongTileBehavior: &#39;lock-auto-eject&#39;,
+      tileBankMode: &#39;exact&#39;,
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: true,
+      tileUnit: &#39;letter&#39;,
+      mode: &#39;recall&#39;,
+
+      rounds: [
+        {
+          word: &#39;spin&#39;,
+        },
+        {
+          word: &#39;nap&#39;,
+        },
+      ],
+    },
+  },
+};
 
 export const HUD_Round2Of5: Story = {
   args: {
@@ -18081,7 +18105,31 @@ export default meta;
 
 type Story = StoryObj&lt;typeof WordSpellWithHarness&gt;;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    config: {
+      gameId: &#39;word-spell&#39;,
+      component: &#39;WordSpell&#39;,
+      inputMethod: &#39;drag&#39;,
+      wrongTileBehavior: &#39;lock-auto-eject&#39;,
+      tileBankMode: &#39;exact&#39;,
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: true,
+      tileUnit: &#39;letter&#39;,
+      mode: &#39;recall&#39;,
+
+      rounds: [
+        {
+          word: &#39;spin&#39;,
+        },
+        {
+          word: &#39;nap&#39;,
+        },
+      ],
+    },
+  },
+};
 
 export const HUD_Round2Of5: Story = {
   args: {
