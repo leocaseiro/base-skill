@@ -12,6 +12,12 @@ import { useGameSkin } from './useGameSkin';
 import type { GameSkin } from './game-skin';
 import { getGameEventBus } from '@/lib/game-event-bus';
 
+// Helper: this test suite exercises useGameSkin's runtime behavior with
+// placeholder skin ids that aren't part of SortNumbersSkinId. Cast at the
+// test boundary — the type-level guarantee is covered by registry.test.ts.
+type ClassicSlot = GameSkin & { id: 'classic' };
+const asClassic = (s: GameSkin) => s as unknown as ClassicSlot;
+
 describe('useGameSkin', () => {
   beforeEach(() => {
     __resetSkinRegistryForTests();
@@ -32,7 +38,7 @@ describe('useGameSkin', () => {
       name: 'Dino',
       tokens: {},
     };
-    registerSkin('sort-numbers', dino);
+    registerSkin('sort-numbers', asClassic(dino));
     const { result } = renderHook(() =>
       useGameSkin('sort-numbers', 'dino'),
     );
@@ -47,7 +53,7 @@ describe('useGameSkin', () => {
       tokens: {},
       onCorrectPlace,
     };
-    registerSkin('sort-numbers', skin);
+    registerSkin('sort-numbers', asClassic(skin));
 
     renderHook(() => useGameSkin('sort-numbers', 'snd'));
 
@@ -72,13 +78,16 @@ describe('useGameSkin', () => {
   it('does NOT call onCorrectPlace for wrong evaluations', () => {
     const onCorrectPlace = vi.fn();
     const onWrongPlace = vi.fn();
-    registerSkin('sort-numbers', {
-      id: 's',
-      name: 'S',
-      tokens: {},
-      onCorrectPlace,
-      onWrongPlace,
-    });
+    registerSkin(
+      'sort-numbers',
+      asClassic({
+        id: 's',
+        name: 'S',
+        tokens: {},
+        onCorrectPlace,
+        onWrongPlace,
+      }),
+    );
 
     renderHook(() => useGameSkin('sort-numbers', 's'));
 
@@ -103,12 +112,15 @@ describe('useGameSkin', () => {
 
   it('forwards retryCount from GameEndEvent to skin.onGameOver', () => {
     const onGameOver = vi.fn();
-    registerSkin('sort-numbers', {
-      id: 'retry-test',
-      name: 'Retry Test',
-      tokens: {},
-      onGameOver,
-    });
+    registerSkin(
+      'sort-numbers',
+      asClassic({
+        id: 'retry-test',
+        name: 'Retry Test',
+        tokens: {},
+        onGameOver,
+      }),
+    );
 
     renderHook(() => useGameSkin('sort-numbers', 'retry-test'));
 
@@ -133,12 +145,15 @@ describe('useGameSkin', () => {
 
   it('unsubscribes on unmount', () => {
     const onCorrectPlace = vi.fn();
-    registerSkin('sort-numbers', {
-      id: 's2',
-      name: 'S2',
-      tokens: {},
-      onCorrectPlace,
-    });
+    registerSkin(
+      'sort-numbers',
+      asClassic({
+        id: 's2',
+        name: 'S2',
+        tokens: {},
+        onCorrectPlace,
+      }),
+    );
 
     const { unmount } = renderHook(() =>
       useGameSkin('sort-numbers', 's2'),

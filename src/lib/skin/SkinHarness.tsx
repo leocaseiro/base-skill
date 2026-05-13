@@ -1,15 +1,21 @@
 import { useMemo, useState } from 'react';
 import { getRegisteredSkins } from './registry';
 import type { GameSkin } from './game-skin';
+import type { GameSkinIdMap } from './registry';
 import type { ReactNode } from 'react';
 import { getGameEventBus } from '@/lib/game-event-bus';
 
-export interface SkinHarnessProps {
-  gameId: string;
-  children: (ctx: { skin: GameSkin }) => ReactNode;
+export interface SkinHarnessProps<TGame extends keyof GameSkinIdMap> {
+  gameId: TGame;
+  children: (ctx: {
+    skin: GameSkin & { id: GameSkinIdMap[TGame] };
+  }) => ReactNode;
 }
 
-export const SkinHarness = ({ gameId, children }: SkinHarnessProps) => {
+export const SkinHarness = <TGame extends keyof GameSkinIdMap>({
+  gameId,
+  children,
+}: SkinHarnessProps<TGame>) => {
   const registered = useMemo(
     () => getRegisteredSkins(gameId),
     [gameId],
