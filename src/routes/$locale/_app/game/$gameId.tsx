@@ -1195,7 +1195,11 @@ const RouteComponent = (): JSX.Element => {
 export const Route = createFileRoute('/$locale/_app/game/$gameId')({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { configId: string | undefined; debug?: true } => {
+  ): {
+    configId: string | undefined;
+    debug?: true;
+    seed?: string;
+  } => {
     const debug =
       search.debug === '1' ||
       search.debug === 'true' ||
@@ -1206,9 +1210,19 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
           ? search.configId
           : undefined,
       ...(debug ? { debug: true as const } : {}),
+      // VR / debug seed override: when present, the route loader uses it
+      // instead of `nanoid()` so deterministic visual baselines stay stable
+      // across runs. Real users never set this; an in-progress session's
+      // own seed (`initialLog?.seed`) still wins to preserve resume.
+      ...(typeof search.seed === 'string' && search.seed.length > 0
+        ? { seed: search.seed }
+        : {}),
     };
   },
-  loaderDeps: ({ search }) => ({ configId: search.configId }),
+  loaderDeps: ({ search }) => ({
+    configId: search.configId,
+    seed: search.seed,
+  }),
   loader: async ({ params, deps }): Promise<GameRouteLoaderData> => {
     const { gameId } = params;
     const profileId = 'default';
@@ -1218,7 +1232,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     // Return minimal defaults so the client hydrates and re-runs on the client.
     if (typeof indexedDB === 'undefined') {
       const sessionId = nanoid();
-      const seed = nanoid();
+      const seed = deps.seed ?? nanoid();
       const initialState: GameEngineState = {
         phase: 'instructions',
         roundIndex: 0,
@@ -1294,7 +1308,7 @@ export const Route = createFileRoute('/$locale/_app/game/$gameId')({
     }
 
     const sessionId = initialLog?.sessionId ?? nanoid();
-    const seed = initialLog?.seed ?? nanoid();
+    const seed = initialLog?.seed ?? deps.seed ?? nanoid();
     const initialContent = initialLog?.initialContent ?? STUB_CONTENT;
     const initialState: GameEngineState = initialLog?.initialState ?? {
       phase: 'instructions',

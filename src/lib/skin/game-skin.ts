@@ -32,6 +32,17 @@ export interface GameSkinLevelCompleteOverlayProps {
   level: number;
   onNextLevel: () => void;
   onDone: () => void;
+  /**
+   * Belt-and-suspenders gate for the "Next level" button. Wired to
+   * `engine.phase === 'levelComplete'` so skin overrides that render the
+   * overlay early (fade/scale animations) can't dispatch ADVANCE_LEVEL
+   * during the roundComplete after-timer. Required: callers (games) must
+   * pass an explicit value; skins must honor it (gate the button on
+   * `nextLevelEnabled`). Render-condition-only gating is a footgun
+   * because animated skin overlays render briefly while the engine is
+   * still in roundComplete. (review #7)
+   */
+  nextLevelEnabled: boolean;
 }
 
 export interface GameSkin {

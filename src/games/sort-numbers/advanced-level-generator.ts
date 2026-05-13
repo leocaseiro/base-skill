@@ -15,11 +15,18 @@ interface AdvancedLevelGeneratorOptions {
 }
 
 /**
- * Level generator for advanced SortNumbers configs. Each call produces a
- * fresh round using the user's configured range/skip/quantity — so every
- * level feels like a new sort from the same rule set. Unlike the simple
- * generator, the range does not shift per level (advanced users pick the
- * range they want to practise).
+ * Level generator for advanced SortNumbers configs.
+ *
+ * For 'by' skip mode with a numeric start, each call shifts the start
+ * (and the implied range) upward by `(completedLevel + 1) * quantity *
+ * step` — mirroring the simple-mode generator so level mode progresses
+ * meaningfully across levels. Without the shift, a fixed numeric start
+ * would produce the same sequence every level.
+ *
+ * For all other skip modes ('by' with 'random'/'range-min' start,
+ * 'consecutive', 'random'), the configured range stays fixed and the
+ * round is freshly sampled per call. Those modes already vary across
+ * calls because they pick a fresh start (or fresh values) within range.
  */
 export const createAdvancedLevelGenerator = (
   options: AdvancedLevelGeneratorOptions,
@@ -35,12 +42,37 @@ export const createAdvancedLevelGenerator = (
     tileBankMode,
     distractors,
   } = options;
-  const distractor =
-    tileBankMode === 'distractors'
-      ? { config: distractors, range }
-      : undefined;
 
-  return () => {
+  return (completedLevel: number) => {
+    if (skip.mode === 'by' && typeof skip.start === 'number') {
+      const shift = (completedLevel + 1) * quantity * skip.step;
+      const shiftedStart = skip.start + shift;
+      const shiftedRange = {
+        min: shiftedStart,
+        max: shiftedStart + (quantity - 1) * skip.step,
+      };
+      const shiftedDistractor =
+        tileBankMode === 'distractors'
+          ? { config: distractors, range: shiftedRange }
+          : undefined;
+      const [round] = generateSortRounds({
+        range: shiftedRange,
+        quantity,
+        skip: { ...skip, start: shiftedStart },
+        totalRounds: 1,
+      });
+      if (!round) return null;
+      return buildSortRound(
+        round.sequence,
+        direction,
+        shiftedDistractor,
+      );
+    }
+
+    const distractor =
+      tileBankMode === 'distractors'
+        ? { config: distractors, range }
+        : undefined;
     const [round] = generateSortRounds({
       range,
       quantity,

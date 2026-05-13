@@ -134,6 +134,38 @@ describe('useAnswerGameDraftSync', () => {
     expect(doc?.draftState).toBeNull();
   });
 
+  it('writes null when phase is round-complete', async () => {
+    const state = makeState({ phase: 'round-complete' });
+    renderHook(() =>
+      useAnswerGameDraftSync(state, 'draft-sess-001', db),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    expect(doc?.draftState).toBeNull();
+  });
+
+  it('writes null when phase is level-complete', async () => {
+    const state = makeState({ phase: 'level-complete' });
+    renderHook(() =>
+      useAnswerGameDraftSync(state, 'draft-sess-001', db),
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    expect(doc?.draftState).toBeNull();
+  });
+
   it('is a no-op when sessionId is null', async () => {
     const state = makeState();
     renderHook(() => useAnswerGameDraftSync(state, null, db));
@@ -208,6 +240,83 @@ describe('useAnswerGameDraftSync', () => {
       .exec();
     const draft = docAfter?.draftState as Record<string, unknown>;
     expect(draft.roundIndex).toBe(1);
+  });
+
+  it('does not throw when the debounced write rejects (review #1)', async () => {
+    const state = makeState();
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    // Stub incrementalPatch to reject; the hook must swallow the error.
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    const patchSpy = vi
+      .spyOn(doc!, 'incrementalPatch')
+      .mockRejectedValue(new Error('boom'));
+
+    expect(() =>
+      renderHook(() =>
+        useAnswerGameDraftSync(state, 'draft-sess-001', db),
+      ),
+    ).not.toThrow();
+
+    // Drive the debounce and let the rejected promise settle.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Patch was attempted; the hook absorbed the rejection.
+    expect(patchSpy).toHaveBeenCalledTimes(1);
+
+    patchSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
+
+  it('does not throw when the visibility flush rejects (review #1)', async () => {
+    const state = makeState();
+    const warnSpy = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const doc = await db.session_history_index
+      .findOne('draft-sess-001')
+      .exec();
+    const patchSpy = vi
+      .spyOn(doc!, 'incrementalPatch')
+      .mockRejectedValue(new Error('flush failed'));
+
+    renderHook(() =>
+      useAnswerGameDraftSync(state, 'draft-sess-001', db),
+    );
+
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'hidden',
+      configurable: true,
+    });
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // The flush attempted the patch and absorbed the rejection.
+    expect(patchSpy).toHaveBeenCalled();
+
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'visible',
+      configurable: true,
+    });
+    patchSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it('flushes immediately on visibilitychange hidden', async () => {

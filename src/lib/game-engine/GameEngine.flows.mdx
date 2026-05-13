@@ -82,6 +82,14 @@ sequenceDiagram
 `useAnswerGameDraftSync` keeps the `AnswerGameState` persisted so a mid-round refresh
 restores exactly where the player left off.
 
+> **Celebration phases are excluded from persistence (U1a).**
+> `buildDraft` returns `null` for `game-over`, `round-complete`, and
+> `level-complete` phases. A tab-close-then-resume during the 750 ms
+> celebration window therefore does not replay the celebration on the
+> next mount — the draft is cleared, and `RESUME_ROUND` is not
+> dispatched. See `useAnswerGameDraftSync.ts` for the source of truth.
+> (review #15)
+
 ```mermaid
 sequenceDiagram
   participant Provider as AnswerGameProvider
@@ -141,6 +149,57 @@ stateDiagram-v2
   models RESTART.
 - `levelComplete` is not in PR 1a's NumberMatch slice. PR 1b adds it
   alongside WordSpell + SortNumbers when they introduce level mode.
+
+### 5b. WordSpell phase machine
+
+Identical to NumberMatch's machine (same states, same events). The
+context shape adds no WordSpell-specific fields — every field is
+shared with NumberMatch. Round construction (`buildSentenceGapRound`,
+`buildTilesAndZones`) stays in `WordSpell.tsx` per Spec Delta 4. At
+runtime `isLevelMode` is always `false` and `levelIndex` is unused —
+the machine never enters `levelComplete`.
+
+### 5c. SortNumbers phase machine (with levelComplete)
+
+Adds a `levelComplete` state and an `ADVANCE_LEVEL` event:
+
+```text
+playing
+↓ always(allFilledCorrectly)
+roundComplete
+↓ after(750)
+  - isLastRound → gameOver
+  - isLastRoundOfLevel → levelComplete
+  - otherwise → waitingForNext
+
+levelComplete
+↓ ADVANCE_LEVEL → incrementLevelIndex + advanceLevelState → playing
+
+waitingForNext
+↓ ADVANCE_ROUND → incrementRoundIndex + advanceRoundState → playing
+```
+
+Level progression is component-driven: `SortNumbersSession` builds the
+next level's tiles + zones via `buildSortRound(nextLevelIndex)` and
+dispatches `ADVANCE_LEVEL { tiles, zones }` via the reducer (mirrored
+to engine). The engine's `ADVANCE_LEVEL` handler runs
+`incrementRoundIndex` + `incrementLevelIndex` + `advanceLevelState` —
+so the engine's `roundIndex` accumulates across level boundaries,
+keeping `isLastRound` correct on the final round of the final level.
+The reducer mirror still resets `roundIndex` per level for HUD
+display; PR 1c collapses the reducer and the HUD will then compute
+per-level round from `engine.roundIndex % levelSize`.
+
+**Endless vs finite level mode.** The component must pass both
+`isLevelMode: config.levelMode !== undefined` AND
+`maxLevels: config.levelMode?.maxLevels ?? null` to `useGameEngine`.
+With `maxLevels === null` (endless), the guards suppress `isLastRound`
+and let `isLastRoundOfLevel` fire on every `levelSize` boundary — so
+the only way to reach `gameOver` is an explicit `COMPLETE_GAME`
+(e.g., "I'm Done" button on the level-complete overlay). Simple-config
+ships exactly this shape: `totalRounds: 1`, `levelMode` defined,
+no cap. See `GameEngine.reference.mdx → Engine-injected guards` for
+the guard bodies.
 
 ### 6. Side-effect flow
 

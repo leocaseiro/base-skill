@@ -1,5 +1,6 @@
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
@@ -131,14 +132,10 @@ describe('WordSpell', () => {
   });
 });
 
-describe('WordSpell library levels recall', () => {
-  it('generates a new sampleSeed when the session restarts', async () => {
-    // Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
-    // This smoke test exists only to pin the component compiles with
-    // the new hook signature.
-    expect(true).toBe(true);
-  });
-});
+// Seed-driven re-sampling is covered by useLibraryRounds.test.tsx.
+// (review #37) the vacuous `expect(true).toBe(true)` smoke that lived
+// here was removed; compile-time pinning is implicitly enforced by the
+// component's strong-typed imports above.
 
 describe('WordSpell stale-draft recovery toast', () => {
   const staleInitialState: AnswerGameDraftState = {
@@ -191,6 +188,111 @@ describe('WordSpell stale-draft recovery toast', () => {
   it('does not fire toast for a fresh session (no initialState)', () => {
     render(<WordSpell config={config} />);
     expect(toastStub).not.toHaveBeenCalled();
+  });
+});
+
+describe('WordSpell round-complete overlay', () => {
+  // U4 coverage scope: this test verifies the engine-driven overlay
+  // invariant under physical-keyboard input (globalThis keydown →
+  // useKeyboardInput → machine). Touch-keyboard input (the primary
+  // BaseSkill platform) drives via useTouchKeyboardInput on the hidden
+  // input element and is covered by tests-e2e/word-spell.e2e.ts.
+  it('mounts the round-complete effect exactly once during the celebration window', async () => {
+    const multiRoundConfig: WordSpellConfig = {
+      gameId: 'word-spell-test',
+      component: 'WordSpell',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      mode: 'recall',
+      tileUnit: 'letter',
+      totalRounds: 3,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      rounds: [{ word: 'cat' }, { word: 'dog' }, { word: 'pig' }],
+    };
+
+    render(<WordSpell config={multiRoundConfig} />);
+
+    // Type 'c', 'a', 't' to complete round 1 — `useKeyboardInput` dispatches
+    // TYPE_TILE for each, AnswerGameProvider mirrors them to the engine,
+    // the XState machine's `always` transition fires when all zones are
+    // filled correctly. The regression we guard against is the prior
+    // `setTimeout` race re-mounting the celebration overlay.
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 't', bubbles: true }),
+      );
+    });
+
+    const overlays = await screen.findAllByRole('status', {
+      name: 'Round complete!',
+    });
+    expect(overlays).toHaveLength(1);
+  });
+});
+
+describe('WordSpell StrictMode round-advance guard', () => {
+  // (review #6) StrictMode mounts effects twice in dev. Without the
+  // `advancedRoundRef` guard the round-advance effect would fire two
+  // ADVANCE_ROUND dispatches in dev, double-incrementing the engine's
+  // roundIndex. With the guard the second invocation is short-circuited.
+  it('round-advance dispatches once under StrictMode double-mount', () => {
+    const strictModeConfig: WordSpellConfig = {
+      gameId: 'word-spell-test',
+      component: 'WordSpell',
+      inputMethod: 'type',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      mode: 'recall',
+      tileUnit: 'letter',
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: false,
+      rounds: [{ word: 'cat' }, { word: 'dog' }],
+    };
+
+    expect(() =>
+      render(
+        <StrictMode>
+          <WordSpell config={strictModeConfig} />
+        </StrictMode>,
+      ),
+    ).not.toThrow();
+
+    // Complete round 1.
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'c', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'a', bubbles: true }),
+      );
+    });
+    act(() => {
+      globalThis.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 't', bubbles: true }),
+      );
+    });
+
+    // If the guard mis-fired, the engine would have advanced past round 2
+    // and surfaced the game-over overlay. Asserting it is NOT present
+    // confirms we stayed within the 2-round bounds.
+    expect(
+      screen.queryByRole('dialog', { name: 'Game complete' }),
+    ).not.toBeInTheDocument();
   });
 });
 

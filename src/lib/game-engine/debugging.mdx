@@ -225,6 +225,13 @@ Filter the browser console to `[TTS]` to see only speech events.
 
 Both reducers are pure functions and can be tested without React:
 
+> **Note:** this snippet relies on `answer-game-reducer`, which is removed in
+> PR 1c. The XState-first engine replaces it (see §5 above and §9 for the
+> overlay invariant). For new tests, drive `wordSpellMachine` /
+> `sortNumbersMachine` / `numberMatchMachine` directly via `createActor(...)`
+> — see the `definition.test.ts` files for the canonical pattern. Kept here
+> as a historical reference until PR 1c lands.
+
 ```ts
 import {
   answerGameReducer,
@@ -363,7 +370,8 @@ Checklist if you see a double-mount in dev:
 2. Confirm overlays are conditionally rendered on `engine.phase`,
    not on a derived `setState`-driven flag. The prior `useGameSounds`
    pattern with a microtask-deferred `confettiReady`/`gameOverReady`
-   is no longer used in NumberMatch.
+   was removed in PR 1b — sounds now fire from machine `entry`
+   actions and overlays gate directly on `engine.phase`.
 3. Confirm only one game component is mounted — e.g., a stale Storybook
    story decorator or React strict-mode double-render.
 
