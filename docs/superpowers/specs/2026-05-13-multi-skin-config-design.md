@@ -2,7 +2,7 @@
 status: draft
 date: 2026-05-13
 branch: feat/multi-skin-config
-follow-up-plan: docs/superpowers/plans/2026-05-13-multi-skin-config-plan.md (TBD)
+follow-up-plan: docs/superpowers/plans/2026-05-13-multi-skin-config-plan.md
 absorbs:
   - PR #358 (cave-dragon skin → ships as part of this PR)
 ---
