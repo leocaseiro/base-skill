@@ -196,27 +196,16 @@ const sceneStyles = `
   background-size: contain;
 }
 /* ── Lava floor ───────────────────────────────────────────────── */
-/* Base div carries a fallback gradient (yellow surface → deep red
-   trench) for prefers-reduced-motion and as a paint backstop. The
-   inline SVG waves layered on top paint the visible color story via
-   per-layer userSpaceOnUse gradients — no opacity tricks.
-   overflow: visible so bubbles can rise out of the lava band into
-   the cave above. */
+/* The 5 inline SVG wave layers paint the entire lava — no base
+   gradient on the div (which previously left a flat strip above the
+   topmost wave). overflow: visible so bubbles can rise past the
+   lava band into the cave above. */
 .cave-dragon-scene__lava {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
   height: 32%;
-  background: linear-gradient(
-    to bottom,
-    #fff48a 0%,
-    #ffc234 18%,
-    #ff8c00 38%,
-    #ff4500 62%,
-    #931c08 84%,
-    #4a0c06 100%
-  );
   overflow: visible;
   pointer-events: none;
 }
@@ -233,65 +222,76 @@ const sceneStyles = `
   animation-direction: alternate;
   animation-timing-function: ease-in-out;
 }
-/* Each layer morphs its d-attribute between two visibly different
-   wave shapes — peaks/troughs swap places AND the wave-line shifts
-   ±15 viewBox units vertically. Combined with animation-direction:
-   alternate, the wave undulates rather than slides rigidly. Larger
-   bezier amplitude (±40 around the wave-line) makes the curves
-   actually read as waves at the rendered scale. Different durations
-   + negative delays so the four layers desync. */
+/* Five waves stacked top → bottom. Waves 2–5 use the exact path-d
+   shapes from base-skill-resources/waves.html (frames 0% and 50%,
+   which are the most contrasting in that animation). Wave 1 is a
+   new top layer with a custom bezier in matching style. Each layer
+   has its own per-wave gradient (cd-wave-grad-N) with stops mapped
+   in userSpaceOnUse to the wave's visible band, so the gradient is
+   actually graduated within the visible strip — fixing the
+   previous "narrow slice of a tall gradient" flatness. */
 .cd-wave-1 {
   animation-name: cd-wave-morph-1;
-  animation-duration: 2.6s;
+  animation-duration: 2.4s;
 }
 .cd-wave-2 {
   animation-name: cd-wave-morph-2;
-  animation-duration: 3.4s;
-  animation-delay: -1s;
+  animation-duration: 3.0s;
+  animation-delay: -0.8s;
 }
 .cd-wave-3 {
   animation-name: cd-wave-morph-3;
-  animation-duration: 2.8s;
-  animation-delay: -0.7s;
+  animation-duration: 2.6s;
+  animation-delay: -1.3s;
 }
 .cd-wave-4 {
   animation-name: cd-wave-morph-4;
-  animation-duration: 3.8s;
+  animation-duration: 3.2s;
+  animation-delay: -0.6s;
+}
+.cd-wave-5 {
+  animation-name: cd-wave-morph-5;
+  animation-duration: 2.8s;
   animation-delay: -1.5s;
 }
-/* Each keyframe pair inverts the bezier peaks/troughs (peak y →
-   trough y and vice versa) so the visible wave silhouette moves
-   horizontally as well as bobbing vertically. */
 @keyframes cd-wave-morph-1 {
   from {
-    d: path('M 0,600 L 0,80 C 200,35 400,125 600,80 C 800,35 1000,125 1200,80 C 1320,55 1400,105 1440,80 L 1440,600 Z');
+    d: path('M 0,600 L 0,28 C 80,14 175,46 260,30 C 345,14 430,46 515,28 C 600,12 690,44 775,28 C 860,12 945,44 1035,30 C 1120,16 1210,42 1300,28 C 1370,18 1410,34 1440,28 L 1440,600 L 0,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,95 C 200,140 400,50 600,95 C 800,140 1000,50 1200,95 C 1320,120 1400,70 1440,95 L 1440,600 Z');
+    d: path('M 0,600 L 0,32 C 80,46 175,14 260,32 C 345,48 430,16 515,34 C 600,50 690,18 775,34 C 860,48 945,18 1035,32 C 1120,46 1210,20 1300,32 C 1370,42 1410,26 1440,32 L 1440,600 L 0,600 Z');
   }
 }
 @keyframes cd-wave-morph-2 {
   from {
-    d: path('M 0,600 L 0,220 C 200,255 400,185 600,220 C 800,255 1000,185 1200,220 C 1320,200 1400,240 1440,220 L 1440,600 Z');
+    d: path('M 0,600 L 0,90 C 71.59,78.63 143.17,67.26 203,71 C 262.83,74.74 310.89,93.59 383,86 C 455.11,78.41 551.26,44.38 626,47 C 700.74,49.62 754.05,88.89 826,106 C 897.95,123.11 988.52,118.07 1054,121 C 1119.48,123.93 1159.85,134.84 1220,131 C 1280.15,127.16 1360.07,108.58 1440,90 L 1440,600 L 0,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,235 C 200,200 400,270 600,235 C 800,200 1000,270 1200,235 C 1320,255 1400,215 1440,235 L 1440,600 Z');
+    d: path('M 0,600 L 0,90 C 62.48,105.47 124.95,120.94 186,106 C 247.05,91.06 306.67,45.72 373,54 C 439.33,62.28 512.38,124.17 589,122 C 665.62,119.83 745.82,53.58 814,51 C 882.18,48.42 938.36,109.50 1010,123 C 1081.64,136.50 1168.76,102.43 1243,89 C 1317.24,75.57 1378.62,82.79 1440,90 L 1440,600 L 0,600 Z');
   }
 }
 @keyframes cd-wave-morph-3 {
   from {
-    d: path('M 0,600 L 0,360 C 200,335 400,385 600,360 C 800,335 1000,385 1200,360 C 1320,345 1400,375 1440,360 L 1440,600 Z');
+    d: path('M 0,600 L 0,210 C 74.04,180.80 148.07,151.59 206,166 C 263.93,180.41 305.75,238.43 382,243 C 458.25,247.57 568.95,198.70 635,195 C 701.05,191.30 722.47,232.76 785,243 C 847.53,253.24 951.18,232.26 1032,213 C 1112.82,193.74 1170.81,176.21 1235,176 C 1299.19,175.79 1369.60,192.89 1440,210 L 1440,600 L 0,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,373 C 200,398 400,348 600,373 C 800,398 1000,348 1200,373 C 1320,388 1400,358 1440,373 L 1440,600 Z');
+    d: path('M 0,600 L 0,210 C 64.73,201.55 129.46,193.11 195,201 C 260.54,208.89 326.88,233.13 390,239 C 453.12,244.87 513.02,232.37 593,231 C 672.98,229.63 773.02,239.39 844,237 C 914.98,234.61 956.88,220.09 1017,203 C 1077.12,185.91 1155.46,166.26 1229,167 C 1302.54,167.74 1371.27,188.87 1440,210 L 1440,600 L 0,600 Z');
   }
 }
 @keyframes cd-wave-morph-4 {
   from {
-    d: path('M 0,600 L 0,500 C 200,478 400,522 600,500 C 800,478 1000,522 1200,500 C 1320,488 1400,512 1440,500 L 1440,600 Z');
+    d: path('M 0,600 L 0,330 C 76.28,310.58 152.56,291.16 213,295 C 273.44,298.84 318.03,325.95 386,328 C 453.97,330.05 545.32,307.06 618,305 C 690.68,302.94 744.68,321.82 808,341 C 871.32,360.18 943.97,379.66 1013,371 C 1082.03,362.34 1147.44,325.52 1218,314 C 1288.56,302.48 1364.28,316.24 1440,330 L 1440,600 L 0,600 Z');
   }
   to {
-    d: path('M 0,600 L 0,512 C 200,534 400,490 600,512 C 800,534 1000,490 1200,512 C 1320,524 1400,500 1440,512 L 1440,600 Z');
+    d: path('M 0,600 L 0,330 C 72.72,336.26 145.44,342.52 208,340 C 270.56,337.48 322.96,326.18 387,314 C 451.04,301.82 526.70,288.75 608,287 C 689.30,285.25 776.22,294.81 851,300 C 925.78,305.19 988.40,306.01 1058,307 C 1127.60,307.99 1204.17,309.14 1269,313 C 1333.83,316.86 1386.91,323.43 1440,330 L 1440,600 L 0,600 Z');
+  }
+}
+@keyframes cd-wave-morph-5 {
+  from {
+    d: path('M 0,600 L 0,450 C 68.59,433.08 137.18,416.16 206,423 C 274.82,429.84 343.88,460.43 411,461 C 478.12,461.57 543.29,432.12 605,438 C 666.71,443.88 724.95,485.10 791,487 C 857.05,488.90 930.90,451.47 1004,441 C 1077.10,430.53 1149.46,447.01 1222,453 C 1294.54,458.99 1367.27,454.50 1440,450 L 1440,600 L 0,600 Z');
+  }
+  to {
+    d: path('M 0,600 L 0,450 C 88.97,457.72 177.93,465.44 239,461 C 300.07,456.56 333.23,439.97 401,449 C 468.77,458.03 571.13,492.69 645,491 C 718.87,489.31 764.23,451.26 827,440 C 889.77,428.74 969.94,444.28 1034,449 C 1098.06,453.72 1146.02,447.64 1211,446 C 1275.98,444.36 1357.99,447.18 1440,450 L 1440,600 L 0,600 Z');
   }
 }
 .cave-dragon-scene__lava-bubble {
@@ -579,14 +579,14 @@ const SceneBackground = () => (
       />
       <div className="cave-dragon-scene__dragon" />
       <div className="cave-dragon-scene__lava" aria-hidden="true">
-        {/* Inline wave silhouettes. Four smooth bezier layers stacked
-            top → bottom, each with its own userSpaceOnUse gradient
-            (lighter near the layer's wave-line, darker at the trench
-            floor). The base lava div's CSS gradient stays as a
-            paint-backstop / reduced-motion fallback. Each layer bobs
-            translateY independently with staggered periods so the
-            surface looks alive without synced motion or expensive
-            d-attribute morphing. */}
+        {/* Five inline SVG wave layers stacked top → bottom. Waves 2-5
+            copy the path-d shapes verbatim from
+            base-skill-resources/waves.html. Wave 1 is a new top layer
+            so the lava has no flat strip at the surface. Each wave
+            has its own per-wave gradient with stops mapped (via
+            userSpaceOnUse) to the wave's visible band only — so the
+            gradient is fully graduated across the visible strip
+            instead of showing a narrow slice of a tall gradient. */}
         <svg
           className="cave-dragon-scene__lava-waves"
           viewBox="0 0 1440 600"
@@ -599,66 +599,82 @@ const SceneBackground = () => (
               id="cd-wave-grad-1"
               gradientUnits="userSpaceOnUse"
               x1="0"
-              y1="80"
+              y1="28"
               x2="0"
-              y2="600"
+              y2="90"
             >
               <stop offset="0%" stopColor="#fff48a" />
-              <stop offset="100%" stopColor="#ffa844" />
+              <stop offset="100%" stopColor="#ffd060" />
             </linearGradient>
             <linearGradient
               id="cd-wave-grad-2"
               gradientUnits="userSpaceOnUse"
               x1="0"
-              y1="220"
+              y1="90"
               x2="0"
-              y2="600"
+              y2="210"
             >
-              <stop offset="0%" stopColor="#ff8c00" />
-              <stop offset="100%" stopColor="#ff4500" />
+              <stop offset="0%" stopColor="#ffa844" />
+              <stop offset="100%" stopColor="#ff7800" />
             </linearGradient>
             <linearGradient
               id="cd-wave-grad-3"
               gradientUnits="userSpaceOnUse"
               x1="0"
-              y1="360"
+              y1="210"
               x2="0"
-              y2="600"
+              y2="330"
             >
-              <stop offset="0%" stopColor="#ff4500" />
-              <stop offset="100%" stopColor="#931c08" />
+              <stop offset="0%" stopColor="#ff6700" />
+              <stop offset="100%" stopColor="#ff3300" />
             </linearGradient>
             <linearGradient
               id="cd-wave-grad-4"
               gradientUnits="userSpaceOnUse"
               x1="0"
-              y1="500"
+              y1="330"
+              x2="0"
+              y2="450"
+            >
+              <stop offset="0%" stopColor="#c12810" />
+              <stop offset="100%" stopColor="#7a1a0a" />
+            </linearGradient>
+            <linearGradient
+              id="cd-wave-grad-5"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="450"
               x2="0"
               y2="600"
             >
-              <stop offset="0%" stopColor="#931c08" />
-              <stop offset="100%" stopColor="#4a0c06" />
+              <stop offset="0%" stopColor="#5e1208" />
+              <stop offset="100%" stopColor="#2a0a04" />
             </linearGradient>
           </defs>
           <path
             className="cd-wave cd-wave-1"
-            d="M 0,600 L 0,80 C 200,35 400,125 600,80 C 800,35 1000,125 1200,80 C 1320,55 1400,105 1440,80 L 1440,600 Z"
+            d="M 0,600 L 0,28 C 80,14 175,46 260,30 C 345,14 430,46 515,28 C 600,12 690,44 775,28 C 860,12 945,44 1035,30 C 1120,16 1210,42 1300,28 C 1370,18 1410,34 1440,28 L 1440,600 L 0,600 Z"
             fill="url(#cd-wave-grad-1)"
           />
           <path
             className="cd-wave cd-wave-2"
-            d="M 0,600 L 0,220 C 200,255 400,185 600,220 C 800,255 1000,185 1200,220 C 1320,200 1400,240 1440,220 L 1440,600 Z"
+            d="M 0,600 L 0,90 C 71.59,78.63 143.17,67.26 203,71 C 262.83,74.74 310.89,93.59 383,86 C 455.11,78.41 551.26,44.38 626,47 C 700.74,49.62 754.05,88.89 826,106 C 897.95,123.11 988.52,118.07 1054,121 C 1119.48,123.93 1159.85,134.84 1220,131 C 1280.15,127.16 1360.07,108.58 1440,90 L 1440,600 L 0,600 Z"
             fill="url(#cd-wave-grad-2)"
           />
           <path
             className="cd-wave cd-wave-3"
-            d="M 0,600 L 0,360 C 200,335 400,385 600,360 C 800,335 1000,385 1200,360 C 1320,345 1400,375 1440,360 L 1440,600 Z"
+            d="M 0,600 L 0,210 C 74.04,180.80 148.07,151.59 206,166 C 263.93,180.41 305.75,238.43 382,243 C 458.25,247.57 568.95,198.70 635,195 C 701.05,191.30 722.47,232.76 785,243 C 847.53,253.24 951.18,232.26 1032,213 C 1112.82,193.74 1170.81,176.21 1235,176 C 1299.19,175.79 1369.60,192.89 1440,210 L 1440,600 L 0,600 Z"
             fill="url(#cd-wave-grad-3)"
           />
           <path
             className="cd-wave cd-wave-4"
-            d="M 0,600 L 0,500 C 200,478 400,522 600,500 C 800,478 1000,522 1200,500 C 1320,488 1400,512 1440,500 L 1440,600 Z"
+            d="M 0,600 L 0,330 C 76.28,310.58 152.56,291.16 213,295 C 273.44,298.84 318.03,325.95 386,328 C 453.97,330.05 545.32,307.06 618,305 C 690.68,302.94 744.68,321.82 808,341 C 871.32,360.18 943.97,379.66 1013,371 C 1082.03,362.34 1147.44,325.52 1218,314 C 1288.56,302.48 1364.28,316.24 1440,330 L 1440,600 L 0,600 Z"
             fill="url(#cd-wave-grad-4)"
+          />
+          <path
+            className="cd-wave cd-wave-5"
+            d="M 0,600 L 0,450 C 68.59,433.08 137.18,416.16 206,423 C 274.82,429.84 343.88,460.43 411,461 C 478.12,461.57 543.29,432.12 605,438 C 666.71,443.88 724.95,485.10 791,487 C 857.05,488.90 930.90,451.47 1004,441 C 1077.10,430.53 1149.46,447.01 1222,453 C 1294.54,458.99 1367.27,454.50 1440,450 L 1440,600 L 0,600 Z"
+            fill="url(#cd-wave-grad-5)"
           />
         </svg>
         {/* Rising bubbles. Plain HTML divs so they stay perfectly round
