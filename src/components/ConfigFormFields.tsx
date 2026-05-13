@@ -212,6 +212,74 @@ export const ConfigFormFields = ({
         );
       }
 
+      if (field.type === 'radio') {
+        const options = field.optionsSource();
+        if (options.length < 2) return null;
+        const selected = config[field.key];
+        const groupId = `field-${field.key}`;
+        const focusByIndex = (index: number) => {
+          const all = [
+            ...document.querySelectorAll<HTMLInputElement>(
+              `input[type="radio"][name="${field.key}"]`,
+            ),
+          ];
+          all[index]?.focus();
+        };
+        return (
+          <div
+            key={field.key}
+            role="radiogroup"
+            aria-labelledby={groupId}
+            className="flex flex-col gap-1 text-sm font-semibold text-foreground"
+          >
+            <span id={groupId}>{field.label}</span>
+            <div className="flex flex-col gap-2">
+              {options.map((opt, i) => {
+                const isSelected = selected === opt.value;
+                const isFirstWhenNone = selected == null && i === 0;
+                return (
+                  <label
+                    key={opt.value}
+                    className="flex min-h-12 cursor-pointer items-center gap-3"
+                  >
+                    <input
+                      type="radio"
+                      name={field.key}
+                      value={opt.value}
+                      checked={isSelected}
+                      tabIndex={isSelected || isFirstWhenNone ? 0 : -1}
+                      onChange={() =>
+                        onChange({ ...config, [field.key]: opt.value })
+                      }
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === 'ArrowDown' ||
+                          e.key === 'ArrowRight'
+                        ) {
+                          e.preventDefault();
+                          focusByIndex((i + 1) % options.length);
+                        }
+                        if (
+                          e.key === 'ArrowUp' ||
+                          e.key === 'ArrowLeft'
+                        ) {
+                          e.preventDefault();
+                          focusByIndex(
+                            (i - 1 + options.length) % options.length,
+                          );
+                        }
+                      }}
+                      className="h-5 w-5 accent-primary"
+                    />
+                    {opt.label}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
+      }
+
       // checkbox
       return (
         <label
