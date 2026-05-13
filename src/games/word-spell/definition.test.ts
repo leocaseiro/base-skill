@@ -1,4 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { createActor } from 'xstate';
 import { wordSpellDefinition } from './definition';
 import type {
@@ -11,6 +18,7 @@ import type {
 } from '@/components/answer-game/types';
 import type { Actor } from 'xstate';
 import { buildEngineGuards } from '@/lib/game-engine/useGameEngine';
+import { __resetSkinRegistryForTests } from '@/lib/skin/registry';
 
 const tile = (id: string, value: string): TileItem => ({
   id,
@@ -485,5 +493,27 @@ describe('WordSpell machine — integration', () => {
     expect(actor.getSnapshot().value).toBe('roundComplete');
     expect(context().roundIndex).toBe(before.roundIndex);
     expect(context().retryCount).toBe(before.retryCount);
+  });
+});
+
+describe('word-spell definition — skin registration invariant', () => {
+  beforeEach(() => {
+    __resetSkinRegistryForTests();
+    // Clear the module cache so the side effect re-fires when we re-import.
+    vi.resetModules();
+  });
+
+  it("registers dragon-cave when 'definition' is imported", async () => {
+    // Both modules must be re-imported together after vi.resetModules():
+    // the statically-imported `getRegisteredSkins` at the top of the file
+    // is bound to the original registry instance, but the freshly-imported
+    // `./definition` would target the freshly-imported registry. Pulling
+    // both dynamically keeps the binding and the side effect on the same
+    // module instance.
+    const { getRegisteredSkins: getFreshSkins } =
+      await import('@/lib/skin/registry');
+    await import('./definition');
+    const ids = getFreshSkins('word-spell').map((s) => s.id);
+    expect(ids).toEqual(['classic', 'dragon-cave']);
   });
 });
