@@ -479,3 +479,78 @@ test('@visual spot-all happy-path layout', async ({ page }) => {
     fullPage: true,
   });
 });
+
+// ── Dragon Cave skin (The Floor is Lava seeded custom game) ───────────────────
+// The seeder writes a custom-game row with a deterministic id (see
+// src/db/seed-the-floor-is-lava.ts) on the home-screen mount. Tests deep-link
+// via `?configId=seed:tfil:anonymous` so the seed runs without a card click
+// (skipping a navigation race) AND pin `?seed=...` so the round sampler is
+// deterministic across runs (otherwise the tile bank shuffle drifts between
+// `update` and `test`, producing perpetual diffs). The home route still mounts
+// briefly to trigger the seeder before the game route mounts and resolves the
+// configId.
+//
+// fullPage: false keeps each screenshot viewport-clamped so each baseline
+// reflects what a user at that viewport sees (the scene has an intrinsic
+// aspect-ratio + min-width that may overflow at narrower viewports).
+
+const DRAGON_CAVE_CONFIG_ID = 'seed:tfil:anonymous';
+const DRAGON_CAVE_SEED = 'vr-dragon-cave-1';
+
+const DRAGON_CAVE_VIEWPORTS = [
+  { width: 1024, height: 768, name: 'tablet-landscape' },
+  { width: 768, height: 1024, name: 'tablet-portrait' },
+  { width: 414, height: 896, name: 'mobile-lg' },
+] as const;
+
+const seedTheFloorIsLava = async (page: Page): Promise<void> => {
+  await page.goto('/en/');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  // Wait for the seeded card to appear in the home grid — confirms the
+  // seeder finished writing the custom-game row before we navigate away.
+  await page
+    .getByRole('button', { name: 'Play The Floor is Lava' })
+    .waitFor({ state: 'visible' });
+};
+
+for (const vp of DRAGON_CAVE_VIEWPORTS) {
+  test(`@visual dragon-cave scene at ${vp.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await seedTheFloorIsLava(page);
+    await page.goto(
+      `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+    );
+    // InstructionsOverlay opens first; dismiss + handle any save prompt.
+    await startGame(page);
+    // Wait for a bank tile to appear so the dragon-cave scene is stable.
+    await page
+      .getByRole('button', { name: /^Letter /i })
+      .first()
+      .waitFor({ state: 'visible' });
+    await expect(page).toHaveScreenshot(
+      `dragon-cave-scene-${vp.name}.png`,
+      { fullPage: false },
+    );
+  });
+}
+
+// The skin radio is rendered inline inside InstructionsOverlay via the
+// per-game SimpleConfigFormRenderer (WordSpellSimpleConfigForm) — no extra
+// click required to expose it. We screenshot the radiogroup itself rather
+// than the full overlay so the baseline isolates the picker UI from
+// surrounding chrome (cover, cog, library source).
+test('@visual word-spell-skin-picker — both options visible', async ({
+  page,
+}) => {
+  await seedTheFloorIsLava(page);
+  await page.goto(
+    `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+  );
+  // Don't call startGame() — we want the overlay (with the simple form)
+  // visible.
+  const skinRadio = page.getByRole('radiogroup', { name: /skin/i });
+  await skinRadio.waitFor({ state: 'visible' });
+  await expect(skinRadio).toHaveScreenshot(
+    'word-spell-skin-picker.png',
+  );
+});
