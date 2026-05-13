@@ -29,6 +29,36 @@ These are the points where this plan **intentionally** diverges from the spec te
 
 ---
 
+## Post-execution corrections
+
+The Phase 1 execution (PR [#375](https://github.com/leocaseiro/base-skill/pull/375)) surfaced seven inaccuracies in the original plan text. They're listed here for the historical record AND so a future executor extending this plan (Phase 2+, or other game skin work) doesn't re-discover them. The inline task bodies below have NOT been retroactively rewritten — apply these corrections when re-using any of the original snippets.
+
+1. **Task 1 Step 2 — `yarn test --run` doesn't catch `expectTypeOf` failures.** `expectTypeOf` is type-only and erased at runtime; vitest reports green regardless of whether the asserted type holds. The actual red-state surface for type-level tests is `yarn typecheck`. The plan's "confirm fail" step should run `yarn typecheck`, not `yarn test --run <file>`.
+
+2. **Task 2 needs symmetric narrowing AND story cleanups beyond `registerSkin<G>`.** Making only `registerSkin<G>` generic leaves `getRegisteredSkins` returning un-narrowed `id: string`, breaking five pre-existing story files that iterate the registry (`WordSpell.skin.stories.tsx`, `NumberMatch.skin.stories.tsx`, `SortNumbers.stories.tsx`, `SortNumbers.skin.stories.tsx`, `SpotAll.skin.stories.tsx`) — all of which carried a fictional `demoSkin` registration the typed signature now rejects. Task 2's real scope: `registerSkin<TGame>` AND `getRegisteredSkins<TGame>` AND `SkinHarness<TGame>` generic over `GameSkinIdMap`; remove the fictional `demoSkin` registration from all five story files; add `'spot-all': 'classic'` to `GameSkinIdMap` as a typing-only entry so `<SkinHarness gameId="spot-all">` and `registerSkin('spot-all', …)` type-check (no `SpotAllSkinId` union, no `SpotAllConfig.skin?` field — SpotAll's runtime skin work is still out-of-scope per Spec item 2). Project ESLint requires `T` / `TXxx` type-param names — use `TGame`, not `G`.
+
+3. **Task 3 reference code uses the wrong `ConfigField` discriminator AND wrong `ConfigFormFields` prop API.** The discriminator is `type`, not `kind` — `ConfigField` carries `type: 'select' | 'number' | ... | 'radio'`. And `ConfigFormFields` takes `config: Record<…>` + `onChange: (nextConfig: Record<…>) => void`, not `values` + `onChange(key, value)`. The plan's snippet would have broken every existing form caller (`WordSpellSimpleConfigForm`, `AdvancedConfigModal`, every per-game ConfigFields story).
+
+4. **Task 5 Step 1 test snippet has a `vi.resetModules()` module-isolation trap.** Calling `vi.resetModules()` and then `await import('./definition')` re-evaluates `definition.ts` AND its transitive import `@/lib/skin/registry` as fresh module instances. The statically-imported `getRegisteredSkins` at the top of the test file is still bound to the ORIGINAL registry module — which `__resetSkinRegistryForTests` cleared — so it always sees `['classic']` regardless of the side effect. Fix: dynamic-import both modules together so they share the same fresh instance:
+
+   ```ts
+   it("registers dragon-cave when 'definition' is imported", async () => {
+     const { getRegisteredSkins: getFreshSkins } =
+       await import('@/lib/skin/registry');
+     await import('./definition');
+     const ids = getFreshSkins('word-spell').map((s) => s.id);
+     expect(ids).toEqual(['classic', 'dragon-cave']);
+   });
+   ```
+
+5. **Task 11 + spec Architecture — `seed:the-floor-is-lava:${profileId}` exceeds `custom_games.id.maxLength: 36`.** The prefix is 23 chars; a 21-char nanoid profileId pushes the total past 36. Shorten to `seed:tfil:${profileId}` (10-char prefix; comfortably fits a 26-char id). Still namespaced, still deterministic, still race-safe.
+
+6. **Task 11 + spec Architecture — `AppDatabase` is not the actual type.** The exported type for the RxDB collections is `BaseSkillDatabase` from `src/db/types.ts`. The seeder signature should be `(db: BaseSkillDatabase, profileId: string)`.
+
+7. **Task 4 cherry-pick replay needs `SKIP_TYPECHECK=1` on intermediate commits.** The 28 absorbed commits from PR #358 still use the `cave-dragon` identifiers; the rename to `dragon-cave` only lands in the final task commit. Each individual cherry-pick fails the pre-commit `tsc --noEmit` because Phase 1a's narrowed `WordSpellSkinId = 'classic' | 'dragon-cave'` rejects `'cave-dragon'`. Cherry-pick with `SKIP_TYPECHECK=1` per replay (the gate that matters is the final rename commit, which runs the hook cleanly). Document the skip in your replay log — no need to amend the absorbed commit messages, which preserve #358's authored content.
+
+---
+
 ## PR structure
 
 This plan produces **one PR** (`feat/multi-skin-config`) with a baby-step commit sequence. Phases map to commits. PR #358 is **absorbed** into this branch in Phase 1b (Task 4) — either by cherry-picking #358's commits onto this branch, or by merging #358's branch in.

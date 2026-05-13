@@ -9,6 +9,15 @@ absorbs:
 
 # Multi-skin config support — Phase 1 (WordSpell + The Floor is Lava)
 
+## Post-execution corrections
+
+The Phase 1 execution (PR [#375](https://github.com/leocaseiro/base-skill/pull/375)) surfaced two spec-level inaccuracies. The narrative below is preserved for the historical record; the corrections below are what actually shipped:
+
+- **Seeded `custom_games` row id is `seed:tfil:${profileId}`, not `seed:the-floor-is-lava:${profileId}`.** The spec's full-length prefix (23 chars) exceeds the schema's `custom_games.id.maxLength: 36` once a 21-char nanoid profileId is appended. Shortened to `seed:tfil:` (10-char prefix). Still namespaced, still deterministic, still multi-tab race-safe at the RxDB primary-key layer.
+- **Seeder type is `BaseSkillDatabase`, not `AppDatabase`.** The exported type for the RxDB collections (`src/db/types.ts`) is `BaseSkillDatabase`. The seeder function signature is `seedTheFloorIsLavaIfNeeded(db: BaseSkillDatabase, profileId: string)`.
+
+See also: the plan's "Post-execution corrections" section ([`docs/superpowers/plans/2026-05-13-multi-skin-config-plan.md`](../plans/2026-05-13-multi-skin-config-plan.md)) for the full list of seven plan/code corrections, most of which are plan-text only and don't affect the spec.
+
 ## Topic
 
 Add multi-skin support to game configs so a user can pick a skin when
