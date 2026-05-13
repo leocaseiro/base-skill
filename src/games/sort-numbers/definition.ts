@@ -8,7 +8,7 @@ import type { GameDefinition } from '@/lib/game-engine/definition-types';
 import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
 import type { GameEvent } from '@/types/game-events';
 
-export interface NumberMatchEngineContext {
+export interface SortNumbersEngineContext {
   allTiles: TileItem[];
   bankTileIds: string[];
   zones: AnswerZone[];
@@ -23,17 +23,17 @@ export interface NumberMatchEngineContext {
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
   isLevelMode: boolean;
-  firstActionAt: number | null;
-  selectedSlotIds: Set<string>;
+  // NOTE (Spec Delta 3): firstActionAt and selectedSlotIds land in PR 1b-bis
+  // alongside the timestamp write and selectedSlotIds toggle.
 }
 
-interface NumberMatchInput {
+interface SortNumbersInput {
   totalRounds: number;
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
 }
 
-type NumberMatchEvent =
+type SortNumbersEvent =
   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'RESUME_ROUND'; draft: AnswerGameDraftState }
   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
@@ -62,6 +62,8 @@ type NumberMatchEvent =
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
   | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'ADVANCE_LEVEL'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'COMPLETE_GAME' }
   | {
       type: 'CELEBRATION_DONE';
       skipMethod?: 'play-again' | 'go-home';
@@ -88,11 +90,11 @@ const allFilledCorrectly = (zones: AnswerZone[]): boolean =>
   zones.length > 0 &&
   zones.every((z) => z.placedTileId !== null && !z.isWrong);
 
-const numberMatchMachine = setup({
+const sortNumbersMachine = setup({
   types: {} as {
-    context: NumberMatchEngineContext;
-    events: NumberMatchEvent;
-    input: NumberMatchInput;
+    context: SortNumbersEngineContext;
+    events: SortNumbersEvent;
+    input: SortNumbersInput;
   },
   guards: {
     // In-definition guards: real bodies (not overridden by engine).
@@ -119,7 +121,6 @@ const numberMatchMachine = setup({
     completeGame: () => {},
     emit: (_, _params: { event: GameEvent }) => {},
 
-    // In-definition assign actions.
     initRound: assign(({ event }) => {
       if (event.type !== 'INIT_ROUND') return {};
       return {
@@ -132,18 +133,17 @@ const numberMatchMachine = setup({
         dragHoverBankTileId: null,
         retryCount: 0,
         roundIndex: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     resumeRound: assign(({ event }) => {
       if (event.type !== 'RESUME_ROUND') return {};
       const { draft } = event;
-      // (review #3) Prefer engine's accumulated roundIndex when present.
-      // NumberMatch has no level mode in PR 1a so the two values match,
-      // but mirroring the SortNumbers contract keeps the resume path
-      // uniform and forward-compatible.
+      // (review #3) Prefer the engine's accumulated roundIndex when the
+      // draft writer persisted it. In SortNumbers level mode the engine
+      // counter grows across levels while the reducer resets per level;
+      // without this preference the `isLastRound` guard fires on the
+      // wrong round after a mid-game resume.
       const accumulatedRoundIndex =
         draft.engineRoundIndex ?? draft.roundIndex;
       return {
@@ -157,7 +157,7 @@ const numberMatchMachine = setup({
         dragActiveTileId: null,
         dragHoverZoneIndex: null,
         dragHoverBankTileId: null,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     placeTile: assign(({ context, event }) => {
@@ -176,7 +176,7 @@ const numberMatchMachine = setup({
         return {
           dragActiveTileId,
           retryCount: context.retryCount + 1,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<SortNumbersEngineContext>;
       }
 
       if (correct) {
@@ -214,7 +214,7 @@ const numberMatchMachine = setup({
             event.zoneIndex,
             context.activeSlotIndex,
           ),
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<SortNumbersEngineContext>;
       }
 
       // Wrong, with lock-manual or lock-auto-eject.
@@ -249,7 +249,7 @@ const numberMatchMachine = setup({
         zones: newZones,
         bankTileIds: newBankTileIds,
         retryCount: context.retryCount + 1,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     typeTile: assign(({ context, event }) => {
@@ -269,7 +269,7 @@ const numberMatchMachine = setup({
       if (!correct && context.wrongTileBehavior === 'reject') {
         return {
           retryCount: context.retryCount + 1,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<SortNumbersEngineContext>;
       }
 
       const previousId = zone.placedTileId;
@@ -303,7 +303,7 @@ const numberMatchMachine = setup({
             event.zoneIndex,
             context.activeSlotIndex,
           ),
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<SortNumbersEngineContext>;
       }
 
       return {
@@ -311,7 +311,7 @@ const numberMatchMachine = setup({
         bankTileIds: baseBankTileIds,
         zones: newZones,
         retryCount: context.retryCount + 1,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     removeTile: assign(({ context, event }) => {
@@ -342,7 +342,7 @@ const numberMatchMachine = setup({
           ? context.bankTileIds
           : [...context.bankTileIds, removedTileId],
         activeSlotIndex: event.zoneIndex,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     swapTiles: assign(({ context, event }) => {
@@ -401,7 +401,7 @@ const numberMatchMachine = setup({
       return {
         dragActiveTileId,
         zones: newZones,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     ejectTile: assign(({ context, event }) => {
@@ -434,7 +434,7 @@ const numberMatchMachine = setup({
             ? context.bankTileIds
             : [...context.bankTileIds, ejectedTileId],
           activeSlotIndex: event.zoneIndex,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<SortNumbersEngineContext>;
       }
 
       return {
@@ -449,7 +449,7 @@ const numberMatchMachine = setup({
             : z,
         ),
         activeSlotIndex: event.zoneIndex,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     swapSlotBank: assign(({ context, event }) => {
@@ -478,7 +478,7 @@ const numberMatchMachine = setup({
         zones: newZones,
         dragActiveTileId: null,
         dragHoverBankTileId: null,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
 
     setActiveSlot: assign(({ context, event }) => {
@@ -494,7 +494,7 @@ const numberMatchMachine = setup({
       retryCount: context.retryCount + 1,
     })),
 
-    selectSlot: assign(() => ({})), // PR 1b placeholder (no-op in PR 1a)
+    selectSlot: assign(() => ({})), // PR 1b-bis populates selectedSlotIds toggle.
 
     setDragActive: assign(({ context, event }) => {
       if (event.type !== 'SET_DRAG_ACTIVE') return {};
@@ -532,13 +532,37 @@ const numberMatchMachine = setup({
         dragHoverZoneIndex: null,
         dragHoverBankTileId: null,
         retryCount: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<SortNumbersEngineContext>;
+    }),
+
+    // SortNumbers-specific.
+    incrementLevelIndex: assign(({ context }) => ({
+      levelIndex: context.levelIndex + 1,
+    })),
+    // Plan deviation (see Spec Delta note below):
+    // `advanceLevelState` does NOT reset `roundIndex` to 0. The engine
+    // guards (`isLastRound: roundIndex + 1 >= totalRounds`) only work
+    // when `roundIndex` accumulates across level boundaries. The reducer
+    // resets roundIndex on ADVANCE_LEVEL (legacy semantics, kept until
+    // PR 1c removes the reducer); the engine intentionally diverges so
+    // `isLastRound` fires correctly on the last round of the last level.
+    // The HUD reads reducer state, which still resets per level.
+    advanceLevelState: assign(({ event }) => {
+      if (event.type !== 'ADVANCE_LEVEL') return {};
+      return {
+        allTiles: event.tiles,
+        bankTileIds: event.tiles.map((t) => t.id),
+        zones: event.zones,
+        activeSlotIndex: 0,
+        dragActiveTileId: null,
+        dragHoverZoneIndex: null,
+        dragHoverBankTileId: null,
+        retryCount: 0,
+      } satisfies Partial<SortNumbersEngineContext>;
     }),
   },
 }).createMachine({
-  id: 'number-match',
+  id: 'sort-numbers',
   initial: 'playing',
   context: ({ input }) => ({
     allTiles: [],
@@ -555,18 +579,18 @@ const numberMatchMachine = setup({
     maxLevels: input.maxLevels,
     wrongTileBehavior: input.wrongTileBehavior,
     isLevelMode: input.maxLevels !== null,
-    firstActionAt: null,
-    selectedSlotIds: new Set<string>(),
   }),
   on: {
-    // Root-level GAME_OVER is defense-in-depth: any state can fall through
-    // to gameOver. INIT_ROUND / RESUME_ROUND used to live here too, but a
-    // stray dispatch from celebration phases (`roundComplete` /
-    // `waitingForNext` / `gameOver`) would silently reset `roundIndex` to
-    // 0. Scope them to `playing` instead — the AnswerGameProvider mount
-    // effect only fires once when the machine is in its initial `playing`
-    // state, so the legitimate paths still work. (review #2)
+    // Root-level GAME_OVER / COMPLETE_GAME are defense-in-depth: any
+    // state can fall through to gameOver. INIT_ROUND / RESUME_ROUND used
+    // to live here too, but a stray dispatch from celebration phases
+    // (`roundComplete` / `waitingForNext` / `levelComplete` / `gameOver`)
+    // would silently reset `roundIndex` to 0. Scope them to `playing`
+    // instead — the AnswerGameProvider mount effect only fires once when
+    // the machine is in its initial `playing` state, so the legitimate
+    // paths still work. (review #2)
     GAME_OVER: { target: '.gameOver' },
+    COMPLETE_GAME: { target: '.gameOver' },
   },
   states: {
     playing: {
@@ -580,10 +604,7 @@ const numberMatchMachine = setup({
         TYPE_TILE: { actions: 'typeTile' },
         REMOVE_TILE: { actions: 'removeTile' },
         SWAP_TILES: { actions: 'swapTiles' },
-        EJECT_TILE: {
-          guard: 'canEject',
-          actions: 'ejectTile',
-        },
+        EJECT_TILE: { guard: 'canEject', actions: 'ejectTile' },
         SWAP_SLOT_BANK: { actions: 'swapSlotBank' },
         SET_ACTIVE_SLOT: { actions: 'setActiveSlot' },
         REJECT_TAP: { actions: 'rejectTap' },
@@ -598,16 +619,35 @@ const numberMatchMachine = setup({
         { type: 'playSound', params: { sound: 'round-complete' } },
       ],
       after: {
+        // TODO(PR 1c): wire from useGameEngine options to restore
+        // skin.timing.roundAdvanceDelay and config.timing.roundAdvanceDelay overrides.
         750: [
           { guard: 'isLastRound', target: 'gameOver' },
+          { guard: 'isLastRoundOfLevel', target: 'levelComplete' },
           { target: 'waitingForNext' },
         ],
       },
       on: {
         CELEBRATION_DONE: [
           { guard: 'isLastRound', target: 'gameOver' },
+          { guard: 'isLastRoundOfLevel', target: 'levelComplete' },
           { target: 'waitingForNext' },
         ],
+      },
+    },
+    levelComplete: {
+      entry: [
+        { type: 'playSound', params: { sound: 'level-complete' } },
+      ],
+      on: {
+        ADVANCE_LEVEL: {
+          actions: [
+            'incrementRoundIndex',
+            'incrementLevelIndex',
+            'advanceLevelState',
+          ],
+          target: 'playing',
+        },
       },
     },
     waitingForNext: {
@@ -628,12 +668,16 @@ const numberMatchMachine = setup({
   },
 });
 
-export const numberMatchDefinition: GameDefinition = {
-  id: 'number-match',
+// (review #26) Exported for tests so they can cast to
+// `Actor<typeof sortNumbersMachine>` instead of `Actor<AnyStateMachine>`.
+export { sortNumbersMachine };
+
+export const sortNumbersDefinition: GameDefinition = {
+  id: 'sort-numbers',
   interaction: 'drag-to-slot',
-  // PR 1a Spec Delta 6: passthrough; round construction stays in the React
-  // component (buildNumeralRound in NumberMatch.tsx). PR 1b lifts it into
-  // definition.ts once WordSpell + SortNumbers migrate.
+  // PR 1b Spec Delta 4: passthrough; round construction stays in the React
+  // component (buildSortRound in SortNumbers.tsx). PR 1c may lift it into
+  // definition.ts once all games are migrated.
   buildRound: (ctx) => ({ roundIndex: ctx.roundIndex }),
-  machine: numberMatchMachine,
+  machine: sortNumbersMachine,
 };

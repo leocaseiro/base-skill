@@ -8,7 +8,7 @@ import type { GameDefinition } from '@/lib/game-engine/definition-types';
 import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
 import type { GameEvent } from '@/types/game-events';
 
-export interface NumberMatchEngineContext {
+export interface WordSpellEngineContext {
   allTiles: TileItem[];
   bankTileIds: string[];
   zones: AnswerZone[];
@@ -23,17 +23,18 @@ export interface NumberMatchEngineContext {
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
   isLevelMode: boolean;
-  firstActionAt: number | null;
-  selectedSlotIds: Set<string>;
+  // NOTE (Spec Delta 3): firstActionAt and selectedSlotIds are introduced
+  // in PR 1b-bis alongside the timestamp write and selectedSlotIds toggle.
+  // PR 1b does not include them.
 }
 
-interface NumberMatchInput {
+interface WordSpellInput {
   totalRounds: number;
   maxLevels: number | null;
   wrongTileBehavior: 'reject' | 'lock-manual' | 'lock-auto-eject';
 }
 
-type NumberMatchEvent =
+type WordSpellEvent =
   | { type: 'INIT_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
   | { type: 'RESUME_ROUND'; draft: AnswerGameDraftState }
   | { type: 'PLACE_TILE'; tileId: string; zoneIndex: number }
@@ -62,6 +63,7 @@ type NumberMatchEvent =
   | { type: 'SET_DRAG_HOVER'; zoneIndex: number | null }
   | { type: 'SET_DRAG_HOVER_BANK'; tileId: string | null }
   | { type: 'ADVANCE_ROUND'; tiles: TileItem[]; zones: AnswerZone[] }
+  | { type: 'COMPLETE_GAME' }
   | {
       type: 'CELEBRATION_DONE';
       skipMethod?: 'play-again' | 'go-home';
@@ -88,11 +90,11 @@ const allFilledCorrectly = (zones: AnswerZone[]): boolean =>
   zones.length > 0 &&
   zones.every((z) => z.placedTileId !== null && !z.isWrong);
 
-const numberMatchMachine = setup({
+const wordSpellMachine = setup({
   types: {} as {
-    context: NumberMatchEngineContext;
-    events: NumberMatchEvent;
-    input: NumberMatchInput;
+    context: WordSpellEngineContext;
+    events: WordSpellEvent;
+    input: WordSpellInput;
   },
   guards: {
     // In-definition guards: real bodies (not overridden by engine).
@@ -119,7 +121,6 @@ const numberMatchMachine = setup({
     completeGame: () => {},
     emit: (_, _params: { event: GameEvent }) => {},
 
-    // In-definition assign actions.
     initRound: assign(({ event }) => {
       if (event.type !== 'INIT_ROUND') return {};
       return {
@@ -132,18 +133,16 @@ const numberMatchMachine = setup({
         dragHoverBankTileId: null,
         retryCount: 0,
         roundIndex: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     resumeRound: assign(({ event }) => {
       if (event.type !== 'RESUME_ROUND') return {};
       const { draft } = event;
       // (review #3) Prefer engine's accumulated roundIndex when present.
-      // NumberMatch has no level mode in PR 1a so the two values match,
-      // but mirroring the SortNumbers contract keeps the resume path
-      // uniform and forward-compatible.
+      // WordSpell has no level mode today so the two values match, but
+      // mirroring the SortNumbers contract keeps the resume path uniform
+      // and forward-compatible.
       const accumulatedRoundIndex =
         draft.engineRoundIndex ?? draft.roundIndex;
       return {
@@ -157,7 +156,7 @@ const numberMatchMachine = setup({
         dragActiveTileId: null,
         dragHoverZoneIndex: null,
         dragHoverBankTileId: null,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     placeTile: assign(({ context, event }) => {
@@ -176,7 +175,7 @@ const numberMatchMachine = setup({
         return {
           dragActiveTileId,
           retryCount: context.retryCount + 1,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<WordSpellEngineContext>;
       }
 
       if (correct) {
@@ -214,7 +213,7 @@ const numberMatchMachine = setup({
             event.zoneIndex,
             context.activeSlotIndex,
           ),
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<WordSpellEngineContext>;
       }
 
       // Wrong, with lock-manual or lock-auto-eject.
@@ -249,7 +248,7 @@ const numberMatchMachine = setup({
         zones: newZones,
         bankTileIds: newBankTileIds,
         retryCount: context.retryCount + 1,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     typeTile: assign(({ context, event }) => {
@@ -269,7 +268,7 @@ const numberMatchMachine = setup({
       if (!correct && context.wrongTileBehavior === 'reject') {
         return {
           retryCount: context.retryCount + 1,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<WordSpellEngineContext>;
       }
 
       const previousId = zone.placedTileId;
@@ -303,7 +302,7 @@ const numberMatchMachine = setup({
             event.zoneIndex,
             context.activeSlotIndex,
           ),
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<WordSpellEngineContext>;
       }
 
       return {
@@ -311,7 +310,7 @@ const numberMatchMachine = setup({
         bankTileIds: baseBankTileIds,
         zones: newZones,
         retryCount: context.retryCount + 1,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     removeTile: assign(({ context, event }) => {
@@ -342,7 +341,7 @@ const numberMatchMachine = setup({
           ? context.bankTileIds
           : [...context.bankTileIds, removedTileId],
         activeSlotIndex: event.zoneIndex,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     swapTiles: assign(({ context, event }) => {
@@ -401,7 +400,7 @@ const numberMatchMachine = setup({
       return {
         dragActiveTileId,
         zones: newZones,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     ejectTile: assign(({ context, event }) => {
@@ -434,7 +433,7 @@ const numberMatchMachine = setup({
             ? context.bankTileIds
             : [...context.bankTileIds, ejectedTileId],
           activeSlotIndex: event.zoneIndex,
-        } satisfies Partial<NumberMatchEngineContext>;
+        } satisfies Partial<WordSpellEngineContext>;
       }
 
       return {
@@ -449,7 +448,7 @@ const numberMatchMachine = setup({
             : z,
         ),
         activeSlotIndex: event.zoneIndex,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     swapSlotBank: assign(({ context, event }) => {
@@ -478,7 +477,7 @@ const numberMatchMachine = setup({
         zones: newZones,
         dragActiveTileId: null,
         dragHoverBankTileId: null,
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
 
     setActiveSlot: assign(({ context, event }) => {
@@ -494,7 +493,7 @@ const numberMatchMachine = setup({
       retryCount: context.retryCount + 1,
     })),
 
-    selectSlot: assign(() => ({})), // PR 1b placeholder (no-op in PR 1a)
+    selectSlot: assign(() => ({})), // PR 1b-bis placeholder (no-op in PR 1b)
 
     setDragActive: assign(({ context, event }) => {
       if (event.type !== 'SET_DRAG_ACTIVE') return {};
@@ -532,13 +531,11 @@ const numberMatchMachine = setup({
         dragHoverZoneIndex: null,
         dragHoverBankTileId: null,
         retryCount: 0,
-        firstActionAt: null,
-        selectedSlotIds: new Set<string>(),
-      } satisfies Partial<NumberMatchEngineContext>;
+      } satisfies Partial<WordSpellEngineContext>;
     }),
   },
 }).createMachine({
-  id: 'number-match',
+  id: 'word-spell',
   initial: 'playing',
   context: ({ input }) => ({
     allTiles: [],
@@ -555,18 +552,23 @@ const numberMatchMachine = setup({
     maxLevels: input.maxLevels,
     wrongTileBehavior: input.wrongTileBehavior,
     isLevelMode: input.maxLevels !== null,
-    firstActionAt: null,
-    selectedSlotIds: new Set<string>(),
   }),
   on: {
-    // Root-level GAME_OVER is defense-in-depth: any state can fall through
-    // to gameOver. INIT_ROUND / RESUME_ROUND used to live here too, but a
-    // stray dispatch from celebration phases (`roundComplete` /
-    // `waitingForNext` / `gameOver`) would silently reset `roundIndex` to
-    // 0. Scope them to `playing` instead — the AnswerGameProvider mount
-    // effect only fires once when the machine is in its initial `playing`
-    // state, so the legitimate paths still work. (review #2)
+    // Root-level GAME_OVER / COMPLETE_GAME are defense-in-depth: any
+    // state can fall through to gameOver. INIT_ROUND / RESUME_ROUND used
+    // to live here too, but a stray dispatch from celebration phases
+    // (`roundComplete` / `waitingForNext` / `gameOver`) would silently
+    // reset `roundIndex` to 0. Scope them to `playing` instead — the
+    // AnswerGameProvider mount effect only fires once when the machine
+    // is in its initial `playing` state, so the legitimate paths still
+    // work. (review #2)
+    //
+    // COMPLETE_GAME mirrors SortNumbers's contract so the reducer's
+    // bail-out path can route every game uniformly. WordSpell currently
+    // has no in-game caller (no levelMode UI) but accepting the event is
+    // cheap and matches the project-wide expectation. (review #35)
     GAME_OVER: { target: '.gameOver' },
+    COMPLETE_GAME: { target: '.gameOver' },
   },
   states: {
     playing: {
@@ -580,10 +582,7 @@ const numberMatchMachine = setup({
         TYPE_TILE: { actions: 'typeTile' },
         REMOVE_TILE: { actions: 'removeTile' },
         SWAP_TILES: { actions: 'swapTiles' },
-        EJECT_TILE: {
-          guard: 'canEject',
-          actions: 'ejectTile',
-        },
+        EJECT_TILE: { guard: 'canEject', actions: 'ejectTile' },
         SWAP_SLOT_BANK: { actions: 'swapSlotBank' },
         SET_ACTIVE_SLOT: { actions: 'setActiveSlot' },
         REJECT_TAP: { actions: 'rejectTap' },
@@ -598,6 +597,8 @@ const numberMatchMachine = setup({
         { type: 'playSound', params: { sound: 'round-complete' } },
       ],
       after: {
+        // TODO(PR 1c): wire from useGameEngine options to restore
+        // skin.timing.roundAdvanceDelay and config.timing.roundAdvanceDelay overrides.
         750: [
           { guard: 'isLastRound', target: 'gameOver' },
           { target: 'waitingForNext' },
@@ -628,12 +629,16 @@ const numberMatchMachine = setup({
   },
 });
 
-export const numberMatchDefinition: GameDefinition = {
-  id: 'number-match',
+// (review #26) Exported for tests so they can cast to
+// `Actor<typeof wordSpellMachine>` instead of `Actor<AnyStateMachine>`.
+export { wordSpellMachine };
+
+export const wordSpellDefinition: GameDefinition = {
+  id: 'word-spell',
   interaction: 'drag-to-slot',
-  // PR 1a Spec Delta 6: passthrough; round construction stays in the React
-  // component (buildNumeralRound in NumberMatch.tsx). PR 1b lifts it into
-  // definition.ts once WordSpell + SortNumbers migrate.
+  // PR 1b Spec Delta 4: passthrough; round construction stays in the React
+  // component (buildSentenceGapRound / buildTilesAndZones in WordSpell.tsx).
+  // PR 1c lifts it into definition.ts.
   buildRound: (ctx) => ({ roundIndex: ctx.roundIndex }),
-  machine: numberMatchMachine,
+  machine: wordSpellMachine,
 };

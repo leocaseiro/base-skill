@@ -135,6 +135,16 @@ export interface AnswerGameDraftState {
   roundIndex: number;
   retryCount: number;
   levelIndex: number;
+  /**
+   * The engine's accumulated round counter. In SortNumbers level mode the
+   * engine's `roundIndex` grows across level boundaries while the reducer's
+   * `roundIndex` resets per level. When this field is present at resume
+   * time, the machine's `resumeRound` action prefers it over `roundIndex`
+   * so engine guards (`isLastRound`) continue to fire on the correct
+   * round. Optional for back-compat with drafts written pre-fix.
+   * (review #3)
+   */
+  engineRoundIndex?: number;
 }
 
 export interface HudConfig {

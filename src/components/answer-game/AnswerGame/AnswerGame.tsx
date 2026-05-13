@@ -25,6 +25,13 @@ interface AnswerGameProps {
    * AnswerGameProvider for details.
    */
   engineDispatch?: (action: AnswerGameAction) => void;
+  /**
+   * The engine's accumulated `roundIndex`. Forwarded to
+   * AnswerGameProvider → useAnswerGameDraftSync so SortNumbers level mode
+   * can persist the engine's view of progress alongside the reducer's
+   * per-level value. See AnswerGameProvider. (review #3)
+   */
+  engineRoundIndex?: number;
   children: ReactNode;
 }
 
@@ -34,6 +41,7 @@ const AnswerGameRoot = ({
   sessionId,
   skin,
   engineDispatch,
+  engineRoundIndex,
   children,
 }: AnswerGameProps) => (
   <AnswerGameProvider
@@ -41,6 +49,7 @@ const AnswerGameRoot = ({
     initialState={initialState}
     sessionId={sessionId}
     engineDispatch={engineDispatch}
+    engineRoundIndex={engineRoundIndex}
   >
     <div className="flex min-h-0 w-full flex-col items-center">
       <ProgressHUDRoot skin={skin} />

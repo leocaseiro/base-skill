@@ -161,12 +161,14 @@ const engine = useGameEngine<TRound, TContext>(
 
 `options`:
 
-| Field         | Type                      | Description                                                                                                                 |
-| ------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `input`       | `unknown`                 | Populates the machine's initial context via XState v5's `setup({ types: { input } })` + `useMachine(machine, { input })`    |
-| `envelope`    | `Partial<EngineEnvelope>` | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook |
-| `totalRounds` | `number`                  | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                   |
-| `levelSize`   | `number`                  | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                             |
+| Field         | Type                          | Description                                                                                                                                                                                                       |
+| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input`       | `unknown`                     | Populates the machine's initial context via XState v5's `setup({ types: { input } })` + `useMachine(machine, { input })`                                                                                          |
+| `envelope`    | `Partial<EngineEnvelope>`     | `{ sessionId, profileId, roundIndex }` for emitted events. `gameId` is taken from `definition.id`. Memoised inside the hook                                                                                       |
+| `totalRounds` | `number`                      | Used to build the runtime `isLastRound` / `isMidLevelRound` / `isLastRoundOfLevel` guards                                                                                                                         |
+| `levelSize`   | `number`                      | Position-in-level modulo used by `isLastRoundOfLevel`. Defaults to `totalRounds` (single level)                                                                                                                   |
+| `isLevelMode` | `boolean \| undefined`        | Set `true` whenever a `levelMode` block exists on the config — even without `maxLevels`. Enables endless level mode in the guards. Defaults to `false` (no level mode) so NumberMatch / WordSpell stay unaffected |
+| `maxLevels`   | `number \| null \| undefined` | `null` = endless levels, `number` = finite. Pair with `isLevelMode: true`. Defaults to `null`                                                                                                                     |
 
 `UseGameEngineResult<TContext>`:
 
@@ -190,18 +192,38 @@ machine state change but always reaches the same underlying actor.
 
 ### Engine-injected guards and actions
 
-`buildEngineGuards(totalRounds, levelSize)` returns the runtime bodies
-for the placeholder guards declared in each game's `setup({ guards })`:
+`buildEngineGuards(totalRounds, levelSize, { isLevelMode, maxLevels })`
+returns the runtime bodies for the placeholder guards declared in each
+game's `setup({ guards })`. The third argument carries level-mode
+context the engine can't derive from `totalRounds` alone:
 
 ```ts
-isMidLevelRound: ({ context }) =>
-  (context.roundIndex + 1) % max(levelSize, 1) !== 0 &&
-  context.roundIndex + 1 < totalRounds;
-isLastRoundOfLevel: ({ context }) =>
-  (context.roundIndex + 1) % max(levelSize, 1) === 0 &&
-  context.roundIndex + 1 < totalRounds;
-isLastRound: ({ context }) => context.roundIndex + 1 >= totalRounds;
+const isEndless = isLevelMode === true && maxLevels === null;
+
+isMidLevelRound: ({ context }) => {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel === 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 < totalRounds;
+};
+isLastRoundOfLevel: ({ context }) => {
+  const positionInLevel = (context.roundIndex + 1) % max(levelSize, 1);
+  if (positionInLevel !== 0) return false;
+  if (isEndless) return true;
+  return context.roundIndex + 1 < totalRounds;
+};
+isLastRound: ({ context }) => {
+  if (isEndless) return false;
+  return context.roundIndex + 1 >= totalRounds;
+};
 ```
+
+The `isEndless` branch keeps `gameOver` reachable only via explicit
+`COMPLETE_GAME` / `GAME_OVER` events (e.g., user taps "I'm Done" on
+the level-complete overlay). Without it, the engine would treat
+`roundIndex + 1 >= totalRounds` as "game's over" even when
+`levelMode.generateNextLevel` is ready to produce another level —
+the regression `e2e/sortnumbers-level-advance.spec.ts` pins this.
 
 Engine-injected actions (overridden by `useGameEngine.provide`):
 
@@ -308,3 +330,60 @@ seed and every subsequent `PLACE_TILE`/`TYPE_TILE`/etc. See
    dispatches.
 10. NumberMatch's engine is held by an inner `NumberMatchInstance`
     keyed by `sessionEpoch` so the actor remounts on Play Again.
+
+### Per-game machine contexts (PR 1b)
+
+#### `WordSpellEngineContext`
+
+Identical field set to `NumberMatchEngineContext` (see
+`src/games/number-match/definition.ts`). Per Spec Delta 3, WordSpell
+does **not** carry `firstActionAt` or `selectedSlotIds` — PR 1b-bis
+introduces them when the timestamp write and Set toggle land.
+
+| Field                 | Type                                             | Notes                                              |
+| --------------------- | ------------------------------------------------ | -------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                    |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                  |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked` |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                   |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                               |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                               |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                     |
+| `retryCount`          | `number`                                         | Wrong placements this round                        |
+| `roundIndex`          | `number`                                         | 0-based current round                              |
+| `levelIndex`          | `number`                                         | Always `0` at runtime — WordSpell never advances   |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                         |
+| `maxLevels`           | `number \| null`                                 | Always `null` — WordSpell has no level mode        |
+| `wrongTileBehavior`   | `'reject' \| 'lock-manual' \| 'lock-auto-eject'` | Defaults to `'lock-auto-eject'`                    |
+| `isLevelMode`         | `boolean`                                        | Always `false` for WordSpell                       |
+
+#### `SortNumbersEngineContext`
+
+Same field set as `WordSpellEngineContext`, with two semantic
+differences:
+
+- `levelIndex` is read at runtime — the machine increments it via the
+  `ADVANCE_LEVEL` handler and `LevelCompleteOverlay` reads it for the
+  level title.
+- `roundIndex` accumulates across level boundaries (see
+  `GameEngine.flows.mdx` §5c). The engine guards
+  (`isLastRound: roundIndex + 1 >= totalRounds`) only fire correctly
+  with cumulative `roundIndex`. The reducer mirror still resets
+  `roundIndex` per level for HUD display until PR 1c.
+
+| Field                 | Type                                             | Notes                                                |
+| --------------------- | ------------------------------------------------ | ---------------------------------------------------- |
+| `allTiles`            | `TileItem[]`                                     | All tiles for the current round                      |
+| `bankTileIds`         | `string[]`                                       | Unplaced tile ids                                    |
+| `zones`               | `AnswerZone[]`                                   | Slot state — `placedTileId`, `isWrong`, `isLocked`   |
+| `activeSlotIndex`     | `number`                                         | Cursor for keyboard-driven input                     |
+| `dragActiveTileId`    | `string \| null`                                 | Transient drag state                                 |
+| `dragHoverZoneIndex`  | `number \| null`                                 | Transient drag hover                                 |
+| `dragHoverBankTileId` | `string \| null`                                 | Transient drag hover over bank                       |
+| `retryCount`          | `number`                                         | Wrong placements this round                          |
+| `roundIndex`          | `number`                                         | Cumulative across level boundaries (engine semantic) |
+| `levelIndex`          | `number`                                         | 0-based current level                                |
+| `totalRounds`         | `number`                                         | From `useGameEngine` input                           |
+| `maxLevels`           | `number \| null`                                 | From `useGameEngine` input                           |
+| `wrongTileBehavior`   | `'reject' \| 'lock-manual' \| 'lock-auto-eject'` | Defaults to `'lock-auto-eject'`                      |
+| `isLevelMode`         | `boolean`                                        | `true` when the config declares a level mode         |

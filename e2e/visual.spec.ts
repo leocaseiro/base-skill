@@ -78,7 +78,9 @@ test('@visual game shell layout dark', async ({ page }) => {
 test('@visual WordSpell picture mode mid-game layout', async ({
   page,
 }) => {
-  await page.goto('/en/game/word-spell');
+  // ?seed= pins the route loader's seed (validateSearch in $gameId.tsx) so
+  // useLibraryRounds.pickWithRecycling produces the same round every run.
+  await page.goto('/en/game/word-spell?seed=vr-word-spell-1');
   await startGame(page);
   await page
     .getByRole('button', { name: /^Letter /i })
@@ -92,7 +94,7 @@ test('@visual WordSpell picture mode mid-game layout', async ({
 test('@visual WordSpell picture mode mid-game layout dark', async ({
   page,
 }) => {
-  await page.goto('/en/game/word-spell');
+  await page.goto('/en/game/word-spell?seed=vr-word-spell-1');
   await startGame(page);
   await page
     .getByRole('button', { name: /^Letter /i })
@@ -392,7 +394,7 @@ test('@visual InstructionsOverlay before start dark', async ({
 test('@visual Slot drag preview target (empty slot hover)', async ({
   page,
 }) => {
-  await page.goto('/en/game/word-spell');
+  await page.goto('/en/game/word-spell?seed=vr-word-spell-1');
   await startGame(page);
   const tileButton = page
     .getByRole('button', { name: /^Letter /i })
@@ -430,7 +432,7 @@ test('@visual Slot drag preview target (empty slot hover)', async ({
 test('@visual Slot drag preview target dark (empty slot hover)', async ({
   page,
 }) => {
-  await page.goto('/en/game/word-spell');
+  await page.goto('/en/game/word-spell?seed=vr-word-spell-1');
   await startGame(page);
   const tileButton = page
     .getByRole('button', { name: /^Letter /i })
