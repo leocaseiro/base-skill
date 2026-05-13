@@ -21,104 +21,104 @@ const LAVA_BUBBLES = [
     startBottom: 55,
     size: 1.1,
     delay: 0,
-    duration: 4.2,
-    rise: 24,
+    duration: 3.2,
+    rise: 14,
   },
   {
     left: 11.5,
     startBottom: 42,
     size: 0.8,
     delay: 1.4,
-    duration: 4.8,
-    rise: 28,
+    duration: 3.6,
+    rise: 16,
   },
   {
     left: 19,
     startBottom: 60,
     size: 1.5,
     delay: 2.6,
-    duration: 5.4,
-    rise: 30,
+    duration: 4,
+    rise: 18,
   },
   {
     left: 27,
     startBottom: 38,
     size: 1,
     delay: 0.8,
-    duration: 4.4,
-    rise: 26,
+    duration: 3.4,
+    rise: 15,
   },
   {
     left: 34,
     startBottom: 65,
     size: 1.3,
     delay: 1.9,
-    duration: 4.8,
-    rise: 27,
+    duration: 3.6,
+    rise: 17,
   },
   {
     left: 42,
     startBottom: 48,
     size: 1.1,
     delay: 3.1,
-    duration: 4,
-    rise: 25,
+    duration: 3.2,
+    rise: 15,
   },
   {
     left: 49,
     startBottom: 70,
     size: 1.7,
     delay: 0.4,
-    duration: 5.6,
-    rise: 32,
+    duration: 4.2,
+    rise: 20,
   },
   {
     left: 57,
     startBottom: 35,
     size: 1,
     delay: 2.1,
-    duration: 4.2,
-    rise: 26,
+    duration: 3.4,
+    rise: 14,
   },
   {
     left: 65,
     startBottom: 58,
     size: 1.3,
     delay: 1,
-    duration: 4.6,
-    rise: 29,
+    duration: 3.8,
+    rise: 18,
   },
   {
     left: 73,
     startBottom: 45,
     size: 0.8,
     delay: 3.6,
-    duration: 4,
-    rise: 24,
+    duration: 3,
+    rise: 13,
   },
   {
     left: 80,
     startBottom: 62,
     size: 1.5,
     delay: 0.9,
-    duration: 5,
-    rise: 30,
+    duration: 4,
+    rise: 19,
   },
   {
     left: 87,
     startBottom: 50,
     size: 1.1,
     delay: 2.3,
-    duration: 4.4,
-    rise: 26,
+    duration: 3.4,
+    rise: 16,
   },
   {
     left: 94,
     startBottom: 40,
     size: 1,
     delay: 1.5,
-    duration: 4.2,
-    rise: 25,
+    duration: 3.2,
+    rise: 14,
   },
 ];
 
@@ -196,12 +196,12 @@ const sceneStyles = `
   background-size: contain;
 }
 /* ── Lava floor ───────────────────────────────────────────────── */
-/* Base = one continuous y-gradient (yellow surface → deep red trench).
-   Above it sits the 5-layer wave silhouette tile from
-   lava-floor-tile.svg at reduced opacity so the layers read as wave
-   shapes over the gradient rather than as discrete color bands.
-   overflow: visible so bubbles can rise out of the lava band into the
-   cave above. */
+/* Base div carries a fallback gradient (yellow surface → deep red
+   trench) for prefers-reduced-motion and as a paint backstop. The
+   inline SVG waves layered on top paint the visible color story via
+   per-layer userSpaceOnUse gradients — no opacity tricks.
+   overflow: visible so bubbles can rise out of the lava band into
+   the cave above. */
 .cave-dragon-scene__lava {
   position: absolute;
   left: 0;
@@ -223,20 +223,38 @@ const sceneStyles = `
 .cave-dragon-scene__lava-waves {
   position: absolute;
   inset: 0;
-  background-image: url('${ASSET_BASE}/lava-floor-tile.svg');
-  background-repeat: repeat-x;
-  background-position: bottom left;
-  background-size: auto 100%;
-  opacity: 0.7;
-  animation: cd-lava-wave-bob 2.6s ease-in-out infinite alternate;
-  will-change: transform;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
-@keyframes cd-lava-wave-bob {
+.cd-wave {
+  will-change: transform;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+  animation-name: cd-wave-bob;
+}
+.cd-wave-1 {
+  animation-duration: 9s;
+}
+.cd-wave-2 {
+  animation-duration: 11s;
+  animation-delay: -3s;
+}
+.cd-wave-3 {
+  animation-duration: 8s;
+  animation-delay: -1.5s;
+}
+.cd-wave-4 {
+  animation-duration: 12s;
+  animation-delay: -4s;
+}
+@keyframes cd-wave-bob {
   from {
-    transform: translateY(-6px);
+    transform: translateY(-8px);
   }
   to {
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
 }
 .cave-dragon-scene__lava-bubble {
@@ -269,7 +287,7 @@ const sceneStyles = `
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cave-dragon-scene__lava-waves,
+  .cd-wave,
   .cave-dragon-scene__lava-bubble {
     animation: none;
   }
@@ -524,11 +542,88 @@ const SceneBackground = () => (
       />
       <div className="cave-dragon-scene__dragon" />
       <div className="cave-dragon-scene__lava" aria-hidden="true">
-        {/* Wave silhouette layer — the same 5-band tile from
-            lava-floor-tile.svg, repeated horizontally over the gradient
-            at reduced opacity so the wave shapes read as silhouettes
-            rather than as opaque color bands. */}
-        <div className="cave-dragon-scene__lava-waves" />
+        {/* Inline wave silhouettes. Four smooth bezier layers stacked
+            top → bottom, each with its own userSpaceOnUse gradient
+            (lighter near the layer's wave-line, darker at the trench
+            floor). The base lava div's CSS gradient stays as a
+            paint-backstop / reduced-motion fallback. Each layer bobs
+            translateY independently with staggered periods so the
+            surface looks alive without synced motion or expensive
+            d-attribute morphing. */}
+        <svg
+          className="cave-dragon-scene__lava-waves"
+          viewBox="0 0 1440 600"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <linearGradient
+              id="cd-wave-grad-1"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="80"
+              x2="0"
+              y2="600"
+            >
+              <stop offset="0%" stopColor="#fff48a" />
+              <stop offset="100%" stopColor="#ffa844" />
+            </linearGradient>
+            <linearGradient
+              id="cd-wave-grad-2"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="220"
+              x2="0"
+              y2="600"
+            >
+              <stop offset="0%" stopColor="#ff8c00" />
+              <stop offset="100%" stopColor="#ff4500" />
+            </linearGradient>
+            <linearGradient
+              id="cd-wave-grad-3"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="360"
+              x2="0"
+              y2="600"
+            >
+              <stop offset="0%" stopColor="#ff4500" />
+              <stop offset="100%" stopColor="#931c08" />
+            </linearGradient>
+            <linearGradient
+              id="cd-wave-grad-4"
+              gradientUnits="userSpaceOnUse"
+              x1="0"
+              y1="500"
+              x2="0"
+              y2="600"
+            >
+              <stop offset="0%" stopColor="#931c08" />
+              <stop offset="100%" stopColor="#4a0c06" />
+            </linearGradient>
+          </defs>
+          <path
+            className="cd-wave cd-wave-1"
+            d="M 0,600 L 0,80 C 240,60 480,100 720,80 C 960,60 1200,100 1440,80 L 1440,600 Z"
+            fill="url(#cd-wave-grad-1)"
+          />
+          <path
+            className="cd-wave cd-wave-2"
+            d="M 0,600 L 0,220 C 240,240 480,200 720,220 C 960,240 1200,200 1440,220 L 1440,600 Z"
+            fill="url(#cd-wave-grad-2)"
+          />
+          <path
+            className="cd-wave cd-wave-3"
+            d="M 0,600 L 0,360 C 240,340 480,380 720,360 C 960,340 1200,380 1440,360 L 1440,600 Z"
+            fill="url(#cd-wave-grad-3)"
+          />
+          <path
+            className="cd-wave cd-wave-4"
+            d="M 0,600 L 0,500 C 240,520 480,480 720,500 C 960,520 1200,480 1440,500 L 1440,600 Z"
+            fill="url(#cd-wave-grad-4)"
+          />
+        </svg>
         {/* Rising bubbles. Plain HTML divs so they stay perfectly round
             at every viewport (no SVG aspect-ratio math) and can rise
             past the lava band into the cave above via overflow: visible
