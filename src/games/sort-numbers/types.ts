@@ -2,6 +2,8 @@
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import type { ConfigField } from '@/lib/config-fields';
 
+export type SortNumbersSkinId = 'classic';
+
 export type SkipConfig =
   | { mode: 'random' }
   | { mode: 'consecutive' }
@@ -35,6 +37,8 @@ export interface SortNumbersConfig extends AnswerGameConfig {
   skip: SkipConfig;
   distractors: DistractorConfig;
   rounds: SortNumbersRound[];
+  /** Narrowed skin id for SortNumbers. */
+  skin?: SortNumbersSkinId;
 }
 
 export interface SortNumbersRound {

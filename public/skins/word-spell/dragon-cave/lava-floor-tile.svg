@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <defs>
+    <linearGradient id="lavaTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff48a"/>
+      <stop offset="100%" stop-color="#ffc234"/>
+    </linearGradient>
+    <linearGradient id="lavaUpper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffa238"/>
+      <stop offset="100%" stop-color="#ff7820"/>
+    </linearGradient>
+    <linearGradient id="lavaMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff5e20"/>
+      <stop offset="100%" stop-color="#e23a14"/>
+    </linearGradient>
+    <linearGradient id="lavaLower" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c12810"/>
+      <stop offset="100%" stop-color="#931c08"/>
+    </linearGradient>
+    <linearGradient id="lavaBase" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#741610"/>
+      <stop offset="100%" stop-color="#4a0c06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Layer 1: Yellow surface gleam — wavelength 300, peak-first, 4 full cycles in 1200 -->
+  <path d="M 0,30 Q 75,12 150,30 T 300,30 T 450,30 T 600,30 T 750,30 T 900,30 T 1050,30 T 1200,30 L 1200,300 L 0,300 Z" fill="url(#lavaTop)"/>
+
+  <!-- Layer 2: Orange — wavelength 400, trough-first, 3 full cycles -->
+  <path d="M 0,75 Q 100,97 200,75 T 400,75 T 600,75 T 800,75 T 1000,75 T 1200,75 L 1200,300 L 0,300 Z" fill="url(#lavaUpper)"/>
+
+  <!-- Layer 3: Red-orange — wavelength 400, peak-first (out of phase with orange) -->
+  <path d="M 0,130 Q 100,110 200,130 T 400,130 T 600,130 T 800,130 T 1000,130 T 1200,130 L 1200,300 L 0,300 Z" fill="url(#lavaMid)"/>
+
+  <!-- Bubbles positioned away from edges to avoid awkward clustering at seams -->
+  <ellipse cx="350" cy="155" rx="6" ry="5" fill="#ff8030" opacity="0.7"/>
+  <ellipse cx="750" cy="158" rx="5" ry="4" fill="#ff8030" opacity="0.7"/>
+  <ellipse cx="900" cy="170" rx="4" ry="3" fill="#ffaa44" opacity="0.6"/>
+  <ellipse cx="500" cy="172" rx="3" ry="2.5" fill="#ffaa44" opacity="0.55"/>
+
+  <!-- Layer 4: Red — wavelength 600, trough-first, 2 full cycles -->
+  <path d="M 0,185 Q 150,205 300,185 T 600,185 T 900,185 T 1200,185 L 1200,300 L 0,300 Z" fill="url(#lavaLower)"/>
+
+  <!-- Layer 5: Deep red base — wavelength 300, trough-first (out of phase with yellow) -->
+  <path d="M 0,245 Q 75,258 150,245 T 300,245 T 450,245 T 600,245 T 750,245 T 900,245 T 1050,245 T 1200,245 L 1200,300 L 0,300 Z" fill="url(#lavaBase)"/>
+</svg>

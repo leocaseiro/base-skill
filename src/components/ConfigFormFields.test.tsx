@@ -1,5 +1,5 @@
 // src/components/ConfigFormFields.test.tsx
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ConfigFormFields } from './ConfigFormFields';
@@ -428,5 +428,77 @@ describe('visibleWhen', () => {
     expect(
       screen.getByRole('combobox', { name: 'Distractor source' }),
     ).toBeInTheDocument();
+  });
+});
+
+const skinRadio = (count: 1 | 2): ConfigField => ({
+  type: 'radio',
+  key: 'skin',
+  label: 'Skin',
+  optionsSource: () =>
+    count === 2
+      ? [
+          { value: 'classic', label: 'Classic' },
+          { value: 'dragon-cave', label: 'Dragon Cave' },
+        ]
+      : [{ value: 'classic', label: 'Classic' }],
+});
+
+describe('ConfigFormFields — radio variant', () => {
+  it('hides the field when optionsSource() returns < 2 entries', () => {
+    render(
+      <ConfigFormFields
+        fields={[skinRadio(1)]}
+        config={{}}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole('radiogroup')).toBeNull();
+  });
+
+  it('renders a radiogroup with aria-label when count >= 2', () => {
+    render(
+      <ConfigFormFields
+        fields={[skinRadio(2)]}
+        config={{}}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByRole('radiogroup', { name: 'Skin' }),
+    ).toBeInTheDocument();
+  });
+
+  it('calls onChange with the picked value merged into config', async () => {
+    const onChange = vi.fn();
+    render(
+      <ConfigFormFields
+        fields={[skinRadio(2)]}
+        config={{ skin: 'classic' }}
+        onChange={onChange}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole('radio', { name: 'Dragon Cave' }),
+    );
+    expect(onChange).toHaveBeenCalledWith({ skin: 'dragon-cave' });
+  });
+
+  it('supports arrow-key navigation between options', () => {
+    render(
+      <ConfigFormFields
+        fields={[skinRadio(2)]}
+        config={{ skin: 'classic' }}
+        onChange={vi.fn()}
+      />,
+    );
+    const [first, second] =
+      screen.getAllByRole<HTMLInputElement>('radio');
+    if (!first || !second) {
+      throw new Error('expected two radio inputs');
+    }
+    first.focus();
+    fireEvent.keyDown(first, { key: 'ArrowDown' });
+    expect(second).toHaveFocus();
   });
 });

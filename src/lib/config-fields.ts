@@ -59,4 +59,17 @@ export type ConfigField =
       key: string;
       label: string;
       visibleWhen?: VisibleWhen;
+    }
+  | {
+      /**
+       * A radio group whose options resolve at render time. The renderer
+       * hides the entire field when `optionsSource()` returns fewer than
+       * 2 entries — used by per-game skin pickers that depend on which
+       * skins are currently registered.
+       */
+      type: 'radio';
+      key: string;
+      label: string;
+      optionsSource: () => { value: string; label: string }[];
+      visibleWhen?: VisibleWhen;
     };

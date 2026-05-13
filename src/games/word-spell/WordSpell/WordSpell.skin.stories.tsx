@@ -1,34 +1,13 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
+import { dragonCaveSkin } from '../skins/dragon-cave-skin';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 import type { AnswerGameDraftState } from '@/components/answer-game/types';
-import type { GameSkin } from '@/lib/skin';
 import type { Meta, StoryObj } from '@storybook/react';
 import { SkinHarness, registerSkin } from '@/lib/skin';
 
-const demoSkin: GameSkin = {
-  id: 'demo',
-  name: 'Demo Pink',
-  tokens: {
-    '--skin-tile-bg': '#ec4899',
-    '--skin-tile-text': '#fff',
-    '--skin-tile-radius': '50%',
-    '--skin-slot-bg': '#fdf2f8',
-    '--skin-slot-border': '#f472b6',
-    '--skin-slot-radius': '50%',
-    '--skin-sentence-gap-border': '#ec4899',
-    '--skin-question-audio-bg': '#ec4899',
-  },
-  onCorrectPlace: (zoneIndex, value) => {
-    console.log(`[word-spell demo] correct @ ${zoneIndex}: ${value}`);
-  },
-  onWrongPlace: (zoneIndex, value) => {
-    console.log(`[word-spell demo] wrong @ ${zoneIndex}: ${value}`);
-  },
-};
-
-registerSkin('word-spell', demoSkin);
+registerSkin('word-spell', dragonCaveSkin);
 
 const fiveRoundConfig: WordSpellConfig = {
   gameId: 'word-spell',
@@ -99,13 +78,10 @@ const baseConfig: WordSpellConfig = {
   tileBankMode: 'exact',
   totalRounds: 2,
   roundsInOrder: true,
-  ttsEnabled: false,
+  ttsEnabled: true,
   tileUnit: 'letter',
-  mode: 'picture',
-  rounds: [
-    { word: 'cat', image: 'https://placehold.co/160?text=cat' },
-    { word: 'dog', image: 'https://placehold.co/160?text=dog' },
-  ],
+  mode: 'recall',
+  rounds: [{ word: 'cat' }, { word: 'dog' }],
 };
 
 const WordSpellWithHarness = ({
@@ -127,7 +103,7 @@ const WordSpellWithHarness = ({
 );
 
 const meta: Meta<typeof WordSpellWithHarness> = {
-  title: 'Games/WordSpell/Skin Harness',
+  title: 'Games/WordSpell/SkinHarness',
   component: WordSpellWithHarness,
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
@@ -137,16 +113,40 @@ export default meta;
 
 type Story = StoryObj<typeof WordSpellWithHarness>;
 
-export const Default: Story = {};
+export const Playground: Story = {
+  args: {
+    config: {
+      gameId: 'word-spell',
+      component: 'WordSpell',
+      inputMethod: 'drag',
+      wrongTileBehavior: 'lock-auto-eject',
+      tileBankMode: 'exact',
+      totalRounds: 2,
+      roundsInOrder: true,
+      ttsEnabled: true,
+      tileUnit: 'letter',
+      mode: 'recall',
 
-export const HUD_Round2Of5: Story = {
+      rounds: [
+        {
+          word: 'spin',
+        },
+        {
+          word: 'nap',
+        },
+      ],
+    },
+  },
+};
+
+export const HudRound2Of5: Story = {
   args: {
     config: fiveRoundConfig,
     initialState: dogDraftState(1),
   },
 };
 
-export const HUD_Round5Of5: Story = {
+export const HudRound5Of5: Story = {
   args: {
     config: fiveRoundConfig,
     initialState: dogDraftState(4),

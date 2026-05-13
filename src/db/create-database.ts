@@ -38,6 +38,9 @@ const COLLECTIONS = {
     schema: appMetaSchema,
     migrationStrategies: {
       1: (oldDoc: Record<string, unknown>) => oldDoc,
+      // v1 → v2 is additive (new optional `theFloorIsLavaSeeded` map).
+      // Leave the field undefined; the seeder writes it lazily per profile.
+      2: (oldDoc: Record<string, unknown>) => oldDoc,
     },
   },
   bookmarks: {

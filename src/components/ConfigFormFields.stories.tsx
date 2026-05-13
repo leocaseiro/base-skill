@@ -10,10 +10,19 @@ type Scenario =
   | 'nested-types'
   | 'nested-select-or-number'
   | 'visible-when-hidden'
-  | 'visible-when-shown';
+  | 'visible-when-shown'
+  | 'radio-variant';
+
+type OptionsCount = 1 | 2 | 3;
 
 interface StoryArgs {
   scenario: Scenario;
+  /**
+   * Only meaningful when `scenario === 'radio-variant'`. Drives the
+   * `optionsSource()` callable on the radio field so reviewers can flip
+   * between "1 option (hidden via gate)" and "2+ options (visible)".
+   */
+  optionsCount: OptionsCount;
   onChange: (config: Record<string, unknown>) => void;
   // Shadowed raw props — driven by scenario; hidden from Controls.
   fields?: never;
@@ -99,8 +108,23 @@ const visibleWhenFields: ConfigField[] = [
   },
 ];
 
-const scenarioData: Record<
-  Scenario,
+const radioSkinOptions: { value: string; label: string }[] = [
+  { value: 'classic', label: 'Classic' },
+  { value: 'dragon-cave', label: 'Dragon Cave' },
+  { value: 'extra', label: 'Extra' },
+];
+
+const buildRadioFields = (count: OptionsCount): ConfigField[] => [
+  {
+    type: 'radio',
+    key: 'skin',
+    label: 'Skin',
+    optionsSource: () => radioSkinOptions.slice(0, count),
+  },
+];
+
+const staticScenarioData: Record<
+  Exclude<Scenario, 'radio-variant'>,
   { fields: ConfigField[]; config: Record<string, unknown> }
 > = {
   'primitive-types': {
@@ -133,12 +157,13 @@ const meta: Meta<StoryArgs> = {
     docs: {
       description: {
         component:
-          'Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through the 5 rendering branches (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown) so reviewers can see every branch in one place. Per-game fixtures live in co-located stories under src/games/<game>/.',
+          'Generic form renderer for the ConfigField union — used by SimpleConfigForm and AdvancedConfigModal across every game. The scenario select cycles through every rendering branch (primitive types, nested types, select-or-number, visibleWhen-hidden, visibleWhen-shown, radio-variant) so reviewers can see every branch in one place. The radio-variant scenario uses the optionsCount control to demonstrate the render-time visibility gate (hides when fewer than 2 options). Per-game fixtures live in co-located stories under src/games/<game>/.',
       },
     },
   },
   args: {
     scenario: 'primitive-types',
+    optionsCount: 2,
     onChange: fn(),
   },
   argTypes: {
@@ -150,14 +175,30 @@ const meta: Meta<StoryArgs> = {
         'nested-select-or-number',
         'visible-when-hidden',
         'visible-when-shown',
+        'radio-variant',
       ] satisfies Scenario[],
+    },
+    optionsCount: {
+      control: { type: 'radio' },
+      options: [1, 2, 3] satisfies OptionsCount[],
+      description:
+        'Number of radio options for the radio-variant scenario. 1 triggers the visibility gate (field hidden); 2+ renders the radiogroup.',
     },
     onChange: { table: { disable: true } },
     fields: { table: { disable: true } },
     config: { table: { disable: true } },
   },
-  render: ({ scenario, onChange }) => {
-    const { fields, config } = scenarioData[scenario];
+  render: ({ scenario, optionsCount, onChange }) => {
+    if (scenario === 'radio-variant') {
+      return (
+        <ConfigFormFields
+          fields={buildRadioFields(optionsCount)}
+          config={{ skin: 'classic' }}
+          onChange={onChange}
+        />
+      );
+    }
+    const { fields, config } = staticScenarioData[scenario];
     return (
       <ConfigFormFields
         fields={fields}

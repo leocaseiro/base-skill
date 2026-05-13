@@ -479,3 +479,133 @@ test('@visual spot-all happy-path layout', async ({ page }) => {
     fullPage: true,
   });
 });
+
+// ── Dragon Cave skin (The Floor is Lava seeded custom game) ───────────────────
+// The seeder writes a custom-game row with a deterministic id (see
+// src/db/seed-the-floor-is-lava.ts) on the home-screen mount. Tests deep-link
+// via `?configId=seed:tfil:anonymous` so the seed runs without a card click
+// (skipping a navigation race) AND pin `?seed=...` so the round sampler is
+// deterministic across runs (otherwise the tile bank shuffle drifts between
+// `update` and `test`, producing perpetual diffs). The home route still mounts
+// briefly to trigger the seeder before the game route mounts and resolves the
+// configId.
+//
+// fullPage: false keeps each screenshot viewport-clamped so each baseline
+// reflects what a user at that viewport sees (the scene has an intrinsic
+// aspect-ratio + min-width that may overflow at narrower viewports).
+
+const DRAGON_CAVE_CONFIG_ID = 'seed:tfil:anonymous';
+const DRAGON_CAVE_SEED = 'vr-dragon-cave-1';
+
+const DRAGON_CAVE_VIEWPORTS = [
+  { width: 1024, height: 768, name: 'tablet-landscape' },
+  { width: 768, height: 1024, name: 'tablet-portrait' },
+  { width: 414, height: 896, name: 'mobile-lg' },
+] as const;
+
+const seedTheFloorIsLava = async (page: Page): Promise<void> => {
+  await page.goto('/en/');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  // Wait for the seeded card to appear in the home grid — confirms the
+  // seeder finished writing the custom-game row before we navigate away.
+  await page
+    .getByRole('button', { name: 'Play The Floor is Lava' })
+    .waitFor({ state: 'visible' });
+};
+
+// Functional regression for two bugs spotted on the live PR preview:
+//   1. The .game-container.skin-dragon-cave box was constrained by
+//      GameShell's padding so it never spanned the full viewport.
+//   2. As a downstream effect, the 100cqi/962px scale on every child of
+//      .skin-dragon-cave produced a smaller-than-natural scale at common
+//      viewports, shrinking the HUD audio button and round-progress dots.
+// Both assertions must FAIL on the broken layout and PASS after the
+// skin-scoped CSS fix in dragon-cave-skin.tsx (position: fixed; inset: 0
+// with width/height min() clamping to preserve the 2738:1536 cliff
+// aspect-ratio via letterbox/pillarbox).
+test('dragon-cave: container fills viewport + HUD scales up', async ({
+  page,
+}) => {
+  const viewport = { width: 1024, height: 768 };
+  await page.setViewportSize(viewport);
+  await seedTheFloorIsLava(page);
+  await page.goto(
+    `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+  );
+  await startGame(page);
+  const container = page.locator('.game-container.skin-dragon-cave');
+  await container.waitFor({ state: 'visible' });
+
+  // Bug 2 regression: cave is fixed-positioned so it breaks out of
+  // GameShell's padded content area (was `position: relative`).
+  await expect(container).toHaveCSS('position', 'fixed');
+
+  // Bug 2 regression — empirical: container actually spans the full
+  // viewport width on a 1024-wide window (pre-fix it was 992px = 1024
+  // minus GameShell's 16px-each-side padding).
+  const containerBox = await container.boundingBox();
+  expect(containerBox, 'container should be visible').not.toBeNull();
+  expect(
+    containerBox!.width,
+    'cave container should span the full viewport width',
+  ).toBeGreaterThanOrEqual(viewport.width);
+
+  // Bug 1 regression: with the container now wider than 962px, the
+  // 100cqi/962px transform-scale on the audio button (intrinsic 56px =
+  // size-14) must exceed natural size on a 1024-wide viewport. Pre-fix
+  // the container was 992px so scale was 1.03 (56 -> 57.7); post-fix
+  // it's 1024px so scale is 1.065 (56 -> 59.6). A >= 58 floor brackets
+  // the regression cleanly without flaking on browser sub-pixel rounding.
+  const audioBtn = page.getByRole('button', {
+    name: /hear the question/i,
+  });
+  await audioBtn.waitFor({ state: 'visible' });
+  const btnBox = await audioBtn.boundingBox();
+  expect(btnBox, 'audio button should be visible').not.toBeNull();
+  expect(
+    btnBox!.height,
+    'HUD audio button should render at least at intrinsic 56px (scale >= 1) on a 1024-wide viewport once the cave fills it',
+  ).toBeGreaterThanOrEqual(58);
+});
+
+for (const vp of DRAGON_CAVE_VIEWPORTS) {
+  test(`@visual dragon-cave scene at ${vp.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: vp.width, height: vp.height });
+    await seedTheFloorIsLava(page);
+    await page.goto(
+      `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+    );
+    // InstructionsOverlay opens first; dismiss + handle any save prompt.
+    await startGame(page);
+    // Wait for a bank tile to appear so the dragon-cave scene is stable.
+    await page
+      .getByRole('button', { name: /^Letter /i })
+      .first()
+      .waitFor({ state: 'visible' });
+    await expect(page).toHaveScreenshot(
+      `dragon-cave-scene-${vp.name}.png`,
+      { fullPage: false },
+    );
+  });
+}
+
+// The skin radio is rendered inline inside InstructionsOverlay via the
+// per-game SimpleConfigFormRenderer (WordSpellSimpleConfigForm) — no extra
+// click required to expose it. We screenshot the radiogroup itself rather
+// than the full overlay so the baseline isolates the picker UI from
+// surrounding chrome (cover, cog, library source).
+test('@visual word-spell-skin-picker — both options visible', async ({
+  page,
+}) => {
+  await seedTheFloorIsLava(page);
+  await page.goto(
+    `/en/game/word-spell?configId=${DRAGON_CAVE_CONFIG_ID}&seed=${DRAGON_CAVE_SEED}`,
+  );
+  // Don't call startGame() — we want the overlay (with the simple form)
+  // visible.
+  const skinRadio = page.getByRole('radiogroup', { name: /skin/i });
+  await skinRadio.waitFor({ state: 'visible' });
+  await expect(skinRadio).toHaveScreenshot(
+    'word-spell-skin-picker.png',
+  );
+});
