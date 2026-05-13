@@ -1,0 +1,1 @@
+const o=e=>{const t=[...e];for(let n=t.length-1;n>0;n--){const l=Math.floor(Math.random()*(n+1));[t[n],t[l]]=[t[l],t[n]]}return t},i=(e,t,n=10)=>{if(e.length<=1)return[...e];if(e.length!==t.length)return o(e);const l=r=>r.every((f,u)=>f===t[u]);let s=o(e),h=0;for(;l(s)&&h<n;)s=o(e),h++;return s};export{i as s};
