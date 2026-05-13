@@ -18,12 +18,12 @@ const buildGhost = (
   const rect = sourceEl.getBoundingClientRect();
   const halfW = rect.width / 2;
   const halfH = rect.height / 2;
-  // Mirror the source's live look so skinned tiles (e.g. cave-dragon's
+  // Mirror the source's live look so skinned tiles (e.g. dragon-cave's
   // transparent stone tablet) don't flash a default white card mid-drag.
   // Clone the source's innerHTML so any tile decoration (SVG stone, etc.)
   // flies along with the letter.
   const sourceCs = getComputedStyle(sourceEl);
-  // The source's parent may be transformed (e.g. cave-dragon scales its UI
+  // The source's parent may be transformed (e.g. dragon-cave scales its UI
   // via transform: scale(...)). The ghost is on document.body and inherits
   // none of that, so its font-size needs to be scaled to the source's
   // visual font-size, not its raw layout font-size.
@@ -37,7 +37,7 @@ const buildGhost = (
   // drop the whole declaration block.
   const ghostBg = sourceCs.background || 'transparent';
   // No fallback shadow when source has one — when source has none (e.g.
-  // cave-dragon's transparent stone), a default rect shadow would draw a
+  // dragon-cave's transparent stone), a default rect shadow would draw a
   // phantom square around the ghost. Skinned tiles that want drag-lift
   // should apply filter: drop-shadow on their decoration so depth follows
   // the shape.
@@ -72,7 +72,7 @@ const buildGhost = (
     opacity: '0.95',
     userSelect: 'none',
     // No scale(1.08) lift — it compounds with parent transforms (e.g.
-    // cave-dragon's scale on the stage) and makes the ghost noticeably
+    // dragon-cave's scale on the stage) and makes the ghost noticeably
     // bigger than the source. Skins that want depth should apply
     // filter: drop-shadow on their tile decoration so the lift follows
     // the actual shape, not a hidden bounding rect.

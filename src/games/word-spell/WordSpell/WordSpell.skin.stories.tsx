@@ -1,13 +1,13 @@
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { withRouter } from '../../../../.storybook/decorators/withRouter';
-import { caveDragonSkin } from '../skins/cave-dragon-skin';
+import { dragonCaveSkin } from '../skins/dragon-cave-skin';
 import { WordSpell } from './WordSpell';
 import type { WordSpellConfig } from '../types';
 import type { AnswerGameDraftState } from '@/components/answer-game/types';
 import type { Meta, StoryObj } from '@storybook/react';
 import { SkinHarness, registerSkin } from '@/lib/skin';
 
-registerSkin('word-spell', caveDragonSkin);
+registerSkin('word-spell', dragonCaveSkin);
 
 const fiveRoundConfig: WordSpellConfig = {
   gameId: 'word-spell',
@@ -103,7 +103,7 @@ const WordSpellWithHarness = ({
 );
 
 const meta: Meta<typeof WordSpellWithHarness> = {
-  title: 'Games/WordSpell/Skin Harness',
+  title: 'Games/WordSpell/SkinHarness',
   component: WordSpellWithHarness,
   tags: ['autodocs'],
   decorators: [withDb, withRouter],
@@ -113,7 +113,7 @@ export default meta;
 
 type Story = StoryObj<typeof WordSpellWithHarness>;
 
-export const Default: Story = {
+export const Playground: Story = {
   args: {
     config: {
       gameId: 'word-spell',
@@ -139,14 +139,14 @@ export const Default: Story = {
   },
 };
 
-export const HUD_Round2Of5: Story = {
+export const HudRound2Of5: Story = {
   args: {
     config: fiveRoundConfig,
     initialState: dogDraftState(1),
   },
 };
 
-export const HUD_Round5Of5: Story = {
+export const HudRound5Of5: Story = {
   args: {
     config: fiveRoundConfig,
     initialState: dogDraftState(4),

@@ -1,6 +1,6 @@
 # Draggable-tile ghost consistency (TODO)
 
-Surfaced while skinning WordSpell (cave-dragon). The user-visible bug: during
+Surfaced while skinning WordSpell (dragon-cave). The user-visible bug: during
 drag the floating "ghost" tile renders at a different size and shape than the
 source tile, especially when the parent has a `transform: scale(...)` or a skin
 that overrides the default rounded-square chrome.
@@ -22,7 +22,7 @@ the skin tokens or the parent's effective transform scale.
 **Updated:** all three ghosts now read `getComputedStyle(source).background`
 and apply `font-size = sourceFontSize × visualScale` (commits `38c7fbe8d`,
 `46cb06194`, and the bank-drag/HUD pass). That removes the white-card flash
-and font-size mismatch for the cave-dragon skin and any future skin.
+and font-size mismatch for the dragon-cave skin and any future skin.
 
 What still needs work:
 
@@ -46,9 +46,9 @@ What still needs work:
 - Computes `visualScale = sourceRect.width / sourceEl.offsetWidth` and
   applies it to the ghost's `font-size`. ✅ All three call sites do this now.
 - Clones the source's `innerHTML` so the skin's tile decoration (e.g. the
-  cave-dragon stone SVG) flies along with the letter. Requires the skin's
+  dragon-cave stone SVG) flies along with the letter. Requires the skin's
   decoration CSS to be globally scoped, not nested under `.skin-<id>` —
-  see the `.cave-dragon-stone` class in `cave-dragon-skin.tsx` for the
+  see the `.dragon-cave-stone` class in `dragon-cave-skin.tsx` for the
   pattern. ✅ useTouchDrag now clones innerHTML; the other two already did.
 - ⏳ Pull the duplicated logic into a shared helper.
 - ⏳ Drop or token-ize the hardcoded `transform: scale(1.08)` lift.
@@ -58,9 +58,9 @@ What still needs work:
 
 Add to `e2e/visual.spec.ts`:
 
-- Mouse drag from slot, ghost mid-flight (lock-auto-eject + cave-dragon)
-- Touch drag from bank, ghost over an empty slot (mobile viewport, cave-dragon)
-- Eject fly-back ghost halfway between slot and bank-hole (cave-dragon)
+- Mouse drag from slot, ghost mid-flight (lock-auto-eject + dragon-cave)
+- Touch drag from bank, ghost over an empty slot (mobile viewport, dragon-cave)
+- Eject fly-back ghost halfway between slot and bank-hole (dragon-cave)
 - All three above for classic skin too — guards against accidental regression
   when refactoring the helper.
 
@@ -70,4 +70,4 @@ Add to `e2e/visual.spec.ts`:
   follow uses pointer-position polling). The consistency fix only standardizes
   the **starting visual** of the ghost, not its motion.
 - The skin-aware state ring (correct/wrong) on the **slot** itself is already
-  resolved via `slotDecoration` — see `cave-dragon-skin.tsx`.
+  resolved via `slotDecoration` — see `dragon-cave-skin.tsx`.
