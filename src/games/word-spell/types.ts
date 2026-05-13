@@ -5,6 +5,7 @@ import type {
   WordSpellSource,
 } from '@/data/words';
 import type { ConfigField } from '@/lib/config-fields';
+import { getRegisteredSkins } from '@/lib/skin/registry';
 
 export type WordSpellSkinId = 'classic' | 'dragon-cave';
 
@@ -126,4 +127,18 @@ export const wordSpellConfigFields: ConfigField[] = [
   },
   { type: 'checkbox', key: 'roundsInOrder', label: 'Rounds in order' },
   { type: 'checkbox', key: 'ttsEnabled', label: 'TTS enabled' },
+  {
+    // Skin is a presentation choice — placed after gameplay fields. The
+    // radio renderer in `ConfigFormFields` hides the entire field when
+    // `optionsSource()` returns fewer than 2 entries, so the field
+    // self-suppresses while only `classic` is registered.
+    type: 'radio',
+    key: 'skin',
+    label: 'Skin',
+    optionsSource: () =>
+      getRegisteredSkins('word-spell').map((s) => ({
+        value: s.id,
+        label: s.name,
+      })),
+  },
 ];
