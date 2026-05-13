@@ -472,19 +472,39 @@ Merge `answerGameReducer` and `spotAllReducer` behind a single `GameEngineReduce
 
 **Why Phase 2 is worth doing:**
 
-- **SRS v1 (issue #302, spec merged) depends on it.** SRS v1 needs every game to emit identical `round:*` events. Today's two-reducer split forces `useSrsRecording` to special-case each reducer; one reducer means subscribe once, works for all games (current and future). SRS v1 implementation is hard-blocked on Phase 2.
+- **Multi-game SRS depends on it.** Multi-game SRS subscribers need every game to emit identical `round:*` events. Today's two-reducer split forces `useSrsRecording` to special-case each reducer; one reducer means subscribe once, works for all games (current and future). **See Spec Delta — SRS v1 scope clarification (2026-05-13) at the end of this section** for the correction that SRS v1 (WordSpell-only per its spec) does **not** require Phase 2.
 - **Pattern coherence.** Prevents the next game from diverging into its own reducer pattern (the SpotAll situation we want to avoid). All games share: question + answer + rounds + optional levels -> one reducer, one set of events, one SRS integration.
 
 **Sequencing:**
 
 - Phase 2 **requires PR 1d done** -- both reducers must be engine-driven before they can be merged.
-- **SRS v1 implementation is blocked on Phase 2** (per ship cluster #343).
+- **SRS v1.5 (multi-game adapters) is blocked on Phase 2.** SRS v1 (WordSpell-only) is **not** — see Spec Delta below.
 
-> **Timeline risk:** The Phase 1 → PR 1d → Phase 2 chain means SRS v1 implementation cannot
-> start until at least 2–3 weeks after PR #350 merges (~1 week Phase 1 + PR 1d landing +
-> ~1 week Phase 2). If SRS v1 has a hard deadline, that deadline gates on this entire chain.
+> **Timeline risk (SRS v1.5):** The Phase 1 → PR 1d → Phase 2 chain means SRS v1.5
+> (multi-game adapters: SortNumbers, NumberMatch, SpotAll) cannot start until at least
+> 2–3 weeks after PR #350 merges (~1 week Phase 1 + PR 1d landing + ~1 week Phase 2).
+> SRS v1 (WordSpell-only) is unblocked and can ship in parallel with Phase 1 work.
 
 **Out of scope for Phase 2:** new input modes (STT, free-form). Those land in Phase 3 on top of the unified reducer.
+
+#### Spec Delta — SRS v1 scope clarification (2026-05-13)
+
+The "SRS v1 implementation is hard-blocked on Phase 2" claim that appeared
+in earlier drafts of this section was **overstated for v1's actual scope**,
+as confirmed by reading the SRS v1 spec end-to-end
+(`docs/superpowers/specs/2026-05-01-srs-v1-design.md`):
+
+- SRS v1 spec line 91: "**WordSpell is the only adapter for v1.**"
+- SRS v1 spec line 73–74: SortNumbers, NumberMatch, SpotAll adaptive difficulty is a non-goal in v1; "their adapters land later."
+- WordSpell is already XState-driven post-PR 1b (#357 + #360), so the six `round:*` events SRS v1 subscribes to can land via `assign` actions in WordSpell's machine — no reducer unification needed for the v1 ship.
+- The "two-reducer split forces `useSrsRecording` to special-case each reducer" rationale only fires for **multi-game** SRS — i.e., SRS v1.5 (other-game adapters). For WordSpell-only v1, there is no special-casing because there is only one game.
+
+**Implication for the roadmap:** SRS v1 (WordSpell-only) ships in parallel with PR 1c rather than after the full engine chain. Phase 2 stays in the roadmap as the enabler for SRS v1.5 (`343-SRS-6a` / `6b` / `6c` — `#370` / `#371` / `#372`), but it no longer gates SRS v1's first ship (`343-SRS-2a` — `#364`). The active ship-cluster issue `#343` reflects this: `#364` (SRS v1) is **not** blocked-by `#369` (Phase 2) in the issue dependency graph; `#370` / `#371` / `#372` are.
+
+**Resolves two prior Open Questions** (preserved in their original locations below):
+
+- "Do-nothing baseline weakly defended for Phase 2" (P3, FYI) — for SRS v1 (WordSpell-only), even the proposed "thin event-bus normalization adapter" alternative is unnecessary. Phase 2's value is real but lives in the v1.5+ scope.
+- "SRS v1 timeline opportunity cost is undersized" (P1) — the active roadmap (`#343` ship cluster) adopts the SRS-parallel approach explicitly. SRS v1 ships alongside Phase 1 engine cleanup; the 2–3 week timeline risk applies to SRS v1.5, not SRS v1.
 
 ### Phase 3: New Interaction Modes (per-game, ongoing)
 
@@ -999,10 +1019,10 @@ stateDiagram-v2
   - Why: Plan resolves three questions ("full suppression is XState default for invoked actors," "guard array first-match wins," "no custom engine rule required — this is native XState behaviour") by asserting XState v5 defaults. Failure modes if the assertion is wrong: (1) v5 invoked-actor states might process external events on their parent state by default — a `NEXT` event during celebration could fire the parent transition prematurely; (2) `entry` actions on parent states could fire while children are active.
   - Fix: Cite the specific XState v5 documentation passages establishing the defaults for (a) blocking behavior of invoked actors on parent state events, (b) `entry` action firing during invoked-actor states, (c) guard array first-match. If docs don't state this clearly, prototype the behavior in a sandbox before pinning the contract.
 
-- **Do-nothing baseline weakly defended for Phase 2** [P3, anchor 50, FYI]
+- **Do-nothing baseline weakly defended for Phase 2** [P3, anchor 50, FYI] — **RESOLVED 2026-05-13**
   - Section: Why this now / Phase 2
   - Why: Plan stakes Phase 2's value on "SRS v1 implementation is hard-blocked on Phase 2." But SRS v1 needs identical `round:*` events — solvable by a thin event-bus normalization adapter at a fraction of Phase 2's cost. The plan goes straight to reducer unification without naming or refuting the cheaper alternative. If the cheap alternative works, Phase 2 is unjustified investment, and "pattern coherence" becomes the only argument — exactly the "code health" justification the doc rejects.
-  - Fix: Add a paragraph explicitly considering and rejecting the "event normalization adapter" alternative for SRS v1 — what it would look like, why it doesn't suffice, what specific SRS feature requires reducer unification (vs just event consistency).
+  - Resolution (see Spec Delta — SRS v1 scope clarification): For SRS v1's actual scope (WordSpell-only), the "two-reducer special-casing" problem doesn't exist — there's only one game, and its XState machine emits the events directly. Neither Phase 2 nor an event-normalization adapter is needed for v1. Phase 2 remains justified for SRS v1.5+ (multi-game scope), where the unification value compounds across all four game adapters. Phase 2 is not on SRS v1's critical path.
 
 #### From product-lens reviewer (design doc)
 
@@ -1011,10 +1031,10 @@ stateDiagram-v2
   - Why: Entire engine investment is justified by "6+ new games planned across 3+ new interaction modes," but the document offers no evidence all (or even most) of these will actually ship. For a solo developer, planned roadmaps frequently shrink. If only 1–2 of 6 ship, the engine pays back nothing — abstraction sized for a pipeline that never materialized.
   - Fix: Add a "minimum viable payback" section: at how many additional games does the engine break even? Identify the 1–2 next games most likely to ship and validate the type against them on paper before Phase 1.
 
-- **SRS v1 timeline opportunity cost is undersized** [P1, anchor 75]
+- **SRS v1 timeline opportunity cost is undersized** [P1, anchor 75] — **RESOLVED 2026-05-13**
   - Section: Phase 2 / Timeline risk
   - Why: Plan acknowledges SRS v1 implementation is gated on 2–3 weeks of engine work but treats it as a footnote. SRS v1 is the project's stated learning-loop differentiator. For a solo developer, 2–3 weeks is a substantial fraction of a quarter. Plan doesn't ask "is shipping SRS v1 now on the existing two-reducer special-case more valuable than blocking it for unified architecture?"
-  - Fix: Explicitly cost the alternative: estimate the SRS v1 "special-case per reducer" approach in LOC/days, compare to the engine path, and justify why the architectural unblock beats shipping the user-visible feature sooner.
+  - Resolution (see Spec Delta — SRS v1 scope clarification): The "2–3 week gate" assumed multi-game SRS scope. SRS v1 is WordSpell-only per its spec, so it does not depend on Phase 2 at all. The active ship-cluster issue `#343` adopts SRS-parallel: SRS v1 (`#364` — `343-SRS-2a`) ships alongside PR 1c (`#363` — `343-SRS-1`) on independent worktrees. The 2–3 week timeline risk applies to SRS v1.5 (multi-game adapters: `#370` / `#371` / `#372`), which is the appropriate place for it.
 
 - **Identity drift: "boring engine" claim contradicts substantial framework surface** [P2, anchor 75]
   - Section: What Makes This Cool / Recommended Approach
