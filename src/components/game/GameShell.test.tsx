@@ -135,6 +135,7 @@ const setFullscreenSupport = (
 function renderShell(
   configOverride?: Partial<ResolvedGameConfig>,
   children?: ReactNode,
+  shellPropsOverride?: { skinId?: string },
 ) {
   const config = { ...baseConfig, ...configOverride };
   return render(
@@ -145,6 +146,7 @@ function renderShell(
         initialState={initialState}
         sessionId="sess-shell-001"
         meta={meta}
+        skinId={shellPropsOverride?.skinId}
       >
         {children ?? <div data-testid="game-content">Game Here</div>}
       </GameShell>
@@ -166,6 +168,18 @@ describe('GameShell', () => {
     const chrome = screen.getByTestId('game-chrome');
     expect(document.body.contains(chrome)).toBe(true);
     expect(chrome).toHaveClass('fixed', 'z-[45]');
+  });
+
+  it('applies skin--<id> class to the chrome when skinId is set (lets per-skin CSS reach the body-portaled chrome)', () => {
+    renderShell(undefined, undefined, { skinId: 'dragon-cave' });
+    const chrome = screen.getByTestId('game-chrome');
+    expect(chrome).toHaveClass('skin--dragon-cave');
+  });
+
+  it('omits the skin--<id> class when skinId is undefined', () => {
+    renderShell();
+    const chrome = screen.getByTestId('game-chrome');
+    expect(chrome.className).not.toMatch(/\bskin--/);
   });
 
   it('does not render a round counter (HUD now owns round display)', () => {

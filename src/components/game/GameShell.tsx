@@ -40,19 +40,30 @@ export interface GameShellProps {
   sessionId: string;
   meta: SessionMeta;
   initialLog?: MoveLog;
+  /**
+   * Active skin id (e.g. `'classic'`, `'dragon-cave'`). When set, the chrome
+   * wrapper receives a `skin--<id>` class so per-skin CSS (e.g. button opacity,
+   * background tinting) can override defaults. The double-dash distinguishes
+   * the chrome scope from the game-container scope (`.skin-<id>`).
+   */
+  skinId?: string;
   children: ReactNode;
 }
 
 interface GameShellChromeProps {
   sessionId: string;
+  skinId?: string;
   children: ReactNode;
 }
 
+// Default chrome button opacity reads from a CSS variable so per-skin overrides
+// (set on `.skin--<id>` wrappers) cascade down without touching this className.
 const ICON_BUTTON_CLASS =
-  'pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-80 shadow-sm ring-1 ring-border transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+  'pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-[var(--skin-chrome-button-opacity,0.8)] shadow-sm ring-1 ring-border transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
 
 const GameShellChrome = ({
   sessionId,
+  skinId,
   children,
 }: GameShellChromeProps): JSX.Element => {
   const navigate = useNavigate();
@@ -85,10 +96,15 @@ const GameShellChrome = ({
 
   // Portaled to `body` so the chrome stays above the instructions overlay
   // (also portaled, z-40). z-[45] is below the exit AlertDialog (z-50).
+  // The `skin--<id>` class lets per-skin CSS reach the chrome (which is NOT a
+  // descendant of `.game-container.skin-<id>`) — e.g., dragon-cave sets
+  // `--skin-chrome-button-opacity: 1` on this wrapper so its icon buttons
+  // render at full opacity instead of the default 0.8.
+  const skinChromeClass = skinId ? `skin--${skinId}` : '';
   const topChrome = (
     <div
       data-testid="game-chrome"
-      className="pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))]"
+      className={`${skinChromeClass} pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))]`}
     >
       {/* Left cluster: menu */}
       <div className="flex items-center gap-2">
@@ -193,6 +209,7 @@ export const GameShell = ({
   sessionId,
   meta,
   initialLog,
+  skinId,
   children,
 }: GameShellProps): JSX.Element => (
   <GameEngineProvider
@@ -203,6 +220,8 @@ export const GameShell = ({
     meta={meta}
     initialLog={initialLog}
   >
-    <GameShellChrome sessionId={sessionId}>{children}</GameShellChrome>
+    <GameShellChrome sessionId={sessionId} skinId={skinId}>
+      {children}
+    </GameShellChrome>
   </GameEngineProvider>
 );
