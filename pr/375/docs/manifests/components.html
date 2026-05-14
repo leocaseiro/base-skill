@@ -582,7 +582,7 @@
 <main>
   <div class="wrap">
     <div class="note info" style="margin-bottom: 16px;">
-            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.4s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
+            <strong>Tip:</strong> You are using <code>react-docgen</code> (the default). Generation took <strong>2.2s</strong>. For higher quality prop types, consider switching to <code>react-docgen-typescript</code> in your <code>main.ts</code>:
             <pre><code>typescript: {
   reactDocgen: 'react-docgen-typescript',
 }</code></pre>
@@ -4363,7 +4363,7 @@ export const Playground: Story = {};
     <div class="title">
       <h2><span class="status-dot dot-ok"></span> GameShell</h2>
       <div class="badges">
-        <label for="c-18-game-gameshell-props" class="badge ok as-toggle">7 prop types</label>
+        <label for="c-18-game-gameshell-props" class="badge ok as-toggle">8 prop types</label>
         <label for="c-18-game-gameshell-info" class="badge info as-toggle">1 info</label>
         <label for="c-18-game-gameshell-stories" class="badge ok as-toggle">4 stories</label>
         
@@ -4397,7 +4397,7 @@ export const Playground: Story = {};
           <div class="note ok">
             <div class="row">
               <span class="ex-name">Prop types <small>(react-docgen)</small></span>
-              <span class="badge ok">7 prop types</span>
+              <span class="badge ok">8 prop types</span>
             </div>
             <pre><code>Component: src/components/game/GameShell.tsx::GameShell</code></pre>
             <pre><code>Props:</code></pre>
@@ -4413,7 +4413,15 @@ meta: SessionMeta
 
 moves: Record&lt;string, MoveHandler&gt;
 
-sessionId: string</code></pre>
+sessionId: string
+
+/**
+ * Active skin id (e.g. `&#39;classic&#39;`, `&#39;dragon-cave&#39;`). When set, the chrome
+ * wrapper receives a `skin--&lt;id&gt;` class so per-skin CSS (e.g. button opacity,
+ * background tinting) can override defaults. The double-dash distinguishes
+ * the chrome scope from the game-container scope (`.skin-&lt;id&gt;`).
+ */
+skinId?: string</code></pre>
           </div>
         </div>
     
