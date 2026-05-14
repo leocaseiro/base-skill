@@ -1,0 +1,1 @@
+import{$ as a,x as c,r as m,a0 as r,j as u,a1 as d}from"./main-CjLwBbAL.js";const l=()=>{const e=a.useLoaderData(),s=a.useSearch().debug===!0||!1,{t:o}=c("games"),n=e.config.gameId,t=e.customGameName??o(n);return m.useEffect(()=>(document.title=r(t),()=>{document.title="BaseSkill"}),[t]),u.jsx(d,{...e,debug:s})};export{l as component};
