@@ -819,11 +819,11 @@ export const dragonCaveSkin: GameSkin & { id: 'dragon-cave' } = {
     //   outline-only on todo). Current dot wears the gold ring.
     // Sizing: 10px dots feel right against the cave's scaled scenery;
     //   classic's 0.875rem reads as oversized. Gap stays at classic 0.5rem.
-    '--skin-hud-gap': '0.5rem',
-    '--skin-hud-dot-size': '10px',
-    '--skin-hud-dot-fill': '#2E1954',
+    '--skin-hud-gap': '0.3rem',
+    '--skin-hud-dot-size': '15px',
+    '--skin-hud-dot-fill': '#F6C562',
     '--skin-hud-dot-empty': '#ffffff',
-    '--skin-hud-dot-border': '#2E1954',
+    '--skin-hud-dot-border': '#ffffff',
     '--skin-hud-dot-current-border': '#F6C562',
     '--skin-hud-fraction-color': '#ffffff',
     '--skin-hud-fraction-sep-color': '#ffffff',
