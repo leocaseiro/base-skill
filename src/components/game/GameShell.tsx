@@ -56,10 +56,24 @@ interface GameShellChromeProps {
   children: ReactNode;
 }
 
-// Default chrome button opacity reads from a CSS variable so per-skin overrides
-// (set on `.skin--<id>` wrappers) cascade down without touching this className.
+// Chrome button visual properties are CSS-variable-driven so per-skin overrides
+// (set on `.skin--<id>` wrappers, which the chrome receives when GameShell gets
+// a skinId) cascade down without touching this className. Each token has a
+// fallback that matches the prior Tailwind class so games without a skin-scoped
+// override look identical to before. Skins can additionally write arbitrary
+// CSS rules under `.skin--<id> [data-testid="game-chrome"]` (e.g., to convert
+// the chrome into a top menu bar — change `position`, add a wrapper background,
+// adjust gap/padding) — tokens cover the common cases; CSS is the escape hatch
+// for structural changes.
 const ICON_BUTTON_CLASS =
-  'pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full bg-background/90 text-foreground opacity-[var(--skin-chrome-button-opacity,0.8)] shadow-sm ring-1 ring-border transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none';
+  'pointer-events-auto flex size-10 shrink-0 items-center justify-center transition-opacity focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ' +
+  'rounded-[var(--skin-chrome-button-radius,9999px)] ' +
+  'bg-[var(--skin-chrome-button-bg,var(--background))] ' +
+  'text-[color:var(--skin-chrome-button-color,var(--foreground))] ' +
+  'opacity-[var(--skin-chrome-button-opacity,0.8)] ' +
+  'shadow-[var(--skin-chrome-button-shadow,0_1px_2px_0_rgb(0_0_0_/_0.05))] ' +
+  'ring-1 ring-[color:var(--skin-chrome-button-ring-color,var(--border))] ' +
+  'hover:opacity-[var(--skin-chrome-button-opacity-hover,1)]';
 
 const GameShellChrome = ({
   sessionId,
@@ -97,14 +111,16 @@ const GameShellChrome = ({
   // Portaled to `body` so the chrome stays above the instructions overlay
   // (also portaled, z-40). z-[45] is below the exit AlertDialog (z-50).
   // The `skin--<id>` class lets per-skin CSS reach the chrome (which is NOT a
-  // descendant of `.game-container.skin-<id>`) — e.g., dragon-cave sets
-  // `--skin-chrome-button-opacity: 1` on this wrapper so its icon buttons
-  // render at full opacity instead of the default 0.8.
+  // descendant of `.game-container.skin-<id>`) — skins set `--skin-chrome-*`
+  // tokens here to override button bg/color/border/radius/shadow/opacity and
+  // the wrapper background. Layout-level changes (turning the chrome into a
+  // top menu bar, repositioning, etc.) are an escape hatch: write CSS rules
+  // under `.skin--<id> [data-testid="game-chrome"]` in the skin's sceneStyles.
   const skinChromeClass = skinId ? `skin--${skinId}` : '';
   const topChrome = (
     <div
       data-testid="game-chrome"
-      className={`${skinChromeClass} pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))]`}
+      className={`${skinChromeClass} pointer-events-none fixed inset-x-0 top-0 z-[45] flex items-start justify-between gap-3 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] bg-[var(--skin-chrome-wrapper-bg,transparent)]`}
     >
       {/* Left cluster: menu */}
       <div className="flex items-center gap-2">
