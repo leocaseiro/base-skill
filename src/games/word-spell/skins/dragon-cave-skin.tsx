@@ -802,12 +802,11 @@ export const dragonCaveSkin: GameSkin & { id: 'dragon-cave' } = {
     '--skin-question-audio-fg': '#000000',
     // HUD tokens — cave palette: dark amethyst dots with a gold "current"
     // ring, white fraction label/separator/level text against the cave bg.
-    // Size + gap overrides: classic's 0.875rem dots feel oversized against
-    // the cave's scaled scenery; 10px reads as a punchy chip without
-    // dominating. Gap bumped from classic's 0.5rem so the smaller dots
-    // have visible breathing room.
+    // Size override: classic's 0.875rem dots feel oversized against the
+    // cave's scaled scenery; 10px reads as a punchy chip without dominating.
+    // Gap stays at classic's 0.5rem (user-confirmed after testing).
     '--skin-hud-dot-size': '10px',
-    '--skin-hud-gap': '0.75rem',
+    '--skin-hud-gap': '0.5rem',
     '--skin-hud-dot-fill': '#2E1954',
     '--skin-hud-dot-current-border': '#F6C562',
     '--skin-hud-fraction-color': '#ffffff',
