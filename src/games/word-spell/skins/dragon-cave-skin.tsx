@@ -801,32 +801,28 @@ export const dragonCaveSkin: GameSkin & { id: 'dragon-cave' } = {
     '--skin-question-audio-bg': '#f7d168',
     '--skin-question-audio-fg': '#000000',
     // HUD tokens — cave palette: dark amethyst dots with a gold "current"
-    // ring, white fraction label/separator/level text. The HUD pill gets a
-    // semi-opaque amethyst wrapper so the white text reads cleanly over the
-    // cave's bg-middle gradient.
+    // ring, white empty/todo dots, white fraction/level text. The wrapper
+    // stays bare (no bg, no rounded chrome) so the HUD reads as floating
+    // chips against the cave instead of a UI pill — user-confirmed.
     //
     // CRITICAL: classic-skin's tokens are NOT inherited by dragon-cave —
     // `style={skin.tokens}` on the game-container only applies the active
     // skin's set. Any HUD token NOT listed here resolves to undefined and
     // its consuming `var(...)` (no fallback in ProgressHUD.tsx) emits an
-    // empty value, so the property silently doesn't apply. Match classic's
-    // FULL HUD token surface, then override what the cave wants different.
+    // empty value, so the property silently doesn't apply. List every key
+    // ProgressHUD reads OR knowingly leave it undefined (intentional for
+    // --skin-hud-bg and --skin-hud-radius below).
     //
-    // Pill: rgba amethyst at 0.85 alpha keeps a hint of the scene visible
-    //   while preserving white-text legibility.
-    // Dots: dark amethyst fill on done/current; semi-transparent white on
-    //   todo so empty slots read as "not yet" against the pill. Border is
-    //   colored to match the fill (invisible on done/current circles;
-    //   visible-as-outline-only on todo).
+    // Dots: dark amethyst fill on done/current; solid white on todo so
+    //   empty slots read clearly against the cave bg. Border colored to
+    //   match the fill (invisible on done/current circles; visible-as-
+    //   outline-only on todo). Current dot wears the gold ring.
     // Sizing: 10px dots feel right against the cave's scaled scenery;
     //   classic's 0.875rem reads as oversized. Gap stays at classic 0.5rem.
-    '--skin-hud-bg': 'rgba(46, 25, 84, 0.85)',
     '--skin-hud-gap': '0.5rem',
-    '--skin-hud-padding': '0.25rem 0.75rem',
-    '--skin-hud-radius': '9999px',
     '--skin-hud-dot-size': '10px',
     '--skin-hud-dot-fill': '#2E1954',
-    '--skin-hud-dot-empty': 'rgba(255, 255, 255, 0.25)',
+    '--skin-hud-dot-empty': '#ffffff',
     '--skin-hud-dot-border': '#2E1954',
     '--skin-hud-dot-current-border': '#F6C562',
     '--skin-hud-fraction-color': '#ffffff',
