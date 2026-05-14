@@ -1153,6 +1153,11 @@ export const GameRoute = ({
     sessionId={sessionId}
     meta={meta}
     initialLog={initialLog ?? undefined}
+    skinId={
+      typeof gameSpecificConfig?.skin === 'string'
+        ? gameSpecificConfig.skin
+        : undefined
+    }
   >
     <GameBody
       gameId={config.gameId}

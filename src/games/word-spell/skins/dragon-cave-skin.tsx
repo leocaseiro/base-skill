@@ -481,6 +481,17 @@ const sceneStyles = `
 .skin-dragon-cave button[aria-label="Hear the question"] {
   filter: drop-shadow(0 -4px 12px rgba(0, 0, 0, 0.4));
 }
+
+/* ── GameShell chrome (portaled to body, outside .skin-dragon-cave) ──
+   The chrome wrapper receives a skin--dragon-cave class from GameShell
+   when the active skin is dragon-cave. Setting the CSS variable here
+   cascades to the icon buttons inside, which read
+   opacity-[var(--skin-chrome-button-opacity, 0.8)]. Result: chrome
+   stays fully visible against the cave's busy backdrop, where the
+   default 0.8 fade reads as accidental dimming rather than intent. */
+.skin--dragon-cave {
+  --skin-chrome-button-opacity: 1;
+}
 `;
 
 const SceneBackground = () => (
