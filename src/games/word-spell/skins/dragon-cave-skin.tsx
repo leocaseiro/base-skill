@@ -470,6 +470,19 @@ const sceneStyles = `
 .skin-dragon-cave .dragon-cave-stone-outline--wrong {
   color: var(--destructive);
 }
+/* Red shake border — the dragon-cave tile-button rule strips 'border' so
+   classic --skin-wrong-border (var(--destructive)) never paints, and the
+   stone-outline SVG alone reads as subtle. triggerShake(el) adds the
+   .animate-shake class to the slot's inner visual div for the ~300ms shake
+   window; this paints a clear red ring during exactly that window. Outline
+   (instead of border or box-shadow) sidesteps the !important border:0
+   rule, composes cleanly with the cave's transform:scale, and isn't
+   clipped by any overflow:hidden ancestor at outline-offset: -3px. */
+.skin-dragon-cave .animate-shake {
+  outline: 3px solid var(--destructive);
+  outline-offset: -3px;
+  border-radius: 16px;
+}
 .skin-dragon-cave [data-tile-bank-hole] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='12' stroke-dasharray='12 6' stroke-linejoin='round' opacity='0.55'/%3E%3C/svg%3E") !important;
   background-size: 100% 100% !important;
