@@ -800,11 +800,16 @@ export const dragonCaveSkin: GameSkin & { id: 'dragon-cave' } = {
     '--skin-hover-border-style': 'none',
     '--skin-question-audio-bg': '#f7d168',
     '--skin-question-audio-fg': '#000000',
-    // HUD tokens — cave palette: dark amethyst dots with a gold "current"
-    // ring, white fraction label/separator/level text against the cave bg.
+    // HUD tokens — cave palette: dark amethyst pill with a gold "current"
+    // ring, white fraction label/separator/level text. Without a background
+    // (classic inherits `transparent`) the pill disappears against the cave's
+    // busy backdrop and the white text fights the bg-middle gradient. The
+    // 0.85 alpha keeps a hint of the scene visible through the chip without
+    // sacrificing legibility.
     // Size override: classic's 0.875rem dots feel oversized against the
     // cave's scaled scenery; 10px reads as a punchy chip without dominating.
     // Gap stays at classic's 0.5rem (user-confirmed after testing).
+    '--skin-hud-bg': 'rgba(46, 25, 84, 0.85)',
     '--skin-hud-dot-size': '10px',
     '--skin-hud-gap': '0.5rem',
     '--skin-hud-dot-fill': '#2E1954',
