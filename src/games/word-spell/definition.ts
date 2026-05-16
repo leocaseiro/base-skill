@@ -1,4 +1,5 @@
 import { assign, setup } from 'xstate';
+import { dragonCaveSkin } from './skins/dragon-cave-skin';
 import type {
   AnswerGameDraftState,
   AnswerZone,
@@ -7,6 +8,12 @@ import type {
 import type { GameDefinition } from '@/lib/game-engine/definition-types';
 import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
 import type { GameEvent } from '@/types/game-events';
+import { registerSkin } from '@/lib/skin/registry';
+
+// Module-load side effect: any importer of this module gets the
+// Dragon Cave skin registered. Synchronous, one-shot — the registry
+// overwrites the same id if hot-module reload re-imports.
+registerSkin('word-spell', dragonCaveSkin);
 
 export interface WordSpellEngineContext {
   allTiles: TileItem[];

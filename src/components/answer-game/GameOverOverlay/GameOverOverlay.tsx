@@ -57,7 +57,7 @@ export const GameOverOverlay = ({
     <div
       role="dialog"
       aria-label="Game complete"
-      className="fixed inset-0 flex flex-col items-center justify-center gap-8 bg-background/95"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-background/95"
     >
       <span className="animate-bounce text-8xl" aria-hidden="true">
         🐨

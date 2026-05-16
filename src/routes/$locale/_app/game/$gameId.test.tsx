@@ -14,7 +14,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import { GameRoute } from './$gameId';
+import { DEFAULT_RECALL_CONFIG, GameRoute } from './$gameId';
 import type { BaseSkillDatabase } from '@/db/types';
 import type {
   GameEngineState,
@@ -226,4 +226,12 @@ describe('GameRoute', () => {
       expect(mockNavigate).toHaveBeenCalledWith(navigateArg);
     },
   );
+});
+
+describe('DEFAULT_RECALL_CONFIG regression', () => {
+  it('uses wrongTileBehavior: "lock-auto-eject" by default', () => {
+    expect(DEFAULT_RECALL_CONFIG.wrongTileBehavior).toBe(
+      'lock-auto-eject',
+    );
+  });
 });

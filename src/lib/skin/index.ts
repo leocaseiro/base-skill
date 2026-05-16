@@ -15,5 +15,6 @@ export {
   registerSkin,
   resolveSkin,
 } from './registry';
+export type { GameSkinIdMap } from './registry';
 export { DEFAULT_SKIN_TIMING, resolveTiming } from './resolve-timing';
 export { useGameSkin } from './useGameSkin';

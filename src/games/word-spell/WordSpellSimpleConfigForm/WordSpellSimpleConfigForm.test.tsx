@@ -1,11 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WordSpellSimpleConfigForm } from './WordSpellSimpleConfigForm';
 import type { LevelGraphemeUnit } from '@/data/words';
 import type { JSX } from 'react';
 import { GRAPHEMES_BY_LEVEL } from '@/data/words';
+import { dragonCaveSkin } from '@/games/word-spell/skins/dragon-cave-skin';
+import {
+  __resetSkinRegistryForTests,
+  registerSkin,
+} from '@/lib/skin/registry';
 
 const L1 = [...(GRAPHEMES_BY_LEVEL[1] ?? [])];
 
@@ -124,5 +129,65 @@ describe('WordSpellSimpleConfigForm Picture toggle', () => {
     expect(
       screen.getByRole('button', { name: /^t \/t\/$/ }),
     ).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+describe('WordSpellSimpleConfigForm — skin radio', () => {
+  const baseConfig: Record<string, unknown> = {
+    configMode: 'simple',
+    selectedUnits: L1,
+    region: 'aus',
+    inputMethod: 'drag',
+  };
+
+  beforeEach(() => {
+    __resetSkinRegistryForTests();
+  });
+
+  it('hides the skin radio when only classic is registered', () => {
+    render(
+      <WordSpellSimpleConfigForm
+        config={baseConfig}
+        onChange={() => {}}
+      />,
+    );
+    expect(
+      screen.queryByRole('radiogroup', { name: /skin/i }),
+    ).toBeNull();
+  });
+
+  it('shows the radio group with both options when dragon-cave is registered', () => {
+    registerSkin('word-spell', dragonCaveSkin);
+    render(
+      <WordSpellSimpleConfigForm
+        config={baseConfig}
+        onChange={() => {}}
+      />,
+    );
+    const group = screen.getByRole('radiogroup', { name: /skin/i });
+    expect(group).toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: /classic/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('radio', { name: /dragon cave/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('writes the picked value to config.skin', () => {
+    registerSkin('word-spell', dragonCaveSkin);
+    const onChange = vi.fn();
+    render(
+      <WordSpellSimpleConfigForm
+        config={baseConfig}
+        onChange={onChange}
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole('radio', { name: /dragon cave/i }),
+    );
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ skin: 'dragon-cave' }),
+    );
   });
 });
