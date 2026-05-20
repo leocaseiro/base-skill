@@ -1,0 +1,636 @@
+{
+  "meta": {
+    "date": "2026-05-20",
+    "document": "docs/brainstorms/2026-05-16-unified-skin-token-architecture-requirements.md",
+    "document_type": "requirements",
+    "branch": "feat/multi-skin-config",
+    "worktree": "worktrees/feat-multi-skin-config",
+    "round": 1,
+    "status": "agents_complete_synthesis_pending",
+    "reviewers_dispatched": 6,
+    "reviewers_completed": 6,
+    "reviewers_failed": 0,
+    "total_findings": 36,
+    "pr": "#393",
+    "issue": "#359"
+  },
+  "reviewers": [
+    {
+      "reviewer": "ce-coherence-reviewer",
+      "findings": [
+        {
+          "title": "R4 modifier names inconsistent with R3 state-value syntax",
+          "severity": "P1",
+          "section": "Requirements — State feedback separation",
+          "why_it_matters": "R3 defines six mutually exclusive `data-tile-state` values (empty, correct, wrong, reject, pickup, ejecting). R4 introduces modifier attributes (`data-shaking`, `data-speaking`, `data-drag-over`) as separate boolean attributes. However, the evidence shows R4 using `data-shaking=\"true\"` syntax while R3 uses attribute-value pairs. This creates ambiguity: does R4 mean boolean presence/absence (`[data-shaking]` selector), or attribute-value pairs (`[data-shaking=\"true\"]`)? AE4 clarifies it as attribute-value, but AE3 and AE4 both show `data-shaking=\"true\"` only when explicitly listed. An implementer might assume modifiers are CSS attribute presence checks, not parsed value checks, leading to CSS selector mismatches.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Clarify R4 by adding explicit CSS selector form: 'Modifier attributes are present (boolean) on the element; CSS targets them via [data-shaking], [data-speaking], [data-drag-over] selectors.' OR revise to match R3's value-pair pattern: 'data-tile-modifiers=\"shaking speaking\"` (space-separated). Then audit all evidence (AE3, AE4) to match chosen pattern.",
+          "confidence": 75,
+          "evidence": [
+            "R3: 'data-tile-state attribute with one of six mutually exclusive values: empty, correct, wrong, reject, pickup, ejecting'",
+            "R4: 'Orthogonal modifier attributes compose with primary state: data-shaking=\"true\" (shake animation window), data-speaking=\"true\" (TTS active), data-drag-over=\"true\" (slot is hover target).'",
+            "AE4: 'when a tile is shaking (either bank-reject or slot-wrong-shake), the element has both data-tile-state=\"wrong\" (or \"reject\") AND data-shaking=\"true\". CSS rules targeting [data-shaking] apply the shared shake motion'"
+          ]
+        },
+        {
+          "title": "R5 and R6 scope boundary unclear — slot-wrong-shake vs. bank-reject state routing",
+          "severity": "P1",
+          "section": "Requirements — State feedback separation",
+          "why_it_matters": "R5 states 'Shake animation and wrong paint are shared between bank-reject and slot-wrong-shake via the data-shaking modifier.' R6 states 'Bank-reject has its own appearance token namespace (--skin-tile-reject-*) separate from slot-wrong (--skin-tile-wrong-*). Classic defaults reject values to the same as wrong values.' This creates ambiguity: does R5 mean both bank-reject AND slot-wrong-shake set data-shaking=\"true\" (shared visual trigger), OR does R5 describe only the slot-wrong-shake motion path?",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Rewrite R5 to be explicit: 'Bank-reject and slot-wrong-shake trigger the same data-shaking=\"true\" modifier, applying identical shake animation. They differ in appearance tokens: bank-reject uses --skin-tile-reject-* tokens while slot-wrong uses --skin-tile-wrong-* tokens.'",
+          "confidence": 75,
+          "evidence": [
+            "R5: 'Shake animation and wrong paint are shared between bank-reject and slot-wrong-shake via the data-shaking modifier.'",
+            "R6: 'Bank-reject has its own appearance token namespace (--skin-tile-reject-*) separate from slot-wrong (--skin-tile-wrong-*). Classic defaults reject values to the same as wrong values. Skins can diverge.'",
+            "AE4: 'when a tile is shaking (either bank-reject or slot-wrong-shake), the element has both data-tile-state=\"wrong\" (or \"reject\") AND data-shaking=\"true\".'"
+          ]
+        },
+        {
+          "title": "Outstanding Questions — R8/R10 state-machine timing contract not defined",
+          "severity": "P1",
+          "section": "Outstanding Questions — Deferred to Planning",
+          "why_it_matters": "R8 claims XState 'drives animation state transitions,' but if timer durations are not fed from CSS tokens to XState, then XState cannot respond to skin-customized durations. R10 says tokens control animation duration, but Outstanding Questions admits the bridge is unresolved. This blocks implementation of R10.",
+          "finding_type": "error",
+          "autofix_class": "gated_auto",
+          "suggested_fix": "Move the timing-contract question from 'Deferred' to 'Blockers' section. OR revise R10 to explicitly state 'CSS tokens control animation duration/easing; XState timers remain hardcoded in machine config.'",
+          "confidence": 75,
+          "evidence": [
+            "R8: 'XState engine drives animation state transitions (wrongShake → ejecting → ejected).'",
+            "R10: 'Six animations are tokenized: shake, pop, pulse-ring, blink, eject-fly, eject-fade. Skins override motion via tokens without redefining keyframes.'",
+            "Outstanding Questions: '(Affects R8, needs research) How does XState read CSS custom property values for timer durations?'"
+          ]
+        },
+        {
+          "title": "R10 'Six animations' list incomplete — state-to-animation mapping absent",
+          "severity": "P2",
+          "section": "Requirements — Animation sequencing",
+          "why_it_matters": "R10 lists six animations but does not map them to states/transitions. Is the list exhaustive or illustrative? States like pickup, correct, empty have no animations listed.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": "Clarify R10 with a state-to-animation mapping table. State whether the list is exhaustive.",
+          "confidence": 50,
+          "evidence": [
+            "R10: 'Six animations are tokenized: shake, pop, pulse-ring, blink, eject-fly, eject-fade.'",
+            "F1: 'shake animation (300ms) → XState timer fires → eject fly-back animation → fade → tile returns to bank'",
+            "R8: 'XState engine drives animation state transitions (wrongShake → ejecting → ejected).'"
+          ]
+        },
+        {
+          "title": "R13 scope expansion vs. Scope Boundaries conflict — 'full game UI' undefined",
+          "severity": "P2",
+          "section": "Requirements — Full game UI scope",
+          "why_it_matters": "R13 claims all seven token namespaces get @property. Scope Boundaries defers SpotAll and S5. Success Criteria only mentions three games. Ambiguous whether R13 is prescriptive or aspirational.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Revise R13 to clarify which namespaces are in-scope for this work vs. follow-up.",
+          "confidence": 75,
+          "evidence": [
+            "R13: 'The @property inheritance model applies to all token namespaces: --skin-tile-*, --skin-slot-*, --skin-hud-*, --skin-chrome-*, --skin-question-*, --skin-scene-*, --skin-bank-*.'",
+            "Scope Boundaries: 'System-alias three-tier cascade (S5 — additive once two skins exercise the system)'",
+            "Success Criteria: 'All three games (WordSpell, SortNumbers, NumberMatch) pass existing tests'"
+          ]
+        },
+        {
+          "title": "R11 cross-game normalization omits NumberMatch bank-tile skin prop coverage",
+          "severity": "P1",
+          "section": "Requirements — Cross-game normalization",
+          "why_it_matters": "R11 and R12 both address the same gap (NumberMatch missing tileDecoration) but from different angles. R11 doesn't mention tileDecoration; R12 does. Overlap creates confusion about which requirement owns the fix.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Revise R11 to focus on token consumption paths. Leave tileDecoration to R12. Or merge them.",
+          "confidence": 75,
+          "evidence": [
+            "R11: 'WordSpell, SortNumbers, and NumberMatch all consume skin tokens via the same code paths. No isCustomSkin branches.'",
+            "R12: 'All three games' bank tile components receive the skin prop and render tileDecoration when provided.'",
+            "Problem Frame: 'NumberMatch bank tiles never receive the skin prop (missing tileDecoration entirely).'"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "Outstanding Questions section admits unresolved timing-contract question that directly blocks R8/R10 implementation.",
+        "R10's animation list is not mapped to state machine states/transitions.",
+        "R13 scope ambiguity will cause misalignment between this spec and follow-up work."
+      ],
+      "deferred_questions": [
+        "Does R4's modifier pattern support simultaneous multiple modifiers?",
+        "Does AE1 imply tile-state tokens override slot-base tokens in CSS cascade?",
+        "R7 independence — stored separately or semantic separation in same file?"
+      ]
+    },
+    {
+      "reviewer": "ce-feasibility-reviewer",
+      "findings": [
+        {
+          "title": "@property initial-value cannot contain var() references",
+          "severity": "P0",
+          "section": "Requirements — R1",
+          "why_it_matters": "R1 states tokens are registered via CSS @property with Classic skin values as initial-value. The CSS @property spec requires initial-value to be computationally independent — var() references are forbidden. Classic skin tokens overwhelmingly use var() references (e.g., 'var(--bs-primary)', 'rgb(from var(--primary) r g b / 0.1)'). Of 63 tokens in classic-skin.ts, the majority reference other custom properties. The plan's core inheritance mechanism cannot work as stated.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 100,
+          "evidence": [
+            "R1: 'Every skin token is registered via CSS @property with Classic skin values as initial-value.'",
+            "classic-skin.ts tokens use var() references: '--skin-tile-bg': 'var(--bs-primary)', '--skin-correct-bg': 'rgb(from var(--primary) r g b / 0.1)'",
+            "CSS @property spec: initial-value must be computationally independent — var() not permitted"
+          ]
+        },
+        {
+          "title": "answer-game animation sequencing uses useReducer, not XState",
+          "severity": "P1",
+          "section": "Requirements — R8, R9",
+          "why_it_matters": "R8 requires XState for animation state transitions. The codebase shows answer-game uses useReducer, not XState. Tile-level animation sequencing lives in useSlotBehavior.ts via imperative setTimeout + animationend chains. Migration to XState requires either extending game-level XState machines or creating per-slot machines.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 100,
+          "evidence": [
+            "R8: 'XState engine drives animation state transitions'",
+            "AnswerGameProvider.tsx line 103: useReducer(answerGameReducer, ...)",
+            "useSlotBehavior.ts lines 300-312: imperative setTimeout chain for auto-eject",
+            "slot-animations.ts lines 7-11: triggerShake uses animationend listener"
+          ]
+        },
+        {
+          "title": "NumeralTileBank confirmed missing skin prop — plan omits migration scope for parent",
+          "severity": "P1",
+          "section": "Requirements — R12",
+          "why_it_matters": "NumberMatch.tsx renders NumeralTileBank without skin prop. Unlike SortNumbers, NumberMatch doesn't even have skin available in render scope. Not just adding a prop — also plumbing through component tree.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R12: 'All three games' bank tile components receive the skin prop'",
+            "NumeralTileBank.tsx interface: no skin prop",
+            "NumberMatch.tsx lines 301-304: skin not passed"
+          ]
+        },
+        {
+          "title": "lock-manual mode has no eject path today — R9 understates the work",
+          "severity": "P1",
+          "section": "Requirements — R9, Key Flow F3",
+          "why_it_matters": "handleClick in useSlotBehavior.ts dispatches bare 'REMOVE_TILE' with no animation. No fly-back, no ejecting state. R9 frames this as routing through same XState state — but this is net-new animation infrastructure, not a refactor.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R9: 'Both manual-eject and auto-eject route through the same ejecting XState state'",
+            "useSlotBehavior.ts lines 265-268: handleClick does REMOVE_TILE with no animation",
+            "useSlotBehavior.ts lines 300-312: only auto-eject has triggerEjectReturn"
+          ]
+        },
+        {
+          "title": "Dragon Cave token count claim (17+ to ~11) does not match actual counts",
+          "severity": "P1",
+          "section": "Success Criteria",
+          "why_it_matters": "Actual dragon-cave-skin.tsx contains 21 token overrides (not 17+) and 10 transparent/none values (not 4). Baseline is wrong; success criterion should use accurate numbers.",
+          "finding_type": "error",
+          "autofix_class": "gated_auto",
+          "suggested_fix": "Update to: 'Dragon Cave token count drops from 21 (with 10 transparent/none nulls) to ~11-13'",
+          "confidence": 100,
+          "evidence": [
+            "Success Criteria: 'Dragon Cave's token count drops from 17+ (with 4 transparent nulls) to ~11'",
+            "dragon-cave-skin.tsx: 21 token overrides, 10 transparent/none values"
+          ]
+        },
+        {
+          "title": "R3 state enum missing 'idle' value for bank tiles at rest",
+          "severity": "P1",
+          "section": "Requirements — R3",
+          "why_it_matters": "R3 defines six states for tile/slot elements. A bank tile at rest has no applicable state — 'empty' describes slots without tiles. Without 'idle', CSS must target absence of data-tile-state, which inverts the pattern.",
+          "finding_type": "omission",
+          "autofix_class": "gated_auto",
+          "suggested_fix": "Add 'idle' to R3 state enum, or explicitly state bank tiles at rest have no data-tile-state attribute.",
+          "confidence": 75,
+          "evidence": [
+            "R3: six values: empty, correct, wrong, reject, pickup, ejecting",
+            "R5: bank-reject shake uses the same modifier",
+            "R12: bank tile components receive skin prop"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "@property registration syntax descriptor choice (e.g. '<color>' vs '*') affects animation interpolation and is unspecified.",
+        "bank-tile-reject-feedback.ts imperative DOM surgery not called out in migration scope.",
+        "SpotAll applies skin.tokens and will break between this PR landing and its separate refactor."
+      ],
+      "deferred_questions": []
+    },
+    {
+      "reviewer": "ce-product-lens-reviewer",
+      "findings": [
+        {
+          "title": "R5 contradicts R6: shared shake claims conflict with separate namespaces",
+          "severity": "P1",
+          "section": "Requirements — State feedback separation",
+          "why_it_matters": "R5 says shake and wrong paint are 'shared'. R6 says reject has separate namespace. If an implementer reads R5 literally, they'd use --skin-tile-wrong-* for both, conflicting with R6. Need to clarify 'shared' means motion only, not paint.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R5: 'Shake animation and wrong paint are shared... One set of shake tokens, consumed by both surfaces.'",
+            "R6: 'Bank-reject has its own appearance token namespace (--skin-tile-reject-*) separate from slot-wrong'",
+            "AE4: data-tile-state='wrong' (or 'reject') AND data-shaking='true'"
+          ]
+        },
+        {
+          "title": "NumberMatch bank tiles lack skin prop — document claims gap but solution scope unclear",
+          "severity": "P1",
+          "section": "Requirements — Cross-game normalization",
+          "why_it_matters": "NumeralTileBank is architecturally different (domino/dice faces, complex layouts). Simply threading a skin prop may require rethinking how tileDecoration composes. R12 understates the work.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R12: 'All three games' bank tile components receive the skin prop'",
+            "Problem Frame: 'NumberMatch bank tiles never receive the skin prop'",
+            "Codebase: NumeralTileBank receives only tileStyle and tilesShowGroup"
+          ]
+        },
+        {
+          "title": "Success criterion '~11 tokens' for Dragon Cave does not match current count",
+          "severity": "P2",
+          "section": "Success Criteria",
+          "why_it_matters": "Current codebase shows 21 overrides with ~10 transparent/none values. '17+' baseline is an undercount. Target should be reconciled against actual list.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "Dragon Cave's token count drops from 17+ (with 4 transparent nulls) to ~11",
+            "Codebase: 21 '--skin-*' overrides, approximately 10 transparent/none"
+          ]
+        },
+        {
+          "title": "R13 full-game-UI scope is orphan — no flow, AE, or success criterion",
+          "severity": "P2",
+          "section": "Requirements — Full game UI scope",
+          "why_it_matters": "R13 declares seven namespaces get @property but no flow exercises non-tile namespaces, no AE validates them, no SC measures them. Makes R13 scope creep without verification criteria.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": "Add an AE for at least one non-tile namespace, or move R13 to Scope Boundaries as follow-up.",
+          "confidence": 75,
+          "evidence": [
+            "R13: '@property inheritance model applies to all token namespaces'",
+            "Key Flows F1-F4 only cover tile/slot scenarios",
+            "Deferred: 'Which chrome/overlay/question tokens need state attributes?'"
+          ]
+        },
+        {
+          "title": "Correct-tile flow missing from Key Flows despite architecture change",
+          "severity": "P2",
+          "section": "Key Flows",
+          "why_it_matters": "The architecture renames correct tokens (R2), and Dependencies says the correctStyle bug is fixed in migration. A flow touched by rename + bug fix but with no flow or AE risks being under-tested.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": "Add flow F5 for correct tile placement + AE validating the color bug fix.",
+          "confidence": 75,
+          "evidence": [
+            "R2: '--skin-correct-bg → --skin-tile-correct-bg'",
+            "Dependencies: 'Slot.tsx correctStyle bug... fixed as part of migration'",
+            "Key Flows F1-F4 cover wrong/reject/ejecting/authoring only"
+          ]
+        },
+        {
+          "title": "XState dependency assertion is contradictory",
+          "severity": "P2",
+          "section": "Dependencies / Assumptions",
+          "why_it_matters": "Dependencies hedges both ways — XState is something Spec 1a will introduce AND something that already exists. R8/R9 require XState for all three games. If only available in NumberMatch today, this work is blocked on Spec 1a.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Clarify whether R8/R9 can work with existing XState (NumberMatch only) or requires Spec 1a.",
+          "confidence": 75,
+          "evidence": [
+            "XState is available in the game engine (Spec 1a M1 introduces it; but the engine already uses XState via useGameEngine in NumberMatch).",
+            "R8: 'XState engine drives animation state transitions'",
+            "R11: 'WordSpell, SortNumbers, and NumberMatch all consume skin tokens via the same code paths.'"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "@property initial-value does not accept var() — may invalidate core architectural premise.",
+        "Document bundles three distinct concerns (token arch, XState animation, cross-game normalization) with no incremental delivery sequence."
+      ],
+      "deferred_questions": [
+        "Is the 'do nothing' path genuinely untenable? Problem exists only for Dragon Cave skin.",
+        "Are there consumers outside the three named games that reference current token names?"
+      ]
+    },
+    {
+      "reviewer": "ce-design-lens-reviewer",
+      "findings": [
+        {
+          "title": "Correct tile placement state has no defined flow",
+          "severity": "P1",
+          "section": "Key Flows",
+          "why_it_matters": "Four flows cover wrong/reject/eject/authoring, but correct placement — the primary success path — has no flow entry. Implementers need to know what data-tile-state value is set, whether any animation fires, and when the tile transitions to correct.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 100,
+          "evidence": [
+            "R3: six mutually exclusive values: empty, correct, wrong, reject, pickup, ejecting",
+            "F1-F4 cover wrong/reject/ejecting/authoring only",
+            "R10: six animations — but none mapped to correct state"
+          ]
+        },
+        {
+          "title": "pickup state interaction contract is undefined",
+          "severity": "P1",
+          "section": "Key Flows / Requirements",
+          "why_it_matters": "pickup is one of six enumerated states but no flow describes when it's set, what visual treatment applies, or when it clears. No --skin-tile-pickup-* tokens defined. Implementer will either guess or block.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 100,
+          "evidence": [
+            "R3: six values including 'pickup'",
+            "R13: implies all state namespaces are covered"
+          ]
+        },
+        {
+          "title": "Simultaneous modifier combinations not specified",
+          "severity": "P2",
+          "section": "Requirements — Token architecture",
+          "why_it_matters": "R4 lists three modifier attributes. No rule specifies valid combinations or conflict resolution (e.g., drag-over + ejecting, shaking + speaking simultaneously).",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R4: data-shaking, data-speaking, data-drag-over as orthogonal modifiers",
+            "R3: six mutually exclusive primary states"
+          ]
+        },
+        {
+          "title": "Token scope per element type not specified — bank tile vs slot tile",
+          "severity": "P2",
+          "section": "Requirements — Token architecture",
+          "why_it_matters": "R3 says 'Tile/slot elements' but doesn't distinguish bank tiles from slot elements. R6 requires different token namespaces per surface. Implementer needs to know how CSS selectors differentiate.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R3: 'Tile/slot elements expose a data-tile-state attribute'",
+            "R6: separate namespaces for bank-reject vs slot-wrong",
+            "F1/F2: tile in slot vs tile in bank have different behaviors"
+          ]
+        },
+        {
+          "title": "No acceptance example covering correct or pickup state tokens",
+          "severity": "P2",
+          "section": "Acceptance Examples",
+          "why_it_matters": "AE1-AE4 cover wrong/reject/eject/shake only. Two primary-state values with no flow coverage also have no acceptance examples.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "AE1-AE4 cover R1,R7,R5,R6,R8,R9,R4 only",
+            "R3: six states including correct and pickup"
+          ]
+        },
+        {
+          "title": "@property fallback behavior for invalid values unspecified",
+          "severity": "P2",
+          "section": "Requirements — Token architecture / Dependencies",
+          "why_it_matters": "R1 registers tokens via @property but no requirement covers which syntax descriptors are used (<color>, <length>, etc.). The syntax descriptor is what makes the inheritance mechanism work for type-safe fallback.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R1: 'registered via CSS @property with Classic skin values as initial-value'",
+            "R10: six animations tokenized",
+            "Deferred: 'should animation tokens be full shorthand or decomposed?'"
+          ]
+        },
+        {
+          "title": "Transition between ejecting and final slot resting state unspecified",
+          "severity": "P2",
+          "section": "Key Flows",
+          "why_it_matters": "F1/F3 describe tile flying back but don't specify what data-tile-state the slot carries after ejection completes. Slot may retain ejecting styles after tile is gone.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "F1: 'Tile is back in bank; slot is empty'",
+            "R8: 'wrongShake → ejecting → ejected'"
+          ]
+        },
+        {
+          "title": "Eject-fly destination override unspecified for skin authors",
+          "severity": "P3",
+          "section": "Key Flows / Requirements — Animation sequencing",
+          "why_it_matters": "R10 tokenizes eject-fly but fly-back needs a target position (bank origin). How is this communicated to CSS? A skin author can't meaningfully override eject-fly without knowing the mechanism.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 50,
+          "evidence": [
+            "R10: 'eject-fly' tokenized",
+            "F1: 'eject fly-back animation → tile returns to bank'",
+            "F3: 'fly-back animation (not instant disappear)'"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "Deferred question about XState reading CSS custom property values may be blocking.",
+        "R13 applies @property to all namespaces but no AEs cover non-tile namespaces.",
+        "Token rename is breaking with no migration path documented."
+      ],
+      "deferred_questions": [
+        "Should correct state have a required flow entry?",
+        "Does pickup refer to drag-start or in-flight?",
+        "Are bank/slot tile elements distinct DOM types or share structure?"
+      ]
+    },
+    {
+      "reviewer": "ce-scope-guardian-reviewer",
+      "findings": [
+        {
+          "title": "F2 (reject mode) missing R5 coverage — shake in reject flow is unowned",
+          "severity": "P1",
+          "section": "Key Flows / F2",
+          "why_it_matters": "F2's steps include 'reject paint + shake animation (300ms)' but coverage list is R3, R4, R6 — R5 is absent. An implementer reading F2 alone won't know to add data-shaking to bank tiles during reject.",
+          "finding_type": "error",
+          "autofix_class": "safe_auto",
+          "suggested_fix": "Add R5 to F2's 'Covered by' list: '- **Covered by:** R3, R4, R5, R6'",
+          "confidence": 100,
+          "evidence": [
+            "F2 steps: 'reject paint + shake animation (300ms)'",
+            "F2 coverage: 'R3, R4, R6'",
+            "R5: 'Shake animation and wrong paint are shared between bank-reject and slot-wrong-shake'"
+          ]
+        },
+        {
+          "title": "R13 extends @property to 5 namespaces with no stated goal or AE",
+          "severity": "P1",
+          "section": "Requirements / Full game UI scope (R13)",
+          "why_it_matters": "Problem frame, success criteria, and all AEs are exclusively about tile/slot state. HUD/chrome/question/scene/bank tokens already work via CSS fallback values. Registering 5 additional namespaces creates ~40+ @property declarations with no linked goal. Pure scope inflation.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Scope R13 to --skin-tile-* and --skin-slot-* for this work. Add note that other namespaces can be migrated incrementally.",
+          "confidence": 75,
+          "evidence": [
+            "R13: '@property inheritance model applies to all token namespaces'",
+            "Success criteria reference only tile, slot, Dragon Cave state feedback",
+            "AE1-AE4 cover exclusively tile/slot state inheritance",
+            "Outstanding Questions: 'Which chrome/overlay/question tokens need state attributes?'"
+          ]
+        },
+        {
+          "title": "AE2 does not demonstrate R5 — only tests R6 color separation",
+          "severity": "P2",
+          "section": "Acceptance Examples / AE2",
+          "why_it_matters": "AE2 claims to cover R5 (shared shake) but only verifies bank-tile reject shows visible red color. Says nothing about data-shaking being set or shake motion. R5's core claim has no acceptance example.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": "Remove R5 from AE2's coverage. Add new AE5 that verifies data-shaking='true' is set on bank tile during reject AND same shake CSS fires.",
+          "confidence": 75,
+          "evidence": [
+            "AE2: 'Covers R5, R6... bank tile shows visible red feedback'",
+            "R5: 'Shake animation shared between bank-reject and slot-wrong-shake via data-shaking modifier'",
+            "AE2 makes no mention of data-shaking or shake animation"
+          ]
+        },
+        {
+          "title": "R2 names only tile-state tokens but rename is broader",
+          "severity": "P2",
+          "section": "Requirements / Token architecture (R2)",
+          "why_it_matters": "R2 says --skin-tile-{state}-{property} pattern. But ~40 existing tokens (bank-hole-bg, hover-border-color, sentence-gap-*, etc.) don't fit this pattern and have live consumers. No rename guidance for them.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": "Narrow R2's scope explicitly or enumerate which tokens are in-scope for renaming.",
+          "confidence": 75,
+          "evidence": [
+            "R2: 'Token naming follows --skin-tile-{state}-{property} kebab-case pattern'",
+            "classic-skin.ts: ~40 tokens don't fit this pattern",
+            "bank-tile-reject-feedback.ts line 83: active consumer of non-tile-state tokens"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "R10 'pulse-ring' and 'blink' have no acceptance examples. Mechanism for injecting custom keyframes unspecified.",
+        "Deferred XState-timer/CSS-token bridge question: if timers stay hardcoded, 300ms shake is not skin-overridable despite R10.",
+        "R9 shared ejecting state may place tile at wrong location if position math differs between manual and auto."
+      ],
+      "deferred_questions": []
+    },
+    {
+      "reviewer": "ce-adversarial-document-reviewer",
+      "findings": [
+        {
+          "title": "@property initial-value cannot accept var() references or relative color syntax",
+          "severity": "P0",
+          "section": "Requirements > Token architecture > R1",
+          "why_it_matters": "The entire inheritance model depends on @property registrations with Classic values as initial-value. Classic skin tokens extensively use var() references. These cannot be used as @property initial-value literals. This is the load-bearing decision — if it doesn't work, R1, R7, F4, AE1, and the core success criterion all fall apart.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 100,
+          "evidence": [
+            "R1: 'registered via CSS @property with Classic skin values as initial-value'",
+            "classic-skin.ts: '--skin-correct-bg': 'rgb(from var(--destructive) r g b / 0.1)'",
+            "classic-skin.ts: '--skin-slot-bg': 'var(--bs-surface)'",
+            "CSS @property spec: initial-value must be computationally independent"
+          ]
+        },
+        {
+          "title": "Dragon Cave has 21 token overrides, not '17+ with 4 transparent nulls'",
+          "severity": "P2",
+          "section": "Problem Frame / Success Criteria",
+          "why_it_matters": "Actual count is 21 with 10 transparent/none. Baseline is wrong, improvement ratio is misleading.",
+          "finding_type": "error",
+          "autofix_class": "safe_auto",
+          "suggested_fix": "Update Problem Frame to '21 token overrides, 10 transparent/none nulls' and adjust Success Criteria accordingly.",
+          "confidence": 100,
+          "evidence": [
+            "Problem Frame: '17+ token overrides'",
+            "Success Criteria: '17+ (with 4 transparent nulls) to ~11'",
+            "dragon-cave-skin.tsx: 21 entries, 10 transparent/none"
+          ]
+        },
+        {
+          "title": "R5 contradicts R6: shared shake tokens vs. separate reject namespace",
+          "severity": "P1",
+          "section": "Requirements > State feedback separation > R5, R6",
+          "why_it_matters": "R5 says shake and wrong paint are 'shared' with 'one set of shake tokens.' R6 says reject has its own separate namespace. The 'wrong paint' R5 says is shared is exactly the appearance R6 says is separated. Ambiguous which tokens data-shaking consumes.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R5: 'One set of shake tokens, consumed by both surfaces.'",
+            "R6: 'Bank-reject has its own appearance token namespace separate from slot-wrong'",
+            "AE4: data-tile-state='wrong' (or 'reject') AND data-shaking='true'"
+          ]
+        },
+        {
+          "title": "NumberMatch bank tiles gap is larger than stated",
+          "severity": "P1",
+          "section": "Problem Frame / Requirements > R12",
+          "why_it_matters": "NumeralTileBank has no skin interface, NumeralTile inner component hardcodes tileSurfaceStyle() without decoration slot, and its DOM structure differs from WordSpell. R12 frames it as prop-threading but it's a structural refactor.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R12: 'receive the skin prop and render tileDecoration when provided'",
+            "NumeralTileBank.tsx: no skin in interface",
+            "NumeralTile component: hardcoded tileSurfaceStyle(), no tileDecoration slot"
+          ]
+        },
+        {
+          "title": "R8 'no animationend listeners' conflicts with bank-reject pattern",
+          "severity": "P1",
+          "section": "Requirements > Animation sequencing > R8",
+          "why_it_matters": "bank-tile-reject-feedback.ts depends on imperative DOM mutation + animationend restore. R8 eliminates all animationend listeners. F2 doesn't reference R8, suggesting XState model wasn't intended to cover this path — but the prohibition is absolute.",
+          "finding_type": "omission",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "R8: 'No imperative animationend listener chains for state transitions.'",
+            "bank-tile-reject-feedback.ts: snapshots inline styles, restores on animationend",
+            "F2 coverage: R3, R4, R6 — does not reference R8"
+          ]
+        },
+        {
+          "title": "Success criterion assumes @property works for animation shorthand",
+          "severity": "P1",
+          "section": "Success Criteria",
+          "why_it_matters": "Success says 'zero state/animation overrides' via inheritance. This depends on @property registering animation tokens — but there's no single syntax descriptor for animation shorthand. Deferred question about token shape is treated as resolved in the success criterion.",
+          "finding_type": "error",
+          "autofix_class": "manual",
+          "suggested_fix": null,
+          "confidence": 75,
+          "evidence": [
+            "Success: 'zero state/animation overrides — all state feedback works via inheritance'",
+            "R10: 'Six animations are tokenized'",
+            "Outstanding Questions: 'Exact keyframe token shape: full shorthand or decomposed?'",
+            "classic-skin.ts: '--skin-wrong-animation': 'shake 300ms ease-in-out'"
+          ]
+        }
+      ],
+      "residual_risks": [
+        "@property constraint may force fundamentally different inheritance mechanism.",
+        "No @property or data-tile-state usage exists in codebase — this is entirely greenfield.",
+        "R13 extends to seven namespaces but requirements only describe state behavior for tiles/slots."
+      ],
+      "deferred_questions": [
+        "How does @property registration handle tokens with var() Classic values?",
+        "Should R8's prohibition on animationend apply to bank-tile-reject-feedback?"
+      ]
+    }
+  ]
+}
