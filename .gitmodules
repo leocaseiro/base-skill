@@ -1,0 +1,3 @@
+[submodule ".specstory"]
+	path = .specstory
+	url = git@github.com:leocaseiro/base-skill-specstory.git
