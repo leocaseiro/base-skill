@@ -636,10 +636,14 @@ const SpeakSpellGameBody = ({
       customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
     [customGames, gameId],
   );
-  const cfg = useMemo(
+  const initial = useMemo(
     () => resolveWordSpellConfig(gameSpecificConfig),
     [gameSpecificConfig],
   );
+  const [cfg, setCfg] = useState(initial);
+  useEffect(() => {
+    setCfg(initial);
+  }, [initial]);
   const [showInstructions, setShowInstructions] = useState(true);
 
   const debugPanel = debug ? (
@@ -679,7 +683,7 @@ const SpeakSpellGameBody = ({
             (customGameColor ?? undefined) as GameColorKey | undefined
           }
           config={cfg as unknown as Record<string, unknown>}
-          onConfigChange={() => {}}
+          onConfigChange={(c) => setCfg(resolveWordSpellConfig(c))}
           onSaveCustomGame={async ({ name, color, config, cover }) =>
             save({ gameId, name, color, config, cover })
           }
