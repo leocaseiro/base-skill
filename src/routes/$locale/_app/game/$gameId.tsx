@@ -35,6 +35,7 @@ import { generateSortRounds } from '@/games/sort-numbers/build-sort-round';
 import { isRoundsStale } from '@/games/sort-numbers/is-rounds-stale';
 import { resolveSimpleConfig } from '@/games/sort-numbers/resolve-simple-config';
 import { SortNumbers } from '@/games/sort-numbers/SortNumbers/SortNumbers';
+import { SpeakSpell } from '@/games/speak-spell/SpeakSpell';
 import { resolveSimpleConfig as resolveSpotAllSimpleConfig } from '@/games/spot-all/resolve-simple-config';
 import { SpotAll } from '@/games/spot-all/SpotAll/SpotAll';
 import { defaultSelection } from '@/games/word-spell/level-unit-selection';
@@ -596,6 +597,132 @@ const WordSpellGameBody = ({
   );
 };
 
+const SpeakSpellGameBody = ({
+  gameId,
+  sessionId,
+  seed,
+  gameSpecificConfig,
+  customGameId,
+  customGameName,
+  customGameColor,
+  customGameCover,
+  debug,
+}: {
+  gameId: string;
+  sessionId: string;
+  seed: string;
+  gameSpecificConfig: Record<string, unknown> | null;
+  customGameId: string | null;
+  customGameName: string | null;
+  customGameColor: string | null;
+  customGameCover: Cover | null;
+  debug: boolean;
+}): JSX.Element => {
+  const { t } = useTranslation('games');
+  const {
+    save,
+    update,
+    remove,
+    customGames,
+    persistLastSessionConfig,
+  } = useCustomGames();
+  const { isBookmarked, toggle } = useBookmarks();
+  const bookmarkTarget = customGameId
+    ? ({ targetType: 'customGame', targetId: customGameId } as const)
+    : ({ targetType: 'game', targetId: gameId } as const);
+  const navigate = useNavigate({ from: '/$locale/game/$gameId' });
+  const existingCustomGameNames = useMemo(
+    () =>
+      customGames.filter((d) => d.gameId === gameId).map((d) => d.name),
+    [customGames, gameId],
+  );
+  const cfg = useMemo(
+    () => resolveWordSpellConfig(gameSpecificConfig),
+    [gameSpecificConfig],
+  );
+  const [showInstructions, setShowInstructions] = useState(true);
+
+  const debugPanel = debug ? (
+    <DebugPanel
+      gameId={gameId}
+      resolvedConfig={cfg as unknown as Record<string, unknown>}
+      rawSavedConfig={gameSpecificConfig}
+      customGame={{
+        id: customGameId,
+        name: customGameName,
+        color: customGameColor,
+        cover: customGameCover,
+      }}
+      session={{
+        sessionId,
+        seed,
+        draftState: null,
+        persistedContent: null,
+      }}
+      rounds={cfg.rounds as unknown[]}
+    />
+  ) : null;
+
+  if (showInstructions) {
+    return (
+      <>
+        <InstructionsOverlay
+          text={t('instructions.speak-spell')}
+          onStart={() => setShowInstructions(false)}
+          ttsEnabled={cfg.ttsEnabled}
+          gameTitle={t('speak-spell')}
+          gameId={gameId}
+          cover={customGameCover ?? undefined}
+          customGameId={customGameId ?? undefined}
+          customGameName={customGameName ?? undefined}
+          customGameColor={
+            (customGameColor ?? undefined) as GameColorKey | undefined
+          }
+          config={cfg as unknown as Record<string, unknown>}
+          onConfigChange={() => {}}
+          onSaveCustomGame={async ({ name, color, config, cover }) =>
+            save({ gameId, name, color, config, cover })
+          }
+          onUpdateCustomGame={
+            customGameId
+              ? async (name, config, extras) => {
+                  await update(customGameId, config, name, extras);
+                }
+              : undefined
+          }
+          onDeleteCustomGame={
+            customGameId
+              ? async (id) => {
+                  await remove(id);
+                  await navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      configId: undefined,
+                    }),
+                  });
+                }
+              : undefined
+          }
+          existingCustomGameNames={existingCustomGameNames}
+          isBookmarked={isBookmarked(bookmarkTarget)}
+          onToggleBookmark={() => void toggle(bookmarkTarget)}
+          onPersistLastSession={(c) =>
+            void persistLastSessionConfig(gameId, c)
+          }
+        />
+        {debugPanel}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SpeakSpell config={cfg} seed={seed} />
+      {debugPanel}
+    </>
+  );
+};
+
 const NumberMatchGameBody = ({
   gameId,
   sessionId,
@@ -1085,6 +1212,22 @@ const GameBody = ({
         customGameColor={customGameColor}
         customGameCover={customGameCover}
         persistedContent={persistedContent}
+        debug={debug}
+      />
+    );
+  }
+
+  if (gameId === 'speak-spell') {
+    return (
+      <SpeakSpellGameBody
+        gameId={gameId}
+        sessionId={sessionId}
+        seed={seed}
+        gameSpecificConfig={gameSpecificConfig}
+        customGameId={customGameId}
+        customGameName={customGameName}
+        customGameColor={customGameColor}
+        customGameCover={customGameCover}
         debug={debug}
       />
     );

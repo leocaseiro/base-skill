@@ -50,6 +50,18 @@ export const GAME_CATALOG: GameCatalogEntry[] = [
     },
   },
   {
+    id: 'speak-spell',
+    titleKey: 'speak-spell',
+    descriptionKey: 'speak-spell-description',
+    levels: ['PK', 'K', '1'],
+    subject: 'reading',
+    defaultCover: {
+      kind: 'emoji',
+      emoji: '🎙️',
+      gradient: ['#c4b5fd', '#6366f1'],
+    },
+  },
+  {
     id: 'spot-all',
     titleKey: 'spot-all',
     descriptionKey: 'spot-all-description',
