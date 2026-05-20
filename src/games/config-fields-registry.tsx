@@ -12,7 +12,8 @@ import type { JSX } from 'react';
 
 export const getConfigFields = (gameId: string): ConfigField[] => {
   switch (gameId) {
-    case 'word-spell': {
+    case 'word-spell':
+    case 'speak-spell': {
       return wordSpellConfigFields;
     }
     case 'number-match': {
@@ -45,7 +46,8 @@ export const getSimpleConfigFormRenderer = (
   gameId: string,
 ): ConfigFormRenderer | undefined => {
   switch (gameId) {
-    case 'word-spell': {
+    case 'word-spell':
+    case 'speak-spell': {
       return WordSpellSimpleConfigForm;
     }
     case 'number-match': {
@@ -72,7 +74,8 @@ export const getAdvancedHeaderRenderer = (
   gameId: string,
 ): ConfigFormRenderer | undefined => {
   switch (gameId) {
-    case 'word-spell': {
+    case 'word-spell':
+    case 'speak-spell': {
       return WordSpellAdvancedHeader;
     }
     default: {
@@ -95,7 +98,7 @@ export const isPlayableConfig = (
   gameId: string,
   config: Record<string, unknown>,
 ): boolean => {
-  if (gameId !== 'word-spell') return true;
+  if (gameId !== 'word-spell' && gameId !== 'speak-spell') return true;
   if (config.mode === 'picture' || config.mode === 'sentence-gap') {
     return true;
   }
