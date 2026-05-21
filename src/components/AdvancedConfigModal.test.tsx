@@ -429,4 +429,41 @@ describe('AdvancedConfigModal', () => {
     );
     expect(screen.queryByLabelText(/distractor count/i)).toBeNull();
   });
+
+  it('stamps configMode: "advanced" on live field changes so the route resolver treats them as advanced config', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <AdvancedConfigModal
+        open
+        onOpenChange={() => {}}
+        gameId="word-spell"
+        mode={{ kind: 'default' }}
+        value={draftFor({
+          name: 'Test',
+          config: {
+            configMode: 'simple',
+            wrongTileBehavior: 'lock-manual',
+            inputMethod: 'drag',
+          },
+        })}
+        onChange={onChange}
+        onCancel={() => {}}
+        onSaveNew={vi.fn()}
+      />,
+      { wrapper },
+    );
+
+    const select = screen.getByLabelText(/wrong tile behaviour/i);
+    await user.selectOptions(select, 'reject');
+
+    const configPatch = onChange.mock.calls.find(
+      (args) => args[0]?.config !== undefined,
+    );
+    expect(configPatch).toBeDefined();
+
+    expect(configPatch![0].config).toEqual(
+      expect.objectContaining({ configMode: 'advanced' }),
+    );
+  });
 });

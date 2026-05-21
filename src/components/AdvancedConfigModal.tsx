@@ -221,13 +221,21 @@ export const AdvancedConfigModal = ({
           {HeaderRenderer && (
             <HeaderRenderer
               config={value.config}
-              onChange={(next) => onChange({ config: next })}
+              onChange={(next) =>
+                onChange({
+                  config: { ...next, configMode: 'advanced' },
+                })
+              }
             />
           )}
           <ConfigFormFields
             fields={fields}
             config={value.config}
-            onChange={(next) => onChange({ config: next })}
+            onChange={(next) =>
+              onChange({
+                config: { ...next, configMode: 'advanced' },
+              })
+            }
           />
 
           {errorMessage && (
