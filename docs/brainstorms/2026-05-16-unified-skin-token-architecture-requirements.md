@@ -21,7 +21,7 @@ The skin system today entangles shape customization with state feedback. Dragon
 Cave needs transparent backgrounds/borders because its visual boundary is an SVG
 stone — but the same tokens (`--skin-wrong-bg`, `--skin-wrong-border`) also
 drive bank-tile reject feedback. Setting them to transparent makes bank-reject
-invisible. The result: 21 token overrides, 2 CSS hacks, and 2+ bugs — all
+invisible. The result: 21 token overrides, 9 `!important` overrides, and 2+ bugs — all
 caused by one architectural gap (no separation between "slot container
 appearance" and "state feedback colors/animations").
 
@@ -49,8 +49,9 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
 
 - F2. Wrong tile placement (reject mode)
   - **Trigger:** Player drags tile to incorrect slot
-  - **Steps:** Tile stays in bank → reject paint + shake animation (300ms) →
-    returns to idle
+  - **Steps:** Tile stays in bank → reject paint applied from
+    `--skin-tile-reject-*` tokens (not `--skin-tile-wrong-*`) + shake
+    animation (300ms) → returns to idle
   - **Outcome:** Tile never leaves bank; visual feedback confirms rejection
   - **Covered by:** R3, R4, R5, R6
 
@@ -65,18 +66,26 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
 - F5. Correct tile placement
   - **Trigger:** Player drags tile to correct slot
   - **Steps:** Tile placed → `data-tile-state` set to `correct` → correct paint
-    applied (background tint + border from `--skin-tile-correct-*` tokens) →
-    tile locks in place
+    applied (background tint + border from `--skin-tile-correct-*` tokens) +
+    pop animation (one-shot, no state change needed) → tile locks in place
   - **Outcome:** Tile stays in slot with correct-state visual feedback
-  - **Covered by:** R1, R2, R3
+  - **Covered by:** R1, R2, R3, R10
 
 - F6. Tile pickup (drag start)
   - **Trigger:** Player begins dragging a tile from bank or lifting from slot
   - **Steps:** Tile picked up → `data-tile-state` set to `pickup` → pickup
-    visual treatment applied (e.g., scale, elevation, opacity from
-    `--skin-tile-pickup-*` tokens) → tile follows pointer
-  - **Outcome:** Tile is visually "lifted" and tracks the drag position
-  - **Covered by:** R3
+    visual treatment applied (scale, elevation, opacity from
+    `--skin-tile-pickup-*` tokens) + pulse-ring animation → tile follows
+    pointer. On drop over valid slot: proceed to F1/F2/F5 (data-tile-state
+    changes to correct/wrong/reject). On drag cancel or drop outside any
+    slot: `data-tile-state` returns to `idle`, pulse-ring ends.
+    _Note: `useTouchDrag.ts` has a tap-forgiveness system —
+    short drags below `tapForgivenessThreshold` fire `onTapFallback`
+    (treated as tap, not drop), so the tile never enters pickup state for
+    accidental child drags._
+  - **Outcome:** Tile is visually "lifted" during drag; always resolves to a
+    terminal state (correct/wrong/reject/idle)
+  - **Covered by:** R3, R10
 
 - F4. New skin authoring
   - **Trigger:** Developer creates a new skin
@@ -97,6 +106,10 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
   easing) are additionally registered via CSS `@property` with literal
   `initial-value` for typed inheritance. A skin that omits a token inherits
   Classic behavior via the CSS cascade.
+  _Note: Current codebase applies tokens via inline `style={skin.tokens}` on
+  the game container. This requirement prescribes migrating to `:root` defaults
+  with skin overrides on the container scope — a net-new infrastructure change,
+  not a description of current behavior._
 - R2. Token naming follows `--skin-tile-{state}-{property}` kebab-case pattern.
   Existing tokens are renamed (e.g., `--skin-correct-bg` →
   `--skin-tile-correct-bg`). This pattern applies to state-feedback tokens.
@@ -118,7 +131,11 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
   `[data-shaking]`. TypeScript types and ESLint enforce boolean-only values to
   prevent `data-shaking="false"` (which CSS would still match). Modifiers can
   co-occur; CSS specificity determines which visual wins when animations
-  conflict.
+  conflict. `data-drag-over` is removed synchronously before the resulting
+  state is applied — whether that's `correct`, `wrong`, `reject`, or the
+  slot reverting to its previous state on drag cancel/drop-miss — so
+  `data-drag-over` and the drop-result state never co-exist on the same
+  element.
 
 **State feedback separation**
 
@@ -142,7 +159,12 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
   Pure CSS animations (no next step needed) require no JS coordination.
   Animations that trigger state changes or sequenced steps go through XState.
   _Depends on Spec 1a (XState migration for answer-game). Current codebase
-  uses `useReducer` + imperative `setTimeout`/`animationend` chains._
+  uses `useReducer` + imperative `setTimeout`/`animationend` chains.
+  Migration scope: 8 imperative `addEventListener` calls across 3 files —
+  `slot-animations.ts` (triggerShake animationend, triggerPop animationend,
+  triggerEjectReturn with 3 transitionend listeners for flight/fade phases)
+  and `bank-tile-reject-feedback.ts` (animationend for style restore after
+  shake)._
 - R9. Both manual-eject (lock-manual tap) and auto-eject route through the same
   `ejecting` XState state with fly-back animation. _Note: manual-eject has no
   animation today (`REMOVE_TILE` is instant). This is net-new animation
@@ -200,19 +222,37 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
 
 - AE4. **Covers R5, R4.** Given any skin, when a tile is shaking (either
   bank-reject or slot-wrong-shake), the element has both
-  `data-tile-state="wrong"` (or `"reject"`) AND `data-shaking="true"`. CSS
-  rules targeting `[data-shaking]` apply the shared shake motion regardless of
-  which surface triggered it.
+  `data-tile-state="wrong"` (or `"reject"`) AND the `[data-shaking]` presence
+  attribute is set. CSS rules targeting `[data-shaking]` apply the shared shake
+  motion regardless of which surface triggered it.
+
+- AE6. **Covers R3, R10.** Given any skin, when the player begins dragging a
+  tile from the bank, the tile has `data-tile-state="pickup"`, the pulse-ring
+  animation plays, and `--skin-tile-pickup-*` tokens control the tile's
+  scale/elevation/opacity. When the drag is cancelled or the tile is dropped
+  outside a slot, `data-tile-state` returns to `idle` and pulse-ring ends.
+
+- AE7. **Covers R13.** Given a skin that overrides `--skin-hud-dot-fill`, the
+  HUD dot color changes without affecting tile state-feedback tokens. The HUD
+  token inherits Classic's value via `:root` defaults when not overridden.
 
 ---
 
 ## Success Criteria
 
-- A new rectangular skin can be authored with 3-4 color token overrides and
-  zero state/animation overrides — all state feedback works via inheritance.
-- Dragon Cave's token count drops from 21 (with 10 transparent/none nulls) to
-  ~11-13 (shape + HUD palette only) with no visual regressions in state
-  feedback.
+- A new rectangular skin that accepts Classic's animation timing can be
+  authored with 3-4 color token overrides and zero state/animation overrides —
+  all state feedback works via inheritance. Skins wanting different motion feel
+  (e.g., longer shake, slower eject) must override animation tokens and stay
+  within the XState timer budget (see Key Decisions: timer sync invariant).
+- Dragon Cave's token count drops from 21 to ~13-15 with no visual
+  regressions in state feedback. Breakdown of eliminations: R7 removes 4
+  state-feedback transparent overrides (`--skin-correct-bg`,
+  `--skin-correct-border`, `--skin-wrong-bg`, `--skin-wrong-border`) and R6
+  removes 2 hover transparent overrides (`--skin-hover-border-color`,
+  `--skin-hover-border-style`). Remaining ~13-15 tokens are genuine shape
+  overrides (`--skin-slot-bg/border: transparent`, `--skin-bank-hole-*`) plus
+  HUD palette and decoration tokens that Dragon Cave legitimately customizes.
 - Bank-reject is visible in Dragon Cave without CSS hacks.
 - Lock-manual mode has fly-back animation matching lock-auto-eject behavior.
 - All three games (WordSpell, SortNumbers, NumberMatch) pass existing tests
@@ -257,11 +297,13 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
   Bootstrap design-system cascade. `@property` registration is reserved for
   animation timing tokens where literal `initial-value` and typed syntax
   descriptors (`<time>`, `<number>`) enable CSS interpolation.
-- **XState timers stay hardcoded; CSS tokens control visual side only:**
-  XState state machine timers (e.g., `after: { 300: 'ejecting' }`) remain in
-  JS config. CSS animation tokens (`--skin-tile-wrong-motion-duration`) control
-  the visual duration/easing. Skins can adjust animation feel within XState's
-  timer window but cannot extend the state machine's transition timing.
+- **CSS animation duration and XState timer must stay in sync:** Skin authors
+  can override animation timing (e.g., `--skin-tile-wrong-motion-duration`),
+  but the XState state machine timer and the CSS animation duration must
+  agree — if CSS shake is 500ms, XState must not fire the `ejecting`
+  transition at 300ms. The sync mechanism (CSS drives JS, JS drives both,
+  or shared config) is deferred to planning. CSS animations are interrupted
+  (not completed) when XState transitions change `data-tile-state`.
 - **Token rename is a breaking change:** `--skin-correct-bg` →
   `--skin-tile-correct-bg`. Accepted within this migration; no backwards
   compatibility shim.
@@ -291,3 +333,7 @@ never receive the `skin` prop (missing `tileDecoration` entirely).
   hardcoded in JS; CSS tokens control visual side only (see Key Decisions).~~
 - _(Affects R13, technical)_ Which chrome/overlay/question tokens need state
   attributes vs. which are simple appearance-only tokens that just inherit?
+- _(Affects R8/R10, technical)_ Timer sync mechanism: should XState read CSS
+  token values at config time (CSS drives JS), or should animation duration
+  live in the skin's JS config with both XState and CSS reading from it
+  (JS drives both)?
