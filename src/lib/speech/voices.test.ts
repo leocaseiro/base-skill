@@ -79,10 +79,34 @@ describe('groupVoicesByLanguage', () => {
     ] as SpeechSynthesisVoice[];
     const groups = groupVoicesByLanguage(voices);
     expect(groups).toHaveLength(3);
+  });
+
+  it('sorts groups alphabetically by friendly language label', () => {
+    const voices = [
+      { name: 'Samantha', lang: 'en-US', localService: true },
+      { name: 'Karen', lang: 'en-AU', localService: true },
+      { name: 'Daniel', lang: 'en-GB', localService: true },
+    ] as SpeechSynthesisVoice[];
+    const groups = groupVoicesByLanguage(voices);
+    // American English < Australian English < British English
     expect(groups.map((g) => g.lang)).toEqual([
+      'en-US',
       'en-AU',
       'en-GB',
-      'en-US',
+    ]);
+  });
+
+  it('sorts voices within a group alphabetically by name', () => {
+    const voices = [
+      { name: 'Zoe', lang: 'en-AU', localService: false },
+      { name: 'Aaron', lang: 'en-AU', localService: true },
+      { name: 'Karen', lang: 'en-AU', localService: true },
+    ] as SpeechSynthesisVoice[];
+    const [group] = groupVoicesByLanguage(voices);
+    expect(group!.voices.map((v) => v.name)).toEqual([
+      'Aaron',
+      'Karen',
+      'Zoe',
     ]);
   });
 

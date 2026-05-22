@@ -39,11 +39,13 @@ export const groupVoicesByLanguage = (
     existing.push(voice);
     map.set(voice.lang, existing);
   }
-  return [...map.entries()].map(([lang, vs]) => ({
-    lang,
-    label: getVoiceLanguageLabel(lang),
-    voices: vs,
-  }));
+  return [...map.entries()]
+    .map(([lang, vs]) => ({
+      lang,
+      label: getVoiceLanguageLabel(lang),
+      voices: vs.toSorted((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .toSorted((a, b) => a.label.localeCompare(b.label));
 };
 
 export function getVoiceByName(
