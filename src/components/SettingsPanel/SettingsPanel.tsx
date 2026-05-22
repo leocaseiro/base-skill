@@ -39,7 +39,7 @@ export const SettingsPanel = ({
   locale,
   onLocaleChange,
 }: SettingsPanelProps) => {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const { settings, update } = useSettings();
   const { db } = useRxDB();
 
@@ -80,15 +80,19 @@ export const SettingsPanel = ({
   );
 
   const voiceGroups = useMemo(
-    () => groupVoicesByLanguage(filteredVoices),
-    [filteredVoices],
+    () => groupVoicesByLanguage(filteredVoices, i18n.language),
+    [filteredVoices, i18n.language],
   );
 
   const isPreferredVoiceAvailable = useMemo(() => {
+    // Optimistic-available: returns true until voices have loaded so we don't
+    // flash an inline "unavailable" warning during the initial voiceschanged
+    // round-trip. The global VoiceUnavailableWarning banner has the same
+    // optimistic gate.
     if (!preferredVoice) return true;
     if (!voicesLoaded) return true;
-    return voices.some((v) => v.name === preferredVoice);
-  }, [voices, preferredVoice, voicesLoaded]);
+    return filteredVoices.some((v) => v.name === preferredVoice);
+  }, [filteredVoices, preferredVoice, voicesLoaded]);
 
   const themes$ = useMemo(
     () => (db ? db.themes.find().$ : EMPTY),
@@ -175,7 +179,15 @@ export const SettingsPanel = ({
                 {group.voices.map((v) => (
                   <SelectItem key={v.name} value={v.name}>
                     {v.name}
-                    {isOnlineVoice(v) ? ' 🌐' : ''}
+                    {isOnlineVoice(v) && (
+                      <>
+                        <span aria-hidden="true"> 🌐</span>
+                        <span className="sr-only">
+                          {' '}
+                          ({t('voiceOnlineIndicator')})
+                        </span>
+                      </>
+                    )}
                   </SelectItem>
                 ))}
               </SelectGroup>
