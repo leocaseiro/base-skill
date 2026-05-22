@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import {
   afterEach,
@@ -47,6 +47,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await destroyTestDatabase(db);
+  vi.unstubAllGlobals();
 });
 
 describe('SettingsPanel', () => {
@@ -94,5 +95,30 @@ describe('SettingsPanel', () => {
     expect(
       screen.getByText(/tap forgiveness — duration \(150ms\)/i),
     ).toBeInTheDocument();
+  });
+
+  it('shows inline warning when preferredVoiceURI is not in loaded voices', async () => {
+    vi.stubGlobal('speechSynthesis', {
+      getVoices: vi
+        .fn()
+        .mockReturnValue([
+          { name: 'Samantha', lang: 'en-US', localService: true },
+        ]),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    await db.settings.insert({
+      id: 'settings:anonymous',
+      profileId: 'anonymous',
+      preferredVoiceURI: 'FakeVoice',
+      updatedAt: new Date().toISOString(),
+    });
+    renderSettingsPanel(db);
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('alert').textContent).toMatch(
+      /not available/i,
+    );
   });
 });
