@@ -653,7 +653,8 @@ In `src/games/number-match/NumberMatch/NumberMatch.tsx`, find where
 />
 ```
 
-The `skin` variable is already available in scope from `useGameSkin` (line 462).
+The `skin` prop is already available in `NumberMatchSession` (passed from
+`NumberMatch` which calls `useGameSkin`). Pass it to `NumeralTileBank`.
 
 - [ ] **Step 4: Run NumberMatch tests**
 
@@ -1299,6 +1300,13 @@ tokens: {
 
 > **Token count target:** ~15 tokens, down from 21. The 6 removed tokens were
 > state-feedback transparent overrides that R7 eliminates.
+
+- [ ] **Step 1b: Remove obsolete inheritance comment**
+
+Remove the CRITICAL comment block in `dragon-cave-skin.tsx` (lines ~822-828)
+that warns classic-skin tokens are NOT inherited by other skins. The `:root`
+architecture makes this warning obsolete — all tokens now inherit from `:root`
+by default, and skins override only what they change.
 
 - [ ] **Step 2: Review `!important` overrides**
 
