@@ -9,14 +9,36 @@ export type VoiceGroup = {
 export const isOnlineVoice = (voice: SpeechSynthesisVoice): boolean =>
   !voice.localService;
 
-export const getVoiceLanguageLabel = (lang: string): string => {
+const displayNamesCache = new Map<string, Intl.DisplayNames | null>();
+
+const getDisplayNames = (locale: string): Intl.DisplayNames | null => {
+  if (displayNamesCache.has(locale))
+    return displayNamesCache.get(locale) ?? null;
   try {
-    const dn = new Intl.DisplayNames(['en'], { type: 'language' });
-    return dn.of(lang) ?? lang;
+    const dn = new Intl.DisplayNames([locale], { type: 'language' });
+    displayNamesCache.set(locale, dn);
+    return dn;
+  } catch {
+    displayNamesCache.set(locale, null);
+    return null;
+  }
+};
+
+export const getVoiceLanguageLabel = (
+  lang: string,
+  displayLocale = 'en',
+): string => {
+  try {
+    return getDisplayNames(displayLocale)?.of(lang) ?? lang;
   } catch {
     return lang;
   }
 };
+
+export const isVoiceAvailableInList = (
+  voiceName: string,
+  voices: SpeechSynthesisVoice[],
+): boolean => voices.some((v) => v.name === voiceName);
 
 export const filterVoicesForLanguage = (
   voices: SpeechSynthesisVoice[],
@@ -32,6 +54,7 @@ export const filterVoicesForLanguage = (
 
 export const groupVoicesByLanguage = (
   voices: SpeechSynthesisVoice[],
+  displayLocale = 'en',
 ): VoiceGroup[] => {
   const map = new Map<string, SpeechSynthesisVoice[]>();
   for (const voice of voices) {
@@ -42,7 +65,7 @@ export const groupVoicesByLanguage = (
   return [...map.entries()]
     .map(([lang, vs]) => ({
       lang,
-      label: getVoiceLanguageLabel(lang),
+      label: getVoiceLanguageLabel(lang, displayLocale),
       voices: vs.toSorted((a, b) => a.name.localeCompare(b.name)),
     }))
     .toSorted((a, b) => a.label.localeCompare(b.label));
@@ -58,16 +81,4 @@ export function getVoiceByName(
     return undefined;
   }
   return safeGetVoices(synth).find((v) => v.name === name);
-}
-
-export function getVoicesForLanguage(
-  lang: string,
-): SpeechSynthesisVoice[] {
-  const synth = (
-    globalThis as unknown as { speechSynthesis?: SpeechSynthesis }
-  ).speechSynthesis;
-  if (!synth) {
-    return [];
-  }
-  return filterVoicesForLanguage(safeGetVoices(synth), lang);
 }

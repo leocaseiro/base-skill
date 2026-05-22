@@ -5,6 +5,7 @@ import {
   getVoiceLanguageLabel,
   groupVoicesByLanguage,
   isOnlineVoice,
+  isVoiceAvailableInList,
 } from './voices';
 
 describe('isOnlineVoice', () => {
@@ -88,12 +89,12 @@ describe('groupVoicesByLanguage', () => {
       { name: 'Daniel', lang: 'en-GB', localService: true },
     ] as SpeechSynthesisVoice[];
     const groups = groupVoicesByLanguage(voices);
-    // American English < Australian English < British English
-    expect(groups.map((g) => g.lang)).toEqual([
-      'en-US',
-      'en-AU',
-      'en-GB',
-    ]);
+    // sorted-invariant: labels appear in localeCompare-sorted order,
+    // regardless of which exact Intl.DisplayNames strings the host produces
+    const labels = groups.map((g) => g.label);
+    expect(labels).toEqual(
+      [...labels].toSorted((a, b) => a.localeCompare(b)),
+    );
   });
 
   it('sorts voices within a group alphabetically by name', () => {
@@ -159,5 +160,25 @@ describe('getVoiceByName', () => {
     // eslint-disable-next-line unicorn/no-useless-undefined -- explicit undefined for vi.stubGlobal second argument
     vi.stubGlobal('speechSynthesis', undefined);
     expect(getVoiceByName('Daniel')).toBeUndefined();
+  });
+});
+
+describe('isVoiceAvailableInList', () => {
+  const voices = [
+    { name: 'Karen' },
+    { name: 'Samantha' },
+    { name: 'Daniel' },
+  ] as SpeechSynthesisVoice[];
+
+  it('returns true when the voice name matches an entry in the list', () => {
+    expect(isVoiceAvailableInList('Samantha', voices)).toBe(true);
+  });
+
+  it('returns false when the voice name does not match any entry', () => {
+    expect(isVoiceAvailableInList('Fake', voices)).toBe(false);
+  });
+
+  it('returns false for an empty list', () => {
+    expect(isVoiceAvailableInList('Samantha', [])).toBe(false);
   });
 });
