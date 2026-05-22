@@ -3,10 +3,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '@/db/hooks/useSettings';
 import { safeGetVoices } from '@/lib/speech/safe-get-voices';
-
-const getSynth = (): SpeechSynthesis | undefined =>
-  (globalThis as unknown as { speechSynthesis?: SpeechSynthesis })
-    .speechSynthesis;
+import { getSynth } from '@/lib/speech/synth-access';
 
 export const VoiceUnavailableWarning = () => {
   const { t } = useTranslation('common');
@@ -28,7 +25,6 @@ export const VoiceUnavailableWarning = () => {
     synth.addEventListener('voiceschanged', check);
     return () => {
       synth.removeEventListener('voiceschanged', check);
-      setUnavailable(false);
     };
   }, [preferredVoice]);
 
