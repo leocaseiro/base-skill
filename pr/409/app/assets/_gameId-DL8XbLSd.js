@@ -1,0 +1,1 @@
+import{ac as a,x as c,r as m,ad as r,j as u,ae as d}from"./main-Dt2VpUj4.js";const l=()=>{const e=a.useLoaderData(),s=a.useSearch().debug===!0||!1,{t:o}=c("games"),n=e.config.gameId,t=e.customGameName??o(n);return m.useEffect(()=>(document.title=r(t),()=>{document.title="BaseSkill"}),[t]),u.jsx(d,{...e,debug:s})};export{l as component};

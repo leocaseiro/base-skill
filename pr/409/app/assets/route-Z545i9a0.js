@@ -1,0 +1,1 @@
+import{R as e,r as o,j as a,O as s}from"./main-Dt2VpUj4.js";import{i as n}from"./i18n-By_0c7av.js";const m=()=>{const{locale:t}=e.useParams();return n.changeLanguage(t),o.useEffect(()=>{document.documentElement.lang=t==="pt-BR"?"pt-BR":"en"},[t]),a.jsx(s,{})};export{m as component};
