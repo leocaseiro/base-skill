@@ -504,7 +504,7 @@ _Integration scenarios:_
 ## Sources & References
 
 - **Origin (now archived):** `docs/superpowers/reviews/archive/2026-05-10-pr1a-tasks-8-9-adversarial-feasibility.md` — the FAIL verdict on the previous Tasks 8 + 9.
-- **Origin (now archived):** `.claude/handoffs/archive/2026-05-10-pr350-tasks-8-9-replan.md` — the session handoff that scoped this replan.
+- **Origin (now archived):** `docs/handoff/archive/2026-05-10-pr350-tasks-8-9-replan.md` — the session handoff that scoped this replan. (Migrated from `.claude/handoffs/archive/` — same file, new home.)
 - **Engine foundation (existing plan, sibling to this one):** `docs/superpowers/plans/2026-05-10-spec-1a-pr1a-game-engine.md` — Tasks 0–7 + 10–12. Tasks 8 + 9 of that plan now point to this file.
 - **Architecture authority:** `docs/superpowers/plans/2026-05-07-game-definition-engine-design.md` — XState-first Phase authority (line 333), useGameRound composition (line 361).
 - **Merged useGameRound spec + Spec Delta:** `docs/superpowers/specs/2026-05-03-use-game-round-design.md` — the optional `engine?` parameter is documented in the 2026-05-11 Spec Delta section appended to that file.

@@ -1326,7 +1326,7 @@ Executors implementing this PR follow Tasks 0–7 of this plan, then switch to t
 - The NumberMatch slice has a different concern (one game's state machine) than the engine foundation (generic infrastructure). Splitting them lets PR 1b/1d executors read the NumberMatch plan as a canonical pattern reference without wading through the engine plumbing.
 - The previous Tasks 8 + 9 were specified before the ce-doc-review surfaced the four critical defects. Rewriting them in place would have buried the rewrite in a 2400-line document; extraction makes the canonical pattern discoverable.
 - The Spec Delta on `useGameRound` (XState engine handle, dated 2026-05-11) is appended to the merged spec at `docs/superpowers/specs/2026-05-03-use-game-round-design.md` — that's where the contract evolution belongs, not in this plan.
-- The archived review (`docs/superpowers/reviews/archive/2026-05-10-pr1a-tasks-8-9-adversarial-feasibility.md`) and archived handoff (`.claude/handoffs/archive/2026-05-10-pr350-tasks-8-9-replan.md`) preserve the failure mode and decision trail.
+- The archived review (`docs/superpowers/reviews/archive/2026-05-10-pr1a-tasks-8-9-adversarial-feasibility.md`) and archived handoff (`docs/handoff/archive/2026-05-10-pr350-tasks-8-9-replan.md`) preserve the failure mode and decision trail.
 
 ### What still lives in this plan
 
