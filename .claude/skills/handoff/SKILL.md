@@ -24,17 +24,20 @@ Explicit invocation: `/handoff` or `/continue`.
 
 ## Worktree rule
 
-Handoffs are written inside the **active worktree**, never on `master`. The
-worktree must live at `<project-root>/worktrees/<name>/` — **not** inside
-`.claude/worktrees/`.
+Handoffs are written to `docs/handoff/` inside the **active worktree**,
+never on `master`. The worktree must live at
+`<project-root>/worktrees/<name>/` — **not** inside `.claude/worktrees/`.
 
 ### Why this matters
 
 `.claude/` is a hardcoded sensitive directory in Claude Code. Every file
-write inside it (including `.claude/worktrees/<anything>/...`) triggers a
-permission prompt that **no `permissions.allow` rule can override**. A
-handoff written inside `.claude/worktrees/<name>/.claude/handoffs/` will
-prompt on every write — `mkdir`, the Markdown file itself, and the commit.
+write inside it triggers a permission prompt that **no `permissions.allow`
+rule can override**. If the worktree itself sits under
+`.claude/worktrees/<name>/`, every file in it — including the handoff at
+`docs/handoff/<name>.md` — is still inside `.claude/` and prompts on every
+write (`mkdir`, the Markdown file itself, and the commit). Keep worktrees
+in `<project-root>/worktrees/`, and the handoff lands cleanly at
+`<worktree>/docs/handoff/<name>.md` with no permission noise.
 
 ### Before writing the handoff, check `pwd`
 
@@ -157,20 +160,28 @@ cd worktrees/<name>
 
 ### Step 4 — Write the file
 
-Save to `.claude/handoffs/YYYY-MM-DD-<brief-slug>.md`. Slug is 2–5 lowercase words joined by hyphens, matching the branch topic.
+Save to `docs/handoff/YYYY-MM-DD-<brief-slug>.md`. Slug is 2–5 lowercase words joined by hyphens, matching the branch topic.
+
+> **Path note:** the handoff lives under `docs/` (project documentation),
+> not `.claude/`. The directory is `docs/handoff/` (singular) — established
+> BaseSkill convention. If `docs/handoff/` doesn't exist yet in the worktree,
+> create it: `mkdir -p docs/handoff`.
 
 ### Step 5 — Commit as a baby step
 
 ```bash
-git add .claude/handoffs/YYYY-MM-DD-<slug>.md
+git add docs/handoff/YYYY-MM-DD-<slug>.md
 git commit -m "docs(handoff): <brief description>"
 ```
+
+The committed file goes through the standard markdown pipeline
+(`yarn fix:md` via lint-staged on commit).
 
 ### Step 6 — Print the resume hint
 
 Tell the user, using the **absolute path** (run `pwd` if needed and join with the handoff filename — never print the repo-relative form):
 
-> Saved handoff: `/absolute/path/to/.claude/handoffs/YYYY-MM-DD-<slug>.md` — paste that path in a new session to resume.
+> Saved handoff: `/absolute/path/to/docs/handoff/YYYY-MM-DD-<slug>.md` — paste that path in a new session to resume.
 
 ## Quality check (before writing)
 
