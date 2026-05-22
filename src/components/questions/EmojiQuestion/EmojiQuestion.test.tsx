@@ -29,6 +29,10 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@/providers/VoiceUnavailableDialogProvider', () => ({
+  useVoiceUnavailableDialog: () => ({ show: vi.fn() }),
+}));
+
 const gameConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',

@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import { AudioButton } from './AudioButton';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
 import { AnswerGameProvider } from '@/components/answer-game/AnswerGameProvider';
@@ -9,15 +16,18 @@ import { speak } from '@/lib/speech/SpeechOutput';
 vi.mock('@/lib/speech/SpeechOutput', () => ({
   speak: vi.fn(),
   cancelSpeech: vi.fn(),
+  isSpeechActive: vi.fn().mockReturnValue(false),
 }));
+
+const settingsMock = {
+  speechRate: 1,
+  volume: 0.8,
+  preferredVoiceURI: undefined as string | undefined,
+};
 
 vi.mock('@/db/hooks/useSettings', () => ({
   useSettings: () => ({
-    settings: {
-      speechRate: 1,
-      volume: 0.8,
-      preferredVoiceURI: undefined,
-    },
+    settings: settingsMock,
     update: vi.fn(),
   }),
 }));
@@ -27,6 +37,12 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
   }),
+}));
+
+const showVoiceDialog = vi.fn();
+
+vi.mock('@/providers/VoiceUnavailableDialogProvider', () => ({
+  useVoiceUnavailableDialog: () => ({ show: showVoiceDialog }),
 }));
 
 const gameConfig: AnswerGameConfig = {
@@ -56,7 +72,14 @@ const NoTtsWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('AudioButton', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    settingsMock.preferredVoiceURI = undefined;
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 
   it('renders a button with aria-label', () => {
     render(<AudioButton prompt="cat" />, { wrapper: Wrapper });
@@ -82,5 +105,21 @@ describe('AudioButton', () => {
       'cat',
       expect.objectContaining({ rate: 1 }),
     );
+  });
+
+  it('does not call speak() and calls showVoiceDialog when preferred voice is unavailable', async () => {
+    settingsMock.preferredVoiceURI = 'Karen';
+    vi.stubGlobal('speechSynthesis', {
+      getVoices: vi.fn().mockReturnValue([{ name: 'Samantha' }]),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    const user = userEvent.setup();
+    render(<AudioButton prompt="cat" />, { wrapper: Wrapper });
+    await user.click(
+      screen.getByRole('button', { name: 'Hear the question' }),
+    );
+    expect(speak).not.toHaveBeenCalled();
+    expect(showVoiceDialog).toHaveBeenCalledWith('Karen', 'en');
   });
 });

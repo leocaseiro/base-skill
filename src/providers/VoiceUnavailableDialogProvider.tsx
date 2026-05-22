@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import {
   createContext,
   useCallback,
@@ -22,11 +23,18 @@ type VoiceUnavailableDialogContextValue = {
 };
 
 const VoiceUnavailableDialogContext =
-  createContext<VoiceUnavailableDialogContextValue>({ show: () => {} });
+  createContext<VoiceUnavailableDialogContextValue | null>(null);
 
 export const useVoiceUnavailableDialog =
-  (): VoiceUnavailableDialogContextValue =>
-    useContext(VoiceUnavailableDialogContext);
+  (): VoiceUnavailableDialogContextValue => {
+    const ctx = useContext(VoiceUnavailableDialogContext);
+    if (!ctx) {
+      throw new Error(
+        'useVoiceUnavailableDialog must be used inside VoiceUnavailableDialogProvider',
+      );
+    }
+    return ctx;
+  };
 
 type DialogState = {
   open: boolean;
@@ -49,7 +57,13 @@ export const VoiceUnavailableDialogProvider = ({
   });
 
   const show = useCallback((voiceName: string, locale: string) => {
-    setDialog({ open: true, voiceName, locale });
+    setDialog((prev) =>
+      prev.open &&
+      prev.voiceName === voiceName &&
+      prev.locale === locale
+        ? prev
+        : { open: true, voiceName, locale },
+    );
   }, []);
 
   const handleOpenChange = useCallback((open: boolean) => {
@@ -76,13 +90,14 @@ export const VoiceUnavailableDialogProvider = ({
               {t('voiceUnavailable.dialogCancel')}
             </AlertDialogCancel>
             <AlertDialogAction asChild>
-              <a
-                href={`/${dialog.locale}/settings`}
+              <Link
+                to="/$locale/settings"
+                params={{ locale: dialog.locale }}
                 target="_blank"
                 rel="noreferrer"
               >
                 {t('voiceUnavailable.dialogAction')}
-              </a>
+              </Link>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
