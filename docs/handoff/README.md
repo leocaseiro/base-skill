@@ -1,6 +1,8 @@
 # Handoffs
 
-Dated handoff documents produced by the `handoff` skill (see [`.claude/skills/handoff/SKILL.md`](../skills/handoff/SKILL.md)).
+Dated handoff documents produced by the `handoff` skill (see [`.claude/skills/handoff/SKILL.md`](../../.claude/skills/handoff/SKILL.md)).
+
+> **Path note:** these used to live at `.claude/handoffs/`. Migrated to `docs/handoff/` in PR ↗️ (see git log for exact PR) so handoff documentation lives alongside other project docs (specs, plans, ADRs). Cross-references inside individual handoff files reflect the path at time of writing — not rewritten for historical accuracy.
 
 Each file captures enough context — branch, worktree, PR status, next steps, key files — for a fresh Claude Code or Cursor session to resume work without re-explanation.
 

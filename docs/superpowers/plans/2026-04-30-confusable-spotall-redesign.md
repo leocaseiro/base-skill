@@ -38,7 +38,7 @@ The following intentional deviations from the spec — flag them in the PR descr
 - **Commit cadence:** one commit per task (T-numbered). Commit messages should reference the spec section (e.g., `feat(spot-all): R5b data layer (spec §2)`).
 - **Skip flags allowed on intermediate commits** if a check fails because dependent code lands later — document the reason in the commit message (project memory: `feedback_skip_hooks_minor.md`).
 - **`yarn fix:md`** must be run after editing **any** `.md` file you author. Project rule.
-- **Do NOT** modify the handoff at `.claude/handoffs/2026-04-30-spotall-redesign-spec.md`. Prettier reflows it incorrectly — leave it untouched.
+- **Do NOT** modify the handoff at `docs/handoff/2026-04-30-spotall-redesign-spec.md`. Prettier reflows it incorrectly — leave it untouched.
 
 ---
 

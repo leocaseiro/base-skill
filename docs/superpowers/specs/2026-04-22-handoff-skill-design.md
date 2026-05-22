@@ -19,7 +19,7 @@ prompt, preserving only what matters.
 
 A project-scoped skill that, on demand or when it detects handoff cues,
 generates a short structured document at
-`.claude/handoffs/YYYY-MM-DD-<slug>.md` with everything a fresh session needs to
+`docs/handoff/YYYY-MM-DD-<slug>.md` with everything a fresh session needs to
 resume work — git state, spec/plan paths, PR status, next steps.
 
 ## Non-goals
@@ -43,8 +43,8 @@ resume work — git state, spec/plan paths, PR status, next steps.
   the existing `.cursor/rules/git-workflow.mdc` → `CLAUDE.md`)
 - `AGENTS.md` — add a one-line pointer under "Where to look next" so
   tool-agnostic agents discover the skill
-- `.claude/handoffs/` — directory where generated handoffs land (created on
-  first use)
+- `docs/handoff/` — directory where generated handoffs land (created on
+  first use). _Migrated from `.claude/handoffs/` — see PR migrating handoffs to docs/._
 
 ## Cross-agent support (Claude Code + Cursor)
 
@@ -112,12 +112,12 @@ When invoked, the skill instructs Claude to:
    gotchas, things you'll forget)". Single prompt, no follow-up loop.
 3. **Generate the document** from the template below, pre-filled with detected
    values.
-4. **Write to** `.claude/handoffs/YYYY-MM-DD-<brief-slug>.md` in the **active
+4. **Write to** `docs/handoff/YYYY-MM-DD-<brief-slug>.md` in the **active
    worktree** (never master — enforced by the project's worktree gate).
 5. **Commit the handoff** as its own baby-step commit, message
    `docs(handoff): <brief description>`.
 6. **Print** the file path and a one-line resume hint:
-   `Saved handoff: .claude/handoffs/…md — paste that path in a new session to resume.`
+   `Saved handoff: docs/handoff/…md — paste that path in a new session to resume.`
 
 ## Document template
 
@@ -255,7 +255,7 @@ Content is minimal — it just references the skill so Claude knows to run it.
 ## Acceptance criteria
 
 - `/handoff` (Claude Code) invoked from any branch worktree produces a dated
-  handoff at `.claude/handoffs/YYYY-MM-DD-<slug>.md` with git state,
+  handoff at `docs/handoff/YYYY-MM-DD-<slug>.md` with git state,
   worktree, PR (if any), spec/plan references, and a resume command block.
 - `/continue` produces the same result as `/handoff` in Claude Code.
 - Cursor detects the same cues via `.cursor/rules/handoff.mdc` and performs
