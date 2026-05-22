@@ -6,7 +6,7 @@ interface ImageQuestionProps {
 }
 
 export const ImageQuestion = ({ src, prompt }: ImageQuestionProps) => {
-  const { speakPrompt } = useGameTTS();
+  const { speakPromptOnDemand } = useGameTTS();
 
   return (
     <button
@@ -19,7 +19,7 @@ export const ImageQuestion = ({ src, prompt }: ImageQuestionProps) => {
         borderRadius: 'var(--skin-question-radius)',
         overflow: 'hidden',
       }}
-      onClick={() => speakPrompt(prompt)}
+      onClick={() => speakPromptOnDemand(prompt)}
     >
       <img
         src={src}

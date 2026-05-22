@@ -5,7 +5,7 @@ interface TextQuestionProps {
 }
 
 export const TextQuestion = ({ text }: TextQuestionProps) => {
-  const { speakPrompt } = useGameTTS();
+  const { speakPromptOnDemand } = useGameTTS();
 
   return (
     <button
@@ -17,7 +17,7 @@ export const TextQuestion = ({ text }: TextQuestionProps) => {
         color: 'var(--skin-question-text)',
         borderRadius: 'var(--skin-question-radius)',
       }}
-      onClick={() => speakPrompt(text)}
+      onClick={() => speakPromptOnDemand(text)}
     >
       {text}
     </button>

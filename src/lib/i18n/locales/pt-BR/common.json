@@ -30,6 +30,14 @@
   "offline": {
     "banner": "Você está offline. Jogando a partir dos dados salvos."
   },
+  "voiceUnavailable": {
+    "banner": "A voz \"{{voice}}\" não está disponível neste dispositivo.",
+    "openSettings": "Abrir configurações de voz",
+    "dialogTitle": "Voz não disponível",
+    "dialogDescription": "A voz \"{{voice}}\" não está disponível. Escolha uma voz diferente nas Configurações.",
+    "dialogAction": "Abrir configurações",
+    "dialogCancel": "Dispensar"
+  },
   "pagination": {
     "previous": "Anterior",
     "next": "Próximo",

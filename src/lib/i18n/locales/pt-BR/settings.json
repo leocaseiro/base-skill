@@ -7,6 +7,7 @@
   "theme": "Tema",
   "voice": "Voz",
   "voiceDefault": "Padrão do sistema",
+  "voiceUnavailableInline": "Esta voz não está disponível neste dispositivo.",
   "tapForgiveness": "Tolerância ao toque — distância ({{px}}px)",
   "tapForgivenessTime": "Tolerância ao toque — duração ({{ms}}ms)",
   "themes": {

@@ -8,7 +8,7 @@ interface AudioButtonProps {
 
 export const AudioButton = ({ prompt }: AudioButtonProps) => {
   const { config } = useAnswerGameContext();
-  const { speakPrompt } = useGameTTS();
+  const { speakPromptOnDemand } = useGameTTS();
 
   if (!config.ttsEnabled) return null;
 
@@ -21,7 +21,7 @@ export const AudioButton = ({ prompt }: AudioButtonProps) => {
         background: 'var(--skin-question-audio-bg)',
         color: 'var(--skin-question-audio-fg)',
       }}
-      onClick={() => speakPrompt(prompt)}
+      onClick={() => speakPromptOnDemand(prompt)}
     >
       <Volume2 size={24} aria-hidden="true" />
     </button>

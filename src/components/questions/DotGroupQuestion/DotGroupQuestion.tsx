@@ -20,7 +20,7 @@ export const DotGroupQuestion = ({
   count,
   prompt,
 }: DotGroupQuestionProps) => {
-  const { speakPrompt } = useGameTTS();
+  const { speakPromptOnDemand } = useGameTTS();
   const { locale } = useParams({ from: '/$locale' });
   const [state, setState] = useState<DotState>(() => ({
     count,
@@ -41,7 +41,7 @@ export const DotGroupQuestion = ({
     const existing = assignedCounts[index];
     if (existing !== null && existing !== undefined) {
       // Already-numbered dot: re-speak its number, don't change state.
-      speakPrompt(toCardinalText(existing, wordLocale));
+      speakPromptOnDemand(toCardinalText(existing, wordLocale));
       return;
     }
     let maxAssigned = 0;
@@ -49,7 +49,7 @@ export const DotGroupQuestion = ({
       if (v !== null && v > maxAssigned) maxAssigned = v;
     }
     const nextValue = maxAssigned + 1;
-    speakPrompt(toCardinalText(nextValue, wordLocale));
+    speakPromptOnDemand(toCardinalText(nextValue, wordLocale));
     setState((previous) => {
       if (previous.assigned[index] !== null) return previous;
       const nextAssigned = [...previous.assigned];
