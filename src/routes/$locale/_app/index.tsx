@@ -3,7 +3,7 @@ import {
   useNavigate,
   useParams,
 } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { compareHomeScreenCardRows } from './home-screen-card-order';
 import type { Draft } from '@/components/answer-game/InstructionsOverlay/useConfigDraft';
@@ -13,10 +13,14 @@ import type { JSX } from 'react';
 import { AdvancedConfigModal } from '@/components/AdvancedConfigModal';
 import { GameCard } from '@/components/GameCard';
 import { GameGrid } from '@/components/GameGrid';
-import { getOrCreateDatabase } from '@/db/create-database';
 import { useBookmarks } from '@/db/hooks/useBookmarks';
 import { useCustomGames } from '@/db/hooks/useCustomGames';
-import { lastSessionConfigId } from '@/db/last-session-game-config';
+import { useRxDB } from '@/db/hooks/useRxDB';
+import {
+  ANONYMOUS_PROFILE_ID,
+  lastSessionConfigId,
+} from '@/db/last-session-game-config';
+import { seedTheFloorIsLavaIfNeeded } from '@/db/seed-the-floor-is-lava';
 import { configToChips } from '@/games/config-chips';
 import { GAME_CATALOG } from '@/games/registry';
 
@@ -31,14 +35,24 @@ type ModalState =
       draft: Draft;
     };
 
-const HomeScreen = (): JSX.Element => {
+export const HomeScreen = (): JSX.Element => {
   const { t } = useTranslation(['games', 'common']);
   const { locale } = useParams({ from: '/$locale' });
   const navigate = useNavigate({ from: '/$locale/' });
+  const { db } = useRxDB();
   const { customGames, save, update, remove, lastSessionConfigs } =
     useCustomGames();
   const { isBookmarked, toggle } = useBookmarks();
   const [modal, setModal] = useState<ModalState>({ kind: 'closed' });
+
+  // Seed "The Floor is Lava" once per profile on first home-screen mount.
+  // The seeder's own per-profile flag makes re-runs no-ops, so a fire-and-forget
+  // void is correct here — we don't await it and we don't surface failures
+  // beyond the seeder's internal handling.
+  useEffect(() => {
+    if (!db) return;
+    void seedTheFloorIsLavaIfNeeded(db, ANONYMOUS_PROFILE_ID);
+  }, [db]);
 
   const handlePlayDefault = (gameId: string) => {
     void navigate({
@@ -57,7 +71,7 @@ const HomeScreen = (): JSX.Element => {
   };
 
   const openDefaultCog = async (gameId: string) => {
-    const db = await getOrCreateDatabase();
+    if (!db) return;
     const lastDoc = await db.saved_game_configs
       .findOne(lastSessionConfigId(gameId))
       .exec();
