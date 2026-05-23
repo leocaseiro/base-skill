@@ -43,6 +43,67 @@ These deltas are tracked here so M2 (full event surface, customConfig override l
 
 ---
 
+## Cross-goal alignment notes (2026-05-23)
+
+M1 is the foundation for **six durable project goals** (per user directive 2026-05-23). This plan stays inside G-1 (TTS XState lifecycle) but must reserve seams + event taxonomy that the other five build on. Reviewer YAGNI on these reservations is **categorically rejected** — they are ADRs, not speculative scaffolding.
+
+### G-1 — 100% XState migration
+
+Owned by this plan. `useLifecycleTts` (Task 7) ships in M1 as a hook with refs; the spec §6.1 XState actor (parallel speech + soundEffect sub-machines) lands in a follow-up PR that promotes the hook into a full `LifecycleTtsProvider`. The actor's `SETTINGS_CHANGED` event (spec §5.5) is mirrored in M1 by the hook re-reading `useSettings()` on every settings change — same observable contract, smaller surface for M1. **Bus** is **only** used for the broadcast-to-N-subscribers pattern (`lifecycle.speak` → audio actor + SRS recorder + future analytics). Actor-to-actor / UI-to-actor calls use XState `sendTo` directly. Spec §3.2 is the rationale.
+
+### G-2 — Game Skins (alignment with `worktrees/feat-multi-skin-config` / PR #393)
+
+Read [`worktrees/feat-multi-skin-config/docs/context-handoff.md`](../../../feat-multi-skin-config/docs/context-handoff.md) for the active skin-token work. The skin PR scope is **visual tokens** (tile states, animations, drag-ghost) — it does **not** touch TTS. M1 reserves the **`skin.tts?` resolver layer** as Layer 2 in the four-layer chain (spec §9.2):
+
+```text
+1. customConfig.events[event]   ← per-game-config code-only override (M2)
+2. skin.tts?[event]             ← themed skin override (M3+, reserved in M1)
+3. definition.tts[event]        ← game's canonical binding (M1)
+4. defaults.tts[event]          ← global fallback (M1)
+```
+
+In M1, Layer 2 is **always `undefined`** (no themed skin ships TTS templates yet); the resolver still walks the layer so M3 work is purely additive (no resolver refactor needed when Dragon Cave or future skins gain `tts?` overrides). **No conflicts** with the active skin PR — different files, different scope. The token-rename work in `feat/multi-skin-config` does not touch any file modified by this plan.
+
+### G-3 — Mini Games (between rounds and levels)
+
+M1 ships the **mini-game event reservations** (spec §10.4) — `mini-game.start | mini-game.complete | mini-game.skip` are baked into the bus type union in **Phase 0 Commit 4** and listed in spec §4.1's 17-event `LifecycleEvent` type, but **no firing code lands in M1**. PR 1b+ adds real mini-game machines (DinoEggHatch, FireworksPainter, BubblePop, etc.) and the firing-side wiring; the dismissal contract (`bus.emit({ type: 'lifecycle.cancel' })`) is locked here so PR 1b+ doesn't re-litigate it.
+
+**Phase 0 Commit 4 covers this** — `'mini-game.*'` is registered as its own top-level namespace (segment-prefix wildcards don't conflate it with `'game.*'` per spec §4.4 / §13.1.A #9).
+
+### G-4 — SRS recorder (M1 consumer of `lifecycle.tts.played`)
+
+Spec §6.7 + §13.1.C #16 lock the `lifecycle.tts.played` event as the SRS recorder's M1 consumer:
+
+```ts
+bus.emit({
+  type: 'lifecycle.tts.played',
+  lifecycleEvent: utterance.event,
+  subject: utterance.subject,
+  source: 'auto' | 'user',
+  variant: Talkativeness,
+  durationMs: number,
+  gameId,
+  sessionId,
+  profileId,
+  roundIndex,
+  timestamp,
+});
+```
+
+This plan emits the event **(via the XState actor in the follow-up PR; for the M1 hook in Task 7, emit via `bus.emit` after `speak()` resolves)**. The SRS recorder lives in a separate spec ([2026-05-01-srs-v1-design.md](../specs/2026-05-01-srs-v1-design.md)) and a separate plan ([#364](https://github.com/leocaseiro/base-skill/issues/364)); this plan **does not** implement the recorder. M1's responsibility is **just emit the event with the correct payload shape** — the `subject?: string | number` field is the only payload field SRS reads beyond the base envelope.
+
+Action item for the executor: after Task 7 ships the hook, add a Task 7.5 (`feat(lifecycle-tts): emit lifecycle.tts.played after each successful speak`) that fires the event with the correct shape. The SRS recorder PR #364 subscribes; M1 owns the producer.
+
+### G-5 — Distractions reused across games (forward-looking note)
+
+No M1 code changes — but a forward-looking framing: the 17-event `LifecycleEvent` taxonomy (spec §4.1) is designed to be **emitter-agnostic**. `round.error` / `round.correct` / `round.advance` fire from any game's XState machine (not just answer-game), which means a future "distractions" data source can emit the same events and trigger the same TTS + UI animation paths. The plan's resolver (Task 3) does not bake assumptions about emitter identity — it just reads `gameId` + `lifecycleEvent` from the bus envelope. SpotAll (G-6) is exempt from this plan but its distractions strategy seeds G-5.
+
+### G-6 — SpotAll exempt (will be redone from scratch)
+
+Spec Delta 1 documents the M1 exclusion. SpotAll continues to use its legacy `useEffect`-driven `speakPrompt` during the M1 → PR 1d window. Tracked in the Deferred section P1 ("SpotAll cross-game UX inconsistency during the M1 → PR 1d window") — open a follow-up issue tracking the consistency gap before this PR merges. No further M1 work on SpotAll itself; the distractions strategy from SpotAll seeds G-5 design but isn't itself in scope.
+
+---
+
 ## Phase 0: Bus colon→dot rename (M1 PR commits 1–4)
 
 Per spec §11.4 (rename strategy) + §13.1.A #9 (segment-prefix wildcard semantics) + §13.1.C #17 (bundling rationale), M1 begins with a bundled mechanical rename of all bus event names from `:`-style to `.`-style. Tasks 1–19 below assume this state.
@@ -1517,6 +1578,152 @@ git commit -m "feat(answer-game): mount useLifecycleTts subscriber in AnswerGame
 
 ---
 
+## Task 8.5: Emit `lifecycle.tts.played` after each successful speak (SRS recorder producer — G-4)
+
+Per spec §6.7 + §13.1.C #16 lock, every successful `speak()` resolution emits a `lifecycle.tts.played` bus event. The **SRS recorder** ([#364](https://github.com/leocaseiro/base-skill/issues/364), separate plan) subscribes to this event as its M1 attempt-context signal. This plan is the **producer** — the recorder is built in #364.
+
+**Files:**
+
+- Modify: `src/lib/lifecycle-tts/useLifecycleTts.tsx` (extend the hook from Task 7)
+- Modify: `src/lib/lifecycle-tts/useLifecycleTts.test.tsx`
+- Modify: `src/types/game-events.ts` (add `LifecycleTtsPlayedEvent` interface per spec §4.3)
+
+- [ ] **Step 1: Write the failing test**
+
+Append to `useLifecycleTts.test.tsx`:
+
+```tsx
+describe('useLifecycleTts — emits lifecycle.tts.played for SRS', () => {
+  it('emits lifecycle.tts.played after successful auto-speech', async () => {
+    mockTalkativeness('helpful');
+    renderHook(() => useLifecycleTts(), { wrapper });
+
+    const playedEvents: LifecycleTtsPlayedEvent[] = [];
+    const unsub = getGameEventBus().subscribe(
+      'lifecycle.tts.played',
+      (e) => playedEvents.push(e as LifecycleTtsPlayedEvent),
+    );
+
+    emitLifecycleSpeak('round.start');
+    await waitFor(() => expect(speakMock).toHaveBeenCalled());
+
+    // Simulate speak() resolving (mock returns undefined immediately for M1).
+    expect(playedEvents).toHaveLength(1);
+    expect(playedEvents[0]).toMatchObject({
+      type: 'lifecycle.tts.played',
+      lifecycleEvent: 'round.start',
+      source: 'auto',
+      variant: 'helpful',
+    });
+    expect(playedEvents[0].durationMs).toBeGreaterThanOrEqual(0);
+
+    unsub();
+  });
+
+  it('emits lifecycle.tts.played after on-demand tap', async () => {
+    mockTalkativeness('on-demand');
+    const { result } = renderHook(() => useLifecycleTts(), { wrapper });
+
+    const playedEvents: LifecycleTtsPlayedEvent[] = [];
+    const unsub = getGameEventBus().subscribe(
+      'lifecycle.tts.played',
+      (e) => playedEvents.push(e as LifecycleTtsPlayedEvent),
+    );
+
+    result.current.speakOnDemand('round.start');
+    await waitFor(() => expect(speakMock).toHaveBeenCalled());
+
+    expect(playedEvents).toHaveLength(1);
+    expect(playedEvents[0].source).toBe('user');
+    unsub();
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
+Expected: FAIL — no `lifecycle.tts.played` emission wired.
+
+- [ ] **Step 3: Add the `LifecycleTtsPlayedEvent` interface**
+
+In `src/types/game-events.ts`, add per spec §4.3:
+
+```ts
+export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.played';
+  lifecycleEvent: LifecycleEvent;
+  subject?: string | number;
+  source: 'auto' | 'user';
+  variant: Talkativeness;
+  durationMs: number;
+}
+```
+
+Add `'lifecycle.tts.played'` to the `GameEventType` union.
+
+- [ ] **Step 4: Wire the emission in `useLifecycleTts`**
+
+In `speakResolved`, capture the start time, call `speak()`, then emit on success. M1 uses a fire-and-forget pattern (the speak callable in `src/lib/speech/SpeechOutput.ts` returns synchronously today — the spec §6 XState actor will use a `Promise<void>` per `Speaker.speak` and emit on `onDone`). For M1, emit right after `speak()` returns:
+
+```ts
+const speakResolved = useCallback(
+  (
+    event: LifecycleEvent,
+    modeOverride?: 'full',
+    source: 'auto' | 'user' = 'auto',
+  ) => {
+    const current = ctxRef.current;
+    const currentSettings = settingsRef.current;
+    // ... resolve verbosity + interpolation (unchanged) ...
+
+    const enqueuedAt = Date.now();
+    speak(interpolated, opts);
+
+    // Emit lifecycle.tts.played for SRS recorder (G-4) per spec §6.7.
+    getGameEventBus().emit({
+      type: 'lifecycle.tts.played',
+      lifecycleEvent: event,
+      source,
+      variant: currentSettings.talkativeness ?? 'helpful',
+      durationMs: Date.now() - enqueuedAt,
+      gameId: current.config.gameId,
+      sessionId: current.sessionId ?? 'unknown',
+      profileId: current.profileId ?? 'default',
+      roundIndex: current.roundIndex ?? 0,
+      timestamp: Date.now(),
+    });
+  },
+  [t, i18n.language],
+);
+```
+
+Update the bus subscriber and `speakOnDemand` callers to pass `'auto'` / `'user'`:
+
+```ts
+// Auto-speech (bus subscriber):
+speakResolved(lifecycleEvent, undefined, 'auto');
+
+// On-demand:
+speakResolved(event, 'full', 'user');
+```
+
+**Note on `durationMs`:** the M1 hook emits immediately after calling `speak()` (which returns synchronously today), so `durationMs` is effectively 0 in M1. The full duration tracking lands when the XState actor in the follow-up PR moves to a `Promise<void>` Speaker.speak() and emits on `onDone`. SRS recorder #364 must handle `durationMs: 0` as "duration unknown" until the actor PR lands.
+
+- [ ] **Step 5: Run tests to verify they pass**
+
+Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/useLifecycleTts.tsx src/lib/lifecycle-tts/useLifecycleTts.test.tsx src/types/game-events.ts
+git commit -m "feat(lifecycle-tts): emit lifecycle.tts.played after speak() — SRS recorder producer (spec §6.7)"
+```
+
+---
+
 ## Task 9: NumberMatch — `tts:` block + machine `speak` entry (fixes "speak the answer" bug)
 
 **Files:**
@@ -2844,6 +3051,9 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] WordSpell, NumberMatch, SortNumbers each have an inline AudioButton via `<QuestionRow>`.
 - [ ] **SpotAll deferred per Spec Delta 1** — tracked in a follow-up issue gated on PR 1d (#368).
 - [ ] User-level **Talkativeness slider** (🤫 Shhh / 💬 Talk a bit / 🗣️ Talk a lot) lands in `SettingsPanel` (spec §8.2); per-game `gradeBand` select lands in `AdvancedConfigModal`. Legacy `ttsEnabled` toggle in SettingsPanel removed.
+- [ ] **G-4 SRS producer**: `lifecycle.tts.played` event emitted after each successful `speak()` (spec §6.7) with the correct payload shape (`source: 'auto' | 'user'`, `variant: Talkativeness`, `durationMs`, full envelope). SRS recorder ([#364](https://github.com/leocaseiro/base-skill/issues/364)) consumes it in a separate PR.
+- [ ] **G-3 mini-game reservations**: `mini-game.start | mini-game.complete | mini-game.skip` baked into the `LifecycleEvent` union + bus event type (Phase 0 Commit 4); no firing code in M1.
+- [ ] **G-2 skin resolver layer**: `skin.tts?` layer is Layer 2 of the four-layer resolver chain (Task 3 resolver — always `undefined` in M1, present in type + walked by resolver so M3 work is purely additive).
 - [ ] WordSpell, NumberMatch, SortNumbers each have a `tts:` block on their `GameDefinition`.
 - [ ] i18n keys for `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*`, `settings.talkativeness.*`, and `config.gradeBand.*` exist in `en` and `pt-BR` (pt-BR may be English placeholders).
 - [ ] `useRoundTTS` removed; all round-start auto-speech goes through the XState machine `entry` actions.
