@@ -92,7 +92,8 @@ update_metadata_key() {
     fi
   else
     # Key=value format (legacy)
-    local escaped_value=$(echo "$value" | sed 's/[&|\/]/\\&/g')
+    local escaped_value
+    escaped_value=$(echo "$value" | sed 's/[&|\/]/\\&/g')
     if grep -q "^$key=" "$metadata_file" 2>/dev/null; then
       sed "s|^$key=.*|$key=$escaped_value|" "$metadata_file" > "$temp_file"
     else
