@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router';
 import { Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { FullscreenToggle } from '@/components/FullscreenToggle';
 import { SettingsPanel } from '@/components/SettingsPanel/SettingsPanel';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   SheetClose,
   SheetContent,
@@ -64,7 +64,7 @@ export const AppMenuPanel = ({
           >
             Docs
           </a>
-          <ThemeToggle />
+          <FullscreenToggle />
         </div>
         <SettingsPanel
           locale={locale}

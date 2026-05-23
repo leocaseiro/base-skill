@@ -562,6 +562,18 @@ a:hover {
   --skeuo-text-shadow: rgb(0 0 0 / 40%);
 }
 
+/* Pseudo-fullscreen for iOS Safari (no native Fullscreen API on iPhone).
+ * Applied by `useFullscreen` when the hook falls back to the CSS path.
+ * Uses 100dvh (dynamic viewport) so the layout follows the URL bar as it
+ * collapses, and locks body scroll to prevent rubber-band overscroll. */
+html[data-pseudo-fullscreen='true'],
+html[data-pseudo-fullscreen='true'] body {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* Game colour utilities — derived from --game-play set per-component */
 .game-bg {
   background: color-mix(in srgb, var(--game-play) 12%, transparent);

@@ -479,3 +479,76 @@ test('@visual spot-all happy-path layout', async ({ page }) => {
     fullPage: true,
   });
 });
+
+// ── Fullscreen chrome (header) ────────────────────────────────────────────────
+// The fullscreen button must be reachable on every non-game page in the
+// app chrome — for both desktop and mobile viewports. The iPhone Safari
+// scenario is special-cased below because the native API is unavailable
+// there and the hook falls back to a CSS pseudo-fullscreen mode.
+
+test('@visual header fullscreen toggle (wide)', async ({ page }) => {
+  await page.goto('/en/');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  await page
+    .getByRole('button', { name: /enter fullscreen/i })
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot('header-fullscreen-wide.png', {
+    fullPage: false,
+    clip: { x: 0, y: 0, width: 1280, height: 80 },
+  });
+});
+
+test('@visual header fullscreen toggle (mobile)', async ({ page }) => {
+  await page.setViewportSize(MOBILE_VIEWPORT);
+  await page.goto('/en/');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  await page
+    .getByRole('button', { name: /enter fullscreen/i })
+    .waitFor({ state: 'visible' });
+  await expect(page).toHaveScreenshot('header-fullscreen-mobile.png', {
+    fullPage: false,
+    clip: { x: 0, y: 0, width: MOBILE_VIEWPORT.width, height: 80 },
+  });
+});
+
+// Regression test for issue #381: iPhone Safari does not implement the
+// standard Fullscreen API, so `document.fullscreenEnabled` is undefined
+// and the original button was hidden. We simulate iPhone Safari in
+// Chromium by stubbing the property and forcing the iOS UA + touch
+// signals via Playwright's contextOptions. If a future change removes
+// the pseudo-fullscreen fallback, this baseline will diff because the
+// button disappears from the header.
+test.describe('iPhone Safari simulation', () => {
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+    viewport: MOBILE_VIEWPORT,
+    hasTouch: true,
+    isMobile: true,
+  });
+
+  test('@visual header fullscreen toggle (iPhone Safari)', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(document, 'fullscreenEnabled', {
+        configurable: true,
+        get: () => false,
+      });
+    });
+    await page.goto('/en/');
+    await page.getByRole('main').waitFor({ state: 'visible' });
+    // Functional assertion — if the iPhone regression returns, this
+    // fails before the screenshot diff (faster signal in CI).
+    await expect(
+      page.getByRole('button', { name: /enter fullscreen/i }),
+    ).toBeVisible();
+    await expect(page).toHaveScreenshot(
+      'header-fullscreen-iphone-safari.png',
+      {
+        fullPage: false,
+        clip: { x: 0, y: 0, width: MOBILE_VIEWPORT.width, height: 80 },
+      },
+    );
+  });
+});

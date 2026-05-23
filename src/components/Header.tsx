@@ -9,7 +9,7 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AppLocale } from '@/components/AppMenuPanel';
 import { AppMenuPanel } from '@/components/AppMenuPanel';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { FullscreenToggle } from '@/components/FullscreenToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
@@ -104,9 +104,7 @@ export const Header = () => {
           </div>
         </div>
 
-        <span className="hidden sm:flex">
-          <ThemeToggle />
-        </span>
+        <FullscreenToggle />
       </div>
     </header>
   );
