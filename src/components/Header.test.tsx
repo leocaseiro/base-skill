@@ -103,4 +103,34 @@ describe('Header', () => {
       screen.getByRole('textbox', { name: 'Search games...' }),
     ).toBeInTheDocument();
   });
+
+  it('renders the fullscreen toggle on a fullscreen-capable browser', () => {
+    Object.defineProperty(document, 'fullscreenEnabled', {
+      configurable: true,
+      value: true,
+    });
+    Object.defineProperty(
+      document.documentElement,
+      'requestFullscreen',
+      {
+        configurable: true,
+        value: () => Promise.resolve(),
+      },
+    );
+    mockPathname.mockReturnValue('/en/');
+    renderHeader(db);
+    expect(
+      screen.getByRole('button', { name: /enter fullscreen/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('does not render the legacy theme toggle in the header', () => {
+    mockPathname.mockReturnValue('/en/');
+    renderHeader(db);
+    expect(
+      screen.queryByRole('button', {
+        name: /switch to (light|dark) mode/i,
+      }),
+    ).not.toBeInTheDocument();
+  });
 });

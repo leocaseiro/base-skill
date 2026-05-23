@@ -1,6 +1,10 @@
 {
   "appName": "BaseSkill",
   "closeMenu": "Close menu",
+  "fullscreen": {
+    "enter": "Enter fullscreen",
+    "exit": "Exit fullscreen"
+  },
   "home": {
     "title": "Home"
   },
