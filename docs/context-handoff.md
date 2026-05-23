@@ -1,74 +1,74 @@
-# Context Handoff — Drag Improvements
+# Context Handoff — Unified Skin Token Architecture
 
 ## Branch
 
-`claude/bold-chatelet` (worktree at `.claude/worktrees/bold-chatelet`)
+`feat/multi-skin-config` (worktree at `worktrees/feat-multi-skin-config`)
 
-## What was just fixed (committed, tests pass)
+## Issue & PR
 
-- **Swap preview bug** (`5f61208`): When dragging tile A from slot A over slot C,
-  the source slot A was hidden (`invisible`) even when `isPreview=true`. Fixed by
-  changing the button's class condition from `isBeingDragged` to
-  `isBeingDragged && !isPreview` in `Slot.tsx`.
+- Issue: [#359 — refactor: unified skin tokens for tile states + animations + drag-ghost consolidation](https://github.com/leocaseiro/base-skill/issues/359)
+- PR: [#393 — feat(skin): multi-skin config Phase 1 + Dragon Cave](https://github.com/leocaseiro/base-skill/pull/393)
 
-## What still needs to be designed and built
+## Current State
 
-Three UX improvements to the drag system (brainstorming was in progress, not completed):
+**Plan reviewed and committed. Ready for implementation.**
 
-### 1. Preview from any tile (bank tiles not showing preview)
+No dedicated spec exists — requirements feed directly into the plan. The
+`2026-05-13-multi-skin-config-design.md` spec covers the broader multi-skin
+config but not this token migration specifically.
 
-Currently `SET_DRAG_ACTIVE` is dispatched when dragging from a **slot**, so the
-slot preview works. But dragging from the **tile bank** never dispatches
-`SET_DRAG_ACTIVE` on the HTML5 DnD path (there's a comment in
-`useDraggableTile.ts`: "no SET_DRAG_ACTIVE to avoid browser snap-back fadeout").
-Also, `onHoverZone` is not passed to `useTouchDrag` in `useDraggableTile.ts`.
+## What's Done
 
-Fix needed in `useDraggableTile.ts`:
+1. **Requirements doc** written and reviewed (2 rounds):
+   `docs/brainstorms/2026-05-16-unified-skin-token-architecture-requirements.md`
+   — R1-R13; R8/R9 deferred to XState migration (Spec 1a)
 
-- HTML5: add `onDragStart` → `dispatch SET_DRAG_ACTIVE(tile.id)` and `onDrop`
-  → `dispatch SET_DRAG_ACTIVE(null)`
-- Touch: pass `onHoverZone: (zoneIndex) => dispatch SET_DRAG_HOVER(zoneIndex)`
+2. **Implementation plan** written and reviewed via `ce-doc-review` (5 personas):
+   `docs/superpowers/plans/2026-05-21-unified-skin-token-architecture.md`
+   — 19 findings applied, all P0/P1/P2 resolved, markdown lint clean
 
-### 2. Expanded drop zone / ghost overlap (both desktop and touch)
+3. Key review decisions baked into the plan:
+   - **P0 fix:** `--skin-tile-effective-bg` indirection for inline style vs
+     `[data-tile-state]` specificity conflict
+   - **Task 1b added:** `skin-tokens.ts` canonical token name registry
+   - **Tasks 3+4 merged:** atomic commit for classic-skin empty + token rename
+   - **SpotAllTile disabled** during migration (needs broader refactor)
+   - **Task 13 prerequisite:** Dragon Cave `!important` removal depends on
+     Task 2 landing first
+   - **Pickup/ejecting motion tokens** added to `:root` + CSS rules
+   - **bank-tile-reject-feedback.ts** refactored from snapshot/restore to
+     `data-tile-state="reject"` set/unset
 
-User wants the drop to trigger as soon as the ghost tile visually overlaps a slot
-("just touching"), not just when the pointer is directly over it.
+## What's Next
 
-**Touch** (`useTouchDrag.ts`): Currently uses a single `elementsFromPoint(x, y)`.
-Change to sample 5 points — the pointer center plus the 4 ghost corners at
-`±halfW, ±halfH` — and use the first zone found.
+Implementation of the plan (14 tasks + Task 1b). The plan uses checkbox syntax
+and is designed for `superpowers:subagent-driven-development` or
+`superpowers:executing-plans`.
 
-**Desktop HTML5 DnD**: Slots use `dropTargetForElements` from
-`@atlaskit/pragmatic-drag-and-drop`. The drop only fires when the **pointer** is
-over the registered element. To expand: wrap the slot's inner content with an
-invisible absolutely-positioned `div` that extends ~24–28 px beyond the visual
-slot bounds, and register THAT as the drop target. Alternatively use
-`monitorForElements` with expanded bounding-box checks.
+Task order matters — see dependency notes in the plan. Key constraint: Task 13
+(Dragon Cave) requires Task 2 first.
 
-There is an existing `magnetic-snap.ts` utility (`MAGNETIC_RADIUS=60`,
-`MAGNETIC_STRENGTH=0.3`) that computes a lerp pull — could optionally be wired in
-to visually pull the ghost toward the nearest slot during touch drag.
+## Key Files
 
-### 3. Bank hover display
+| File                                                                          | Role                            |
+| ----------------------------------------------------------------------------- | ------------------------------- |
+| `docs/superpowers/plans/2026-05-21-unified-skin-token-architecture.md`        | Implementation plan (binding)   |
+| `docs/brainstorms/2026-05-16-unified-skin-token-architecture-requirements.md` | Requirements (R1-R13)           |
+| `src/lib/skin/classic-skin.ts`                                                | 63 tokens to migrate to `:root` |
+| `src/components/answer-game/styles.ts`                                        | `tileStyle()` to simplify       |
+| `src/components/answer-game/Slot/Slot.tsx`                                    | State styling migration         |
+| `src/games/word-spell/skins/dragon-cave-skin.tsx`                             | Only custom skin                |
 
-When the ghost is dragged over the bank area, show visual feedback (subtle ring or
-highlight) on the bank container.
+## Resume Commands
 
-State: add `dragHoverBankTarget: boolean` to `AnswerGameState`.
+```bash
+# 1. Sync
+/resync
 
-- Touch (`useTouchDrag.ts`): detect `data-tile-bank` in `elementsFromPoint` during
-  `onPointerMove` and fire a new `onHoverBank` callback.
-- Desktop: `useBankDropTarget` hook (find it or check `LetterTileBank.tsx`)—add
-  `onDragEnter`/`onDragLeave`.
+# 2. cd to worktree
+cd /Users/leocaseiro/Sites/base-skill/worktrees/feat-multi-skin-config
 
-## Key files
-
-- `src/components/answer-game/useDraggableTile.ts` — bank tile drag hook
-- `src/components/answer-game/useTouchDrag.ts` — touch drag engine
-- `src/components/answer-game/useSlotTileDrag.ts` — slot tile drag hook
-- `src/components/answer-game/Slot/useSlotBehavior.ts` — slot state + drop registration
-- `src/components/answer-game/Slot/Slot.tsx` — slot rendering
-- `src/components/answer-game/types.ts` — state types
-- `src/components/answer-game/answer-game-reducer.ts` — reducer
-- `src/components/answer-game/magnetic-snap.ts` — existing (unused) snap utility
-- `src/games/word-spell/LetterTileBank/LetterTileBank.tsx` — bank rendering
+# 3. Start implementation
+# Use superpowers:executing-plans or superpowers:subagent-driven-development
+# on docs/superpowers/plans/2026-05-21-unified-skin-token-architecture.md
+```
