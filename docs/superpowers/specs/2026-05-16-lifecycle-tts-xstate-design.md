@@ -139,7 +139,7 @@ XState's `sendTo` / `spawn` / `invoke` solves a different problem: **point-to-po
 
 ## 4. Lifecycle Event Taxonomy
 
-### 4.1 The 17 events
+### 4.1 The 19 events
 
 ```ts
 // src/lib/lifecycle-tts/types.ts
@@ -164,47 +164,77 @@ export type LifecycleEvent =
   // Mini-game-level (reserved in M1, fired in PR 1b+)
   | 'mini-game.start'
   | 'mini-game.complete'
-  | 'mini-game.skip';
+  | 'mini-game.skip'
+  // Privacy / availability signals (added 2026-05-23 per §13.1.D #19 lock)
+  | 'lifecycle.tts.unavailable' // No voice available under user's privacy settings
+  | 'lifecycle.tts.cloud-fallback'; // System default cloud voice in use (processLocally: false)
 ```
 
 ### 4.2 Event semantics + trigger points
 
-| Event                | Trigger                                                      | Default priority | Default speech throttle (ms) | Default SFX throttle (ms) |
-| -------------------- | ------------------------------------------------------------ | ---------------- | ---------------------------- | ------------------------- |
-| `game.prepare`       | `GameOptionsOverlay` mount                                   | 2                | 0                            | —                         |
-| `game.start`         | Game machine `loading.entry`                                 | 2                | 0                            | —                         |
-| `game.resume`        | `AnswerGameProvider` remount-into-active-session detection   | 2                | 0                            | —                         |
-| `game.end`           | Engine `gameOver.entry`                                      | 3                | 0                            | —                         |
-| `round.start`        | `playingRound.entry`                                         | 2                | 0                            | —                         |
-| `round.idle`         | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2) | 2                | 0                            | —                         |
-| `round.error`        | `ROUND_FAILED` transition action (definitive)                | 2                | 1500                         | 400                       |
-| `round.correct`      | `ROUND_CORRECT` transition action                            | 3                | 0                            | 400                       |
-| `round.celebrate`    | (Reserved — M1 doesn't fire; M2+ fires on celebration entry) | 3                | 0                            | 0                         |
-| `round.advance`      | `ADVANCE_ROUND` transition action                            | 2                | 0                            | —                         |
-| `level.complete`     | `levelTransition.entry`                                      | 3                | 0                            | —                         |
-| `turn.error`         | Wrong tap/keypress (every occurrence within a round)         | 1                | 800                          | 150                       |
-| `turn.correct`       | Right tap/keypress                                           | 2                | 400                          | 100                       |
-| `turn.action`        | Tile pickup/place (every drag interaction)                   | 0                | 0 (no speech)                | 50                        |
-| `mini-game.start`    | (Reserved — PR 1b+ when first mini-game lands)               | 2                | 0                            | 0                         |
-| `mini-game.complete` | (Reserved)                                                   | 2                | 0                            | 0                         |
-| `mini-game.skip`     | (Reserved)                                                   | 1                | 0                            | 0                         |
+| Event                          | Trigger                                                                                             | Default priority | Default speech throttle (ms) | Default SFX throttle (ms) |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------- | ------------------------- |
+| `game.prepare`                 | `GameOptionsOverlay` mount                                                                          | 2                | 0                            | —                         |
+| `game.start`                   | Game machine `loading.entry`                                                                        | 2                | 0                            | —                         |
+| `game.resume`                  | `AnswerGameProvider` remount-into-active-session detection                                          | 2                | 0                            | —                         |
+| `game.end`                     | Engine `gameOver.entry`                                                                             | 3                | 0                            | —                         |
+| `round.start`                  | `playingRound.entry`                                                                                | 2                | 0                            | —                         |
+| `round.idle`                   | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2)                                        | 2                | 0                            | —                         |
+| `round.error`                  | `ROUND_FAILED` transition action (definitive)                                                       | 2                | 1500                         | 400                       |
+| `round.correct`                | `ROUND_CORRECT` transition action                                                                   | 3                | 0                            | 400                       |
+| `round.celebrate`              | (Reserved — M1 doesn't fire; M2+ fires on celebration entry)                                        | 3                | 0                            | 0                         |
+| `round.advance`                | `ADVANCE_ROUND` transition action                                                                   | 2                | 0                            | —                         |
+| `level.complete`               | `levelTransition.entry`                                                                             | 3                | 0                            | —                         |
+| `turn.error`                   | Wrong tap/keypress (every occurrence within a round)                                                | 1                | 800                          | 150                       |
+| `turn.correct`                 | Right tap/keypress                                                                                  | 2                | 400                          | 100                       |
+| `turn.action`                  | Tile pickup/place (every drag interaction)                                                          | 0                | 0 (no speech)                | 50                        |
+| `mini-game.start`              | (Reserved — PR 1b+ when first mini-game lands)                                                      | 2                | 0                            | 0                         |
+| `mini-game.complete`           | (Reserved)                                                                                          | 2                | 0                            | 0                         |
+| `mini-game.skip`               | (Reserved)                                                                                          | 1                | 0                            | 0                         |
+| `lifecycle.tts.unavailable`    | `pickVoice()` returns no candidate under `processLocally: true` (privacy fail-closed; see §5.7)     | —                | —                            | —                         |
+| `lifecycle.tts.cloud-fallback` | `pickVoice()` returns no candidate under `processLocally: false` (browser default in use; see §5.7) | —                | —                            | —                         |
 
-Priorities and throttles are overridable per game/skin/customConfig via the same resolution chain as templates (see §9.2).
+Priorities and throttles are overridable per game/skin/customConfig via the same resolution chain as templates (see §9.2). The two `lifecycle.tts.*` signal events (last rows) are emitted by the speaker, not the actor — they are observability signals, not speech triggers, so priority/throttle don't apply.
 
 ### 4.3 Bus event additions
+
+`subject` is a **branded opaque token** — never user input — enforced at the
+type system layer (§13.1.D #21 lock):
+
+```ts
+// src/lib/lifecycle-tts/types.ts
+declare const __lifecycleSubject: unique symbol;
+export type LifecycleSubject = string & {
+  readonly [__lifecycleSubject]: 'LifecycleSubject';
+};
+
+export const subjectToken = (raw: string): LifecycleSubject =>
+  raw as LifecycleSubject;
+```
+
+**Subject invariant:** `subject` is an opaque token — tile ID, phoneme key, or
+word ID, max 64 chars. It MUST NEVER carry free-form user input (kid's spelling
+answer, prompt text, locale-translated string, etc.). The branded type + factory
+enforce intent at compile time; a follow-up issue will add an ESLint rule
+enforcing factory-only construction so raw strings can't slip through.
+
+`subject` is `string` only — no `number` variant. Callers convert numerics via
+`subjectToken(String(id))`. This keeps log/test/match semantics single-typed.
+
+Event interfaces:
 
 ```ts
 // src/types/game-events.ts (additive)
 export interface LifecycleSpeakEvent extends BaseGameEvent {
   type: 'lifecycle.speak';
   lifecycleEvent: LifecycleEvent;
-  subject?: string | number; // optional ID for animation matching (e.g. tileId)
+  subject?: LifecycleSubject; // optional ID for animation matching (e.g. tileId)
 }
 
 export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
   type: 'lifecycle.tts.played';
   lifecycleEvent: LifecycleEvent;
-  subject?: string | number;
+  subject: LifecycleSubject | null; // REQUIRED, no undefined — boundary coerces ?? null (see §6.7)
   source: 'auto' | 'user';
   variant: Talkativeness;
   durationMs: number;
@@ -213,9 +243,22 @@ export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
 export interface LifecycleCancelEvent extends BaseGameEvent {
   type: 'lifecycle.cancel';
 }
+
+// Privacy / availability signals (§5.7)
+export interface LifecycleTtsUnavailableEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.unavailable';
+  subject: LifecycleSubject; // the locale that failed to resolve, e.g. subjectToken('en-AU')
+}
+
+export interface LifecycleTtsCloudFallbackEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.cloud-fallback';
+  subject: LifecycleSubject; // the locale that fell back to browser default
+}
 ```
 
-The `subject` field enables UI animation sync (§10.3): emitters set it to identify the visual target (`tileId`, `phonemeKey`, `wordIndex`); UI subscribers match on it to highlight/un-highlight.
+The `subject` field enables UI animation sync (§10.3): emitters set it to identify
+the visual target (`tileId`, `phonemeKey`, `wordIndex`); UI subscribers match on
+it via `isSubjectMatch(event, expected)` (§10.3) to highlight/un-highlight.
 
 ### 4.4 Bus event naming — dot-style locked
 
@@ -288,24 +331,26 @@ export type SettingsDoc = {
 
 **Field naming follows master, not canon.** Canon used `voiceName` and `voiceLocale`; master already had `preferredVoiceURI` (voice picker) and `activeLanguage` (locale). M1 reuses both — **no `voiceName` or `voiceLocale` fields are added**.
 
-**Focused subset type for TTS/audio consumers** (avoids importing the full SettingsDoc into every audio file):
+**Focused subset type for TTS/audio consumers** (avoids importing the full SettingsDoc into every audio file). All fields are **non-optional** (`Required<>`) — defaults are applied at the boundary in `pickTtsSettings()` (§5.5), so downstream consumers never see `undefined` and never need scattered `?? N` fallbacks:
 
 ```ts
 // src/lib/lifecycle-tts/types.ts
-export type TtsSettings = Pick<
-  SettingsDoc,
-  | 'talkativeness'
-  | 'processLocally'
-  | 'speechRate'
-  | 'voiceVolume'
-  | 'soundEffectsVolume'
-  | 'preferredVoiceURI'
-  | 'preferredVoiceDeviceId'
-  | 'activeLanguage'
+export type TtsSettings = Required<
+  Pick<
+    SettingsDoc,
+    | 'talkativeness'
+    | 'processLocally'
+    | 'speechRate'
+    | 'voiceVolume'
+    | 'soundEffectsVolume'
+    | 'preferredVoiceURI'
+    | 'preferredVoiceDeviceId'
+    | 'activeLanguage'
+  >
 >;
 ```
 
-The machine, speaker, and sound-effect player consume `TtsSettings`, not the full `SettingsDoc`. The Provider extracts `TtsSettings` from the `useSettings()` result (§5.5) before passing to the actor.
+The machine, speaker, and sound-effect player consume `TtsSettings`, not the full `SettingsDoc`. The Provider extracts `TtsSettings` from the `useSettings()` result via `pickTtsSettings()` (§5.5) before passing to the actor — the boundary coerces `undefined` fields to privacy-safe defaults so the rest of the system can rely on every field being defined.
 
 ### 5.2 Defaults
 
@@ -351,11 +396,12 @@ The OS volume slider is the escape hatch for "completely silent." We do not mode
 
 Reuse the existing canonical hook at [src/db/hooks/useSettings.ts](../../../src/db/hooks/useSettings.ts) — it wraps `db.settings.findOne(ANONYMOUS_SETTINGS_ID).$` (RxDB observable) in `useRxQuery`, merges defaults with the live doc, and returns `{ settings, update }`. **Do not invent a new subscription pattern.**
 
-The Provider extracts a `TtsSettings` slice (§5.1) and forwards it to the actor whenever it changes:
+The Provider extracts a `TtsSettings` slice (§5.1) via `pickTtsSettings()` and forwards it to the actor whenever it changes:
 
 ```tsx
 // src/lib/lifecycle-tts/Provider.tsx
 import { useSettings } from '@/db/hooks/useSettings';
+import { pickTtsSettings } from './pick-tts-settings';
 
 const LifecycleTtsProvider = ({ children }: PropsWithChildren) => {
   const { settings } = useSettings();
@@ -376,20 +422,44 @@ const LifecycleTtsProvider = ({ children }: PropsWithChildren) => {
     </LifecycleTtsContext.Provider>
   );
 };
+```
 
-const pickTtsSettings = (
-  s: ReturnType<typeof useSettings>['settings'],
+`pickTtsSettings()` lives in its own file and applies privacy-safe defaults at
+the boundary — every `TtsSettings` field becomes non-optional after this call:
+
+```ts
+// src/lib/lifecycle-tts/pick-tts-settings.ts
+import type { SettingsDoc } from '@/db/schemas/settings';
+import type { TtsSettings } from './types';
+import { DEFAULT_SETTINGS } from '@/db/hooks/useSettings';
+
+export const pickTtsSettings = (
+  s: SettingsDoc | undefined,
 ): TtsSettings => ({
-  talkativeness: s.talkativeness,
-  processLocally: s.processLocally,
-  speechRate: s.speechRate,
-  voiceVolume: s.voiceVolume,
-  soundEffectsVolume: s.soundEffectsVolume,
-  preferredVoiceURI: s.preferredVoiceURI,
-  preferredVoiceDeviceId: s.preferredVoiceDeviceId,
-  activeLanguage: s.activeLanguage,
+  speechRate: s?.speechRate ?? DEFAULT_SETTINGS.speechRate ?? 1,
+  voiceVolume: s?.voiceVolume ?? DEFAULT_SETTINGS.voiceVolume ?? 0.8,
+  soundEffectsVolume:
+    s?.soundEffectsVolume ?? DEFAULT_SETTINGS.soundEffectsVolume ?? 0.8,
+  preferredVoiceURI:
+    s?.preferredVoiceURI ?? DEFAULT_SETTINGS.preferredVoiceURI ?? '',
+  preferredVoiceDeviceId:
+    s?.preferredVoiceDeviceId ??
+    DEFAULT_SETTINGS.preferredVoiceDeviceId ??
+    '',
+  activeLanguage:
+    s?.activeLanguage ?? DEFAULT_SETTINGS.activeLanguage ?? 'en-AU',
+  talkativeness:
+    s?.talkativeness ?? DEFAULT_SETTINGS.talkativeness ?? 'helpful',
+  processLocally:
+    s?.processLocally ?? DEFAULT_SETTINGS.processLocally ?? true,
 });
 ```
+
+**Privacy-safe boundary defaults:** when `useSettings()` is still resolving (or
+the doc lacks a field), `pickTtsSettings()` returns `processLocally: true` and
+`talkativeness: 'helpful'`. The system can never accidentally route audio
+through a cloud voice or speak when the schema is mid-load. `DEFAULT_SETTINGS`
+in `useSettings.ts` (§5.2) is updated to match so the two layers agree.
 
 No subscription churn beyond the RxDB observable that `useSettings()` already manages — the actor's settings live in machine context, not in a per-hook dep array elsewhere. Eliminates plan-365's P2 "bus subscription churns on every config change" finding.
 
@@ -403,14 +473,36 @@ No subscription churn beyond the RxDB observable that `useSettings()` already ma
 
 `SPEAK_USER` utterances in flight finish as-is — the caller passed an explicit variant; settings shouldn't override it retroactively.
 
-### 5.7 `processLocally` privacy semantics
+### 5.7 `processLocally` privacy semantics — deterministic ladder
 
-- `voice.localService === true` → voice operates entirely on-device.
-- `voice.localService === false` → voice may route audio data to a cloud TTS service (Google, Microsoft, etc.).
-- `processLocally: true` filters the voice picker to local-only voices.
-- `processLocally: false` shows all voices (after privacy modal confirmation).
+`processLocally: true` is enforced via a deterministic fallback ladder in
+`WebSpeechSpeaker.pickVoice()`. There is no silent cloud fallback when the
+user has opted into local-only voices.
 
-The `localService` field is **browser-reported and not fully reliable** across browsers — some over-report or under-report. The setting is **best-effort privacy**, not a guarantee. Modal copy explicitly acknowledges this.
+**Pick order:**
+
+1. If `voiceURI` provided and lang prefix matches → use it.
+2. Filter to local-only (`voice.localService === true`) when
+   `processLocally: true`.
+3. Exact locale match → return it.
+4. Language-prefix match (`'en-AU'` matches `'en'`) → return it.
+5. If candidates set is empty after step 4 **and** `processLocally: true`:
+   - Emit `lifecycle.tts.unavailable` with `{ subject: locale }`.
+   - Throw `LocalVoiceUnavailableError(locale)` from `speak()`.
+   - A handler at the Provider tree (sibling of `LifecycleTtsProvider`) subscribes
+     to the event and triggers PR #409's existing
+     `VoiceUnavailableDialogProvider` AlertDialog (see §7.2 integration note).
+6. If candidates empty and `processLocally: false`:
+   - Emit `lifecycle.tts.cloud-fallback` (system default in use).
+   - Return `undefined`; browser picks default voice. Best-effort.
+
+The `voice.localService` flag is browser-reported and inconsistent across
+Chrome / Safari / Firefox. Treat `localService !== false` as "may be local"
+when the field is undefined (Firefox case).
+
+**Privacy invariant:** under `processLocally: true`, no utterance is ever
+spoken via a voice with `localService === false`. Step 5 enforces this by
+failing closed, not falling back open.
 
 ### 5.8 RxDB schema migration v3 → v4 — full schema
 
@@ -477,14 +569,32 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
 };
 
 export const settingsMigrations = {
-  4: (oldDoc: SettingsDocV3 & Record<string, unknown>): SettingsDoc => {
-    const { ttsEnabled, ...rest } = oldDoc;
-    return {
-      ...rest,
-      talkativeness: ttsEnabled === false ? 'on-demand' : 'helpful',
-      processLocally: true,
-    } as SettingsDoc;
-  },
+  // v3 → v4 — explicit field allowlist; no `{ ...rest }` spread.
+  // `additionalProperties: false` in the v4 schema would reject any
+  // legacy field that leaked through, so we enumerate every v3 field
+  // that survives. See §5.9 for the general rule.
+  4: (oldDoc: SettingsDocV3): SettingsDoc => ({
+    id: oldDoc.id,
+    profileId: oldDoc.profileId,
+    updatedAt: oldDoc.updatedAt,
+    soundEffectsVolume: oldDoc.soundEffectsVolume,
+    voiceVolume: oldDoc.voiceVolume,
+    speechRate: oldDoc.speechRate,
+    activeLanguage: oldDoc.activeLanguage,
+    showSubtitles: oldDoc.showSubtitles,
+    themeId: oldDoc.themeId,
+    preferredVoiceURI: oldDoc.preferredVoiceURI,
+    preferredVoiceDeviceId: oldDoc.preferredVoiceDeviceId,
+    tapForgivenessThreshold: oldDoc.tapForgivenessThreshold,
+    tapForgivenessTimeMs: oldDoc.tapForgivenessTimeMs,
+    // === NEW v4 fields ===
+    talkativeness:
+      oldDoc.ttsEnabled === false ? 'on-demand' : 'helpful',
+    processLocally: true, // privacy-safe default
+    // `ttsEnabled` is intentionally dropped — replaced by `talkativeness`.
+    // Any other unknown legacy field on `oldDoc` is also dropped because
+    // this allowlist never references it.
+  }),
 };
 ```
 
@@ -492,10 +602,52 @@ export const settingsMigrations = {
 
 - `ttsEnabled: false` (v3) → `talkativeness: 'on-demand'` (v4) — preserves the user's intent for silence; speaker taps still work (taps are not gated by `talkativeness`).
 - `ttsEnabled: true` or absent (v3) → `talkativeness: 'helpful'` (v4) — the safe default; auto-speech enabled at the kid-friendly middle position.
-- All other existing fields (`speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `voiceVolume`, `soundEffectsVolume`, etc.) are passed through untouched via `...rest`.
+- All other existing v3 fields (`speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `voiceVolume`, `soundEffectsVolume`, etc.) are passed through by **explicit enumeration** — never `{ ...rest }` spread (see §5.9 for why).
 - `processLocally` defaults to `true` for privacy.
 
-Migration test mirrors [src/db/migrations/word-spell-multi-level.collection.test.ts](../../../src/db/migrations/word-spell-multi-level.collection.test.ts) and asserts both branches of the `ttsEnabled` ternary plus untouched-field preservation.
+**Non-leakage unit test (REQUIRED).** Migration test mirrors
+[src/db/migrations/word-spell-multi-level.collection.test.ts](../../../src/db/migrations/word-spell-multi-level.collection.test.ts)
+and asserts both branches of the `ttsEnabled` ternary, untouched-field
+preservation, AND that an unknown legacy field on the source doc is dropped
+from the target doc:
+
+```ts
+// In settings-migration.test.ts
+it('drops unknown legacy fields during v3 → v4 migration', () => {
+  const v3Doc = {
+    id: 'anonymous',
+    profileId: 'anonymous',
+    updatedAt: '2026-05-23T00:00:00.000Z',
+    speechRate: 1.2,
+    ttsEnabled: false,
+    legacyDebugFlag: 'leaked' as any,
+  } satisfies SettingsDocV3 & { legacyDebugFlag: string };
+  const v4Doc = settingsMigrations[4](v3Doc);
+  expect(v4Doc).not.toHaveProperty('legacyDebugFlag');
+  expect(v4Doc.talkativeness).toBe('on-demand');
+});
+```
+
+### 5.8.1 Migration failure recovery
+
+If `settingsMigrations[4]` throws (e.g., a v3 doc shape so malformed it can't
+be coerced), `useSettings()` returns `DEFAULT_SETTINGS` (its EMPTY-observable
+fallback per [src/db/hooks/useSettings.ts](../../../src/db/hooks/useSettings.ts)).
+The user sees first-run defaults — privacy-safe `processLocally: true`,
+`talkativeness: 'helpful'`. No crash, no broken UI.
+
+Log to `console.error` with the migration error for dogfooding visibility.
+
+### 5.9 Migration safety rule (applies to all future RxDB migrations under `additionalProperties: false`)
+
+All future migrations on schemas with `additionalProperties: false` MUST use
+explicit field allowlist (enumerate every target field by name from the source
+doc), never destructure-and-spread (`{ ...rest, newField }`). The spread carries
+unknown fields that the schema will then reject during validation.
+
+Test contract: every migration MUST include a unit test asserting that an
+unknown legacy field on the source doc is dropped from the target doc (see
+§5.8 for an example).
 
 ## 6. XState Machine + Queue Policy
 
@@ -510,8 +662,8 @@ export const lifecycleTtsMachine = setup({
     context: TtsContext;
     input: { settings: TtsSettings };
     events:
-      | { type: 'SPEAK_AUTO'; event: LifecycleEvent; payload: SpeakPayload; subject?: string | number }
-      | { type: 'SPEAK_USER'; event: LifecycleEvent; payload: SpeakPayload; variant: Talkativeness; subject?: string | number }
+      | { type: 'SPEAK_AUTO'; event: LifecycleEvent; payload: SpeakPayload; subject?: LifecycleSubject }
+      | { type: 'SPEAK_USER'; event: LifecycleEvent; payload: SpeakPayload; variant: Talkativeness; subject?: LifecycleSubject }
       | { type: 'SETTINGS_CHANGED'; settings: TtsSettings }
       | { type: 'CANCEL' };
   },
@@ -698,13 +850,15 @@ On `SETTINGS_CHANGED` where `talkativeness` actually changes:
 
 ### 6.7 `lifecycle.tts.played` emission
 
-After each successful speaker resolve, the actor emits on the bus:
+After each successful speaker resolve, the actor emits on the bus. `subject` is
+coerced to `null` at the boundary so downstream consumers (animation sync, SRS
+recorder, tests) only ever see `LifecycleSubject | null`, never `undefined`:
 
 ```ts
 bus.emit({
   type: 'lifecycle.tts.played',
   lifecycleEvent: utterance.event,
-  subject: utterance.subject,
+  subject: utterance.subject ?? null, // boundary coercion — never undefined
   source: utterance.source, // 'auto' | 'user'
   variant: utterance.variant,
   durationMs: now - utterance.enqueuedAt,
@@ -716,7 +870,7 @@ bus.emit({
 });
 ```
 
-This signal lets game machines gate transitions on speech completion (§10.2) and lets UI animations un-highlight in sync (§10.3). SRS records every `tts.played` as an attempt-context signal.
+This signal lets game machines gate transitions on speech completion (§10.2) and lets UI animations un-highlight in sync (§10.3) via the `isSubjectMatch()` helper (§10.3). SRS records every `tts.played` as an attempt-context signal, **without persisting `subject`** (see §10.2.5).
 
 ## 7. Speaker + SoundEffectPlayer Adapters
 
@@ -760,7 +914,12 @@ export class WebSpeechSpeaker implements Speaker {
   private keepaliveTimer: ReturnType<typeof setInterval>;
   private settings: TtsSettings;
 
-  constructor(settings: TtsSettings) {
+  constructor(
+    settings: TtsSettings,
+    private bus: TypedGameEventBus,
+  ) {
+    // Constructor now takes the bus too — pickVoice() emits
+    // lifecycle.tts.unavailable / lifecycle.tts.cloud-fallback per §5.7.
     this.settings = settings;
     this.warmVoiceCache();
     this.keepaliveTimer = setInterval(
@@ -789,18 +948,28 @@ export class WebSpeechSpeaker implements Speaker {
 
     return new Promise<void>((resolve, reject) => {
       const u = new SpeechSynthesisUtterance(utterance.text);
-      const voice = this.pickVoice(
-        utterance.locale,
-        utterance.voiceURI,
-      );
+      // pickVoice() throws LocalVoiceUnavailableError under processLocally: true
+      // with no candidates — let it propagate to reject this promise (§5.7 step 5).
+      let voice: SpeechSynthesisVoice | undefined;
+      try {
+        voice = this.pickVoice(utterance.locale, utterance.voiceURI);
+      } catch (err) {
+        reject(err as Error);
+        return;
+      }
       if (voice) {
         u.voice = voice;
         u.lang = voice.lang; // REQUIRED on Chrome Android — voice alone is not enough
       } else {
+        // processLocally: false, ladder step 6 — browser picks default;
+        // cloud-fallback event already emitted by pickVoice().
         u.lang = utterance.locale;
       }
-      u.volume = this.settings.voiceVolume ?? 0.8;
-      u.rate = this.settings.speechRate ?? 1; // PRESERVE existing speechRate (range 0.5..2)
+      // No `?? N` fallbacks — TtsSettings is Required<Pick<...>> (§5.1);
+      // pickTtsSettings() (§5.5) applies defaults at the boundary so every
+      // field is guaranteed defined here.
+      u.volume = this.settings.voiceVolume;
+      u.rate = this.settings.speechRate; // PRESERVE existing speechRate (range 0.5..2)
       u.pitch = 1;
       u.onend = () => this.finalize(resolve);
       u.onerror = (e) =>
@@ -870,9 +1039,13 @@ export class WebSpeechSpeaker implements Speaker {
     locale: string,
     voiceURI: string | undefined,
   ): SpeechSynthesisVoice | undefined {
+    // Step 2: filter to local-only voices when processLocally: true.
+    // Treat `localService !== false` as "may be local" (Firefox returns
+    // undefined for the field — fail open per §5.7 note).
     const candidates = [...this.voiceCache.values()].filter((v) =>
-      this.settings.processLocally ? v.localService === true : true,
+      this.settings.processLocally ? v.localService !== false : true,
     );
+    // Step 1: explicit voiceURI match with lang-prefix sanity check.
     if (voiceURI) {
       const exact = candidates.find(
         (v) =>
@@ -881,10 +1054,41 @@ export class WebSpeechSpeaker implements Speaker {
       );
       if (exact) return exact;
     }
-    return (
+    // Steps 3-4: exact locale, then language-prefix match.
+    const localeMatch =
       candidates.find((v) => v.lang === locale) ??
-      candidates.find((v) => v.lang.startsWith(locale.split('-')[0]))
+      candidates.find((v) => v.lang.startsWith(locale.split('-')[0]));
+    if (localeMatch) return localeMatch;
+    // Step 5: privacy-mode empty set — fail closed.
+    if (this.settings.processLocally) {
+      this.bus.emit({
+        type: 'lifecycle.tts.unavailable',
+        subject: subjectToken(locale),
+      });
+      throw new LocalVoiceUnavailableError(locale);
+    }
+    // Step 6: cloud-fallback path — emit signal, return undefined so
+    // browser picks its default voice. Best-effort.
+    this.bus.emit({
+      type: 'lifecycle.tts.cloud-fallback',
+      subject: subjectToken(locale),
+    });
+    return undefined;
+  }
+}
+```
+
+`LocalVoiceUnavailableError` lives in
+[`src/lib/lifecycle-tts/errors.ts`](../../../src/lib/lifecycle-tts/errors.ts) (new file):
+
+```ts
+// src/lib/lifecycle-tts/errors.ts
+export class LocalVoiceUnavailableError extends Error {
+  constructor(public readonly locale: string) {
+    super(
+      `No local voice available for locale '${locale}' under processLocally: true`,
     );
+    this.name = 'LocalVoiceUnavailableError';
   }
 }
 ```
@@ -1446,30 +1650,76 @@ states: {
 
 The mechanism ships in M1 (engine recognizes `LIFECYCLE_TTS_PLAYED` as a transition signal). Phoneme content + CSS classes ship in Spec 1b.
 
+### 10.2.5 SRS recorder constraint (issue #364)
+
+The SRS recorder (issue #364, not built in M1; ships alongside SRS v1 per
+the P1 milestone) subscribes to `lifecycle.tts.played` for play-count signal —
+how many times has each phoneme/word been spoken to the user?
+
+**The recorder MUST NOT persist `event.subject` to RxDB.**
+
+Recorder reads `subject` in memory only — for matching against the active
+attempt via `isSubjectMatch()` (§10.3) — but stores only:
+
+- `lifecycleEvent` (the verb fired: `round.start` / `round.error` / ...)
+- `durationMs` (timing signal for SRS scheduling)
+- the active attempt key (the SRS row already keyed by phoneme/word)
+
+This preserves the privacy invariant established in §4.3: `subject` is an
+opaque token, never user input — but even opaque tokens shouldn't be routed
+to durable storage via the observability path. SRS already keys its rows
+by phoneme/word independently; storing `subject` would be redundant data
+carrying privacy risk.
+
 ### 10.3 Animation sync via `subject` field
 
-Same speak/played events drive UI animation. Emitter populates `subject`; UI subscribers match on it:
+Same speak/played events drive UI animation. Emitter populates `subject` (a
+branded `LifecycleSubject`, §4.3); UI subscribers match via the
+`isSubjectMatch()` helper to keep the null/string discipline in one place:
+
+```ts
+// src/lib/lifecycle-tts/subject-utils.ts (new file)
+import type { LifecycleSubject } from './types';
+import type {
+  LifecycleTtsPlayedEvent,
+  LifecycleSpeakEvent,
+} from '@/types/game-events';
+
+export const isSubjectMatch = (
+  event:
+    | { subject: LifecycleSubject | null }
+    | { subject?: LifecycleSubject },
+  expected: LifecycleSubject,
+): boolean => {
+  const s = (event as { subject?: LifecycleSubject | null }).subject;
+  return s !== null && s !== undefined && s === expected;
+};
+```
 
 ```tsx
 // src/games/word-spell/use-tile-highlight.ts
+import { isSubjectMatch } from '@/lib/lifecycle-tts/subject-utils';
+import { subjectToken } from '@/lib/lifecycle-tts/types';
+
 const useTileHighlight = (tileId: string) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const bus = useGameEventBus();
+  const expected = useMemo(() => subjectToken(tileId), [tileId]);
 
   useEffect(() => {
     const offSpeak = bus.subscribe('lifecycle.speak', (event) => {
       if (event.type !== 'lifecycle.speak') return;
-      if (event.subject === tileId) setIsSpeaking(true);
+      if (isSubjectMatch(event, expected)) setIsSpeaking(true);
     });
     const offPlayed = bus.subscribe('lifecycle.tts.played', (event) => {
       if (event.type !== 'lifecycle.tts.played') return;
-      if (event.subject === tileId) setIsSpeaking(false);
+      if (isSubjectMatch(event, expected)) setIsSpeaking(false);
     });
     return () => {
       offSpeak();
       offPlayed();
     };
-  }, [bus, tileId]);
+  }, [bus, expected]);
 
   return isSpeaking;
 };
@@ -1506,8 +1756,11 @@ The rename is **bundled** into this PR rather than split into a prerequisite PR.
 
 ```text
 src/lib/lifecycle-tts/
-├── types.ts                              # LifecycleEvent, Talkativeness, EventBindings, RoundContextValue
+├── types.ts                              # LifecycleEvent, Talkativeness, EventBindings, RoundContextValue, LifecycleSubject + subjectToken
 ├── sentinel-values.ts                    # INHERITED, DONT_SPEAK constants
+├── errors.ts                             # LocalVoiceUnavailableError (§5.7, §7.2)
+├── pick-tts-settings.ts                  # boundary coercion + privacy-safe defaults (§5.5)
+├── subject-utils.ts                      # isSubjectMatch() helper (§10.3)
 ├── machine.ts                            # XState parallel sub-machines
 ├── machine.test.ts                       # ~20 tests
 ├── Provider.tsx                          # LifecycleTtsProvider + bus subscription
