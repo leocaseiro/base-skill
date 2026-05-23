@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { withDarkMode } from '../../../../.storybook/decorators';
 import { withDb } from '../../../../.storybook/decorators/withDb';
 import { SortNumbersTileBank } from './SortNumbersTileBank';
 import type { AnswerGameConfig } from '@/components/answer-game/types';
@@ -74,10 +73,6 @@ export default meta;
 type Story = StoryObj<typeof SortNumbersTileBank>;
 
 export const Default: Story = {};
-
-export const DefaultDark: Story = {
-  decorators: [withDarkMode],
-};
 
 const SortNumbersDragHoverSetup = ({
   children,

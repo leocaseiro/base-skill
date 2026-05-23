@@ -24,7 +24,7 @@ export const OfflineIndicator = () => {
     <div
       role="status"
       aria-live="polite"
-      className="flex items-center justify-center gap-2 bg-yellow-100 px-4 py-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+      className="flex items-center justify-center gap-2 bg-yellow-100 px-4 py-2 text-sm text-yellow-800"
     >
       {t('offline.banner')}
     </div>

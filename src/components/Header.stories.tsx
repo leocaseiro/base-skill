@@ -12,7 +12,7 @@ const meta: Meta<typeof Header> = {
     docs: {
       description: {
         component:
-          'Zero-prop app-shell header: app title, beta chip, version, docs link, debounced search input, ThemeToggle, and a menu sheet whose panel reads live settings + theme docs from RxDB. Both decorators are required — `withDb` for the sheet panel hooks (`useSettings`, `useRxDB`, `safeGetVoices`) and `withRouter` for the `Link` + `useNavigate` calls. No Playground controls: every visible affordance is either intrinsic to the component or driven by the global Theme + Viewport toolbars.',
+          'Zero-prop app-shell header: app title, beta chip, version, docs link, debounced search input, and a menu sheet whose panel reads live settings + theme docs from RxDB. Both decorators are required — `withDb` for the sheet panel hooks (`useSettings`, `useRxDB`, `safeGetVoices`) and `withRouter` for the `Link` + `useNavigate` calls. No Playground controls: every visible affordance is either intrinsic to the component or driven by the global Theme + Viewport toolbars.',
       },
     },
   },

@@ -1,4 +1,3 @@
-import { ThemeProvider } from 'next-themes';
 import { toast } from 'sonner';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from './button';
@@ -16,14 +15,10 @@ interface StoryArgs {
 
 const withToastUi: Meta['decorators'] = [
   (Story) => (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem={false}
-    >
+    <>
       <Story />
       <Toaster />
-    </ThemeProvider>
+    </>
   ),
 ];
 

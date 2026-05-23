@@ -1,10 +1,9 @@
 import '../src/styles.css';
 import '../src/lib/i18n/i18n';
-import { ThemeProvider } from 'next-themes';
 import { Mermaid } from '../src/components/ui/Mermaid';
 import { withDefaultSkin } from './decorators';
 import { withTheme } from './decorators/withTheme';
-import type { Decorator, Preview } from '@storybook/react';
+import type { Preview } from '@storybook/react';
 import type { ReactNode } from 'react';
 
 interface CodeProps {
@@ -22,16 +21,6 @@ const MermaidCodeBlock = ({
   return <code className={className}>{children}</code>;
 };
 
-const withAppThemeProvider: Decorator = (Story) => (
-  <ThemeProvider
-    attribute="class"
-    defaultTheme="light"
-    enableSystem={false}
-  >
-    {Story()}
-  </ThemeProvider>
-);
-
 const preview: Preview = {
   globalTypes: {
     theme: {
@@ -40,10 +29,7 @@ const preview: Preview = {
         icon: 'paintbrush',
         items: [
           { value: 'light', title: 'Ocean Light' },
-          { value: 'dark', title: 'Ocean Dark' },
           { value: 'forest-light', title: 'Forest Light' },
-          { value: 'forest-dark', title: 'Forest Dark' },
-          { value: 'high-contrast', title: 'High Contrast' },
         ],
         dynamicTitle: true,
       },
@@ -52,7 +38,7 @@ const preview: Preview = {
   initialGlobals: {
     theme: 'light',
   },
-  decorators: [withAppThemeProvider, withTheme, withDefaultSkin],
+  decorators: [withTheme, withDefaultSkin],
   parameters: {
     viewport: {
       viewports: {

@@ -9,7 +9,6 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AppLocale } from '@/components/AppMenuPanel';
 import { AppMenuPanel } from '@/components/AppMenuPanel';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
@@ -72,7 +71,7 @@ export const Header = () => {
           {t('appName')}
         </Link>
         {IS_BETA && (
-          <span className="flex-shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+          <span className="flex-shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
             Beta
           </span>
         )}
@@ -103,10 +102,6 @@ export const Header = () => {
             />
           </div>
         </div>
-
-        <span className="hidden sm:flex">
-          <ThemeToggle />
-        </span>
       </div>
     </header>
   );

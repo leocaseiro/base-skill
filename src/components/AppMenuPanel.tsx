@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router';
 import { Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SettingsPanel } from '@/components/SettingsPanel/SettingsPanel';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   SheetClose,
   SheetContent,
@@ -55,17 +54,14 @@ export const AppMenuPanel = ({
       </div>
 
       <div className="flex flex-col gap-6 px-4 pb-4">
-        <div className="flex items-center justify-between">
-          <a
-            href="/base-skill/docs/"
-            className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Docs
-          </a>
-          <ThemeToggle />
-        </div>
+        <a
+          href="/base-skill/docs/"
+          className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Docs
+        </a>
         <SettingsPanel
           locale={locale}
           onLocaleChange={onLocaleChange}
