@@ -899,6 +899,21 @@ Browser-quirk mitigations summary:
 - iOS Brave returns broken voice objects → `safeGetVoices()` filters them (already on master).
 - Stale handlers fire after unmount → `finalize()` clears all listeners; `dispose()` clears keepalive.
 
+> **Integration with `VoiceUnavailableDialogProvider` (added 2026-05-23 after PR #409 shipped):**
+> PR [#409](https://github.com/leocaseiro/base-skill/pull/409) shipped
+> [`src/providers/VoiceUnavailableDialogProvider.tsx`](../../../src/providers/VoiceUnavailableDialogProvider.tsx)
+> (AlertDialog when on-demand TTS lacks an available voice) and
+> [`src/components/VoiceUnavailableWarning.tsx`](../../../src/components/VoiceUnavailableWarning.tsx)
+> (global banner). M1's `WebSpeechSpeaker` MUST integrate with these surfaces
+> rather than inventing its own dialog: when `pickVoice()` returns no candidate
+> _and_ `settings.processLocally === true`, the speaker emits
+> `lifecycle.tts.unavailable` on the bus (new event, see [§13.1.D #19](#13-open-questions--deferred-to-follow-up)
+> for the lock); a thin handler at the Provider tree (sibling of
+> `LifecycleTtsProvider`) subscribes and triggers the existing
+> `VoiceUnavailableDialogProvider` AlertDialog. This keeps voice-availability
+> surfaces consistent across on-demand (`speakPromptOnDemand` from #409) and
+> lifecycle-driven speech (this spec's XState actor).
+
 ### 7.3 `HtmlAudioSoundEffectPlayer`
 
 ```ts
