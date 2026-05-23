@@ -4,8 +4,6 @@
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
 
-@custom-variant dark (&:is(.dark *));
-
 @plugin "@tailwindcss/typography";
 
 @theme {
@@ -90,74 +88,6 @@
   --skeuo-inset-bottom: rgb(0 0 0 / 8%);
   --skeuo-inset-top: rgb(255 255 255 / 50%);
   --skeuo-text-shadow: rgb(0 0 0 / 12%);
-}
-
-:root[data-theme='dark'] {
-  --sea-ink: #d7ece8;
-  --sea-ink-soft: #afcdc8;
-  --lagoon: #60d7cf;
-  --lagoon-deep: #8de5db;
-  --palm: #6ec89a;
-  --sand: #0f1a1e;
-  --foam: #101d22;
-  --surface: rgb(16 30 34 / 80%);
-  --surface-strong: rgb(15 27 31 / 92%);
-  --line: rgb(141 229 219 / 18%);
-  --inset-glint: rgb(194 247 238 / 14%);
-  --kicker: #b8efe5;
-  --bg-base: #0a1418;
-  --header-bg: rgb(10 20 24 / 80%);
-  --chip-bg: rgb(13 28 32 / 90%);
-  --chip-line: rgb(141 229 219 / 24%);
-  --link-bg-hover: rgb(24 44 49 / 80%);
-  --hero-a: rgb(96 215 207 / 18%);
-  --hero-b: rgb(110 200 154 / 12%);
-
-  /* BaseSkill Design System — Galaxy (dark) */
-  --bs-primary: #ff9f43;
-  --bs-secondary: #54a0ff;
-  --bs-background: #1a1a2e;
-  --bs-surface: #16213e;
-  --bs-text: #e8f4fd;
-  --bs-accent: #feca57;
-  --bs-success: #6bcb77;
-  --bs-warning: #f4a261;
-  --bs-error: #ff6b6b;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --sea-ink: #d7ece8;
-    --sea-ink-soft: #afcdc8;
-    --lagoon: #60d7cf;
-    --lagoon-deep: #8de5db;
-    --palm: #6ec89a;
-    --sand: #0f1a1e;
-    --foam: #101d22;
-    --surface: rgb(16 30 34 / 80%);
-    --surface-strong: rgb(15 27 31 / 92%);
-    --line: rgb(141 229 219 / 18%);
-    --inset-glint: rgb(194 247 238 / 14%);
-    --kicker: #b8efe5;
-    --bg-base: #0a1418;
-    --header-bg: rgb(10 20 24 / 80%);
-    --chip-bg: rgb(13 28 32 / 90%);
-    --chip-line: rgb(141 229 219 / 24%);
-    --link-bg-hover: rgb(24 44 49 / 80%);
-    --hero-a: rgb(96 215 207 / 18%);
-    --hero-b: rgb(110 200 154 / 12%);
-
-    /* BaseSkill Design System — Galaxy (dark) */
-    --bs-primary: #ff9f43;
-    --bs-secondary: #54a0ff;
-    --bs-background: #1a1a2e;
-    --bs-surface: #16213e;
-    --bs-text: #e8f4fd;
-    --bs-accent: #feca57;
-    --bs-success: #6bcb77;
-    --bs-warning: #f4a261;
-    --bs-error: #ff6b6b;
-  }
 }
 
 * {
@@ -515,80 +445,19 @@ a:hover {
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-.dark {
-  /*
-   * Derive from --bs-* tokens with dark-mode fallbacks.
-   * --bs-* vars are set as inline styles on <html> by ThemeRuntimeProvider
-   * and by the Storybook withTheme decorator. The fallback values match the
-   * Galaxy dark palette for when no inline --bs-* vars are present.
-   */
-  --background: var(--bs-background, oklch(14.5% 0 0deg));
-  --foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --card: var(--bs-surface, oklch(20.5% 0 0deg));
-  --card-foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --popover: var(--bs-surface, oklch(20.5% 0 0deg));
-  --popover-foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --primary: var(--bs-primary, oklch(92.2% 0 0deg));
-  --primary-foreground: var(--bs-surface, oklch(20.5% 0 0deg));
-  --secondary: var(--bs-secondary, oklch(26.9% 0 0deg));
-  --secondary-foreground: var(--bs-surface, oklch(98.5% 0 0deg));
-  --muted: var(--bs-surface, oklch(26.9% 0 0deg));
-  --muted-foreground: oklch(70.8% 0 0deg);
-  --accent: var(--bs-accent, oklch(26.9% 0 0deg));
-  --accent-foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --destructive: oklch(70.4% 0.191 22.216deg);
-  --border: oklch(100% 0 0deg / 10%);
-  --input: oklch(100% 0 0deg / 15%);
-  --ring: var(--bs-primary, oklch(55.6% 0 0deg));
-  --chart-1: oklch(87% 0 0deg);
-  --chart-2: oklch(55.6% 0 0deg);
-  --chart-3: oklch(43.9% 0 0deg);
-  --chart-4: oklch(37.1% 0 0deg);
-  --chart-5: oklch(26.9% 0 0deg);
-  --sidebar: var(--bs-surface, oklch(20.5% 0 0deg));
-  --sidebar-foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --sidebar-primary: oklch(48.8% 0.243 264.376deg);
-  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-  --sidebar-accent: var(--bs-surface, oklch(26.9% 0 0deg));
-  --sidebar-accent-foreground: var(--bs-text, oklch(98.5% 0 0deg));
-  --sidebar-border: oklch(100% 0 0deg / 10%);
-  --sidebar-ring: oklch(55.6% 0 0deg);
-
-  /* Skeuomorphic tile tokens — dark */
-  --skeuo-highlight: rgb(255 255 255 / 6%);
-  --skeuo-ring: rgb(255 255 255 / 10%);
-  --skeuo-inset-bottom: rgb(255 255 255 / 4%);
-  --skeuo-inset-top: rgb(255 255 255 / 8%);
-  --skeuo-text-shadow: rgb(0 0 0 / 40%);
-}
-
 /* Game colour utilities — derived from --game-play set per-component */
 .game-bg {
   background: color-mix(in srgb, var(--game-play) 12%, transparent);
-}
-
-.dark .game-bg {
-  background: color-mix(in srgb, var(--game-play) 20%, transparent);
 }
 
 .game-tag-bg {
   background: color-mix(in srgb, var(--game-play) 18%, transparent);
 }
 
-.dark .game-tag-bg {
-  background: color-mix(in srgb, var(--game-play) 25%, transparent);
-}
-
 .game-text {
   /* Darken the game colour so it meets WCAG AA 4.5:1 against the lightly-tinted
-   * game-bg (which is 12–20 % of the same colour on a light background). */
+   * game-bg (which is 12 % of the same colour on a light background). */
   color: color-mix(in srgb, var(--game-play) 60%, #000);
-}
-
-.dark .game-text {
-  /* Lighten for dark backgrounds so the mix-against-transparent game-bg
-   * still provides sufficient contrast. */
-  color: color-mix(in srgb, var(--game-play) 60%, #fff);
 }
 
 @layer base {

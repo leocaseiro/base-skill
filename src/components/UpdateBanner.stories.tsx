@@ -33,7 +33,7 @@ const meta: Meta<StoryArgs> = {
     docs: {
       description: {
         component:
-          'Renders a primary-coloured "New version available" banner when `ServiceWorkerContext.updateAvailable` is true, the route is not a `/game/` path, and the banner has not been dismissed. The Playground exposes `updateAvailable` and the `applyUpdate` callback via the `ServiceWorkerContext` provider wrapped around the component; the internal `dismissed` state is reachable by clicking the "✕" button. Use the global Theme toolbar to preview the banner across `light` / `dark` / `forest-light` / `forest-dark` / `high-contrast`.',
+          'Renders a primary-coloured "New version available" banner when `ServiceWorkerContext.updateAvailable` is true, the route is not a `/game/` path, and the banner has not been dismissed. The Playground exposes `updateAvailable` and the `applyUpdate` callback via the `ServiceWorkerContext` provider wrapped around the component; the internal `dismissed` state is reachable by clicking the "✕" button. Use the global Theme toolbar to preview the banner across `light` / `forest-light`.',
       },
     },
   },

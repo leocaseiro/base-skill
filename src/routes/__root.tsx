@@ -28,17 +28,12 @@ import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvide
  */
 const SPA_REDIRECT_SCRIPT = String.raw`(function(){try{var b=${JSON.stringify(import.meta.env.BASE_URL.replace(/\/$/, ''))};var l=window.location;var r=sessionStorage.getItem('spa-redirect');if(r){sessionStorage.removeItem('spa-redirect');history.replaceState(null,'',r);return}if(b.indexOf('/pr/')>=0)return;if(l.pathname.indexOf(b+'/pr/')!==0)return;var s=l.pathname.substring((b+'/pr/').length);var n=s.match(/^(\d+)\/app\//);if(!n)return;sessionStorage.setItem('spa-redirect',l.pathname+l.search+l.hash);l.replace(b+'/pr/'+n[1]+'/app/')}catch(e){}})();`;
 
-/** First paint only: class + color-scheme from system preference (no localStorage). */
-const THEME_INIT_SCRIPT =
-  "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
-
 const RootDocument = ({ children }: { children: React.ReactNode }) => (
   <html lang="en" suppressHydrationWarning>
     <head>
       <script
         dangerouslySetInnerHTML={{ __html: SPA_REDIRECT_SCRIPT }}
       />
-      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       <HeadContent />
     </head>
     <body className="font-sans antialiased">
