@@ -482,8 +482,9 @@ user has opted into local-only voices.
 **Pick order:**
 
 1. If `voiceURI` provided and lang prefix matches → use it.
-2. Filter to local-only (`voice.localService === true`) when
-   `processLocally: true`.
+2. Filter to local-only (`voice.localService !== false`) when
+   `processLocally: true` (see Firefox note below — treat `undefined`
+   as "may be local").
 3. Exact locale match → return it.
 4. Language-prefix match (`'en-AU'` matches `'en'`) → return it.
 5. If candidates set is empty after step 4 **and** `processLocally: true`:
