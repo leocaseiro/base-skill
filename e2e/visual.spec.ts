@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { seedMathRandom } from './seed-math-random';
+import {
+  UNAVAILABLE_VOICE_NAME,
+  mockSpeechSynthesisVoices,
+  seedPreferredVoiceUnavailable,
+} from './seed-voice-unavailable';
 import { startGame } from './start-game';
 import type { Page } from '@playwright/test';
 
@@ -478,4 +483,100 @@ test('@visual spot-all happy-path layout', async ({ page }) => {
   await expect(page).toHaveScreenshot('spot-all-grid.png', {
     fullPage: true,
   });
+});
+
+// ── VoiceUnavailable banner + dialog ────────────────────────────────────────
+//
+// PR #409 added two voice-unavailability surfaces that we need to lock in:
+//   1. <VoiceUnavailableWarning> — global yellow banner mounted in
+//      `src/routes/$locale/_app.tsx`; visible when settings.preferredVoiceURI
+//      is set but missing from speechSynthesis.getVoices().
+//   2. <VoiceUnavailableDialogProvider> — Radix AlertDialog triggered from
+//      on-demand speak paths (AudioButton's "Hear the question" → useGameTTS).
+//
+// State seeding lives in `e2e/seed-voice-unavailable.ts`:
+//   - speechSynthesis is stubbed via addInitScript so getVoices() returns
+//     ['Samantha', 'Alex'] (NOT including the preferred voice).
+//   - The settings doc is written straight into the RxDB IDB store after the
+//     app boots (same direct-IDB pattern as wordspell-resume-desync.spec.ts).
+//   - We reload after seeding so the reactive useSettings query re-reads.
+//
+// We deliberately avoid touching production code: no test-mode db hook is
+// needed because the IDB store name is well-known and stable.
+
+async function bootAndSeedVoiceUnavailable(page: Page): Promise<void> {
+  await mockSpeechSynthesisVoices(page);
+  await page.goto('/en/');
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  // First nav creates the `rxdb-dexie-baseskill-data--3--settings` IDB store
+  // and runs migrations. Now we can mutate the anonymous settings doc.
+  await seedPreferredVoiceUnavailable(page);
+}
+
+test('@visual voice unavailable banner', async ({ page }) => {
+  await bootAndSeedVoiceUnavailable(page);
+  await page.reload();
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  const banner = page.getByRole('alert');
+  await banner.waitFor({ state: 'visible' });
+  await expect(banner).toContainText(UNAVAILABLE_VOICE_NAME);
+  await expect(page).toHaveScreenshot('voice-unavailable-banner.png', {
+    fullPage: true,
+  });
+});
+
+test('@visual voice unavailable banner dark', async ({ page }) => {
+  await bootAndSeedVoiceUnavailable(page);
+  await page.reload();
+  await page.getByRole('main').waitFor({ state: 'visible' });
+  const banner = page.getByRole('alert');
+  await banner.waitFor({ state: 'visible' });
+  await expect(banner).toContainText(UNAVAILABLE_VOICE_NAME);
+  await setDarkMode(page);
+  await expect(page).toHaveScreenshot(
+    'voice-unavailable-banner-dark.png',
+    { fullPage: true },
+  );
+});
+
+async function openVoiceUnavailableDialog(page: Page): Promise<void> {
+  await bootAndSeedVoiceUnavailable(page);
+  // Navigate into NumberMatch where AudioButton ("Hear the question") wires
+  // speakPromptOnDemand → showVoiceDialog when the preferred voice is missing.
+  await page.goto('/en/game/number-match');
+  await startGame(page);
+  const hearBtn = page.getByRole('button', {
+    name: 'Hear the question',
+  });
+  await hearBtn.waitFor({ state: 'visible' });
+  await hearBtn.click();
+  // Radix AlertDialog renders in a portal; wait for the title to confirm
+  // the open transition finished before screenshotting.
+  await page.getByRole('alertdialog').waitFor({ state: 'visible' });
+}
+
+test('@visual voice unavailable dialog', async ({ page }) => {
+  await openVoiceUnavailableDialog(page);
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText(UNAVAILABLE_VOICE_NAME);
+  await expect(
+    dialog.getByRole('link', { name: /open settings/i }),
+  ).toBeVisible();
+  await expect(
+    dialog.getByRole('button', { name: /dismiss/i }),
+  ).toBeVisible();
+  await expect(page).toHaveScreenshot('voice-unavailable-dialog.png', {
+    fullPage: true,
+  });
+});
+
+test('@visual voice unavailable dialog dark', async ({ page }) => {
+  await openVoiceUnavailableDialog(page);
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toContainText(UNAVAILABLE_VOICE_NAME);
+  await setDarkMode(page);
+  await expect(page).toHaveScreenshot(
+    'voice-unavailable-dialog-dark.png',
+    { fullPage: true },
+  );
 });
