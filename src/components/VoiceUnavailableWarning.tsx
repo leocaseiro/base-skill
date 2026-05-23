@@ -12,6 +12,20 @@ export const VoiceUnavailableWarning = () => {
   const preferredVoice = settings.preferredVoiceURI;
 
   const [unavailable, setUnavailable] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    globalThis.addEventListener('online', handleOnline);
+    globalThis.addEventListener('offline', handleOffline);
+    return () => {
+      globalThis.removeEventListener('online', handleOnline);
+      globalThis.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const synth = getSynth();
@@ -28,7 +42,7 @@ export const VoiceUnavailableWarning = () => {
     };
   }, [preferredVoice]);
 
-  if (!unavailable || !preferredVoice) return null;
+  if (!unavailable || !preferredVoice || !isOnline) return null;
 
   return (
     <div

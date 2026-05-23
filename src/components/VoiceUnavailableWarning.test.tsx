@@ -159,4 +159,67 @@ describe('VoiceUnavailableWarning', () => {
       expect.any(Function),
     );
   });
+
+  it('renders null when offline even if preferred voice is missing (OfflineIndicator already covers the user)', () => {
+    settingsMock.preferredVoiceURI = 'Karen';
+    setupSpeechSynthesis([{ name: 'Samantha' }]);
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      'onLine',
+    );
+    Object.defineProperty(globalThis.navigator, 'onLine', {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+    try {
+      const { container } = render(<VoiceUnavailableWarning />);
+      expect(container).toBeEmptyDOMElement();
+    } finally {
+      if (originalDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          'onLine',
+          originalDescriptor,
+        );
+      }
+    }
+  });
+
+  it('re-renders the banner when transitioning offline -> online with preferred voice still missing', () => {
+    settingsMock.preferredVoiceURI = 'Karen';
+    setupSpeechSynthesis([{ name: 'Samantha' }]);
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis.navigator,
+      'onLine',
+    );
+    Object.defineProperty(globalThis.navigator, 'onLine', {
+      value: false,
+      writable: true,
+      configurable: true,
+    });
+    try {
+      render(<VoiceUnavailableWarning />);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      Object.defineProperty(globalThis.navigator, 'onLine', {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+      act(() => {
+        globalThis.dispatchEvent(new Event('online'));
+      });
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert.textContent).toContain('Karen');
+    } finally {
+      if (originalDescriptor) {
+        Object.defineProperty(
+          globalThis.navigator,
+          'onLine',
+          originalDescriptor,
+        );
+      }
+    }
+  });
 });
