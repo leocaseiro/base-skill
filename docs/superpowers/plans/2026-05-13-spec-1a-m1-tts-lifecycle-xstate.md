@@ -189,9 +189,9 @@ src/components/answer-game/InstructionsOverlay/
 - **SpotAll AudioButton + speakPrompt consolidation.** Follow-up tied to PR 1d (#368). Open as `M1 follow-up: SpotAll AudioButton` once #368 lands.
 - **Per-event `customConfig.events` override surface.** Code-only — game designers set it on customConfigs. M2 work.
 - **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of `byGradeBand` defaults across multiple games. Deferred until M2 expands the event vocabulary.
-- **ARIA live region implementation.** Spec §7.3. M2 — ARIA live regions for round outcomes are decoupled from TTS and ship separately.
-- **`round.idle` timer + per-game predicate.** M2 — spec §4.2.
-- **Queue policy (cancel-on-new, drop-debounce for repeated errors).** M2 — spec §4.3. Web Speech's default cancel-on-new behavior covers the common case in M1.
+- **ARIA live region implementation.** M2 — ARIA live regions for round outcomes are decoupled from TTS and ship separately. Known gap surfaced by 2026-05-13 review (P2); see Deferred / Open Questions below. (The new 2026-05-16 spec carries ARIA under §12.2 acceptance criteria but not as a dedicated section.)
+- **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
+- **Queue policy (cancel-on-new, drop-debounce for repeated errors).** M2 — spec §6.3 + §6.4. Web Speech's default cancel-on-new behavior covers the common case in M1.
 - **`game.resume` event emission.** M2 — requires `AnswerGameProvider` remount-detection logic.
 
 ---
@@ -228,7 +228,7 @@ export type Verbosity = 'off' | 'brief' | 'full';
 export type Talkativeness = 'on-demand' | 'helpful' | 'chatty';
 
 export type EventTemplate = {
-  /** i18n keys, one per verbosity mode. Spec §6.1. */
+  /** i18n keys, one per verbosity mode. Spec §9.3 + §9.4. */
   tts: { brief: string; full: string };
   byGradeBand: Record<GradeBand, Verbosity>;
   default: Verbosity;
@@ -318,7 +318,7 @@ type PresetProfile = Partial<
  * pairs to a verbosity. Unmapped pairs return undefined so the caller
  * falls through to `definition.tts[event].byGradeBand` / `.default`.
  *
- * Spec §5.1 + §5.3.
+ * Spec §5.3 (Talkativeness vocabulary) + §9.2 (layer chain).
  */
 const PRESETS: Record<Talkativeness, PresetProfile> = {
   quiet: {
@@ -547,8 +547,8 @@ export interface ResolveVerbosityInput {
 }
 
 /**
- * Resolution chain (spec §5.1, simplified for M1 — no customConfig.events
- * surface yet, that lands in M2):
+ * Resolution chain (spec §9.2, simplified for M1 — no customConfig.events
+ * surface yet, that lands in M2; skin.tts? layer reserved for M3):
  *
  *   1. talkativeness preset override         ← parent/teacher form (M1)
  *   2. definition.tts[event].byGradeBand     ← per-game default
@@ -1803,7 +1803,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Add the `tts:` block + entry action**
 
-Add the `wordSpellTTS` constant before the exported definition (same structure as Task 9 but with `word-spell` i18n keys), and add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to the `playing` state. Use the WordSpell template values from spec §6.2 as a starting point.
+Add the `wordSpellTTS` constant before the exported definition (same structure as Task 9 but with `word-spell` i18n keys), and add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to the `playing` state. Use the WordSpell template values from spec §9.4 (i18n key convention examples) as a starting point.
 
 - [ ] **Step 3b: Remove the legacy `useRoundTTS` caller from WordSpell**
 
@@ -1836,7 +1836,7 @@ By the end of this task, all three XState-migrated games drive round-start speec
 
 - [ ] **Step 1: Add the `tts:` block + entry action**
 
-Same shape as Task 9/10 but with SortNumbers template values (uses `{{direction}}`, `{{from}}`, `{{to}}`, `{{step}}` per spec §6.5). Reference SortNumbers' `round.start` template from spec §10.
+Same shape as Task 9/10 but with SortNumbers template values (uses `{{direction}}`, `{{from}}`, `{{to}}`, `{{step}}` per spec §9.7 interpolation table). Reference SortNumbers' `round.start` template from spec §9.4 (i18n key conventions).
 
 - [ ] **Step 1b: Remove the legacy `useRoundTTS` caller from SortNumbers**
 
@@ -2867,6 +2867,23 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 ---
 
 ## Deferred / Open Questions
+
+### Status note (2026-05-23) — many P1/P2 findings superseded by §13.1.B locks
+
+The findings below were captured by the 2026-05-13 ce-doc-review pass against the 2026-05-13 plan draft (which used the 4-flag `autoSpeak`/`ttsOnDemandAllowed`/`gradeBand`/`talkativeness` per-game scheme). Several have been **resolved or superseded** by the §13.1.B locks closed 2026-05-23 + the Phase B restructure of this plan:
+
+- **P1 — RxDB Settings.ttsEnabled schema migration missing** — **RESOLVED.** Task 5 sub-task 5A now includes the v3→v4 schema migration with full schema declaration (every field, because `additionalProperties: false`) and `settingsMigrations[4]` mapping per spec §5.8. Migration test file path included.
+- **P1 — AdvancedConfigModal.onChange signature** — **RESOLVED.** Task 17B's snippet now uses `onChange({ config: { ...value.config, gradeBand } })` (single-key patch shape).
+- **P1 — Per-game ConfigField descriptors + config-tags.ts not in Task 5 checklist** — **RESOLVED.** Task 5 sub-task 5C per-file checklist now includes `*ConfigFields` arrays, `config-tags.ts`, and `config-tags.test.ts`.
+- **P1 — AudioButton has no specified visual state while speaking** — **STILL DEFERRED** (M2 follow-up; documented as Out-of-scope). The "disabled (hidden when ttsOnDemandAllowed: false)" third state is **gone** per §5.4 (no hard-mute) — only the speaking-indicator P1 (idle vs speaking) remains.
+- **P1 — SpotAllPrompt prop migration underspecified** — **PARTIALLY RESOLVED.** With the §5.4 no-hard-mute lock, SpotAllPrompt's conditional render no longer needs an `ttsOnDemandAllowed` gate — it always renders. The auto-speak `useEffect` gate flips to `useSettings().talkativeness !== 'on-demand'`. PR 1d (#368) still owns the full SpotAll wiring.
+- **P1 — Task 5 commit size: single `git add -A`** — **RESOLVED.** Task 5 sub-tasks now have explicit per-sub-task commit instructions following the baby-step convention.
+- **P2 — ARIA live region** — **STILL OPEN.** See §13.1.D #19 / Task 19.5 candidate; documented as a known gap. The pre-Phase-B framing referenced `autoSpeak: false` (a dropped field); the gap itself is real and unchanged — accessibility-driven silent mode users get no round-outcome announcement in M1.
+- **P2 — Talkativeness "Default" semantics ambiguous** — **MOOT.** §13.1.A renamed the values to `on-demand | helpful | chatty` (no "Default" label). The new labels are self-explanatory.
+- **P2 — gradeBand / talkativeness have no UI surface in Game Options panel** — **PARTIALLY RESOLVED.** `talkativeness` now lives in **SettingsPanel** (Task 17A) where it is reachable via the settings gear; `gradeBand` is in `AdvancedConfigModal` (Task 17B).
+- **P2 — Talkativeness presets include events deferred to M2** — **STILL OPEN.** Task 2's preset table currently covers all events; trimming to M1-active events is a low-priority polish task.
+
+The remaining findings below are kept verbatim from the 2026-05-13 review for traceability. Read each one with the §13.1.B lock context in mind — references to `autoSpeak`/`ttsOnDemandAllowed` should be mentally translated to the new model (`talkativeness !== 'on-demand'` for auto-speech; no gate for taps).
 
 ### From 2026-05-13 ce-doc-review
 
