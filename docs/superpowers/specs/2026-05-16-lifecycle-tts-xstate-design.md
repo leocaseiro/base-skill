@@ -228,48 +228,108 @@ All bus event types use dots, not colons. Refactor in commits 1–4 of PR B (§1
 - `lifecycle:speak` → `lifecycle.speak`
 - `round:shown` (#257) → `round.shown`
 
-`bus.subscribe('game:*')` wildcard becomes `bus.subscribe('game.*')`. The `*` semantics survive.
+`bus.subscribe('game:*')` wildcard becomes `bus.subscribe('game.*')`. The `*` semantics survive **and are sharpened to segment-prefix match**:
+
+- `'game.*'` matches `'game.start'`, `'game.round-advance'`, `'game.end'` — any event whose type begins with `game.` followed by a single segment.
+- `'game.*'` does **not** match `'mini-game.start'` (different top-level namespace) — `mini-game.` is its own segment, not a `game.` sub-segment.
+- The `*` does not cross dot boundaries: `'game.*'` does not match `'game.round.deeper.path'` (would require `'game.**'` if we ever need recursive matching — not in M1).
+
+**Implementation gap:** master's `TypedGameEventBus` ([src/lib/game-event-bus.ts](../../../src/lib/game-event-bus.ts)) currently treats `'game:*'` as a single literal magic string (`this.wildcards` is a flat `Set`). Commit 2 in §11.4 (`chore(bus): update game-event-bus wildcard match for dotted namespaces`) must replace the literal check with a segment-prefix matcher that handles arbitrary `<namespace>.*` subscriptions (`game.*`, `lifecycle.*`, `celebration.*`, `mini-game.*`, etc.). SRS recorder + any new namespace subscribers benefit.
 
 ## 5. Settings Model + Talkativeness + Gates
 
-### 5.1 Settings shape
+### 5.1 Settings shape — flat extension of existing SettingsDoc
+
+M1 extends the **existing flat `SettingsDoc`** ([src/db/schemas/settings.ts](../../../src/db/schemas/settings.ts)). There is **no** `audio: {}` nesting wrapper — all new fields live at the top level alongside `speechRate`, `voiceVolume`, `preferredVoiceURI`, etc. Master's schema declares `additionalProperties: false`, which would reject nested-object additions anyway; flatness is enforced by the schema, not a convention.
+
+**Breaking-change note for readers of the canon (pre-XState) design:**
+
+The two-axis model (`Verbosity = 'off' | 'brief' | 'full'` + `TalkativenessPreset = 'quiet' | 'default' | 'chatty'`) is **removed in M1**. M1 collapses to a single axis:
 
 ```ts
-// src/lib/settings/types.ts (additive)
+// src/lib/settings/types.ts (additive — M1 introduces only this one type)
 export type Talkativeness = 'on-demand' | 'helpful' | 'chatty';
-
-export interface AudioSettings {
-  /** Single user-facing control. Drives autoSpeak + variant resolution. */
-  talkativeness: Talkativeness;
-  /** Locale for voice selection. Falls back to Settings.activeLanguage. */
-  voiceLocale?: string;
-  /** Optional specific voice resolved via getVoices() at speak time. */
-  voiceName?: string;
-  /** Speech volume 0..1. Threaded per-utterance from settings. */
-  voiceVolume: number;
-  /** SFX volume 0..1. Threaded per-play. */
-  soundEffectsVolume: number;
-  /** Privacy: when true, filter voices to localService === true only. */
-  processLocally: boolean;
-}
-
-export interface Settings {
-  activeLanguage: string; // existing — default 'en-AU'
-  audio: AudioSettings;
-  // ... other existing fields
-}
 ```
+
+Migration mapping from canon `TalkativenessPreset` values:
+
+| Canon value | M1 value      | Change                                                                                                                         |
+| ----------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `'quiet'`   | `'on-demand'` | **Semantic shift** — canon's `quiet` allowed brief auto-speech at y1-2; M1's `on-demand` means NO auto-speech ever, taps only. |
+| `'default'` | `'helpful'`   | Kid-friendly rename, no semantic change.                                                                                       |
+| `'chatty'`  | `'chatty'`    | Unchanged.                                                                                                                     |
+
+**Flat `SettingsDoc` shape after M1 (v4):**
+
+```ts
+// src/db/schemas/settings.ts — v4 (additive over master v3, all flat top-level fields)
+export type SettingsDoc = {
+  // === Existing v3 fields, preserved exactly ===
+  id: string;
+  profileId: string;
+  soundEffectsVolume?: number; // existing — 0..1, default 0.8
+  voiceVolume?: number; // existing — 0..1, default 0.8
+  speechRate?: number; // existing — 0.5..2, default 1 (PRESERVE — consumed by useGameTTS.ts:25,33,44,52 + SettingsPanel slider)
+  activeLanguage?: string; // existing — default 'en-AU'; provides voice-locale fallback (no separate voiceLocale field)
+  showSubtitles?: boolean;
+  themeId?: string;
+  preferredVoiceURI?: string; // existing — voice picker dropdown selection (replaces canon's `voiceName`)
+  preferredVoiceDeviceId?: string; // existing — preserved
+  tapForgivenessThreshold?: number;
+  tapForgivenessTimeMs?: number;
+  updatedAt: string;
+  // === REMOVED in v4 ===
+  // ttsEnabled?: boolean  — migrated to `talkativeness` (see §5.8)
+  // === NEW in v4 ===
+  talkativeness?: Talkativeness; // NEW — single-axis user control (see §5.3)
+  processLocally?: boolean; // NEW — privacy gate filtering the voice picker (see §5.7)
+};
+```
+
+**Field naming follows master, not canon.** Canon used `voiceName` and `voiceLocale`; master already had `preferredVoiceURI` (voice picker) and `activeLanguage` (locale). M1 reuses both — **no `voiceName` or `voiceLocale` fields are added**.
+
+**Focused subset type for TTS/audio consumers** (avoids importing the full SettingsDoc into every audio file):
+
+```ts
+// src/lib/lifecycle-tts/types.ts
+export type TtsSettings = Pick<
+  SettingsDoc,
+  | 'talkativeness'
+  | 'processLocally'
+  | 'speechRate'
+  | 'voiceVolume'
+  | 'soundEffectsVolume'
+  | 'preferredVoiceURI'
+  | 'preferredVoiceDeviceId'
+  | 'activeLanguage'
+>;
+```
+
+The machine, speaker, and sound-effect player consume `TtsSettings`, not the full `SettingsDoc`. The Provider extracts `TtsSettings` from the `useSettings()` result (§5.5) before passing to the actor.
 
 ### 5.2 Defaults
 
+Existing v3 field defaults are preserved by master's per-field `default:` JSON-schema entries (`soundEffectsVolume: 0.8`, `voiceVolume: 0.8`, `speechRate: 1`, `tapForgivenessThreshold: 17`, `tapForgivenessTimeMs: 150`, `showSubtitles: true`, etc.) — M1 inherits them as-is.
+
+M1 introduces defaults only for the two new fields:
+
 ```ts
-export const defaultAudioSettings: AudioSettings = {
-  talkativeness: 'helpful', // safe middle
-  voiceLocale: undefined, // → activeLanguage → 'en-AU'
-  voiceName: undefined, // → first local voice for the locale
-  voiceVolume: 0.8,
-  soundEffectsVolume: 0.8,
-  processLocally: true, // privacy-safe default
+// src/db/schemas/settings.ts (v4 — additive default entries on new fields)
+properties: {
+  // ... existing v3 property defaults preserved
+  talkativeness:  { type: 'string', enum: ['on-demand', 'helpful', 'chatty'], default: 'helpful' },
+  processLocally: { type: 'boolean', default: true }, // privacy-safe default
+}
+```
+
+The `useSettings()` hook ([src/db/hooks/useSettings.ts](../../../src/db/hooks/useSettings.ts)) already merges schema defaults with a `DEFAULT_SETTINGS` constant — M1 adds the new defaults there as well so first-paint (before RxDB resolves) carries the same values:
+
+```ts
+// useSettings.ts DEFAULT_SETTINGS — add M1 fields
+const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
+  // ... existing
+  talkativeness: 'helpful',
+  processLocally: true,
 };
 ```
 
@@ -287,19 +347,51 @@ export const defaultAudioSettings: AudioSettings = {
 
 The OS volume slider is the escape hatch for "completely silent." We do not model `(autoSpeak: false, ttsOnDemandAllowed: false)` as a distinct setting. Speaker taps always play; the tooltip on the Talkativeness slider explains.
 
-### 5.5 Reactivity — actor receives `SETTINGS_CHANGED`
+### 5.5 Reactivity — actor receives `SETTINGS_CHANGED` via the canonical `useSettings()` hook
 
-Single subscription wired in the Provider relays settings changes:
+Reuse the existing canonical hook at [src/db/hooks/useSettings.ts](../../../src/db/hooks/useSettings.ts) — it wraps `db.settings.findOne(ANONYMOUS_SETTINGS_ID).$` (RxDB observable) in `useRxQuery`, merges defaults with the live doc, and returns `{ settings, update }`. **Do not invent a new subscription pattern.**
+
+The Provider extracts a `TtsSettings` slice (§5.1) and forwards it to the actor whenever it changes:
 
 ```tsx
-useEffect(() => {
-  return settingsStore.subscribe((settings) => {
-    actorRef.send({ type: 'SETTINGS_CHANGED', settings });
+// src/lib/lifecycle-tts/Provider.tsx
+import { useSettings } from '@/db/hooks/useSettings';
+
+const LifecycleTtsProvider = ({ children }: PropsWithChildren) => {
+  const { settings } = useSettings();
+  const actorRef = useActorRef(lifecycleTtsMachine, {
+    input: { settings: pickTtsSettings(settings) },
   });
-}, [actorRef]);
+
+  useEffect(() => {
+    actorRef.send({
+      type: 'SETTINGS_CHANGED',
+      settings: pickTtsSettings(settings),
+    });
+  }, [actorRef, settings]);
+
+  return (
+    <LifecycleTtsContext.Provider value={actorRef}>
+      {children}
+    </LifecycleTtsContext.Provider>
+  );
+};
+
+const pickTtsSettings = (
+  s: ReturnType<typeof useSettings>['settings'],
+): TtsSettings => ({
+  talkativeness: s.talkativeness,
+  processLocally: s.processLocally,
+  speechRate: s.speechRate,
+  voiceVolume: s.voiceVolume,
+  soundEffectsVolume: s.soundEffectsVolume,
+  preferredVoiceURI: s.preferredVoiceURI,
+  preferredVoiceDeviceId: s.preferredVoiceDeviceId,
+  activeLanguage: s.activeLanguage,
+});
 ```
 
-No subscription churn — the actor's settings live in machine context, not in a hook's dep array. Eliminates plan-365's P2 "bus subscription churns on every config change" finding.
+No subscription churn beyond the RxDB observable that `useSettings()` already manages — the actor's settings live in machine context, not in a per-hook dep array elsewhere. Eliminates plan-365's P2 "bus subscription churns on every config change" finding.
 
 ### 5.6 Talkativeness change mid-flight
 
@@ -320,31 +412,90 @@ No subscription churn — the actor's settings live in machine context, not in a
 
 The `localService` field is **browser-reported and not fully reliable** across browsers — some over-report or under-report. The setting is **best-effort privacy**, not a guarantee. Modal copy explicitly acknowledges this.
 
-### 5.8 RxDB schema migration v3 → v4
+### 5.8 RxDB schema migration v3 → v4 — full schema
+
+Because master enforces `additionalProperties: false`, the v4 schema must declare **every** field (existing + new) explicitly. Shown in full:
 
 ```ts
 // src/db/schemas/settings.ts
-version: 4,
-properties: {
-  // ... existing
-  talkativeness:  { type: 'string', enum: ['on-demand', 'helpful', 'chatty'] },
-  processLocally: { type: 'boolean' },
-  voiceLocale:    { type: 'string' },
-  // ttsEnabled removed — see migration
-}
+export const settingsSchema: RxJsonSchema<SettingsDoc> = {
+  version: 4, // bumped from 3
+  primaryKey: 'id',
+  type: 'object',
+  properties: {
+    // === Preserved from v3 (verbatim) ===
+    id: { type: 'string', maxLength: 36 },
+    profileId: { type: 'string', maxLength: 36 },
+    soundEffectsVolume: {
+      type: 'number',
+      minimum: 0,
+      maximum: 1,
+      default: 0.8,
+    },
+    voiceVolume: {
+      type: 'number',
+      minimum: 0,
+      maximum: 1,
+      default: 0.8,
+    },
+    speechRate: {
+      type: 'number',
+      minimum: 0.5,
+      maximum: 2,
+      default: 1,
+    }, // PRESERVE
+    activeLanguage: { type: 'string' },
+    showSubtitles: { type: 'boolean', default: true },
+    themeId: { type: 'string' },
+    preferredVoiceURI: { type: 'string' },
+    preferredVoiceDeviceId: { type: 'string' },
+    tapForgivenessThreshold: {
+      type: 'number',
+      minimum: 0,
+      maximum: 100,
+      default: 17,
+    },
+    tapForgivenessTimeMs: {
+      type: 'number',
+      minimum: 0,
+      maximum: 500,
+      default: 150,
+    },
+    updatedAt: { type: 'string', format: 'date-time' },
+    // === NEW in v4 ===
+    talkativeness: {
+      type: 'string',
+      enum: ['on-demand', 'helpful', 'chatty'],
+      default: 'helpful',
+    },
+    processLocally: { type: 'boolean', default: true },
+    // === REMOVED in v4 ===
+    // ttsEnabled was removed; see migrationStrategies[4]
+  },
+  required: ['id', 'profileId', 'updatedAt'],
+  additionalProperties: false,
+};
 
-migrationStrategies: {
-  4: (oldDoc) => ({
-    ...oldDoc,
-    talkativeness: oldDoc.ttsEnabled === false ? 'on-demand' : 'helpful',
-    processLocally: true,
-    voiceLocale: undefined,
-    ttsEnabled: undefined, // drop
-  }),
-}
+export const settingsMigrations = {
+  4: (oldDoc: SettingsDocV3 & Record<string, unknown>): SettingsDoc => {
+    const { ttsEnabled, ...rest } = oldDoc;
+    return {
+      ...rest,
+      talkativeness: ttsEnabled === false ? 'on-demand' : 'helpful',
+      processLocally: true,
+    } as SettingsDoc;
+  },
+};
 ```
 
-Existing users with `ttsEnabled: false` migrate to `talkativeness: 'on-demand'` (preserves silence intent; taps still work). Migration test mirrors `src/db/migrations/word-spell-multi-level.collection.test.ts`.
+**Migration semantics:**
+
+- `ttsEnabled: false` (v3) → `talkativeness: 'on-demand'` (v4) — preserves the user's intent for silence; speaker taps still work (taps are not gated by `talkativeness`).
+- `ttsEnabled: true` or absent (v3) → `talkativeness: 'helpful'` (v4) — the safe default; auto-speech enabled at the kid-friendly middle position.
+- All other existing fields (`speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `voiceVolume`, `soundEffectsVolume`, etc.) are passed through untouched via `...rest`.
+- `processLocally` defaults to `true` for privacy.
+
+Migration test mirrors [src/db/migrations/word-spell-multi-level.collection.test.ts](../../../src/db/migrations/word-spell-multi-level.collection.test.ts) and asserts both branches of the `ttsEnabled` ternary plus untouched-field preservation.
 
 ## 6. XState Machine + Queue Policy
 
@@ -357,11 +508,11 @@ import { setup, fromPromise, assign } from 'xstate';
 export const lifecycleTtsMachine = setup({
   types: {} as {
     context: TtsContext;
-    input: { settings: Settings };
+    input: { settings: TtsSettings };
     events:
       | { type: 'SPEAK_AUTO'; event: LifecycleEvent; payload: SpeakPayload; subject?: string | number }
       | { type: 'SPEAK_USER'; event: LifecycleEvent; payload: SpeakPayload; variant: Talkativeness; subject?: string | number }
-      | { type: 'SETTINGS_CHANGED'; settings: Settings }
+      | { type: 'SETTINGS_CHANGED'; settings: TtsSettings }
       | { type: 'CANCEL' };
   },
   actors: {
@@ -369,7 +520,7 @@ export const lifecycleTtsMachine = setup({
     soundEffectPlayer: fromPromise<void, SoundEffectRequest>(async ({ input }) => soundEffectAdapter.play(input)),
   },
   guards: {
-    autoAllowed: ({ context }) => context.settings.audio.talkativeness !== 'on-demand',
+    autoAllowed: ({ context }) => context.settings.talkativeness !== 'on-demand',
     speechNotThrottled: ({ context, event }) => /* see §6.4 */,
     sfxNotThrottled: ({ context, event }) => /* see §6.4 */,
     hasQueuedSpeech: ({ context }) => context.queuedSpeech !== null,
@@ -576,7 +727,7 @@ This signal lets game machines gate transitions on speech completion (§10.2) an
 export interface Speaker {
   speak(utterance: SpeechUtterance): Promise<void>; // resolves on natural end
   cancel(): void; // sync; rejects in-flight promise with 'cancelled'
-  updateSettings(next: AudioSettings): void; // for voice + volume changes
+  updateSettings(next: TtsSettings): void; // for voice + volume + rate changes
   dispose(): void; // cleanup timers + listeners
 }
 
@@ -607,9 +758,9 @@ export class WebSpeechSpeaker implements Speaker {
   private currentReject: ((err: Error) => void) | null = null;
   private watchdogTimer: ReturnType<typeof setTimeout> | null = null;
   private keepaliveTimer: ReturnType<typeof setInterval>;
-  private settings: AudioSettings;
+  private settings: TtsSettings;
 
-  constructor(settings: AudioSettings) {
+  constructor(settings: TtsSettings) {
     this.settings = settings;
     this.warmVoiceCache();
     this.keepaliveTimer = setInterval(
@@ -618,7 +769,7 @@ export class WebSpeechSpeaker implements Speaker {
     );
   }
 
-  updateSettings(next: AudioSettings) {
+  updateSettings(next: TtsSettings) {
     this.settings = next;
   }
 
@@ -640,7 +791,7 @@ export class WebSpeechSpeaker implements Speaker {
       const u = new SpeechSynthesisUtterance(utterance.text);
       const voice = this.pickVoice(
         utterance.locale,
-        utterance.voiceName,
+        utterance.voiceURI,
       );
       if (voice) {
         u.voice = voice;
@@ -648,8 +799,8 @@ export class WebSpeechSpeaker implements Speaker {
       } else {
         u.lang = utterance.locale;
       }
-      u.volume = this.settings.voiceVolume;
-      u.rate = 1;
+      u.volume = this.settings.voiceVolume ?? 0.8;
+      u.rate = this.settings.speechRate ?? 1; // PRESERVE existing speechRate (range 0.5..2)
       u.pitch = 1;
       u.onend = () => this.finalize(resolve);
       u.onerror = (e) =>
@@ -717,15 +868,15 @@ export class WebSpeechSpeaker implements Speaker {
 
   private pickVoice(
     locale: string,
-    voiceName: string | undefined,
+    voiceURI: string | undefined,
   ): SpeechSynthesisVoice | undefined {
     const candidates = [...this.voiceCache.values()].filter((v) =>
       this.settings.processLocally ? v.localService === true : true,
     );
-    if (voiceName) {
+    if (voiceURI) {
       const exact = candidates.find(
         (v) =>
-          v.name === voiceName &&
+          v.voiceURI === voiceURI &&
           v.lang.startsWith(locale.split('-')[0]),
       );
       if (exact) return exact;
@@ -828,8 +979,8 @@ Multi-turn scenario: user drags `soundEffectsVolume` from 0.8 → 0.3 mid-round.
 
 - `voiceVolume` — today: 0–100% slider (default 80). M1: unchanged.
 - `soundEffectsVolume` — today: 0–100% slider (default 80). M1: unchanged.
-- `voiceName` — today: voice picker dropdown. M1: filtered by `voice.localService` when `processLocally: true`.
-- `voiceLocale` — today: absent. M1: new dropdown (locale before voice picker); defaults to `activeLanguage`.
+- `preferredVoiceURI` — today: voice picker dropdown. M1: filtered by `voice.localService` when `processLocally: true`. (No rename — reuse master's existing field; canon's proposed `voiceName` is dropped.)
+- `activeLanguage` — today: locale selector exists. M1: ensure the voice picker re-filters when this changes; no new `voiceLocale` field is added (the existing `activeLanguage` is the source of truth for voice locale).
 - `talkativeness` — today: absent (was `ttsEnabled` toggle). M1: 3-stop slider replaces `ttsEnabled` — Shhh 🤫 / Talk a bit 💬 / Talk a lot 🗣️.
 - `processLocally` — today: absent. M1: new toggle below voice picker; toggling off triggers privacy modal.
 
@@ -1047,6 +1198,8 @@ Four layers, walked top to bottom. First non-`undefined` binding wins.
 4. defaults.tts[event]          — global fallback (mostly INHERITED)
 ```
 
+**In M1, `layers.skin` is always `undefined`** (no themed skins ship yet); the resolver fall-through cost for layer 2 is one branch in a hot-path function that is already pure, already memoizable, and already needed for layer 1 (`customConfig`). Reserving the layer in the resolver + type now means the M3 skin feature is purely additive (no resolver refactor, no type-shape change, no migration). See §13 follow-up #2 for the M3 work.
+
 ```ts
 export interface ResolutionLayers {
   customConfig?: EventBindingsMap;
@@ -1215,6 +1368,8 @@ Deferred events without M1 keys (`game.resume`, `round.idle`, `round.celebrate`,
 
 ## 10. round.idle + Animation Sync + Mini-Game Reservations
 
+> **Reviewer note — M1 scope philosophy.** This section (and the spec generally) deliberately includes more architectural rationale, forward-looking examples, and pattern-locked decisions than a minimal-M1 spec would. M1 is greenfield foundational work for **four explicit goals**: (1) migrate 100% to XState, (2) allow every game to be fully customised by skin (less repetition), (3) prepare for SRS, (4) integrate mini-games between rounds/levels. Reviewers should expect §10.2 (state-machine flow-control example for Spec 1b phoneme explain), §10.3 (animation-sync example for `useTileHighlight`), §10.4 (mini-game taxonomy reservations), and §9.2's `skin.tts?` resolution layer to be present **by design** even when no M1 consumer exists yet. These surfaces are ADRs locking the architecture so PR 1b+/SRS v1/M3 work doesn't relitigate dismissal contracts, payload shapes, event names, or resolver layers under time pressure. PR size and review difficulty are not reasons to cut.
+
 ### 10.1 `round.idle` gradeBand-aware timer
 
 Per canon §4.2, adopted directly:
@@ -1309,6 +1464,8 @@ CSS class toggle (`tile--speaking`) is applied from speak start to played end. N
 
 ### 10.4 Mini-game reservations
 
+**Why M1 ships the reservations even with no firing code.** Mini-game integration between rounds/levels is one of the **four M1 core goals** (see §10 preamble). The taxonomy + dismissal contract are locked here so PR 1b+ adds firing code without re-litigating event names, dismissal flow (`bus.emit({ type: 'lifecycle.cancel' })`), default priorities, or whether the game machine needs a `roundTransition.celebrate` sub-state (it doesn't — confirmed M1 decision). PR 1b+ work happens under different time pressure than this spec session; locking the contract now preserves coherence across the gap.
+
 Mini-games (DinoEggHatch, FireworksPainter, BubblePop, IceCreamPop, CoinTap) are PR 1b+ scope. M1 reserves the event taxonomy:
 
 ```ts
@@ -1327,6 +1484,8 @@ Real mini-games dismiss via `bus.emit({ type: 'lifecycle.cancel' })` from their 
 ### 11.1 Single combined PR
 
 One PR, ~80 files, 25 commits for per-commit review. Commits 1–4 are the bus colon→dot rename (mechanical, low-risk); commits 5–25 are the M1 functional work.
+
+The rename is **bundled** into this PR rather than split into a prerequisite PR. Rationale: the rename is mechanical (no semantic change beyond the segment-prefix wildcard upgrade in commit 2 — see §4.4), each of the 25 commits leaves CI green, and splitting would force a rebase of all 21 functional commits the moment a prerequisite rename PR merges. Per-commit review handles the "large PR" cognitive-load concern: every `chore(bus):`-prefixed commit (1–4) is visually distinct from `feat(*):` commits (5–25), so a reviewer can skim or skip the mechanical commits as one unit. This is consistent with the M1 scope philosophy in the §10 preamble: PR size and review difficulty are not reasons to split work that belongs together.
 
 ### 11.2 New files
 
@@ -1378,7 +1537,8 @@ src/db/migrations/
 
 - `src/types/game-events.ts` — add 3 new event interfaces + 17 `LifecycleEvent` values + `subject` field; rename colon types to dots.
 - `src/lib/game-event-bus.ts` — wildcard match supports `'game.*'` etc.
-- `src/db/schemas/settings.ts` — v3 → v4 schema bump; add `talkativeness`, `processLocally`, `voiceLocale`; migration strategy.
+- `src/db/schemas/settings.ts` — v3 → v4 schema bump; add **flat top-level** `talkativeness` + `processLocally`; preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId` exactly; remove `ttsEnabled` via migration. Full v4 schema shown in §5.8 (every field declared explicitly because `additionalProperties: false`).
+- `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `processLocally: true` so first-paint matches the v4 schema defaults (no code-path change; same RxJS observable wrapping pattern reused).
 - `src/db/create-database.ts` — schema version bump.
 - `src/components/answer-game/answer-game-reducer.ts` — emit `lifecycle.speak` for `round.*` + `game.*` events via SideEffect.
 - `src/components/answer-game/AnswerGameProvider.tsx` — emit `lifecycle.speak` for `game.start`, `game.resume` (remount detect).
