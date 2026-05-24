@@ -224,6 +224,12 @@ feedback tokens use the new `--skin-tile-{state}-*` naming convention (R2).
   /* ── Bank-hole tokens ────────────────────────────────────── */
   --skin-bank-hole-bg: rgb(from var(--muted) r g b / 0.6);
   --skin-bank-hole-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  /* F-26: image-based override surface — skins set --skin-bank-hole-image
+   * to a `url(...)` to provide an SVG/raster overlay (e.g. Dragon Cave's
+   * stone-cut hole). Defaults to `none` so Classic has no image. */
+  --skin-bank-hole-image: none;
+  --skin-bank-hole-image-size: 100% 100%;
+  --skin-bank-hole-image-repeat: no-repeat;
 
   /* ── Hover-preview tokens ────────────────────────────────── */
   --skin-hover-border-color: var(--bs-primary);
@@ -416,6 +422,12 @@ export const SKIN_TOKENS = {
   // ── Bank hole ───────────────────────────────────────────
   bankHoleBg: '--skin-bank-hole-bg',
   bankHoleShadow: '--skin-bank-hole-shadow',
+  /** F-26: image-based override surface for skins that want an SVG/raster
+   *  overlay on bank holes. Default `none`. Use with `bankHoleImageSize`
+   *  + `bankHoleImageRepeat`. */
+  bankHoleImage: '--skin-bank-hole-image',
+  bankHoleImageSize: '--skin-bank-hole-image-size',
+  bankHoleImageRepeat: '--skin-bank-hole-image-repeat',
 
   // ── Hover preview ───────────────────────────────────────
   hoverBorderColor: '--skin-hover-border-color',
@@ -1908,11 +1920,18 @@ remove tokens that `:root` inheritance now handles:
 tokens: {
   '--skin-bank-hole-bg': 'transparent',
   '--skin-bank-hole-shadow': 'none',
+  /* F-26: image-based bank-hole override (was an !important CSS rule
+   * targeting [data-tile-bank-hole]; now lives here as a token). */
+  '--skin-bank-hole-image':
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='12' stroke-dasharray='12 6' stroke-linejoin='round' opacity='0.55'/%3E%3C/svg%3E\")",
   '--skin-slot-bg': 'transparent',
   '--skin-slot-border': 'transparent',
   '--skin-tile-bg': 'transparent',
   '--skin-tile-shadow': 'none',
-  '--skin-tile-text-shadow': 'none',
+  '--skin-tile-text-shadow':
+    '0 1px 0 rgba(255, 240, 200, 0.4), 0 -1px 0 rgba(0, 0, 0, 0.3)',
+  '--skin-tile-text': '#3a200c',
+  '--skin-tile-border': 'transparent',
   '--skin-question-audio-bg': '#f7d168',
   '--skin-question-audio-fg': '#000000',
   '--skin-hud-gap': '0.3rem',
@@ -1927,8 +1946,44 @@ tokens: {
 },
 ```
 
-> **Token count target:** ~15 tokens, down from 21. The 6 removed tokens were
-> state-feedback transparent overrides that R7 eliminates.
+> **Token count delta:**
+>
+> - Original Dragon Cave Keep list (pre-migration): 18 tokens
+> - Remove (R7 — state-feedback transparent overrides now inherit from `:root`):
+>   `--skin-correct-bg`, `--skin-correct-border`, `--skin-wrong-bg`,
+>   `--skin-wrong-border`, `--skin-hover-border-color`,
+>   `--skin-hover-border-style` (6 removed; only some were in the original
+>   18-token Keep list — see Dragon Cave source for the actual starting
+>   set)
+> - Add (F-26 — previously `!important` rules in scoped CSS, now tokenized):
+>   `--skin-bank-hole-image`, `--skin-tile-text`, `--skin-tile-border`
+>   (3 added)
+> - Net: ~21 tokens after migration. Exact final count depends on the
+>   pre-migration starting set; verify with the F-27 gate below.
+>
+> **F-27 reconciliation gate (run before commit):**
+>
+> ```bash
+> # Count the actual tokens after editing
+> node -e "console.log(Object.keys(require('./src/games/word-spell/skins/dragon-cave-skin').dragonCaveSkin.tokens).length)"
+>
+> # Compare the actual name set against the Keep list above
+> diff \
+>   <(node -e 'console.log(Object.keys(require("./src/games/word-spell/skins/dragon-cave-skin").dragonCaveSkin.tokens).sort().join("\n"))') \
+>   <(printf '%s\n' \
+>       '--skin-bank-hole-bg' '--skin-bank-hole-shadow' '--skin-bank-hole-image' \
+>       '--skin-slot-bg' '--skin-slot-border' \
+>       '--skin-tile-bg' '--skin-tile-shadow' '--skin-tile-text-shadow' \
+>       '--skin-tile-text' '--skin-tile-border' \
+>       '--skin-question-audio-bg' '--skin-question-audio-fg' \
+>       '--skin-hud-gap' '--skin-hud-dot-size' '--skin-hud-dot-fill' \
+>       '--skin-hud-dot-empty' '--skin-hud-dot-border' '--skin-hud-dot-current-border' \
+>       '--skin-hud-fraction-color' '--skin-hud-fraction-sep-color' '--skin-hud-level-color' \
+>       | sort)
+> ```
+>
+> Any delta indicates an unintentional add/remove — document in commit
+> message before proceeding.
 
 - [ ] **Step 1b: Remove obsolete inheritance comment**
 
@@ -1937,35 +1992,86 @@ that warns classic-skin tokens are NOT inherited by other skins. The `:root`
 architecture makes this warning obsolete — all tokens now inherit from `:root`
 by default, and skins override only what they change.
 
-- [ ] **Step 2: Review `!important` overrides**
+- [ ] **Step 2: Eliminate every `!important` declaration (F-26)**
 
-Several `!important` declarations in Dragon Cave's scoped CSS can now use
-token overrides instead:
+The goal of this step is **zero `!important` in dragon-cave-skin.tsx**.
+After Task 2 simplified `tileStyle()` and after F-26 introduced
+`--skin-bank-hole-image*` tokens, every existing `!important` either
+becomes a token override (cascade wins) or is replaced by class+attribute
+specificity (the cascade naturally wins via `.skin-dragon-cave [...]`
+beating bare `[...]`).
 
-**Container-level `!important` (lines ~various):**
+**Button-level `!important` block** (currently L420-427 in
+dragon-cave-skin.tsx scoped CSS) — full before/after:
 
-- `background: transparent !important` → handled by
-  `--skin-tile-bg: transparent` (token override on container scope)
-- `box-shadow: none !important` → handled by
-  `--skin-tile-shadow: none`
-- `border: 0 !important` → handled by `--skin-tile-border: transparent`
+```css
+/* BEFORE */
+.skin-dragon-cave [data-zone-index] button {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  text-shadow:
+    0 1px 0 rgba(255, 240, 200, 0.4),
+    0 -1px 0 rgba(0, 0, 0, 0.3) !important;
+  color: #3a200c !important;
+  isolation: isolate;
+}
 
-**Button-level `!important` (lines ~418-427):**
+/* AFTER — delete this entire block. */
+/* All 5 properties are now handled by token overrides in the Keep list
+ * above: --skin-tile-bg, --skin-tile-shadow, --skin-tile-border,
+ * --skin-tile-text-shadow, --skin-tile-text. The `isolation: isolate`
+ * declaration, if still needed, moves to a different scoped rule (no
+ * !important required). */
+```
 
-- Button `background: ... !important` → convert to token override via
-  `--skin-tile-bg` scoped to Dragon Cave's container
-- Button `border: ... !important` → handled by `--skin-tile-border`
+**Bank-hole `!important` block** (currently L487-491 in the scoped CSS) —
+full before/after:
 
-> **Critical:** Any `!important` on `background`, `border-color`, `color`, or
-> `box-shadow` of tile elements (buttons) MUST be removed — these are the
-> exact properties that `[data-tile-state]` rules target. Leaving them blocks
-> state feedback entirely.
+```css
+/* BEFORE */
+.skin-dragon-cave [data-tile-bank-hole] {
+  background-image: url('data:image/svg+xml,...') !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+}
 
-Update the scoped CSS string to remove these `!important` declarations where
-the token system now handles them. Keep `!important` only for properties that
-genuinely need to override component-level styles (e.g., stone texture
-`background-image` on `.dragon-cave-stone` which must override the tile
-`background`).
+/* AFTER — delete this entire block. */
+/* All 4 properties are now handled by tokens:
+ *   --skin-bank-hole-image (Keep list)        → background-image
+ *   --skin-bank-hole-image-size (root default) → background-size
+ *   --skin-bank-hole-image-repeat (root default) → background-repeat
+ *   --skin-bank-hole-bg (Keep list)            → background-color
+ * The bank-hole component CSS reads these tokens — no scoped rule needed
+ * for Dragon Cave anymore. */
+```
+
+**Component-side change needed:** the bank-hole component's own CSS must
+consume the new tokens. Find the rule that styles `[data-tile-bank-hole]`
+in the component source and update:
+
+```css
+/* In the bank-hole component's CSS (not in Dragon Cave's skin file) */
+[data-tile-bank-hole] {
+  background-image: var(--skin-bank-hole-image);
+  background-size: var(--skin-bank-hole-image-size);
+  background-repeat: var(--skin-bank-hole-image-repeat);
+  background-color: var(--skin-bank-hole-bg);
+  box-shadow: var(--skin-bank-hole-shadow);
+}
+```
+
+> **Acceptance check:** after this step,
+> `grep -c '!important' src/games/word-spell/skins/dragon-cave-skin.tsx`
+> must return `0`. If any `!important` remains, justify in the commit
+> message (it should not happen — every known case is covered above).
+>
+> **Why this matters:** any `!important` on `background`, `border-color`,
+> `color`, or `box-shadow` of tile elements would BLOCK `[data-tile-state]`
+> rules from applying state feedback. The F-26 elimination is what makes
+> state feedback work in Dragon Cave; this is the fix for the
+> "bank-reject invisible" bug.
 
 - [ ] **Step 2b: Update `.animate-shake` selector to `[data-shaking]`**
 
@@ -1995,9 +2101,149 @@ Start the dev server and verify Dragon Cave skin in the browser:
 git add src/games/word-spell/skins/dragon-cave-skin.tsx
 git commit -m "refactor(skin): migrate Dragon Cave to new token architecture
 
-Removes 6 state-feedback transparent overrides (R7 makes them
-unnecessary). Token count: 21 → ~15. Bank-reject now visible without
-CSS hacks. Reduces !important usage where token cascade handles it."
+Removes R7-obsolete state-feedback transparent overrides; adds
+F-26 explicit overrides for properties that were !important rules
+(--skin-tile-text, --skin-tile-border, --skin-bank-hole-image,
+--skin-tile-text-shadow). Net token count documented per F-27 gate.
+Bank-reject now visible (was hidden by !important pre-migration).
+Zero !important remaining in dragon-cave-skin.tsx."
+```
+
+---
+
+## Task 13.5: Storybook + VR coverage
+
+Per project convention ([CLAUDE.md](../../CLAUDE.md) Storybook + VR rules
+for UI components), every changed presentation component needs a Storybook
+story and VR coverage. This task is the explicit home for that work.
+
+**Files (per the File Structure table at top):**
+
+- Create: `src/components/answer-game/Slot/slot-state-styles.stories.tsx`
+- Create: `tests-vr/skin-tokens.spec.ts`
+- Modify: `src/components/answer-game/Slot/Slot.stories.tsx`
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx`
+- Modify: `src/games/word-spell/skins/dragon-cave-skin.stories.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx`
+
+> **Skill invocation:** This task's `.stories.tsx` files are governed by
+> the `write-storybook` skill. The VR specs are governed by the
+> `write-e2e-vr-tests` skill. Load both before editing.
+
+- [ ] **Step 1: New story — slot-state-styles.stories.tsx**
+
+A single Storybook story that renders the inner-slot div with every
+`SlotTileState` value (empty / correct / wrong / pickup / ejecting). One
+Storybook control (radio) for the state. This is the canonical VR baseline
+for the `[data-tile-state]` CSS rules.
+
+```tsx
+// src/components/answer-game/Slot/slot-state-styles.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import type { SlotTileState } from '../tile-state';
+
+const meta: Meta = {
+  title: 'AnswerGame/Slot/StateStyles',
+  argTypes: {
+    state: {
+      control: { type: 'radio' },
+      options: [
+        'empty',
+        'correct',
+        'wrong',
+        'pickup',
+        'ejecting',
+      ] satisfies SlotTileState[],
+    },
+  },
+};
+export default meta;
+
+export const Playground: StoryObj<{ state: SlotTileState }> = {
+  args: { state: 'empty' },
+  render: ({ state }) => (
+    <div
+      data-tile-state={state}
+      style={{
+        width: 80,
+        height: 80,
+        borderRadius: 'var(--skin-tile-radius)',
+        background: 'var(--skin-tile-effective-bg)',
+        boxShadow: 'var(--skin-tile-shadow)',
+        color: 'var(--skin-tile-text)',
+      }}
+    >
+      {state}
+    </div>
+  ),
+};
+```
+
+- [ ] **Step 2: Modify existing stories — add data-tile-state coverage**
+
+For each of the 4 modified story files (Slot, LetterTileBank,
+SortNumbersTileBank, NumeralTileBank):
+
+- Add a control or fixture that exercises the new `data-tile-state`
+  attribute on the rendered element.
+- For bank-tile stories: a control for `BankTileState` (`'idle' | 'reject'`).
+- For Slot.stories: extend the existing controls to cycle through all 5
+  `SlotTileState` values.
+
+For `dragon-cave-skin.stories.tsx`: add a story that triggers
+bank-reject feedback so the now-visible reject state has a baseline.
+
+- [ ] **Step 3: New VR spec — tests-vr/skin-tokens.spec.ts**
+
+```ts
+// tests-vr/skin-tokens.spec.ts
+import { test, expect } from '@playwright/test';
+
+const STORIES = [
+  'answer-game-slot-state-styles--playground',
+  'answer-game-slot--state-cycle',
+  'games-word-spell-letter-tile-bank--state-cycle',
+  'games-sort-numbers-sort-numbers-tile-bank--state-cycle',
+  'games-number-match-numeral-tile-bank--state-cycle',
+  'games-word-spell-skins-dragon-cave--bank-reject',
+];
+
+for (const storyId of STORIES) {
+  test(`skin-tokens VR — ${storyId}`, async ({ page }) => {
+    await page.goto(`/iframe.html?id=${storyId}`);
+    await expect(page).toHaveScreenshot(`${storyId}.png`);
+  });
+}
+```
+
+- [ ] **Step 4: Generate baselines**
+
+```bash
+# Requires Docker (per project rule) for consistent Linux/Chromium rendering
+yarn test:vr:update
+```
+
+The first run produces baseline PNGs in `tests-vr/skin-tokens.spec.ts-snapshots/`.
+Inspect each to confirm it's the expected rendering before committing.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/answer-game/Slot/slot-state-styles.stories.tsx \
+  src/components/answer-game/Slot/Slot.stories.tsx \
+  src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx \
+  src/games/word-spell/skins/dragon-cave-skin.stories.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx \
+  tests-vr/skin-tokens.spec.ts \
+  tests-vr/skin-tokens.spec.ts-snapshots/
+git commit -m "test(skin): add Storybook + VR coverage for data-tile-state (F-1)
+
+Per project rule (UI components → Storybook + VR), add stories rendering
+every SlotTileState and BankTileState value, plus a Dragon Cave story
+for the now-visible bank-reject state. New VR spec generates baselines
+for all stories under tests-vr/skin-tokens.spec.ts."
 ```
 
 ---
@@ -2053,13 +2299,61 @@ Start dev server (`yarn dev`) and test each game:
 - Domino/dice tiles render correctly
 - tileDecoration works if a skin provides it
 
-- [ ] **Step 5: Push and verify CI**
+- [ ] **Step 4.5: VR baseline regeneration (F-28)**
+
+Several visual changes in this migration are intentional and will move VR
+baselines: (1) Task 1's gradient promotion of `--skin-tile-bg`; (2) Task 9's
+inline-style → CSS-rule swap; (3) Dragon Cave's now-visible bank-reject;
+(4) any pulse-ring timing differences. Run VR locally (Docker required per
+project rule), review the diffs (Claude can read PNGs from `test-results/`),
+then update baselines for intentional changes only.
 
 ```bash
-git push
+# Detect VR diffs (requires Docker; falls back to a warning if Docker is down)
+yarn test:vr
+
+# Review the diff images under test-results/ for each failing spec.
+# Confirm each diff is an intentional consequence of this migration
+# (no surprise regressions elsewhere).
+
+# When the diffs are confirmed intentional:
+yarn test:vr:update
 ```
 
-Expected: All CI checks pass (Lint, Type Check, Unit Tests, Build)
+> **Don't blindly run `:update`.** A VR diff somewhere you didn't expect
+> usually means a real regression hiding in the change set. Investigate
+> first.
+
+- [ ] **Step 5: Push and verify CI (F-29)**
+
+This is the final push for the migration branch — all task commits land
+together. The branch already has an upstream tracking ref ([PR #393]).
+
+```bash
+# If the branch was rebased during the apply, use --force-with-lease so
+# you don't overwrite any concurrent work on the same remote branch.
+git push                # plain push if no rebase
+# OR
+git push --force-with-lease origin feat/multi-skin-config
+```
+
+Expected: All CI checks pass (Lint, Type Check, Unit Tests, Storybook
+Tests, Build, E2E — chromium).
+
+**Rollback strategy if a single task's verification fails post-push:**
+
+- Atomic commits per task mean you can `git revert <task-commit-sha>` for
+  any one task in isolation without unwinding the rest. The task-graph
+  dependencies are documented in the commit messages; revert in reverse
+  order if multiple need backing out.
+- Hard-revert candidates (most likely to need rollback if intermediate
+  verification fails): Task 13 (Dragon Cave migration) — visual issues
+  here are isolated; Task 12 (animation timing) — JS read of CSS tokens
+  is the most novel change.
+- Do NOT revert Task 1 or Task 3 in isolation — those are foundational
+  and reverting partially leaves the codebase in an inconsistent state.
+
+[PR #393]: https://github.com/leocaseiro/base-skill/pull/393
 
 ---
 
@@ -2082,8 +2376,17 @@ same XState `ejecting` state with fly-back animation.
   triggerEjectReturn with 3 transitionend listeners
 - `bank-tile-reject-feedback.ts`: animationend for style restore
 
-**Timer sync invariant:** CSS animation duration and XState timer must stay in
-sync. The sync mechanism will be decided in the follow-up plan.
+**Timer sync invariant:** CSS animation duration and XState timer must stay
+in sync. The sync mechanism will be decided in the follow-up plan.
+
+> **F-30 — Cross-plan coordination:** The follow-up plan (Spec 1a, XState
+> migration for answer-game) will own R8/R9 wiring. When choosing the
+> timer-sync mechanism (e.g. read CSS token via `getComputedStyle` at
+> state-machine boot; or expose `:root` constants imported in TS), it must
+> consume the `@property`-typed timing tokens established here in Task 12
+> (`--skin-anim-shake-duration`, `--skin-anim-eject-fly-duration`, etc.).
+> Don't reinvent these as TS constants — the source of truth is CSS.
+> When Spec 1a lands, link it back from here.
 
 ---
 
