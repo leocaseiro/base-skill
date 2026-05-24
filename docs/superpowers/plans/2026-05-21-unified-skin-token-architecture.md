@@ -211,6 +211,13 @@ feedback tokens use the new `--skin-tile-{state}-*` naming convention (R2).
   --skin-tile-pickup-shadow: var(--skin-tile-shadow);
   --skin-tile-ejecting-animation: eject-return 200ms ease-out;
 
+  /* ── Pulse-ring animation timing (consumed by Task 11) ──── */
+  /* F-21: declared here in Task 1 (not Task 12) because Task 11's
+   * [data-drag-over] rule depends on them. Otherwise Task 11's commit
+   * would have undefined refs until Task 12 lands. */
+  --skin-anim-pulse-ring-duration: 1.5s;
+  --skin-anim-pulse-ring-easing: ease-in-out;
+
   /* ── Effective-bg indirection (Finding 1: specificity) ──── */
   --skin-tile-effective-bg: var(--skin-tile-bg);
 
@@ -1558,12 +1565,41 @@ Replace the snapshot/restore inline-style pattern (lines 24-41) with
 inline styles, which fights CSS-driven state feedback (inline styles have
 higher specificity than `[data-tile-state]` selectors).
 
-New reject flow:
+Concrete implementation:
 
-1. Set `data-tile-state="reject"` on the bank tile element
-2. `triggerShake(el)` sets `data-shaking` (Step 3 handles this)
-3. On `animationend`, remove `data-tile-state="reject"` (revert to `idle`)
-4. Remove the snapshot/restore block entirely — CSS handles all visual states
+```ts
+// src/components/answer-game/bank-tile-reject-feedback.ts
+import { triggerShake } from './Slot/slot-animations';
+
+export const flashBankTileRejectFeedback = (el: HTMLElement): void => {
+  // Set the state attribute — CSS [data-tile-state='reject'] handles the visual.
+  el.dataset.tileState = 'reject';
+
+  // Listen for the shake animation specifically (F-24 guard).
+  // The listener is not `{ once: true }` because other animations could
+  // fire on the same element in the future; we explicitly remove the
+  // handler when our animation lands.
+  const handler = (e: AnimationEvent) => {
+    if (e.animationName !== 'shake') return;
+    el.removeEventListener('animationend', handler);
+    delete el.dataset.tileState; // attribute removal restores JSX-driven default ('idle')
+  };
+  el.addEventListener('animationend', handler);
+
+  // Trigger the shake animation (sets data-shaking, cleans itself up via
+  // its own animationend listener — see Step 3).
+  triggerShake(el);
+};
+```
+
+Why two listeners (one in `triggerShake`, one here) and not one shared:
+each owns its own attribute lifecycle. `triggerShake` owns `data-shaking`;
+this function owns `data-tile-state='reject'`. They can coexist and clean
+up independently.
+
+The snapshot/restore block — the old `el.style.borderWidth = ...` /
+`el.style.background = ...` / etc. — is removed entirely. The CSS rule
+`[data-tile-state='reject']` (from Task 9) supplies the visual.
 
 - [ ] **Step 6: Commit**
 
@@ -1598,19 +1634,27 @@ target during a drag. It's removed synchronously before the resulting state
 - [ ] **Step 1: Set data-drag-over based on isPreview**
 
 In `Slot.tsx`, the `isPreview` flag already tracks drag-over state. Set the
-attribute on the `InnerTag`:
+attribute on the `InnerTag` using plain JSX (F-25):
 
 ```tsx
 <InnerTag
   ref={slotRef as Ref<HTMLDivElement>}
   className={[stateClasses, className].filter(Boolean).join(' ')}
   style={finalStyle}
-  {...{
-    [TILE_STATE_ATTR]: tileState,
-    ...(isPreview ? { 'data-drag-over': '' } : {}),
-  }}
+  data-tile-state={tileState}
+  data-drag-over={isPreview ? '' : undefined}
 >
 ```
+
+`data-drag-over={undefined}` omits the attribute from the rendered DOM;
+`data-drag-over=""` sets it to empty string (presence-only, like
+`disabled`). The CSS `[data-drag-over]` selector matches on attribute
+presence regardless of value, so the empty-string form is correct.
+
+`TILE_STATE_ATTR` stays exported as a constant for any imperative
+`setAttribute()` callsite (e.g. `bank-tile-reject-feedback.ts`). JSX uses
+the literal attribute name for readability — the spread/computed-key
+pattern in the original draft was an unnecessary indirection.
 
 - [ ] **Step 2: Move preview styling to CSS**
 
@@ -1656,7 +1700,8 @@ animations. Register timing tokens via `@property` for typed interpolation.
 
 - [ ] **Step 1: Add animation timing tokens to skin-tokens.css**
 
-Append to the `:root` block in `src/skin-tokens.css`:
+Append to the `:root` block in `src/skin-tokens.css` (pulse-ring tokens
+already landed in Task 1 per F-21 — do not redeclare them here):
 
 ```css
 /* ── Animation timing tokens (R10) ────────────────────────── */
@@ -1664,18 +1709,29 @@ Append to the `:root` block in `src/skin-tokens.css`:
 --skin-anim-shake-easing: ease-in-out;
 --skin-anim-pop-duration: 250ms;
 --skin-anim-pop-easing: ease-out;
---skin-anim-pulse-ring-duration: 1.5s;
---skin-anim-pulse-ring-easing: ease-in-out;
 --skin-anim-eject-fly-duration: 300ms;
 --skin-anim-eject-fly-easing: ease-in;
 --skin-anim-eject-fade-duration: 200ms;
 --skin-anim-eject-fade-easing: ease-out;
+/* --skin-anim-pulse-ring-{duration,easing} live in Task 1 (F-21). */
 ```
 
 - [ ] **Step 2: Register `@property` for animation timing tokens**
 
 Add `@property` declarations to `src/skin-tokens.css` (before the `:root`
-block):
+block). This includes pulse-ring tokens even though their `:root` values
+live in Task 1 — `@property` and the `:root` declaration can be split
+across files, and `@property` provides validation regardless of where the
+value is set.
+
+> **Why @property here (F-23):** these tokens don't get interpolated by
+> CSS transitions — they're constants applied to animations. `@property`
+> still earns its keep for two reasons: (1) **type validation** — a skin
+> author setting `--skin-anim-shake-duration: 300x` fails loudly with
+> `syntax: '<time>'` instead of silently breaking the animation, and (2)
+> **intent-as-code** — each `@property` block documents the expected
+> type. If we drop `@property` later, the only loss is validation; default
+> values are independently declared in `:root`.
 
 ```css
 @property --skin-anim-shake-duration {
