@@ -18,8 +18,38 @@ const buildGhost = (
   const rect = sourceEl.getBoundingClientRect();
   const halfW = rect.width / 2;
   const halfH = rect.height / 2;
+  // Mirror the source's live look so skinned tiles (e.g. dragon-cave's
+  // transparent stone tablet) don't flash a default white card mid-drag.
+  // Clone the source's innerHTML so any tile decoration (SVG stone, etc.)
+  // flies along with the letter.
+  const sourceCs = getComputedStyle(sourceEl);
+  // The source's parent may be transformed (e.g. dragon-cave scales its UI
+  // via transform: scale(...)). The ghost is on document.body and inherits
+  // none of that, so its font-size needs to be scaled to the source's
+  // visual font-size, not its raw layout font-size.
+  const sourceLayoutWidth = sourceEl.offsetWidth;
+  const visualScale =
+    sourceLayoutWidth > 0 ? rect.width / sourceLayoutWidth : 1;
+  const sourceFontSizePx = Number.parseFloat(sourceCs.fontSize) || 0;
+  const ghostFontSize = `${sourceFontSizePx * visualScale}px`;
+  // Empty-string fallbacks are needed because jsdom returns '' from
+  // getComputedStyle on unstyled elements; empty values in cssText silently
+  // drop the whole declaration block.
+  const ghostBg = sourceCs.background || 'transparent';
+  // No fallback shadow when source has one — when source has none (e.g.
+  // dragon-cave's transparent stone), a default rect shadow would draw a
+  // phantom square around the ghost. Skinned tiles that want drag-lift
+  // should apply filter: drop-shadow on their decoration so depth follows
+  // the shape.
+  const ghostShadow = sourceCs.boxShadow || 'none';
+
   const el = document.createElement('div');
-  el.textContent = label;
+  el.innerHTML = sourceEl.innerHTML;
+  // Fallback when the source has no innerHTML (defensive — should not happen
+  // for the bank-tile button which always renders the letter).
+  if (el.innerHTML.trim() === '') {
+    el.textContent = label;
+  }
   el.setAttribute('aria-hidden', 'true');
   Object.assign(el.style, {
     position: 'fixed',
@@ -30,17 +60,22 @@ const buildGhost = (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '12px',
-    background: 'var(--card, #fff)',
-    color: 'var(--card-foreground, #000)',
-    fontSize: getComputedStyle(sourceEl).fontSize,
-    fontWeight: 'bold',
-    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+    borderRadius: sourceCs.borderRadius || '12px',
+    background: ghostBg,
+    color: sourceCs.color,
+    fontSize: ghostFontSize,
+    fontFamily: sourceCs.fontFamily,
+    fontWeight: sourceCs.fontWeight,
+    boxShadow: ghostShadow,
     pointerEvents: 'none',
     zIndex: '9999',
     opacity: '0.95',
     userSelect: 'none',
-    transform: 'scale(1.08)',
+    // No scale(1.08) lift — it compounds with parent transforms (e.g.
+    // dragon-cave's scale on the stage) and makes the ghost noticeably
+    // bigger than the source. Skins that want depth should apply
+    // filter: drop-shadow on their tile decoration so the lift follows
+    // the actual shape, not a hidden bounding rect.
   });
   document.body.append(el);
   return { el, halfW, halfH };

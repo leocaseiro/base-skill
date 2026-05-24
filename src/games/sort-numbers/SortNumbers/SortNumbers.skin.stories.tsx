@@ -4,29 +4,7 @@ import { createSortNumbersLevelGenerator } from '../sort-numbers-level-generator
 import { SortNumbers } from './SortNumbers';
 import type { SortNumbersConfig } from '../types';
 import type { AnswerGameDraftState } from '@/components/answer-game/types';
-import type { GameSkin } from '@/lib/skin';
 import type { Meta, StoryObj } from '@storybook/react';
-import { registerSkin } from '@/lib/skin';
-
-const demoSkin: GameSkin = {
-  id: 'demo',
-  name: 'Demo Pink',
-  tokens: {
-    '--skin-tile-bg': '#ec4899',
-    '--skin-tile-text': '#fff',
-    '--skin-tile-radius': '50%',
-    '--skin-slot-bg': '#fdf2f8',
-    '--skin-slot-border': '#f472b6',
-    '--skin-slot-radius': '50%',
-  },
-  onCorrectPlace: (zoneIndex, value) => {
-    console.log(`[sort-numbers demo] correct @ ${zoneIndex}: ${value}`);
-  },
-  onWrongPlace: (zoneIndex, value) => {
-    console.log(`[sort-numbers demo] wrong @ ${zoneIndex}: ${value}`);
-  },
-};
-registerSkin('sort-numbers', demoSkin);
 
 // Stable tiles/zones for sequence [3,4,5] — reused across level stories
 const levelDraftState = (

@@ -37,6 +37,35 @@ filesystem. Filesystem paths under `src/games/<game-id>/` stay kebab-case
 (they're runtime `gameId`s used by registries and URLs); Storybook titles
 PascalCase the same names for display.
 
+## Static assets in `public/`
+
+The same code runs in three deploy contexts, each with a different base path:
+
+| Context              | `import.meta.env.BASE_URL` | Assets served from               |
+| -------------------- | -------------------------- | -------------------------------- |
+| Dev (`yarn dev`)     | `/`                        | `http://localhost:3000/foo.png`  |
+| Main app prod        | `/base-skill/`             | `/base-skill/foo.png`            |
+| Storybook PR preview | `./`                       | `./foo.png` (relative to iframe) |
+
+**Always resolve `public/`-served URLs against `import.meta.env.BASE_URL`,
+never hardcode a leading `/`:**
+
+```ts
+// ❌ Breaks the Storybook PR-preview deploy at /base-skill/pr/<n>/docs/
+const src = '/skins/word-spell/cave-dragon/bg-left.png';
+
+// ✅ Works in dev, app prod, and Storybook builds
+const src = `${import.meta.env.BASE_URL}skins/word-spell/cave-dragon/bg-left.png`;
+```
+
+Applies to `<img src>`, CSS `background-image: url(...)`, `fetch()` of
+JSON/audio under `public/`, and anywhere else you reference a built asset.
+Note `BASE_URL` ends with a `/`, so concatenate without a leading slash on
+the asset path.
+
+Inline `data:` URLs (SVG-as-string in CSS) don't need this treatment —
+they're not fetched as files.
+
 ## Git Workflow
 
 **Never commit directly to `master`.** All changes must be made on a branch via a git worktree.

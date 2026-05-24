@@ -222,7 +222,7 @@ const WordSpellSession = ({
           )}
         </AnswerGame.Answer>
         <AnswerGame.Choices>
-          <LetterTileBank />
+          <LetterTileBank skin={skin} />
         </AnswerGame.Choices>
       </div>
       {skin.RoundCompleteEffect ? (

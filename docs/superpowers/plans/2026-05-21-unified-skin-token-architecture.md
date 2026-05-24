@@ -1,0 +1,2497 @@
+# Unified Skin Token Architecture — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use
+> superpowers:subagent-driven-development (recommended) or
+> superpowers:executing-plans to implement this plan task-by-task. Steps use
+> checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Migrate the skin token system to `:root`-based CSS inheritance so new
+skins work by overriding only what they change, state feedback tokens are
+independent of base appearance, and all three games consume tokens uniformly.
+
+**Architecture:** Classic-skin token values move from JS
+(`Record<string, string>` applied via inline styles) to CSS `:root`
+declarations. Skins override tokens on the game container scope — the CSS
+cascade handles inheritance. State-feedback tokens get their own
+`--skin-tile-{state}-*` namespace. `data-tile-state` attributes on DOM
+elements enable CSS-driven state styling. `@property` is used only for
+animation timing tokens where typed interpolation is needed.
+
+**Tech Stack:** CSS custom properties, CSS `@property`, HTML data attributes,
+React, TypeScript, Vitest
+
+**Requirements covered:** R1-R7, R10-R13 from
+`docs/brainstorms/2026-05-16-unified-skin-token-architecture-requirements.md`
+
+**Not covered (gated on Spec 1a — XState migration):** R8, R9 (imperative
+animation chain → XState-driven sequencing). A follow-up plan will address
+these after Spec 1a lands.
+
+**Disabled during migration:** `SpotAllTile` (`src/components/SpotAllTile.tsx`)
+currently hard-references `var(--skin-correct-bg)` and `var(--skin-wrong-bg)`.
+This component needs broader refactoring beyond token renames — disable it
+during this migration and re-enable in a follow-up PR that addresses the full
+refactor.
+
+---
+
+## Scope Check
+
+This plan covers one coherent subsystem: the token infrastructure and its
+consumers. R8/R9 (XState animation sequencing) are a separate subsystem gated
+on Spec 1a and will be a follow-up plan.
+
+---
+
+## File Structure
+
+> **MDX scope:** Per project convention, `.mdx` documentation is for service
+> modules, not presentation components. Slot, animations, and bank-reject are
+> UI files — covered by Storybook + VR per [Task 13.5](#task-135-storybook--vr-coverage).
+
+### New files
+
+| File                                                            | Responsibility                                                                       |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/skin-tokens.css`                                           | `:root` defaults for all skin tokens; `@property` registrations for animation timing |
+| `src/lib/skin/skin-tokens.ts`                                   | Canonical token name constants (single source of truth for TS + CSS)                 |
+| `src/lib/skin/skin-tokens.test.ts`                              | Tests: `:root` tokens resolve, skin overrides cascade, name-set parity with CSS      |
+| `src/components/answer-game/tile-state.ts`                      | `SlotTileState` / `BankTileState` / `TileState` types, `TILE_STATE_ATTR` constant    |
+| `src/components/answer-game/tile-state.test.ts`                 | Tests for tile-state types and helpers                                               |
+| `src/components/answer-game/Slot/slot-state-styles.css`         | CSS rules targeting `[data-tile-state]` and modifier attributes                      |
+| `src/components/answer-game/Slot/slot-state-styles.stories.tsx` | Storybook story rendering all `[data-tile-state]` values for VR coverage             |
+| `tests-vr/skin-tokens.spec.ts`                                  | VR baseline for state-attribute styling across all three games — see Task 13.5       |
+
+### Modified files
+
+| File                                                                         | Changes                                                                                    |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `src/styles.css`                                                             | Import `skin-tokens.css`                                                                   |
+| `src/lib/skin/classic-skin.ts`                                               | `tokens` becomes `{}` (all defaults in `:root`)                                            |
+| `src/components/answer-game/styles.ts`                                       | `tileStyle()` simplified to use single token vars                                          |
+| `src/components/answer-game/styles.test.ts`                                  | Updated assertions                                                                         |
+| `src/components/answer-game/Slot/Slot.tsx`                                   | State styling via `data-tile-state` + CSS; fix `correctStyle` bug; add modifier attributes |
+| `src/components/answer-game/Slot/Slot.test.tsx`                              | Tests for `data-tile-state` attribute values                                               |
+| `src/components/answer-game/Slot/slot-animations.ts`                         | Set `data-shaking` modifier during animation                                               |
+| `src/components/answer-game/Slot/slot-animations.test.ts`                    | Test `data-shaking` modifier                                                               |
+| `src/components/answer-game/bank-tile-reject-feedback.ts`                    | Use `--skin-tile-reject-*` tokens; set `data-shaking`                                      |
+| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`         | Remove `isCustomSkin` branches; add `data-tile-state`                                      |
+| `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`                 | Add `skin` prop; add `tileDecoration`; add `data-tile-state`                               |
+| `src/games/number-match/NumberMatch/NumberMatch.tsx`                         | Thread `skin` to `NumeralTileBank`                                                         |
+| `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`                     | Add `data-tile-state`                                                                      |
+| `src/games/word-spell/skins/dragon-cave-skin.tsx`                            | Migrate to new token names; remove state-feedback overrides; eliminate `!important`        |
+| `src/components/answer-game/Slot/Slot.stories.tsx`                           | Add argTypes for all SlotTileState values (Task 13.5)                                      |
+| `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx`             | Add `data-tile-state` story coverage (Task 13.5)                                           |
+| `src/games/word-spell/skins/dragon-cave-skin.stories.tsx`                    | Add story verifying reject feedback now visible (was hidden by `!important`) (Task 13.5)   |
+| `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx` | Add `data-tile-state` story coverage (Task 13.5)                                           |
+| `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx`         | Add skin-prop + `data-tile-state` story coverage (Task 13.5)                               |
+
+---
+
+## Task 1: Create `skin-tokens.css` with `:root` defaults
+
+Extracts all Classic token values from `classic-skin.ts` into CSS `:root`
+declarations. This is the foundation — after this task, tokens are available
+everywhere via the cascade without inline styles.
+
+**Files:**
+
+- Create: `src/skin-tokens.css`
+- Modify: `src/styles.css` (add import)
+- Test: `src/lib/skin/skin-tokens.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+```ts
+// src/lib/skin/skin-tokens.test.ts
+import { describe, expect, it } from 'vitest';
+
+describe('skin-tokens.css :root defaults', () => {
+  it('provides --skin-slot-bg from :root', () => {
+    const el = document.createElement('div');
+    document.body.append(el);
+    const value =
+      getComputedStyle(el).getPropertyValue('--skin-slot-bg');
+    el.remove();
+    // jsdom doesn't process CSS files — this test verifies the import chain
+    // doesn't break. Visual verification via Storybook/browser.
+    expect(value).toBeDefined();
+  });
+});
+```
+
+> **Note:** jsdom does not evaluate CSS files, so `:root` tokens won't resolve
+> in unit tests. This test is a smoke-test for the import chain. Real
+> verification is visual (Storybook, dev server). For token value correctness,
+> we'll test in integration (Storybook VR) and by confirming Dragon Cave's
+> token count drops.
+>
+> **jsdom limitation (applies to all tasks):** Unit tests verify DOM structure
+> (attribute presence, token string values, function return shapes) but cannot
+> verify CSS cascade, specificity, or computed styles. Visual correctness of
+> `[data-tile-state]` rules is verified by: (1) Task 14 manual visual
+> verification across all three games, and (2) VR tests (post-migration
+> baseline update) which catch regressions in CI. If a CSS rule change passes
+> unit tests but looks wrong in the browser, the unit test was never designed
+> to catch it — check the CSS file directly.
+
+- [ ] **Step 2: Run test to verify baseline**
+
+Run: `yarn vitest run src/lib/skin/skin-tokens.test.ts`
+
+- [ ] **Step 3: Create `src/skin-tokens.css`**
+
+Extract every token from `classic-skin.ts` into `:root` declarations. State-
+feedback tokens use the new `--skin-tile-{state}-*` naming convention (R2).
+
+```css
+/* src/skin-tokens.css
+ * Classic skin defaults — the CSS cascade provides these to all elements.
+ * Skins override individual tokens on the game container scope via
+ * style={skin.tokens}, and the cascade does the rest.
+ */
+
+:root {
+  /* ── Tile appearance ─────────────────────────────────────── */
+  --skin-tile-bg:
+    linear-gradient(
+      180deg,
+      transparent 70.48%,
+      var(--skin-tile-highlight) 93.62%,
+      transparent 100%
+    ),
+    var(--skin-tile-surface);
+  --skin-tile-text: var(--bs-surface);
+  --skin-tile-radius: 0.75rem;
+  --skin-tile-border: transparent;
+  --skin-tile-shadow:
+    var(--skin-tile-ring) 0 0 0 1px,
+    var(--skin-tile-inset-bottom) 0 -2px 1px 0 inset,
+    var(--skin-tile-inset-top) 0 2px 1px 0 inset,
+    0 2px 5px -1px rgba(0, 0, 0, 0.05),
+    0 1px 3px -1px rgba(0, 0, 0, 0.3);
+  --skin-tile-font-weight: 700;
+  --skin-tile-text-shadow: 0px 1px 1px rgba(0, 0, 0, 0.12);
+
+  /* Sub-tokens for Classic's skeuomorphic tile surface */
+  --skin-tile-surface: var(--card, #fafafa);
+  --skin-tile-highlight: rgba(255, 255, 255, 1);
+  --skin-tile-ring: rgba(0, 0, 0, 0.08);
+  --skin-tile-inset-bottom: rgba(0, 0, 0, 0.08);
+  --skin-tile-inset-top: rgba(255, 255, 255, 0.5);
+  --skin-tile-active-scale: 0.95;
+
+  /* ── Slot appearance ─────────────────────────────────────── */
+  --skin-slot-bg: var(--bs-surface);
+  --skin-slot-border: var(--bs-accent);
+  --skin-slot-radius: 0.75rem;
+  --skin-slot-active-border: var(--bs-primary);
+
+  /* ── State-feedback tokens (R2: --skin-tile-{state}-*) ──── */
+  --skin-tile-correct-bg: rgb(from var(--primary) r g b / 0.1);
+  --skin-tile-correct-border: var(--bs-primary);
+  --skin-tile-correct-color: var(--bs-success);
+  --skin-tile-correct-animation: pop 250ms ease-out;
+
+  --skin-tile-wrong-bg: rgb(from var(--destructive) r g b / 0.1);
+  --skin-tile-wrong-border: var(--destructive);
+  --skin-tile-wrong-color: var(--bs-error);
+  --skin-tile-wrong-animation: shake 300ms ease-in-out;
+
+  /* R6: Reject namespace — aliases to wrong by default.
+   * To distinguish reject visually, override all 4 reject-* tokens. */
+  --skin-tile-reject-bg: var(--skin-tile-wrong-bg);
+  --skin-tile-reject-border: var(--skin-tile-wrong-border);
+  --skin-tile-reject-color: var(--skin-tile-wrong-color);
+  --skin-tile-reject-animation: var(--skin-tile-wrong-animation);
+
+  /* R5: Motion states (pickup, ejecting) */
+  --skin-tile-pickup-opacity: 0.3;
+  --skin-tile-pickup-scale: 0.95;
+  --skin-tile-pickup-shadow: var(--skin-tile-shadow);
+  --skin-tile-ejecting-animation: eject-return 200ms ease-out;
+
+  /* ── Pulse-ring animation timing (consumed by Task 11) ──── */
+  /* F-21: declared here in Task 1 (not Task 12) because Task 11's
+   * [data-drag-over] rule depends on them. Otherwise Task 11's commit
+   * would have undefined refs until Task 12 lands. */
+  --skin-anim-pulse-ring-duration: 1.5s;
+  --skin-anim-pulse-ring-easing: ease-in-out;
+
+  /* ── Effective-bg indirection (Finding 1: specificity) ──── */
+  --skin-tile-effective-bg: var(--skin-tile-bg);
+
+  /* ── Bank-hole tokens ────────────────────────────────────── */
+  --skin-bank-hole-bg: rgb(from var(--muted) r g b / 0.6);
+  --skin-bank-hole-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  /* F-26: image-based override surface — skins set --skin-bank-hole-image
+   * to a `url(...)` to provide an SVG/raster overlay (e.g. Dragon Cave's
+   * stone-cut hole). Defaults to `none` so Classic has no image. */
+  --skin-bank-hole-image: none;
+  --skin-bank-hole-image-size: 100% 100%;
+  --skin-bank-hole-image-repeat: no-repeat;
+
+  /* ── Hover-preview tokens ────────────────────────────────── */
+  --skin-hover-border-color: var(--bs-primary);
+  --skin-hover-border-style: dashed;
+
+  /* ── Scene / bank container tokens ───────────────────────── */
+  --skin-scene-bg: transparent;
+  --skin-bank-bg: transparent;
+  --skin-bank-border: transparent;
+
+  /* ── Celebration tokens ──────────────────────────────────── */
+  --skin-celebration-emoji: '🐨';
+
+  /* ── Question component tokens ───────────────────────────── */
+  --skin-question-bg: transparent;
+  --skin-question-text: inherit;
+  --skin-question-radius: 0.75rem;
+  --skin-question-audio-bg: var(--bs-primary);
+  --skin-question-audio-fg: var(--primary-foreground);
+  --skin-question-dot-bg: var(--bs-primary);
+  --skin-question-dot-assigned-bg: var(--bs-primary);
+
+  /* ── Sentence-with-gaps tokens ───────────────────────────── */
+  --skin-sentence-gap-border: currentColor;
+  --skin-sentence-gap-style: dashed;
+
+  /* ── Domino pip tokens ───────────────────────────────────── */
+  --skin-pip-color: currentColor;
+  --skin-pip-divider-color: currentColor;
+  --skin-pip-divider-opacity: 0.3;
+
+  /* ── HUD tokens ──────────────────────────────────────────── */
+  --skin-hud-bg: transparent;
+  --skin-hud-gap: 0.5rem;
+  --skin-hud-padding: 0.25rem 0.75rem;
+  --skin-hud-radius: 9999px;
+  --skin-hud-dot-size: 0.875rem;
+  --skin-hud-dot-fill: var(--bs-primary);
+  --skin-hud-dot-empty: var(--bs-surface);
+  --skin-hud-dot-border: var(--bs-border);
+  --skin-hud-dot-current-border: var(--skin-slot-border);
+  --skin-hud-fraction-color: var(--bs-foreground);
+  --skin-hud-fraction-sep-color: var(--skin-hud-dot-fill);
+  --skin-hud-level-color: var(--bs-primary);
+
+  /* ── Chrome tokens (GameShell buttons/wrapper) ───────────── */
+  --skin-chrome-button-radius: 9999px;
+  --skin-chrome-button-bg: var(--background);
+  --skin-chrome-button-color: var(--foreground);
+  --skin-chrome-button-opacity: 0.8;
+  --skin-chrome-button-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --skin-chrome-button-ring-color: var(--border);
+  --skin-chrome-button-opacity-hover: 1;
+  --skin-chrome-wrapper-bg: transparent;
+
+  /* ── Visual variation tokens (cross-game palette) ────────── */
+  --skin-variation-1: var(--bs-primary);
+  --skin-variation-2: var(--destructive);
+  --skin-variation-3: var(--bs-success);
+  --skin-variation-4: oklch(54% 0.22 295);
+  --skin-variation-5: oklch(63% 0.18 35);
+  --skin-variation-6: var(--skin-tile-text);
+}
+```
+
+> **`--skin-tile-bg` promotion note:** In `classic-skin.ts`, `--skin-tile-bg`
+> is currently a flat color (`var(--bs-primary)`). This plan intentionally
+> promotes it to a gradient in `:root`. This is a deliberate visual refinement,
+> not a bug — the gradient was previously composed inline by `tileStyle()`.
+> After Task 2 simplifies `tileStyle()`, the gradient moves to the token.
+>
+> **Reconciliation:** Two checks, both must pass before the commit.
+>
+> 1. **Count check:** `grep -c '^\s*--skin-' src/skin-tokens.css` should
+>    equal `Object.keys(classicSkin.tokens).length + 1` from the current
+>    `classic-skin.ts` (the `+1` is the new `--skin-tile-reject-animation`
+>    introduced by this task as the R6 alias counterpart for animation).
+> 2. **Name-set check (catches renames the count misses):**
+>
+>    ```bash
+>    diff <(grep -oE '^\s*(--skin-[a-z0-9-]+):' src/skin-tokens.css | sed 's/[: ]//g' | sort) \
+>         <(node -e 'console.log(Object.keys(require("./src/lib/skin/classic-skin").classicSkin.tokens).concat(["--skin-tile-reject-animation"]).sort().join("\n"))')
+>    ```
+>
+> Document any delta (intentional rename, merged, dropped, added) in the
+> commit message.
+
+- [ ] **Step 4: Import skin-tokens.css from styles.css**
+
+Add to the top of `src/styles.css` (after the existing `@import` lines):
+
+```css
+@import './skin-tokens.css';
+```
+
+- [ ] **Step 5: Run tests**
+
+Run: `yarn vitest run src/lib/skin/skin-tokens.test.ts`
+Expected: PASS (smoke test passes; import chain doesn't break)
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/skin-tokens.css src/styles.css src/lib/skin/skin-tokens.test.ts
+git commit -m "feat(skin): add skin-tokens.css with :root defaults (R1)
+
+Classic token values now live in CSS :root declarations. State-feedback
+tokens use the new --skin-tile-{state}-* naming convention (R2). Reject
+namespace aliases to wrong by default (R6)."
+```
+
+---
+
+## Task 1b: Create `src/lib/skin/skin-tokens.ts` — canonical token name registry
+
+Single source of truth for skin token names. TS code references
+`SKIN_TOKENS.*` instead of repeating raw `'--skin-*'` strings.
+
+**Files:**
+
+- Create: `src/lib/skin/skin-tokens.ts`
+
+- [ ] **Step 1: Create the token registry**
+
+This registry mirrors every `--skin-*` declaration in `src/skin-tokens.css`.
+Names use the post-R2 convention (`--skin-tile-{state}-*`, not the pre-R2
+`--skin-{state}-*`). Add a JSDoc to every entry — see the Skin Author
+Migration Notes section for the pattern and what to document (default value,
+R-number, override semantics, alias relationships).
+
+```ts
+// src/lib/skin/skin-tokens.ts
+export const SKIN_TOKENS = {
+  // ── Tile appearance ─────────────────────────────────────
+  /** Composed gradient + surface fill. After Task 2, `tileStyle()` reads
+   *  `--skin-tile-effective-bg` (indirection) so `[data-tile-state]` rules
+   *  can override without `!important`. (R1) */
+  tileBg: '--skin-tile-bg',
+  tileText: '--skin-tile-text',
+  tileRadius: '--skin-tile-radius',
+  tileBorder: '--skin-tile-border',
+  tileShadow: '--skin-tile-shadow',
+  tileFontWeight: '--skin-tile-font-weight',
+  tileTextShadow: '--skin-tile-text-shadow',
+
+  // ── Tile sub-tokens (Classic skeuomorphism) ─────────────
+  tileSurface: '--skin-tile-surface',
+  tileHighlight: '--skin-tile-highlight',
+  tileRing: '--skin-tile-ring',
+  tileInsetBottom: '--skin-tile-inset-bottom',
+  tileInsetTop: '--skin-tile-inset-top',
+  tileActiveScale: '--skin-tile-active-scale',
+
+  // ── Slot ────────────────────────────────────────────────
+  slotBg: '--skin-slot-bg',
+  slotBorder: '--skin-slot-border',
+  slotRadius: '--skin-slot-radius',
+  slotActiveBorder: '--skin-slot-active-border',
+
+  // ── State: correct (R2) ─────────────────────────────────
+  tileCorrectBg: '--skin-tile-correct-bg',
+  tileCorrectBorder: '--skin-tile-correct-border',
+  tileCorrectColor: '--skin-tile-correct-color',
+  tileCorrectAnimation: '--skin-tile-correct-animation',
+
+  // ── State: wrong (R2) ───────────────────────────────────
+  tileWrongBg: '--skin-tile-wrong-bg',
+  tileWrongBorder: '--skin-tile-wrong-border',
+  tileWrongColor: '--skin-tile-wrong-color',
+  tileWrongAnimation: '--skin-tile-wrong-animation',
+
+  // ── State: reject — aliases wrong by default (R6) ───────
+  /** Override all 4 reject-* tokens to visually distinguish reject from wrong. */
+  tileRejectBg: '--skin-tile-reject-bg',
+  tileRejectBorder: '--skin-tile-reject-border',
+  tileRejectColor: '--skin-tile-reject-color',
+  tileRejectAnimation: '--skin-tile-reject-animation',
+
+  // ── Motion: pickup / ejecting (R5) ──────────────────────
+  tilePickupOpacity: '--skin-tile-pickup-opacity',
+  tilePickupScale: '--skin-tile-pickup-scale',
+  tilePickupShadow: '--skin-tile-pickup-shadow',
+  tileEjectingAnimation: '--skin-tile-ejecting-animation',
+
+  // ── Specificity indirection (P0 fix) ────────────────────
+  /** `tileStyle()` reads this so CSS `[data-tile-state='X']` rules
+   *  can override via re-pointing the variable, not via `!important`. */
+  tileEffectiveBg: '--skin-tile-effective-bg',
+
+  // ── Bank hole ───────────────────────────────────────────
+  bankHoleBg: '--skin-bank-hole-bg',
+  bankHoleShadow: '--skin-bank-hole-shadow',
+  /** F-26: image-based override surface for skins that want an SVG/raster
+   *  overlay on bank holes. Default `none`. Use with `bankHoleImageSize`
+   *  + `bankHoleImageRepeat`. */
+  bankHoleImage: '--skin-bank-hole-image',
+  bankHoleImageSize: '--skin-bank-hole-image-size',
+  bankHoleImageRepeat: '--skin-bank-hole-image-repeat',
+
+  // ── Hover preview ───────────────────────────────────────
+  hoverBorderColor: '--skin-hover-border-color',
+  hoverBorderStyle: '--skin-hover-border-style',
+
+  // ── Scene / bank container ──────────────────────────────
+  sceneBg: '--skin-scene-bg',
+  bankBg: '--skin-bank-bg',
+  bankBorder: '--skin-bank-border',
+
+  // ── Celebration ─────────────────────────────────────────
+  celebrationEmoji: '--skin-celebration-emoji',
+
+  // ── Question ────────────────────────────────────────────
+  questionBg: '--skin-question-bg',
+  questionText: '--skin-question-text',
+  questionRadius: '--skin-question-radius',
+  questionAudioBg: '--skin-question-audio-bg',
+  questionAudioFg: '--skin-question-audio-fg',
+  questionDotBg: '--skin-question-dot-bg',
+  questionDotAssignedBg: '--skin-question-dot-assigned-bg',
+
+  // ── Sentence-with-gaps ──────────────────────────────────
+  sentenceGapBorder: '--skin-sentence-gap-border',
+  sentenceGapStyle: '--skin-sentence-gap-style',
+
+  // ── Domino pip ──────────────────────────────────────────
+  pipColor: '--skin-pip-color',
+  pipDividerColor: '--skin-pip-divider-color',
+  pipDividerOpacity: '--skin-pip-divider-opacity',
+
+  // ── HUD ─────────────────────────────────────────────────
+  hudBg: '--skin-hud-bg',
+  hudGap: '--skin-hud-gap',
+  hudPadding: '--skin-hud-padding',
+  hudRadius: '--skin-hud-radius',
+  hudDotSize: '--skin-hud-dot-size',
+  hudDotFill: '--skin-hud-dot-fill',
+  hudDotEmpty: '--skin-hud-dot-empty',
+  hudDotBorder: '--skin-hud-dot-border',
+  hudDotCurrentBorder: '--skin-hud-dot-current-border',
+  hudFractionColor: '--skin-hud-fraction-color',
+  hudFractionSepColor: '--skin-hud-fraction-sep-color',
+  hudLevelColor: '--skin-hud-level-color',
+
+  // ── Chrome (GameShell buttons + wrapper) ────────────────
+  chromeButtonRadius: '--skin-chrome-button-radius',
+  chromeButtonBg: '--skin-chrome-button-bg',
+  chromeButtonColor: '--skin-chrome-button-color',
+  chromeButtonOpacity: '--skin-chrome-button-opacity',
+  chromeButtonShadow: '--skin-chrome-button-shadow',
+  chromeButtonRingColor: '--skin-chrome-button-ring-color',
+  chromeButtonOpacityHover: '--skin-chrome-button-opacity-hover',
+  chromeWrapperBg: '--skin-chrome-wrapper-bg',
+
+  // ── Visual variation (cross-game palette) ───────────────
+  variation1: '--skin-variation-1',
+  variation2: '--skin-variation-2',
+  variation3: '--skin-variation-3',
+  variation4: '--skin-variation-4',
+  variation5: '--skin-variation-5',
+  variation6: '--skin-variation-6',
+} as const;
+
+export type SkinTokenName =
+  (typeof SKIN_TOKENS)[keyof typeof SKIN_TOKENS];
+export const SKIN_TOKEN_NAMES: readonly SkinTokenName[] =
+  Object.values(SKIN_TOKENS);
+```
+
+> **Note:** Add JSDoc to every entry following the pattern shown above.
+> Future tasks (F-21 in Batch D, F-26 in Batch E) add additional tokens to
+> `:root` and grow this registry — update both in lockstep.
+
+- [ ] **Step 1b: Name-set assertion test (not just count)**
+
+Add to `src/lib/skin/skin-tokens.test.ts`:
+
+```ts
+// Counts catch additions/removals; name-set catches renames too.
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { SKIN_TOKEN_NAMES } from './skin-tokens';
+
+describe('skin token registry parity with skin-tokens.css', () => {
+  it('SKIN_TOKEN_NAMES matches the :root declarations 1:1', () => {
+    const cssText = fs.readFileSync(
+      path.resolve(__dirname, '../../skin-tokens.css'),
+      'utf8',
+    );
+    const cssTokens = Array.from(
+      cssText.matchAll(/^\s*(--skin-[a-z0-9-]+):/gm),
+      (m) => m[1],
+    ).sort();
+    const tsTokens = [...SKIN_TOKEN_NAMES].sort();
+    expect(tsTokens).toEqual(cssTokens);
+  });
+});
+```
+
+This catches: renames, drops, additions, and accidental typos in either file.
+
+- [ ] **Step 2: Update imports in registry.ts**
+
+Replace hardcoded `'--skin-tile-bg'` strings in `registry.ts` and
+`registry.test.ts` with `SKIN_TOKENS.tileBg` imports.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/lib/skin/skin-tokens.ts src/lib/skin/registry.ts src/lib/skin/registry.test.ts
+git commit -m "feat(skin): add skin-tokens.ts canonical token name registry
+
+Single source of truth for TS + CSS token names. Replaces hardcoded
+'--skin-*' magic strings in registry.ts with SKIN_TOKENS.* constants."
+```
+
+---
+
+## Task 2: Simplify `tileStyle()` to use single-token vars
+
+Currently `tileStyle()` builds complex CSS values from sub-tokens. After Task 1,
+the `:root` already composes these into `--skin-tile-bg`, `--skin-tile-shadow`,
+and `--skin-tile-text-shadow`. Simplify the function to use the composed tokens.
+
+> **Specificity fix (P0):** `tileStyle()` returns inline styles, which have
+> higher specificity than any `[data-tile-state]` CSS selector. To allow
+> state-feedback rules to override tile background, `tileStyle()` must
+> reference `--skin-tile-effective-bg` (not `--skin-tile-bg` directly). The
+> `:root` sets `--skin-tile-effective-bg: var(--skin-tile-bg)` as default;
+> `[data-tile-state='correct']` overrides it to `var(--skin-tile-correct-bg)`.
+> This indirection lets state-feedback win without `!important`.
+
+**Files:**
+
+- Modify: `src/components/answer-game/styles.ts`
+- Modify: `src/components/answer-game/styles.test.ts`
+
+- [ ] **Step 1: Update the test**
+
+```ts
+// src/components/answer-game/styles.test.ts
+import { describe, expect, it } from 'vitest';
+import { tileStyle } from './styles';
+
+describe('tileStyle', () => {
+  it('returns an object with background, boxShadow, and textShadow using skin tokens', () => {
+    const style = tileStyle();
+    // P0 indirection: background references --skin-tile-effective-bg
+    // so [data-tile-state='X'] CSS rules can re-point the var without
+    // fighting inline-style specificity.
+    expect(style.background).toBe('var(--skin-tile-effective-bg)');
+    expect(style.boxShadow).toBe('var(--skin-tile-shadow)');
+    expect(style.textShadow).toBe('var(--skin-tile-text-shadow)');
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `yarn vitest run src/components/answer-game/styles.test.ts`
+Expected: FAIL — current `tileStyle()` returns hardcoded gradient, not
+`var(--skin-tile-effective-bg)`
+
+- [ ] **Step 3: Simplify tileStyle()**
+
+```ts
+// src/components/answer-game/styles.ts
+import type { CSSProperties } from 'react';
+
+export function tileStyle(): CSSProperties {
+  return {
+    // P0: `--skin-tile-effective-bg` defaults to `var(--skin-tile-bg)` in :root
+    // and gets re-pointed to state-specific bg by `[data-tile-state='X']` rules.
+    // Reference the indirection — not `--skin-tile-bg` directly — so CSS wins
+    // over this inline style without `!important`.
+    background: 'var(--skin-tile-effective-bg)',
+    boxShadow: 'var(--skin-tile-shadow)',
+    textShadow: 'var(--skin-tile-text-shadow)',
+  };
+}
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `yarn vitest run src/components/answer-game/styles.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/answer-game/styles.ts src/components/answer-game/styles.test.ts
+git commit -m "refactor(skin): simplify tileStyle() to use composed token vars
+
+tileStyle() now references --skin-tile-bg, --skin-tile-shadow, and
+--skin-tile-text-shadow directly. The complex gradient/shadow composition
+lives in :root declarations (skin-tokens.css)."
+```
+
+---
+
+## Task 3: Migrate classic-skin to empty tokens + rename state-feedback references
+
+> **Atomic commit:** Tasks 3 and 4 are merged into one commit. Emptying
+> classic-skin tokens while consumers still reference old token names creates a
+> window where both sides are wrong. Doing both in one commit keeps the
+> codebase consistent at every commit boundary.
+
+Now that `:root` provides all defaults, Classic's `tokens` object becomes `{}`.
+Simultaneously, rename all `--skin-correct-*`/`--skin-wrong-*` consumer
+references to the new `--skin-tile-{state}-*` names and wire `--skin-tile-reject-*`
+(R6).
+
+**Files:**
+
+- Modify: `src/lib/skin/classic-skin.ts`
+- Modify: `src/components/answer-game/Slot/Slot.tsx`
+- Modify: `src/components/answer-game/bank-tile-reject-feedback.ts`
+- Test: existing `src/lib/skin/registry.test.ts` (must still pass)
+
+- [ ] **Step 1: Write a failing test for empty tokens**
+
+Add to `src/lib/skin/registry.test.ts`:
+
+```ts
+it('classic skin has empty tokens (defaults live in :root CSS)', () => {
+  expect(Object.keys(classicSkin.tokens)).toHaveLength(0);
+});
+```
+
+- [ ] **Step 2: Run to verify it fails**
+
+Run: `yarn vitest run src/lib/skin/registry.test.ts`
+Expected: FAIL — classic skin currently has 63 tokens
+
+- [ ] **Step 3: Empty the tokens object**
+
+```ts
+// src/lib/skin/classic-skin.ts
+import type { GameSkin } from './game-skin';
+
+export const classicSkin: GameSkin = {
+  id: 'classic',
+  name: 'Classic',
+  tokens: {},
+};
+```
+
+- [ ] **Step 4: Update Slot.tsx token references**
+
+In `src/components/answer-game/Slot/Slot.tsx`, replace old token names with
+new ones in the style objects (lines 85-109):
+
+| Old reference                | New reference                     |
+| ---------------------------- | --------------------------------- |
+| `var(--skin-wrong-bg)`       | `var(--skin-tile-wrong-bg)`       |
+| `var(--skin-wrong-border)`   | `var(--skin-tile-wrong-border)`   |
+| `var(--skin-wrong-color)`    | `var(--skin-tile-wrong-color)`    |
+| `var(--skin-correct-bg)`     | `var(--skin-tile-correct-bg)`     |
+| `var(--skin-correct-border)` | `var(--skin-tile-correct-border)` |
+
+> **Why no `--skin-correct-color` row:** the old codebase never had a
+> `--skin-correct-color` token — that's the correctStyle bug fix (covered in
+> the next block). `correctStyle.color` currently reads `--skin-correct-border`
+> by mistake. After this task, `color` uses the new
+> `--skin-tile-correct-color` token (no rename, brand new reference).
+
+Also fix the **correctStyle bug** at line 107:
+
+```ts
+// BEFORE (bug: uses border color for text):
+color: 'var(--skin-correct-border)',
+
+// AFTER (fix: uses correct color token):
+color: 'var(--skin-tile-correct-color)',
+```
+
+The full updated style blocks in Slot.tsx:
+
+```ts
+const wrongStyle: React.CSSProperties = isWrong
+  ? {
+      background: 'var(--skin-tile-wrong-bg)',
+      borderColor: 'var(--skin-tile-wrong-border)',
+      color: 'var(--skin-tile-wrong-color)',
+    }
+  : {};
+
+const correctStyle: React.CSSProperties =
+  !isEmpty && !isWrong && !isPreview
+    ? {
+        background: 'var(--skin-tile-correct-bg)',
+        borderColor: 'var(--skin-tile-correct-border)',
+        color: 'var(--skin-tile-correct-color)',
+      }
+    : {};
+```
+
+- [ ] **Step 5: Update bank-tile-reject-feedback.ts**
+
+Replace `--skin-wrong-*` with `--skin-tile-reject-*` (R6 — reject has its
+own namespace):
+
+```ts
+// In flashBankTileRejectFeedback, lines 79-84:
+el.style.borderWidth = '2px';
+el.style.borderStyle = 'solid';
+el.style.borderColor = 'var(--skin-tile-reject-border)';
+el.style.background = 'var(--skin-tile-reject-bg)';
+el.style.color = 'var(--skin-tile-reject-color)';
+el.style.boxShadow = 'none';
+```
+
+- [ ] **Step 6: Run all tests**
+
+Run: `yarn vitest run`
+Expected: ALL PASS
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/lib/skin/classic-skin.ts src/lib/skin/registry.test.ts \
+  src/components/answer-game/Slot/Slot.tsx \
+  src/components/answer-game/bank-tile-reject-feedback.ts
+git commit -m "refactor(skin): empty classic tokens + rename state tokens (R1, R2, R6, R7)
+
+Atomic commit — both changes must land together to keep the codebase
+consistent. Classic is now the zero-override skin. All default token values
+come from skin-tokens.css :root. State-feedback tokens renamed:
+--skin-correct-* → --skin-tile-correct-*, --skin-wrong-* → --skin-tile-wrong-*.
+Fix correctStyle bug: color used border token, now uses color token.
+bank-tile-reject-feedback uses --skin-tile-reject-* namespace (R6)."
+```
+
+---
+
+## Task 5: Remove `isCustomSkin` from SortNumbers (R11)
+
+The `isCustomSkin` branch in `SortNumbersTileBank` was a workaround for
+classic-skin's `tileStyle()` not using token vars for all properties. Now that
+`tileStyle()` reads from `:root` tokens (Task 2), the branch is unnecessary.
+
+**Files:**
+
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
+
+- [ ] **Step 1: Remove `isCustomSkin` from NumberTile (lines 25-37)**
+
+Replace the conditional with `tileStyle()` directly:
+
+```tsx
+const NumberTile = ({
+  tile,
+  skin,
+}: {
+  tile: TileItem;
+  skin?: GameSkin;
+}) => {
+  const {
+    ref,
+    handleClick,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+  } = useDraggableTile(tile);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-label={`Number ${tile.label}`}
+      className={`flex size-14 touch-none select-none cursor-grab items-center justify-center rounded-xl ${getNumericTileFontClass(tile.label.length, 56)} font-bold tabular-nums transition-transform active:scale-95 active:cursor-grabbing`}
+      style={tileStyle()}
+      onClick={handleClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+    >
+      {tile.label}
+      {skin?.tileDecoration?.(tile)}
+    </button>
+  );
+};
+```
+
+- [ ] **Step 2: Remove `isCustomSkin` holeRadiusStyle (lines 76-79)**
+
+Delete the `isCustomSkin` check and `holeRadiusStyle` variable. The hole
+already has `rounded-xl` which matches the default tile radius. For custom
+skins that change `--skin-tile-radius`, the hole's border-radius should be
+set via the token:
+
+Replace all `{...holeRadiusStyle}` spreads with:
+`borderRadius: 'var(--skin-tile-radius)'`
+
+Apply this to the four places `holeRadiusStyle` was spread (hole div, in-bank
+wrapper, hover indicator, empty hole).
+
+- [ ] **Step 3: Run SortNumbers tests**
+
+Run: `yarn vitest run --testPathPattern sort-numbers`
+Expected: PASS
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx
+git commit -m "refactor(skin): remove isCustomSkin branches from SortNumbers (R11)
+
+tileStyle() now reads all properties from :root tokens, so the
+isCustomSkin workaround is unnecessary. Hole border-radius always
+uses var(--skin-tile-radius) for consistency."
+```
+
+---
+
+## Task 6: Add skin prop to NumberMatch `NumeralTileBank` (R12)
+
+NumberMatch bank tiles are the only game where the skin prop doesn't reach the
+bank. This task threads the skin prop through and adds `tileDecoration`.
+
+**Files:**
+
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+- Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx`
+
+- [ ] **Step 1: Update NumeralTileBankProps**
+
+```ts
+export interface NumeralTileBankProps {
+  tileStyle: TileStyle;
+  tilesShowGroup: boolean;
+  skin?: GameSkin;
+}
+```
+
+Add `import type { GameSkin } from '@/lib/skin';` to the imports.
+
+- [ ] **Step 2: Thread skin to NumeralTile**
+
+Update `NumeralTile` component to accept `skin` and render `tileDecoration`:
+
+```tsx
+const NumeralTile = ({
+  tile,
+  tileStyle,
+  tilesShowGroup,
+  skin,
+}: {
+  tile: TileItem;
+  tileStyle: TileStyle;
+  tilesShowGroup: boolean;
+  skin?: GameSkin;
+}) => {
+  // ... existing code ...
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-label={`Number ${tile.label}`}
+      className={/* existing */}
+      style={tileSurfaceStyle()}
+      onClick={handleClick}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+    >
+      {showDomino ? (
+        <DominoTile value={numericValue} />
+      ) : isWordTile ? (
+        <span className={/* existing */}>{tile.label}</span>
+      ) : (
+        <span className={/* existing */}>{tile.label}</span>
+      )}
+      {skin?.tileDecoration?.(tile)}
+    </button>
+  );
+};
+```
+
+Update the `NumeralTile` render call inside `NumeralTileBank` to pass `skin`:
+
+```tsx
+<NumeralTile
+  tile={tile}
+  tileStyle={tileStyle}
+  tilesShowGroup={tilesShowGroup}
+  skin={skin}
+/>
+```
+
+- [ ] **Step 3: Thread skin from NumberMatch game component**
+
+In `src/games/number-match/NumberMatch/NumberMatch.tsx`, find where
+`NumeralTileBank` is rendered (around line 301-304) and add the `skin` prop:
+
+```tsx
+<NumeralTileBank
+  tileStyle={tileStyle}
+  tilesShowGroup={tilesShowGroup}
+  skin={skin}
+/>
+```
+
+The `skin` prop is already available in `NumberMatchSession` (passed from
+`NumberMatch` which calls `useGameSkin`). Pass it to `NumeralTileBank`.
+
+- [ ] **Step 4: Add render test asserting `tileDecoration` is invoked**
+
+The wiring change adds a new code path but no test currently verifies that
+`skin?.tileDecoration?.(tile)` actually executes. Add to
+`src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`:
+
+```tsx
+import { render } from '@testing-library/react';
+import type { GameSkin } from '@/lib/skin';
+import { NumeralTileBank } from './NumeralTileBank';
+
+it('invokes skin.tileDecoration for each tile when skin provides it', () => {
+  const tileDecoration = vi.fn((tile) => (
+    <span data-testid={`decoration-${tile.id}`}>decoration</span>
+  ));
+  const skin: GameSkin = {
+    id: 'test-skin',
+    name: 'Test',
+    tokens: {},
+    tileDecoration,
+  };
+
+  // Render with the project's existing NumeralTileBank test harness
+  // (extend the existing setup; this test asserts the new wiring).
+  render(
+    <NumeralTileBank
+      tileStyle={/* … */}
+      tilesShowGroup={false}
+      skin={skin}
+    />,
+  );
+
+  expect(tileDecoration).toHaveBeenCalled();
+  // Defensive: the decoration's output is in the DOM (didn't get filtered).
+  expect(
+    document.querySelector('[data-testid^="decoration-"]'),
+  ).not.toBeNull();
+});
+```
+
+> **Why this test:** without it, removing the `{skin?.tileDecoration?.(tile)}`
+> render line would silently pass — no compile error, no test failure. This
+> guards the cross-game normalization invariant.
+
+- [ ] **Step 5: Run NumberMatch tests**
+
+Run: `yarn vitest run --testPathPattern number-match`
+Expected: PASS (including the new tileDecoration invocation test).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx \
+  src/games/number-match/NumberMatch/NumberMatch.tsx
+git commit -m "feat(skin): thread skin prop to NumberMatch NumeralTileBank (R12)
+
+NumeralTile now receives the skin prop and renders tileDecoration,
+matching WordSpell and SortNumbers. Closes the last cross-game
+normalization gap. Render test guards the wiring invariant."
+```
+
+---
+
+## Task 7: Add `data-tile-state` attribute to Slot (R3)
+
+Add a `data-tile-state` attribute to the slot's inner element that reflects
+the current state. **Slot** values: `empty`, `correct`, `wrong`, `pickup`,
+`ejecting`. **Bank tile** values (Task 8): `idle`, `reject`. State values are
+split by element type for compile-time safety — see Step 1.
+
+The Slot's `tileState` is owned by `useSlotBehavior` as a single source of
+truth (React state). Imperative DOM mutation would be clobbered by React's
+next render — see "Why state-driven, not imperative" below.
+
+**Files:**
+
+- Create: `src/components/answer-game/tile-state.ts`
+- Create: `src/components/answer-game/tile-state.test.ts`
+- Modify: `src/components/answer-game/Slot/Slot.tsx`
+- Modify: `src/components/answer-game/Slot/Slot.test.tsx`
+- Modify: `src/components/answer-game/Slot/useSlotBehavior.ts`
+
+- [ ] **Step 1: Create the tile-state types**
+
+Split slot-valid vs bank-valid states so each consumer is typed narrowly. A
+slot can't accidentally be set to `'idle'`, and a bank tile can't be set to
+`'pickup'` — both caught at compile time.
+
+```ts
+// src/components/answer-game/tile-state.ts
+
+/** State values valid for a Slot's inner div. */
+export type SlotTileState =
+  | 'empty'
+  | 'correct'
+  | 'wrong'
+  | 'pickup'
+  | 'ejecting';
+
+/** State values valid for a bank tile button. */
+export type BankTileState = 'idle' | 'reject';
+
+/** Union — used by CSS rule type maps and by anywhere that
+ *  accepts either kind of element. Never use this as the variable
+ *  type at a write site; use SlotTileState or BankTileState. */
+export type TileState = SlotTileState | BankTileState;
+
+export const TILE_STATE_ATTR = 'data-tile-state' as const;
+```
+
+> **Why split:** without the split, a bank component could set
+> `data-tile-state="pickup"` and the type system wouldn't catch it. The
+> CSS rule `[data-tile-state='pickup']` would then apply opacity/transform
+> to a bank button that has no drag context — a real bug class.
+
+- [ ] **Step 2: Write tests for Slot data-tile-state (concrete code)**
+
+Add to `src/components/answer-game/Slot/Slot.test.tsx`. Reuses the existing
+`createWrapper`/`emptyZones`/`filledZones` harness already in the file:
+
+```tsx
+// Add at top of the file with the other fixtures.
+const wrongZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'A',
+    placedTileId: 'tile-1',
+    isWrong: true,
+    isLocked: false,
+  },
+];
+
+// Add inside the existing describe('Slot', () => { … }).
+describe('data-tile-state', () => {
+  it('sets "empty" on an empty slot', () => {
+    const Wrapper = createWrapper(baseConfig, emptyZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'empty');
+  });
+
+  it('sets "correct" on a filled correct slot', () => {
+    const Wrapper = createWrapper(baseConfig, filledZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'correct');
+  });
+
+  it('sets "wrong" on a wrong slot', () => {
+    const Wrapper = createWrapper(baseConfig, wrongZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'wrong');
+  });
+});
+```
+
+> **jsdom note:** Tests assert the attribute presence and value, not
+> rendered styling. CSS-cascade correctness (`[data-tile-state='wrong']`
+> rules from `slot-state-styles.css`) is verified by Storybook + VR in
+> Task 13.5, not by these unit tests.
+
+- [ ] **Step 3: Run tests to verify they fail**
+
+Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
+Expected: FAIL — Slot doesn't set `data-tile-state` yet.
+
+- [ ] **Step 4: Add `tileState` to `useSlotBehavior` (state-driven, F-12 Option A)**
+
+> **Why state-driven, not imperative (F-12 rationale):**
+>
+> The existing `useEffect` at L271-338 in `useSlotBehavior.ts` mutates the
+> slot element imperatively (`triggerShake`, `triggerPop`,
+> `triggerEjectReturn`). If we _also_ wrote `data-tile-state` imperatively
+> from there while Slot.tsx wrote it from JSX, React's next render would
+> overwrite the imperative value — classic two-writer bug.
+>
+> Option A makes `useSlotBehavior` the **single owner** of `tileState` via
+> React state. Slot.tsx reads it from the hook and renders it. The
+> animation hub continues to do its own imperative animation calls, but
+> `data-tile-state` writes go through React state.
+>
+> Performance note: `pickup`/`ejecting` transitions happen per-drag/per-eject
+> (infrequent, ≤1 Hz). The extra render is cheap.
+>
+> SRS-safety: this change does NOT affect event emission (drag-start /
+> drag-over-zone / evaluate fire from the same code paths). SRS reads
+> events, not DOM attributes. See follow-up issue (F-19) for event-surface
+> expansion.
+
+In `useSlotBehavior.ts`, add transient state plus a computed `tileState`:
+
+```ts
+import { useState } from 'react';
+import type { SlotTileState } from '../tile-state';
+
+// Inside useSlotBehavior():
+
+// null means "derive from underlying zone state" (empty/wrong/correct).
+const [transientTileState, setTransientTileState] = useState<
+  'pickup' | 'ejecting' | null
+>(null);
+
+// Inside the existing animation useEffect (L271-338 today), add transitions
+// at the points already handling these state changes:
+//
+//   • Drag start (when isBeingDragged becomes true for this tile):
+//       setTransientTileState('pickup');
+//
+//   • Drag ends (without eject following):
+//       setTransientTileState((cur) =>
+//         cur === 'ejecting' ? cur : null,
+//       );
+//
+//   • Right before the 350 ms setTimeout that calls triggerEjectReturn
+//     (the eject branch of the existing wrongTileBehavior === 'lock-auto-eject'
+//     condition):
+//       setTransientTileState('ejecting');
+//
+//   • In the "tile left this slot" branch — after startFadeRef.current?.():
+//       setTransientTileState(null);
+
+// Compute the exposed value (single source of truth for JSX):
+const tileState: SlotTileState =
+  transientTileState ??
+  (isEmpty ? 'empty' : isWrong ? 'wrong' : 'correct');
+
+// Add to the returned object:
+return {
+  renderProps,
+  outerRef,
+  slotRef,
+  dragRef,
+  handleClick,
+  isBeingDragged,
+  tileState, // NEW (F-12)
+  pointerHandlers,
+};
+```
+
+Update `UseSlotBehaviorReturn` interface to include `tileState: SlotTileState`.
+
+- [ ] **Step 5: Consume `tileState` from Slot.tsx**
+
+In `Slot.tsx`, read `tileState` from the hook and pass it to the JSX
+attribute directly (no more local derivation, no spread):
+
+```tsx
+import { TILE_STATE_ATTR } from '../tile-state';
+
+const { tileState /* ...other useSlotBehavior returns */ } =
+  useSlotBehavior({
+    /* … */
+  });
+
+// On the InnerTag element:
+<InnerTag
+  ref={slotRef as Ref<HTMLDivElement>}
+  className={[stateClasses, className].filter(Boolean).join(' ')}
+  style={finalStyle}
+  data-tile-state={tileState}
+>
+```
+
+`TILE_STATE_ATTR` stays exported for any callsite that needs to set the
+attribute imperatively (e.g. `bank-tile-reject-feedback.ts` in Task 10).
+JSX writes use the literal attribute name for readability.
+
+- [ ] **Step 6: Run tests to verify they pass**
+
+Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
+Expected: PASS for all 3 new `data-tile-state` tests; existing Slot tests
+continue to pass.
+
+> **Spec Delta — XState (Spec 1a, R8/R9):** This task's `transientTileState`
+> React state is the migration target for XState. When Spec 1a lands, the
+> state machine will own the same set of transitions (pickup/ejecting), and
+> Slot.tsx will keep consuming `tileState` from the hook unchanged. The
+> attribute-set pattern established here remains; only the upstream owner
+> shifts from `useState` to XState.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/components/answer-game/tile-state.ts \
+  src/components/answer-game/tile-state.test.ts \
+  src/components/answer-game/Slot/useSlotBehavior.ts \
+  src/components/answer-game/Slot/Slot.tsx \
+  src/components/answer-game/Slot/Slot.test.tsx
+git commit -m "feat(skin): add data-tile-state attribute to Slot (R3)
+
+Slot inner element now carries data-tile-state with values empty, wrong,
+correct, pickup, or ejecting. tileState is owned by useSlotBehavior
+(React state) and consumed by Slot.tsx as JSX prop — single source of
+truth, no clobber risk between effect + render. SlotTileState and
+BankTileState are split types for compile-time safety."
+```
+
+---
+
+## Task 8: Add `data-tile-state` to bank tile components (R3)
+
+Bank tiles use `data-tile-state="idle"` as their initial state. All three
+bank components get the attribute. The `reject` state transition is wired
+in Task 10 via `bank-tile-reject-feedback.ts`.
+
+> **State scope (per F-13 split):** bank tile state is always one of
+> `BankTileState = 'idle' | 'reject'`. Bank tiles do NOT have `pickup` or
+> `ejecting` (those are slot-only). The TS type catches accidental
+> assignment of other state values at compile time.
+
+**Files:**
+
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`
+
+- [ ] **Step 1: Add data-tile-state to LetterTile button**
+
+In `LetterTileBank.tsx`, add `data-tile-state="idle"` to the LetterTile
+button element:
+
+```tsx
+<button
+  ref={ref}
+  type="button"
+  data-tile-state="idle"
+  aria-label={`Letter ${tile.label}`}
+  // ... rest of props
+>
+```
+
+- [ ] **Step 2: Add data-tile-state to NumberTile button (SortNumbers)**
+
+Same pattern in `SortNumbersTileBank.tsx`:
+
+```tsx
+<button
+  ref={ref}
+  type="button"
+  data-tile-state="idle"
+  aria-label={`Number ${tile.label}`}
+  // ...
+>
+```
+
+- [ ] **Step 3: Add data-tile-state to NumeralTile button (NumberMatch)**
+
+Same pattern in `NumeralTileBank.tsx`:
+
+```tsx
+<button
+  ref={ref}
+  type="button"
+  data-tile-state="idle"
+  aria-label={`Number ${tile.label}`}
+  // ...
+>
+```
+
+- [ ] **Step 4: Add presence tests per bank component (F-15)**
+
+Each of the 3 bank components gets a render test asserting the attribute is
+present. Without these, a future change could silently remove the attribute
+and existing tests would still pass.
+
+Pattern (adapt to each bank's existing test harness):
+
+```tsx
+// e.g. LetterTileBank.test.tsx
+it('renders data-tile-state="idle" on each bank tile button', () => {
+  // Render LetterTileBank with the existing test setup.
+  // Assert: every <button> within the bank carries data-tile-state="idle".
+  const buttons = screen.getAllByRole('button');
+  buttons.forEach((b) =>
+    expect(b).toHaveAttribute('data-tile-state', 'idle'),
+  );
+});
+```
+
+Repeat the same test (with appropriate aria-label assertion if needed) in
+`SortNumbersTileBank.test.tsx` and `NumeralTileBank.test.tsx`.
+
+- [ ] **Step 5: Run all game tests**
+
+Run: `yarn vitest run`
+Expected: ALL PASS (including the 3 new presence tests).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/games/word-spell/LetterTileBank/LetterTileBank.tsx \
+  src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
+git commit -m "feat(skin): add data-tile-state to bank tile buttons (R3)
+
+All three games' bank tile buttons now carry data-tile-state='idle' on
+their button elements. Per-component presence tests guard against silent
+attribute removal. Reject state transition wired in Task 10."
+```
+
+---
+
+## Task 9: Move slot state styling from inline styles to CSS rules (R3)
+
+With `data-tile-state` in place, move the conditional inline styles (wrong,
+correct) to CSS rules targeting the attribute. This eliminates the JS-computed
+style objects and lets CSS do the work.
+
+**Files:**
+
+- Create: `src/components/answer-game/Slot/slot-state-styles.css`
+- Modify: `src/components/answer-game/Slot/Slot.tsx`
+
+- [ ] **Step 1: Create CSS rules for slot states**
+
+```css
+/* src/components/answer-game/Slot/slot-state-styles.css
+ *
+ * WARNING — UNSCOPED SELECTORS, READ BEFORE EXTENDING:
+ *
+ * These rules match ANY element with `data-tile-state` attribute, anywhere
+ * in the DOM. `data-tile-state` is an attribute we own (no third-party
+ * collision risk), but if YOU add the attribute to a future component
+ * thinking it's just a marker, this CSS will style it. The intentional
+ * targets are:
+ *   • Slot inner divs (set by Slot.tsx via JSX)
+ *   • Bank tile buttons (set by *TileBank.tsx via JSX, see Task 8)
+ *   • bank-tile-reject-feedback transient writes (see Task 10)
+ * Do NOT use `data-tile-state` outside these surfaces unless you want
+ * this styling to apply. If you need a semantic marker without styling,
+ * use a different attribute (e.g. `data-tile-kind`).
+ *
+ * Note: there is intentionally NO `[data-tile-state='idle']` rule.
+ * `idle` means "no override" — the default tile appearance comes from
+ * :root tokens via tileStyle() inline styles. Adding an `idle` rule would
+ * either be a no-op or cause specificity surprises against tileStyle().
+ */
+
+[data-tile-state='wrong'] {
+  background: var(--skin-tile-wrong-bg);
+  border-color: var(--skin-tile-wrong-border);
+  color: var(--skin-tile-wrong-color);
+}
+
+[data-tile-state='correct'] {
+  background: var(--skin-tile-correct-bg);
+  border-color: var(--skin-tile-correct-border);
+  color: var(--skin-tile-correct-color);
+}
+
+[data-tile-state='reject'] {
+  background: var(--skin-tile-reject-bg);
+  border-color: var(--skin-tile-reject-border);
+  color: var(--skin-tile-reject-color);
+}
+
+[data-tile-state='pickup'] {
+  opacity: var(--skin-tile-pickup-opacity);
+  transform: scale(var(--skin-tile-pickup-scale));
+  box-shadow: var(--skin-tile-pickup-shadow);
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+[data-tile-state='ejecting'] {
+  animation: var(--skin-tile-ejecting-animation);
+}
+```
+
+- [ ] **Step 2: Import the CSS file**
+
+Add to `src/styles.css`:
+
+```css
+@import './components/answer-game/Slot/slot-state-styles.css';
+```
+
+- [ ] **Step 3: Remove inline state style objects from Slot.tsx**
+
+Delete the `wrongStyle`, `correctStyle` variables and their spreads into
+`finalStyle`. The `baseStyle` and `previewStyle` remain (they're slot-specific,
+not state-driven).
+
+The `finalStyle` computation becomes:
+
+```ts
+const finalStyle: React.CSSProperties = {
+  ...baseStyle,
+  ...previewStyle,
+  ...style,
+};
+```
+
+- [ ] **Step 4: Run Slot tests**
+
+Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/answer-game/Slot/slot-state-styles.css src/styles.css src/components/answer-game/Slot/Slot.tsx
+git commit -m "refactor(skin): move slot state styling to CSS rules (R3)
+
+State-feedback styles (wrong bg/border, correct bg/border) now live in
+CSS rules targeting [data-tile-state] instead of JS-computed inline
+styles. Removes wrongStyle/correctStyle variables from Slot.tsx."
+```
+
+---
+
+## Task 10: Add `data-shaking` modifier attribute (R4, R5)
+
+The `data-shaking` modifier fires on both bank-reject and slot-wrong-shake,
+providing shared shake motion (R5).
+
+**Files:**
+
+- Modify: `src/components/answer-game/Slot/slot-animations.ts`
+- Modify: `src/components/answer-game/Slot/slot-animations.test.ts`
+- Modify: `src/components/answer-game/Slot/slot-state-styles.css`
+- Modify: `src/components/answer-game/bank-tile-reject-feedback.ts`
+
+> `bank-tile-reject-feedback.ts` already calls `triggerShake()` and gets the
+> `data-shaking` modifier automatically — no source changes needed for
+> the shake attribute itself. However, this task also refactors the reject
+> flow to use `data-tile-state="reject"` (see Step 5b below).
+
+- [ ] **Step 1: Write failing test for data-shaking**
+
+Add to `src/components/answer-game/Slot/slot-animations.test.ts`:
+
+```ts
+describe('triggerShake — data-shaking modifier', () => {
+  let el: HTMLDivElement;
+
+  beforeEach(() => {
+    el = document.createElement('div');
+    document.body.append(el);
+  });
+
+  afterEach(() => el.remove());
+
+  it('sets data-shaking during animation', () => {
+    triggerShake(el);
+    expect(el.hasAttribute('data-shaking')).toBe(true);
+  });
+
+  it('removes data-shaking on animationend', () => {
+    triggerShake(el);
+    el.dispatchEvent(new Event('animationend'));
+    expect(el.hasAttribute('data-shaking')).toBe(false);
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `yarn vitest run src/components/answer-game/Slot/slot-animations.test.ts`
+Expected: FAIL — `data-shaking` not set
+
+- [ ] **Step 3: Update triggerShake to set data-shaking**
+
+```ts
+// src/components/answer-game/Slot/slot-animations.ts
+
+export const triggerShake = (el: HTMLElement): void => {
+  el.classList.remove('animate-shake');
+  void el.offsetWidth;
+  el.classList.add('animate-shake');
+  el.setAttribute('data-shaking', '');
+  el.addEventListener(
+    'animationend',
+    () => {
+      el.classList.remove('animate-shake');
+      el.removeAttribute('data-shaking');
+    },
+    { once: true },
+  );
+};
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `yarn vitest run src/components/answer-game/Slot/slot-animations.test.ts`
+Expected: PASS
+
+- [ ] **Step 5: Add CSS rule for shared shake**
+
+Add to `slot-state-styles.css`:
+
+```css
+[data-shaking] {
+  animation: var(--skin-tile-wrong-animation);
+}
+```
+
+- [ ] **Step 5b: Refactor bank-tile-reject-feedback.ts to use data-tile-state**
+
+Replace the snapshot/restore inline-style pattern (lines 24-41) with
+`data-tile-state` attribute set/unset. The old pattern saves and restores
+inline styles, which fights CSS-driven state feedback (inline styles have
+higher specificity than `[data-tile-state]` selectors).
+
+Concrete implementation:
+
+```ts
+// src/components/answer-game/bank-tile-reject-feedback.ts
+import { triggerShake } from './Slot/slot-animations';
+
+export const flashBankTileRejectFeedback = (el: HTMLElement): void => {
+  // Set the state attribute — CSS [data-tile-state='reject'] handles the visual.
+  el.dataset.tileState = 'reject';
+
+  // Listen for the shake animation specifically (F-24 guard).
+  // The listener is not `{ once: true }` because other animations could
+  // fire on the same element in the future; we explicitly remove the
+  // handler when our animation lands.
+  const handler = (e: AnimationEvent) => {
+    if (e.animationName !== 'shake') return;
+    el.removeEventListener('animationend', handler);
+    delete el.dataset.tileState; // attribute removal restores JSX-driven default ('idle')
+  };
+  el.addEventListener('animationend', handler);
+
+  // Trigger the shake animation (sets data-shaking, cleans itself up via
+  // its own animationend listener — see Step 3).
+  triggerShake(el);
+};
+```
+
+Why two listeners (one in `triggerShake`, one here) and not one shared:
+each owns its own attribute lifecycle. `triggerShake` owns `data-shaking`;
+this function owns `data-tile-state='reject'`. They can coexist and clean
+up independently.
+
+The snapshot/restore block — the old `el.style.borderWidth = ...` /
+`el.style.background = ...` / etc. — is removed entirely. The CSS rule
+`[data-tile-state='reject']` (from Task 9) supplies the visual.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/components/answer-game/Slot/slot-animations.ts \
+  src/components/answer-game/Slot/slot-animations.test.ts \
+  src/components/answer-game/bank-tile-reject-feedback.ts \
+  src/components/answer-game/Slot/slot-state-styles.css
+git commit -m "feat(skin): add data-shaking modifier + refactor reject flow (R4, R5)
+
+triggerShake() now sets/removes data-shaking boolean attribute. CSS
+targets [data-shaking] for shared shake motion across bank-reject
+and slot-wrong-shake surfaces.
+bank-tile-reject-feedback: replaces snapshot/restore inline-style
+pattern with data-tile-state='reject' set/unset — CSS handles visual
+state, eliminating specificity conflicts."
+```
+
+---
+
+## Task 11: Add `data-drag-over` modifier attribute (R4)
+
+The `data-drag-over` modifier is set on the slot when it's the active hover
+target during a drag. It's removed synchronously before the resulting state
+(correct/wrong/reject/cancel) is applied.
+
+**Files:**
+
+- Modify: `src/components/answer-game/Slot/Slot.tsx`
+- Modify: `src/components/answer-game/Slot/slot-state-styles.css`
+
+- [ ] **Step 1: Set data-drag-over based on isPreview**
+
+In `Slot.tsx`, the `isPreview` flag already tracks drag-over state. Set the
+attribute on the `InnerTag` using plain JSX (F-25):
+
+```tsx
+<InnerTag
+  ref={slotRef as Ref<HTMLDivElement>}
+  className={[stateClasses, className].filter(Boolean).join(' ')}
+  style={finalStyle}
+  data-tile-state={tileState}
+  data-drag-over={isPreview ? '' : undefined}
+>
+```
+
+`data-drag-over={undefined}` omits the attribute from the rendered DOM;
+`data-drag-over=""` sets it to empty string (presence-only, like
+`disabled`). The CSS `[data-drag-over]` selector matches on attribute
+presence regardless of value, so the empty-string form is correct.
+
+`TILE_STATE_ATTR` stays exported as a constant for any imperative
+`setAttribute()` callsite (e.g. `bank-tile-reject-feedback.ts`). JSX uses
+the literal attribute name for readability — the spread/computed-key
+pattern in the original draft was an unnecessary indirection.
+
+- [ ] **Step 2: Move preview styling to CSS**
+
+Add to `slot-state-styles.css`:
+
+```css
+[data-drag-over] {
+  border-color: var(--skin-hover-border-color);
+  border-style: var(--skin-hover-border-style);
+  animation: pulse-ring var(--skin-anim-pulse-ring-duration)
+    var(--skin-anim-pulse-ring-easing) infinite;
+}
+```
+
+Remove `previewStyle` from Slot.tsx (the CSS rule handles it now).
+
+- [ ] **Step 3: Run Slot tests**
+
+Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
+Expected: PASS
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add src/components/answer-game/Slot/Slot.tsx src/components/answer-game/Slot/slot-state-styles.css
+git commit -m "feat(skin): add data-drag-over modifier to Slot (R4)
+
+Slot now sets/removes data-drag-over boolean attribute during drag
+hover. Preview styling (border, pulse-ring) moved to CSS rule."
+```
+
+---
+
+## Task 12: Tokenize animation timing (R10)
+
+Define CSS custom properties for animation duration and easing for all 5
+animations. Register timing tokens via `@property` for typed interpolation.
+
+**Files:**
+
+- Modify: `src/skin-tokens.css`
+- Modify: `src/styles.css` (keyframe references)
+
+- [ ] **Step 1: Add animation timing tokens to skin-tokens.css**
+
+Append to the `:root` block in `src/skin-tokens.css` (pulse-ring tokens
+already landed in Task 1 per F-21 — do not redeclare them here):
+
+```css
+/* ── Animation timing tokens (R10) ────────────────────────── */
+--skin-anim-shake-duration: 300ms;
+--skin-anim-shake-easing: ease-in-out;
+--skin-anim-pop-duration: 250ms;
+--skin-anim-pop-easing: ease-out;
+--skin-anim-eject-fly-duration: 300ms;
+--skin-anim-eject-fly-easing: ease-in;
+--skin-anim-eject-fade-duration: 200ms;
+--skin-anim-eject-fade-easing: ease-out;
+/* --skin-anim-pulse-ring-{duration,easing} live in Task 1 (F-21). */
+```
+
+- [ ] **Step 2: Register `@property` for animation timing tokens**
+
+Add `@property` declarations to `src/skin-tokens.css` (before the `:root`
+block). This includes pulse-ring tokens even though their `:root` values
+live in Task 1 — `@property` and the `:root` declaration can be split
+across files, and `@property` provides validation regardless of where the
+value is set.
+
+> **Why @property here (F-23):** these tokens don't get interpolated by
+> CSS transitions — they're constants applied to animations. `@property`
+> still earns its keep for two reasons: (1) **type validation** — a skin
+> author setting `--skin-anim-shake-duration: 300x` fails loudly with
+> `syntax: '<time>'` instead of silently breaking the animation, and (2)
+> **intent-as-code** — each `@property` block documents the expected
+> type. If we drop `@property` later, the only loss is validation; default
+> values are independently declared in `:root`.
+
+```css
+@property --skin-anim-shake-duration {
+  syntax: '<time>';
+  initial-value: 300ms;
+  inherits: true;
+}
+
+@property --skin-anim-shake-easing {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --skin-anim-pop-duration {
+  syntax: '<time>';
+  initial-value: 250ms;
+  inherits: true;
+}
+
+@property --skin-anim-pop-easing {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --skin-anim-eject-fly-duration {
+  syntax: '<time>';
+  initial-value: 300ms;
+  inherits: true;
+}
+
+@property --skin-anim-eject-fly-easing {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --skin-anim-eject-fade-duration {
+  syntax: '<time>';
+  initial-value: 200ms;
+  inherits: true;
+}
+
+@property --skin-anim-eject-fade-easing {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --skin-anim-pulse-ring-duration {
+  syntax: '<time>';
+  initial-value: 1.5s;
+  inherits: true;
+}
+
+@property --skin-anim-pulse-ring-easing {
+  syntax: '*';
+  inherits: true;
+}
+```
+
+> **Note:** `@property` with `syntax: '*'` for easing strings allows
+> inheritance but no typed interpolation. Duration tokens get `<time>` for
+> typed transition/animation interpolation.
+>
+> **Re-assembly patterns (three sites):** Decomposed timing tokens are
+> re-assembled differently depending on context: (1) `@theme inline`
+> shorthand for Tailwind utility classes (Step 3), (2) CSS token
+> composition for `--skin-tile-*-animation` state-feedback tokens (Step 4),
+> (3) `getComputedStyle` read for imperative JS transitions like eject
+> (Step 5). Each pattern suits its consumer — CSS shorthand for declarative
+> use, JS read for imperative transitions.
+
+- [ ] **Step 3: Update theme animation shorthand**
+
+In `src/styles.css`, update the `@theme inline` block:
+
+```css
+--animate-shake: shake var(--skin-anim-shake-duration)
+  var(--skin-anim-shake-easing);
+--animate-pop: pop var(--skin-anim-pop-duration)
+  var(--skin-anim-pop-easing);
+```
+
+- [ ] **Step 4: Update state-feedback animation tokens**
+
+In `src/skin-tokens.css`, update the state-feedback animation tokens to use
+the timing tokens:
+
+```css
+--skin-tile-correct-animation: pop var(--skin-anim-pop-duration)
+  var(--skin-anim-pop-easing);
+--skin-tile-wrong-animation: shake var(--skin-anim-shake-duration)
+  var(--skin-anim-shake-easing);
+```
+
+- [ ] **Step 5: Update slot-animations.ts eject timing**
+
+In `triggerEjectReturn`, use a helper to read the CSS token value for eject
+timings. Since these are runtime values, read from `getComputedStyle`:
+
+```ts
+// At the top of triggerEjectReturn, after getting ghost element:
+const rootStyle = getComputedStyle(document.documentElement);
+const flyDuration =
+  rootStyle.getPropertyValue('--skin-anim-eject-fly-duration').trim() ||
+  '300ms';
+const flyEasing =
+  rootStyle.getPropertyValue('--skin-anim-eject-fly-easing').trim() ||
+  'ease-in';
+const fadeDuration =
+  rootStyle
+    .getPropertyValue('--skin-anim-eject-fade-duration')
+    .trim() || '200ms';
+const fadeEasing =
+  rootStyle.getPropertyValue('--skin-anim-eject-fade-easing').trim() ||
+  'ease-out';
+
+// Use in transitions:
+ghost.style.transition = `transform ${flyDuration} ${flyEasing}`;
+// ...
+ghost.style.transition = `opacity ${fadeDuration} ${fadeEasing}`;
+```
+
+- [ ] **Step 6: Run tests**
+
+Run: `yarn vitest run src/components/answer-game/Slot/slot-animations.test.ts`
+Expected: PASS
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/skin-tokens.css src/styles.css src/components/answer-game/Slot/slot-animations.ts
+git commit -m "feat(skin): tokenize animation timing with @property (R10)
+
+Five animations (shake, pop, pulse-ring, eject-fly, eject-fade) now
+have CSS custom property tokens for duration and easing. @property
+registers timing tokens with <time> syntax for typed interpolation.
+Skins override motion feel without redefining keyframes."
+```
+
+---
+
+## Task 13: Migrate Dragon Cave skin to new tokens
+
+> **Prerequisite:** Task 2 must land first. Dragon Cave's `!important` on
+> `background` currently overrides `tileStyle()`'s complex inline gradient.
+> Removing `!important` is only safe after Task 2 simplifies `tileStyle()` to
+> `var(--skin-tile-bg)`.
+
+Update Dragon Cave to use the new token naming convention and remove overrides
+that the new architecture eliminates.
+
+**Files:**
+
+- Modify: `src/games/word-spell/skins/dragon-cave-skin.tsx`
+
+- [ ] **Step 1: Update token names in Dragon Cave**
+
+In `dragon-cave-skin.tsx` (lines ~802-845), rename state-feedback tokens and
+remove tokens that `:root` inheritance now handles:
+
+**Remove** (R7 — state feedback inherits from `:root`):
+
+- `'--skin-correct-bg': 'transparent'` — no longer needed; correct-state
+  tokens are independent of slot base
+- `'--skin-correct-border': 'transparent'` — same
+- `'--skin-wrong-bg': 'transparent'` — same
+- `'--skin-wrong-border': 'transparent'` — same
+- `'--skin-hover-border-color': 'transparent'` — R7 separation means hover
+  tokens inherit from `:root`
+- `'--skin-hover-border-style': 'none'` — same
+
+**Keep** (genuine shape/appearance overrides):
+
+```ts
+tokens: {
+  '--skin-bank-hole-bg': 'transparent',
+  '--skin-bank-hole-shadow': 'none',
+  /* F-26: image-based bank-hole override (was an !important CSS rule
+   * targeting [data-tile-bank-hole]; now lives here as a token). */
+  '--skin-bank-hole-image':
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M 100,14 C 126,14 158,30 174,58 C 182,86 182,114 178,142 C 162,170 124,184 98,188 C 72,184 38,168 24,144 C 18,116 18,86 26,54 C 40,30 74,14 100,14 Z' fill='none' stroke='%233a200c' stroke-width='12' stroke-dasharray='12 6' stroke-linejoin='round' opacity='0.55'/%3E%3C/svg%3E\")",
+  '--skin-slot-bg': 'transparent',
+  '--skin-slot-border': 'transparent',
+  '--skin-tile-bg': 'transparent',
+  '--skin-tile-shadow': 'none',
+  '--skin-tile-text-shadow':
+    '0 1px 0 rgba(255, 240, 200, 0.4), 0 -1px 0 rgba(0, 0, 0, 0.3)',
+  '--skin-tile-text': '#3a200c',
+  '--skin-tile-border': 'transparent',
+  '--skin-question-audio-bg': '#f7d168',
+  '--skin-question-audio-fg': '#000000',
+  '--skin-hud-gap': '0.3rem',
+  '--skin-hud-dot-size': '15px',
+  '--skin-hud-dot-fill': '#F6C562',
+  '--skin-hud-dot-empty': '#ffffff',
+  '--skin-hud-dot-border': '#ffffff',
+  '--skin-hud-dot-current-border': '#F6C562',
+  '--skin-hud-fraction-color': '#ffffff',
+  '--skin-hud-fraction-sep-color': '#ffffff',
+  '--skin-hud-level-color': '#ffffff',
+},
+```
+
+> **Token count delta:**
+>
+> - Original Dragon Cave Keep list (pre-migration): 18 tokens
+> - Remove (R7 — state-feedback transparent overrides now inherit from `:root`):
+>   `--skin-correct-bg`, `--skin-correct-border`, `--skin-wrong-bg`,
+>   `--skin-wrong-border`, `--skin-hover-border-color`,
+>   `--skin-hover-border-style` (6 removed; only some were in the original
+>   18-token Keep list — see Dragon Cave source for the actual starting
+>   set)
+> - Add (F-26 — previously `!important` rules in scoped CSS, now tokenized):
+>   `--skin-bank-hole-image`, `--skin-tile-text`, `--skin-tile-border`
+>   (3 added)
+> - Net: ~21 tokens after migration. Exact final count depends on the
+>   pre-migration starting set; verify with the F-27 gate below.
+>
+> **F-27 reconciliation gate (run before commit):**
+>
+> ```bash
+> # Count the actual tokens after editing
+> node -e "console.log(Object.keys(require('./src/games/word-spell/skins/dragon-cave-skin').dragonCaveSkin.tokens).length)"
+>
+> # Compare the actual name set against the Keep list above
+> diff \
+>   <(node -e 'console.log(Object.keys(require("./src/games/word-spell/skins/dragon-cave-skin").dragonCaveSkin.tokens).sort().join("\n"))') \
+>   <(printf '%s\n' \
+>       '--skin-bank-hole-bg' '--skin-bank-hole-shadow' '--skin-bank-hole-image' \
+>       '--skin-slot-bg' '--skin-slot-border' \
+>       '--skin-tile-bg' '--skin-tile-shadow' '--skin-tile-text-shadow' \
+>       '--skin-tile-text' '--skin-tile-border' \
+>       '--skin-question-audio-bg' '--skin-question-audio-fg' \
+>       '--skin-hud-gap' '--skin-hud-dot-size' '--skin-hud-dot-fill' \
+>       '--skin-hud-dot-empty' '--skin-hud-dot-border' '--skin-hud-dot-current-border' \
+>       '--skin-hud-fraction-color' '--skin-hud-fraction-sep-color' '--skin-hud-level-color' \
+>       | sort)
+> ```
+>
+> Any delta indicates an unintentional add/remove — document in commit
+> message before proceeding.
+
+- [ ] **Step 1b: Remove obsolete inheritance comment**
+
+Remove the CRITICAL comment block in `dragon-cave-skin.tsx` (lines ~822-828)
+that warns classic-skin tokens are NOT inherited by other skins. The `:root`
+architecture makes this warning obsolete — all tokens now inherit from `:root`
+by default, and skins override only what they change.
+
+- [ ] **Step 2: Eliminate every `!important` declaration (F-26)**
+
+The goal of this step is **zero `!important` in dragon-cave-skin.tsx**.
+After Task 2 simplified `tileStyle()` and after F-26 introduced
+`--skin-bank-hole-image*` tokens, every existing `!important` either
+becomes a token override (cascade wins) or is replaced by class+attribute
+specificity (the cascade naturally wins via `.skin-dragon-cave [...]`
+beating bare `[...]`).
+
+**Button-level `!important` block** (currently L420-427 in
+dragon-cave-skin.tsx scoped CSS) — full before/after:
+
+```css
+/* BEFORE */
+.skin-dragon-cave [data-zone-index] button {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  text-shadow:
+    0 1px 0 rgba(255, 240, 200, 0.4),
+    0 -1px 0 rgba(0, 0, 0, 0.3) !important;
+  color: #3a200c !important;
+  isolation: isolate;
+}
+
+/* AFTER — delete this entire block. */
+/* All 5 properties are now handled by token overrides in the Keep list
+ * above: --skin-tile-bg, --skin-tile-shadow, --skin-tile-border,
+ * --skin-tile-text-shadow, --skin-tile-text. The `isolation: isolate`
+ * declaration, if still needed, moves to a different scoped rule (no
+ * !important required). */
+```
+
+**Bank-hole `!important` block** (currently L487-491 in the scoped CSS) —
+full before/after:
+
+```css
+/* BEFORE */
+.skin-dragon-cave [data-tile-bank-hole] {
+  background-image: url('data:image/svg+xml,...') !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
+}
+
+/* AFTER — delete this entire block. */
+/* All 4 properties are now handled by tokens:
+ *   --skin-bank-hole-image (Keep list)        → background-image
+ *   --skin-bank-hole-image-size (root default) → background-size
+ *   --skin-bank-hole-image-repeat (root default) → background-repeat
+ *   --skin-bank-hole-bg (Keep list)            → background-color
+ * The bank-hole component CSS reads these tokens — no scoped rule needed
+ * for Dragon Cave anymore. */
+```
+
+**Component-side change needed:** the bank-hole component's own CSS must
+consume the new tokens. Find the rule that styles `[data-tile-bank-hole]`
+in the component source and update:
+
+```css
+/* In the bank-hole component's CSS (not in Dragon Cave's skin file) */
+[data-tile-bank-hole] {
+  background-image: var(--skin-bank-hole-image);
+  background-size: var(--skin-bank-hole-image-size);
+  background-repeat: var(--skin-bank-hole-image-repeat);
+  background-color: var(--skin-bank-hole-bg);
+  box-shadow: var(--skin-bank-hole-shadow);
+}
+```
+
+> **Acceptance check:** after this step,
+> `grep -c '!important' src/games/word-spell/skins/dragon-cave-skin.tsx`
+> must return `0`. If any `!important` remains, justify in the commit
+> message (it should not happen — every known case is covered above).
+>
+> **Why this matters:** any `!important` on `background`, `border-color`,
+> `color`, or `box-shadow` of tile elements would BLOCK `[data-tile-state]`
+> rules from applying state feedback. The F-26 elimination is what makes
+> state feedback work in Dragon Cave; this is the fix for the
+> "bank-reject invisible" bug.
+
+- [ ] **Step 2b: Update `.animate-shake` selector to `[data-shaking]`**
+
+Dragon Cave's scoped CSS (lines ~481-485) targets `.animate-shake` class for
+shake styling. Task 10 migrated to `[data-shaking]` attribute instead. Update
+the selector in the scoped CSS string from `.animate-shake` to `[data-shaking]`.
+
+- [ ] **Step 3: Run existing tests**
+
+Run: `yarn vitest run`
+Expected: ALL PASS
+
+- [ ] **Step 4: Visual verification**
+
+Start the dev server and verify Dragon Cave skin in the browser:
+
+1. Bank-reject is visible (red feedback on rejected tiles)
+2. Correct-state paint shows on correct tiles
+3. Wrong-state paint shows on wrong tiles
+4. Stone tile textures render correctly
+5. HUD styling matches pre-migration appearance
+6. Scene background (cave, lava, dragon) renders correctly
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/games/word-spell/skins/dragon-cave-skin.tsx
+git commit -m "refactor(skin): migrate Dragon Cave to new token architecture
+
+Removes R7-obsolete state-feedback transparent overrides; adds
+F-26 explicit overrides for properties that were !important rules
+(--skin-tile-text, --skin-tile-border, --skin-bank-hole-image,
+--skin-tile-text-shadow). Net token count documented per F-27 gate.
+Bank-reject now visible (was hidden by !important pre-migration).
+Zero !important remaining in dragon-cave-skin.tsx."
+```
+
+---
+
+## Task 13.5: Storybook + VR coverage
+
+Per project convention ([CLAUDE.md](../../CLAUDE.md) Storybook + VR rules
+for UI components), every changed presentation component needs a Storybook
+story and VR coverage. This task is the explicit home for that work.
+
+**Files (per the File Structure table at top):**
+
+- Create: `src/components/answer-game/Slot/slot-state-styles.stories.tsx`
+- Create: `tests-vr/skin-tokens.spec.ts`
+- Modify: `src/components/answer-game/Slot/Slot.stories.tsx`
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx`
+- Modify: `src/games/word-spell/skins/dragon-cave-skin.stories.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx`
+
+> **Skill invocation:** This task's `.stories.tsx` files are governed by
+> the `write-storybook` skill. The VR specs are governed by the
+> `write-e2e-vr-tests` skill. Load both before editing.
+
+- [ ] **Step 1: New story — slot-state-styles.stories.tsx**
+
+A single Storybook story that renders the inner-slot div with every
+`SlotTileState` value (empty / correct / wrong / pickup / ejecting). One
+Storybook control (radio) for the state. This is the canonical VR baseline
+for the `[data-tile-state]` CSS rules.
+
+```tsx
+// src/components/answer-game/Slot/slot-state-styles.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import type { SlotTileState } from '../tile-state';
+
+const meta: Meta = {
+  title: 'AnswerGame/Slot/StateStyles',
+  argTypes: {
+    state: {
+      control: { type: 'radio' },
+      options: [
+        'empty',
+        'correct',
+        'wrong',
+        'pickup',
+        'ejecting',
+      ] satisfies SlotTileState[],
+    },
+  },
+};
+export default meta;
+
+export const Playground: StoryObj<{ state: SlotTileState }> = {
+  args: { state: 'empty' },
+  render: ({ state }) => (
+    <div
+      data-tile-state={state}
+      style={{
+        width: 80,
+        height: 80,
+        borderRadius: 'var(--skin-tile-radius)',
+        background: 'var(--skin-tile-effective-bg)',
+        boxShadow: 'var(--skin-tile-shadow)',
+        color: 'var(--skin-tile-text)',
+      }}
+    >
+      {state}
+    </div>
+  ),
+};
+```
+
+- [ ] **Step 2: Modify existing stories — add data-tile-state coverage**
+
+For each of the 4 modified story files (Slot, LetterTileBank,
+SortNumbersTileBank, NumeralTileBank):
+
+- Add a control or fixture that exercises the new `data-tile-state`
+  attribute on the rendered element.
+- For bank-tile stories: a control for `BankTileState` (`'idle' | 'reject'`).
+- For Slot.stories: extend the existing controls to cycle through all 5
+  `SlotTileState` values.
+
+For `dragon-cave-skin.stories.tsx`: add a story that triggers
+bank-reject feedback so the now-visible reject state has a baseline.
+
+- [ ] **Step 3: New VR spec — tests-vr/skin-tokens.spec.ts**
+
+```ts
+// tests-vr/skin-tokens.spec.ts
+import { test, expect } from '@playwright/test';
+
+const STORIES = [
+  'answer-game-slot-state-styles--playground',
+  'answer-game-slot--state-cycle',
+  'games-word-spell-letter-tile-bank--state-cycle',
+  'games-sort-numbers-sort-numbers-tile-bank--state-cycle',
+  'games-number-match-numeral-tile-bank--state-cycle',
+  'games-word-spell-skins-dragon-cave--bank-reject',
+];
+
+for (const storyId of STORIES) {
+  test(`skin-tokens VR — ${storyId}`, async ({ page }) => {
+    await page.goto(`/iframe.html?id=${storyId}`);
+    await expect(page).toHaveScreenshot(`${storyId}.png`);
+  });
+}
+```
+
+- [ ] **Step 4: Generate baselines**
+
+```bash
+# Requires Docker (per project rule) for consistent Linux/Chromium rendering
+yarn test:vr:update
+```
+
+The first run produces baseline PNGs in `tests-vr/skin-tokens.spec.ts-snapshots/`.
+Inspect each to confirm it's the expected rendering before committing.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/answer-game/Slot/slot-state-styles.stories.tsx \
+  src/components/answer-game/Slot/Slot.stories.tsx \
+  src/games/word-spell/LetterTileBank/LetterTileBank.stories.tsx \
+  src/games/word-spell/skins/dragon-cave-skin.stories.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.stories.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.stories.tsx \
+  tests-vr/skin-tokens.spec.ts \
+  tests-vr/skin-tokens.spec.ts-snapshots/
+git commit -m "test(skin): add Storybook + VR coverage for data-tile-state (F-1)
+
+Per project rule (UI components → Storybook + VR), add stories rendering
+every SlotTileState and BankTileState value, plus a Dragon Cave story
+for the now-visible bank-reject state. New VR spec generates baselines
+for all stories under tests-vr/skin-tokens.spec.ts."
+```
+
+---
+
+## Task 14: Full integration verification
+
+Verify the entire migration end-to-end across all three games.
+
+**Files:** None (verification only)
+
+- [ ] **Step 1: Run full test suite**
+
+Run: `yarn vitest run`
+Expected: ALL PASS
+
+- [ ] **Step 2: Run typecheck**
+
+Run: `yarn typecheck`
+Expected: No errors
+
+- [ ] **Step 3: Run linters**
+
+Run: `yarn fix:md && yarn lint:md`
+
+- [ ] **Step 4: Visual verification in browser**
+
+Start dev server (`yarn dev`) and test each game:
+
+**WordSpell (Classic skin):**
+
+- Empty slots have Classic styling
+- Correct tiles show green tint + pop animation
+- Wrong tiles show red tint + shake animation
+- Bank-reject shows red flash + shake
+- Drag preview shows dashed border + pulse-ring
+- HUD dots render correctly
+
+**WordSpell (Dragon Cave skin):**
+
+- Slots are transparent (SVG stone background visible)
+- State feedback (correct/wrong) uses Classic `:root` colors (not transparent)
+- Bank-reject is visible (was previously invisible — this is the key fix)
+- Stone tile textures render correctly
+
+**SortNumbers (Classic skin):**
+
+- No `isCustomSkin` visual regressions
+- Tiles use token-driven styling uniformly
+
+**NumberMatch (Classic skin):**
+
+- Bank tiles accept skin prop
+- Domino/dice tiles render correctly
+- tileDecoration works if a skin provides it
+
+- [ ] **Step 4.5: VR baseline regeneration (F-28)**
+
+Several visual changes in this migration are intentional and will move VR
+baselines: (1) Task 1's gradient promotion of `--skin-tile-bg`; (2) Task 9's
+inline-style → CSS-rule swap; (3) Dragon Cave's now-visible bank-reject;
+(4) any pulse-ring timing differences. Run VR locally (Docker required per
+project rule), review the diffs (Claude can read PNGs from `test-results/`),
+then update baselines for intentional changes only.
+
+```bash
+# Detect VR diffs (requires Docker; falls back to a warning if Docker is down)
+yarn test:vr
+
+# Review the diff images under test-results/ for each failing spec.
+# Confirm each diff is an intentional consequence of this migration
+# (no surprise regressions elsewhere).
+
+# When the diffs are confirmed intentional:
+yarn test:vr:update
+```
+
+> **Don't blindly run `:update`.** A VR diff somewhere you didn't expect
+> usually means a real regression hiding in the change set. Investigate
+> first.
+
+- [ ] **Step 5: Push and verify CI (F-29)**
+
+This is the final push for the migration branch — all task commits land
+together. The branch already has an upstream tracking ref ([PR #393]).
+
+```bash
+# If the branch was rebased during the apply, use --force-with-lease so
+# you don't overwrite any concurrent work on the same remote branch.
+git push                # plain push if no rebase
+# OR
+git push --force-with-lease origin feat/multi-skin-config
+```
+
+Expected: All CI checks pass (Lint, Type Check, Unit Tests, Storybook
+Tests, Build, E2E — chromium).
+
+**Rollback strategy if a single task's verification fails post-push:**
+
+- Atomic commits per task mean you can `git revert <task-commit-sha>` for
+  any one task in isolation without unwinding the rest. The task-graph
+  dependencies are documented in the commit messages; revert in reverse
+  order if multiple need backing out.
+- Hard-revert candidates (most likely to need rollback if intermediate
+  verification fails): Task 13 (Dragon Cave migration) — visual issues
+  here are isolated; Task 12 (animation timing) — JS read of CSS tokens
+  is the most novel change.
+- Do NOT revert Task 1 or Task 3 in isolation — those are foundational
+  and reverting partially leaves the codebase in an inconsistent state.
+
+[PR #393]: https://github.com/leocaseiro/base-skill/pull/393
+
+---
+
+## Deferred: XState Animation Sequencing (R8, R9)
+
+These requirements depend on Spec 1a (XState migration for answer-game) and
+will be addressed in a follow-up plan.
+
+**R8:** Replace imperative `animationend`/`transitionend` listener chains in
+`slot-animations.ts` and `bank-tile-reject-feedback.ts` with XState-driven
+state transitions. XState engine broadcasts state changes; CSS reacts to
+`data-tile-state` attribute changes.
+
+**R9:** Route both manual-eject (lock-manual tap) and auto-eject through the
+same XState `ejecting` state with fly-back animation.
+
+**Migration scope:** 8 imperative `addEventListener` calls across 3 files:
+
+- `slot-animations.ts`: triggerShake animationend, triggerPop animationend,
+  triggerEjectReturn with 3 transitionend listeners
+- `bank-tile-reject-feedback.ts`: animationend for style restore
+
+**Timer sync invariant:** CSS animation duration and XState timer must stay
+in sync. The sync mechanism will be decided in the follow-up plan.
+
+> **F-30 — Cross-plan coordination:** The follow-up plan (Spec 1a, XState
+> migration for answer-game) will own R8/R9 wiring. When choosing the
+> timer-sync mechanism (e.g. read CSS token via `getComputedStyle` at
+> state-machine boot; or expose `:root` constants imported in TS), it must
+> consume the `@property`-typed timing tokens established here in Task 12
+> (`--skin-anim-shake-duration`, `--skin-anim-eject-fly-duration`, etc.).
+> Don't reinvent these as TS constants — the source of truth is CSS.
+> When Spec 1a lands, link it back from here.
+
+---
+
+## Skin Author Migration Notes
+
+Patterns skin authors need to know after this migration. These are the things
+that aren't obvious from reading `:root` declarations or `SKIN_TOKENS`.
+
+### Reject is wrong by default (R6)
+
+The `--skin-tile-reject-*` tokens (bg, border, color, animation) all alias
+their `--skin-tile-wrong-*` counterparts in `:root`. A skin that wants reject
+feedback to look identical to wrong (the typical case) does nothing. A skin
+that wants a visually distinct reject (e.g. a yellow flash instead of red)
+must override all 4 reject-\* tokens explicitly — overriding just one mixes
+the two palettes.
+
+### Modifier attributes are independent of state attributes
+
+- `data-tile-state` holds the dominant state (idle, empty, correct, wrong,
+  reject, pickup, ejecting). One value at a time.
+- `data-shaking` and `data-drag-over` are boolean modifiers that can coexist
+  with any state. They're set/unset by the animation hub (`triggerShake`,
+  `useSlotBehavior`'s drag-over derivation).
+
+A skin can target combinations: `[data-tile-state='wrong'][data-shaking]` is a
+valid selector. Don't expect modifiers to imply a state — the slot may be
+`data-drag-over` while still `data-tile-state='empty'`.
+
+### Tokens always apply via container scope, never globally
+
+When a skin overrides a token (e.g. `--skin-tile-bg: transparent`), the
+override applies via the game container scope (`<div className="skin--{id}">`
+wrapper). It cascades down to every tile inside via CSS inheritance. Don't
+declare overrides on `:root` from a skin — that would change Classic
+globally too.
+
+### Decoration vs background — when not to override `--skin-tile-bg`
+
+If your skin renders a decoration element on top of the tile (e.g. Dragon
+Cave's stone SVG via `tileDecoration`), don't override `--skin-tile-bg` to
+your decoration's color. Set `--skin-tile-bg: transparent` and let the
+decoration element handle visual appearance. The token controls the tile's
+own background; decorations are separate children rendered above.
+
+### Image-based overrides via `--skin-bank-hole-image*` (and similar)
+
+For elements that need a `background-image` override (e.g. SVG textures on
+bank holes), the architecture provides `--skin-{element}-image`,
+`--skin-{element}-image-size`, and `--skin-{element}-image-repeat` tokens.
+Override these tokens — don't add `!important` declarations to your skin's
+scoped CSS. The cascade + class+attribute specificity is enough to win
+without `!important`. (See F-26 in plan history for the rationale.)
+
+### Future: hub-token pattern (deferred — tracked at [issue #413](https://github.com/leocaseiro/base-skill/issues/413))
+
+A follow-up plan will introduce hub tokens like `--skin-tile-wrong:
+var(--destructive)` that derive bg/border via `rgb(from ... r g b / 0.1)`.
+After that lands, a skin can override one token to change all derived
+appearance — instead of overriding 3 per state. For now, use the 3-token
+surface (bg + border + color); when hub tokens ship, existing 3-token
+overrides remain backward-compatible.
+
+---
+
+## Outstanding Questions (from requirements doc + plan walk)
+
+### From the original requirements review (decisions baked into this plan)
+
+1. **Keyframe token shape:** This plan uses decomposed tokens
+   (`--skin-anim-shake-duration` + `--skin-anim-shake-easing`) rather than
+   full shorthand. This gives skins finer control.
+
+2. **Which non-tile tokens need state attributes:** This plan treats non-tile
+   tokens (HUD, chrome, question, scene, bank) as appearance-only — they
+   inherit from `:root` without needing `data-*` state attributes. If a
+   future skin needs state-driven non-tile styling, the pattern established
+   here (attribute + CSS rule) extends naturally.
+
+3. **Timer sync mechanism:** Deferred to the XState follow-up plan (Spec 1a).
+   Current plan tokenizes CSS timing but doesn't address JS/CSS sync. See §16
+   "Deferred: XState Animation Sequencing" for the cross-plan coordination
+   note (timer-sync mechanism must consume the `@property`-typed timing
+   tokens from Task 12).
+
+### From the plan walk (2026-05-23/24, follow-up issues filed)
+
+1. **Hub-token pattern for state-feedback color (F-5):** Tracked at
+   [issue #413](https://github.com/leocaseiro/base-skill/issues/413). Lands
+   after PR #393 merges. Adds `--skin-tile-{correct,wrong,reject}` hub
+   tokens with derived `-bg` / `-border`, collapsing the 4-token override
+   surface per state to 1 hub. Default values must continue resolving the
+   same way (no VR baseline drift on Classic).
+
+2. **SRS event-surface expansion (F-19):** Tracked at
+   [issue #414](https://github.com/leocaseiro/base-skill/issues/414). Adds
+   `game:drag-end`, `game:tap`, `game:tap-fallback`, `game:drag-cancel`
+   events to `getGameEventBus()`. PR #393 does NOT depend on this; this is
+   independent SRS instrumentation work. Worth defining before SRS cluster
+   #364 starts so SRS doesn't have to retrofit.
+
+3. **`@property` rationale (F-23):** This plan uses `@property` for animation
+   timing tokens (Task 12 Step 2) primarily for **type validation** and
+   **intent-as-code** — not interpolation, since these tokens are constants
+   applied to animations rather than transitioned themselves. If `@property`
+   ever becomes a bottleneck or maintenance burden, dropping it is safe:
+   the only loss is validation; default values are independently set in
+   `:root`. See §13 Step 2 explanation.
