@@ -558,7 +558,10 @@ import { tileStyle } from './styles';
 describe('tileStyle', () => {
   it('returns an object with background, boxShadow, and textShadow using skin tokens', () => {
     const style = tileStyle();
-    expect(style.background).toBe('var(--skin-tile-bg)');
+    // P0 indirection: background references --skin-tile-effective-bg
+    // so [data-tile-state='X'] CSS rules can re-point the var without
+    // fighting inline-style specificity.
+    expect(style.background).toBe('var(--skin-tile-effective-bg)');
     expect(style.boxShadow).toBe('var(--skin-tile-shadow)');
     expect(style.textShadow).toBe('var(--skin-tile-text-shadow)');
   });
@@ -569,7 +572,7 @@ describe('tileStyle', () => {
 
 Run: `yarn vitest run src/components/answer-game/styles.test.ts`
 Expected: FAIL — current `tileStyle()` returns hardcoded gradient, not
-`var(--skin-tile-bg)`
+`var(--skin-tile-effective-bg)`
 
 - [ ] **Step 3: Simplify tileStyle()**
 
@@ -579,7 +582,11 @@ import type { CSSProperties } from 'react';
 
 export function tileStyle(): CSSProperties {
   return {
-    background: 'var(--skin-tile-bg)',
+    // P0: `--skin-tile-effective-bg` defaults to `var(--skin-tile-bg)` in :root
+    // and gets re-pointed to state-specific bg by `[data-tile-state='X']` rules.
+    // Reference the indirection — not `--skin-tile-bg` directly — so CSS wins
+    // over this inline style without `!important`.
+    background: 'var(--skin-tile-effective-bg)',
     boxShadow: 'var(--skin-tile-shadow)',
     textShadow: 'var(--skin-tile-text-shadow)',
   };
@@ -663,6 +670,12 @@ new ones in the style objects (lines 85-109):
 | `var(--skin-wrong-color)`    | `var(--skin-tile-wrong-color)`    |
 | `var(--skin-correct-bg)`     | `var(--skin-tile-correct-bg)`     |
 | `var(--skin-correct-border)` | `var(--skin-tile-correct-border)` |
+
+> **Why no `--skin-correct-color` row:** the old codebase never had a
+> `--skin-correct-color` token — that's the correctStyle bug fix (covered in
+> the next block). `correctStyle.color` currently reads `--skin-correct-border`
+> by mistake. After this task, `color` uses the new
+> `--skin-tile-correct-color` token (no rename, brand new reference).
 
 Also fix the **correctStyle bug** at line 107:
 
@@ -907,20 +920,66 @@ In `src/games/number-match/NumberMatch/NumberMatch.tsx`, find where
 The `skin` prop is already available in `NumberMatchSession` (passed from
 `NumberMatch` which calls `useGameSkin`). Pass it to `NumeralTileBank`.
 
-- [ ] **Step 4: Run NumberMatch tests**
+- [ ] **Step 4: Add render test asserting `tileDecoration` is invoked**
+
+The wiring change adds a new code path but no test currently verifies that
+`skin?.tileDecoration?.(tile)` actually executes. Add to
+`src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`:
+
+```tsx
+import { render } from '@testing-library/react';
+import type { GameSkin } from '@/lib/skin';
+import { NumeralTileBank } from './NumeralTileBank';
+
+it('invokes skin.tileDecoration for each tile when skin provides it', () => {
+  const tileDecoration = vi.fn((tile) => (
+    <span data-testid={`decoration-${tile.id}`}>decoration</span>
+  ));
+  const skin: GameSkin = {
+    id: 'test-skin',
+    name: 'Test',
+    tokens: {},
+    tileDecoration,
+  };
+
+  // Render with the project's existing NumeralTileBank test harness
+  // (extend the existing setup; this test asserts the new wiring).
+  render(
+    <NumeralTileBank
+      tileStyle={/* … */}
+      tilesShowGroup={false}
+      skin={skin}
+    />,
+  );
+
+  expect(tileDecoration).toHaveBeenCalled();
+  // Defensive: the decoration's output is in the DOM (didn't get filtered).
+  expect(
+    document.querySelector('[data-testid^="decoration-"]'),
+  ).not.toBeNull();
+});
+```
+
+> **Why this test:** without it, removing the `{skin?.tileDecoration?.(tile)}`
+> render line would silently pass — no compile error, no test failure. This
+> guards the cross-game normalization invariant.
+
+- [ ] **Step 5: Run NumberMatch tests**
 
 Run: `yarn vitest run --testPathPattern number-match`
-Expected: PASS
+Expected: PASS (including the new tileDecoration invocation test).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx src/games/number-match/NumberMatch/NumberMatch.tsx
+git add src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx \
+  src/games/number-match/NumberMatch/NumberMatch.tsx
 git commit -m "feat(skin): thread skin prop to NumberMatch NumeralTileBank (R12)
 
 NumeralTile now receives the skin prop and renders tileDecoration,
 matching WordSpell and SortNumbers. Closes the last cross-game
-normalization gap."
+normalization gap. Render test guards the wiring invariant."
 ```
 
 ---
