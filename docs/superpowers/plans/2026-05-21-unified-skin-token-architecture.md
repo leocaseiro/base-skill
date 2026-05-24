@@ -986,9 +986,14 @@ normalization gap. Render test guards the wiring invariant."
 
 ## Task 7: Add `data-tile-state` attribute to Slot (R3)
 
-Add a `data-tile-state` attribute to the slot's inner element that reflects the
-current state. Values: `idle`, `empty`, `correct`, `wrong`, `pickup`,
-`ejecting`. (The `reject` value applies only to bank tiles, not slots.)
+Add a `data-tile-state` attribute to the slot's inner element that reflects
+the current state. **Slot** values: `empty`, `correct`, `wrong`, `pickup`,
+`ejecting`. **Bank tile** values (Task 8): `idle`, `reject`. State values are
+split by element type for compile-time safety — see Step 1.
+
+The Slot's `tileState` is owned by `useSlotBehavior` as a single source of
+truth (React state). Imperative DOM mutation would be clobbered by React's
+next render — see "Why state-driven, not imperative" below.
 
 **Files:**
 
@@ -996,115 +1001,247 @@ current state. Values: `idle`, `empty`, `correct`, `wrong`, `pickup`,
 - Create: `src/components/answer-game/tile-state.test.ts`
 - Modify: `src/components/answer-game/Slot/Slot.tsx`
 - Modify: `src/components/answer-game/Slot/Slot.test.tsx`
+- Modify: `src/components/answer-game/Slot/useSlotBehavior.ts`
 
-- [ ] **Step 1: Create the tile-state helper**
+- [ ] **Step 1: Create the tile-state types**
+
+Split slot-valid vs bank-valid states so each consumer is typed narrowly. A
+slot can't accidentally be set to `'idle'`, and a bank tile can't be set to
+`'pickup'` — both caught at compile time.
 
 ```ts
 // src/components/answer-game/tile-state.ts
 
-export type TileState =
-  | 'idle'
+/** State values valid for a Slot's inner div. */
+export type SlotTileState =
   | 'empty'
   | 'correct'
   | 'wrong'
-  | 'reject'
   | 'pickup'
   | 'ejecting';
+
+/** State values valid for a bank tile button. */
+export type BankTileState = 'idle' | 'reject';
+
+/** Union — used by CSS rule type maps and by anywhere that
+ *  accepts either kind of element. Never use this as the variable
+ *  type at a write site; use SlotTileState or BankTileState. */
+export type TileState = SlotTileState | BankTileState;
 
 export const TILE_STATE_ATTR = 'data-tile-state' as const;
 ```
 
-- [ ] **Step 2: Write test for Slot data-tile-state**
+> **Why split:** without the split, a bank component could set
+> `data-tile-state="pickup"` and the type system wouldn't catch it. The
+> CSS rule `[data-tile-state='pickup']` would then apply opacity/transform
+> to a bank button that has no drag context — a real bug class.
 
-Add to `src/components/answer-game/Slot/Slot.test.tsx`:
+- [ ] **Step 2: Write tests for Slot data-tile-state (concrete code)**
 
-```ts
-it('sets data-tile-state="empty" on an empty slot', () => {
-  // Render a Slot with no placed tile
-  // Assert: inner element has data-tile-state="empty"
-});
+Add to `src/components/answer-game/Slot/Slot.test.tsx`. Reuses the existing
+`createWrapper`/`emptyZones`/`filledZones` harness already in the file:
 
-it('sets data-tile-state="wrong" on a wrong slot', () => {
-  // Render a Slot with isWrong=true
-  // Assert: inner element has data-tile-state="wrong"
-});
+```tsx
+// Add at top of the file with the other fixtures.
+const wrongZones: AnswerZone[] = [
+  {
+    id: 'z0',
+    index: 0,
+    expectedValue: 'A',
+    placedTileId: 'tile-1',
+    isWrong: true,
+    isLocked: false,
+  },
+];
 
-it('sets data-tile-state="correct" on a filled correct slot', () => {
-  // Render a Slot with a correct tile
-  // Assert: inner element has data-tile-state="correct"
+// Add inside the existing describe('Slot', () => { … }).
+describe('data-tile-state', () => {
+  it('sets "empty" on an empty slot', () => {
+    const Wrapper = createWrapper(baseConfig, emptyZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'empty');
+  });
+
+  it('sets "correct" on a filled correct slot', () => {
+    const Wrapper = createWrapper(baseConfig, filledZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'correct');
+  });
+
+  it('sets "wrong" on a wrong slot', () => {
+    const Wrapper = createWrapper(baseConfig, wrongZones);
+    render(
+      <Wrapper>
+        <ol>
+          <Slot index={0}>{() => null}</Slot>
+        </ol>
+      </Wrapper>,
+    );
+    const inner = screen
+      .getByRole('listitem')
+      .querySelector('[data-tile-state]');
+    expect(inner).toHaveAttribute('data-tile-state', 'wrong');
+  });
 });
 ```
 
-> **Note:** The exact test setup depends on the existing test harness in
-> `Slot.test.tsx`. The executor should follow the existing patterns for
-> rendering Slot with different states. The key assertion is:
-> `expect(innerEl).toHaveAttribute('data-tile-state', expectedValue)`
+> **jsdom note:** Tests assert the attribute presence and value, not
+> rendered styling. CSS-cascade correctness (`[data-tile-state='wrong']`
+> rules from `slot-state-styles.css`) is verified by Storybook + VR in
+> Task 13.5, not by these unit tests.
 
-- [ ] **Step 3: Run test to verify it fails**
+- [ ] **Step 3: Run tests to verify they fail**
 
 Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
-Expected: FAIL — Slot doesn't set `data-tile-state` yet
+Expected: FAIL — Slot doesn't set `data-tile-state` yet.
 
-- [ ] **Step 4: Add data-tile-state to Slot's inner element**
+- [ ] **Step 4: Add `tileState` to `useSlotBehavior` (state-driven, F-12 Option A)**
 
-In `Slot.tsx`, compute the tile state from `renderProps` and set it on the
-`InnerTag`:
+> **Why state-driven, not imperative (F-12 rationale):**
+>
+> The existing `useEffect` at L271-338 in `useSlotBehavior.ts` mutates the
+> slot element imperatively (`triggerShake`, `triggerPop`,
+> `triggerEjectReturn`). If we _also_ wrote `data-tile-state` imperatively
+> from there while Slot.tsx wrote it from JSX, React's next render would
+> overwrite the imperative value — classic two-writer bug.
+>
+> Option A makes `useSlotBehavior` the **single owner** of `tileState` via
+> React state. Slot.tsx reads it from the hook and renders it. The
+> animation hub continues to do its own imperative animation calls, but
+> `data-tile-state` writes go through React state.
+>
+> Performance note: `pickup`/`ejecting` transitions happen per-drag/per-eject
+> (infrequent, ≤1 Hz). The extra render is cheap.
+>
+> SRS-safety: this change does NOT affect event emission (drag-start /
+> drag-over-zone / evaluate fire from the same code paths). SRS reads
+> events, not DOM attributes. See follow-up issue (F-19) for event-surface
+> expansion.
+
+In `useSlotBehavior.ts`, add transient state plus a computed `tileState`:
+
+```ts
+import { useState } from 'react';
+import type { SlotTileState } from '../tile-state';
+
+// Inside useSlotBehavior():
+
+// null means "derive from underlying zone state" (empty/wrong/correct).
+const [transientTileState, setTransientTileState] = useState<
+  'pickup' | 'ejecting' | null
+>(null);
+
+// Inside the existing animation useEffect (L271-338 today), add transitions
+// at the points already handling these state changes:
+//
+//   • Drag start (when isBeingDragged becomes true for this tile):
+//       setTransientTileState('pickup');
+//
+//   • Drag ends (without eject following):
+//       setTransientTileState((cur) =>
+//         cur === 'ejecting' ? cur : null,
+//       );
+//
+//   • Right before the 350 ms setTimeout that calls triggerEjectReturn
+//     (the eject branch of the existing wrongTileBehavior === 'lock-auto-eject'
+//     condition):
+//       setTransientTileState('ejecting');
+//
+//   • In the "tile left this slot" branch — after startFadeRef.current?.():
+//       setTransientTileState(null);
+
+// Compute the exposed value (single source of truth for JSX):
+const tileState: SlotTileState =
+  transientTileState ??
+  (isEmpty ? 'empty' : isWrong ? 'wrong' : 'correct');
+
+// Add to the returned object:
+return {
+  renderProps,
+  outerRef,
+  slotRef,
+  dragRef,
+  handleClick,
+  isBeingDragged,
+  tileState, // NEW (F-12)
+  pointerHandlers,
+};
+```
+
+Update `UseSlotBehaviorReturn` interface to include `tileState: SlotTileState`.
+
+- [ ] **Step 5: Consume `tileState` from Slot.tsx**
+
+In `Slot.tsx`, read `tileState` from the hook and pass it to the JSX
+attribute directly (no more local derivation, no spread):
 
 ```tsx
 import { TILE_STATE_ATTR } from '../tile-state';
-import type { TileState } from '../tile-state';
 
-// Inside the Slot component, before the return:
-const tileState: TileState = isEmpty
-  ? 'empty'
-  : isWrong
-    ? 'wrong'
-    : 'correct';
+const { tileState /* ...other useSlotBehavior returns */ } =
+  useSlotBehavior({
+    /* … */
+  });
 
-// On the InnerTag element, add the attribute:
+// On the InnerTag element:
 <InnerTag
   ref={slotRef as Ref<HTMLDivElement>}
   className={[stateClasses, className].filter(Boolean).join(' ')}
   style={finalStyle}
-  {...{ [TILE_STATE_ATTR]: tileState }}
+  data-tile-state={tileState}
 >
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+`TILE_STATE_ATTR` stays exported for any callsite that needs to set the
+attribute imperatively (e.g. `bank-tile-reject-feedback.ts` in Task 10).
+JSX writes use the literal attribute name for readability.
+
+- [ ] **Step 6: Run tests to verify they pass**
 
 Run: `yarn vitest run src/components/answer-game/Slot/Slot.test.tsx`
-Expected: PASS
+Expected: PASS for all 3 new `data-tile-state` tests; existing Slot tests
+continue to pass.
 
-- [ ] **Step 6: Wire dynamic pickup and ejecting states**
-
-The `pickup` and `ejecting` states are transient — they exist during drag and
-eject animations respectively:
-
-- **Pickup:** In `useSlotBehavior.ts`, when `dragActiveTileId` matches this
-  slot's tile, set `data-tile-state="pickup"` on the slot element. When drag
-  ends, revert to the underlying state (correct/wrong/empty).
-
-- **Ejecting:** In `useSlotBehavior.ts`, when the eject animation starts
-  (around line 302 where `triggerEjectReturn` is called), set
-  `data-tile-state="ejecting"` on the slot element. When `EJECT_TILE`
-  dispatches and the tile leaves, the slot returns to `empty`.
-
-> **Implementation note:** The executor should read `useSlotBehavior.ts`
-> carefully. The `isBeingDragged` flag already tracks pickup state. The eject
-> flow starts at line 302 (setTimeout after shake). Both transitions are
-> imperative today — when Spec 1a lands, XState will drive these transitions
-> declaratively, but the attribute-setting pattern established here will be
-> reused.
+> **Spec Delta — XState (Spec 1a, R8/R9):** This task's `transientTileState`
+> React state is the migration target for XState. When Spec 1a lands, the
+> state machine will own the same set of transitions (pickup/ejecting), and
+> Slot.tsx will keep consuming `tileState` from the hook unchanged. The
+> attribute-set pattern established here remains; only the upstream owner
+> shifts from `useState` to XState.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/components/answer-game/tile-state.ts src/components/answer-game/tile-state.test.ts src/components/answer-game/Slot/Slot.tsx src/components/answer-game/Slot/Slot.test.tsx
+git add src/components/answer-game/tile-state.ts \
+  src/components/answer-game/tile-state.test.ts \
+  src/components/answer-game/Slot/useSlotBehavior.ts \
+  src/components/answer-game/Slot/Slot.tsx \
+  src/components/answer-game/Slot/Slot.test.tsx
 git commit -m "feat(skin): add data-tile-state attribute to Slot (R3)
 
 Slot inner element now carries data-tile-state with values empty, wrong,
-correct, pickup, or ejecting based on current zone/drag state. Enables
-CSS-driven state styling."
+correct, pickup, or ejecting. tileState is owned by useSlotBehavior
+(React state) and consumed by Slot.tsx as JSX prop — single source of
+truth, no clobber risk between effect + render. SlotTileState and
+BankTileState are split types for compile-time safety."
 ```
 
 ---
@@ -1115,11 +1252,19 @@ Bank tiles use `data-tile-state="idle"` as their initial state. All three
 bank components get the attribute. The `reject` state transition is wired
 in Task 10 via `bank-tile-reject-feedback.ts`.
 
+> **State scope (per F-13 split):** bank tile state is always one of
+> `BankTileState = 'idle' | 'reject'`. Bank tiles do NOT have `pickup` or
+> `ejecting` (those are slot-only). The TS type catches accidental
+> assignment of other state values at compile time.
+
 **Files:**
 
 - Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.tsx`
+- Modify: `src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx`
 - Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx`
+- Modify: `src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx`
 - Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.tsx`
+- Modify: `src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx`
 
 - [ ] **Step 1: Add data-tile-state to LetterTile button**
 
@@ -1164,19 +1309,48 @@ Same pattern in `NumeralTileBank.tsx`:
 >
 ```
 
-- [ ] **Step 4: Run all game tests**
+- [ ] **Step 4: Add presence tests per bank component (F-15)**
+
+Each of the 3 bank components gets a render test asserting the attribute is
+present. Without these, a future change could silently remove the attribute
+and existing tests would still pass.
+
+Pattern (adapt to each bank's existing test harness):
+
+```tsx
+// e.g. LetterTileBank.test.tsx
+it('renders data-tile-state="idle" on each bank tile button', () => {
+  // Render LetterTileBank with the existing test setup.
+  // Assert: every <button> within the bank carries data-tile-state="idle".
+  const buttons = screen.getAllByRole('button');
+  buttons.forEach((b) =>
+    expect(b).toHaveAttribute('data-tile-state', 'idle'),
+  );
+});
+```
+
+Repeat the same test (with appropriate aria-label assertion if needed) in
+`SortNumbersTileBank.test.tsx` and `NumeralTileBank.test.tsx`.
+
+- [ ] **Step 5: Run all game tests**
 
 Run: `yarn vitest run`
-Expected: ALL PASS
+Expected: ALL PASS (including the 3 new presence tests).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/games/word-spell/LetterTileBank/LetterTileBank.tsx src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx src/games/number-match/NumeralTileBank/NumeralTileBank.tsx
+git add src/games/word-spell/LetterTileBank/LetterTileBank.tsx \
+  src/games/word-spell/LetterTileBank/LetterTileBank.test.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.tsx \
+  src/games/sort-numbers/SortNumbersTileBank/SortNumbersTileBank.test.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.tsx \
+  src/games/number-match/NumeralTileBank/NumeralTileBank.test.tsx
 git commit -m "feat(skin): add data-tile-state to bank tile buttons (R3)
 
-All three games' bank tiles now carry data-tile-state='idle' on their
-button elements. Reject state transition wired in Task 10."
+All three games' bank tile buttons now carry data-tile-state='idle' on
+their button elements. Per-component presence tests guard against silent
+attribute removal. Reject state transition wired in Task 10."
 ```
 
 ---
@@ -1196,8 +1370,25 @@ style objects and lets CSS do the work.
 
 ```css
 /* src/components/answer-game/Slot/slot-state-styles.css
- * Intentionally unscoped — selectors target both slot tiles and bank tiles
- * that carry the data-tile-state attribute.
+ *
+ * WARNING — UNSCOPED SELECTORS, READ BEFORE EXTENDING:
+ *
+ * These rules match ANY element with `data-tile-state` attribute, anywhere
+ * in the DOM. `data-tile-state` is an attribute we own (no third-party
+ * collision risk), but if YOU add the attribute to a future component
+ * thinking it's just a marker, this CSS will style it. The intentional
+ * targets are:
+ *   • Slot inner divs (set by Slot.tsx via JSX)
+ *   • Bank tile buttons (set by *TileBank.tsx via JSX, see Task 8)
+ *   • bank-tile-reject-feedback transient writes (see Task 10)
+ * Do NOT use `data-tile-state` outside these surfaces unless you want
+ * this styling to apply. If you need a semantic marker without styling,
+ * use a different attribute (e.g. `data-tile-kind`).
+ *
+ * Note: there is intentionally NO `[data-tile-state='idle']` rule.
+ * `idle` means "no override" — the default tile appearance comes from
+ * :root tokens via tileStyle() inline styles. Adding an `idle` rule would
+ * either be a no-op or cause specificity surprises against tileStyle().
  */
 
 [data-tile-state='wrong'] {
