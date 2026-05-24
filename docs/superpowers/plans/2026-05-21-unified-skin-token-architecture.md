@@ -2441,7 +2441,7 @@ Override these tokens — don't add `!important` declarations to your skin's
 scoped CSS. The cascade + class+attribute specificity is enough to win
 without `!important`. (See F-26 in plan history for the rationale.)
 
-### Future: hub-token pattern (deferred — see F-5)
+### Future: hub-token pattern (deferred — tracked at [issue #413](https://github.com/leocaseiro/base-skill/issues/413))
 
 A follow-up plan will introduce hub tokens like `--skin-tile-wrong:
 var(--destructive)` that derive bg/border via `rgb(from ... r g b / 0.1)`.
@@ -2452,10 +2452,9 @@ overrides remain backward-compatible.
 
 ---
 
-## Outstanding Questions (from requirements doc)
+## Outstanding Questions (from requirements doc + plan walk)
 
-These were deferred from the requirements review and should be resolved during
-or after implementation:
+### From the original requirements review (decisions baked into this plan)
 
 1. **Keyframe token shape:** This plan uses decomposed tokens
    (`--skin-anim-shake-duration` + `--skin-anim-shake-easing`) rather than
@@ -2463,9 +2462,36 @@ or after implementation:
 
 2. **Which non-tile tokens need state attributes:** This plan treats non-tile
    tokens (HUD, chrome, question, scene, bank) as appearance-only — they
-   inherit from `:root` without needing `data-*` state attributes. If a future
-   skin needs state-driven non-tile styling, the pattern established here
-   (attribute + CSS rule) extends naturally.
+   inherit from `:root` without needing `data-*` state attributes. If a
+   future skin needs state-driven non-tile styling, the pattern established
+   here (attribute + CSS rule) extends naturally.
 
-3. **Timer sync mechanism:** Deferred to the XState follow-up plan. Current
-   plan tokenizes CSS timing but doesn't address JS/CSS sync.
+3. **Timer sync mechanism:** Deferred to the XState follow-up plan (Spec 1a).
+   Current plan tokenizes CSS timing but doesn't address JS/CSS sync. See §16
+   "Deferred: XState Animation Sequencing" for the cross-plan coordination
+   note (timer-sync mechanism must consume the `@property`-typed timing
+   tokens from Task 12).
+
+### From the plan walk (2026-05-23/24, follow-up issues filed)
+
+1. **Hub-token pattern for state-feedback color (F-5):** Tracked at
+   [issue #413](https://github.com/leocaseiro/base-skill/issues/413). Lands
+   after PR #393 merges. Adds `--skin-tile-{correct,wrong,reject}` hub
+   tokens with derived `-bg` / `-border`, collapsing the 4-token override
+   surface per state to 1 hub. Default values must continue resolving the
+   same way (no VR baseline drift on Classic).
+
+2. **SRS event-surface expansion (F-19):** Tracked at
+   [issue #414](https://github.com/leocaseiro/base-skill/issues/414). Adds
+   `game:drag-end`, `game:tap`, `game:tap-fallback`, `game:drag-cancel`
+   events to `getGameEventBus()`. PR #393 does NOT depend on this; this is
+   independent SRS instrumentation work. Worth defining before SRS cluster
+   #364 starts so SRS doesn't have to retrofit.
+
+3. **`@property` rationale (F-23):** This plan uses `@property` for animation
+   timing tokens (Task 12 Step 2) primarily for **type validation** and
+   **intent-as-code** — not interpolation, since these tokens are constants
+   applied to animations rather than transitioned themselves. If `@property`
+   ever becomes a bottleneck or maintenance burden, dropping it is safe:
+   the only loss is validation; default values are independently set in
+   `:root`. See §13 Step 2 explanation.
