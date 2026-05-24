@@ -15,7 +15,7 @@ Replace the ad-hoc speech model (component-local `SpeechSynthesisUtterance` call
 Five user-visible shifts in M1:
 
 1. **Rename** `InstructionsOverlay` → `GameOptionsOverlay`. The renamed panel **does not auto-speak how-to-play** on mount; it emits a brief `game.prepare` event instead.
-2. **`ttsEnabled` flag splits** into a single user-facing **Talkativeness slider** (`on-demand | helpful | chatty`) and a separate **`processLocally`** privacy toggle.
+2. **`ttsEnabled` flag splits** into a single user-facing **Talkativeness slider** (`on-demand | helpful | chatty`) and a separate **`useOfflineVoicesOnly`** privacy toggle.
 3. **Fix NumberMatch's bare-numeral speech bug** by routing through registry-backed instructional templates (`"Find the matching number for {{count}}."`).
 4. **Add a `<QuestionRow>`** layout primitive (speaker-icon left, question text right) used by all four games.
 5. **Centralize Chrome speech-synthesis workarounds** (keepalive timer, end-event watchdog, `voiceschanged` cache, rAF cancel guard) in one `WebSpeechSpeaker` adapter.
@@ -167,32 +167,32 @@ export type LifecycleEvent =
   | 'mini-game.skip'
   // Privacy / availability signals (added 2026-05-23 per §13.1.D #19 lock)
   | 'lifecycle.tts.unavailable' // No voice available under user's privacy settings
-  | 'lifecycle.tts.cloud-fallback'; // System default cloud voice in use (processLocally: false)
+  | 'lifecycle.tts.cloud-fallback'; // System default cloud voice in use (useOfflineVoicesOnly: false)
 ```
 
 ### 4.2 Event semantics + trigger points
 
-| Event                          | Trigger                                                                                             | Default priority | Default speech throttle (ms) | Default SFX throttle (ms) |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------- | ------------------------- |
-| `game.prepare`                 | `GameOptionsOverlay` mount                                                                          | 2                | 0                            | —                         |
-| `game.start`                   | Game machine `loading.entry`                                                                        | 2                | 0                            | —                         |
-| `game.resume`                  | `AnswerGameProvider` remount-into-active-session detection                                          | 2                | 0                            | —                         |
-| `game.end`                     | Engine `gameOver.entry`                                                                             | 3                | 0                            | —                         |
-| `round.start`                  | `playingRound.entry`                                                                                | 2                | 0                            | —                         |
-| `round.idle`                   | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2)                                        | 2                | 0                            | —                         |
-| `round.error`                  | `ROUND_FAILED` transition action (definitive)                                                       | 2                | 1500                         | 400                       |
-| `round.correct`                | `ROUND_CORRECT` transition action                                                                   | 3                | 0                            | 400                       |
-| `round.celebrate`              | (Reserved — M1 doesn't fire; M2+ fires on celebration entry)                                        | 3                | 0                            | 0                         |
-| `round.advance`                | `ADVANCE_ROUND` transition action                                                                   | 2                | 0                            | —                         |
-| `level.complete`               | `levelTransition.entry`                                                                             | 3                | 0                            | —                         |
-| `turn.error`                   | Wrong tap/keypress (every occurrence within a round)                                                | 1                | 800                          | 150                       |
-| `turn.correct`                 | Right tap/keypress                                                                                  | 2                | 400                          | 100                       |
-| `turn.action`                  | Tile pickup/place (every drag interaction)                                                          | 0                | 0 (no speech)                | 50                        |
-| `mini-game.start`              | (Reserved — PR 1b+ when first mini-game lands)                                                      | 2                | 0                            | 0                         |
-| `mini-game.complete`           | (Reserved)                                                                                          | 2                | 0                            | 0                         |
-| `mini-game.skip`               | (Reserved)                                                                                          | 1                | 0                            | 0                         |
-| `lifecycle.tts.unavailable`    | `pickVoice()` returns no candidate under `processLocally: true` (privacy fail-closed; see §5.7)     | —                | —                            | —                         |
-| `lifecycle.tts.cloud-fallback` | `pickVoice()` returns no candidate under `processLocally: false` (browser default in use; see §5.7) | —                | —                            | —                         |
+| Event                          | Trigger                                                                                                   | Default priority | Default speech throttle (ms) | Default SFX throttle (ms) |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------- | ------------------------- |
+| `game.prepare`                 | `GameOptionsOverlay` mount                                                                                | 2                | 0                            | —                         |
+| `game.start`                   | Game machine `loading.entry`                                                                              | 2                | 0                            | —                         |
+| `game.resume`                  | `AnswerGameProvider` remount-into-active-session detection                                                | 2                | 0                            | —                         |
+| `game.end`                     | Engine `gameOver.entry`                                                                                   | 3                | 0                            | —                         |
+| `round.start`                  | `playingRound.entry`                                                                                      | 2                | 0                            | —                         |
+| `round.idle`                   | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2)                                              | 2                | 0                            | —                         |
+| `round.error`                  | `ROUND_FAILED` transition action (definitive)                                                             | 2                | 1500                         | 400                       |
+| `round.correct`                | `ROUND_CORRECT` transition action                                                                         | 3                | 0                            | 400                       |
+| `round.celebrate`              | (Reserved — M1 doesn't fire; M2+ fires on celebration entry)                                              | 3                | 0                            | 0                         |
+| `round.advance`                | `ADVANCE_ROUND` transition action                                                                         | 2                | 0                            | —                         |
+| `level.complete`               | `levelTransition.entry`                                                                                   | 3                | 0                            | —                         |
+| `turn.error`                   | Wrong tap/keypress (every occurrence within a round)                                                      | 1                | 800                          | 150                       |
+| `turn.correct`                 | Right tap/keypress                                                                                        | 2                | 400                          | 100                       |
+| `turn.action`                  | Tile pickup/place (every drag interaction)                                                                | 0                | 0 (no speech)                | 50                        |
+| `mini-game.start`              | (Reserved — PR 1b+ when first mini-game lands)                                                            | 2                | 0                            | 0                         |
+| `mini-game.complete`           | (Reserved)                                                                                                | 2                | 0                            | 0                         |
+| `mini-game.skip`               | (Reserved)                                                                                                | 1                | 0                            | 0                         |
+| `lifecycle.tts.unavailable`    | `pickVoice()` returns no candidate under `useOfflineVoicesOnly: true` (privacy fail-closed; see §5.7)     | —                | —                            | —                         |
+| `lifecycle.tts.cloud-fallback` | `pickVoice()` returns no candidate under `useOfflineVoicesOnly: false` (browser default in use; see §5.7) | —                | —                            | —                         |
 
 Priorities and throttles are overridable per game/skin/customConfig via the same resolution chain as templates (see §9.2). The two `lifecycle.tts.*` signal events (last rows) are emitted by the speaker, not the actor — they are observability signals, not speech triggers, so priority/throttle don't apply.
 
@@ -325,7 +325,7 @@ export type SettingsDoc = {
   // ttsEnabled?: boolean  — migrated to `talkativeness` (see §5.8)
   // === NEW in v4 ===
   talkativeness?: Talkativeness; // NEW — single-axis user control (see §5.3)
-  processLocally?: boolean; // NEW — privacy gate filtering the voice picker (see §5.7)
+  useOfflineVoicesOnly?: boolean; // NEW — privacy gate filtering the voice picker (see §5.7)
 };
 ```
 
@@ -339,7 +339,7 @@ export type TtsSettings = Required<
   Pick<
     SettingsDoc,
     | 'talkativeness'
-    | 'processLocally'
+    | 'useOfflineVoicesOnly'
     | 'speechRate'
     | 'voiceVolume'
     | 'soundEffectsVolume'
@@ -363,7 +363,7 @@ M1 introduces defaults only for the two new fields:
 properties: {
   // ... existing v3 property defaults preserved
   talkativeness:  { type: 'string', enum: ['on-demand', 'helpful', 'chatty'], default: 'helpful' },
-  processLocally: { type: 'boolean', default: true }, // privacy-safe default
+  useOfflineVoicesOnly: { type: 'boolean', default: true }, // privacy-safe default
 }
 ```
 
@@ -374,7 +374,7 @@ The `useSettings()` hook ([src/db/hooks/useSettings.ts](../../../src/db/hooks/us
 const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   // ... existing
   talkativeness: 'helpful',
-  processLocally: true,
+  useOfflineVoicesOnly: true,
 };
 ```
 
@@ -450,13 +450,15 @@ export const pickTtsSettings = (
     s?.activeLanguage ?? DEFAULT_SETTINGS.activeLanguage ?? 'en-AU',
   talkativeness:
     s?.talkativeness ?? DEFAULT_SETTINGS.talkativeness ?? 'helpful',
-  processLocally:
-    s?.processLocally ?? DEFAULT_SETTINGS.processLocally ?? true,
+  useOfflineVoicesOnly:
+    s?.useOfflineVoicesOnly ??
+    DEFAULT_SETTINGS.useOfflineVoicesOnly ??
+    true,
 });
 ```
 
 **Privacy-safe boundary defaults:** when `useSettings()` is still resolving (or
-the doc lacks a field), `pickTtsSettings()` returns `processLocally: true` and
+the doc lacks a field), `pickTtsSettings()` returns `useOfflineVoicesOnly: true` and
 `talkativeness: 'helpful'`. The system can never accidentally route audio
 through a cloud voice or speak when the schema is mid-load. `DEFAULT_SETTINGS`
 in `useSettings.ts` (§5.2) is updated to match so the two layers agree.
@@ -473,9 +475,15 @@ No subscription churn beyond the RxDB observable that `useSettings()` already ma
 
 `SPEAK_USER` utterances in flight finish as-is — the caller passed an explicit variant; settings shouldn't override it retroactively.
 
-### 5.7 `processLocally` privacy semantics — deterministic ladder
+#### 5.6.1 Kid-facing transition cue when flipping to `on-demand` mid-attempt
 
-`processLocally: true` is enforced via a deterministic fallback ladder in
+When `talkativeness` flips to `'on-demand'` mid-attempt (auto-speech goes silent from the kid's perspective), the AudioButton **pulses once on the next `round.start`** to advertise the tap-to-speak handoff. The pulse uses the `.audio-button--restart-flash` class (reuses the 200ms flash keyframe from §8.7 — visually distinct enough at one-off cadence). Implementation: `useSpeakButton` watches for `talkativeness` transitions to `'on-demand'` and fires the pulse on next `round.start` (~5 lines CSS keyframe + 1 `useEffect` in the hook). The pulse advertises: "the game just got quieter; tap me if you need to hear the question."
+
+See §12.2 for the new acceptance criterion covering this behavior.
+
+### 5.7 `useOfflineVoicesOnly` privacy semantics — deterministic ladder
+
+`useOfflineVoicesOnly: true` is enforced via a deterministic fallback ladder in
 `WebSpeechSpeaker.pickVoice()`. There is no silent cloud fallback when the
 user has opted into local-only voices.
 
@@ -483,17 +491,17 @@ user has opted into local-only voices.
 
 1. If `voiceURI` provided and lang prefix matches → use it.
 2. Filter to local-only (`voice.localService !== false`) when
-   `processLocally: true` (see Firefox note below — treat `undefined`
+   `useOfflineVoicesOnly: true` (see Firefox note below — treat `undefined`
    as "may be local").
 3. Exact locale match → return it.
 4. Language-prefix match (`'en-AU'` matches `'en'`) → return it.
-5. If candidates set is empty after step 4 **and** `processLocally: true`:
+5. If candidates set is empty after step 4 **and** `useOfflineVoicesOnly: true`:
    - Emit `lifecycle.tts.unavailable` with `{ subject: locale }`.
    - Throw `LocalVoiceUnavailableError(locale)` from `speak()`.
    - A handler at the Provider tree (sibling of `LifecycleTtsProvider`) subscribes
      to the event and triggers PR #409's existing
      `VoiceUnavailableDialogProvider` AlertDialog (see §7.2 integration note).
-6. If candidates empty and `processLocally: false`:
+6. If candidates empty and `useOfflineVoicesOnly: false`:
    - Emit `lifecycle.tts.cloud-fallback` (system default in use).
    - Return `undefined`; browser picks default voice. Best-effort.
 
@@ -501,7 +509,7 @@ The `voice.localService` flag is browser-reported and inconsistent across
 Chrome / Safari / Firefox. Treat `localService !== false` as "may be local"
 when the field is undefined (Firefox case).
 
-**Privacy invariant:** under `processLocally: true`, no utterance is ever
+**Privacy invariant:** under `useOfflineVoicesOnly: true`, no utterance is ever
 spoken via a voice with `localService === false`. Step 5 enforces this by
 failing closed, not falling back open.
 
@@ -561,7 +569,7 @@ export const settingsSchema: RxJsonSchema<SettingsDoc> = {
       enum: ['on-demand', 'helpful', 'chatty'],
       default: 'helpful',
     },
-    processLocally: { type: 'boolean', default: true },
+    useOfflineVoicesOnly: { type: 'boolean', default: true },
     // === REMOVED in v4 ===
     // ttsEnabled was removed; see migrationStrategies[4]
   },
@@ -591,7 +599,7 @@ export const settingsMigrations = {
     // === NEW v4 fields ===
     talkativeness:
       oldDoc.ttsEnabled === false ? 'on-demand' : 'helpful',
-    processLocally: true, // privacy-safe default
+    useOfflineVoicesOnly: true, // privacy-safe default
     // `ttsEnabled` is intentionally dropped — replaced by `talkativeness`.
     // Any other unknown legacy field on `oldDoc` is also dropped because
     // this allowlist never references it.
@@ -604,7 +612,7 @@ export const settingsMigrations = {
 - `ttsEnabled: false` (v3) → `talkativeness: 'on-demand'` (v4) — preserves the user's intent for silence; speaker taps still work (taps are not gated by `talkativeness`).
 - `ttsEnabled: true` or absent (v3) → `talkativeness: 'helpful'` (v4) — the safe default; auto-speech enabled at the kid-friendly middle position.
 - All other existing v3 fields (`speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `voiceVolume`, `soundEffectsVolume`, etc.) are passed through by **explicit enumeration** — never `{ ...rest }` spread (see §5.9 for why).
-- `processLocally` defaults to `true` for privacy.
+- `useOfflineVoicesOnly` defaults to `true` for privacy.
 
 **Non-leakage unit test (REQUIRED).** Migration test mirrors
 [src/db/migrations/word-spell-multi-level.collection.test.ts](../../../src/db/migrations/word-spell-multi-level.collection.test.ts)
@@ -634,7 +642,7 @@ it('drops unknown legacy fields during v3 → v4 migration', () => {
 If `settingsMigrations[4]` throws (e.g., a v3 doc shape so malformed it can't
 be coerced), `useSettings()` returns `DEFAULT_SETTINGS` (its EMPTY-observable
 fallback per [src/db/hooks/useSettings.ts](../../../src/db/hooks/useSettings.ts)).
-The user sees first-run defaults — privacy-safe `processLocally: true`,
+The user sees first-run defaults — privacy-safe `useOfflineVoicesOnly: true`,
 `talkativeness: 'helpful'`. No crash, no broken UI.
 
 Log to `console.error` with the migration error for dogfooding visibility.
@@ -949,7 +957,7 @@ export class WebSpeechSpeaker implements Speaker {
 
     return new Promise<void>((resolve, reject) => {
       const u = new SpeechSynthesisUtterance(utterance.text);
-      // pickVoice() throws LocalVoiceUnavailableError under processLocally: true
+      // pickVoice() throws LocalVoiceUnavailableError under useOfflineVoicesOnly: true
       // with no candidates — let it propagate to reject this promise (§5.7 step 5).
       let voice: SpeechSynthesisVoice | undefined;
       try {
@@ -962,7 +970,7 @@ export class WebSpeechSpeaker implements Speaker {
         u.voice = voice;
         u.lang = voice.lang; // REQUIRED on Chrome Android — voice alone is not enough
       } else {
-        // processLocally: false, ladder step 6 — browser picks default;
+        // useOfflineVoicesOnly: false, ladder step 6 — browser picks default;
         // cloud-fallback event already emitted by pickVoice().
         u.lang = utterance.locale;
       }
@@ -1040,11 +1048,13 @@ export class WebSpeechSpeaker implements Speaker {
     locale: string,
     voiceURI: string | undefined,
   ): SpeechSynthesisVoice | undefined {
-    // Step 2: filter to local-only voices when processLocally: true.
+    // Step 2: filter to local-only voices when useOfflineVoicesOnly: true.
     // Treat `localService !== false` as "may be local" (Firefox returns
     // undefined for the field — fail open per §5.7 note).
     const candidates = [...this.voiceCache.values()].filter((v) =>
-      this.settings.processLocally ? v.localService !== false : true,
+      this.settings.useOfflineVoicesOnly
+        ? v.localService !== false
+        : true,
     );
     // Step 1: explicit voiceURI match with lang-prefix sanity check.
     if (voiceURI) {
@@ -1061,7 +1071,7 @@ export class WebSpeechSpeaker implements Speaker {
       candidates.find((v) => v.lang.startsWith(locale.split('-')[0]));
     if (localeMatch) return localeMatch;
     // Step 5: privacy-mode empty set — fail closed.
-    if (this.settings.processLocally) {
+    if (this.settings.useOfflineVoicesOnly) {
       this.bus.emit({
         type: 'lifecycle.tts.unavailable',
         subject: subjectToken(locale),
@@ -1087,7 +1097,7 @@ export class WebSpeechSpeaker implements Speaker {
 export class LocalVoiceUnavailableError extends Error {
   constructor(public readonly locale: string) {
     super(
-      `No local voice available for locale '${locale}' under processLocally: true`,
+      `No local voice available for locale '${locale}' under useOfflineVoicesOnly: true`,
     );
     this.name = 'LocalVoiceUnavailableError';
   }
@@ -1111,7 +1121,7 @@ Browser-quirk mitigations summary:
 > [`src/components/VoiceUnavailableWarning.tsx`](../../../src/components/VoiceUnavailableWarning.tsx)
 > (global banner). M1's `WebSpeechSpeaker` MUST integrate with these surfaces
 > rather than inventing its own dialog: when `pickVoice()` returns no candidate
-> _and_ `settings.processLocally === true`, the speaker emits
+> _and_ `settings.useOfflineVoicesOnly === true`, the speaker emits
 > `lifecycle.tts.unavailable` on the bus (new event, see [§13.1.D #19](#13-open-questions--deferred-to-follow-up)
 > for the lock); a thin handler at the Provider tree (sibling of
 > `LifecycleTtsProvider`) subscribes and triggers the existing
@@ -1194,15 +1204,18 @@ Multi-turn scenario: user drags `soundEffectsVolume` from 0.8 → 0.3 mid-round.
 
 ### 8.1 SettingsPanel changes
 
-| Setting | Today's UI | After M1 |
-| ------- | ---------- | -------- |
+Settings list (today → after M1):
 
 - `voiceVolume` — today: 0–100% slider (default 80). M1: unchanged.
 - `soundEffectsVolume` — today: 0–100% slider (default 80). M1: unchanged.
-- `preferredVoiceURI` — today: voice picker dropdown. M1: filtered by `voice.localService` when `processLocally: true`. (No rename — reuse master's existing field; canon's proposed `voiceName` is dropped.)
 - `activeLanguage` — today: locale selector exists. M1: ensure the voice picker re-filters when this changes; no new `voiceLocale` field is added (the existing `activeLanguage` is the source of truth for voice locale).
 - `talkativeness` — today: absent (was `ttsEnabled` toggle). M1: 3-stop slider replaces `ttsEnabled` — Shhh 🤫 / Talk a bit 💬 / Talk a lot 🗣️.
-- `processLocally` — today: absent. M1: new toggle below voice picker; toggling off triggers privacy modal.
+
+**Offline voices** (new dedicated subsection, rendered ABOVE the voice picker):
+
+- **Offline voices only** — when on, the game uses only voices already on your device. Cloud voices won't appear in the voice picker.
+- `useOfflineVoicesOnly` — today: absent. M1: new toggle (default `true`); a `(?)` info-button next to the label surfaces browser caveats (see §8.3); toggling in either direction triggers the confirmation modal.
+- `preferredVoiceURI` (voice picker dropdown) — today: voice picker dropdown. M1: filtered by `voice.localService` when `useOfflineVoicesOnly: true`. (No rename — reuse master's existing field; canon's proposed `voiceName` is dropped.) The picker re-filters live whenever the offline-only toggle flips.
 
 ### 8.2 Talkativeness slider
 
@@ -1214,16 +1227,28 @@ Multi-turn scenario: user drags `soundEffectsVolume` from 0.8 → 0.3 mid-round.
     max={2}
     step={1}
     value={[idx]}
+    aria-valuetext={t(
+      `settings.talkativeness.descriptor.${SLIDER_VALUES[idx]}`,
+    )}
     onValueChange={([i]) => update({ talkativeness: SLIDER_VALUES[i] })}
   />
   <div className="slider-labels">
-    <span>🤫 Shhh</span>
-    <span>💬 Talk a bit</span>
-    <span>🗣️ Talk a lot</span>
+    <span>
+      <span aria-hidden="true">🤫</span> Shhh
+    </span>
+    <span>
+      <span aria-hidden="true">💬</span> Talk a bit
+    </span>
+    <span>
+      <span aria-hidden="true">🗣️</span> Talk a lot
+    </span>
   </div>
+  <p className="settings-row__descriptor">
+    {t(`settings.talkativeness.descriptor.${SLIDER_VALUES[idx]}`)}
+  </p>
   <Tooltip>
-    The speaker button always works. This setting only controls how much
-    the game talks on its own.
+    Pick how much help your child needs. Quiet focus / Read along /
+    Coach me through it.
   </Tooltip>
 </div>;
 
@@ -1234,19 +1259,57 @@ const SLIDER_VALUES: Talkativeness[] = [
 ];
 ```
 
+**Persistent current-state descriptor below the slider.** Always rendered (not tooltip-gated) so the user sees the meaning of the selected value without hovering:
+
+| Value       | Descriptor (i18n key `settings.talkativeness.descriptor.<value>`) |
+| ----------- | ----------------------------------------------------------------- |
+| `on-demand` | "Game stays quiet. Tap the speaker button to hear questions."     |
+| `helpful`   | "Game speaks the question and key tips."                          |
+| `chatty`    | "Game talks through every round."                                 |
+
+The descriptor copy also drives the Slider's `aria-valuetext`, so screen-reader users hear the same description live as they move the slider — no separate copy track.
+
+**Tooltip framing.** Intent-framed (parents pick by need, not by volume):
+
+> _"Pick how much help your child needs. Quiet focus / Read along / Coach me through it."_
+
+Existing emoji labels (`🤫 Shhh`, `💬 Talk a bit`, `🗣️ Talk a lot`) stay — no new label keys.
+
+**Emoji a11y pattern.** Wrap the emoji in `aria-hidden="true"`, keep the text outside; do NOT add `aria-label` on the parent (avoids double-announce risk on NVDA/VoiceOver):
+
+```tsx
+<span>
+  <span aria-hidden="true">🤫</span> Shhh
+</span>
+```
+
+Repeat for all 3 labels. Screen readers announce only the text ("Shhh" / "Talk a bit" / "Talk a lot"); the emoji is decorative.
+
+**3 new i18n keys** added per §9.8: `settings.talkativeness.descriptor.on-demand`, `.helpful`, `.chatty`. See §9.8 for the updated key count.
+
 Storybook control uses `argTypes` radio (`'on-demand' | 'helpful' | 'chatty'`) per project convention — slider is the user-facing UI, radio is the dev surface.
 
-### 8.3 `processLocally` toggle + cloud-voice modal
+### 8.3 `useOfflineVoicesOnly` toggle + cloud-voice modal
 
-Toggle ON → OFF triggers a confirmation modal with browser-specific privacy doc links. Modal copy via i18n keys (`settings.cloudVoiceTitle`, `settings.cloudVoiceBody`); links open in new tab. Default action `Cancel` leaves setting at `true`. `Yes, allow` flips to `false` and unhides cloud voices in the picker.
+**Any toggle change triggers the confirmation modal** (both `false → true` and `true → false`). Rationale: kid-tap protection — a child accidentally tapping the toggle in either direction shouldn't silently re-route audio. The modal asks for parent confirmation in both directions.
 
-Toggle OFF → ON (privacy-strengthening) does NOT require confirmation. If the active voice was a cloud voice, the speaker falls back to the first available local voice for the locale + logs `console.warn` for dogfooders.
+**Modal copy (neutral; mentions both online + offline):**
 
-Caveats documented in the modal body:
+- Title (`settings.cloudVoiceTitle`): `"Use online voices too?"`
+- Body (`settings.cloudVoiceBody`): `"Online voices need an internet connection — they won't work when you're offline. Turning this on lets the game also use voices from a cloud service in addition to the voices already on your device."`
+- Actions: `Cancel` (default; leaves setting unchanged) / `Yes, allow` (flips the toggle).
+
+When confirming `true → false` (enabling cloud voices): unhides cloud voices in the picker.
+
+When confirming `false → true` (re-enabling offline-only): if the active voice was a cloud voice, the speaker falls back to the first available local voice for the locale + logs `console.warn` for dogfooders.
+
+**Browser caveats live in a `(?)` info-button next to the toggle label — NOT in the modal body.** Tap/hover surfaces a tooltip with the 3 caveats. i18n key `settings.cloudVoiceCaveats` carries the bullets:
 
 - `voice.localService` is browser-reported and not fully reliable.
 - iOS Safari: all voices are local; toggle has no visible effect.
 - Chrome Android: many voices are cloud-by-default; toggling on may leave a very short list.
+
+Rationale for moving caveats out of the modal: most parents don't need the browser-quirk detail to make the decision; the modal copy stays scannable. The info-button keeps the detail one tap away for users who want it.
 
 ### 8.4 `InstructionsOverlay` → `GameOptionsOverlay` rename
 
@@ -1264,6 +1327,8 @@ src/components/answer-game/InstructionsOverlay/
 Storybook title: `'AnswerGame/InstructionsOverlay'` → `'AnswerGame/GameOptions/GameOptionsOverlay'` (PascalCase per CLAUDE.md).
 
 ### 8.5 Behavior change — drop auto-speak, emit `game.prepare` to bus
+
+> **M1 acceptance — auto-speak removal is a behavior regression.** Today the panel auto-speaks the how-to-play text on mount; M1 stops doing that. We accept this regression in M1 because the app is in beta with no production users yet — no one is relying on the old behavior. Post-launch the same change would need a migration toast or first-N-sessions taper to soften the surprise. We are NOT shipping migration UX in M1.
 
 ```tsx
 // src/components/answer-game/GameOptions/GameOptionsOverlay.tsx (post-rename)
@@ -1360,24 +1425,102 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
   variant = 'helpful',
 }) => {
   const round = useRoundContext();
-  const speak = useSpeakButton({ event, payload: { round }, variant });
+  const { speak, isSpeaking } = useSpeakButton({
+    event,
+    payload: { round },
+    variant,
+  });
+  const [restartFlash, setRestartFlash] = useState(false);
+
+  const handleClick = () => {
+    if (isSpeaking) {
+      // Re-tap preempts current utterance — visualize the restart.
+      setRestartFlash(true);
+      window.setTimeout(() => setRestartFlash(false), 200);
+    }
+    speak();
+  };
 
   return (
     <button
       type="button"
-      aria-label={t('common.audio.replay', {
-        defaultValue: 'Hear the question',
-      })}
-      onClick={speak}
-      className="audio-button"
+      aria-label={t(
+        isSpeaking ? 'audio.replay.playing' : 'audio.replay.idle',
+      )}
+      onClick={handleClick}
+      className={[
+        'audio-button',
+        isSpeaking && 'audio-button--playing',
+        restartFlash && 'audio-button--restart-flash',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
-      <SpeakerIcon />
+      <SpeakerIcon className={isSpeaking ? 'pulse' : undefined} />
     </button>
   );
 };
 ```
 
 The button takes a lifecycle event name (default `round.start`) and lets `useSpeakButton` build the variant template at speak time. Game callers stop passing raw prompt strings — that pattern was a silent-bug source (`speakOnDemand('cat')` would fail i18n lookup and silently no-op).
+
+**Three interaction states.** Per §6, `SPEAK_USER` always preempts in-flight speech, so the button never refuses a tap — every state below is reachable from every other.
+
+| State                        | Icon                                | `aria-label`                                                                          | Class                                      | Animation                                                                              |
+| ---------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `idle`                       | `<SpeakerIcon />`                   | `t('audio.replay.idle')` → "Hear the question"                                        | `audio-button`                             | none                                                                                   |
+| `playing`                    | `<SpeakerIcon className="pulse" />` | `t('audio.replay.playing')` → "Playing question — tap to replay"                      | `audio-button audio-button--playing`       | Steady-state pulsing ring keyframe on `.audio-button--playing` (loops while speaking)  |
+| `briefly-paused-after-retap` | `<SpeakerIcon />`                   | unchanged (transient — no aria flicker, screen readers re-read on next tap if needed) | `audio-button audio-button--restart-flash` | One-shot 200ms bg flash + icon scale-down on `.audio-button--restart-flash` (keyframe) |
+
+**`useSpeakButton` hook signature change** — now returns `{ speak, isSpeaking }` (was `() => speak`):
+
+```ts
+// src/lib/lifecycle-tts/use-speak-button.ts
+export interface UseSpeakButtonResult {
+  speak: () => void;
+  isSpeaking: boolean;
+}
+
+export const useSpeakButton = (
+  opts: UseSpeakButtonOpts,
+): UseSpeakButtonResult => {
+  const actor = useLifecycleTts();
+  const expectedSubject = useMemo(
+    () => subjectToken(opts.event, opts.payload),
+    [opts.event, opts.payload],
+  );
+
+  // Track playing state by subscribing to lifecycle.tts.played matching this
+  // button's expected subject. The actor emits `tts.played` on both speak-end
+  // and speak-cancel — both transition us back to idle.
+  const isSpeaking = useSelector(
+    actor,
+    (snapshot) =>
+      snapshot.context.current?.lifecycleEvent === opts.event &&
+      isSubjectMatch(
+        { subject: snapshot.context.current?.subject },
+        expectedSubject,
+      ),
+  );
+
+  const speak = useCallback(() => {
+    actor.send({
+      type: 'SPEAK_USER',
+      event: opts.event,
+      payload: opts.payload,
+      variant: opts.variant,
+    });
+  }, [actor, opts.event, opts.payload, opts.variant]);
+
+  return { speak, isSpeaking };
+};
+```
+
+`isSpeaking` is derived by subscribing to the machine and matching the in-flight utterance's `lifecycleEvent + subject` against this button's expected subject (`isSubjectMatch()` from §10.3). It flips back to `false` automatically when the actor's `current` slot clears (on speak end, cancel, or preempt).
+
+**Re-tap preemption visualization.** Per §6, `SPEAK_USER` always preempts. The 200ms one-shot flash + icon scale-down (`.audio-button--restart-flash`) is distinct from the steady-state pulsing ring (`.audio-button--playing`) so the user sees the restart, not just the continued playback. The flash auto-clears via `setTimeout` (200ms); the pulsing ring continues as long as the new utterance plays. No aria change on the flash — screen readers re-announce on next tap if needed; an aria-live ping on every re-tap would over-announce.
+
+**Two new i18n keys** added per §9.8: `audio.replay.idle` ("Hear the question") and `audio.replay.playing` ("Playing question — tap to replay"). See §9.8 for the updated key count.
 
 ## 9. Template Resolver + RoundContext + i18n
 
@@ -1405,7 +1548,7 @@ export const resolveTemplate = (input: ResolveInput): ResolveOutput => {
 };
 ```
 
-Pure function: no flags awareness (`autoSpeak`, `processLocally` gate before/after), no subscriptions, no side effects.
+Pure function: no flags awareness (`autoSpeak`, `useOfflineVoicesOnly` gate before/after), no subscriptions, no side effects.
 
 ### 9.2 Layer chain
 
@@ -1576,15 +1719,21 @@ const buildInterpolation = (
 
 Missing required variable → resolver returns `null` (no speech) + dev warn. Detection: after interpolation, if the result still contains `{{` or `}}`, a variable wasn't substituted.
 
-### 9.8 i18n M1 scope — 64 keys
+### 9.8 i18n M1 scope — ~70 keys
 
-4 games × 8 user-visible events × 2 variants (helpful + chatty) = 64 keys.
+Baseline: 4 games × 8 user-visible events × 2 variants (helpful + chatty) ≈ 64 game-event keys. M1 additions push the total to ~70:
 
-User-visible M1 events (have keys): `game.prepare`, `game.start`, `round.start`, `round.error`, `round.correct`, `turn.error`, `turn.correct`, `level.complete`, `game.end`. Roughly 9 events × 2 variants × 4 games = 72 keys actually — call it ~64–72 depending on which events each game implements.
+- **+6** `round.idle` nudges (per §10.1.1) — WordSpell / NumberMatch / SortNumbers × 2 variants (SpotAll skipped per G-6).
+- **+2** AudioButton aria-labels (per §8.7) — `audio.replay.idle`, `audio.replay.playing`.
+- **+3** Talkativeness descriptors (per §8.2) — `settings.talkativeness.descriptor.on-demand` / `.helpful` / `.chatty`.
+- **+1** Cloud-voice caveats tooltip (per §8.3) — `settings.cloudVoiceCaveats` (bullets).
+- (Existing in §8.3) `settings.cloudVoiceTitle`, `settings.cloudVoiceBody` — already locked.
+
+User-visible M1 events (have keys): `game.prepare`, `game.start`, `round.start`, `round.idle` (promoted from deferred in M1, see §10.1.1), `round.error`, `round.correct`, `turn.error`, `turn.correct`, `level.complete`, `game.end`. Roughly 10 events × 2 variants × 4 games (minus SpotAll's `round.idle`) plus the settings/audio keys above lands the total in the ~70 range.
 
 `on-demand` variant defaults to `DONT_SPEAK` for most events (no keys). Game definitions may override per event.
 
-Deferred events without M1 keys (`game.resume`, `round.idle`, `round.celebrate`, `round.advance`, `turn.action`, all `mini-game.*`) get keys in M2 or later phases.
+Still-deferred events without M1 keys (`game.resume`, `round.celebrate`, `round.advance`, `turn.action`, all `mini-game.*`) get keys in M2 or later phases.
 
 ## 10. round.idle + Animation Sync + Mini-Game Reservations
 
@@ -1626,6 +1775,19 @@ playingRound: {
 ```
 
 Trigger predicate per canon: fires once per round, N seconds after `round.start`, if no zone has received a correct placement AND no tile has been picked up. Cancelled on first correct placement; restarted once on first wrong placement; never restarted again that round.
+
+#### 10.1.1 `round.idle` template content (M1)
+
+Per §9.8's previously-deferred i18n key list — `round.idle` is **no longer deferred in M1**. Kid-friendly nudge copy per game × variant:
+
+| Game        | `helpful` key                         | `helpful` copy                                                  | `chatty` key                         | `chatty` copy                                         |
+| ----------- | ------------------------------------- | --------------------------------------------------------------- | ------------------------------------ | ----------------------------------------------------- |
+| WordSpell   | `tts.word-spell.round-idle.helpful`   | "Take your time. Tap the speaker if you need to hear it again." | `tts.word-spell.round-idle.chatty`   | "No rush — try one of the letters when you're ready." |
+| NumberMatch | `tts.number-match.round-idle.helpful` | "Take your time. Which numbers match?"                          | `tts.number-match.round-idle.chatty` | "Tap a number when you're ready."                     |
+| SortNumbers | `tts.sort-numbers.round-idle.helpful` | "Take your time. Drag the numbers in order."                    | `tts.sort-numbers.round-idle.chatty` | "No rush — start with the smallest one."              |
+| SpotAll     | _skipped per G-6_                     | _skipped (game will be redone)_                                 | _skipped per G-6_                    | _skipped (game will be redone)_                       |
+
+`on-demand` variant remains `DONT_SPEAK` (round.idle is auto-speech; silent-mode users tap the speaker to hear the question instead). SpotAll skipped per G-6 (will be redone). ~6 new keys added; §9.8 key count updated.
 
 ### 10.2 `lifecycle.tts.played` as state-machine flow control
 
@@ -1745,6 +1907,8 @@ Mini-games have their own state machines, their own templates (`tts.dino-egg-hat
 
 Real mini-games dismiss via `bus.emit({ type: 'lifecycle.cancel' })` from their Play Again / Go Home button handlers. **No timeout** — if user does nothing, mini-game sits idle (possibly using its own `round.idle`-style hints internally).
 
+**Escape hatch.** Event NAMES are locked (downstream consumers must not rename `mini-game.start` / `mini-game.complete` / `mini-game.skip`); semantic refinements — priorities, throttle values, dismissal flow nuance — may happen via the first mini-game's PR in PR 1b+ without breaking change. Per `project_m1_six_goals` the contract is forward-looking; per the §10 preamble, refinements are expected as consumers materialize.
+
 ## 11. File Inventory + PR Slicing
 
 ### 11.1 Single combined PR
@@ -1806,8 +1970,8 @@ src/db/migrations/
 
 - `src/types/game-events.ts` — add 3 new event interfaces + 17 `LifecycleEvent` values + `subject` field; rename colon types to dots.
 - `src/lib/game-event-bus.ts` — wildcard match supports `'game.*'` etc.
-- `src/db/schemas/settings.ts` — v3 → v4 schema bump; add **flat top-level** `talkativeness` + `processLocally`; preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId` exactly; remove `ttsEnabled` via migration. Full v4 schema shown in §5.8 (every field declared explicitly because `additionalProperties: false`).
-- `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `processLocally: true` so first-paint matches the v4 schema defaults (no code-path change; same RxJS observable wrapping pattern reused).
+- `src/db/schemas/settings.ts` — v3 → v4 schema bump; add **flat top-level** `talkativeness` + `useOfflineVoicesOnly`; preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId` exactly; remove `ttsEnabled` via migration. Full v4 schema shown in §5.8 (every field declared explicitly because `additionalProperties: false`).
+- `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `useOfflineVoicesOnly: true` so first-paint matches the v4 schema defaults (no code-path change; same RxJS observable wrapping pattern reused).
 - `src/db/create-database.ts` — schema version bump.
 - `src/components/answer-game/answer-game-reducer.ts` — emit `lifecycle.speak` for `round.*` + `game.*` events via SideEffect.
 - `src/components/answer-game/AnswerGameProvider.tsx` — emit `lifecycle.speak` for `game.start`, `game.resume` (remount detect).
@@ -1828,7 +1992,7 @@ src/db/migrations/
 - `src/games/number-match/definition.ts` — same.
 - `src/games/sort-numbers/definition.ts` — same.
 - `src/games/spot-all/definition.ts` — same.
-- `src/components/SettingsPanel/SettingsPanel.tsx` — Talkativeness slider, `processLocally` toggle + modal, voice picker filter.
+- `src/components/SettingsPanel/SettingsPanel.tsx` — Talkativeness slider, `useOfflineVoicesOnly` toggle + modal, voice picker filter.
 - `src/lib/audio/AudioFeedback.ts` — `@deprecated` JSDoc + dev-mode `console.warn` on legacy functions.
 - `src/lib/i18n/locales/en/games.json` — add `tts.*` namespace (~64 keys).
 - `src/lib/i18n/i18n.ts` — ensure `fallbackLng: 'en'` + missing-key handler.
@@ -1852,7 +2016,7 @@ src/db/migrations/
 10. feat(lifecycle-tts): Provider + hooks + tests
 11. feat(lifecycle-tts): RoundContext provider/hook + tests
 12. feat(settings): RxDB schema v4 migration + tests
-13. feat(settings): Talkativeness slider, processLocally toggle, cloud-voice modal
+13. feat(settings): Talkativeness slider, useOfflineVoicesOnly toggle, cloud-voice modal
 14. feat(answer-game): rename InstructionsOverlay → GameOptionsOverlay, drop auto-speak
 15. feat(answer-game): QuestionRow component + breakpoints
 16. feat(answer-game): split ttsEnabled → autoSpeak + talkativeness in AnswerGameConfig
@@ -1863,7 +2027,7 @@ src/db/migrations/
 21. feat(number-match): RoundContextProvider + tts bindings + fix bare-numeral bug
 22. feat(sort-numbers): RoundContextProvider + tts bindings + add AudioButton
 23. feat(spot-all): RoundContextProvider + tts bindings + consolidate speakPrompt
-24. feat(i18n): add tts.* namespace (~64 en keys)
+24. feat(i18n): add tts.* + audio.* + settings.* namespaces (~70 en keys)
 25. chore: smoke-test integration + e2e coverage
 ```
 
@@ -1891,7 +2055,7 @@ Each commit leaves CI green. Reviewer scans commit-by-commit.
 - `speak()` rejects with `'cancelled'` on `cancel()`.
 - `speak()` rejects with `'speech-timeout'` after `SPEECH_WATCHDOG_MS`.
 - Voice cache + `voiceschanged` refresh.
-- `pickVoice('en-AU')` filters by `localService` when `processLocally: true`.
+- `pickVoice('en-AU')` filters by `localService` when `useOfflineVoicesOnly: true`.
 - Chrome Android: `u.lang = voice.lang` always set with voice.
 - Pre-speak `synth.paused === true` → `resume()` called.
 - Keepalive: while `synth.speaking === true`, `pause/resume` every 10s.
@@ -1928,10 +2092,10 @@ Each commit leaves CI green. Reviewer scans commit-by-commit.
 
 **Settings migration** (`lifecycle-tts-settings-v4.collection.test.ts`):
 
-- RxDB v3 with `ttsEnabled: true` → v4 `talkativeness: 'helpful'`, `processLocally: true`.
+- RxDB v3 with `ttsEnabled: true` → v4 `talkativeness: 'helpful'`, `useOfflineVoicesOnly: true`.
 - RxDB v3 with `ttsEnabled: false` → v4 `talkativeness: 'on-demand'`.
 
-**`processLocally` UI**:
+**`useOfflineVoicesOnly` UI**:
 
 - Toggle ON → OFF → modal appears; cancel reverts.
 - Toggle ON → OFF → confirm flips to `false`; picker shows cloud voices.
@@ -1953,13 +2117,14 @@ Each commit leaves CI green. Reviewer scans commit-by-commit.
 - [ ] NumberMatch's bare-numeral speech bug fixed.
 - [ ] `ttsEnabled` migrated to `talkativeness` via RxDB v4.
 - [ ] AudioButton renders when `talkativeness !== 'on-demand'` ... wait, button always renders. AudioButton always available; uses `helpful` variant on tap.
+- [ ] Mid-round Talkativeness change to `'on-demand'` triggers AudioButton pulse on next `round.start` (per §5.6.1). Verifiable via unit test on `useSpeakButton`.
 - [ ] All four games use `<QuestionRow>` with AudioButton.
 - [ ] SortNumbers gains AudioButton (currently missing).
 - [ ] SpotAllPrompt consolidates into `useSpeakButton`.
 - [ ] Talkativeness slider lives in `SettingsPanel` with tooltip.
-- [ ] `processLocally` toggle lives in `SettingsPanel` with confirmation modal.
+- [ ] `useOfflineVoicesOnly` toggle lives in `SettingsPanel` with confirmation modal.
 - [ ] All four game definitions have `tts` `EventBindings` for user-visible events.
-- [ ] ~64 i18n keys exist in en; pt-BR falls back via `fallbackLng`.
+- [ ] ~70 i18n keys exist in en (~64 game-event keys + 6 round.idle nudges + 2 AudioButton aria-labels + 3 Talkativeness descriptors + 1 cloud-voice caveats); pt-BR falls back via `fallbackLng`.
 - [ ] WebSpeechSpeaker keepalive resolves Chromium 40747712 freeze.
 - [ ] `lifecycle.tts.played` emitted after each successful play.
 - [ ] No `useRoundTTS` in codebase; all callers migrated.
