@@ -7,8 +7,10 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
 import appCss from '../styles.css?url';
+import { ConsentBanner } from '@/components/ConsentBanner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/sonner';
+import { useAnalytics } from '@/lib/analytics/useAnalytics';
 import { ServiceWorkerProvider } from '@/lib/service-worker/ServiceWorkerProvider';
 
 /**
@@ -32,33 +34,39 @@ const SPA_REDIRECT_SCRIPT = String.raw`(function(){try{var b=${JSON.stringify(im
 const THEME_INIT_SCRIPT =
   "(function(){try{var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=prefersDark?'dark':'light';var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);root.removeAttribute('data-theme');root.style.colorScheme=resolved;}catch(e){}})();";
 
-const RootDocument = ({ children }: { children: React.ReactNode }) => (
-  <html lang="en" suppressHydrationWarning>
-    <head>
-      <script
-        dangerouslySetInnerHTML={{ __html: SPA_REDIRECT_SCRIPT }}
-      />
-      <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      <HeadContent />
-    </head>
-    <body className="font-sans antialiased">
-      <ErrorBoundary>
-        <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
-      </ErrorBoundary>
-      <Toaster />
-      <TanStackDevtools
-        config={{ position: 'bottom-right' }}
-        plugins={[
-          {
-            name: 'Tanstack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-        ]}
-      />
-      <Scripts />
-    </body>
-  </html>
-);
+const RootDocument = ({ children }: { children: React.ReactNode }) => {
+  useAnalytics();
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: SPA_REDIRECT_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
+        <HeadContent />
+      </head>
+      <body className="font-sans antialiased">
+        <ErrorBoundary>
+          <ServiceWorkerProvider>{children}</ServiceWorkerProvider>
+        </ErrorBoundary>
+        <Toaster />
+        <ConsentBanner />
+        <TanStackDevtools
+          config={{ position: 'bottom-right' }}
+          plugins={[
+            {
+              name: 'Tanstack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+          ]}
+        />
+        <Scripts />
+      </body>
+    </html>
+  );
+};
 
 export const Route = createRootRoute({
   head: () => ({
