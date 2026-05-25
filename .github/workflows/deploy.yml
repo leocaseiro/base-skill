@@ -81,6 +81,7 @@ jobs:
           VITE_ONEDRIVE_CLIENT_ID: ${{ secrets.VITE_ONEDRIVE_CLIENT_ID }}
           VITE_CF_WORKER_URL: ${{ secrets.VITE_CF_WORKER_URL }}
           VITE_ANALYTICS_PROVIDER: ${{ vars.VITE_ANALYTICS_PROVIDER }}
+          VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
 
       - name: Copy shell to index.html
         run: cp dist/client/_shell.html dist/client/index.html
