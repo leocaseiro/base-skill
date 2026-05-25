@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { EMPTY } from 'rxjs';
-import { useRxDB } from './useRxDB';
 import { useRxQuery } from './useRxQuery';
 import type { SettingsDoc } from '@/db/schemas/settings';
+import { DbContext } from '@/providers/DbProvider';
 
 const ANONYMOUS_PROFILE_ID = 'anonymous';
 const ANONYMOUS_SETTINGS_ID = 'settings:anonymous';
@@ -39,7 +39,13 @@ type UseSettingsResult = {
 };
 
 export function useSettings(): UseSettingsResult {
-  const { db } = useRxDB();
+  // Use useContext directly (not useRxDB) so consumers rendered outside
+  // a DbProvider — Storybook stories, partial-tree component tests —
+  // degrade gracefully to DEFAULT_SETTINGS instead of throwing. Real
+  // production callers always sit under the _app.tsx DbProvider so the
+  // ctx will be present and behavior is unchanged for them.
+  const ctx = useContext(DbContext);
+  const db = ctx?.db ?? null;
 
   const query$ = useMemo(
     () => (db ? db.settings.findOne(ANONYMOUS_SETTINGS_ID).$ : EMPTY),
