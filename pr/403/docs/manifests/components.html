@@ -18668,6 +18668,26 @@ All hooks live in `src/components/answer-game/`.
 | `useTouchKeyboardInput` | `useTouchKeyboardInput.ts` | Hidden `&lt;input&gt;` for mobile OS keyboard                                                       | `REMOVE_TILE`; via `useTileEvaluation`                                         |
 | `useBankDropTarget`     | `useBankDropTarget.ts`     | Makes the bank a drop target for slot tiles (no dispatch — returns `isDragOver`)              | —                                                                              |
 | `useTouchDrag`          | `useTouchDrag.ts`          | Low-level pointer event handler; calls `onDrop`, `onDropOnBank`, `onDropOnBankTile` callbacks | Callers dispatch                                                               |
+| `useGameTTS`            | `useGameTTS.ts`            | Returns `{ speakTile, speakPrompt, speakPromptOnDemand }` — TTS surface for games             | —                                                                              |
+
+---
+
+## TTS Surface (`useGameTTS`)
+
+The `useGameTTS` hook returns three callbacks with three distinct
+voice-availability semantics. The user notification mechanism differs
+per-callback by intent:
+
+| Callback              | When to use                                                  | Preferred voice unavailable → behaviour                                                                   |
+| --------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `speakTile`           | Auto playback on tile interactions (drag pickup, tile reads) | Silent fallback to the OS default voice; global `VoiceUnavailableWarning` banner informs the user.        |
+| `speakPrompt`         | Auto playback at round start / auto-trigger paths            | Silent return — does NOT play with the OS default; banner informs the user.                               |
+| `speakPromptOnDemand` | User-initiated speak actions (audio button, tile tap)        | Opens the `VoiceUnavailableDialogProvider` AlertDialog so the user can fix the configuration immediately. |
+
+The global `VoiceUnavailableWarning` banner (mounted in `_app.tsx`) is the
+ambient notification surface. The `VoiceUnavailableDialogProvider` AlertDialog
+(also mounted in `_app.tsx`) is the on-demand notification surface that interrupts
+the user flow only when they explicitly triggered a speak action.
 
 ---
 
