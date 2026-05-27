@@ -1,0 +1,1 @@
+import{ad as a,x as c,r as m,ae as r,j as u,af as d}from"./main-BRyVbt4B.js";const l=()=>{const e=a.useLoaderData(),s=a.useSearch().debug===!0||!1,{t:o}=c("games"),n=e.config.gameId,t=e.customGameName??o(n);return m.useEffect(()=>(document.title=r(t),()=>{document.title="BaseSkill"}),[t]),u.jsx(d,{...e,debug:s})};export{l as component};
