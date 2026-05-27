@@ -1,1 +1,0 @@
-import{R as e,r as o,j as a,O as s}from"./main-BloGsz_F.js";import{i as n}from"./i18n-DL5P4MEY.js";const m=()=>{const{locale:t}=e.useParams();return n.changeLanguage(t),o.useEffect(()=>{document.documentElement.lang=t==="pt-BR"?"pt-BR":"en"},[t]),a.jsx(s,{})};export{m as component};
