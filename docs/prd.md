@@ -298,6 +298,12 @@ Analytics provider selection is deferred. The requirement is to build an **analy
 
 **Recommendation**: Implement a `AnalyticsAdapter` interface. Ship with a no-op implementation. Connect a provider via config without touching core logic. See `docs/architecture.md` for the interface spec.
 
+> **Spec Delta (2026-05-25): v1 ships inline GA4, not `AnalyticsAdapter`.**
+>
+> Trade-off: simpler implementation now (~150 lines vs ~300 for the abstraction), refactor cost deferred until a second provider is needed. The PRD's privacy concerns about GA4 (Low rating, blocked by ~30–40% of users) are partially mitigated by a consent banner that defaults to opt-out (no script load until the user clicks Accept).
+>
+> Tracked in [#415](https://github.com/leocaseiro/base-skill/issues/415). Revisit when: a second provider becomes needed, the kids' app privacy story requires a swap, or call sites accumulate enough to benefit from a typed interface.
+
 ### 5.15 Extension Points
 
 The app exposes an **event bus and plugin hook system** so future premium features (from separate private repos) can:
