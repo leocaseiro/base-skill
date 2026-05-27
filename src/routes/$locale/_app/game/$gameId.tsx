@@ -1173,20 +1173,21 @@ export const GameRoute = ({
 export const buildGamePageTitle = (name: string | null): string =>
   name ? `${name} | BaseSkill` : 'BaseSkill';
 
+const resetDocumentTitle = () => {
+  document.title = 'BaseSkill';
+};
+
 const RouteComponent = (): JSX.Element => {
   const data = Route.useLoaderData();
   const search = Route.useSearch();
   const debug = search.debug === true || import.meta.env.DEV;
   const { t } = useTranslation('games');
   const gameId = data.config.gameId;
-  const gameName =
-    data.customGameName ?? t(gameId as Parameters<typeof t>[0]);
+  const gameName = data.customGameName ?? t(gameId);
 
   useEffect(() => {
     document.title = buildGamePageTitle(gameName);
-    return () => {
-      document.title = 'BaseSkill';
-    };
+    return resetDocumentTitle;
   }, [gameName]);
 
   return <GameRoute {...data} debug={debug} />;
