@@ -27,6 +27,17 @@ vi.mock('./phoneme-audio', async () => {
   };
 });
 
+vi.mock('#/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      voiceVolume: 0.8,
+      preferredVoiceURI: undefined as string | undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
 // These tests drive the full WordLibraryExplorer — multiple clicks,
 // debounced search, IndexedDB-backed drafts. Under CI's slower runners
 // the biggest tests push past Vitest's 5s default and the cascade

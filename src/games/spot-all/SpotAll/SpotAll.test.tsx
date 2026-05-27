@@ -42,6 +42,10 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@/providers/VoiceUnavailableDialogProvider', () => ({
+  useVoiceUnavailableDialog: () => ({ show: vi.fn() }),
+}));
+
 const config: SpotAllConfig = {
   gameId: 'spot-all',
   component: 'SpotAll',

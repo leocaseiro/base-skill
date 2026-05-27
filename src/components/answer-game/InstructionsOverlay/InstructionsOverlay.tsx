@@ -17,13 +17,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useSettings } from '@/db/hooks/useSettings';
 import {
   getSimpleConfigFormRenderer,
   isPlayableConfig,
 } from '@/games/config-fields-registry';
 import { resolveCover } from '@/games/cover';
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
+import { getSynth } from '@/lib/speech/synth-access';
+import { isVoiceAvailableInList } from '@/lib/speech/voices';
 import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
 
 type HeaderActionsProps = {
@@ -132,7 +136,8 @@ export const InstructionsOverlay = ({
   isBookmarked,
   onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
-  const { t } = useTranslation(['games', 'common']);
+  const { t, i18n } = useTranslation(['games', 'common']);
+  const { settings } = useSettings();
   const navigate = useNavigate({
     from: '/$locale/game/$gameId',
   });
@@ -171,7 +176,26 @@ export const InstructionsOverlay = ({
   }, [saveDialogOpen]);
 
   useEffect(() => {
-    if (ttsEnabled) speak(text);
+    if (ttsEnabled) {
+      const preferredVoice = settings.preferredVoiceURI;
+      const synth = getSynth();
+      const preferredVoiceMissing =
+        preferredVoice !== undefined &&
+        synth !== undefined &&
+        !isVoiceAvailableInList(preferredVoice, safeGetVoices(synth));
+      // Silent-skip when the preferred voice can't be honored. This is an
+      // auto-trigger (instructions read on mount); the global
+      // VoiceUnavailableWarning banner already informs the user. Same
+      // policy as useGameTTS.speakPrompt (see F14).
+      if (!preferredVoiceMissing) {
+        speak(text, {
+          rate: settings.speechRate,
+          volume: settings.voiceVolume,
+          voiceName: preferredVoice,
+          lang: i18n.language,
+        });
+      }
+    }
     return () => {
       cancelSpeech();
     };

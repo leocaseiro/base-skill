@@ -9,12 +9,14 @@ import { Footer } from '@/components/Footer';
 import { Header } from '@/components/Header';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
 import { UpdateBanner } from '@/components/UpdateBanner';
+import { VoiceUnavailableWarning } from '@/components/VoiceUnavailableWarning';
 import { useAudioVolumes } from '@/db/hooks/useAudioVolumes';
 import { seedThemesOnce } from '@/db/seed-themes';
 import { shouldRenderAppHeaderFooter } from '@/lib/app-paths';
 import { i18n } from '@/lib/i18n/i18n';
 import { DbProvider } from '@/providers/DbProvider';
 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
+import { VoiceUnavailableDialogProvider } from '@/providers/VoiceUnavailableDialogProvider';
 
 const AppLayoutInner = (): JSX.Element => {
   const { pathname } = useLocation();
@@ -23,15 +25,18 @@ const AppLayoutInner = (): JSX.Element => {
 
   return (
     <ThemeRuntimeProvider>
-      <div className="flex min-h-screen flex-col">
-        {showAppChrome ? <Header /> : null}
-        <OfflineIndicator />
-        <UpdateBanner />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-        {showAppChrome ? <Footer /> : null}
-      </div>
+      <VoiceUnavailableDialogProvider>
+        <div className="flex min-h-screen flex-col">
+          {showAppChrome ? <Header /> : null}
+          <OfflineIndicator />
+          <VoiceUnavailableWarning />
+          <UpdateBanner />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+          {showAppChrome ? <Footer /> : null}
+        </div>
+      </VoiceUnavailableDialogProvider>
     </ThemeRuntimeProvider>
   );
 };

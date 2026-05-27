@@ -12,6 +12,17 @@ import { __resetPhonemeAudioForTests } from './phoneme-audio';
 import { ResultCard } from './WordLibraryExplorer';
 import type { WordHit } from './types';
 
+vi.mock('#/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      voiceVolume: 0.8,
+      preferredVoiceURI: undefined as string | undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
 const putting: WordHit = {
   word: 'putting',
   region: 'aus',

@@ -10,7 +10,7 @@ export const EmojiQuestion = ({
   emoji,
   prompt,
 }: EmojiQuestionProps) => {
-  const { speakPrompt } = useGameTTS();
+  const { speakPromptOnDemand } = useGameTTS();
 
   return (
     <button
@@ -22,7 +22,7 @@ export const EmojiQuestion = ({
         color: 'var(--skin-question-text)',
         borderRadius: 'var(--skin-question-radius)',
       }}
-      onClick={() => speakPrompt(prompt)}
+      onClick={() => speakPromptOnDemand(prompt)}
     >
       <span
         className="block text-[7rem] leading-none select-none"

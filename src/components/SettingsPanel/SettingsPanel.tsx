@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -15,6 +17,11 @@ import { useRxDB } from '@/db/hooks/useRxDB';
 import { useRxQuery } from '@/db/hooks/useRxQuery';
 import { useSettings } from '@/db/hooks/useSettings';
 import { safeGetVoices } from '@/lib/speech/safe-get-voices';
+import {
+  filterVoicesForLanguage,
+  groupVoicesByLanguage,
+  isOnlineVoice,
+} from '@/lib/speech/voices';
 
 const LOCALES = [
   { code: 'en', label: '🇬🇧 English' },
@@ -32,7 +39,7 @@ export const SettingsPanel = ({
   locale,
   onLocaleChange,
 }: SettingsPanelProps) => {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const { settings, update } = useSettings();
   const { db } = useRxDB();
 
@@ -66,6 +73,26 @@ export const SettingsPanel = ({
     synth.addEventListener('voiceschanged', load);
     return () => synth.removeEventListener('voiceschanged', load);
   }, []);
+
+  const filteredVoices = useMemo(
+    () => filterVoicesForLanguage(voices, locale),
+    [voices, locale],
+  );
+
+  const voiceGroups = useMemo(
+    () => groupVoicesByLanguage(filteredVoices, i18n.language),
+    [filteredVoices, i18n.language],
+  );
+
+  const isPreferredVoiceAvailable = useMemo(() => {
+    // Optimistic-available: returns true until voices have loaded so we don't
+    // flash an inline "unavailable" warning during the initial voiceschanged
+    // round-trip. The global VoiceUnavailableWarning banner has the same
+    // optimistic gate.
+    if (!preferredVoice) return true;
+    if (!voicesLoaded) return true;
+    return filteredVoices.some((v) => v.name === preferredVoice);
+  }, [filteredVoices, preferredVoice, voicesLoaded]);
 
   const themes$ = useMemo(
     () => (db ? db.themes.find().$ : EMPTY),
@@ -146,13 +173,37 @@ export const SettingsPanel = ({
             <SelectItem value="__default__">
               {t('voiceDefault')}
             </SelectItem>
-            {voices.map((v) => (
-              <SelectItem key={v.name} value={v.name}>
-                {v.name}
-              </SelectItem>
+            {voiceGroups.map((group) => (
+              <SelectGroup key={group.lang}>
+                <SelectLabel>{group.label}</SelectLabel>
+                {group.voices.map((v) => (
+                  <SelectItem key={v.name} value={v.name}>
+                    {v.name}
+                    {isOnlineVoice(v) && (
+                      <>
+                        <span aria-hidden="true"> 🌐</span>
+                        <span className="sr-only">
+                          {' '}
+                          ({t('voiceOnlineIndicator')})
+                        </span>
+                      </>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             ))}
           </SelectContent>
         </Select>
+        {voicesLoaded &&
+          preferredVoice &&
+          !isPreferredVoiceAvailable && (
+            <p
+              role="alert"
+              className="text-sm text-yellow-700 dark:text-yellow-400"
+            >
+              {t('voiceUnavailableInline')}
+            </p>
+          )}
       </div>
 
       <div className="flex flex-col gap-2">

@@ -46,6 +46,17 @@ vi.mock('./phoneme-audio', async () => {
   };
 });
 
+vi.mock('#/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {
+      speechRate: 1,
+      voiceVolume: 0.8,
+      preferredVoiceURI: undefined as string | undefined,
+    },
+    update: vi.fn(),
+  }),
+}));
+
 // CI runs this suite through IndexedDB + React liveQuery + grid
 // re-renders; the default 5s ceiling + 1s waitFor are too tight.
 vi.setConfig({ testTimeout: 15_000 });

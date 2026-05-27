@@ -42,6 +42,10 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@/providers/VoiceUnavailableDialogProvider', () => ({
+  useVoiceUnavailableDialog: () => ({ show: vi.fn() }),
+}));
+
 const bankDropState = vi.hoisted(() => ({ isDragOver: false }));
 
 vi.mock('@/components/answer-game/useBankDropTarget', () => ({

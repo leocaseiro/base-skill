@@ -44,6 +44,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '#/components/ui/sheet';
+import { useSettings } from '#/db/hooks/useSettings';
 import { speak } from '#/lib/speech/SpeechOutput';
 import { cn } from '#/lib/utils';
 
@@ -367,65 +368,73 @@ export const ResultCard = ({
   hit,
   chipsVisible,
   onEdit,
-}: ResultCardProps) => (
-  <Card>
-    <CardHeader className="gap-1">
-      <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        {hit.syllables ? (
-          <span className="text-muted-foreground">
-            {hit.syllables.join('·')}
-          </span>
-        ) : null}
-        {hit.ipa ? (
-          <button
-            type="button"
-            aria-label={`Speak ${hit.word}`}
-            onClick={() =>
-              speak(hit.word, { rate: 0.9, lang: 'en-AU' })
-            }
-            className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
-          >
-            🔈 /{normalizeIpa(hit.ipa)}/
-          </button>
-        ) : null}
-        <div className="ms-auto flex items-center gap-1 text-xs">
-          <Badge>L{hit.level}</Badge>
-          <Badge>{hit.syllableCount} syl</Badge>
-          <span
-            className={`ml-2 rounded px-2 py-0.5 text-xs ${
-              hit.provenance === 'draft'
-                ? 'bg-amber-100 text-amber-800'
-                : 'bg-slate-100 text-slate-600'
-            }`}
-          >
-            {hit.provenance === 'draft'
-              ? '✏️ draft (unsynced)'
-              : '📚 shipped'}
-          </span>
-          {onEdit ? (
+}: ResultCardProps) => {
+  const { settings } = useSettings();
+  return (
+    <Card>
+      <CardHeader className="gap-1">
+        <CardTitle className="text-2xl font-bold">{hit.word}</CardTitle>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {hit.syllables ? (
+            <span className="text-muted-foreground">
+              {hit.syllables.join('·')}
+            </span>
+          ) : null}
+          {hit.ipa ? (
             <button
               type="button"
-              aria-label={`Edit ${hit.word}`}
-              onClick={() => onEdit(hit)}
-              className="rounded-md border border-input px-2 py-0.5 text-xs hover:bg-muted"
+              aria-label={`Speak ${hit.word}`}
+              onClick={() =>
+                speak(hit.word, {
+                  rate: settings.speechRate ?? 0.9,
+                  volume: settings.voiceVolume,
+                  voiceName: settings.preferredVoiceURI,
+                  lang: 'en-AU',
+                })
+              }
+              className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-0.5 font-mono text-xs hover:bg-muted"
             >
-              Edit
+              🔈 /{normalizeIpa(hit.ipa)}/
             </button>
           ) : null}
+          <div className="ms-auto flex items-center gap-1 text-xs">
+            <Badge>L{hit.level}</Badge>
+            <Badge>{hit.syllableCount} syl</Badge>
+            <span
+              className={`ml-2 rounded px-2 py-0.5 text-xs ${
+                hit.provenance === 'draft'
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-slate-100 text-slate-600'
+              }`}
+            >
+              {hit.provenance === 'draft'
+                ? '✏️ draft (unsynced)'
+                : '📚 shipped'}
+            </span>
+            {onEdit ? (
+              <button
+                type="button"
+                aria-label={`Edit ${hit.word}`}
+                onClick={() => onEdit(hit)}
+                className="rounded-md border border-input px-2 py-0.5 text-xs hover:bg-muted"
+              >
+                Edit
+              </button>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </CardHeader>
-    <CardContent className="flex flex-col gap-3">
-      {hit.graphemes ? (
-        <PhonemeBlender word={hit.word} graphemes={hit.graphemes} />
-      ) : null}
-      {chipsVisible && hit.graphemes ? (
-        <GraphemeChips graphemes={hit.graphemes} />
-      ) : null}
-    </CardContent>
-  </Card>
-);
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        {hit.graphemes ? (
+          <PhonemeBlender word={hit.word} graphemes={hit.graphemes} />
+        ) : null}
+        {chipsVisible && hit.graphemes ? (
+          <GraphemeChips graphemes={hit.graphemes} />
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+};
 
 const Badge = ({ children }: { children: React.ReactNode }) => (
   <span className="inline-flex items-center rounded-md bg-secondary px-1.5 py-0.5 font-medium text-secondary-foreground">

@@ -2,6 +2,7 @@ import '../src/styles.css';
 import '../src/lib/i18n/i18n';
 import { ThemeProvider } from 'next-themes';
 import { Mermaid } from '../src/components/ui/Mermaid';
+import { VoiceUnavailableDialogProvider } from '../src/providers/VoiceUnavailableDialogProvider';
 import { withDefaultSkin } from './decorators';
 import { withTheme } from './decorators/withTheme';
 import type { Decorator, Preview } from '@storybook/react';
@@ -32,6 +33,12 @@ const withAppThemeProvider: Decorator = (Story) => (
   </ThemeProvider>
 );
 
+const withVoiceUnavailableDialog: Decorator = (Story) => (
+  <VoiceUnavailableDialogProvider>
+    <Story />
+  </VoiceUnavailableDialogProvider>
+);
+
 const preview: Preview = {
   globalTypes: {
     theme: {
@@ -52,7 +59,12 @@ const preview: Preview = {
   initialGlobals: {
     theme: 'light',
   },
-  decorators: [withAppThemeProvider, withTheme, withDefaultSkin],
+  decorators: [
+    withAppThemeProvider,
+    withTheme,
+    withVoiceUnavailableDialog,
+    withDefaultSkin,
+  ],
   parameters: {
     viewport: {
       viewports: {

@@ -94,7 +94,7 @@ describe('SpeechOutput', () => {
     expect(utterance.voice).toBeNull();
   });
 
-  it('speak defaults to Daniel voice', () => {
+  it('speak leaves utterance.voice unset when no voiceName is provided so the OS default applies', () => {
     const danielVoice = { name: 'Daniel' } as SpeechSynthesisVoice;
     const synth = makeSynth([danielVoice]);
     vi.stubGlobal('speechSynthesis', synth);
@@ -112,7 +112,7 @@ describe('SpeechOutput', () => {
     const utterance = synth.speak.mock.calls[0]?.[0] as {
       voice: SpeechSynthesisVoice | null;
     };
-    expect(utterance.voice).toBe(danielVoice);
+    expect(utterance.voice).toBeNull();
   });
 
   it('speak applies rate and volume from SpeakOptions', () => {

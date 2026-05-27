@@ -59,6 +59,10 @@ vi.mock('@/lib/audio/AudioFeedback', () => ({
   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
+vi.mock('@/providers/VoiceUnavailableDialogProvider', () => ({
+  useVoiceUnavailableDialog: () => ({ show: vi.fn() }),
+}));
+
 vi.mock('canvas-confetti', () => ({
   default: Object.assign(
     vi.fn().mockImplementation(() => Promise.resolve()),

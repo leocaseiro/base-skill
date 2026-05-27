@@ -24,9 +24,10 @@ function buildUtterance(
   if (options.rate !== undefined) u.rate = options.rate;
   if (options.volume !== undefined) u.volume = options.volume;
   if (options.lang !== undefined) u.lang = options.lang;
-  const voiceName = options.voiceName ?? 'Daniel';
-  const voice = voices.find((v) => v.name === voiceName);
-  if (voice) u.voice = voice;
+  if (options.voiceName !== undefined) {
+    const voice = voices.find((v) => v.name === options.voiceName);
+    if (voice) u.voice = voice;
+  }
   return u;
 }
 

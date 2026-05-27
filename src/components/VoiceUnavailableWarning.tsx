@@ -1,0 +1,67 @@
+import { Link, useParams } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useSettings } from '@/db/hooks/useSettings';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
+import { getSynth } from '@/lib/speech/synth-access';
+
+export const VoiceUnavailableWarning = () => {
+  const { t } = useTranslation('common');
+  const { settings } = useSettings();
+  const { locale } = useParams({ from: '/$locale' });
+  const preferredVoice = settings.preferredVoiceURI;
+
+  const [unavailable, setUnavailable] = useState(false);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    globalThis.addEventListener('online', handleOnline);
+    globalThis.addEventListener('offline', handleOffline);
+    return () => {
+      globalThis.removeEventListener('online', handleOnline);
+      globalThis.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const synth = getSynth();
+    if (!preferredVoice || !synth) return;
+    const check = () => {
+      const voices = safeGetVoices(synth);
+      if (voices.length === 0) return;
+      setUnavailable(!voices.some((v) => v.name === preferredVoice));
+    };
+    check();
+    synth.addEventListener('voiceschanged', check);
+    return () => {
+      synth.removeEventListener('voiceschanged', check);
+    };
+  }, [preferredVoice]);
+
+  if (!unavailable || !preferredVoice || !isOnline) return null;
+
+  return (
+    <div
+      role="alert"
+      aria-live="polite"
+      className="flex items-center justify-center gap-2 bg-yellow-100 px-4 py-2 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+    >
+      <span>
+        {t('voiceUnavailable.banner', { voice: preferredVoice })}
+      </span>
+      <Link
+        to="/$locale/settings"
+        params={{ locale }}
+        target="_blank"
+        rel="noreferrer"
+        className="underline underline-offset-2"
+      >
+        {t('voiceUnavailable.openSettings')}
+      </Link>
+    </div>
+  );
+};
