@@ -3,6 +3,8 @@
   "word-spell-description": "Drag letter tiles to spell the word.",
   "number-match": "Match the Number!",
   "number-match-description": "Match numerals to groups by dragging tiles.",
+  "speak-spell": "Say It!",
+  "speak-spell-description": "Say the word out loud using your microphone.",
   "sort-numbers": "Count in Order",
   "sort-numbers-description": "Put the numbers in order!",
   "shell": {
@@ -24,6 +26,7 @@
     "word-spell": "Drag the letters into the boxes to spell the word. Tap the picture or the speaker to hear the word.",
     "number-match": "Drag the tiles to match each number. Tap the number to hear it.",
     "sort-numbers": "Put the numbers in order! Drag each number to the right place.",
+    "speak-spell": "Look at the picture and say the word out loud. Tap the microphone to start, then speak clearly!",
     "spot-all": "Tap every tile that shows the highlighted character. Some tiles look similar but are flipped or different — only tap the correct ones.",
     "lets-go": "Let's go!",
     "settings": "⚙️ Settings",

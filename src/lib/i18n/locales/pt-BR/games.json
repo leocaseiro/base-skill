@@ -3,6 +3,8 @@
   "word-spell-description": "Arraste as letras para soletrar a palavra mostrada na imagem.",
   "number-match": "Ache o Número!",
   "number-match-description": "Combine numerais com grupos arrastando as peças para o lugar certo.",
+  "speak-spell": "Fale!",
+  "speak-spell-description": "Diga a palavra em voz alta usando o microfone.",
   "sort-numbers": "Conte na Ordem",
   "sort-numbers-description": "Coloque os números em ordem do menor para o maior — ou do maior para o menor.",
   "shell": {
@@ -24,6 +26,7 @@
     "word-spell": "Arraste as letras para as caixas e forme a palavra. Toque na imagem ou no alto-falante para ouvir a palavra.",
     "number-match": "Arraste as peças para combinar cada número. Toque no número para ouvir.",
     "sort-numbers": "Coloque os números em ordem! Arraste cada número para o lugar certo.",
+    "speak-spell": "Olhe a imagem e diga a palavra em voz alta. Toque no microfone para começar e fale com clareza!",
     "spot-all": "Toque em cada peça que mostra o caractere destacado. Algumas peças parecem similares mas estão invertidas ou são diferentes — toque apenas nas corretas.",
     "lets-go": "Vamos lá!",
     "advanced": "Avançado",

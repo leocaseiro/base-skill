@@ -2,6 +2,7 @@ export type SpeechRecognitionLike = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  maxAlternatives: number;
   onresult: ((ev: unknown) => void) | null;
   onerror: ((ev: unknown) => void) | null;
   onend: (() => void) | null;
