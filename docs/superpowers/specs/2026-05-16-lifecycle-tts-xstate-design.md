@@ -153,6 +153,26 @@ XState's `sendTo` / `spawn` / `invoke` solves a different problem: **point-to-po
 | Subscription churn on config change | `useEffect` dep array recreates handler             | Settings flow via `SETTINGS_CHANGED` event, no churn |
 | Two emit paths (`speakAuto` + bus)  | Duplicate logic, divergence risk                    | One bus path for auto; one direct path for user-tap  |
 
+### 3.4 Bus access pattern
+
+Components, hooks, the engine, and tests reach the bus through the existing
+`getGameEventBus()` module singleton from
+[src/lib/game-event-bus.ts](../../../src/lib/game-event-bus.ts). **There is no
+`useGameEventBus` hook** — calling the singleton directly keeps the access path
+identical everywhere:
+
+```ts
+import { getGameEventBus } from '@/lib/game-event-bus';
+
+const bus = getGameEventBus();
+bus.emit({ type: 'lifecycle.speak' /* … */ });
+```
+
+Tests mock the module:
+`vi.mock('@/lib/game-event-bus', () => ({ getGameEventBus: () => fakeBus }))`.
+Spec samples that previously showed a `useGameEventBus()` hook (§8.5, §10.3) call
+`getGameEventBus()` directly.
+
 ## 4. Lifecycle Event Taxonomy
 
 ### 4.1 The 19 events
@@ -192,7 +212,7 @@ export type LifecycleEvent =
 | ------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------- | ------------------------- |
 | `game.prepare`                 | `GameOptionsOverlay` mount                                                                                | 2                | 0                            | —                         |
 | `game.start`                   | Game machine `loading.entry`                                                                              | 2                | 0                            | —                         |
-| `game.resume`                  | `AnswerGameProvider` remount-into-active-session detection                                                | 2                | 0                            | —                         |
+| `game.resume`                  | Game machine `loading.entry` when `initialState` present (see §4.2.1)                                     | 2                | 0                            | —                         |
 | `game.end`                     | Engine `gameOver.entry`                                                                                   | 3                | 0                            | —                         |
 | `round.start`                  | `playingRound.entry`                                                                                      | 2                | 0                            | —                         |
 | `round.idle`                   | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2)                                              | 2                | 0                            | —                         |
@@ -211,6 +231,29 @@ export type LifecycleEvent =
 | `lifecycle.tts.cloud-fallback` | `pickVoice()` returns no candidate under `useOfflineVoicesOnly: false` (browser default in use; see §5.7) | —                | —                            | —                         |
 
 Priorities and throttles are overridable per game/skin/customConfig via the same resolution chain as templates (see §9.2). The two `lifecycle.tts.*` signal events (last rows) are emitted by the speaker, not the actor — they are observability signals, not speech triggers, so priority/throttle don't apply.
+
+### 4.2.1 `game.start` / `game.resume` emission contract
+
+The engine `loading.entry` action is the **single emit site** for BOTH
+`game.start` and `game.resume`. `AnswerGameProvider` MUST NOT emit either —
+there is exactly one emit site so the events can never double-fire on mount.
+The two are distinguished by the `initialState` prop: absent → `game.start`,
+present (resuming a persisted session) → `game.resume`.
+
+```ts
+// src/lib/game-engine/side-effects.ts — loading.entry action
+const lifecycleEvent = input.initialState
+  ? 'game.resume'
+  : 'game.start';
+getGameEventBus().emit({
+  type: 'lifecycle.speak',
+  lifecycleEvent,
+  gameId: ctx.gameId,
+  sessionId: ctx.sessionId,
+  profileId: ctx.profileId,
+  // roundIndex omitted — game.* are non-round events (see §4.3 two-tier)
+});
+```
 
 ### 4.3 Bus event additions
 
@@ -276,6 +319,72 @@ The `subject` field enables UI animation sync (§10.3): emitters set it to ident
 the visual target (`tileId`, `phonemeKey`, `wordIndex`); UI subscribers match on
 it via `isSubjectMatch(event, expected)` (§10.3) to highlight/un-highlight.
 
+#### 4.3.1 `GameEventType` literals + two-tier `BaseGameEvent` (issue #38, #40)
+
+Two `game-events.ts` changes land with these events:
+
+**(a) Four new `GameEventType` literals** (dot-style per §4.4) and four union
+members:
+
+```ts
+// src/types/game-events.ts
+export type GameEventType =
+  | /* …existing… */
+  | 'lifecycle.cancel'
+  | 'lifecycle.tts.played'
+  | 'lifecycle.tts.unavailable'
+  | 'lifecycle.tts.cloud-fallback';
+
+export type GameEvent =
+  | /* …existing… */
+  | LifecycleCancelEvent
+  | LifecycleTtsPlayedEvent
+  | LifecycleTtsUnavailableEvent
+  | LifecycleTtsCloudFallbackEvent;
+```
+
+**(b) `roundIndex` moves off the base envelope into a round-scoped tier.**
+`roundIndex` was required on every event, forcing non-round events
+(`game.start`, `game.end`, `celebration.*`, `level.advance`, `lifecycle.speak`
+for game-level verbs) to fabricate a meaningless value. Only one consumer reads
+the envelope field (`useGameSkin.ts` `onRoundComplete`). Split the base:
+
+```ts
+// src/types/game-events.ts
+export interface BaseGameEvent {
+  type: GameEventType;
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  timestamp: number;
+  // roundIndex REMOVED from base
+}
+
+export interface RoundScopedGameEvent extends BaseGameEvent {
+  roundIndex: number;
+}
+```
+
+Classification:
+
+- **Round-scoped** (`extends RoundScopedGameEvent`): `game.action`,
+  `game.evaluate`, `game.score`, `game.hint`, `game.retry`, `game.time_up`,
+  `game.round-advance`, `game.drag-start`, `game.drag-over-zone`,
+  `game.tile-ejected`.
+- **Non-round** (`extends BaseGameEvent`): `game.start`,
+  `game.instructions_shown`, `game.end`, `game.level-advance`,
+  `celebration.start`, `celebration.complete`, `celebration.skip`.
+- **Dual-natured** (`extends BaseGameEvent` with its own optional
+  `roundIndex?: number`): `LifecycleSpeakEvent` — its `lifecycleEvent` spans both
+  round verbs (`round.start`, `round.error`) and non-round verbs
+  (`game.prepare`, `game.start`, `level.complete`), so `roundIndex` is set only
+  for the round-scoped verbs.
+
+The discriminated union makes TypeScript enumerate every emit/consume site that
+needs updating — the migration is compiler-guided. `game.prepare` therefore
+carries **no** `roundIndex` (it is pre-round); the §8.5 sample is updated
+accordingly (remove the `roundIndex: 0` line).
+
 ### 4.4 Bus event naming — dot-style locked
 
 All bus event types use dots, not colons. Refactor in commits 1–4 of PR B (§11.4):
@@ -294,6 +403,13 @@ All bus event types use dots, not colons. Refactor in commits 1–4 of PR B (§1
 - The `*` does not cross dot boundaries: `'game.*'` does not match `'game.round.deeper.path'` (would require `'game.**'` if we ever need recursive matching — not in M1).
 
 **Implementation gap:** master's `TypedGameEventBus` ([src/lib/game-event-bus.ts](../../../src/lib/game-event-bus.ts)) currently treats `'game:*'` as a single literal magic string (`this.wildcards` is a flat `Set`). Commit 2 in §11.4 (`chore(bus): update game-event-bus wildcard match for dotted namespaces`) must replace the literal check with a segment-prefix matcher that handles arbitrary `<namespace>.*` subscriptions (`game.*`, `lifecycle.*`, `celebration.*`, `mini-game.*`, etc.). SRS recorder + any new namespace subscribers benefit.
+
+**No data migration.** The colon→dot rename touches runtime code only. The one
+durable event log — `session_history.events[].action`
+([src/db/schemas/session_history.ts](../../../src/db/schemas/session_history.ts))
+— stores `Move.type` (`'SUBMIT_ANSWER' | 'REQUEST_HINT' | …`, UPPER_SNAKE), a
+namespace entirely separate from the colon-style `GameEventType`. No persisted
+RxDB row holds a bus event-type string, so no migration is required.
 
 ## 5. Settings Model + Talkativeness + Gates
 
@@ -445,12 +561,12 @@ the boundary — every `TtsSettings` field becomes non-optional after this call:
 
 ```ts
 // src/lib/lifecycle-tts/pick-tts-settings.ts
-import type { SettingsDoc } from '@/db/schemas/settings';
+import type { UseSettingsResult } from '@/db/hooks/useSettings';
 import type { TtsSettings } from './types';
 import { DEFAULT_SETTINGS } from '@/db/hooks/useSettings';
 
 export const pickTtsSettings = (
-  s: SettingsDoc | undefined,
+  s: UseSettingsResult['settings'],
 ): TtsSettings => ({
   speechRate: s?.speechRate ?? DEFAULT_SETTINGS.speechRate ?? 1,
   voiceVolume: s?.voiceVolume ?? DEFAULT_SETTINGS.voiceVolume ?? 0.8,
@@ -473,13 +589,24 @@ export const pickTtsSettings = (
 });
 ```
 
-**Privacy-safe boundary defaults:** when `useSettings()` is still resolving (or
-the doc lacks a field), `pickTtsSettings()` returns `useOfflineVoicesOnly: true` and
-`talkativeness: 'helpful'`. The system can never accidentally route audio
-through a cloud voice or speak when the schema is mid-load. `DEFAULT_SETTINGS`
-in `useSettings.ts` (§5.2) is updated to match so the two layers agree.
+**Privacy-safe boundary defaults:** `useSettings()` never returns `undefined` —
+it merges `DEFAULT_SETTINGS` with the live doc internally — but a partial doc may
+still lack individual fields, so `pickTtsSettings()` applies the same defaults at
+the boundary: `useOfflineVoicesOnly: true` and `talkativeness: 'helpful'`. The
+system can never accidentally route audio through a cloud voice. `DEFAULT_SETTINGS`
+in `useSettings.ts` (§5.2) is kept in sync so the two layers agree.
 
 No subscription churn beyond the RxDB observable that `useSettings()` already manages — the actor's settings live in machine context, not in a per-hook dep array elsewhere. Eliminates plan-365's P2 "bus subscription churns on every config change" finding.
+
+### 5.5.1 Provider mount site
+
+`LifecycleTtsProvider` mounts once in
+[src/routes/\_\_root.tsx](../../../src/routes/__root.tsx) — inside
+`ServiceWorkerProvider`, outside the route outlet — so a single actor instance
+spans every route (including SettingsPanel previews). In development a
+context-existence guard warns if a second `LifecycleTtsProvider` is ever mounted
+(`useContext(LifecycleTtsContext)` returning non-null at Provider mount =
+duplicate), catching accidental double-mounts.
 
 ### 5.6 Talkativeness change mid-flight
 
@@ -685,7 +812,7 @@ import { setup, fromPromise, assign } from 'xstate';
 export const lifecycleTtsMachine = setup({
   types: {} as {
     context: TtsContext;
-    input: { settings: TtsSettings };
+    input: { settings: TtsSettings; speaker: Speaker; bus: GameEventBus }; // speaker + bus injected by Provider (§7.2.1)
     events:
       | { type: 'SPEAK_AUTO'; event: LifecycleEvent; payload: SpeakPayload; subject?: LifecycleSubject }
       | { type: 'SPEAK_USER'; event: LifecycleEvent; payload: SpeakPayload; variant: Talkativeness; subject?: LifecycleSubject }
@@ -693,7 +820,7 @@ export const lifecycleTtsMachine = setup({
       | { type: 'CANCEL' };
   },
   actors: {
-    speaker: fromPromise<void, SpeechUtterance>(async ({ input }) => speakerAdapter.speak(input)),
+    speaker: fromPromise<void, SpeechUtterance>(async ({ input }) => speakerAdapter.speak(input)), // speaker from context (§7.2.1)
     soundEffectPlayer: fromPromise<void, SoundEffectRequest>(async ({ input }) => soundEffectAdapter.play(input)),
   },
   guards: {
@@ -773,6 +900,40 @@ export const lifecycleTtsMachine = setup({
   },
 });
 ```
+
+### 6.1.1 Hook contracts
+
+`useLifecycleTts()` and `useSpeakButton()` follow the existing
+`useAnswerGameContext()` convention — React 19 `use(Context)` + throw on missing
+provider:
+
+```ts
+// src/lib/lifecycle-tts/use-lifecycle-tts.ts
+export function useLifecycleTts(): LifecycleTtsActorRef {
+  const ref = use(LifecycleTtsContext);
+  if (!ref)
+    throw new Error(
+      'useLifecycleTts must be used inside LifecycleTtsProvider',
+    );
+  return ref;
+}
+```
+
+- **Missing-provider behaviour: throw.** The Provider is root-mounted (§5.5.1),
+  so the throw can never fire in-app; it only fires in a Storybook story or test
+  that forgot the decorator — a loud, actionable signal. (No noop, no Suspense:
+  there is nothing async to await — the actor is created synchronously.)
+- **Storybook:** stories that render hook consumers add a named decorator
+  `withLifecycleTts` (new file `tests/storybook/with-lifecycle-tts.tsx`),
+  mirroring existing `withSettings`/`withRouter` decorators. Stories testing the
+  missing-context branch simply omit it.
+- **`useSpeakButton(explicit?)` empty-payload fallback.** It resolves the
+  payload `explicit ?? roundToPayload(round) ?? PREVIEW_PAYLOAD`. SettingsPanel
+  renders `AudioButton` with an explicit payload
+  (`{ text: t('settings.voicePreview'), subject: 'preview', lang: settings.activeLanguage }`),
+  exactly like today's `AudioButton({ prompt })`, so the voice preview works
+  without a `RoundContext`. In-game, the round payload is used; `PREVIEW_PAYLOAD`
+  is the last-resort constant.
 
 ### 6.2 Why parallel sub-machines
 
@@ -896,6 +1057,11 @@ bus.emit({
 ```
 
 This signal lets game machines gate transitions on speech completion (§10.2) and lets UI animations un-highlight in sync (§10.3) via the `isSubjectMatch()` helper (§10.3). SRS records every `tts.played` as an attempt-context signal, **without persisting `subject`** (see §10.2.5).
+
+The `?? null` coercion stays **inline at this single emit site** — there is only
+one place `lifecycle.tts.played` is produced, so a `createTtsPlayedEvent()`
+factory would be premature. Read-side null discipline is already centralized in
+`isSubjectMatch()` (§10.3).
 
 ## 7. Speaker + SoundEffectPlayer Adapters
 
@@ -1145,6 +1311,35 @@ Browser-quirk mitigations summary:
 > surfaces consistent across on-demand (`speakPromptOnDemand` from #409) and
 > lifecycle-driven speech (this spec's XState actor).
 
+### 7.2.1 Speaker lifecycle
+
+The `WebSpeechSpeaker` is constructed **inside `LifecycleTtsProvider`** and
+handed to the machine via input — it is not a module global:
+
+```tsx
+// inside LifecycleTtsProvider (§5.5)
+const bus = getGameEventBus();
+const speaker = useMemo(
+  () => new WebSpeechSpeaker(pickTtsSettings(settings), bus),
+  [],
+);
+const actorRef = useActorRef(lifecycleTtsMachine, {
+  input: { settings: pickTtsSettings(settings), speaker, bus },
+});
+```
+
+- **Settings forwarding:** on every `SETTINGS_CHANGED` the machine runs a
+  `forwardSettings` action that calls `speaker.updateSettings(next)`. The actor
+  stays the single source of truth; the speaker is a pure adapter. Ordering
+  relative to the §6.6 drain rule is therefore a machine assertion, not a race.
+- **Unavailable handling:** a named sibling hook
+  `useLifecycleTtsUnavailableHandler` (new file) subscribes to
+  `lifecycle.tts.unavailable` on the bus and drives PR #409's
+  `VoiceUnavailableDialogProvider` (§7.2). Keeping it a discrete hook (not inline
+  in the Provider, not a machine action) keeps the engine free of React dialog
+  coupling and makes the listener unit-testable in isolation.
+- **Cleanup:** the Provider's effect calls `speaker.dispose()` (§7.1) on unmount.
+
 ### 7.3 `HtmlAudioSoundEffectPlayer`
 
 ```ts
@@ -1305,6 +1500,10 @@ Repeat for all 3 labels. Screen readers announce only the text ("Shhh" / "Talk a
 
 Storybook control uses `argTypes` radio (`'on-demand' | 'helpful' | 'chatty'`) per project convention — slider is the user-facing UI, radio is the dev surface.
 
+`talkativeness` is a **single user setting** — there is no per-game override
+(§13.1.B #11). Game definitions tune verbosity per event via `EventBindings`
+(§9), not via a competing per-game talkativeness value.
+
 ### 8.3 `useOfflineVoicesOnly` toggle + cloud-voice modal
 
 **Any toggle change triggers the confirmation modal** (both `false → true` and `true → false`). Rationale: kid-tap protection — a child accidentally tapping the toggle in either direction shouldn't silently re-route audio. The modal asks for parent confirmation in both directions.
@@ -1349,7 +1548,7 @@ Storybook title: `'AnswerGame/InstructionsOverlay'` → `'AnswerGame/GameOptions
 ```tsx
 // src/components/answer-game/GameOptions/GameOptionsOverlay.tsx (post-rename)
 const GameOptionsOverlay: React.FC<Props> = ({ gameId, gameName }) => {
-  const bus = useGameEventBus();
+  const bus = getGameEventBus();
   const profile = useCurrentProfile();
   const session = useCurrentSession();
 
@@ -1360,7 +1559,6 @@ const GameOptionsOverlay: React.FC<Props> = ({ gameId, gameName }) => {
       gameId,
       sessionId: session.id,
       profileId: profile.id,
-      roundIndex: 0,
       timestamp: Date.now(),
     });
     // No CANCEL on unmount — game.prepare is short, just let it finish.
@@ -1371,6 +1569,10 @@ const GameOptionsOverlay: React.FC<Props> = ({ gameId, gameName }) => {
   );
 };
 ```
+
+`game.prepare` sources its envelope from `useCurrentProfile()` /
+`useCurrentSession()` (option A1) because it fires pre-engine; `game.start` /
+`game.resume` source theirs from engine context (option A2, §4.2.1).
 
 What disappears from the file:
 
@@ -1882,7 +2084,7 @@ import { subjectToken } from '@/lib/lifecycle-tts/types';
 
 const useTileHighlight = (tileId: string) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const bus = useGameEventBus();
+  const bus = getGameEventBus();
   const expected = useMemo(() => subjectToken(tileId), [tileId]);
 
   useEffect(() => {
@@ -1958,6 +2160,9 @@ src/lib/lifecycle-tts/
 ├── round-context.tsx                     # Provider + hook
 ├── round-context.test.tsx
 ├── use-lifecycle-tts.ts                  # hook returning actor ref
+├── use-lifecycle-tts-unavailable-handler.ts   # bus → VoiceUnavailableDialogProvider bridge (§7.2.1)
+├── use-current-profile.ts                # current profile (ANONYMOUS_PROFILE_ID fallback) for game.prepare envelope (§8.5)
+├── use-current-session.ts                # current session via RxDB sessions.findOne() for game.prepare envelope (§8.5)
 ├── use-speak-button.ts                   # hook for SPEAK_USER taps
 ├── use-speak-button.test.tsx
 ├── idle-timeout.ts                       # gradeBand → ms table
@@ -1980,6 +2185,9 @@ src/components/SettingsPanel/
 
 src/db/migrations/
 └── lifecycle-tts-settings-v4.collection.test.ts
+
+tests/storybook/
+└── with-lifecycle-tts.tsx                # Storybook decorator mounting LifecycleTtsProvider (§6.1.1)
 ```
 
 ### 11.3 Modified files
@@ -1990,7 +2198,8 @@ src/db/migrations/
 - `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `useOfflineVoicesOnly: true` so first-paint matches the v4 schema defaults (no code-path change; same RxJS observable wrapping pattern reused).
 - `src/db/create-database.ts` — schema version bump.
 - `src/components/answer-game/answer-game-reducer.ts` — emit `lifecycle.speak` for `round.*` + `game.*` events via SideEffect.
-- `src/components/answer-game/AnswerGameProvider.tsx` — emit `lifecycle.speak` for `game.start`, `game.resume` (remount detect).
+- `src/components/answer-game/AnswerGameProvider.tsx` — no lifecycle emit; `game.start`/`game.resume` are emitted solely by the engine `loading.entry` action (see §4.2.1).
+- `src/routes/__root.tsx` — mount `LifecycleTtsProvider` (inside `ServiceWorkerProvider`, outside route outlet) per §5.5.1.
 - `src/components/answer-game/types.ts` — `AnswerGameConfig` gains `gradeBand`, `talkativeness`; drop `ttsEnabled`.
 - `src/components/answer-game/useGameTTS.ts` — deprecate; route to lifecycle-tts where applicable.
 - `src/components/answer-game/useRoundTTS.ts` — **removed**; callers migrate to `useLifecycleTts` / `useSpeakButton`.
