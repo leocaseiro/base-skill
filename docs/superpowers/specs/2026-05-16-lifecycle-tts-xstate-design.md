@@ -62,6 +62,22 @@ Audience: **parents** and **teachers** for configuration; **game designers** for
 | Cross-tab muting via `BroadcastChannel`                                   | **Backlog**                |
 | Composition layer (`parent()` / `event()` template helpers)               | **M3**                     |
 
+### 2.1 ADR — i18n key indirection is a deliberate forward-looking investment
+
+M1 routes all lifecycle speech through i18n keys resolved by the 4-layer chain
+(§9.2) rather than inline strings. This is heavier than M1's single-locale
+(en-AU) needs today, but it is a deliberate investment per the M1 "done once,
+done right" directive:
+
+- It enables **M3 skin TTS overrides** (`GameSkin.tts?`, goal G-2) to swap copy
+  via translated keys without touching the resolver.
+- It enables any **future locale rollout** (pt-BR and beyond) with no resolver
+  rewrite — only new translation files.
+
+Locale-shipping schedule is **TBD** and there is **no kill criterion**: the
+indirection stays regardless of when additional locales ship. Paying for the
+indirection now avoids a forced rewrite when G-2 or additional locales land.
+
 ## 3. Architecture Overview
 
 ### 3.1 The three ingress paths
@@ -2003,35 +2019,48 @@ src/db/migrations/
 
 ### 11.4 Commit slicing within PR (25 commits)
 
+Each commit carries a **goal tier** (`§13.1.F #31` done-once shield) mapping it to
+one of the M1 goals (G-1 XState · G-2 Skin · G-3 Mini-games · G-4 SRS · G-5
+Distractions · G-6 SpotAll-exempt) or to `foundation` / `polish`. The tier makes
+scope **negotiable without cutting**: a reviewer can see what each commit buys
+rather than treating the PR as one indivisible block.
+
 ```text
- 1. chore(bus): replace colon separator with dot in GameEventType union
- 2. chore(bus): update game-event-bus wildcard match for dotted namespaces
- 3. chore(bus): update all emit/subscribe call sites across codebase
- 4. chore(bus): update test fixtures and e2e assertions
- 5. feat(lifecycle-tts): types + sentinel constants
- 6. feat(lifecycle-tts): resolver (pure function) + tests
- 7. feat(lifecycle-tts): WebSpeechSpeaker + Chrome workarounds + tests
- 8. feat(lifecycle-tts): HtmlAudioSoundEffectPlayer + tests
- 9. feat(lifecycle-tts): XState machine (speech + soundEffect parallel) + tests
-10. feat(lifecycle-tts): Provider + hooks + tests
-11. feat(lifecycle-tts): RoundContext provider/hook + tests
-12. feat(settings): RxDB schema v4 migration + tests
-13. feat(settings): Talkativeness slider, useOfflineVoicesOnly toggle, cloud-voice modal
-14. feat(answer-game): rename InstructionsOverlay → GameOptionsOverlay, drop auto-speak
-15. feat(answer-game): QuestionRow component + breakpoints
-16. feat(answer-game): split ttsEnabled → autoSpeak + talkativeness in AnswerGameConfig
-17. feat(answer-game): emit lifecycle.speak from reducer + AnswerGameProvider
-18. feat(audio): @deprecated tags on AudioFeedback + dev-mode warn
-19. feat(questions): refactor AudioButton + 4 question components to useSpeakButton
-20. feat(word-spell): RoundContextProvider + tts bindings
-21. feat(number-match): RoundContextProvider + tts bindings + fix bare-numeral bug
-22. feat(sort-numbers): RoundContextProvider + tts bindings + add AudioButton
-23. feat(spot-all): RoundContextProvider + tts bindings + consolidate speakPrompt
-24. feat(i18n): add tts.* + audio.* + settings.* namespaces (~70 en keys)
-25. chore: smoke-test integration + e2e coverage
+ 1. chore(bus): replace colon separator with dot in GameEventType union          · foundation (indirect G-1/G-3)
+ 2. chore(bus): update game-event-bus wildcard match for dotted namespaces        · foundation (indirect G-1/G-3)
+ 3. chore(bus): update all emit/subscribe call sites across codebase              · foundation (indirect G-1/G-3)
+ 4. chore(bus): update test fixtures and e2e assertions                           · foundation (indirect G-1/G-3)
+ 5. feat(lifecycle-tts): types + sentinel constants                               · G-1
+ 6. feat(lifecycle-tts): resolver (pure function) + tests                         · G-1 · enables G-2
+ 7. feat(lifecycle-tts): WebSpeechSpeaker + Chrome workarounds + tests            · G-1
+ 8. feat(lifecycle-tts): HtmlAudioSoundEffectPlayer + tests                       · G-1
+ 9. feat(lifecycle-tts): XState machine (speech + soundEffect parallel) + tests   · G-1
+10. feat(lifecycle-tts): Provider + hooks + tests                                 · G-1
+11. feat(lifecycle-tts): RoundContext provider/hook + tests                       · G-1
+12. feat(settings): RxDB schema v4 migration + tests                             · foundation
+13. feat(settings): Talkativeness slider, useOfflineVoicesOnly toggle, modal     · G-1
+14. feat(answer-game): rename InstructionsOverlay → GameOptionsOverlay, no auto   · G-1
+15. feat(answer-game): QuestionRow component + breakpoints                        · polish
+16. feat(answer-game): split ttsEnabled → autoSpeak + talkativeness              · G-1
+17. feat(answer-game): emit lifecycle.speak from reducer + AnswerGameProvider     · G-1
+18. feat(audio): @deprecated tags on AudioFeedback + dev-mode warn                · polish
+19. feat(questions): refactor AudioButton + 4 question components to useSpeakBtn   · G-1
+20. feat(word-spell): RoundContextProvider + tts bindings                         · G-1
+21. feat(number-match): RoundContextProvider + tts bindings + fix bare-numeral    · G-1
+22. feat(sort-numbers): RoundContextProvider + tts bindings + add AudioButton     · G-1
+23. feat(spot-all): RoundContextProvider + tts bindings + consolidate speakPrompt · G-6 (exempt)
+24. feat(i18n): add tts.* + audio.* + settings.* namespaces (~70 en keys)        · G-1 · enables G-2
+25. chore: smoke-test integration + e2e coverage                                 · polish
 ```
 
-Each commit leaves CI green. Reviewer scans commit-by-commit.
+Each commit leaves CI green. Reviewer scans commit-by-commit. **Tier legend:**
+`G-1` = XState lifecycle/audio substrate · `foundation` = shared infra (bus
+rename, settings schema) enabling multiple goals · `polish` = layout, deprecation,
+test coverage · `G-6 (exempt)` = SpotAll bindings (game slated for redo).
+
+> **§13.1.F #31 Part B (skipped):** the §10 "comprehensive over YAGNI" preamble
+> phrasing is unchanged — the durable directive lives in the `project_m1_six_goals`
+> memory, so no spec churn is needed there.
 
 ## 12. Tests + Acceptance Criteria
 
