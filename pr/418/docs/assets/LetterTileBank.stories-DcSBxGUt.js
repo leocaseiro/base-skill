@@ -1,0 +1,13 @@
+import{j as r}from"./iframe-DJm7UBnT.js";import{w as i}from"./withDb-DFaH-WO1.js";import{L as m}from"./LetterTileBank-BiKefcmT.js";import{A as n,u as c}from"./AnswerGameProvider-BtzmAPOU.js";import"./preload-helper-PPVm8Dsz.js";import"./DbProvider-ii0l-pTT.js";import"./import-wrapper-prod-DLKzGee7.js";import"./Subject-dqPabvlm.js";import"./phoneme-codes-BoyU28CG.js";import"./styles-Cu2jWhUp.js";import"./useDraggableTile-CVThVw1N.js";import"./useGameTTS-CsP4I1Sy.js";import"./useSettings-BF7ZVBFx.js";import"./useRxQuery-D45Q3vQw.js";import"./voices-BsnJG_W_.js";import"./SpeechOutput-f45Kz2kS.js";import"./synth-access-CUeUQ1FV.js";import"./AudioFeedback--m-fHcTR.js";const d={gameId:"storybook",inputMethod:"drag",wrongTileBehavior:"lock-auto-eject",tileBankMode:"exact",totalRounds:1,ttsEnabled:!0},l=[{id:"t1",label:"c",value:"c"},{id:"t2",label:"a",value:"a"},{id:"t3",label:"a",value:"t"}],p=[{id:"z0",index:0,expectedValue:"C",placedTileId:null,isWrong:!1,isLocked:!1}],u=({children:e})=>(c()({type:"INIT_ROUND",tiles:l,zones:p}),r.jsx(r.Fragment,{children:e})),C={component:m,title:"Games/WordSpell/LetterTileBank",tags:["autodocs"],decorators:[i,e=>r.jsx(n,{config:d,children:r.jsx(u,{children:r.jsx(e,{})})})]},o={},g={...d,tileBankMode:"distractors",distractorCount:2},D=[...l,{id:"td1",label:"X",value:"X"},{id:"td2",label:"Z",value:"Z"}],v=({children:e})=>(c()({type:"INIT_ROUND",tiles:D,zones:p}),r.jsx(r.Fragment,{children:e})),a={decorators:[i,e=>r.jsx(n,{config:g,children:r.jsx(v,{children:r.jsx(e,{})})})]},x=({children:e})=>{const t=c();return t({type:"INIT_ROUND",tiles:l,zones:p}),t({type:"PLACE_TILE",tileId:"t1",zoneIndex:0}),t({type:"SET_DRAG_ACTIVE",tileId:"t1"}),t({type:"SET_DRAG_HOVER_BANK",tileId:"t2"}),r.jsx(r.Fragment,{children:e})},s={decorators:[i,e=>r.jsx(n,{config:d,children:r.jsx(x,{children:r.jsx(e,{})})})]};o.parameters={...o.parameters,docs:{...o.parameters?.docs,source:{originalSource:"{}",...o.parameters?.docs?.source}}};a.parameters={...a.parameters,docs:{...a.parameters?.docs,source:{originalSource:`{
+  decorators: [withDb, Story => <AnswerGameProvider config={distractorConfig}>
+        <DistractorInitProvider>
+          <Story />
+        </DistractorInitProvider>
+      </AnswerGameProvider>]
+}`,...a.parameters?.docs?.source}}};s.parameters={...s.parameters,docs:{...s.parameters?.docs,source:{originalSource:`{
+  decorators: [withDb, Story => <AnswerGameProvider config={config}>
+        <DragHoverBankTileSetup>
+          <Story />
+        </DragHoverBankTileSetup>
+      </AnswerGameProvider>]
+}`,...s.parameters?.docs?.source}}};const H=["Default","WithDistractors","DragHoverBankTile"];export{o as Default,s as DragHoverBankTile,a as WithDistractors,H as __namedExportsOrder,C as default};
