@@ -24,10 +24,8 @@ import {
 } from '@/games/config-fields-registry';
 import { resolveCover } from '@/games/cover';
 import { DEFAULT_GAME_COLOR, GAME_COLORS } from '@/lib/game-colors';
-import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { cancelSpeech, speak } from '@/lib/speech/SpeechOutput';
-import { getSynth } from '@/lib/speech/synth-access';
-import { isVoiceAvailableInList } from '@/lib/speech/voices';
+import { resolveSpeechLang } from '@/lib/speech/voices';
 import { suggestCustomGameName } from '@/lib/suggest-custom-game-name';
 
 type HeaderActionsProps = {
@@ -137,7 +135,7 @@ export const InstructionsOverlay = ({
   onToggleBookmark,
 }: InstructionsOverlayProps): JSX.Element => {
   const { t, i18n } = useTranslation(['games', 'common']);
-  const { settings } = useSettings();
+  const { settings, isLoading } = useSettings();
   const navigate = useNavigate({
     from: '/$locale/game/$gameId',
   });
@@ -175,32 +173,31 @@ export const InstructionsOverlay = ({
     return;
   }, [saveDialogOpen]);
 
+  const spokenRef = useRef(false);
   useEffect(() => {
-    if (ttsEnabled) {
-      const preferredVoice = settings.preferredVoiceURI;
-      const synth = getSynth();
-      const preferredVoiceMissing =
-        preferredVoice !== undefined &&
-        synth !== undefined &&
-        !isVoiceAvailableInList(preferredVoice, safeGetVoices(synth));
-      // Silent-skip when the preferred voice can't be honored. This is an
-      // auto-trigger (instructions read on mount); the global
-      // VoiceUnavailableWarning banner already informs the user. Same
-      // policy as useGameTTS.speakPrompt (see F14).
-      if (!preferredVoiceMissing) {
-        speak(text, {
-          rate: settings.speechRate,
-          volume: settings.voiceVolume,
-          voiceName: preferredVoice,
-          lang: i18n.language,
-        });
-      }
-    }
-    return () => {
-      cancelSpeech();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount to speak instructions once
-  }, []);
+    if (!ttsEnabled) return;
+    // Wait for RxDB to hydrate the saved voice before reading the
+    // instructions — speaking earlier drops the preference and falls back to
+    // the OS default voice. When the saved voice is genuinely missing,
+    // resolveSpeechVoice (inside speak) picks the best on-device voice for the
+    // language instead of going silent. Speak only once.
+    if (isLoading) return;
+    if (spokenRef.current) return;
+    spokenRef.current = true;
+    speak(text, {
+      rate: settings.speechRate,
+      volume: settings.voiceVolume,
+      voiceName: settings.preferredVoiceURI,
+      lang: resolveSpeechLang({
+        activeLanguage: settings.activeLanguage,
+        uiLanguage: i18n.language,
+      }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- speak instructions once, after settings finish loading
+  }, [isLoading, ttsEnabled]);
+
+  // Stop reading the instructions when the overlay unmounts (e.g. "Let's go").
+  useEffect(() => () => cancelSpeech(), []);
 
   const settingsColors = GAME_COLORS[draftApi.draft.color];
   const resolvedCover = resolveCover(

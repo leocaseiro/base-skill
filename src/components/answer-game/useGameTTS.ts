@@ -5,7 +5,10 @@ import { useSettings } from '@/db/hooks/useSettings';
 import { safeGetVoices } from '@/lib/speech/safe-get-voices';
 import { isSpeechActive, speak } from '@/lib/speech/SpeechOutput';
 import { getSynth } from '@/lib/speech/synth-access';
-import { isVoiceAvailableInList } from '@/lib/speech/voices';
+import {
+  isVoiceAvailableInList,
+  resolveSpeechLang,
+} from '@/lib/speech/voices';
 import { useVoiceUnavailableDialog } from '@/providers/VoiceUnavailableDialogProvider';
 
 export interface GameTTS {
@@ -28,6 +31,13 @@ export const useGameTTS = (): GameTTS => {
   const { i18n } = useTranslation();
   const { show: showVoiceDialog } = useVoiceUnavailableDialog();
 
+  // en-AU by default (region-less 'en' maps to en-AU) so the spoken accent
+  // matches the project default instead of the browser's US fallback.
+  const lang = resolveSpeechLang({
+    activeLanguage: settings.activeLanguage,
+    uiLanguage: i18n.language,
+  });
+
   const speakTile = useCallback(
     (label: string) => {
       if (!config.ttsEnabled) return;
@@ -39,7 +49,7 @@ export const useGameTTS = (): GameTTS => {
         rate: settings.speechRate ?? 1,
         volume: settings.voiceVolume ?? 0.8,
         voiceName: settings.preferredVoiceURI,
-        lang: i18n.language,
+        lang,
       });
     },
     [
@@ -47,24 +57,23 @@ export const useGameTTS = (): GameTTS => {
       settings.speechRate,
       settings.voiceVolume,
       settings.preferredVoiceURI,
-      i18n.language,
+      lang,
     ],
   );
 
   const speakPrompt = useCallback(
     (text: string) => {
       if (!config.ttsEnabled) return;
-      if (
-        settings.preferredVoiceURI &&
-        !isPreferredVoiceAvailable(settings.preferredVoiceURI)
-      ) {
-        return;
-      }
+      // No availability bail: when the saved voice is missing,
+      // resolveSpeechVoice (inside speak) gracefully falls back to the best
+      // on-device voice for the language instead of going silent. The
+      // VoiceUnavailableWarning banner still tells the user their exact pick
+      // is unavailable.
       speak(text, {
         rate: settings.speechRate ?? 1,
         volume: settings.voiceVolume ?? 0.8,
         voiceName: settings.preferredVoiceURI,
-        lang: i18n.language,
+        lang,
       });
     },
     [
@@ -72,7 +81,7 @@ export const useGameTTS = (): GameTTS => {
       settings.speechRate,
       settings.voiceVolume,
       settings.preferredVoiceURI,
-      i18n.language,
+      lang,
     ],
   );
 
@@ -93,7 +102,7 @@ export const useGameTTS = (): GameTTS => {
           rate: settings.speechRate ?? 1,
           volume: settings.voiceVolume ?? 0.8,
           voiceName: settings.preferredVoiceURI,
-          lang: i18n.language,
+          lang,
         });
       };
       doSpeak(text);
@@ -103,8 +112,9 @@ export const useGameTTS = (): GameTTS => {
       settings.speechRate,
       settings.voiceVolume,
       settings.preferredVoiceURI,
-      i18n.language,
+      lang,
       showVoiceDialog,
+      i18n.language,
     ],
   );
 

@@ -26,6 +26,7 @@ import {
   destroyTestDatabase,
 } from '@/db/create-database';
 import { i18n } from '@/lib/i18n/i18n';
+import { speak } from '@/lib/speech/SpeechOutput';
 import { DbProvider } from '@/providers/DbProvider';
 import { ThemeRuntimeProvider } from '@/providers/ThemeRuntimeProvider';
 
@@ -50,6 +51,11 @@ vi.mock('sonner', () => ({
     error: vi.fn(),
     success: vi.fn(),
   },
+}));
+
+vi.mock('@/lib/speech/SpeechOutput', () => ({
+  speak: vi.fn(),
+  cancelSpeech: vi.fn(),
 }));
 
 let db: BaseSkillDatabase;
@@ -730,6 +736,24 @@ describe('InstructionsOverlay error handling', () => {
     expect(onStart).toHaveBeenCalled();
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalled();
+    });
+  });
+});
+
+describe('InstructionsOverlay auto-speak', () => {
+  it('reads the instructions once settings load, using the en-AU default lang', async () => {
+    await i18n.changeLanguage('en');
+    render(
+      <InstructionsOverlay
+        {...baseProps({ ttsEnabled: true, text: 'Read me' })}
+      />,
+      { wrapper },
+    );
+    await waitFor(() => {
+      expect(speak).toHaveBeenCalledWith(
+        'Read me',
+        expect.objectContaining({ lang: 'en-AU' }),
+      );
     });
   });
 });
