@@ -82,3 +82,74 @@ export function getVoiceByName(
   }
   return safeGetVoices(synth).find((v) => v.name === name);
 }
+
+export type ResolveVoiceOptions = {
+  /** The user's saved voice name (stored as preferredVoiceURI). */
+  preferredVoiceName?: string;
+  /** Target language for the utterance, e.g. 'en-AU'. */
+  lang: string;
+};
+
+// Voices can arrive without a usable `lang` at runtime (see safe-get-voices);
+// read it defensively so language matching never throws.
+const langOf = (voice: SpeechSynthesisVoice): string =>
+  (voice as { lang?: string }).lang ?? '';
+
+const localServiceFirst = (
+  a: SpeechSynthesisVoice,
+  b: SpeechSynthesisVoice,
+): number => Number(b.localService) - Number(a.localService);
+
+/**
+ * Pick the best voice for an utterance — device-aware and AU-first:
+ * 1. the exact saved voice by name, if present on this device;
+ * 2. else the best voice whose lang matches `lang` exactly (local first);
+ * 3. else the best voice in the same language family, e.g. en-* (local first);
+ * 4. else undefined — the caller leaves utterance.voice unset and relies on
+ *    utterance.lang to bias the browser's own fallback.
+ *
+ * Voice names differ across devices, so step 1 can miss; steps 2–3 keep the
+ * spoken accent on-target instead of dropping to the OS default (US) voice.
+ */
+export const resolveSpeechVoice = (
+  voices: SpeechSynthesisVoice[],
+  { preferredVoiceName, lang }: ResolveVoiceOptions,
+): SpeechSynthesisVoice | undefined => {
+  if (voices.length === 0) return undefined;
+
+  if (preferredVoiceName) {
+    const exact = voices.find((v) => v.name === preferredVoiceName);
+    if (exact) return exact;
+  }
+
+  const target = lang.toLowerCase();
+  const prefix = target.split('-')[0] ?? target;
+
+  const exactLang = voices
+    .filter((v) => langOf(v).toLowerCase() === target)
+    .toSorted(localServiceFirst);
+  if (exactLang[0]) return exactLang[0];
+
+  const family = voices
+    .filter((v) => langOf(v).toLowerCase().startsWith(prefix))
+    .toSorted(localServiceFirst);
+  return family[0];
+};
+
+/**
+ * Resolve the spoken language, defaulting to the project's en-AU.
+ * Chain: Settings.activeLanguage → UI language (when region-specific) → 'en-AU'.
+ * A region-less 'en' maps to 'en-AU' so the browser biases the Australian
+ * accent instead of falling back to a US default voice.
+ */
+export const resolveSpeechLang = ({
+  activeLanguage,
+  uiLanguage,
+}: {
+  activeLanguage?: string;
+  uiLanguage?: string;
+}): string => {
+  const candidate = activeLanguage ?? uiLanguage;
+  if (!candidate || candidate.toLowerCase() === 'en') return 'en-AU';
+  return candidate;
+};
