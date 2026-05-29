@@ -6,6 +6,8 @@ import {
   groupVoicesByLanguage,
   isOnlineVoice,
   isVoiceAvailableInList,
+  resolveSpeechLang,
+  resolveSpeechVoice,
 } from './voices';
 
 describe('isOnlineVoice', () => {
@@ -180,5 +182,103 @@ describe('isVoiceAvailableInList', () => {
 
   it('returns false for an empty list', () => {
     expect(isVoiceAvailableInList('Samantha', [])).toBe(false);
+  });
+});
+
+describe('resolveSpeechVoice', () => {
+  const auLocal = {
+    name: 'Karen',
+    lang: 'en-AU',
+    localService: true,
+  } as SpeechSynthesisVoice;
+  const auOnline = {
+    name: 'Zoe',
+    lang: 'en-AU',
+    localService: false,
+  } as SpeechSynthesisVoice;
+  const gb = {
+    name: 'Daniel',
+    lang: 'en-GB',
+    localService: true,
+  } as SpeechSynthesisVoice;
+  const us = {
+    name: 'Samantha',
+    lang: 'en-US',
+    localService: true,
+  } as SpeechSynthesisVoice;
+  const pt = {
+    name: 'Luciana',
+    lang: 'pt-BR',
+    localService: true,
+  } as SpeechSynthesisVoice;
+
+  it('returns the exact saved voice by name when present (even if not the target lang)', () => {
+    expect(
+      resolveSpeechVoice([auLocal, us, pt], {
+        preferredVoiceName: 'Samantha',
+        lang: 'en-AU',
+      }),
+    ).toBe(us);
+  });
+
+  it('falls back to a target-language (en-AU) voice when the saved voice is missing', () => {
+    expect(
+      resolveSpeechVoice([auLocal, gb, us], {
+        preferredVoiceName: 'Nonexistent',
+        lang: 'en-AU',
+      }),
+    ).toBe(auLocal);
+  });
+
+  it('prefers a local (offline) voice over an online one for the target lang', () => {
+    expect(
+      resolveSpeechVoice([auOnline, auLocal], { lang: 'en-AU' }),
+    ).toBe(auLocal);
+  });
+
+  it('falls back to any English voice when no en-AU voice exists', () => {
+    const result = resolveSpeechVoice([gb, us, pt], { lang: 'en-AU' });
+    expect(result?.lang.startsWith('en')).toBe(true);
+  });
+
+  it('returns undefined when no voice matches the language family', () => {
+    expect(resolveSpeechVoice([pt], { lang: 'en-AU' })).toBeUndefined();
+  });
+
+  it('returns undefined for an empty voice list', () => {
+    expect(resolveSpeechVoice([], { lang: 'en-AU' })).toBeUndefined();
+  });
+
+  it('ignores voices with no lang when matching by language', () => {
+    const noLang = { name: 'Mystery' } as SpeechSynthesisVoice;
+    expect(
+      resolveSpeechVoice([noLang], { lang: 'en-AU' }),
+    ).toBeUndefined();
+  });
+});
+
+describe('resolveSpeechLang', () => {
+  it('uses activeLanguage when set', () => {
+    expect(
+      resolveSpeechLang({ activeLanguage: 'pt-BR', uiLanguage: 'en' }),
+    ).toBe('pt-BR');
+  });
+
+  it('maps a region-less "en" UI language to en-AU', () => {
+    expect(resolveSpeechLang({ uiLanguage: 'en' })).toBe('en-AU');
+  });
+
+  it('keeps a region-specific UI language', () => {
+    expect(resolveSpeechLang({ uiLanguage: 'pt-BR' })).toBe('pt-BR');
+  });
+
+  it('defaults to en-AU when nothing is provided', () => {
+    expect(resolveSpeechLang({})).toBe('en-AU');
+  });
+
+  it('prefers an explicit activeLanguage of en-AU over a bare "en" UI language', () => {
+    expect(
+      resolveSpeechLang({ activeLanguage: 'en-AU', uiLanguage: 'en' }),
+    ).toBe('en-AU');
   });
 });

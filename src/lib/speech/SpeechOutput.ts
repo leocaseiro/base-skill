@@ -1,4 +1,5 @@
 import { safeGetVoices } from './safe-get-voices';
+import { resolveSpeechVoice } from './voices';
 
 export interface SpeakOptions {
   rate?: number;
@@ -24,10 +25,14 @@ function buildUtterance(
   if (options.rate !== undefined) u.rate = options.rate;
   if (options.volume !== undefined) u.volume = options.volume;
   if (options.lang !== undefined) u.lang = options.lang;
-  if (options.voiceName !== undefined) {
-    const voice = voices.find((v) => v.name === options.voiceName);
-    if (voice) u.voice = voice;
-  }
+  // Device-aware, AU-first resolution: exact saved voice, else best
+  // matching voice for the language, else leave unset (u.lang biases the
+  // browser's own fallback). Runs on the deferred voiceschanged path too.
+  const voice = resolveSpeechVoice(voices, {
+    preferredVoiceName: options.voiceName,
+    lang: options.lang ?? 'en-AU',
+  });
+  if (voice) u.voice = voice;
   return u;
 }
 

@@ -73,9 +73,13 @@ describe('SpeechOutput', () => {
     expect(utterance.voice).toBe(danielVoice);
   });
 
-  it('speak leaves utterance.voice unset when the named voice is not found', () => {
-    const knownVoice = { name: 'Samantha' } as SpeechSynthesisVoice;
-    const synth = makeSynth([knownVoice]);
+  it('speak falls back to a target-language voice when the named voice is missing', () => {
+    const karen = {
+      name: 'Karen',
+      lang: 'en-AU',
+      localService: true,
+    } as SpeechSynthesisVoice;
+    const synth = makeSynth([karen]);
     vi.stubGlobal('speechSynthesis', synth);
     vi.stubGlobal(
       'SpeechSynthesisUtterance',
@@ -87,16 +91,45 @@ describe('SpeechOutput', () => {
         constructor(public text: string) {}
       },
     );
-    speak('hello', { voiceName: 'UnknownVoice' });
+    speak('hello', { voiceName: 'UnknownVoice', lang: 'en-AU' });
+    const utterance = synth.speak.mock.calls[0]?.[0] as {
+      voice: SpeechSynthesisVoice | null;
+    };
+    expect(utterance.voice).toBe(karen);
+  });
+
+  it('speak leaves utterance.voice unset when no voice matches the language', () => {
+    const pt = {
+      name: 'Luciana',
+      lang: 'pt-BR',
+      localService: true,
+    } as SpeechSynthesisVoice;
+    const synth = makeSynth([pt]);
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello', { voiceName: 'UnknownVoice', lang: 'en-AU' });
     const utterance = synth.speak.mock.calls[0]?.[0] as {
       voice: SpeechSynthesisVoice | null;
     };
     expect(utterance.voice).toBeNull();
   });
 
-  it('speak leaves utterance.voice unset when no voiceName is provided so the OS default applies', () => {
-    const danielVoice = { name: 'Daniel' } as SpeechSynthesisVoice;
-    const synth = makeSynth([danielVoice]);
+  it('speak picks the best target-language voice when no voiceName is provided', () => {
+    const karen = {
+      name: 'Karen',
+      lang: 'en-AU',
+      localService: true,
+    } as SpeechSynthesisVoice;
+    const synth = makeSynth([karen]);
     vi.stubGlobal('speechSynthesis', synth);
     vi.stubGlobal(
       'SpeechSynthesisUtterance',
@@ -112,7 +145,29 @@ describe('SpeechOutput', () => {
     const utterance = synth.speak.mock.calls[0]?.[0] as {
       voice: SpeechSynthesisVoice | null;
     };
-    expect(utterance.voice).toBeNull();
+    expect(utterance.voice).toBe(karen);
+  });
+
+  it('speak sets utterance.lang from options.lang', () => {
+    const synth = makeSynth([
+      { name: 'Karen', lang: 'en-AU' } as SpeechSynthesisVoice,
+    ]);
+    vi.stubGlobal('speechSynthesis', synth);
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        voice: SpeechSynthesisVoice | null = null;
+        rate = 1;
+        volume = 1;
+        lang = '';
+        constructor(public text: string) {}
+      },
+    );
+    speak('hello', { lang: 'en-AU' });
+    const utterance = synth.speak.mock.calls[0]?.[0] as {
+      lang: string;
+    };
+    expect(utterance.lang).toBe('en-AU');
   });
 
   it('speak applies rate and volume from SpeakOptions', () => {

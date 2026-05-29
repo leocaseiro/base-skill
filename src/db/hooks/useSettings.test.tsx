@@ -15,8 +15,8 @@ let db: BaseSkillDatabase | undefined;
 
 function useSettingsUnderTest() {
   const { isReady } = useRxDB();
-  const { settings, update } = useSettings();
-  return { isReady, settings, update };
+  const { settings, update, isLoading } = useSettings();
+  return { isReady, settings, update, isLoading };
 }
 
 const makeWrapper = (testDb: BaseSkillDatabase) => {
@@ -84,5 +84,30 @@ describe('useSettings', () => {
       expect(result.current.settings.speechRate).toBe(1.5);
       expect(result.current.settings.soundEffectsVolume).toBe(0.8);
     });
+  });
+
+  it('reports isLoading=false once the database is ready', async () => {
+    db = await createTestDatabase();
+    const { result } = renderHook(() => useSettingsUnderTest(), {
+      wrapper: makeWrapper(db),
+    });
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
+
+  it('stays isLoading=true while the database is still opening', () => {
+    const Pending = ({ children }: { children: ReactNode }) => {
+      const openDatabase = useCallback(
+        () => new Promise<BaseSkillDatabase>(() => {}),
+        [],
+      );
+      return (
+        <DbProvider openDatabase={openDatabase}>{children}</DbProvider>
+      );
+    };
+    const { result } = renderHook(() => useSettingsUnderTest(), {
+      wrapper: Pending,
+    });
+    expect(result.current.isLoading).toBe(true);
   });
 });

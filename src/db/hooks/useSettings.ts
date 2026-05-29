@@ -33,9 +33,21 @@ function plainSettingsFromQuery(
   return doc as SettingsDoc;
 }
 
+// Distinct from `null` (which is a real "no settings doc" emission) so we can
+// tell "RxDB hasn't emitted yet" apart from "emitted, but no doc exists".
+const UNLOADED = Symbol('settings-unloaded');
+
+type RawDoc = SettingsDoc | { toJSON: () => SettingsDoc } | null;
+
 type UseSettingsResult = {
   settings: typeof DEFAULT_SETTINGS & Partial<SettingsDoc>;
   update: (patch: Partial<SettingsDoc>) => Promise<void>;
+  /**
+   * True while a DbProvider is present and the settings query has not emitted
+   * yet. False outside a provider (Storybook, partial tests) or after a
+   * db-open error, so callers that gate on it never wait forever.
+   */
+  isLoading: boolean;
 };
 
 export function useSettings(): UseSettingsResult {
@@ -52,11 +64,21 @@ export function useSettings(): UseSettingsResult {
     [db],
   );
 
-  const rawDoc = useRxQuery<
-    SettingsDoc | { toJSON: () => SettingsDoc } | null
-  >(query$, null);
+  const rawDoc = useRxQuery<RawDoc | typeof UNLOADED>(
+    query$,
+    ctx ? UNLOADED : null,
+  );
+
+  // Loading only while a provider is present, hasn't errored, and the query
+  // has not emitted yet. Outside a provider or on error we fall through to
+  // defaults so callers gating on this are never blocked forever.
+  const isLoading =
+    ctx !== null && ctx.error === undefined && rawDoc === UNLOADED;
 
   const settings = useMemo((): UseSettingsResult['settings'] => {
+    if (rawDoc === UNLOADED) {
+      return { ...DEFAULT_SETTINGS };
+    }
     const doc = plainSettingsFromQuery(rawDoc);
     if (doc === null) {
       return { ...DEFAULT_SETTINGS };
@@ -82,5 +104,5 @@ export function useSettings(): UseSettingsResult {
     }
   };
 
-  return { settings, update };
+  return { settings, update, isLoading };
 }

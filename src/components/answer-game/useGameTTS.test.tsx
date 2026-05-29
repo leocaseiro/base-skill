@@ -177,7 +177,7 @@ describe('useGameTTS', () => {
       );
     });
 
-    it('speakPrompt is a no-op when preferred voice is unavailable (silent guard)', () => {
+    it('speakPrompt still calls speak() when preferred voice is unavailable (graceful fallback)', () => {
       settingsMock.preferredVoiceURI = 'FakeVoice';
       vi.stubGlobal('speechSynthesis', {
         getVoices: vi.fn().mockReturnValue([{ name: 'Samantha' }]),
@@ -188,8 +188,26 @@ describe('useGameTTS', () => {
         wrapper: createWrapper(ttsConfig),
       });
       result.current.speakPrompt('Some prompt');
-      expect(speak).not.toHaveBeenCalled();
       expect(showVoiceDialog).not.toHaveBeenCalled();
+      expect(speak).toHaveBeenCalledWith(
+        'Some prompt',
+        expect.objectContaining({
+          voiceName: 'FakeVoice',
+          lang: 'en-AU',
+        }),
+      );
+    });
+
+    it('speakPrompt resolves a region-less "en" UI language to en-AU', () => {
+      settingsMock.preferredVoiceURI = undefined;
+      const { result } = renderHook(() => useGameTTS(), {
+        wrapper: createWrapper(ttsConfig),
+      });
+      result.current.speakPrompt('What is this animal?');
+      expect(speak).toHaveBeenCalledWith(
+        'What is this animal?',
+        expect.objectContaining({ lang: 'en-AU' }),
+      );
     });
   });
 });

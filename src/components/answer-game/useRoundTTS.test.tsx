@@ -25,6 +25,16 @@ vi.mock('@/lib/audio/AudioFeedback', () => ({
   whenSoundEnds: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
+const mockSettingsState = { isLoading: false };
+
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: {},
+    update: vi.fn(),
+    isLoading: mockSettingsState.isLoading,
+  }),
+}));
+
 const ttsConfig: AnswerGameConfig = {
   gameId: 'test',
   inputMethod: 'drag',
@@ -62,6 +72,7 @@ function createWrapper(config: AnswerGameConfig) {
 describe('useRoundTTS', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSettingsState.isLoading = false;
   });
 
   it('calls speakPrompt on mount with the prompt', async () => {
@@ -104,5 +115,23 @@ describe('useRoundTTS', () => {
     await waitFor(() => {
       expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
     });
+  });
+
+  it('waits for settings to load before speaking, then speaks once', async () => {
+    mockSettingsState.isLoading = true;
+    const { rerender } = renderHook(() => useRoundTTS('cat'), {
+      wrapper: createWrapper(ttsConfig),
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(mockSpeakPrompt).not.toHaveBeenCalled();
+
+    mockSettingsState.isLoading = false;
+    rerender();
+    await waitFor(() => {
+      expect(mockSpeakPrompt).toHaveBeenCalledWith('cat');
+    });
+    expect(mockSpeakPrompt).toHaveBeenCalledTimes(1);
   });
 });
