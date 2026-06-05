@@ -223,8 +223,8 @@ src/components/answer-game/GameOptions/
 | `src/types/game-events.ts`                                       | **Two-tier `BaseGameEvent` restructure** (`roundIndex` moves to new `RoundScopedGameEvent`); add `game.prepare` + 4 lifecycle literals (`lifecycle.cancel`, `lifecycle.tts.played`, `lifecycle.tts.unavailable`, `lifecycle.tts.cloud-fallback`) to `GameEventType`; add `GamePrepareEvent` + 4 new lifecycle event interfaces; extend the `GameEvent` union. Full set per **Chunk D** in Task 4. (`lifecycle.speak` already exists.)                                                         |
 | `src/components/answer-game/types.ts`                            | Add `gradeBand: GradeBand` to per-game `AnswerGameConfig`. **Drop `ttsEnabled`.** `talkativeness` lives on user `SettingsDoc`, NOT on per-game config (spec §5.5, §13.1.B #11) — access via `useSettings()`.                                                                                                                                                                                                                                                                                  |
 | `src/games/spot-all/types.ts`                                    | Drop `ttsEnabled`; add `gradeBand: GradeBand` to `SpotAllConfig`. (SpotAll's `speakPrompt` consolidation is deferred per Spec Delta 1 — only the type changes here so the config blob stays consistent.)                                                                                                                                                                                                                                                                                      |
-| `src/db/schemas/settings.ts`                                     | **v3 → v4 RxDB schema migration.** Add `talkativeness: 'on-demand' \| 'helpful' \| 'chatty'` (default `'helpful'`) + `processLocally: boolean` (default `true`) at the top level. Drop `ttsEnabled`. Full v4 schema per spec §5.8 — every field declared because master enforces `additionalProperties: false`. Preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage`, all volume fields, etc. exactly.                                                      |
-| `src/db/hooks/useSettings.ts`                                    | Extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `processLocally: true` so first-paint (before RxDB resolves) matches v4 defaults. No code-path change — reuse the existing `useRxQuery` wrapping.                                                                                                                                                                                                                                                                                 |
+| `src/db/schemas/settings.ts`                                     | **v3 → v4 RxDB schema migration.** Add `talkativeness: 'on-demand' \| 'helpful' \| 'chatty'` (default `'helpful'`) + `useOfflineVoicesOnly: boolean` (default `true`) at the top level. Drop `ttsEnabled`. Full v4 schema per spec §5.8 — every field declared because master enforces `additionalProperties: false`. Preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage`, all volume fields, etc. exactly.                                                |
+| `src/db/hooks/useSettings.ts`                                    | Extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `useOfflineVoicesOnly: true` so first-paint (before RxDB resolves) matches v4 defaults. No code-path change — reuse the existing `useRxQuery` wrapping.                                                                                                                                                                                                                                                                           |
 | `src/components/answer-game/useGameTTS.ts`                       | **Deprecated / superseded by the actor.** Auto-speech vs on-demand is now decided in the `lifecycleTtsMachine` (`SPEAK_AUTO` gated by the `autoAllowed` guard `talkativeness !== 'on-demand'`; `SPEAK_USER` never gated, §6.1). `speakTile`'s legacy `config.ttsEnabled` gate flips to the user-level `talkativeness` gate during the Task 5 `ttsEnabled` sweep; remaining call sites migrate to `useLifecycleTts()` / `useSpeakButton()`. Add `@deprecated` JSDoc so no new callers slip in. |
 | `src/components/answer-game/useGameTTS.test.tsx`                 | Update tests for the talkativeness-gated `speakTile`; mock `useSettings()`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `src/components/answer-game/useRoundTTS.ts`                      | **DELETE.** All three XState games drive round-start speech via `entry: [speak({ lifecycleEvent: 'round.start' })]` on the machine's `playing` state. No callers remain after Tasks 9, 10, 11.                                                                                                                                                                                                                                                                                                |
@@ -873,7 +873,7 @@ This is the load-bearing settings refactor. Two parallel changes, **kept in one 
 - Modify: every test fixture / mock config
 - Create: `src/db/migrations/lifecycle-tts-settings-v4.collection.test.ts` (mirror existing `word-spell-multi-level.collection.test.ts`)
 
-### Sub-task 5A: `SettingsDoc` v4 migration (talkativeness + processLocally)
+### Sub-task 5A: `SettingsDoc` v4 migration (talkativeness + useOfflineVoicesOnly)
 
 - [ ] **Step 1: Write the failing migration test**
 
@@ -882,7 +882,7 @@ Create `src/db/migrations/lifecycle-tts-settings-v4.collection.test.ts` mirrorin
 ```ts
 // v3 doc with ttsEnabled: false migrates to v4 talkativeness: 'on-demand'
 expect(migrated.talkativeness).toBe('on-demand');
-expect(migrated.processLocally).toBe(true);
+expect(migrated.useOfflineVoicesOnly).toBe(true);
 // 'ttsEnabled' must be gone from the v4 doc
 expect(
   (migrated as Record<string, unknown>).ttsEnabled,
@@ -903,7 +903,7 @@ Expected: FAIL — schema is still v3.
 
 - [ ] **Step 3: Implement v4 schema + migration**
 
-In `src/db/schemas/settings.ts`, replace the v3 schema with the v4 schema from spec §5.8 in full. Because master enforces `additionalProperties: false`, **every field must be declared explicitly**. Preserve `speechRate` (range 0.5..2, default 1), `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage` (default `'en-AU'` per [project_default_language_en_au](../../../../.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/project_default_language_en_au.md)), all volume fields, `tapForgivenessThreshold/TimeMs`, `showSubtitles`, `themeId`, etc. Drop `ttsEnabled`. Add `talkativeness` (enum `['on-demand', 'helpful', 'chatty']`, default `'helpful'`) and `processLocally` (boolean, default `true`).
+In `src/db/schemas/settings.ts`, replace the v3 schema with the v4 schema from spec §5.8 in full. Because master enforces `additionalProperties: false`, **every field must be declared explicitly**. Preserve `speechRate` (range 0.5..2, default 1), `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage` (default `'en-AU'` per [project_default_language_en_au](../../../../.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/project_default_language_en_au.md)), all volume fields, `tapForgivenessThreshold/TimeMs`, `showSubtitles`, `themeId`, etc. Drop `ttsEnabled`. Add `talkativeness` (enum `['on-demand', 'helpful', 'chatty']`, default `'helpful'`) and `useOfflineVoicesOnly` (boolean, default `true`).
 
 Add `settingsMigrations[4]` mapping:
 
@@ -913,7 +913,7 @@ Add `settingsMigrations[4]` mapping:
   return {
     ...rest,
     talkativeness: ttsEnabled === false ? 'on-demand' : 'helpful',
-    processLocally: true,
+    useOfflineVoicesOnly: true,
   } as SettingsDoc;
 },
 ```
@@ -928,7 +928,7 @@ In `src/db/hooks/useSettings.ts`, update `DEFAULT_SETTINGS` so first-paint (befo
 const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   // ... existing
   talkativeness: 'helpful',
-  processLocally: true,
+  useOfflineVoicesOnly: true,
 };
 ```
 
@@ -1081,7 +1081,7 @@ Suggested commit sequence (one commit per sub-task above):
 ```bash
 # 5A — schema + DEFAULT_SETTINGS
 git add src/db/schemas/settings.ts src/db/hooks/useSettings.ts src/db/migrations/lifecycle-tts-settings-v4.collection.test.ts
-git commit -m "feat(settings): add talkativeness + processLocally to SettingsDoc; v3→v4 RxDB migration"
+git commit -m "feat(settings): add talkativeness + useOfflineVoicesOnly to SettingsDoc; v3→v4 RxDB migration"
 
 # 5B — per-game type + gradeBand
 git add src/components/answer-game/types.ts src/games/spot-all/types.ts src/components/answer-game/AnswerGameProvider.test.tsx
@@ -3466,7 +3466,7 @@ In `GameOptionsOverlay.tsx`:
 - Delete the `useEffect` block at lines 173–174 that calls `speak(text)`.
 - Add a new `useEffect(() => { ... }, [])` that emits `game.prepare`.
 
-**Envelope source for `game.prepare`** (spec §13.1.G #34 A1 path). `GameOptionsOverlay` reads `profileId` and `sessionId` for the bus envelope from the two new hooks (it fires pre-engine, so it cannot source them from engine context):
+**Envelope source for `game.prepare`** (spec §8.5 — A1 pre-engine path). `GameOptionsOverlay` reads `profileId` and `sessionId` for the bus envelope from the two new hooks (it fires pre-engine, so it cannot source them from engine context):
 
 ```tsx
 // inside GameOptionsOverlay.tsx
@@ -3982,6 +3982,8 @@ The remaining findings below are kept verbatim from the 2026-05-13 review for tr
 ### From 2026-05-13 ce-doc-review
 
 A multi-persona review (coherence, feasibility, product-lens, design-lens, scope-guardian, adversarial) surfaced findings that were deferred during the review pass. They require resolution during execution or in a follow-up review. The reviewer that surfaced each finding is noted in parentheses. Convergent findings (multiple reviewers flagged the same concern) are marked with a count.
+
+> **⚠️ Pre-actor-rewrite findings (annotated 2026-06-05).** Several findings below were captured against the original **hook-based** architecture (2026-05-13 review) and are partially or fully **superseded by the actor rewrite**. Any finding premised on _"Task 7's hook reads `gameDefinition` / `currentRound` from context"_, the per-tree `useLifecycleTts` mount, or the _"mount in game component vs thread through `AnswerGameProvider`"_ choice no longer applies — the runtime is now a single root-mounted `lifecycleTtsMachine` actor (Tasks 6–8.5), and each game machine supplies its own interpolation payload in the `lifecycle.speak` event (Tasks 9–11). Re-evaluate each finding against the actor model at execution; the `game.start` / `game.prepare` P0 is already marked **RESOLVED** below.
 
 #### P0 — implementation blockers (must resolve before or during execution)
 
