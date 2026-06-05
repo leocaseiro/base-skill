@@ -698,18 +698,25 @@ git commit -m "feat(lifecycle-tts): add pure verbosity + copy resolvers"
 
 ---
 
-## Task 4: `game.prepare` Bus Event
+## Task 4: `game.prepare` + lifecycle bus events — two-tier `BaseGameEvent` restructure
+
+This task lands the full bus-event surface the actor runtime needs (spec §4.3 + §4.3.1, issues #38 / #40):
+
+- a new `game.prepare` event (non-round, emitted by `GameOptionsOverlay`);
+- four new lifecycle event literals/interfaces (`lifecycle.cancel`, `lifecycle.tts.played`, `lifecycle.tts.unavailable`, `lifecycle.tts.cloud-fallback`);
+- the **two-tier `BaseGameEvent` restructure** — `roundIndex` moves off the base envelope into a new `RoundScopedGameEvent` tier so non-round events stop fabricating a meaningless value.
+
+`lifecycle.speak` already exists in `GameEventType` — no work needed for that event.
 
 **Files:**
 
-- Modify: `src/types/game-events.ts` (add to `GameEventType` union + `GameEvent` discriminated union)
+- Modify: `src/types/game-events.ts` (two-tier base + new `GameEventType` literals + new event interfaces + `GameEvent` union members)
+- Modify: every emit/consume site the discriminated-union split surfaces as a typecheck error (compiler-guided migration — only `useGameSkin.ts` `onRoundComplete` reads the envelope `roundIndex` today, but the union change forces each non-round emit site to drop the fabricated `roundIndex`)
 - Test: `src/lib/game-event-bus.test.ts` (append)
-
-`lifecycle.speak` is already declared in `GameEventType` at line 29 (`src/types/game-events.ts`) — no work needed for that event. Only `game.prepare` is new in M1.
 
 - [ ] **Step 1: Write the failing test**
 
-Append to `src/lib/game-event-bus.test.ts`:
+Append to `src/lib/game-event-bus.test.ts`. Note `GamePrepareEvent extends BaseGameEvent` — it is **non-round**, so the literal carries **no** `roundIndex` (Chunk D reclassification):
 
 ```ts
 import { getGameEventBus } from './game-event-bus';
@@ -729,7 +736,7 @@ describe('game.prepare event', () => {
       sessionId: 'test',
       profileId: 'test',
       timestamp: Date.now(),
-      roundIndex: 0,
+      // no roundIndex — game.prepare is non-round (spec §4.3.1)
     };
     bus.emit(event);
 
@@ -745,46 +752,100 @@ describe('game.prepare event', () => {
 Run: `npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose`
 Expected: FAIL — `GamePrepareEvent` not exported, `'game.prepare'` not assignable to `GameEventType`.
 
-- [ ] **Step 3: Add the event to game-events.ts**
+- [ ] **Step 3: Apply the two-tier base + new events to `game-events.ts`**
 
-In `src/types/game-events.ts`, add `'game.prepare'` to the `GameEventType` union (after `'game.start'`, before `'lifecycle.speak'`):
+Apply all of the following to `src/types/game-events.ts` (spec §4.3 + §4.3.1). `LifecycleEvent`, `LifecycleSubject`, `Talkativeness` come from `@/lib/lifecycle-tts/types`.
 
 ```ts
+// src/types/game-events.ts
+
+// (a) Two-tier base — #40
+export interface BaseGameEvent {
+  type: GameEventType;
+  gameId: string;
+  sessionId: string;
+  profileId: string;
+  timestamp: number;
+  // roundIndex REMOVED from base — see RoundScopedGameEvent below
+}
+
+export interface RoundScopedGameEvent extends BaseGameEvent {
+  roundIndex: number;
+}
+
+// (b) Reclassify:
+//   - Round-scoped (extends RoundScopedGameEvent): game.action, game.evaluate, game.score,
+//     game.hint, game.retry, game.time_up, game.round-advance, game.drag-start,
+//     game.drag-over-zone, game.tile-ejected
+//   - Non-round (extends BaseGameEvent): game.start, game.instructions_shown, game.end,
+//     game.level-advance, celebration.start, celebration.complete, celebration.skip
+//   - Dual-natured (extends BaseGameEvent + own optional roundIndex?): LifecycleSpeakEvent
+
+// (c) GameEventType — add 4 new lifecycle literals (#38)
 export type GameEventType =
   | 'game.start'
-  | 'game.prepare'
-  // ... existing entries unchanged
-  | 'lifecycle.speak';
-```
+  | 'game.prepare' // Task 4 addition
+  | /* …existing entries unchanged… */
+  | 'lifecycle.speak'
+  | 'lifecycle.cancel' // NEW
+  | 'lifecycle.tts.played' // NEW
+  | 'lifecycle.tts.unavailable' // NEW
+  | 'lifecycle.tts.cloud-fallback'; // NEW
 
-Add the interface (group it with the other game-level events, near `GameStartEvent`):
-
-```ts
+// (d) game.prepare — non-round, no roundIndex
 export interface GamePrepareEvent extends BaseGameEvent {
   type: 'game.prepare';
 }
-```
 
-Add `GamePrepareEvent` to the `GameEvent` discriminated union (locate the union definition and add the new member):
+// (e) New lifecycle event interfaces
+export interface LifecycleCancelEvent extends BaseGameEvent {
+  type: 'lifecycle.cancel';
+}
 
-```ts
+export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.played';
+  lifecycleEvent: LifecycleEvent;
+  subject: LifecycleSubject | null;
+  source: 'auto' | 'user';
+  variant: Talkativeness;
+  durationMs: number;
+  roundIndex?: number; // dual-natured (round verbs only)
+}
+
+export interface LifecycleTtsUnavailableEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.unavailable';
+  subject: LifecycleSubject;
+}
+
+export interface LifecycleTtsCloudFallbackEvent extends BaseGameEvent {
+  type: 'lifecycle.tts.cloud-fallback';
+  subject: LifecycleSubject;
+}
+
+// (f) GameEvent discriminated union — add new members
 export type GameEvent =
   | GameStartEvent
   | GamePrepareEvent
-  // ... existing entries unchanged
-  | LifecycleSpeakEvent;
+  | /* …existing entries unchanged… */
+  | LifecycleSpeakEvent
+  | LifecycleCancelEvent
+  | LifecycleTtsPlayedEvent
+  | LifecycleTtsUnavailableEvent
+  | LifecycleTtsCloudFallbackEvent;
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+The discriminated union makes TypeScript enumerate every emit/consume site that needs updating — the migration is compiler-guided. Walk each typecheck error: non-round emit sites drop the fabricated `roundIndex`; round-scoped events that previously relied on the base field now `extends RoundScopedGameEvent`. `LifecycleSpeakEvent` becomes **dual-natured** — `extends BaseGameEvent` with its own optional `roundIndex?: number`, set only for round verbs (`round.start`, `round.error`), absent for game-level verbs (`game.prepare`, `game.start`, `level.complete`).
 
-Run: `npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose`
-Expected: PASS.
+- [ ] **Step 4: Run test + typecheck to verify they pass**
+
+Run: `npx vitest run src/lib/game-event-bus.test.ts --reporter=verbose && yarn typecheck`
+Expected: PASS — `game.prepare` round-trips; the two-tier split typechecks across every emit/consume site (fix each compiler error per Step 3).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add src/types/game-events.ts src/lib/game-event-bus.test.ts
-git commit -m "feat(events): add game.prepare bus event"
+git commit -m "feat(events): two-tier BaseGameEvent + game.prepare + lifecycle event interfaces (#38, #40)"
 ```
 
 ---
