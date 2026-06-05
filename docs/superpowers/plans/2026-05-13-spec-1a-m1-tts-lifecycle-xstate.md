@@ -4,7 +4,7 @@
 
 **Goal:** Ship the user-visible TTS copy fixes from #229 — rename InstructionsOverlay, stop auto-speaking how-to-play, fix NumberMatch's "speak the answer" bug, add `talkativeness` (`on-demand | helpful | chatty`) to the user-level `SettingsDoc` (v3→v4 RxDB migration), add `gradeBand` to per-game `AnswerGameConfig`, deprecate `ttsEnabled`, add an inline QuestionRow + AudioButton on the three XState-migrated games (WordSpell, NumberMatch, SortNumbers), and surface the Talkativeness slider in `SettingsPanel`.
 
-**Architecture:** Build the `src/lib/lifecycle-tts/` module whose forward-reference the engine already imports (`GameDefinition.tts`, `SideEffect 'speak'`). Each game's `src/games/<id>/definition.ts` carries its own `tts:` block — there is no parallel registry directory. The XState machine emits `{ type: 'speak', params: { lifecycleEvent } }` actions at the right transitions; `useGameEngine` routes those through `executeSideEffects` which emits a single `lifecycle.speak` bus event. The new `useLifecycleTts` hook subscribes to that one event, looks up the active game's `definition.tts[lifecycleEvent]`, resolves verbosity from the user's `talkativeness` (read via `useSettings()` per spec §5.5) and the per-game `gradeBand`, interpolates the i18n template, and calls `speak()` — auto-speech suppressed when `talkativeness === 'on-demand'` per spec §6.1's `autoAllowed` guard. On-demand surfaces (AudioButton, question onClick) call `speakOnDemand` directly — taps **always** speak per spec §5.4 (no hard-mute); the OS volume slider is the escape hatch.
+**Architecture:** Build the `src/lib/lifecycle-tts/` module whose forward-reference the engine already imports (`GameDefinition.tts`, `SideEffect 'speak'`). Each game's `src/games/<id>/definition.ts` carries its own `tts:` block — there is no parallel registry directory. A **single `lifecycleTtsMachine` XState actor** is mounted once at the React root via `LifecycleTtsProvider` (spec §5.5.1); it owns all game audio (speech + SFX) through two parallel sub-machines, a priority/throttle/single-queued speech policy, and the injected `WebSpeechSpeaker` + `HtmlAudioSoundEffectPlayer` adapters. Game machines emit `{ type: 'speak', params: { lifecycleEvent } }` actions; `useGameEngine` → `executeSideEffects` emits a single `lifecycle.speak` bus event; the actor is the **one** bus subscriber and relays it as `SPEAK_AUTO`, looking up the active game's `definition.tts[lifecycleEvent]`, resolving verbosity from the user's `talkativeness` (forwarded via `SETTINGS_CHANGED`, spec §5.5) + per-game `gradeBand`, interpolating the i18n template, and invoking the speaker — auto-speech suppressed when `talkativeness === 'on-demand'` per spec §6.1's `autoAllowed` guard. On-demand surfaces (AudioButton, question onClick) call `useSpeakButton().speak()` → `SPEAK_USER` directly on the actor (bus uninvolved) — taps **always** speak per spec §5.4 (no hard-mute); the OS volume slider is the escape hatch.
 
 **Tech Stack:** React 18, TypeScript, xstate@5, @xstate/react@5, Vitest, i18next, Web Speech API, existing GameEventBus.
 
@@ -37,7 +37,7 @@ Refreshed against the 2026-05-16 spec (which now incorporates the deltas previou
    - `autoSpeak` is **derived**, not stored: `autoSpeak = talkativeness !== 'on-demand'` (§5.3). Two flags can't drift apart.
    - `ttsOnDemandAllowed` is rejected by spec §5.4 (no hard-mute). Taps always speak. OS volume slider is the escape hatch.
 
-   This delta is **applied throughout the plan below** — Task 5 migrates `talkativeness` into `SettingsDoc` (RxDB v3→v4) and adds `gradeBand` to per-game config; Task 7's hook reads `talkativeness` via `useSettings()` and gates only auto-speech (not on-demand).
+   This delta is **applied throughout the plan below** — Task 5 migrates `talkativeness` into `SettingsDoc` (RxDB v3→v4) and adds `gradeBand` to per-game config; the actor (Tasks 6–8.5) reads `talkativeness` via the `LifecycleTtsProvider`'s `useSettings()` and gates only auto-speech (`autoAllowed`, not on-demand).
 
 These deltas are tracked here so M2 (full event surface, customConfig override layer) inherits the same conventions.
 
@@ -235,9 +235,9 @@ src/components/answer-game/GameOptions/
 | `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Replace stacked numeral + question siblings with `<QuestionRow>`; pass `event="round.start"` to AudioButton.                                                                                                                                                                                                                                                                                                                                                                                  |
 | `src/games/word-spell/WordSpell/WordSpell.tsx`                   | Same — `<QuestionRow>` wrap; pass `event` prop.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`             | **Add AudioButton** (currently has none) via `<QuestionRow>`; pass `event="round.start"`.                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch `prompt: string` prop to `event: LifecycleEvent`; call `useLifecycleTts().speakOnDemand(event)`. **No `talkativeness` gate** — taps always speak per spec §5.4. Button always renders (was: hidden when `ttsEnabled: false`).                                                                                                                                                                                                                                                          |
+| `src/components/questions/AudioButton/AudioButton.tsx`           | Switch `prompt: string` prop to `event: LifecycleEvent` (+ optional `variant`); use `useSpeakButton({ event, payload, variant })` → `SPEAK_USER` (spec §8.7), surfacing `{ speak, isSpeaking }`. **No `talkativeness` gate** — taps always speak per spec §5.4. Button always renders (was: hidden when `ttsEnabled: false`).                                                                                                                                                                 |
 | `src/components/questions/AudioButton/AudioButton.test.tsx`      | Update tests for new prop API + "always renders" behavior.                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route `onClick` speech through `useLifecycleTts().speakOnDemand`. No `talkativeness` gate — taps always speak (§5.4).                                                                                                                                                                                                                                                                                                                                                                         |
+| `src/components/questions/TextQuestion/TextQuestion.tsx`         | Route `onClick` speech through `useSpeakButton(...).speak` (`SPEAK_USER`). No `talkativeness` gate — taps always speak (§5.4).                                                                                                                                                                                                                                                                                                                                                                |
 | `src/components/questions/ImageQuestion/ImageQuestion.tsx`       | Same.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `src/components/questions/EmojiQuestion/EmojiQuestion.tsx`       | Same.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx` | Same.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
@@ -1044,7 +1044,7 @@ Don't grep-replace blindly — the semantics differ by call site.
 
 Per-file checklist (derived from Step 9):
 
-- `src/components/answer-game/useGameTTS.ts` — `speakTile`'s `if (!config.ttsEnabled) return` becomes `if (settings.talkativeness === 'on-demand') return` (read via `useSettings()` — see Task 6 for the full rewrite).
+- `src/components/answer-game/useGameTTS.ts` — `speakTile`'s `if (!config.ttsEnabled) return` becomes `if (settings.talkativeness === 'on-demand') return` (read via `useSettings()`). This hook is **deprecated/superseded by the actor** (Tasks 6–8.5) — flip the gate here for any surviving callers and add `@deprecated` JSDoc; remaining call sites migrate to `useLifecycleTts()` / `useSpeakButton()`.
 - `src/components/answer-game/useRoundTTS.ts` — file is deleted in Task 11; no migration needed.
 - `src/components/answer-game/InstructionsOverlay/InstructionsOverlay.tsx:174` — file is rewritten in Task 16; no per-line migration needed.
 - `src/components/questions/AudioButton/AudioButton.tsx` — **drop the gate entirely** (Task 13); button always renders.
@@ -3140,63 +3140,41 @@ Update `src/components/questions/AudioButton/AudioButton.test.tsx`:
 
 ```tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioButton } from './AudioButton';
 
-const speakOnDemand = vi.fn();
-vi.mock('@/lib/lifecycle-tts/useLifecycleTts', () => ({
-  useLifecycleTts: () => ({ speakOnDemand }),
+// Taps go through useSpeakButton → SPEAK_USER (spec §8.7), not a
+// useLifecycleTts().speakOnDemand callable. Mock the hook to capture the send.
+const speak = vi.fn();
+vi.mock('@/lib/lifecycle-tts/use-speak-button', () => ({
+  useSpeakButton: () => ({ speak, isSpeaking: false }),
 }));
-
-vi.mock('@/db/hooks/useSettings', () => ({
-  useSettings: vi.fn(),
+vi.mock('@/components/questions/RoundContext', () => ({
+  useRoundContext: () => ({}),
 }));
-import { useSettings } from '@/db/hooks/useSettings';
-
-const withTalkativeness = (
-  talkativeness: 'on-demand' | 'helpful' | 'chatty',
-) => {
-  (useSettings as ReturnType<typeof vi.fn>).mockReturnValue({
-    settings: { talkativeness },
-    update: vi.fn(),
-  });
-};
 
 describe('AudioButton', () => {
-  beforeEach(() => speakOnDemand.mockClear());
+  beforeEach(() => speak.mockClear());
 
-  it('renders when talkativeness is helpful', () => {
-    withTalkativeness('helpful');
+  // Talkativeness no longer affects whether the button renders OR whether a tap
+  // speaks — the actor's autoAllowed guard only gates SPEAK_AUTO; SPEAK_USER
+  // (taps) is never gated (§5.4). So the button always renders and always sends.
+  it('always renders the button', () => {
     render(<AudioButton event="round.start" />);
     expect(
       screen.getByRole('button', { name: /hear/i }),
     ).toBeInTheDocument();
   });
 
-  it('STILL renders when talkativeness is on-demand — spec §5.4 (no hard-mute)', () => {
-    withTalkativeness('on-demand');
-    render(<AudioButton event="round.start" />);
-    expect(
-      screen.getByRole('button', { name: /hear/i }),
-    ).toBeInTheDocument();
-  });
-
-  it('STILL renders when talkativeness is chatty', () => {
-    withTalkativeness('chatty');
-    render(<AudioButton event="round.start" />);
-    expect(
-      screen.getByRole('button', { name: /hear/i }),
-    ).toBeInTheDocument();
-  });
-
-  it('calls speakOnDemand with the lifecycle event when clicked (any talkativeness)', () => {
-    withTalkativeness('on-demand');
+  it('sends SPEAK_USER (speak()) when clicked — taps always speak (§5.4)', () => {
     render(<AudioButton event="round.start" />);
     fireEvent.click(screen.getByRole('button'));
-    expect(speakOnDemand).toHaveBeenCalledWith('round.start');
+    expect(speak).toHaveBeenCalledTimes(1);
   });
 });
 ```
+
+The talkativeness-by-render assertions from the pre-actor draft are dropped: render and tap-speak no longer depend on `talkativeness` (the gate lives in the actor's `autoAllowed` guard and only affects `SPEAK_AUTO`). `isSpeaking` is exercised by the `useSpeakButton` unit test (Task 8.5), not here.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -3209,33 +3187,47 @@ Replace `src/components/questions/AudioButton/AudioButton.tsx`:
 
 ```tsx
 import { useTranslation } from 'react-i18next';
-import { useLifecycleTts } from '@/lib/lifecycle-tts/useLifecycleTts';
-import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
+import { useSpeakButton } from '@/lib/lifecycle-tts/use-speak-button';
+import { useRoundContext } from '@/components/questions/RoundContext';
+import type {
+  LifecycleEvent,
+  Talkativeness,
+} from '@/lib/lifecycle-tts/types';
 import type { JSX } from 'react';
 
 export interface AudioButtonProps {
-  event: LifecycleEvent;
+  event?: LifecycleEvent;
+  variant?: Talkativeness;
 }
 
 // AudioButton always renders. Spec §5.4: no hard-mute — taps always speak,
 // regardless of the user's Talkativeness setting. OS volume slider is the
 // escape hatch for "completely silent".
 //
-// A future P1 visual-state addition (speaking indicator via isSpeechActive())
-// is tracked in the Deferred section.
+// Taps go through useSpeakButton → SPEAK_USER (spec §8.7); `isSpeaking` is
+// derived from the actor so the button can show a pulse + restart-flash.
 export const AudioButton = ({
-  event,
+  event = 'round.start',
+  variant = 'helpful',
 }: AudioButtonProps): JSX.Element => {
-  const { speakOnDemand } = useLifecycleTts();
+  const round = useRoundContext();
+  const { speak, isSpeaking } = useSpeakButton({
+    event,
+    payload: { round },
+    variant,
+  });
   const { t } = useTranslation();
 
   return (
     <button
       type="button"
-      aria-label={t('common.audio.replay', {
-        defaultValue: 'Hear the question',
-      })}
-      onClick={() => speakOnDemand(event)}
+      aria-label={t(
+        isSpeaking ? 'audio.replay.playing' : 'audio.replay.idle',
+      )}
+      onClick={speak}
+      className={['audio-button', isSpeaking && 'audio-button--playing']
+        .filter(Boolean)
+        .join(' ')}
     >
       🔊
     </button>
@@ -3243,7 +3235,7 @@ export const AudioButton = ({
 };
 ```
 
-(Replace the emoji with whatever icon component the existing AudioButton uses; preserve existing styling classnames.)
+Full state table (idle / playing / briefly-paused-after-retap) + the `.audio-button--restart-flash` keyframe live in spec §8.7 — implement them per that section; `SPEAK_USER` always preempts in-flight speech (§6.3), so the button never refuses a tap. Replace the emoji with the icon component the existing AudioButton uses; preserve existing styling classnames.
 
 - [ ] **Step 4: Update Storybook story per write-storybook skill**
 
@@ -3273,9 +3265,9 @@ git commit -m "feat(audio-button): switch to lifecycle event prop; always render
 - Modify: `src/components/questions/DotGroupQuestion/DotGroupQuestion.tsx`
 - Modify: each component's `.test.tsx` file
 
-Each of the four question components today reads `config.ttsEnabled` for its onClick speech. Per spec §5.4 (no hard-mute), **the gate is removed entirely** — clicks always invoke `speakOnDemand`. The hook handles voice availability via `VoiceUnavailableDialogProvider` (PR #409); there is no in-component gate.
+Each of the four question components today reads `config.ttsEnabled` for its onClick speech. Per spec §5.4 (no hard-mute), **the gate is removed entirely** — clicks always send `SPEAK_USER` to the actor (via `useSpeakButton`). Voice availability is handled centrally: the speaker's `pickVoice()` fails closed and emits `lifecycle.tts.unavailable`, which `useLifecycleTtsUnavailableHandler` routes to PR #409's `VoiceUnavailableDialogProvider`. There is no in-component gate.
 
-Routes the speech call through `useLifecycleTts.speakOnDemand` for SRS observability parity (the `lifecycle.tts.played` emission for the SRS recorder lands via the bus path in Task 7's hook — see spec §6.7).
+Routing taps through the actor (`SPEAK_USER`) gives SRS observability parity for free — the actor's `emitTtsPlayed` fires `lifecycle.tts.played` on every speaker resolve, including user taps (spec §6.7).
 
 - [ ] **Step 1: Write the failing test (per question component)**
 
@@ -3283,50 +3275,23 @@ For `TextQuestion`, add or update:
 
 ```tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TextQuestion } from './TextQuestion';
 
-const speakOnDemand = vi.fn();
-vi.mock('@/lib/lifecycle-tts/useLifecycleTts', () => ({
-  useLifecycleTts: () => ({ speakOnDemand }),
+// Question clicks send SPEAK_USER via useSpeakButton (spec §8.7); taps are
+// never gated by talkativeness (§5.4), so a single click-speaks test suffices.
+const speak = vi.fn();
+vi.mock('@/lib/lifecycle-tts/use-speak-button', () => ({
+  useSpeakButton: () => ({ speak, isSpeaking: false }),
 }));
-
-vi.mock('@/db/hooks/useSettings', () => ({
-  useSettings: vi.fn(),
-}));
-import { useSettings } from '@/db/hooks/useSettings';
-
-const withTalkativeness = (
-  talkativeness: 'on-demand' | 'helpful' | 'chatty',
-) => {
-  (useSettings as ReturnType<typeof vi.fn>).mockReturnValue({
-    settings: { talkativeness },
-    update: vi.fn(),
-  });
-};
 
 describe('TextQuestion onClick speech — taps always speak (spec §5.4)', () => {
-  beforeEach(() => speakOnDemand.mockClear());
+  beforeEach(() => speak.mockClear());
 
-  it('speaks when talkativeness is helpful', () => {
-    withTalkativeness('helpful');
+  it('sends SPEAK_USER (speak()) when clicked', () => {
     render(<TextQuestion text="cat" />);
     fireEvent.click(screen.getByText('cat'));
-    expect(speakOnDemand).toHaveBeenCalledTimes(1);
-  });
-
-  it('STILL speaks when talkativeness is on-demand (no hard-mute)', () => {
-    withTalkativeness('on-demand');
-    render(<TextQuestion text="cat" />);
-    fireEvent.click(screen.getByText('cat'));
-    expect(speakOnDemand).toHaveBeenCalledTimes(1);
-  });
-
-  it('STILL speaks when talkativeness is chatty', () => {
-    withTalkativeness('chatty');
-    render(<TextQuestion text="cat" />);
-    fireEvent.click(screen.getByText('cat'));
-    expect(speakOnDemand).toHaveBeenCalledTimes(1);
+    expect(speak).toHaveBeenCalledTimes(1);
   });
 });
 ```
@@ -3335,18 +3300,21 @@ Repeat for `ImageQuestion`, `EmojiQuestion`, `DotGroupQuestion` with their respe
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Expected: FAIL — components still gate by `ttsEnabled` (or no longer call speakOnDemand at all).
+Expected: FAIL — components still gate by `ttsEnabled` (or no longer route clicks through `useSpeakButton`).
 
 - [ ] **Step 3: Update each component**
 
-In each of the four files, locate the onClick handler that calls `speak()` or `useGameTTS().speakPrompt()`, and replace with:
+In each of the four files, locate the onClick handler that calls `speak()` or `useGameTTS().speakPrompt()`, and replace with a `useSpeakButton` tap (spec §8.7):
 
 ```tsx
-const { speakOnDemand } = useLifecycleTts();
+const { speak } = useSpeakButton({
+  event: 'round.start',
+  payload: { round },
+});
 
 const handleClick = () => {
   // No gate — taps always speak per spec §5.4 (no hard-mute).
-  speakOnDemand('round.start');
+  speak(); // → SPEAK_USER to the actor
 };
 ```
 
@@ -3965,7 +3933,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.full` ("Find the matching number for {{count}}.").
 - [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'k'`).
 - [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); always speaks the resolved `full` copy for its `event` prop when tapped.
-- [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) route onClick speech through `useLifecycleTts.speakOnDemand` with **no gate** (taps always speak per §5.4). (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
+- [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) route onClick speech through `useSpeakButton().speak()` (`SPEAK_USER`) with **no gate** (taps always speak per §5.4). (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
 - [ ] `<QuestionRow>` renders inline (icon left, content right) on all breakpoints; AudioButton ≥ 44×44 px; content wraps to extra lines.
 - [ ] WordSpell, NumberMatch, SortNumbers each have an inline AudioButton via `<QuestionRow>`.
 - [ ] **SpotAll deferred per Spec Delta 1** — tracked in a follow-up issue gated on PR 1d (#368).
