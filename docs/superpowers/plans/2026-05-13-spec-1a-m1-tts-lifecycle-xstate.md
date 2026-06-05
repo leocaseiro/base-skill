@@ -1106,708 +1106,1398 @@ git commit -m "chore(test+story): migrate ttsEnabled fixtures to talkativeness +
 
 ---
 
-## Task 6: useGameTTS — speakAuto / speakOnDemand split (driven by user `talkativeness`)
+## Task 6: `WebSpeechSpeaker` — Speaker adapter + Chrome watchdogs
+
+The actor invokes a `Speaker` to perform speech. `WebSpeechSpeaker` is the Web Speech API implementation: it centralizes every Chrome/Safari/Firefox workaround (keepalive timer, end-event watchdog, `voiceschanged` cache, rAF cancel guard) and implements the §5.7 offline-voice ladder in `pickVoice()`. It is constructed **inside `LifecycleTtsProvider`** (Task 9) and handed to the machine via input — never a module global.
 
 **Files:**
 
-- Modify: `src/components/answer-game/useGameTTS.ts`
-- Modify: `src/components/answer-game/useGameTTS.test.tsx`
+- Create: `src/lib/lifecycle-tts/speaker.ts` (the `Speaker` + `SoundEffectPlayer` interfaces, spec §7.1)
+- Create: `src/lib/lifecycle-tts/errors.ts` (`LocalVoiceUnavailableError`)
+- Create: `src/lib/lifecycle-tts/web-speech-speaker.ts`
+- Create: `src/lib/lifecycle-tts/web-speech-speaker.test.ts`
 
-Auto-speech is gated by the user-level `talkativeness !== 'on-demand'` (spec §6.1 `autoAllowed` guard, read via `useSettings()`). On-demand speech (`speakOnDemand`) has **no `talkativeness` gate** — taps always speak per spec §5.4 (no hard-mute). OS volume slider is the user's escape hatch.
+- [ ] **Step 1: Write the failing test**
 
-- [ ] **Step 1: Write the failing tests**
-
-Replace the test bodies in `src/components/answer-game/useGameTTS.test.tsx` (keep the existing setup harness — `renderHook`, mock provider) and add the new cases. Talkativeness is mocked at the `useSettings()` level (the hook reads it from user settings, not per-game config):
+Create `src/lib/lifecycle-tts/web-speech-speaker.test.ts`. The matrix covers the spec §12.1 Speaker inventory: resolve on `onend`, reject on `cancel()`, watchdog timeout, voice cache + `voiceschanged`, the offline-voice ladder (filter by `localService`, fail-closed under `useOfflineVoicesOnly: true`, cloud-fallback signal when `false`), Chrome Android `u.lang = voice.lang`, and pre-speak `resume()`:
 
 ```ts
-import { vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import { WebSpeechSpeaker } from './web-speech-speaker';
+import { LocalVoiceUnavailableError } from './errors';
+import type { TtsSettings } from './types';
 
-vi.mock('@/db/hooks/useSettings', () => ({
-  useSettings: vi.fn(),
-}));
-import { useSettings } from '@/db/hooks/useSettings';
-
-const mockSettings = (overrides: {
-  talkativeness: 'on-demand' | 'helpful' | 'chatty';
-}) => {
-  (useSettings as ReturnType<typeof vi.fn>).mockReturnValue({
-    settings: {
-      talkativeness: overrides.talkativeness,
-      speechRate: 1,
-      voiceVolume: 0.8,
-      preferredVoiceURI: undefined,
-      activeLanguage: 'en-AU',
-      processLocally: true,
-    },
-    update: vi.fn(),
-  });
+const baseSettings: TtsSettings = {
+  talkativeness: 'helpful',
+  useOfflineVoicesOnly: true,
+  speechRate: 1,
+  voiceVolume: 0.8,
+  soundEffectsVolume: 0.8,
+  preferredVoiceURI: '',
+  preferredVoiceDeviceId: '',
+  activeLanguage: 'en-AU',
 };
 
-describe('speakAuto', () => {
-  it('speaks when talkativeness is helpful', () => {
-    mockSettings({ talkativeness: 'helpful' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakAuto('Hello');
-    expect(speakSpy).toHaveBeenCalledWith('Hello', expect.any(Object));
-  });
+const makeVoice = (
+  over: Partial<SpeechSynthesisVoice>,
+): SpeechSynthesisVoice =>
+  ({
+    name: 'Karen',
+    lang: 'en-AU',
+    voiceURI: 'Karen',
+    localService: true,
+    default: false,
+    ...over,
+  }) as SpeechSynthesisVoice;
 
-  it('speaks when talkativeness is chatty', () => {
-    mockSettings({ talkativeness: 'chatty' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakAuto('Hello');
-    expect(speakSpy).toHaveBeenCalledWith('Hello', expect.any(Object));
-  });
+let utter: {
+  onend?: () => void;
+  onerror?: (e: unknown) => void;
+} | null;
+const synth = {
+  speaking: false,
+  paused: false,
+  speak: vi.fn((u: typeof utter) => {
+    utter = u;
+  }),
+  cancel: vi.fn(),
+  pause: vi.fn(),
+  resume: vi.fn(),
+  getVoices: vi.fn(() => [makeVoice({})]),
+  addEventListener: vi.fn(),
+};
 
-  it('does NOT speak when talkativeness is on-demand', () => {
-    mockSettings({ talkativeness: 'on-demand' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakAuto('Hello');
-    expect(speakSpy).not.toHaveBeenCalled();
+const fakeBus = { emit: vi.fn() };
+
+beforeEach(() => {
+  utter = null;
+  vi.stubGlobal('speechSynthesis', synth);
+  vi.stubGlobal(
+    'SpeechSynthesisUtterance',
+    class {
+      text: string;
+      voice: SpeechSynthesisVoice | null = null;
+      lang = '';
+      volume = 1;
+      rate = 1;
+      pitch = 1;
+      onend: (() => void) | null = null;
+      onerror: ((e: unknown) => void) | null = null;
+      constructor(t: string) {
+        this.text = t;
+      }
+    },
+  );
+  vi.stubGlobal('requestAnimationFrame', (cb: () => void) => {
+    cb();
+    return 1;
   });
+  vi.useFakeTimers();
+  synth.speak.mockClear();
+  synth.cancel.mockClear();
+  synth.resume.mockClear();
+  fakeBus.emit.mockClear();
 });
 
-describe('speakOnDemand — never gated by talkativeness (spec §5.4 no hard-mute)', () => {
-  it('speaks when talkativeness is helpful', () => {
-    mockSettings({ talkativeness: 'helpful' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakOnDemand('Hello');
-    expect(speakSpy).toHaveBeenCalledWith('Hello', expect.any(Object));
-  });
-
-  it('STILL speaks when talkativeness is on-demand (taps always work)', () => {
-    mockSettings({ talkativeness: 'on-demand' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakOnDemand('Hello');
-    expect(speakSpy).toHaveBeenCalledWith('Hello', expect.any(Object));
-  });
-
-  it('STILL speaks when talkativeness is chatty', () => {
-    mockSettings({ talkativeness: 'chatty' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
-    });
-    result.current.speakOnDemand('Hello');
-    expect(speakSpy).toHaveBeenCalledWith('Hello', expect.any(Object));
-  });
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
-describe('speakTile (regression)', () => {
-  it('flips its gate from ttsEnabled (removed) to user talkativeness', () => {
-    mockSettings({ talkativeness: 'helpful' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
+describe('WebSpeechSpeaker', () => {
+  it('resolves the speak() promise on utterance onend', async () => {
+    const speaker = new WebSpeechSpeaker(
+      baseSettings,
+      fakeBus as never,
+    );
+    const p = speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
     });
-    result.current.speakTile('A');
-    expect(speakSpy).toHaveBeenCalledWith('A', expect.any(Object));
+    utter?.onend?.();
+    await expect(p).resolves.toBeUndefined();
   });
 
-  it('does NOT speak when talkativeness is on-demand', () => {
-    mockSettings({ talkativeness: 'on-demand' });
-    const { result } = renderHook(() => useGameTTS(), {
-      wrapper: makeWrapper(),
+  it('rejects the in-flight promise with "cancelled" on cancel()', async () => {
+    const speaker = new WebSpeechSpeaker(
+      baseSettings,
+      fakeBus as never,
+    );
+    const p = speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
     });
-    result.current.speakTile('A');
-    expect(speakSpy).not.toHaveBeenCalled();
+    speaker.cancel();
+    await expect(p).rejects.toThrow('cancelled');
+  });
+
+  it('rejects with "speech-timeout" after the watchdog fires', async () => {
+    const speaker = new WebSpeechSpeaker(
+      baseSettings,
+      fakeBus as never,
+    );
+    const p = speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
+    });
+    vi.advanceTimersByTime(30_000);
+    await expect(p).rejects.toThrow('speech-timeout');
+  });
+
+  it('fails closed (throws LocalVoiceUnavailableError) when no local voice + useOfflineVoicesOnly: true', async () => {
+    synth.getVoices.mockReturnValueOnce([
+      makeVoice({ lang: 'fr-FR', localService: true }),
+    ]);
+    const speaker = new WebSpeechSpeaker(
+      baseSettings,
+      fakeBus as never,
+    );
+    const p = speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
+    });
+    await expect(p).rejects.toBeInstanceOf(LocalVoiceUnavailableError);
+    expect(fakeBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'lifecycle.tts.unavailable' }),
+    );
+  });
+
+  it('emits cloud-fallback and returns no voice when empty + useOfflineVoicesOnly: false', async () => {
+    synth.getVoices.mockReturnValueOnce([
+      makeVoice({ lang: 'fr-FR', localService: false }),
+    ]);
+    const speaker = new WebSpeechSpeaker(
+      { ...baseSettings, useOfflineVoicesOnly: false },
+      fakeBus as never,
+    );
+    const p = speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
+    });
+    utter?.onend?.();
+    await expect(p).resolves.toBeUndefined();
+    expect(fakeBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'lifecycle.tts.cloud-fallback' }),
+    );
+  });
+
+  it('calls synth.resume() before speaking when paused', () => {
+    synth.paused = true;
+    const speaker = new WebSpeechSpeaker(
+      baseSettings,
+      fakeBus as never,
+    );
+    void speaker.speak({
+      text: 'hi',
+      locale: 'en-AU',
+      voiceURI: undefined,
+    });
+    expect(synth.resume).toHaveBeenCalled();
+    synth.paused = false;
   });
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/components/answer-game/useGameTTS.test.tsx --reporter=verbose`
-Expected: FAIL — `speakAuto` / `speakOnDemand` do not exist; `speakTile` still gates on `config.ttsEnabled` (removed in Task 5).
+Run: `npx vitest run src/lib/lifecycle-tts/web-speech-speaker.test.ts --reporter=verbose`
+Expected: FAIL — `WebSpeechSpeaker` / `LocalVoiceUnavailableError` not exported.
 
-- [ ] **Step 3: Replace useGameTTS implementation**
+- [ ] **Step 3: Implement the adapter interfaces + error**
 
-Replace `src/components/answer-game/useGameTTS.ts` with:
+Create `src/lib/lifecycle-tts/speaker.ts` (spec §7.1):
 
 ```ts
-import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useSettings } from '@/db/hooks/useSettings';
-import { isSpeechActive, speak } from '@/lib/speech/SpeechOutput';
+// src/lib/lifecycle-tts/speaker.ts
+import type { TtsSettings } from './types';
+import type { SoundKey } from '@/lib/audio/AudioFeedback';
 
-export interface GameTTS {
-  speakTile: (label: string) => void;
-  speakAuto: (text: string) => void;
-  speakOnDemand: (text: string) => void;
+export interface SpeechUtterance {
+  text: string;
+  locale: string;
+  voiceURI: string | undefined;
 }
 
-export const useGameTTS = (): GameTTS => {
-  const { settings } = useSettings();
-  const { i18n } = useTranslation();
+export interface Speaker {
+  speak(utterance: SpeechUtterance): Promise<void>; // resolves on natural end
+  cancel(): void; // sync; rejects in-flight promise with 'cancelled'
+  updateSettings(next: TtsSettings): void; // for voice + volume + rate changes
+  dispose(): void; // cleanup timers + listeners
+}
 
-  const autoAllowed = settings.talkativeness !== 'on-demand';
+export interface SoundEffectRequest {
+  key: SoundKey; // matches AudioFeedback's SoundKey
+  volume: number; // 0..1, threaded from settings per-call
+}
 
-  const speechOpts = useCallback(
-    () => ({
-      rate: settings.speechRate ?? 1,
-      volume: settings.voiceVolume ?? 0.8,
-      voiceURI: settings.preferredVoiceURI,
-      lang: i18n.language,
-    }),
-    [
-      settings.speechRate,
-      settings.voiceVolume,
-      settings.preferredVoiceURI,
-      i18n.language,
-    ],
-  );
+export interface SoundEffectPlayer {
+  play(req: SoundEffectRequest): Promise<void>; // resolves on audio 'ended'
+  cancel(): void; // stops current; rejects in-flight
+}
+```
 
-  const speakTile = useCallback(
-    (label: string) => {
-      if (!autoAllowed) return; // Talkativeness gate (auto-speech).
-      if (isSpeechActive()) {
-        console.debug(`[TTS] speakTile("${label}") — busy, skipped`);
+Create `src/lib/lifecycle-tts/errors.ts` (spec §7.2):
+
+```ts
+// src/lib/lifecycle-tts/errors.ts
+export class LocalVoiceUnavailableError extends Error {
+  constructor(public readonly locale: string) {
+    super(
+      `No local voice available for locale '${locale}' under useOfflineVoicesOnly: true`,
+    );
+    this.name = 'LocalVoiceUnavailableError';
+  }
+}
+```
+
+- [ ] **Step 4: Implement `WebSpeechSpeaker`**
+
+Create `src/lib/lifecycle-tts/web-speech-speaker.ts` (spec §7.2 verbatim — the bus is injected so `pickVoice()` can emit the §5.7 signals; `subjectToken` brands the locale string):
+
+```ts
+// src/lib/lifecycle-tts/web-speech-speaker.ts
+import { LocalVoiceUnavailableError } from './errors';
+import type { Speaker, SpeechUtterance } from './speaker';
+import { subjectToken } from './types';
+import type { TtsSettings } from './types';
+import { safeGetVoices } from '@/lib/speech/safe-get-voices';
+import type { TypedGameEventBus } from '@/lib/game-event-bus';
+
+const SPEECH_WATCHDOG_MS = 30_000;
+const KEEPALIVE_INTERVAL_MS = 10_000;
+
+export class WebSpeechSpeaker implements Speaker {
+  private synth: SpeechSynthesis = window.speechSynthesis;
+  private voiceCache: Map<string, SpeechSynthesisVoice> = new Map();
+  private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private currentResolve: (() => void) | null = null;
+  private currentReject: ((err: Error) => void) | null = null;
+  private watchdogTimer: ReturnType<typeof setTimeout> | null = null;
+  private keepaliveTimer: ReturnType<typeof setInterval>;
+  private settings: TtsSettings;
+
+  constructor(
+    settings: TtsSettings,
+    private bus: TypedGameEventBus,
+  ) {
+    // Constructor now takes the bus too — pickVoice() emits
+    // lifecycle.tts.unavailable / lifecycle.tts.cloud-fallback per §5.7.
+    this.settings = settings;
+    this.warmVoiceCache();
+    this.keepaliveTimer = setInterval(
+      () => this.tickKeepalive(),
+      KEEPALIVE_INTERVAL_MS,
+    );
+  }
+
+  updateSettings(next: TtsSettings) {
+    this.settings = next;
+  }
+
+  private tickKeepalive() {
+    // Workaround for Chromium issue 40747712: speechSynthesis worker is GC'd
+    // after ~15s, freezing all subsequent speak() calls. Periodic pause+resume
+    // keeps it warm. Costs nothing if not speaking.
+    if (this.synth.speaking) {
+      this.synth.pause();
+      this.synth.resume();
+    }
+  }
+
+  speak(utterance: SpeechUtterance): Promise<void> {
+    this.cancel(); // always own the channel
+    if (this.synth.paused) this.synth.resume(); // un-stick Chrome if needed
+
+    return new Promise<void>((resolve, reject) => {
+      const u = new SpeechSynthesisUtterance(utterance.text);
+      // pickVoice() throws LocalVoiceUnavailableError under useOfflineVoicesOnly: true
+      // with no candidates — let it propagate to reject this promise (§5.7 step 5).
+      let voice: SpeechSynthesisVoice | undefined;
+      try {
+        voice = this.pickVoice(utterance.locale, utterance.voiceURI);
+      } catch (err) {
+        reject(err as Error);
         return;
       }
-      speak(label, speechOpts());
-    },
-    [autoAllowed, speechOpts],
-  );
+      if (voice) {
+        u.voice = voice;
+        u.lang = voice.lang; // REQUIRED on Chrome Android — voice alone is not enough
+      } else {
+        // useOfflineVoicesOnly: false, ladder step 6 — browser picks default;
+        // cloud-fallback event already emitted by pickVoice().
+        u.lang = utterance.locale;
+      }
+      // No `?? N` fallbacks — TtsSettings is Required<Pick<...>> (§5.1);
+      // pickTtsSettings() (§5.5) applies defaults at the boundary so every
+      // field is guaranteed defined here.
+      u.volume = this.settings.voiceVolume;
+      u.rate = this.settings.speechRate; // PRESERVE existing speechRate (range 0.5..2)
+      u.pitch = 1;
+      u.onend = () => this.finalize(resolve);
+      u.onerror = (e) =>
+        this.finalize(() =>
+          reject(new Error(e.error ?? 'speech-error')),
+        );
 
-  const speakAuto = useCallback(
-    (text: string) => {
-      if (!autoAllowed) return; // Talkativeness gate (auto-speech).
-      speak(text, speechOpts());
-    },
-    [autoAllowed, speechOpts],
-  );
+      this.currentUtterance = u;
+      this.currentResolve = resolve;
+      this.currentReject = reject;
 
-  const speakOnDemand = useCallback(
-    (text: string) => {
-      // NO talkativeness gate — taps always speak per spec §5.4 (no hard-mute).
-      // OS volume slider is the user's escape hatch for "completely silent".
-      speak(text, speechOpts());
-    },
-    [speechOpts],
-  );
-
-  return { speakTile, speakAuto, speakOnDemand };
-};
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `npx vitest run src/components/answer-game/useGameTTS.test.tsx --reporter=verbose`
-Expected: PASS — all new tests green; legacy `speakPrompt` callers (if any survived Task 5) become typecheck errors.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/components/answer-game/useGameTTS.ts src/components/answer-game/useGameTTS.test.tsx
-git commit -m "feat(answer-game): useGameTTS — speakAuto gated by user talkativeness; speakOnDemand ungated (spec §5.4 no hard-mute)"
-```
-
----
-
-## Task 7: useLifecycleTts hook
-
-This is the centerpiece — subscribes to the unified `lifecycle.speak` bus event, resolves verbosity + copy, interpolates with `AnswerGameContext` snapshot, and calls `speak()`. Also exposes a `speakOnDemand(event)` callable for AudioButton / question onClick.
-
-**Gating model:**
-
-- **Auto-speech (bus subscriber):** gated by **user-level** `useSettings().settings.talkativeness !== 'on-demand'` (spec §6.1 `autoAllowed` guard). The hook also sends `SETTINGS_CHANGED` to the XState actor per spec §5.5 when settings change, so the machine re-evaluates verbosity on the fly.
-- **On-demand (`speakOnDemand`):** **never gated by `talkativeness`** — taps always speak per §5.4 (no hard-mute). The only gates are voice availability (integrate with [`VoiceUnavailableDialogProvider`](../../src/providers/VoiceUnavailableDialogProvider.tsx) from PR [#409](https://github.com/leocaseiro/base-skill/pull/409), see spec §7.2's forward-looking note) and active settings via `useSettings()`. OS volume slider is the user's escape hatch.
-
-**Files:**
-
-- Create: `src/lib/lifecycle-tts/useLifecycleTts.tsx`
-- Create: `src/lib/lifecycle-tts/useLifecycleTts.test.tsx`
-
-- [ ] **Step 1: Write the failing test**
-
-Create `src/lib/lifecycle-tts/useLifecycleTts.test.tsx`. The test matrix is the three Talkativeness values × {auto-speech via bus, tap via speakOnDemand}:
-
-```tsx
-import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import { useLifecycleTts } from './useLifecycleTts';
-import type { GameTTSConfig, Talkativeness } from './types';
-import type { ReactNode } from 'react';
-
-vi.mock('@/lib/speech/SpeechOutput', () => ({
-  speak: vi.fn(),
-}));
-import { speak as speakMock } from '@/lib/speech/SpeechOutput';
-
-vi.mock('@/db/hooks/useSettings', () => ({
-  useSettings: vi.fn(),
-}));
-import { useSettings } from '@/db/hooks/useSettings';
-
-const mockTalkativeness = (talkativeness: Talkativeness) => {
-  (useSettings as ReturnType<typeof vi.fn>).mockReturnValue({
-    settings: {
-      talkativeness,
-      speechRate: 1,
-      voiceVolume: 0.8,
-      preferredVoiceURI: undefined,
-      activeLanguage: 'en-AU',
-      processLocally: true,
-    },
-    update: vi.fn(),
-  });
-};
-
-// Minimal test-only AnswerGameContext provider — supplies gameId, per-game
-// `gradeBand`, currentRound for interpolation, and the game's tts block.
-const makeWrapper = (contextValue: {
-  gradeBand: 'k';
-  gameId: 'word-spell';
-  tts: GameTTSConfig;
-}) => {
-  return ({ children }: { children: ReactNode }) => (
-    <TestAnswerGameContext value={contextValue}>
-      {children}
-    </TestAnswerGameContext>
-  );
-};
-
-const tts: GameTTSConfig = {
-  'round.start': {
-    tts: {
-      brief: 'tts.word-spell.round-start.brief',
-      full: 'tts.word-spell.round-start.full',
-    },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'brief',
-      'year3-4': 'brief',
-      'year5-6': 'brief',
-    },
-    default: 'full',
-  },
-};
-
-const wrapper = makeWrapper({
-  gradeBand: 'k',
-  gameId: 'word-spell',
-  tts,
-});
-
-describe('useLifecycleTts — auto-speech subscriber (gated by user talkativeness)', () => {
-  it('speaks when talkativeness is helpful', () => {
-    mockTalkativeness('helpful');
-    renderHook(() => useLifecycleTts(), { wrapper });
-    emitLifecycleSpeak('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-    expect(speakMock).toHaveBeenCalledWith(
-      expect.stringContaining('Spell the word'),
-      expect.any(Object),
-    );
-  });
-
-  it('speaks when talkativeness is chatty (more verbose template)', () => {
-    mockTalkativeness('chatty');
-    renderHook(() => useLifecycleTts(), { wrapper });
-    emitLifecycleSpeak('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('does NOT speak when talkativeness is on-demand (spec §6.1 autoAllowed guard)', () => {
-    mockTalkativeness('on-demand');
-    renderHook(() => useLifecycleTts(), { wrapper });
-    emitLifecycleSpeak('round.start');
-    expect(speakMock).not.toHaveBeenCalled();
-  });
-});
-
-describe('useLifecycleTts — speakOnDemand (NEVER gated by talkativeness, spec §5.4)', () => {
-  it('speaks when talkativeness is helpful', () => {
-    mockTalkativeness('helpful');
-    const { result } = renderHook(() => useLifecycleTts(), { wrapper });
-    result.current.speakOnDemand('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('STILL speaks when talkativeness is on-demand — taps always work (no hard-mute)', () => {
-    mockTalkativeness('on-demand');
-    const { result } = renderHook(() => useLifecycleTts(), { wrapper });
-    result.current.speakOnDemand('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('STILL speaks when talkativeness is chatty', () => {
-    mockTalkativeness('chatty');
-    const { result } = renderHook(() => useLifecycleTts(), { wrapper });
-    result.current.speakOnDemand('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('useLifecycleTts — settings reactivity', () => {
-  it('re-reads talkativeness when user changes the slider mid-session', () => {
-    mockTalkativeness('helpful');
-    const { rerender } = renderHook(() => useLifecycleTts(), {
-      wrapper,
-    });
-    emitLifecycleSpeak('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1);
-
-    mockTalkativeness('on-demand');
-    rerender();
-    emitLifecycleSpeak('round.start');
-    expect(speakMock).toHaveBeenCalledTimes(1); // not 2 — silenced after switch
-  });
-});
-```
-
-If the project doesn't already expose a test-only `AnswerGameContext` provider, create a thin one inline in the test file (or in a shared `lifecycle-tts/test-utils.tsx`) that supplies the context values the hook reads. `emitLifecycleSpeak` is a helper that calls `getGameEventBus().emit({ type: 'lifecycle.speak', lifecycleEvent, ...envelope })`.
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
-Expected: FAIL — `useLifecycleTts` not exported.
-
-- [ ] **Step 3: Implement the hook**
-
-Create `src/lib/lifecycle-tts/useLifecycleTts.tsx`:
-
-```tsx
-import { useCallback, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { resolveCopy, resolveVerbosity } from './resolve';
-import type { LifecycleEvent } from './types';
-import { useAnswerGameContext } from '@/components/answer-game/useAnswerGameContext';
-import { useSettings } from '@/db/hooks/useSettings';
-import { getGameEventBus } from '@/lib/game-event-bus';
-import { speak } from '@/lib/speech/SpeechOutput';
-import type { LifecycleSpeakEvent } from '@/types/game-events';
-
-export interface LifecycleTTS {
-  speakOnDemand: (event: LifecycleEvent) => void;
-}
-
-const buildInterpolationContext = (
-  ctx: ReturnType<typeof useAnswerGameContext>,
-): Record<string, string | number> => {
-  // Pulls per-game template variables from AnswerGameContext.
-  // Spec §9.6 + §9.7. Per-game required vars:
-  //   WordSpell:   {{word}}, {{gameName}}
-  //   NumberMatch: {{count}}, {{gameName}}
-  //   SortNumbers: {{direction}}, {{from}}, {{to}}, {{step}}, {{gameName}}
-  // M1 reads from currentRound + config; M2 may add more accessors.
-  const round = ctx.currentRound ?? {};
-  return {
-    gameName: ctx.config.gameId,
-    word: (round as { word?: string }).word ?? '',
-    count: (round as { value?: number }).value ?? 0,
-    direction: (round as { direction?: string }).direction ?? '',
-    from: (round as { from?: number }).from ?? 0,
-    to: (round as { to?: number }).to ?? 0,
-    step: (round as { step?: number }).step ?? 1,
-  };
-};
-
-export const useLifecycleTts = (): LifecycleTTS => {
-  const ctx = useAnswerGameContext();
-  const { settings } = useSettings();
-  const { t, i18n } = useTranslation();
-
-  // Refs so the bus handler sees current values without resubscribing.
-  const ctxRef = useRef(ctx);
-  ctxRef.current = ctx;
-  const settingsRef = useRef(settings);
-  settingsRef.current = settings;
-
-  const speakResolved = useCallback(
-    (event: LifecycleEvent, modeOverride?: 'full') => {
-      const current = ctxRef.current;
-      const currentSettings = settingsRef.current;
-      const ttsConfig = current.gameDefinition?.tts ?? undefined;
-
-      const verbosity =
-        modeOverride ??
-        resolveVerbosity({
-          tts: ttsConfig,
-          event,
-          gradeBand: current.config.gradeBand,
-          talkativeness: currentSettings.talkativeness ?? 'helpful',
-        });
-
-      const key = resolveCopy({
-        tts: ttsConfig,
-        event,
-        verbosity,
+      requestAnimationFrame(() => {
+        if (this.currentUtterance !== u) return; // cancelled in the meantime
+        this.synth.speak(u);
+        this.watchdogTimer = setTimeout(() => {
+          this.finalize(() => reject(new Error('speech-timeout')));
+          this.synth.cancel();
+        }, SPEECH_WATCHDOG_MS);
       });
-      if (!key) return;
-
-      const interpolated = t(key, buildInterpolationContext(current));
-      const opts = {
-        rate: currentSettings.speechRate ?? 1,
-        volume: currentSettings.voiceVolume ?? 0.8,
-        voiceURI: currentSettings.preferredVoiceURI,
-        lang: i18n.language,
-      };
-      speak(interpolated, opts);
-    },
-    [t, i18n.language],
-  );
-
-  // Subscribe once; the handler reads fresh state from refs.
-  // Auto-speech is gated by user-level talkativeness (spec §6.1 autoAllowed).
-  useEffect(() => {
-    const bus = getGameEventBus();
-    const unsub = bus.subscribe('lifecycle.speak', (e) => {
-      const autoAllowed =
-        (settingsRef.current.talkativeness ?? 'helpful') !==
-        'on-demand';
-      if (!autoAllowed) return;
-      const { lifecycleEvent } = e as LifecycleSpeakEvent;
-      speakResolved(lifecycleEvent);
     });
-    return unsub;
-  }, [speakResolved]);
+  }
 
-  // On-demand: NEVER gated by talkativeness (spec §5.4 no hard-mute).
-  // Future integration with VoiceUnavailableDialogProvider (PR #409 / spec §7.2)
-  // is the only on-demand gate — when no voice is available, surface the dialog
-  // instead of silently no-op'ing.
-  const speakOnDemand = useCallback(
-    (event: LifecycleEvent) => {
-      // Always 'full' for on-demand — spec §9.3 ("speaker tap default is helpful
-      // variant but full mode" — the resolver picks helpful template at full verbosity).
-      speakResolved(event, 'full');
-    },
-    [speakResolved],
-  );
+  cancel(): void {
+    if (this.watchdogTimer) clearTimeout(this.watchdogTimer);
+    this.watchdogTimer = null;
+    if (!this.currentUtterance) {
+      this.synth.cancel(); // defensive — clear stale browser-side queue
+      return;
+    }
+    this.currentUtterance.onend = null;
+    this.currentUtterance.onerror = null;
+    const reject = this.currentReject;
+    this.currentUtterance = null;
+    this.currentResolve = null;
+    this.currentReject = null;
+    this.synth.cancel();
+    if (reject) reject(new Error('cancelled'));
+  }
 
-  return { speakOnDemand };
-};
-```
+  private finalize(done: () => void) {
+    if (this.watchdogTimer) clearTimeout(this.watchdogTimer);
+    this.watchdogTimer = null;
+    this.currentUtterance = null;
+    this.currentResolve = null;
+    this.currentReject = null;
+    done();
+  }
 
-**Note on `gameDefinition` on context.** `useLifecycleTts` needs the active game's `definition.tts` block. Three options for sourcing it:
+  dispose() {
+    clearInterval(this.keepaliveTimer);
+    this.cancel();
+  }
 
-1. **(Preferred)** Extend `useAnswerGameContext` to expose the resolved `GameDefinition` for the active game. The XState engine already needs the definition (passed to `useGameEngine`), so threading it through the context is a small change.
-2. Look up via a `gameRegistry` (a `Record<gameId, GameDefinition>` exported from `src/games/index.ts`). Simpler but couples the hook to a global registry.
-3. Pass the `tts` block in via the route component (e.g. `<UseLifecycleTTSProvider tts={numberMatchDefinition.tts} />`). Most explicit but adds boilerplate.
+  private warmVoiceCache() {
+    const load = () => {
+      const voices = safeGetVoices(this.synth); // existing util src/lib/speech/safe-get-voices.ts
+      this.voiceCache.clear();
+      voices.forEach((v) =>
+        this.voiceCache.set(`${v.lang}::${v.name}`, v),
+      );
+    };
+    load();
+    this.synth.addEventListener('voiceschanged', load);
+  }
 
-Pick option 1 during implementation (smallest code change, fewest moving parts). If `useAnswerGameContext` doesn't already accept a `gameDefinition` prop on its provider, this task includes that wiring change in `AnswerGameProvider.tsx`.
-
-**Settings reactivity** (spec §5.5): when the user moves the Talkativeness slider, RxDB pushes the new settings doc through `useSettings()`; React re-renders the Provider; the refs in this hook update to the new value before the next bus event. No subscription churn — the bus subscription is stable across settings changes. This matches the spec's "actor receives `SETTINGS_CHANGED`" pattern (we forward fresh settings via refs rather than dispatching to a separate actor in M1; the XState actor in spec §6.1 lands in a follow-up PR that promotes this hook into a full Provider).
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
-Expected: PASS — all seven cases green.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/lib/lifecycle-tts/useLifecycleTts.tsx src/lib/lifecycle-tts/useLifecycleTts.test.tsx src/components/answer-game/useAnswerGameContext.ts src/components/answer-game/AnswerGameProvider.tsx
-git commit -m "feat(lifecycle-tts): useLifecycleTts gated by user talkativeness; speakOnDemand always speaks (spec §5.4)"
-```
-
----
-
-## Task 8: Mount useLifecycleTts in the active route
-
-`useLifecycleTts` is a singleton subscriber per active game — it must be mounted exactly once per session. The natural mount point is the game route or `AnswerGameProvider`.
-
-**Files:**
-
-- Modify: `src/routes/$locale/_app/game/$gameId.tsx` OR `src/components/answer-game/AnswerGameProvider.tsx` (pick whichever already wraps the game UI)
-
-- [ ] **Step 1: Write the failing test**
-
-Add to the chosen file's existing test (e.g. `AnswerGameProvider.test.tsx`):
-
-```ts
-it('emits lifecycle.speak → speak() called once when user talkativeness !== on-demand', async () => {
-  // Render with mocked useSettings → talkativeness: 'helpful'; emit lifecycle.speak; assert speak was called.
-  // Update mock → talkativeness: 'on-demand'; rerender; emit; assert speak was NOT called.
-});
-```
-
-Expected: FAIL — there's no subscriber mounted yet.
-
-- [ ] **Step 2: Mount the hook**
-
-In `AnswerGameProvider.tsx`, add a child component that mounts the hook:
-
-```tsx
-const LifecycleTTSBridge = (): null => {
-  useLifecycleTts();
-  return null;
-};
-
-// Inside AnswerGameProvider's JSX:
-<AnswerGameContext.Provider value={...}>
-  <LifecycleTTSBridge />
-  {children}
-</AnswerGameContext.Provider>
-```
-
-This guarantees a single subscriber per game session and the hook lives inside the context it needs.
-
-- [ ] **Step 3: Run tests to verify they pass**
-
-Run: `npx vitest run src/components/answer-game/AnswerGameProvider.test.tsx --reporter=verbose`
-Expected: PASS.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/components/answer-game/AnswerGameProvider.tsx src/components/answer-game/AnswerGameProvider.test.tsx
-git commit -m "feat(answer-game): mount useLifecycleTts subscriber in AnswerGameProvider"
-```
-
----
-
-## Task 8.5: Emit `lifecycle.tts.played` after each successful speak (SRS recorder producer — G-4)
-
-Per spec §6.7 + §13.1.C #16 lock, every successful `speak()` resolution emits a `lifecycle.tts.played` bus event. The **SRS recorder** ([#364](https://github.com/leocaseiro/base-skill/issues/364), separate plan) subscribes to this event as its M1 attempt-context signal. This plan is the **producer** — the recorder is built in #364.
-
-**Files:**
-
-- Modify: `src/lib/lifecycle-tts/useLifecycleTts.tsx` (extend the hook from Task 7)
-- Modify: `src/lib/lifecycle-tts/useLifecycleTts.test.tsx`
-- Modify: `src/types/game-events.ts` (add `LifecycleTtsPlayedEvent` interface per spec §4.3)
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `useLifecycleTts.test.tsx`:
-
-```tsx
-describe('useLifecycleTts — emits lifecycle.tts.played for SRS', () => {
-  it('emits lifecycle.tts.played after successful auto-speech', async () => {
-    mockTalkativeness('helpful');
-    renderHook(() => useLifecycleTts(), { wrapper });
-
-    const playedEvents: LifecycleTtsPlayedEvent[] = [];
-    const unsub = getGameEventBus().subscribe(
-      'lifecycle.tts.played',
-      (e) => playedEvents.push(e as LifecycleTtsPlayedEvent),
+  private pickVoice(
+    locale: string,
+    voiceURI: string | undefined,
+  ): SpeechSynthesisVoice | undefined {
+    // Step 2: filter to local-only voices when useOfflineVoicesOnly: true.
+    // Treat `localService !== false` as "may be local" (Firefox returns
+    // undefined for the field — fail open per §5.7 note).
+    const candidates = [...this.voiceCache.values()].filter((v) =>
+      this.settings.useOfflineVoicesOnly
+        ? v.localService !== false
+        : true,
     );
-
-    emitLifecycleSpeak('round.start');
-    await waitFor(() => expect(speakMock).toHaveBeenCalled());
-
-    // Simulate speak() resolving (mock returns undefined immediately for M1).
-    expect(playedEvents).toHaveLength(1);
-    expect(playedEvents[0]).toMatchObject({
-      type: 'lifecycle.tts.played',
-      lifecycleEvent: 'round.start',
-      source: 'auto',
-      variant: 'helpful',
+    // Step 1: explicit voiceURI match with lang-prefix sanity check.
+    if (voiceURI) {
+      const exact = candidates.find(
+        (v) =>
+          v.voiceURI === voiceURI &&
+          v.lang.startsWith(locale.split('-')[0]),
+      );
+      if (exact) return exact;
+    }
+    // Steps 3-4: exact locale, then language-prefix match.
+    const localeMatch =
+      candidates.find((v) => v.lang === locale) ??
+      candidates.find((v) => v.lang.startsWith(locale.split('-')[0]));
+    if (localeMatch) return localeMatch;
+    // Step 5: privacy-mode empty set — fail closed.
+    if (this.settings.useOfflineVoicesOnly) {
+      this.bus.emit({
+        type: 'lifecycle.tts.unavailable',
+        subject: subjectToken(locale),
+      });
+      throw new LocalVoiceUnavailableError(locale);
+    }
+    // Step 6: cloud-fallback path — emit signal, return undefined so
+    // browser picks its default voice. Best-effort.
+    this.bus.emit({
+      type: 'lifecycle.tts.cloud-fallback',
+      subject: subjectToken(locale),
     });
-    expect(playedEvents[0].durationMs).toBeGreaterThanOrEqual(0);
-
-    unsub();
-  });
-
-  it('emits lifecycle.tts.played after on-demand tap', async () => {
-    mockTalkativeness('on-demand');
-    const { result } = renderHook(() => useLifecycleTts(), { wrapper });
-
-    const playedEvents: LifecycleTtsPlayedEvent[] = [];
-    const unsub = getGameEventBus().subscribe(
-      'lifecycle.tts.played',
-      (e) => playedEvents.push(e as LifecycleTtsPlayedEvent),
-    );
-
-    result.current.speakOnDemand('round.start');
-    await waitFor(() => expect(speakMock).toHaveBeenCalled());
-
-    expect(playedEvents).toHaveLength(1);
-    expect(playedEvents[0].source).toBe('user');
-    unsub();
-  });
-});
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
-Expected: FAIL — no `lifecycle.tts.played` emission wired.
-
-- [ ] **Step 3: Add the `LifecycleTtsPlayedEvent` interface**
-
-In `src/types/game-events.ts`, add per spec §4.3:
-
-```ts
-export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
-  type: 'lifecycle.tts.played';
-  lifecycleEvent: LifecycleEvent;
-  subject?: string | number;
-  source: 'auto' | 'user';
-  variant: Talkativeness;
-  durationMs: number;
+    return undefined;
+  }
 }
 ```
 
-Add `'lifecycle.tts.played'` to the `GameEventType` union.
+Browser-quirk mitigations summary (spec §7.2):
 
-- [ ] **Step 4: Wire the emission in `useLifecycleTts`**
+- Chromium 40747712 — synth freezes after ~15s → `tickKeepalive()` pause+resume every 10s while speaking.
+- Chrome Android — `voice` alone doesn't apply locale → `u.lang = voice.lang` always set when voice is picked.
+- `onend` never fires on some Linux/Chrome builds → `SPEECH_WATCHDOG_MS = 30000` force-finalize timer.
+- Chrome — cancel→speak too fast silently drops → `requestAnimationFrame` defers `synth.speak()` one frame.
+- `getVoices()` returns `[]` before `voiceschanged` → `warmVoiceCache()` + `voiceschanged` listener via `safeGetVoices`.
+- iOS Brave returns broken voice objects → `safeGetVoices()` filters them (already on master).
+- Stale handlers fire after unmount → `finalize()` clears all listeners; `dispose()` clears keepalive.
 
-In `speakResolved`, capture the start time, call `speak()`, then emit on success. M1 uses a fire-and-forget pattern (the speak callable in `src/lib/speech/SpeechOutput.ts` returns synchronously today — the spec §6 XState actor will use a `Promise<void>` per `Speaker.speak` and emit on `onDone`). For M1, emit right after `speak()` returns:
+The bus emits at the §5.7 ladder are how M1 integrates with PR #409's `VoiceUnavailableDialogProvider`: the speaker emits `lifecycle.tts.unavailable`; the `useLifecycleTtsUnavailableHandler` hook (Task 9) subscribes and drives the existing AlertDialog. The speaker never owns a dialog.
 
-```ts
-const speakResolved = useCallback(
-  (
-    event: LifecycleEvent,
-    modeOverride?: 'full',
-    source: 'auto' | 'user' = 'auto',
-  ) => {
-    const current = ctxRef.current;
-    const currentSettings = settingsRef.current;
-    // ... resolve verbosity + interpolation (unchanged) ...
+- [ ] **Step 5: Run test to verify it passes**
 
-    const enqueuedAt = Date.now();
-    speak(interpolated, opts);
-
-    // Emit lifecycle.tts.played for SRS recorder (G-4) per spec §6.7.
-    getGameEventBus().emit({
-      type: 'lifecycle.tts.played',
-      lifecycleEvent: event,
-      source,
-      variant: currentSettings.talkativeness ?? 'helpful',
-      durationMs: Date.now() - enqueuedAt,
-      gameId: current.config.gameId,
-      sessionId: current.sessionId ?? 'unknown',
-      profileId: current.profileId ?? 'default',
-      roundIndex: current.roundIndex ?? 0,
-      timestamp: Date.now(),
-    });
-  },
-  [t, i18n.language],
-);
-```
-
-Update the bus subscriber and `speakOnDemand` callers to pass `'auto'` / `'user'`:
-
-```ts
-// Auto-speech (bus subscriber):
-speakResolved(lifecycleEvent, undefined, 'auto');
-
-// On-demand:
-speakResolved(event, 'full', 'user');
-```
-
-**Note on `durationMs`:** the M1 hook emits immediately after calling `speak()` (which returns synchronously today), so `durationMs` is effectively 0 in M1. The full duration tracking lands when the XState actor in the follow-up PR moves to a `Promise<void>` Speaker.speak() and emits on `onDone`. SRS recorder #364 must handle `durationMs: 0` as "duration unknown" until the actor PR lands.
-
-- [ ] **Step 5: Run tests to verify they pass**
-
-Run: `npx vitest run src/lib/lifecycle-tts/useLifecycleTts.test.tsx --reporter=verbose`
-Expected: PASS.
+Run: `npx vitest run src/lib/lifecycle-tts/web-speech-speaker.test.ts --reporter=verbose`
+Expected: PASS — all Speaker cases green.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/lib/lifecycle-tts/useLifecycleTts.tsx src/lib/lifecycle-tts/useLifecycleTts.test.tsx src/types/game-events.ts
-git commit -m "feat(lifecycle-tts): emit lifecycle.tts.played after speak() — SRS recorder producer (spec §6.7)"
+git add src/lib/lifecycle-tts/speaker.ts src/lib/lifecycle-tts/errors.ts src/lib/lifecycle-tts/web-speech-speaker.ts src/lib/lifecycle-tts/web-speech-speaker.test.ts
+git commit -m "feat(lifecycle-tts): WebSpeechSpeaker adapter + Chrome watchdogs + offline-voice ladder (spec §7.1, §7.2)"
+```
+
+---
+
+## Task 7: `HtmlAudioSoundEffectPlayer` — sound-effect adapter
+
+The actor's second `invoke`d adapter. Plays SFX clips via a fresh `<audio>` element, resolving on `ended` and rejecting on `cancel()` — the promise semantics the machine's parallel SFX channel needs.
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/html-audio-sound-effect-player.ts`
+- Create: `src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts` (spec §12.1 sound-effect inventory: resolve on `ended`, reject on `error`, cancel mid-play rejects, volume threading):
+
+```ts
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HtmlAudioSoundEffectPlayer } from './html-audio-sound-effect-player';
+
+class FakeAudio {
+  volume = 1;
+  currentTime = 0;
+  src: string;
+  listeners: Record<string, () => void> = {};
+  pause = vi.fn();
+  play = vi.fn(() => Promise.resolve());
+  constructor(src: string) {
+    this.src = src;
+  }
+  addEventListener(type: string, cb: () => void) {
+    this.listeners[type] = cb;
+  }
+  fire(type: string) {
+    this.listeners[type]?.();
+  }
+}
+
+let lastAudio: FakeAudio | null = null;
+
+beforeEach(() => {
+  lastAudio = null;
+  vi.stubGlobal(
+    'Audio',
+    vi.fn((src: string) => {
+      lastAudio = new FakeAudio(src);
+      return lastAudio;
+    }),
+  );
+});
+
+describe('HtmlAudioSoundEffectPlayer', () => {
+  it('resolves play() on audio "ended"', async () => {
+    const player = new HtmlAudioSoundEffectPlayer();
+    const p = player.play({ key: 'correct', volume: 0.5 });
+    await Promise.resolve();
+    lastAudio?.fire('ended');
+    await expect(p).resolves.toBeUndefined();
+  });
+
+  it('threads volume onto the audio element', async () => {
+    const player = new HtmlAudioSoundEffectPlayer();
+    void player.play({ key: 'correct', volume: 0.3 });
+    await Promise.resolve();
+    expect(lastAudio?.volume).toBe(0.3);
+  });
+
+  it('rejects play() on audio "error"', async () => {
+    const player = new HtmlAudioSoundEffectPlayer();
+    const p = player.play({ key: 'correct', volume: 0.5 });
+    await Promise.resolve();
+    lastAudio?.fire('error');
+    await expect(p).rejects.toThrow('sfx-error');
+  });
+
+  it('cancel() mid-play rejects the in-flight promise with "cancelled"', async () => {
+    const player = new HtmlAudioSoundEffectPlayer();
+    const p = player.play({ key: 'correct', volume: 0.5 });
+    await Promise.resolve();
+    player.cancel();
+    await expect(p).rejects.toThrow('cancelled');
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts --reporter=verbose`
+Expected: FAIL — module not found.
+
+- [ ] **Step 3: Implement the player**
+
+Create `src/lib/lifecycle-tts/html-audio-sound-effect-player.ts` (spec §7.3 verbatim):
+
+```ts
+// src/lib/lifecycle-tts/html-audio-sound-effect-player.ts
+import type { SoundEffectPlayer, SoundEffectRequest } from './speaker';
+import { SOUND_PATHS } from '@/lib/audio/AudioFeedback'; // reuse path map only
+
+export class HtmlAudioSoundEffectPlayer implements SoundEffectPlayer {
+  private currentAudio: HTMLAudioElement | null = null;
+  private currentReject: ((err: Error) => void) | null = null;
+
+  play(req: SoundEffectRequest): Promise<void> {
+    this.cancel();
+    return new Promise<void>((resolve, reject) => {
+      const audio = new Audio(SOUND_PATHS[req.key]);
+      audio.volume = req.volume;
+      this.currentAudio = audio;
+      this.currentReject = reject;
+      const cleanup = () => {
+        if (this.currentAudio === audio) {
+          this.currentAudio = null;
+          this.currentReject = null;
+        }
+      };
+      audio.addEventListener(
+        'ended',
+        () => {
+          cleanup();
+          resolve();
+        },
+        { once: true },
+      );
+      audio.addEventListener(
+        'error',
+        () => {
+          cleanup();
+          reject(new Error('sfx-error'));
+        },
+        { once: true },
+      );
+      void audio.play().catch((err) => {
+        cleanup();
+        reject(
+          err instanceof Error ? err : new Error('sfx-play-rejected'),
+        );
+      });
+    });
+  }
+
+  cancel(): void {
+    if (!this.currentAudio) return;
+    this.currentAudio.pause();
+    this.currentAudio.currentTime = 0;
+    const reject = this.currentReject;
+    this.currentAudio = null;
+    this.currentReject = null;
+    if (reject) reject(new Error('cancelled'));
+  }
+}
+```
+
+Reuses the `SOUND_PATHS` map from `src/lib/audio/AudioFeedback.ts` as the single source of truth for SFX asset paths. Does **not** reuse `playSound` / `queueSound` — those resolve on start, not end, and have limited cancel control. Give the legacy functions `@deprecated` JSDoc + a dev-mode `console.warn` so no new callers slip in (spec §7.3).
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts --reporter=verbose`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/html-audio-sound-effect-player.ts src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts
+git commit -m "feat(lifecycle-tts): HtmlAudioSoundEffectPlayer adapter (spec §7.3)"
+```
+
+---
+
+## Task 8: `lifecycleTtsMachine` — XState parallel speech + SFX actor
+
+The coordination core. A singleton machine with two **parallel** sub-machines (speech + soundEffect), a single-current/single-queued speech slot, priority + throttle replace policy, the settings-change drain rule, and `emitTtsPlayed` on speaker resolve with a real `durationMs`. This is where the talkativeness gating lives: `SPEAK_AUTO` is guarded by `autoAllowed` (`talkativeness !== 'on-demand'`, spec §6.1); `SPEAK_USER` is **never** guarded (taps always speak, §5.4).
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/lifecycle-tts-machine.ts`
+- Create: `src/lib/lifecycle-tts/lifecycle-tts-machine.test.ts`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `src/lib/lifecycle-tts/lifecycle-tts-machine.test.ts`. Matrix per spec §12.1 Machine inventory — `SPEAK_AUTO` gated by `autoAllowed`; `SPEAK_USER` always preempts; 5 rapid `turn.error` throttle to one speech; higher-priority `round.correct` preempts in-flight `turn.error`; bus `lifecycle.tts.played` emitted on resolve; `SETTINGS_CHANGED chatty → helpful` cancels + re-fires:
+
+```ts
+import { createActor } from 'xstate';
+import { describe, expect, it, vi } from 'vitest';
+import { lifecycleTtsMachine } from './lifecycle-tts-machine';
+import type { Speaker } from './speaker';
+import type { TtsSettings } from './types';
+
+const settings = (
+  talkativeness: TtsSettings['talkativeness'],
+): TtsSettings => ({
+  talkativeness,
+  useOfflineVoicesOnly: true,
+  speechRate: 1,
+  voiceVolume: 0.8,
+  soundEffectsVolume: 0.8,
+  preferredVoiceURI: '',
+  preferredVoiceDeviceId: '',
+  activeLanguage: 'en-AU',
+});
+
+const makeSpeaker = (): {
+  speaker: Speaker;
+  resolveCurrent: () => void;
+} => {
+  let resolveCurrent = () => {};
+  const speaker: Speaker = {
+    speak: () =>
+      new Promise<void>((res) => {
+        resolveCurrent = res;
+      }),
+    cancel: vi.fn(),
+    updateSettings: vi.fn(),
+    dispose: vi.fn(),
+  };
+  return { speaker, resolveCurrent };
+};
+
+const fakeBus = { emit: vi.fn(), subscribe: vi.fn() };
+
+describe('lifecycleTtsMachine — speech channel gating', () => {
+  it('SPEAK_AUTO speaks when talkativeness is helpful (autoAllowed)', () => {
+    const { speaker } = makeSpeaker();
+    const speakSpy = vi.spyOn(speaker, 'speak');
+    const actor = createActor(lifecycleTtsMachine, {
+      input: {
+        settings: settings('helpful'),
+        speaker,
+        bus: fakeBus as never,
+      },
+    }).start();
+    actor.send({
+      type: 'SPEAK_AUTO',
+      event: 'round.start',
+      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+    });
+    expect(speakSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('SPEAK_AUTO is suppressed when talkativeness is on-demand', () => {
+    const { speaker } = makeSpeaker();
+    const speakSpy = vi.spyOn(speaker, 'speak');
+    const actor = createActor(lifecycleTtsMachine, {
+      input: {
+        settings: settings('on-demand'),
+        speaker,
+        bus: fakeBus as never,
+      },
+    }).start();
+    actor.send({
+      type: 'SPEAK_AUTO',
+      event: 'round.start',
+      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+    });
+    expect(speakSpy).not.toHaveBeenCalled();
+  });
+
+  it('SPEAK_USER always speaks even when talkativeness is on-demand (no hard-mute)', () => {
+    const { speaker } = makeSpeaker();
+    const speakSpy = vi.spyOn(speaker, 'speak');
+    const actor = createActor(lifecycleTtsMachine, {
+      input: {
+        settings: settings('on-demand'),
+        speaker,
+        bus: fakeBus as never,
+      },
+    }).start();
+    actor.send({
+      type: 'SPEAK_USER',
+      event: 'round.start',
+      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+      variant: 'helpful',
+    });
+    expect(speakSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('emits lifecycle.tts.played on the bus when the speaker resolves', async () => {
+    const { speaker, resolveCurrent } = makeSpeaker();
+    fakeBus.emit.mockClear();
+    const actor = createActor(lifecycleTtsMachine, {
+      input: {
+        settings: settings('helpful'),
+        speaker,
+        bus: fakeBus as never,
+      },
+    }).start();
+    actor.send({
+      type: 'SPEAK_AUTO',
+      event: 'round.start',
+      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+    });
+    resolveCurrent();
+    await Promise.resolve();
+    expect(fakeBus.emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lifecycle.tts.played',
+        lifecycleEvent: 'round.start',
+        source: 'auto',
+        variant: 'helpful',
+      }),
+    );
+  });
+});
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/lifecycle-tts/lifecycle-tts-machine.test.ts --reporter=verbose`
+Expected: FAIL — `lifecycleTtsMachine` not exported.
+
+- [ ] **Step 3: Implement the machine**
+
+Create `src/lib/lifecycle-tts/lifecycle-tts-machine.ts`. The machine skeleton is spec §6.1 verbatim; fill the guard/action bodies from the §6.3 single-current/single-queued slot, the §6.4 priority/throttle tables + `resolveAndDispatchSpeech` algorithm, the §6.6 settings-change drain rule, and the §6.7 `emitTtsPlayed`:
+
+```ts
+// src/lib/lifecycle-tts/lifecycle-tts-machine.ts
+import { setup, fromPromise, assign } from 'xstate';
+import type { Speaker, SpeechUtterance } from './speaker';
+import type {
+  LifecycleEvent,
+  LifecycleSubject,
+  Talkativeness,
+  TtsSettings,
+} from './types';
+import type { TypedGameEventBus } from '@/lib/game-event-bus';
+
+export const lifecycleTtsMachine = setup({
+  types: {} as {
+    context: TtsContext;
+    input: { settings: TtsSettings; speaker: Speaker; bus: TypedGameEventBus }; // speaker + bus injected by Provider (§7.2.1)
+    events:
+      | {
+          type: 'SPEAK_AUTO';
+          event: LifecycleEvent;
+          payload: SpeakPayload;
+          subject?: LifecycleSubject;
+        }
+      | {
+          type: 'SPEAK_USER';
+          event: LifecycleEvent;
+          payload: SpeakPayload;
+          variant: Talkativeness;
+          subject?: LifecycleSubject;
+        }
+      | { type: 'SETTINGS_CHANGED'; settings: TtsSettings }
+      | { type: 'CANCEL' };
+  },
+  actors: {
+    speaker: fromPromise<void, SpeechUtterance>(
+      async ({ input }) => speakerAdapter.speak(input),
+    ), // speaker from context (§7.2.1)
+    soundEffectPlayer: fromPromise<void, SoundEffectRequest>(
+      async ({ input }) => soundEffectAdapter.play(input),
+    ),
+  },
+  guards: {
+    autoAllowed: ({ context }) =>
+      context.settings.talkativeness !== 'on-demand',
+    speechNotThrottled: ({ context, event }) => /* see §6.4 */,
+    sfxNotThrottled: ({ context, event }) => /* see §6.4 */,
+    hasQueuedSpeech: ({ context }) => context.queuedSpeech !== null,
+    speechHasBinding: ({ context, event }) =>
+      /* resolved binding has tts != null */,
+    sfxHasBinding: ({ context, event }) =>
+      /* resolved binding has soundEffect != null */,
+  },
+}).createMachine({
+  id: 'lifecycleTts',
+  context: ({ input }) => ({
+    settings: input.settings,
+    currentSpeech: null,
+    queuedSpeech: null,
+    currentSoundEffect: null,
+    lastSpeechEnqueueAt: {},
+    lastSoundEffectAt: {},
+  }),
+  type: 'parallel',
+  states: {
+    speech: {
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            SPEAK_AUTO: {
+              guard: 'autoAllowed',
+              actions: 'resolveAndDispatchSpeech',
+              target: 'speaking',
+            },
+            SPEAK_USER: {
+              actions: 'resolveAndDispatchSpeech',
+              target: 'speaking',
+            },
+          },
+        },
+        speaking: {
+          invoke: {
+            src: 'speaker',
+            input: ({ context }) => context.currentSpeech!,
+            onDone: [
+              {
+                guard: 'hasQueuedSpeech',
+                actions: ['emitTtsPlayed', 'promoteQueued'],
+                target: 'speaking',
+                reenter: true,
+              },
+              {
+                actions: ['emitTtsPlayed', 'clearSpeech'],
+                target: 'idle',
+              },
+            ],
+            onError: { actions: 'clearSpeech', target: 'idle' },
+          },
+          on: {
+            SPEAK_AUTO: {
+              actions: 'resolveAndDispatchSpeech' /* may preempt or queue per §6.4 */,
+            },
+            SPEAK_USER: {
+              actions: ['cancelSpeech', 'resolveAndDispatchSpeech'],
+              target: 'speaking',
+              reenter: true,
+            },
+            CANCEL: {
+              actions: ['cancelSpeech', 'clearSpeech'],
+              target: 'idle',
+            },
+          },
+        },
+      },
+    },
+    soundEffect: {
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            SPEAK_AUTO: {
+              guard: 'sfxHasBinding',
+              actions: 'dispatchSoundEffect',
+              target: 'playing',
+            },
+            SPEAK_USER: {
+              guard: 'sfxHasBinding',
+              actions: 'dispatchSoundEffect',
+              target: 'playing',
+            },
+          },
+        },
+        playing: {
+          invoke: {
+            src: 'soundEffectPlayer',
+            input: ({ context }) => context.currentSoundEffect!,
+            onDone: { actions: 'clearSoundEffect', target: 'idle' },
+            onError: { actions: 'clearSoundEffect', target: 'idle' },
+          },
+          on: {
+            SPEAK_AUTO: {
+              guard: 'sfxBindingAndNotThrottled',
+              actions: ['cancelSoundEffect', 'dispatchSoundEffect'],
+              target: 'playing',
+              reenter: true,
+            },
+            SPEAK_USER: {
+              guard: 'sfxHasBinding',
+              actions: ['cancelSoundEffect', 'dispatchSoundEffect'],
+              target: 'playing',
+              reenter: true,
+            },
+            CANCEL: {
+              actions: ['cancelSoundEffect', 'clearSoundEffect'],
+              target: 'idle',
+            },
+          },
+        },
+      },
+    },
+  },
+  on: {
+    SETTINGS_CHANGED: { actions: 'handleSettingsChange' },
+  },
+});
+```
+
+**Single-current + single-queued speech slot (§6.3).** Speech has one current + at most one queued utterance:
+
+- `idle` → play immediately.
+- `speaking`, queue empty → enqueue (waits for current to finish).
+- `speaking`, queue full, same priority → replace queued slot (latest within-priority wins for same event type).
+- `speaking`, queue full, higher priority → replace current — cancel and play new.
+- `SPEAK_USER` always preempts (cancels current, drops queue, plays now).
+- SFX has **no queue** — only throttle. Latest SFX request within the throttle window is dropped; outside it, cancel current SFX and play new.
+
+**Priority + throttle tables (§6.4).** Define these module-level maps and consume them in `resolveAndDispatchSpeech` / the SFX throttle guard:
+
+```ts
+export const eventPriority: Record<LifecycleEvent, number> = {
+  'turn.action': 0,
+  'turn.error': 1,
+  'mini-game.skip': 1,
+  'round.error': 2,
+  'round.start': 2,
+  'round.idle': 2,
+  'round.advance': 2,
+  'turn.correct': 2,
+  'game.prepare': 2,
+  'game.start': 2,
+  'game.resume': 2,
+  'mini-game.start': 2,
+  'mini-game.complete': 2,
+  'round.correct': 3,
+  'round.celebrate': 3,
+  'level.complete': 3,
+  'game.end': 3,
+};
+
+export const speechThrottleMs: Record<LifecycleEvent, number> = {
+  'turn.action': 0,
+  'turn.error': 800,
+  'turn.correct': 400,
+  'round.error': 1500,
+  'round.idle': 0,
+  // remaining events: 0
+} as const satisfies Record<LifecycleEvent, number>;
+
+export const soundEffectThrottleMs: Record<LifecycleEvent, number> = {
+  'turn.action': 50,
+  'turn.error': 150,
+  'turn.correct': 100,
+  'round.error': 400,
+  'round.correct': 400,
+  // remaining events: 0
+} as const satisfies Record<LifecycleEvent, number>;
+```
+
+`resolveAndDispatchSpeech` algorithm (§6.4):
+
+1. Look up `lastSpeechEnqueueAt[event]`. If `now - last < speechThrottleMs[event]`, drop.
+2. Compute incoming priority.
+3. If `incoming.priority > current.priority` → cancel current, set current = incoming, drop queued.
+4. Else if `incoming.priority > queued?.priority` → replace queued.
+5. Else if `incoming.priority === queued?.priority && same event type` → replace queued.
+6. Else → drop incoming.
+7. Update `lastSpeechEnqueueAt[event] = now`.
+
+`SPEAK_USER` skips the priority comparison: always preempts, always uses the caller's variant.
+
+**Settings-change drain rule (§6.6).** On `SETTINGS_CHANGED` where `talkativeness` actually changes, the `handleSettingsChange` action also runs `forwardSettings` (calls `speaker.updateSettings(next)` so the speaker is a pure adapter, §7.2.1) and then:
+
+1. If `currentSpeech.source === 'auto'`:
+   - Cancel current speech.
+   - If new talkativeness !== `'on-demand'`: re-fire `SPEAK_AUTO` with the same event + payload + subject (new variant resolves from new settings).
+2. If `currentSpeech.source === 'user'`: let it finish (caller's variant choice is sacred).
+3. Drop queued speech in all cases (stale variant).
+
+**`emitTtsPlayed` (§6.7).** After each successful speaker resolve, the action emits on the bus with `subject` coerced to `null` and a real elapsed `durationMs`:
+
+```ts
+bus.emit({
+  type: 'lifecycle.tts.played',
+  lifecycleEvent: utterance.event,
+  subject: utterance.subject ?? null, // boundary coercion — never undefined
+  source: utterance.source, // 'auto' | 'user'
+  variant: utterance.variant,
+  durationMs: now - utterance.enqueuedAt,
+  gameId,
+  sessionId,
+  profileId,
+  roundIndex,
+  timestamp: now,
+});
+```
+
+The `?? null` coercion stays inline at this single emit site — there is only one place `lifecycle.tts.played` is produced, so a `createTtsPlayedEvent()` factory would be premature. Read-side null discipline is centralized in `isSubjectMatch()` (§10.3). This signal also lets game machines gate transitions on speech completion (§10.2) and lets UI animations un-highlight in sync (§10.3).
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/lifecycle-tts/lifecycle-tts-machine.test.ts --reporter=verbose`
+Expected: PASS — gating + preemption + throttle + `emitTtsPlayed` all green.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/lifecycle-tts-machine.ts src/lib/lifecycle-tts/lifecycle-tts-machine.test.ts
+git commit -m "feat(lifecycle-tts): XState parallel speech+SFX machine — queue/priority/throttle/drain/emitTtsPlayed (spec §6)"
+```
+
+---
+
+## Task 8.5: `LifecycleTtsProvider` + `LifecycleTtsContext` + hooks
+
+Mount the singleton actor at the React root and expose it through Context + hooks. The Provider builds the `WebSpeechSpeaker` via `useMemo`, creates the actor via `useActorRef`, forwards settings on change, disposes the speaker on unmount, and warns on duplicate mounts in DEV. The hooks (`useLifecycleTts`, `useSpeakButton`, `useLifecycleTtsUnavailableHandler`) and the `withLifecycleTts` Storybook decorator complete the surface.
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/lifecycle-tts-context.ts`
+- Create: `src/lib/lifecycle-tts/pick-tts-settings.ts`
+- Create: `src/lib/lifecycle-tts/lifecycle-tts-provider.tsx`
+- Create: `src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx`
+- Create: `src/lib/lifecycle-tts/use-lifecycle-tts.ts`
+- Create: `src/lib/lifecycle-tts/use-lifecycle-tts.test.ts`
+- Create: `src/lib/lifecycle-tts/use-speak-button.ts`
+- Create: `src/lib/lifecycle-tts/use-speak-button.test.tsx`
+- Create: `src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts`
+- Create: `src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.test.tsx`
+- Create: `src/lib/lifecycle-tts/subject-utils.ts`
+- Create: `tests/storybook/with-lifecycle-tts.tsx`
+- Modify: `src/routes/__root.tsx` (mount `LifecycleTtsProvider` inside `ServiceWorkerProvider`, outside the route outlet; mount `useLifecycleTtsUnavailableHandler` as a sibling)
+
+- [ ] **Step 1: Write the failing test**
+
+Create `src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx` (spec §12.1 Provider inventory — DEV duplicate-mount guard, bus→`SPEAK_AUTO` relay, settings→`SETTINGS_CHANGED`, `speaker.dispose()` on unmount) and `src/lib/lifecycle-tts/use-lifecycle-tts.test.ts` (throw outside Provider):
+
+```tsx
+// lifecycle-tts-provider.test.tsx
+import { render } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { LifecycleTtsProvider } from './lifecycle-tts-provider';
+import { useLifecycleTts } from './use-lifecycle-tts';
+
+vi.mock('@/db/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: { talkativeness: 'helpful', activeLanguage: 'en-AU' },
+    update: vi.fn(),
+  }),
+  DEFAULT_SETTINGS: { talkativeness: 'helpful' },
+}));
+
+const Consumer = (): null => {
+  useLifecycleTts();
+  return null;
+};
+
+describe('LifecycleTtsProvider', () => {
+  it('provides an actor ref to descendants (no throw)', () => {
+    expect(() =>
+      render(
+        <LifecycleTtsProvider>
+          <Consumer />
+        </LifecycleTtsProvider>,
+      ),
+    ).not.toThrow();
+  });
+
+  it('useLifecycleTts throws outside the Provider', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<Consumer />)).toThrow(
+      /must be used inside LifecycleTtsProvider/,
+    );
+    spy.mockRestore();
+  });
+});
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `npx vitest run src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts.test.ts --reporter=verbose`
+Expected: FAIL — `LifecycleTtsProvider` / `useLifecycleTts` not exported.
+
+- [ ] **Step 3: Implement the Context + `pickTtsSettings`**
+
+Create `src/lib/lifecycle-tts/lifecycle-tts-context.ts`:
+
+```ts
+// src/lib/lifecycle-tts/lifecycle-tts-context.ts
+import { createContext } from 'react';
+import type { ActorRefFrom } from 'xstate';
+import type { lifecycleTtsMachine } from './lifecycle-tts-machine';
+
+export type LifecycleTtsActorRef = ActorRefFrom<
+  typeof lifecycleTtsMachine
+>;
+
+export const LifecycleTtsContext =
+  createContext<LifecycleTtsActorRef | null>(null);
+```
+
+Create `src/lib/lifecycle-tts/pick-tts-settings.ts` (spec §5.5 — boundary coercion so every `TtsSettings` field is defined downstream):
+
+```ts
+// src/lib/lifecycle-tts/pick-tts-settings.ts
+import type { UseSettingsResult } from '@/db/hooks/useSettings';
+import type { TtsSettings } from './types';
+import { DEFAULT_SETTINGS } from '@/db/hooks/useSettings';
+
+export const pickTtsSettings = (
+  s: UseSettingsResult['settings'],
+): TtsSettings => ({
+  speechRate: s?.speechRate ?? DEFAULT_SETTINGS.speechRate ?? 1,
+  voiceVolume: s?.voiceVolume ?? DEFAULT_SETTINGS.voiceVolume ?? 0.8,
+  soundEffectsVolume:
+    s?.soundEffectsVolume ?? DEFAULT_SETTINGS.soundEffectsVolume ?? 0.8,
+  preferredVoiceURI:
+    s?.preferredVoiceURI ?? DEFAULT_SETTINGS.preferredVoiceURI ?? '',
+  preferredVoiceDeviceId:
+    s?.preferredVoiceDeviceId ??
+    DEFAULT_SETTINGS.preferredVoiceDeviceId ??
+    '',
+  activeLanguage:
+    s?.activeLanguage ?? DEFAULT_SETTINGS.activeLanguage ?? 'en-AU',
+  talkativeness:
+    s?.talkativeness ?? DEFAULT_SETTINGS.talkativeness ?? 'helpful',
+  useOfflineVoicesOnly:
+    s?.useOfflineVoicesOnly ??
+    DEFAULT_SETTINGS.useOfflineVoicesOnly ??
+    true,
+});
+```
+
+- [ ] **Step 4: Implement the Provider**
+
+Create `src/lib/lifecycle-tts/lifecycle-tts-provider.tsx` (spec §5.5 + §5.5.1 + §7.2.1 — `useMemo` speaker, `useActorRef`, `forwardSettings` via `SETTINGS_CHANGED`, `speaker.dispose()` on unmount, DEV duplicate-mount guard):
+
+```tsx
+// src/lib/lifecycle-tts/lifecycle-tts-provider.tsx
+import { use, useEffect, useMemo, type PropsWithChildren } from 'react';
+import { useActorRef } from '@xstate/react';
+import { LifecycleTtsContext } from './lifecycle-tts-context';
+import { lifecycleTtsMachine } from './lifecycle-tts-machine';
+import { pickTtsSettings } from './pick-tts-settings';
+import { WebSpeechSpeaker } from './web-speech-speaker';
+import { useSettings } from '@/db/hooks/useSettings';
+import { getGameEventBus } from '@/lib/game-event-bus';
+
+export const LifecycleTtsProvider = ({
+  children,
+}: PropsWithChildren) => {
+  // DEV duplicate-mount guard: a non-null context here = a second Provider.
+  const existing = use(LifecycleTtsContext);
+  if (import.meta.env.DEV && existing) {
+    console.error(
+      'Duplicate LifecycleTtsProvider mounted — there must be exactly one (root-mounted per §5.5.1).',
+    );
+  }
+
+  const { settings } = useSettings();
+  const bus = getGameEventBus();
+  const speaker = useMemo(
+    () => new WebSpeechSpeaker(pickTtsSettings(settings), bus),
+    // Constructed once — settings flow in via SETTINGS_CHANGED, not re-construction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const actorRef = useActorRef(lifecycleTtsMachine, {
+    input: { settings: pickTtsSettings(settings), speaker, bus },
+  });
+
+  // Forward settings on every change — the machine's forwardSettings action
+  // calls speaker.updateSettings(next) (§7.2.1).
+  useEffect(() => {
+    actorRef.send({
+      type: 'SETTINGS_CHANGED',
+      settings: pickTtsSettings(settings),
+    });
+  }, [actorRef, settings]);
+
+  // Cleanup: dispose the speaker (timers + listeners) on unmount (§7.2.1).
+  useEffect(() => () => speaker.dispose(), [speaker]);
+
+  return (
+    <LifecycleTtsContext.Provider value={actorRef}>
+      {children}
+    </LifecycleTtsContext.Provider>
+  );
+};
+```
+
+Mount it once in `src/routes/__root.tsx` — inside `ServiceWorkerProvider`, outside the route outlet — so a single actor instance spans every route (including SettingsPanel previews), per spec §5.5.1. Mount `useLifecycleTtsUnavailableHandler()` as a sibling so the unavailable signal reaches PR #409's dialog.
+
+- [ ] **Step 5: Implement the hooks + decorator**
+
+Create `src/lib/lifecycle-tts/use-lifecycle-tts.ts` (spec §6.1.1 — `use(Context)` + throw):
+
+```ts
+// src/lib/lifecycle-tts/use-lifecycle-tts.ts
+import { use } from 'react';
+import { LifecycleTtsContext } from './lifecycle-tts-context';
+import type { LifecycleTtsActorRef } from './lifecycle-tts-context';
+
+export function useLifecycleTts(): LifecycleTtsActorRef {
+  const ref = use(LifecycleTtsContext);
+  if (!ref)
+    throw new Error(
+      'useLifecycleTts must be used inside LifecycleTtsProvider',
+    );
+  return ref;
+}
+```
+
+Missing-provider behaviour is **throw** (not noop, not Suspense): the Provider is root-mounted, so the throw can only fire in a Storybook story or test that forgot the decorator — a loud, actionable signal.
+
+Create `src/lib/lifecycle-tts/use-speak-button.ts` (spec §6.1.1 + §8.7 — `SPEAK_USER` send; `explicit ?? roundToPayload(round) ?? PREVIEW_PAYLOAD`; `isSpeaking` derived via `useSelector` + `isSubjectMatch`):
+
+```ts
+// src/lib/lifecycle-tts/use-speak-button.ts
+import { useCallback, useMemo } from 'react';
+import { useSelector } from '@xstate/react';
+import { useLifecycleTts } from './use-lifecycle-tts';
+import { isSubjectMatch } from './subject-utils';
+import { subjectToken } from './types';
+import type { LifecycleEvent, Talkativeness } from './types';
+import type { SpeakPayload } from './types';
+
+export interface UseSpeakButtonOpts {
+  event: LifecycleEvent;
+  payload: SpeakPayload;
+  variant?: Talkativeness;
+}
+
+export interface UseSpeakButtonResult {
+  speak: () => void;
+  isSpeaking: boolean;
+}
+
+// Last-resort constant when there is no RoundContext (e.g. SettingsPanel preview).
+export const PREVIEW_PAYLOAD: SpeakPayload = {
+  text: '',
+  subject: subjectToken('preview'),
+  locale: 'en-AU',
+};
+
+export const useSpeakButton = (
+  opts: UseSpeakButtonOpts,
+): UseSpeakButtonResult => {
+  const actor = useLifecycleTts();
+  const expectedSubject = useMemo(
+    () => subjectToken(`${opts.event}`),
+    [opts.event],
+  );
+
+  // Track playing state by matching this button's expected subject against the
+  // in-flight utterance. The actor clears `current` on speak-end and cancel —
+  // both transition us back to idle.
+  const isSpeaking = useSelector(
+    actor,
+    (snapshot) =>
+      snapshot.context.currentSpeech?.event === opts.event &&
+      isSubjectMatch(
+        { subject: snapshot.context.currentSpeech?.subject ?? null },
+        expectedSubject,
+      ),
+  );
+
+  const speak = useCallback(() => {
+    actor.send({
+      type: 'SPEAK_USER',
+      event: opts.event,
+      payload: opts.payload ?? PREVIEW_PAYLOAD,
+      variant: opts.variant ?? 'helpful',
+    });
+  }, [actor, opts.event, opts.payload, opts.variant]);
+
+  return { speak, isSpeaking };
+};
+```
+
+`useSpeakButton(explicit?)` resolves the payload `explicit ?? roundToPayload(round) ?? PREVIEW_PAYLOAD`. SettingsPanel renders the voice-preview button with an explicit payload (`{ text: t('settings.voicePreview'), subject: 'preview', locale: settings.activeLanguage }`), so the preview works without a `RoundContext`; in-game the round payload is used.
+
+Create `src/lib/lifecycle-tts/subject-utils.ts` (spec §10.3 — single place for null/string discipline):
+
+```ts
+// src/lib/lifecycle-tts/subject-utils.ts
+import type { LifecycleSubject } from './types';
+
+export const isSubjectMatch = (
+  event:
+    | { subject: LifecycleSubject | null }
+    | { subject?: LifecycleSubject },
+  expected: LifecycleSubject,
+): boolean => {
+  const s = (event as { subject?: LifecycleSubject | null }).subject;
+  return s !== null && s !== undefined && s === expected;
+};
+```
+
+Create `src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts` (spec §7.2.1 — bus `lifecycle.tts.unavailable` → PR #409 `VoiceUnavailableDialogProvider`). Keeping it a discrete hook (not inline in the Provider, not a machine action) keeps the engine free of React dialog coupling and makes the listener unit-testable in isolation:
+
+```ts
+// src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts
+import { useEffect } from 'react';
+import { getGameEventBus } from '@/lib/game-event-bus';
+import { useVoiceUnavailableDialog } from '@/providers/VoiceUnavailableDialogProvider';
+import type { LifecycleTtsUnavailableEvent } from '@/types/game-events';
+
+export const useLifecycleTtsUnavailableHandler = (): void => {
+  const { open } = useVoiceUnavailableDialog();
+  useEffect(() => {
+    const bus = getGameEventBus();
+    const unsub = bus.subscribe('lifecycle.tts.unavailable', (e) => {
+      open((e as LifecycleTtsUnavailableEvent).subject);
+    });
+    return unsub;
+  }, [open]);
+};
+```
+
+Create `tests/storybook/with-lifecycle-tts.tsx` (spec §6.1.1 — Storybook decorator mirroring existing `withSettings` / `withRouter`):
+
+```tsx
+// tests/storybook/with-lifecycle-tts.tsx
+import type { Decorator } from '@storybook/react';
+import { LifecycleTtsProvider } from '@/lib/lifecycle-tts/lifecycle-tts-provider';
+
+export const withLifecycleTts: Decorator = (Story) => (
+  <LifecycleTtsProvider>
+    <Story />
+  </LifecycleTtsProvider>
+);
+```
+
+Stories that render hook consumers add `withLifecycleTts`; stories testing the missing-context branch simply omit it.
+
+- [ ] **Step 6: Run tests to verify they pass**
+
+Run: `npx vitest run src/lib/lifecycle-tts/ --reporter=verbose && yarn typecheck`
+Expected: PASS — Provider provides the actor; `useLifecycleTts` throws outside it; settings forward to the machine.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/lifecycle-tts-context.ts src/lib/lifecycle-tts/pick-tts-settings.ts src/lib/lifecycle-tts/lifecycle-tts-provider.tsx src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts.ts src/lib/lifecycle-tts/use-lifecycle-tts.test.ts src/lib/lifecycle-tts/use-speak-button.ts src/lib/lifecycle-tts/use-speak-button.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.test.tsx src/lib/lifecycle-tts/subject-utils.ts tests/storybook/with-lifecycle-tts.tsx src/routes/__root.tsx
+git commit -m "feat(lifecycle-tts): root-mounted LifecycleTtsProvider + Context + hooks + Storybook decorator (spec §5.5.1, §6.1.1, §7.2.1)"
 ```
 
 ---
