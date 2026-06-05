@@ -2502,6 +2502,111 @@ git commit -m "feat(lifecycle-tts): root-mounted LifecycleTtsProvider + Context 
 
 ---
 
+## Task 8.6: Single emit-site for `game.start` / `game.resume` (engine `loading.entry`)
+
+Per spec §4.2.1, the engine `loading.entry` action is the **single emit site** for BOTH `game.start` and `game.resume` — there is exactly one emit site so the events can never double-fire on mount. The two are distinguished by the `initialState` prop: absent → `game.start`, present (resuming a persisted session) → `game.resume`. **`AnswerGameProvider` MUST NOT emit either** (TP8 contract — see the Modified-files row for `AnswerGameProvider.tsx`).
+
+This event flows to the root-mounted actor (Tasks 6–8.5) on the bus exactly like every other `lifecycle.speak`; the actor's `autoAllowed` guard gates the auto-speech.
+
+**Files:**
+
+- Modify: `src/lib/game-engine/side-effects.ts` — add the `loading.entry` emit using `initialState` to pick the lifecycle verb
+- Modify: `src/lib/game-engine/side-effects.test.ts` — assert both branches (absent → `game.start`; present → `game.resume`); assert no double-fire
+
+- [ ] **Step 1: Write the failing test**
+
+Add to `src/lib/game-engine/side-effects.test.ts`:
+
+```ts
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/game-event-bus', () => {
+  const emit = vi.fn();
+  return { getGameEventBus: () => ({ emit }) };
+});
+import { getGameEventBus } from '@/lib/game-event-bus';
+
+describe('loading.entry single emit-site (spec §4.2.1)', () => {
+  it('emits lifecycle.speak { game.start } when initialState is absent', () => {
+    const emit = getGameEventBus().emit as ReturnType<typeof vi.fn>;
+    emit.mockClear();
+    runLoadingEntry({
+      initialState: undefined,
+      gameId: 'word-spell',
+      sessionId: 's1',
+      profileId: 'p1',
+    });
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lifecycle.speak',
+        lifecycleEvent: 'game.start',
+      }),
+    );
+  });
+
+  it('emits lifecycle.speak { game.resume } when initialState is present', () => {
+    const emit = getGameEventBus().emit as ReturnType<typeof vi.fn>;
+    emit.mockClear();
+    runLoadingEntry({
+      initialState: { roundIndex: 3 },
+      gameId: 'word-spell',
+      sessionId: 's1',
+      profileId: 'p1',
+    });
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lifecycle.speak',
+        lifecycleEvent: 'game.resume',
+      }),
+    );
+  });
+});
+```
+
+(`runLoadingEntry` is the extracted `loading.entry` action under test — wire it to whatever the engine exposes; if the action is inlined in the machine setup, export a small named helper so it is unit-testable in isolation.)
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/game-engine/side-effects.test.ts --reporter=verbose`
+Expected: FAIL — no `loading.entry` emit yet.
+
+- [ ] **Step 3: Add the single emit-site**
+
+In `src/lib/game-engine/side-effects.ts`, add the `loading.entry` action (spec §4.2.1 verbatim):
+
+```ts
+// src/lib/game-engine/side-effects.ts — loading.entry action
+const lifecycleEvent = input.initialState
+  ? 'game.resume'
+  : 'game.start';
+getGameEventBus().emit({
+  type: 'lifecycle.speak',
+  lifecycleEvent,
+  gameId: ctx.gameId,
+  sessionId: ctx.sessionId,
+  profileId: ctx.profileId,
+  // roundIndex omitted — game.* are non-round events (see §4.3 two-tier)
+});
+```
+
+Confirm `AnswerGameProvider.tsx` does **not** also emit `game.start` / `game.resume` (delete any such emit if present) — the single-emit-site contract requires exactly one producer.
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/game-engine/side-effects.test.ts --reporter=verbose && yarn typecheck`
+Expected: PASS — both branches emit the correct verb; no double-fire.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/game-engine/side-effects.ts src/lib/game-engine/side-effects.test.ts src/components/answer-game/AnswerGameProvider.tsx
+git commit -m "feat(game-engine): single emit-site for game.start/game.resume in loading.entry (spec §4.2.1)"
+```
+
+---
+
 ## Task 9: NumberMatch — `tts:` block + machine `speak` entry (fixes "speak the answer" bug)
 
 **Files:**
@@ -2511,6 +2616,31 @@ git commit -m "feat(lifecycle-tts): root-mounted LifecycleTtsProvider + Context 
 - Modify: `src/games/number-match/definition.test.ts` (add test for new entry action)
 
 The current behavior at `NumberMatch.tsx` reads the bare numeral aloud (the "5" bug). After this task, the machine's `playing` state entry fires `speak({ lifecycleEvent: 'round.start' })`, which resolves to the registered template (`"Find the matching number for {{count}}."`).
+
+> **Integration note (applies to Tasks 9–11).** The machine `entry: [{ type: 'speak', … }]` action is **not** wired to any hook. The engine's `speak` side-effect provider (`useGameEngine` → `executeSideEffects`, in [src/lib/game-engine/side-effects.ts](../../src/lib/game-engine/side-effects.ts)) emits a single `lifecycle.speak` bus event; the **root-mounted `lifecycleTtsMachine` actor** (Tasks 6–8.5) is the bus subscriber that relays it as `SPEAK_AUTO` and performs the speech via `WebSpeechSpeaker`. There is no `useLifecycleTts` per-game subscriber and no `useRoundTTS` — the per-game machine emits to the bus, the single actor consumes. Auto-speech stays gated by the actor's `autoAllowed` guard (`talkativeness !== 'on-demand'`, §6.1); the game machine never reads settings.
+>
+> **`LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2, ships in M1).** The engine recognizes `LIFECYCLE_TTS_PLAYED` as a state-machine transition signal: a game machine can gate a transition on `lifecycle.tts.played` matching `gameId + lifecycleEvent + subject`, so a sequenced speech flow advances only after the prior utterance resolves. **This mechanism (the engine wiring that turns the `lifecycle.tts.played` bus event into a machine-consumable `LIFECYCLE_TTS_PLAYED` event) ships in M1** so Spec 1b's phoneme-explain sequence drops in with **zero engine churn**. The phoneme **content** (the `explaining.phoneme*` states + CSS classes) is **Spec 1b**, not this PR. Example of the future shape M1 enables:
+>
+> ```ts
+> // Future Spec 1b sequence — rail exists in M1, content lands in 1b
+> states: {
+>   'explaining.phoneme1': {
+>     entry: 'speakPhoneme1', // emits lifecycle.speak { subject: 'tile-k' }
+>     on: {
+>       LIFECYCLE_TTS_PLAYED: {
+>         guard: 'matchesPhoneme1', // event.subject === 'tile-k'
+>         target: 'explaining.phoneme2',
+>       },
+>     },
+>   },
+>   'explaining.phoneme2': {
+>     /* ... */
+>   },
+>   'explaining.whole': {
+>     /* ... */
+>   },
+> }
+> ```
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2734,7 +2864,7 @@ git commit -m "fix(number-match): replace bare-numeral readout with registry-bac
 - Modify: `src/games/word-spell/definition.ts`
 - Modify: `src/games/word-spell/definition.test.ts`
 
-Mirror the shape of Task 9, but with WordSpell template variables (`{{word}}` instead of `{{count}}`).
+Mirror the shape of Task 9, but with WordSpell template variables (`{{word}}` instead of `{{count}}`). The same **integration note** and **`LIFECYCLE_TTS_PLAYED` transition-gate rail** from Task 9 apply: the `speak` entry emits `lifecycle.speak` to the root-mounted actor (no per-game hook), and the engine's `LIFECYCLE_TTS_PLAYED` rail (spec §10.2) ships in M1.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2817,7 +2947,7 @@ git commit -m "feat(word-spell): add TTS registry + round.start speak entry to m
 - Delete: `src/components/answer-game/useRoundTTS.ts`
 - Delete: `src/components/answer-game/useRoundTTS.test.tsx`
 
-By the end of this task, all three XState-migrated games drive round-start speech via the machine. `useRoundTTS` has no remaining callers and is deleted.
+By the end of this task, all three XState-migrated games drive round-start speech via the machine — the `speak` entry emits `lifecycle.speak` to the root-mounted actor (Task 9 integration note), consumed by the single `lifecycleTtsMachine`. `useRoundTTS` has no remaining callers and is deleted; its old per-tree subscription model is fully replaced by the actor. The `LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2) ships in M1 as part of the engine, not the per-game machine.
 
 - [ ] **Step 1: Add the `tts:` block + entry action**
 
@@ -3302,7 +3432,7 @@ git commit -m "feat(games): inline QuestionRow + AudioButton on word-spell, numb
 - Move: `src/components/answer-game/InstructionsOverlay/` → `src/components/answer-game/GameOptions/`
 - Rename inside the directory: `InstructionsOverlay.tsx` → `GameOptionsOverlay.tsx` (plus `.test.tsx`, `.stories.tsx`)
 - Move (unchanged): `useConfigDraft.ts` and `useConfigDraft.test.tsx`
-- Modify (behavior): `GameOptionsOverlay.tsx` — remove the `useEffect(() => { if (ttsEnabled) speak(text); ... }, [])` block at line 173–174; replace with bus emit of `game.prepare`
+- Modify (behavior): `GameOptionsOverlay.tsx` — remove the `useEffect(() => { if (ttsEnabled) speak(text); ... }, [])` block at line 173–174; replace with bus emit of `game.prepare` whose envelope (`profileId` / `sessionId`) comes from `useCurrentProfile()` / `useCurrentSession()` (created in Task 8.5; spec §8.5 A1 path)
 - Modify: `src/routes/$locale/_app/game/$gameId.tsx` — update import + JSX
 
 - [ ] **Step 1: Move the files via git**
@@ -3362,22 +3492,29 @@ In `GameOptionsOverlay.tsx`:
 
 - Rename the exported component: `InstructionsOverlay` → `GameOptionsOverlay`.
 - Delete the `useEffect` block at lines 173–174 that calls `speak(text)`.
-- Add a new `useEffect(() => { ... }, [])` that emits `game.prepare`:
+- Add a new `useEffect(() => { ... }, [])` that emits `game.prepare`.
+
+**Envelope source for `game.prepare`** (spec §13.1.G #34 A1 path). `GameOptionsOverlay` reads `profileId` and `sessionId` for the bus envelope from the two new hooks (it fires pre-engine, so it cannot source them from engine context):
 
 ```tsx
+// inside GameOptionsOverlay.tsx
+const profile = useCurrentProfile();
+const session = useCurrentSession();
 useEffect(() => {
   getGameEventBus().emit({
     type: 'game.prepare',
     gameId,
-    sessionId,
-    profileId,
+    sessionId: session.id,
+    profileId: profile.id,
     timestamp: Date.now(),
-    roundIndex: 0,
+    // no roundIndex — `game.prepare` is non-round (spec §4.3.1)
   });
-}, [gameId, sessionId, profileId]);
+}, [gameId, session.id, profile.id]);
 ```
 
-- Drop the `ttsEnabled` prop (replaced by `game.prepare` flowing through `useLifecycleTts`).
+`game.start` / `game.resume` are emitted by the engine `loading.entry` action (single emit-site contract, spec §4.2.1) — not by the provider or overlay.
+
+- Drop the `ttsEnabled` prop (replaced by `game.prepare` flowing through the actor on the bus).
 - Update the Storybook title to `'AnswerGame/GameOptions/GameOptionsOverlay'`.
 - The visible content stays the same for M1 — the `text` prop still renders, but it's no longer spoken aloud unless the resolved `game.prepare` template says so.
 
