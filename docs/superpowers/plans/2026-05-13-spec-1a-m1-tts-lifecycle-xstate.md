@@ -122,40 +122,46 @@ Justification (per §13.1.C #17): rename is mechanical (no semantic change beyon
 
 ## How TTS flows (after M1)
 
+Three ingress paths feed **one** root-mounted `lifecycleTtsMachine` actor (spec §3.1). Auto-speech (Paths A + B) flows through the bus; UI taps (Path C) call the actor directly.
+
 ```text
-[ XState machine in definition.ts ]
+Path A — engine-emitted (game machine state entry)
+[ XState game machine in definition.ts ]
    entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]
                               │
                               ▼
-[ useGameEngine.ts:150 `speak` action provider ]
-   executeSideEffects([{ type: 'speak', lifecycleEvent }], envelope)
+[ useGameEngine `speak` action provider → executeSideEffects() ]
                               │
                               ▼
-[ side-effects.ts:26-34 ]
-   bus.emit({ type: 'lifecycle.speak', lifecycleEvent, ...envelope })
-                              │
-                              ▼
-[ useLifecycleTts subscriber (NEW) ]
-   const { settings } = useSettings()                  // user-level (RxDB)
-   if (settings.talkativeness === 'on-demand') return  // §6.1 autoAllowed guard
-   resolveVerbosity(definition.tts, lifecycleEvent, config.gradeBand, settings.talkativeness)
-     → 'off' | 'brief' | 'full'
-   if 'off': return
-   resolveCopy(definition.tts, lifecycleEvent, verbosity)
-     → i18n key
-   interpolate i18n key with AnswerGameContext snapshot
-     → speakable string
-   speak(string, { rate, volume, voiceURI, lang })
+[ src/lib/game-engine/side-effects.ts ]
+   getGameEventBus().emit({ type: 'lifecycle.speak', lifecycleEvent, ...envelope })
+   // game.start / game.resume come from the loading.entry SINGLE emit-site (§4.2.1)
 
-Tap-to-speak path (AudioButton, question onClick):
+Path B — UI lifecycle moment (component useEffect)
+[ GameOptionsOverlay mount ]
+   getGameEventBus().emit({ type: 'lifecycle.speak', lifecycleEvent: 'game.prepare', ...envelope })
+
+        Path A and Path B both land on the bus:
+                              │
+                              ▼
+[ lifecycleTtsMachine actor — the single bus subscriber (root-mounted, §5.5.1) ]
+   bus.subscribe('lifecycle.speak') → actor.send({ type: 'SPEAK_AUTO', event, payload, subject })
+   guard autoAllowed: settings.talkativeness !== 'on-demand'   // §6.1 — drops auto-speech in on-demand
+   resolveAndDispatchSpeech (priority + throttle + single-queued slot, §6.4)
+                              │
+                              ▼
+[ invoke speaker: WebSpeechSpeaker.speak({ text, locale, voiceURI }) ]   // §7.2
+   onDone → emitTtsPlayed: bus.emit('lifecycle.tts.played', { durationMs: now - enqueuedAt, … })  // §6.7
+   (SRS recorder #364 + UI animation sync subscribe to lifecycle.tts.played)
+
+Path C — UI user action (speaker tap / question onClick) — NOT via bus
 [ <AudioButton event="round.start" /> ]
-   const { speakOnDemand } = useLifecycleTts()
-   onClick: speakOnDemand('round.start')
-   // NO talkativeness gate — taps always speak per §5.4 (no hard-mute).
-   // OS volume slider is the escape hatch for "completely silent".
-   // Future: gate on voice-availability via VoiceUnavailableDialogProvider
-   //        (PR #409); see Task 7 for the integration sketch.
-   resolve + interpolate + speak (always 'full' mode)
+   const { speak } = useSpeakButton({ event, payload, variant })
+   onClick: speak()  →  actor.send({ type: 'SPEAK_USER', event, payload, variant })
+   // SPEAK_USER is NEVER gated by talkativeness — taps always speak per §5.4 (no hard-mute);
+   //   always preempts in-flight speech (§6.3). OS volume slider is the "completely silent" escape hatch.
+   // Voice-availability: WebSpeechSpeaker.pickVoice() fails closed under useOfflineVoicesOnly,
+   //   emitting lifecycle.tts.unavailable → useLifecycleTtsUnavailableHandler → PR #409 dialog (§7.2.1).
 ```
 
 ---
@@ -279,8 +285,6 @@ src/components/answer-game/InstructionsOverlay/
 - **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of `byGradeBand` defaults across multiple games. Deferred until M2 expands the event vocabulary.
 - **ARIA live region implementation.** M2 — ARIA live regions for round outcomes are decoupled from TTS and ship separately. Known gap surfaced by 2026-05-13 review (P2); see Deferred / Open Questions below. (The new 2026-05-16 spec carries ARIA under §12.2 acceptance criteria but not as a dedicated section.)
 - **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
-- **Queue policy (cancel-on-new, drop-debounce for repeated errors).** M2 — spec §6.3 + §6.4. Web Speech's default cancel-on-new behavior covers the common case in M1.
-- **`game.resume` event emission.** M2 — requires `AnswerGameProvider` remount-detection logic.
 
 ---
 
@@ -3957,7 +3961,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] `src/lib/lifecycle-tts/types.ts` exists and satisfies the forward reference at `src/lib/game-engine/definition-types.ts:8`.
 - [ ] `InstructionsOverlay` → `GameOptionsOverlay` rename complete; **does not auto-speak** how-to-play on mount.
 - [ ] `game.prepare` bus event added; emitted by `GameOptionsOverlay` on mount.
-- [ ] `game.start` lifecycle event speaks the registered full-mode copy after "Let's go" (via the XState machine's entry action on the `playing` state — implemented per-game in Tasks 9–11).
+- [ ] `game.start` lifecycle event speaks the registered full-mode copy after "Let's go" (via the engine `loading.entry` single emit-site — Task 8.6, spec §4.2.1 — which emits `lifecycle.speak { lifecycleEvent: 'game.start' }` to the root-mounted actor). **Not** the `playing`-state entry: that fires `round.start`, not `game.start`.
 - [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.full` ("Find the matching number for {{count}}.").
 - [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'k'`).
 - [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); always speaks the resolved `full` copy for its `event` prop when tapped.
@@ -3966,7 +3970,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] WordSpell, NumberMatch, SortNumbers each have an inline AudioButton via `<QuestionRow>`.
 - [ ] **SpotAll deferred per Spec Delta 1** — tracked in a follow-up issue gated on PR 1d (#368).
 - [ ] User-level **Talkativeness slider** (🤫 Shhh / 💬 Talk a bit / 🗣️ Talk a lot) lands in `SettingsPanel` (spec §8.2); per-game `gradeBand` select lands in `AdvancedConfigModal`. Legacy `ttsEnabled` toggle in SettingsPanel removed.
-- [ ] **G-4 SRS producer**: `lifecycle.tts.played` event emitted after each successful `speak()` (spec §6.7) with the correct payload shape (`source: 'auto' | 'user'`, `variant: Talkativeness`, `durationMs`, full envelope). SRS recorder ([#364](https://github.com/leocaseiro/base-skill/issues/364)) consumes it in a separate PR.
+- [ ] **G-4 SRS producer**: `lifecycle.tts.played` event emitted by the actor's `emitTtsPlayed` action on each speaker `invoke.onDone` resolve (spec §6.7) with the correct payload shape (`source: 'auto' | 'user'`, `variant: Talkativeness`, real `durationMs = now - enqueuedAt`, `subject: LifecycleSubject | null`, full envelope). SRS recorder ([#364](https://github.com/leocaseiro/base-skill/issues/364)) consumes it in a separate PR.
 - [ ] **G-3 mini-game reservations**: `mini-game.start | mini-game.complete | mini-game.skip` baked into the `LifecycleEvent` union + bus event type (Phase 0 Commit 4); no firing code in M1.
 - [ ] **G-2 skin resolver layer**: `skin.tts?` layer is Layer 2 of the four-layer resolver chain (Task 3 resolver — always `undefined` in M1, present in type + walked by resolver so M3 work is purely additive).
 - [ ] WordSpell, NumberMatch, SortNumbers each have a `tts:` block on their `GameDefinition`.
@@ -3981,9 +3985,6 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - `LifecycleTTSExplorer.stories.tsx` registry-table viewer → M2.
 - ARIA live regions for round outcomes → M2.
 - `round.idle` timer + per-game predicate → M2.
-- Queue policy (cancel-on-new, drop-debounce) beyond Web Speech default → M2.
-- `game.resume` event emission → M2.
-- `round:tts-played` SRS event emission from speakOnDemand path → M2 (SRS recorder hook).
 
 ---
 
@@ -4019,7 +4020,7 @@ A multi-persona review (coherence, feasibility, product-lens, design-lens, scope
 - **P0 — `useLifecycleTts` reads `gameDefinition` + `currentRound` from a context that doesn't expose them** (coherence + scope-guardian + feasibility + adversarial — 4-way). Task 7's hook reads `current.gameDefinition?.tts` and `current.currentRound`. `AnswerGameState` (`src/components/answer-game/types.ts:81-99`) has neither. The plan's "Pick option 1" note is prose, not a concrete sub-step; option 2's premise is false (`src/games/registry.ts` only has metadata). **Resolution at execution:** pick one of (a) mount `useLifecycleTts` inside each game component where `gameDefinition` and `round` are in scope (recommended — avoids context surgery + sidesteps PR 1c divergence), (b) thread `gameDefinition` through `AnswerGameProvider` and update ~12 call sites. Commit the choice as a Spec Delta in the implementation PR.
 - **P0 — `{{count}}` / `{{word}}` / `{{direction}}` interpolation reads `currentRound` but no machine populates `lastRoundOutput`** (adversarial). The headline NumberMatch "speak the answer" fix would render `"Find the matching number for 0"` instead of `"...for five"` — same shape as the bug it's meant to fix. Verified: `numberMatchMachine.context` (definition.ts:543-560) has no `lastRoundOutput`; round data lives in `NumberMatch.tsx:127` (`roundOrder[engineRoundIndex]`). **Resolution at execution:** if P0 above picks "mount in game component", interpolation reads `round` from the same closure that already computes it — no extra change. If P0 picks "thread through context", each of the three machines must add `assign({ lastRoundOutput: <derived> })` on `INIT_ROUND` / `ADVANCE_ROUND`.
 - **P0 — Task 1 is misframed as "create types.ts"; file already exists on origin/master** (scope-guardian + adversarial — 2-way). `src/lib/lifecycle-tts/types.ts` was committed at `a653cf284` as a forward-reference pin. Contains `LifecycleEvent`, `Verbosity`, `Talkativeness`, `EventTemplate` — **missing `GameTTSConfig`** that Tasks 3 and 7 import. **Resolution at execution:** restructure Task 1 as "verify-and-extend": read existing file, add single missing export `export type GameTTSConfig = Partial<Record<LifecycleEvent, EventTemplate>>`, typecheck, commit `feat(lifecycle-tts): add GameTTSConfig type for per-game registry blocks`.
-- **P0 — `game.start` and `game.prepare` speech paths are unwired** (post-review spec-coverage check, 2026-05-13). Spec §14 M1 acceptance criteria #2 (`game.prepare` speaks `{{gameName}}` brief on overlay mount) and #3 (`game.start` speaks the full how-to-play after "Let's go") are both unimplementable as written. The plan adds the `game.prepare` bus event (Task 4) and emits it from `GameOptionsOverlay` (Task 16 Step 4), and i18n has `tts.<game>.game-start.full` keys (Task 18), but Task 7's `useLifecycleTts` only subscribes to the single `lifecycle.speak` bus event — nothing translates `game.prepare` or `game.start` bus emissions into `lifecycle.speak` payloads, and no task emits `lifecycle.speak { lifecycleEvent: 'game.start' }` at any flow point (the XState machines' `playing`-state entry fires `round.start`, not `game.start`). User flow goes overlay → silence → `round.start` speech, skipping both the brief game-name cue and the full "Let's spell some words" how-to-play. The plan's own acceptance criterion that says "game.start speaks the full how-to-play copy after 'Let's go' (via the XState machine's entry action on the playing state — implemented per-game in Tasks 9–11)" is **factually wrong** — playing-state entry is `round.start`. **Resolution at execution:** pick one of (a) extend `useLifecycleTts` to also subscribe to `game.prepare`, `game.start`, `game.end` bus events and translate each into a `speakResolved(<matching lifecycleEvent>)` call inline (smallest code change, single hook stays the integration surface); (b) have each non-machine emitter (`GameOptionsOverlay` for game.prepare, `AnswerGameProvider` for game.start) emit BOTH the original bus event AND a `lifecycle.speak` event with the matching payload (duplicates emission logic but keeps the hook simple); (c) add a dedicated bridge component (e.g. `LifecycleSpeakBridge`) mounted alongside `LifecycleTTSBridge` that listens for non-machine bus events and re-emits as `lifecycle.speak` (separation of concerns but adds a moving part). Whichever path is chosen, add an explicit task ("Wire game.start + game.prepare speech paths"), correct the misleading acceptance-criterion claim about the playing-state entry, and add a TDD test that asserts the brief speaks on overlay mount and the full how-to-play speaks after "Let's go".
+- **P0 — `game.start` and `game.prepare` speech paths are unwired** — **RESOLVED by the actor rewrite.** All three lifecycle moments now emit a single `lifecycle.speak` bus event consumed by the root-mounted `lifecycleTtsMachine` actor (Tasks 6–8.5): (1) `game.prepare` is emitted by `GameOptionsOverlay` on mount, envelope sourced from `useCurrentProfile()` / `useCurrentSession()` (Task 16 Step 4, spec §8.5 A1 path); (2) `game.start` / `game.resume` are emitted by the engine `loading.entry` **single emit-site**, distinguished by `initialState` (Task 8.6, spec §4.2.1); (3) `round.*` verbs are emitted by each game machine's `entry: [speak]` actions (Tasks 9–11). There is no per-game `useLifecycleTts` subscriber to "translate" events — the actor is the one bus subscriber and resolves verbosity + copy itself. The earlier false acceptance-criterion (claiming `game.start` speaks via the `playing`-state entry) is corrected in the M1 acceptance list above: `playing`-state entry fires `round.start`; `game.start` comes from `loading.entry`. The Task 8.6 + Task 16 TDD steps assert the brief speaks on overlay mount and the full how-to-play speaks after "Let's go".
 
 #### P1 — implementability gaps (resolve during execution, document choice in PR)
 
