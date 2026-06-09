@@ -361,18 +361,17 @@ export const subjectToken = (raw: string): LifecycleSubject =>
 // Focused, all-non-optional subset of SettingsDoc for audio consumers.
 // Defaults are applied at the boundary by pickTtsSettings() (Task 8.5), so
 // downstream code never sees `undefined` and never needs scattered `?? N`.
-// NOTE (executor): spec §5.1 also lists `soundEffectsVolume` +
-// `preferredVoiceDeviceId` in this Pick — reconcile the exact field set
-// against the speaker + SFX adapter needs (Tasks 6/7) when wiring.
 export type TtsSettings = Required<
   Pick<
     SettingsDoc,
+    | 'talkativeness'
+    | 'useOfflineVoicesOnly'
     | 'speechRate'
     | 'voiceVolume'
+    | 'soundEffectsVolume'
     | 'preferredVoiceURI'
+    | 'preferredVoiceDeviceId'
     | 'activeLanguage'
-    | 'useOfflineVoicesOnly'
-    | 'talkativeness'
   >
 >;
 
