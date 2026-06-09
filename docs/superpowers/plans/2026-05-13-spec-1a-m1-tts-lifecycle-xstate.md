@@ -245,7 +245,7 @@ src/components/answer-game/GameOptions/
 | `src/components/SettingsPanel/SettingsPanel.tsx`                 | Add 3-stop Talkativeness slider (`on-demand` \| `helpful` \| `chatty`) replacing the legacy `ttsEnabled` toggle; read/write via `useSettings()`. Tooltip explains "The speaker button always works." Spec §8.2.                                                                                                                                                                                                                                                                               |
 | `src/components/AdvancedConfigModal.tsx`                         | Add `gradeBand` select to per-game config form (no Talkativeness here — it lives in SettingsPanel as a user-level setting per §13.1.B #11).                                                                                                                                                                                                                                                                                                                                                   |
 | `src/components/AdvancedConfigModal.test.tsx`                    | Add test that selecting a gradeBand writes to the config draft.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `src/lib/i18n/locales/en/games.json`                             | Add `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*` keys (events: `game-prepare`, `game-start`, `round-start`, `round-error`, `round-correct`, `round-advance`, `level-complete`, `game-over`).                                                                                                                                                                                                                                                                                |
+| `src/lib/i18n/locales/en/games.json`                             | Add `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*` keys (events: `game-prepare`, `game-start`, `round-start`, `round-error`, `round-correct`, `round-advance`, `level-complete`, `game-end`).                                                                                                                                                                                                                                                                                 |
 | `src/lib/i18n/locales/pt-BR/games.json`                          | Mirror keys (placeholder English values; Portuguese translations follow-up).                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `src/routes/$locale/_app/game/$gameId.tsx`                       | Update `InstructionsOverlay` import + JSX to `GameOptionsOverlay`.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `src/routes/__root.tsx`                                          | **Mount `LifecycleTtsProvider` once** — inside `ServiceWorkerProvider`, outside the route outlet — so a single actor spans every route (spec §5.5.1). A sibling `useLifecycleTtsUnavailableHandler` subscribes to `lifecycle.tts.unavailable` and drives PR #409's `VoiceUnavailableDialogProvider`.                                                                                                                                                                                          |
@@ -300,20 +300,35 @@ src/components/answer-game/InstructionsOverlay/
 Create `src/lib/lifecycle-tts/types.ts`:
 
 ```ts
-import type { GradeBand } from '@/types/game-events';
+import type { GradeBand, SettingsDoc } from '@/types/game-events';
 
+// Full 19-event lifecycle surface (spec §4.1). The actor's priority/throttle
+// tables (Task 8) and bus union (Task 4) are keyed on this exact set.
 export type LifecycleEvent =
-  | 'game.prepare'
-  | 'game.start'
-  | 'game.resume'
-  | 'game.over'
-  | 'round.start'
-  | 'round.idle'
-  | 'round.error'
-  | 'round.correct'
-  | 'round.celebrate'
-  | 'round.advance'
-  | 'level.complete';
+  // Game-level
+  | 'game.prepare' // Game Options panel mount
+  | 'game.start' // "Let's go" tapped, engine mount
+  | 'game.resume' // Browser refresh / return-to-tab into active session
+  | 'game.end' // Game over (renamed from canon's 'game.over')
+  // Round-level
+  | 'round.start' // First round mount and on each roundIndex change
+  | 'round.idle' // Per-game timeout, kid is stuck
+  | 'round.error' // Definitive round failure
+  | 'round.correct' // Round won
+  | 'round.celebrate' // Post-correct, pre-advance (slot for celebrations; M2+ usage)
+  | 'round.advance' // Moving to next round
+  | 'level.complete' // Level boundary
+  // Turn-level
+  | 'turn.error' // Single wrong tap/keypress within a round
+  | 'turn.correct' // Single right tap/keypress within a round
+  | 'turn.action' // Tile pickup/place — interaction feedback, SFX only
+  // Mini-game-level (reserved in M1, fired in PR 1b+)
+  | 'mini-game.start'
+  | 'mini-game.complete'
+  | 'mini-game.skip'
+  // Privacy / availability signals (spec §13.1.D #19 lock)
+  | 'lifecycle.tts.unavailable' // No voice available under user's privacy settings
+  | 'lifecycle.tts.cloud-fallback'; // System default cloud voice in use (useOfflineVoicesOnly: false)
 
 export type Verbosity = 'off' | 'brief' | 'full';
 
@@ -329,6 +344,49 @@ export type EventTemplate = {
 export type GameTTSConfig = Partial<
   Record<LifecycleEvent, EventTemplate>
 >;
+
+// --- Branded subject token (spec §4.3) -------------------------------------
+// `subject` is an opaque ID (tile ID, phoneme key, word ID, locale, max 64
+// chars) — NEVER free-form user input. The branded type + factory enforce
+// intent at compile time.
+declare const __lifecycleSubject: unique symbol;
+export type LifecycleSubject = string & {
+  readonly [__lifecycleSubject]: 'LifecycleSubject';
+};
+
+export const subjectToken = (raw: string): LifecycleSubject =>
+  raw as LifecycleSubject;
+
+// --- TTS settings slice (spec §5.1) ----------------------------------------
+// Focused, all-non-optional subset of SettingsDoc for audio consumers.
+// Defaults are applied at the boundary by pickTtsSettings() (Task 8.5), so
+// downstream code never sees `undefined` and never needs scattered `?? N`.
+// NOTE (executor): spec §5.1 also lists `soundEffectsVolume` +
+// `preferredVoiceDeviceId` in this Pick — reconcile the exact field set
+// against the speaker + SFX adapter needs (Tasks 6/7) when wiring.
+export type TtsSettings = Required<
+  Pick<
+    SettingsDoc,
+    | 'speechRate'
+    | 'voiceVolume'
+    | 'preferredVoiceURI'
+    | 'activeLanguage'
+    | 'useOfflineVoicesOnly'
+    | 'talkativeness'
+  >
+>;
+
+// --- Speak payload (derived from spec §6 / §9 usage) -----------------------
+// The interpolation + voice-routing data SPEAK_AUTO / SPEAK_USER carry into
+// the actor. NOTE (executor): reconcile SpeakPayload's exact fields against
+// the actor's §6 needs (resolveAndDispatchSpeech reads `text` + `subject` +
+// `lang`; `event` is also carried on the SPEAK_* event itself).
+export type SpeakPayload = {
+  event: LifecycleEvent;
+  text?: string;
+  subject?: LifecycleSubject;
+  lang?: string;
+};
 ```
 
 - [ ] **Step 2: Verify typecheck**
@@ -413,14 +471,14 @@ type PresetProfile = Partial<
  * Spec §5.3 (Talkativeness vocabulary) + §9.2 (layer chain).
  */
 const PRESETS: Record<Talkativeness, PresetProfile> = {
-  quiet: {
+  'on-demand': {
     'pre-k': {
       'game.start': 'brief',
       'round.start': 'brief',
       'round.error': 'brief',
       'round.correct': 'off',
       'level.complete': 'brief',
-      'game.over': 'brief',
+      'game.end': 'brief',
     },
     k: {
       'game.start': 'brief',
@@ -428,7 +486,7 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.error': 'brief',
       'round.correct': 'off',
       'level.complete': 'brief',
-      'game.over': 'brief',
+      'game.end': 'brief',
     },
     'year1-2': {
       'game.start': 'off',
@@ -436,7 +494,7 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.error': 'brief',
       'round.correct': 'off',
       'level.complete': 'off',
-      'game.over': 'brief',
+      'game.end': 'brief',
     },
     'year3-4': {
       'game.start': 'off',
@@ -444,7 +502,7 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.error': 'brief',
       'round.correct': 'off',
       'level.complete': 'off',
-      'game.over': 'off',
+      'game.end': 'off',
     },
     'year5-6': {
       'game.start': 'off',
@@ -452,10 +510,10 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.error': 'off',
       'round.correct': 'off',
       'level.complete': 'off',
-      'game.over': 'off',
+      'game.end': 'off',
     },
   },
-  default: {
+  helpful: {
     // Undefined for every (gradeBand, event) — falls through to registry.
   },
   chatty: {
@@ -467,7 +525,7 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.correct': 'full',
       'round.advance': 'full',
       'level.complete': 'full',
-      'game.over': 'full',
+      'game.end': 'full',
     },
     k: {
       'game.prepare': 'full',
@@ -477,7 +535,7 @@ const PRESETS: Record<Talkativeness, PresetProfile> = {
       'round.correct': 'full',
       'round.advance': 'full',
       'level.complete': 'full',
-      'game.over': 'full',
+      'game.end': 'full',
     },
     'year1-2': {
       'game.start': 'full',
@@ -920,19 +978,27 @@ Add `settingsMigrations[4]` mapping:
 
 Bump the schema version: `version: 4` (was `3`).
 
-- [ ] **Step 4: Extend `DEFAULT_SETTINGS` in `useSettings.ts`**
+- [ ] **Step 4: Extend `DEFAULT_SETTINGS` in `useSettings.ts` + export it and `UseSettingsResult`**
 
-In `src/db/hooks/useSettings.ts`, update `DEFAULT_SETTINGS` so first-paint (before RxDB resolves the live doc) carries v4 defaults:
+In `src/db/hooks/useSettings.ts`, update `DEFAULT_SETTINGS` so first-paint (before RxDB resolves the live doc) carries v4 defaults. **Also add the `export` keyword to both `DEFAULT_SETTINGS` and the `UseSettingsResult` type** — Task 8.5's `src/lib/lifecycle-tts/pick-tts-settings.ts` imports both (`import { DEFAULT_SETTINGS } from '@/db/hooks/useSettings'` for boundary defaults and `import type { UseSettingsResult } from '@/db/hooks/useSettings'` for the `settings` slice type). They are module-private on master, so the import would fail to compile without this change:
 
 ```ts
-const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
+// const DEFAULT_SETTINGS  →  export const DEFAULT_SETTINGS
+export const DEFAULT_SETTINGS: Omit<SettingsDoc, 'updatedAt'> = {
   // ... existing
   talkativeness: 'helpful',
   useOfflineVoicesOnly: true,
 };
+
+// type UseSettingsResult  →  export type UseSettingsResult
+// (the existing return-type alias of useSettings; just add `export`)
+export type UseSettingsResult = {
+  settings: SettingsDoc;
+  update: (patch: Partial<SettingsDoc>) => Promise<void>;
+};
 ```
 
-Drop `ttsEnabled: true` from the default block. The `useSettings()` hook's API (`{ settings, update }`) is unchanged — consumers just read `settings.talkativeness` instead of `settings.ttsEnabled`.
+Drop `ttsEnabled: true` from the default block. The `useSettings()` hook's API (`{ settings, update }`) is unchanged — consumers just read `settings.talkativeness` instead of `settings.ttsEnabled`. (If `useSettings.ts` does not currently declare a named `UseSettingsResult` alias, extract its inline return type into one and export it; reconcile the exact field shape against the existing implementation.)
 
 - [ ] **Step 5: Verify migration test passes**
 
@@ -2465,14 +2531,18 @@ import { useVoiceUnavailableDialog } from '@/providers/VoiceUnavailableDialogPro
 import type { LifecycleTtsUnavailableEvent } from '@/types/game-events';
 
 export const useLifecycleTtsUnavailableHandler = (): void => {
-  const { open } = useVoiceUnavailableDialog();
+  // PR #409's VoiceUnavailableDialogProvider exposes `show`, not `open`.
+  // Signature: show(voiceName: string, locale: string). The unavailable
+  // event's `subject` carries the locale that failed to resolve (spec §4.3),
+  // so pass '' for the (unknown) voice name and the subject as the locale.
+  const { show } = useVoiceUnavailableDialog();
   useEffect(() => {
     const bus = getGameEventBus();
     const unsub = bus.subscribe('lifecycle.tts.unavailable', (e) => {
-      open((e as LifecycleTtsUnavailableEvent).subject);
+      show('', (e as LifecycleTtsUnavailableEvent).subject);
     });
     return unsub;
-  }, [open]);
+  }, [show]);
 };
 ```
 
@@ -2793,10 +2863,10 @@ const numberMatchTTS: GameTTSConfig = {
     },
     default: 'full',
   },
-  'game.over': {
+  'game.end': {
     tts: {
-      brief: 'tts.number-match.game-over.brief',
-      full: 'tts.number-match.game-over.full',
+      brief: 'tts.number-match.game-end.brief',
+      full: 'tts.number-match.game-end.full',
     },
     byGradeBand: {
       'pre-k': 'full',
@@ -2837,7 +2907,7 @@ playing: {
 Also add `speak` entries at the appropriate transitions for the other events the registry handles. Minimum set for M1:
 
 - `roundComplete` state (already has `playSound`): also add `{ type: 'speak', params: { lifecycleEvent: 'round.correct' } }`.
-- Optional: track `round.error` via an `assign` + `entry`-like pattern on `placeTile` actions — defer to M2 if the wiring is non-trivial; M1's must-haves are `round.start` (fixes the "5" bug) + `game.over` (already present at line 624).
+- Optional: track `round.error` via an `assign` + `entry`-like pattern on `placeTile` actions — defer to M2 if the wiring is non-trivial; M1's must-haves are `round.start` (fixes the "5" bug) + `game.end` (already present at line 624).
 
 - [ ] **Step 4b: Remove the legacy `useRoundTTS` caller from NumberMatch**
 
@@ -3750,7 +3820,7 @@ Add to `src/lib/i18n/locales/en/games.json`:
         "brief": "Level complete.",
         "full": "Level complete. You spelled {{count}} words.",
       },
-      "game-over": {
+      "game-end": {
         "brief": "Done.",
         "full": "Game over. You spelled {{count}} words.",
       },
@@ -3780,7 +3850,7 @@ Add to `src/lib/i18n/locales/en/games.json`:
         "brief": "Level complete.",
         "full": "Level complete.",
       },
-      "game-over": {
+      "game-end": {
         "brief": "Done.",
         "full": "Game over. Great job!",
       },
@@ -3810,7 +3880,7 @@ Add to `src/lib/i18n/locales/en/games.json`:
         "brief": "Level complete.",
         "full": "Level complete.",
       },
-      "game-over": {
+      "game-end": {
         "brief": "Done.",
         "full": "Game over. Great job!",
       },
@@ -4036,3 +4106,35 @@ A multi-persona review (coherence, feasibility, product-lens, design-lens, scope
 - Reviewers: ce-coherence-reviewer (7 findings), ce-feasibility-reviewer (11), ce-product-lens-reviewer (8), ce-design-lens-reviewer (6), ce-scope-guardian-reviewer (6), ce-adversarial-document-reviewer (12).
 - Total raw findings: 50. After cross-persona dedup + merging: ~32 unique. Applied silently (safe_auto at anchor 100): 5. Applied via walk-through (P0-1 — caller removal in Tasks 9-11): 1. Deferred to this section: ~26 actionable + 5 FYI.
 - Critical convergences: (1) `gameDefinition` / `currentRound` context wiring (4-way), (2) Task 5 ttsEnabled scope (3-way: 164 refs / 85 files / `git add -A` violation), (3) SpotAll scope underspecification (multi-way), (4) `sessionId` / `profileId` props missing (2-way), (5) per-game `ConfigField` descriptors gap (2-way), (6) ARIA live region defer (2-way), (7) `types.ts` exists / `GameTTSConfig` missing (2-way, verified).
+
+### From 2026-06-09 ce-doc-review
+
+Second multi-persona pass (coherence, feasibility, scope, design, adversarial) against the **actor-rewrite** plan. Findings are grouped into clusters C1–C7 plus an FYI/P2 list. The compile-blocker clusters (C1, C3d, C3e, C7) were fixed in the 2026-06-09 commit that lands this subsection; the rest are tracked here for resolution at execution. Entry format: `Cn — severity — status — Title — why it matters — fix — flagged by`.
+
+- **C1 — P0 — RESOLVED 2026-06-09 (compile-blocker fix) — Task 1 `LifecycleEvent` 11→19 + `game.over`→`game.end` + missing type exports** — the 11-member union, the stale `game.over` literal, and the absent `SpeakPayload` / `TtsSettings` / `LifecycleSubject` / `subjectToken` exports made Tasks 6/8/8.5 fail to typecheck against `./types`. — fix: expanded Task 1 to the spec §4.1 19-event set, renamed `game.over`→`game.end` (+ `game-over`→`game-end` i18n keys) across Tasks 2/9–11/18 + the Modified-files table, and added the four missing type definitions (`LifecycleSubject` + `subjectToken` verbatim from §4.3, `TtsSettings` as a `Required<Pick<SettingsDoc, …>>`, `SpeakPayload` derived from §6/§9). — flagged by: coherence, feasibility, scope, adversarial.
+- **C2 — P0 — DEFERRED (DECISION D1) — Resolver model diverges from spec §9** — the plan's `EventTemplate{brief,full}` / `Verbosity` / `byGradeBand` resolver (Tasks 1–3) does not match spec §9's `EventBindings{'on-demand',helpful,chatty}` / `Talkativeness` / `INHERITED` / `DONT_SPEAK` / 4-layer model, and `resolveCopy` returns only an i18n key (no `{{var}}` interpolation, no `soundEffect` output), so the two models cannot both be the source of truth. — fix: **DECISION D1** — either rewrite Tasks 1–3 to spec §9 (spec-wins) OR keep the Verbosity model, declare a Spec Delta, and map Talkativeness→Verbosity at the actor boundary. — flagged by: coherence, scope, adversarial.
+- **C3a — P0 — DEFERRED — Task 8.6 `loading.entry` single-emit-site has no machine to attach to** — per-game machines start `initial: 'playing'` with no shared engine machine and no `loading` state, and `executeSideEffects` has no `initialState`, so the prescribed `game.start`/`game.resume` single emit-site has nowhere to live. — fix: at execution, locate or introduce the engine-level `loading` state (or relocate the emit to the real mount seam) and thread `initialState`; reconcile against the actual engine surface after PR 1c. — flagged by: feasibility, adversarial.
+- **C3b — P1 — DEFERRED — `LIFECYCLE_TTS_PLAYED` transition-gate rail asserted "ships in M1" but unimplemented** — Tasks 10/11 claim the bus→machine forwarding rail (spec §10.2) ships in M1, but no task wires `lifecycle.tts.played` back into the game machines. — fix: either add an explicit task implementing the bus→machine forward or downgrade the "ships in M1" claim to a reservation. — flagged by: feasibility, adversarial.
+- **C3c — P1 — DEFERRED — `RoundContext` / `round-context.tsx` consumed but never created** — Tasks 13/8.5 call `useRoundContext` (via `roundToPayload(round)`), but no task creates `RoundContext` or specifies its mount site, so the in-game payload path is unbuildable as written. — fix: add a task creating `round-context.tsx` + provider and name its mount site (likely inside each game component, aligning with the C2/2026-05-13 P0 mount decision). — flagged by: feasibility, scope, design.
+- **C3d — P0 — RESOLVED 2026-06-09 (compile-blocker fix) — `pick-tts-settings.ts` imported non-exported `DEFAULT_SETTINGS` / `UseSettingsResult`** — Task 8.5's `pick-tts-settings.ts` imports both symbols from `@/db/hooks/useSettings`, but they are module-private on master, so the import fails to compile. — fix: Task 5 Step 4 now adds `export` to `const DEFAULT_SETTINGS` and `type UseSettingsResult` (extracting the inline return type into a named alias if needed). — flagged by: feasibility.
+- **C3e — P0 — RESOLVED 2026-06-09 (compile-blocker fix) — Unavailable-handler called `open(subject)` vs provider `show(voiceName, locale)`** — PR #409's `VoiceUnavailableDialogProvider` exposes `{ show }` with signature `show(voiceName: string, locale: string)`, not `open`, so the handler in Task 8.5 would not compile and would pass the wrong argument shape. — fix: changed to `const { show } = useVoiceUnavailableDialog()` and `show('', (e as LifecycleTtsUnavailableEvent).subject)` (subject carries the locale per §4.3); dep array updated to `[show]`. — flagged by: feasibility.
+- **C3f — P1 — DEFERRED (DECISION D2) — `LifecycleTtsProvider` root-mount sits above `DbProvider`** — mounting in `__root.tsx` (per §5.5.1) places the Provider above `DbProvider` (mounted at `_app.tsx`), so `useSettings()` degrades to defaults (commit 76dc53e36) → the actor never sees live settings and the Talkativeness slider is inert. — fix: **DECISION D2** — either mount `LifecycleTtsProvider` below `DbProvider` (deviate from spec §5.5.1 and fix the spec) OR hoist `DbProvider` to the root. — flagged by: feasibility.
+- **C4 — P1 — DEFERRED — Task 16 emits a bare `game.prepare` bus event, not `lifecycle.speak`** — the actor subscribes only to `lifecycle.speak`, so a raw `game.prepare` emit is silently dropped and the Game Options speech never plays; relatedly, the engine `speak` SideEffect is flat `{ type, lifecycleEvent }`, not `{ type, params: { lifecycleEvent } }` as some machine snippets show. — fix: emit `{ type: 'lifecycle.speak', lifecycleEvent: 'game.prepare', … }` from Task 16, and reconcile the `speak` SideEffect shape across the engine + machine snippets to one form. — flagged by: scope, coherence, feasibility, adversarial.
+- **C5 — P1 — DEFERRED — Task 5 v4 migration never wired into `create-database.ts`; uses forbidden spread** — the migration is defined but not registered in `src/db/create-database.ts`, so it never runs and existing docs fail to load; it also uses `{ ...rest }` spread, which spec §5.9 forbids under `additionalProperties: false`. — fix: register `settingsMigrations[4]` in `create-database.ts` and rewrite the migration to an explicit field allowlist (no spread) per §5.8/§5.9. — flagged by: feasibility, scope, adversarial.
+- **C6 — P1 — DEFERRED — M1 acceptance criteria with no implementing task** — several spec-mandated M1 behaviors have no task: §5.6.1 AudioButton pulse on talkativeness→`on-demand`; `CloudVoiceModal` + `useOfflineVoicesOnly` confirmation (§8.3); ARIA live region for round outcomes (§7.3/§12.2); AudioButton `restart-flash` re-tap handler (§8.7) missing from Task 13 code. — fix: add minimal tasks for each (or declare each an explicit Spec Delta), e.g. wrap round outcomes in `<div role="status" aria-live="polite">` and add the pulse `useEffect` to `useSpeakButton`. — flagged by: scope, design.
+- **C7 — P1 — RESOLVED 2026-06-09 (compile-blocker fix) — Task 2 `PRESETS` keys `quiet`/`default` vs `Talkativeness` `on-demand`/`helpful`** — the `Record<Talkativeness, PresetProfile>` map used legacy keys `quiet:` / `default:`, which do not satisfy the `Talkativeness` union (`'on-demand' | 'helpful' | 'chatty'`), so the object fails to typecheck. — fix: renamed the map keys `quiet:`→`'on-demand':` and `default:`→`helpful:` (kept `chatty:`); preset contents unchanged. — flagged by: feasibility, scope.
+
+#### FYI / P2 (2026-06-09 — DEFERRED, triage at execution)
+
+- **QuestionRow prop API mismatch** — plan uses `{ audio, content }`; spec §8.6 uses `{ audioEvent, children }`. Reconcile to the spec shape in Task 12.
+- **Provider DEV duplicate-guard misses sibling providers** — `use(Context)` only detects an ancestor Provider, not a sibling double-mount; use a module-level mount counter instead.
+- **`useSpeakButton` `isSpeaking` brands subject as the event name** — matching on `subjectToken(event)` breaks multi-button match; use the real payload `subject` per §8.7.
+- **Talkativeness presets gate events with no M1 wiring** — `round.advance` / `round.celebrate`, `game.resume`, `turn.action` appear in presets but have no firing path in M1; trim or annotate.
+- **Task 5A migration test lacks the unknown-field-drop assertion** — §5.8 requires asserting an unknown legacy field is dropped (non-leakage); the current Step 1 asserts only the `ttsEnabled` branches + field preservation.
+- **`i18n-template-coverage.test.ts` (§11.2) has no task** — the spec's template-coverage test is unowned; add a task or note the gap.
+- **Talkativeness slider missing persistent descriptor + `aria-valuetext`** — §8.2 requires a below-slider text descriptor and `aria-valuetext`; Task 17 omits both.
+- **`gradeBand` default `'k'` vs spec §5.3 safest `'pre-k'`** — the migration/default uses `'k'`; spec §5.3 prefers `'pre-k'` (always speaks) as the safe default.
+- **`useOfflineVoicesOnly` re-enable active-cloud-voice fallback UI unspecified** — §8.3's feedback when re-enabling offline-only while a cloud voice is active is not described in any task.
+- **`(?)` info-button caveats tooltip not in Task 17** — the settings info-button tooltip copy is unspecified.
+- **`round.error` entry wiring deferred in Task 9 with no acceptance note** — the optional `round.error` tracking is deferred to M2 without an explicit acceptance criterion documenting the gap.
+- **`game.resume` emitted (Task 8.6) but has no M1 i18n key / tts block** — on refresh, `game.resume` resolves to `null` because no game registers a `game.resume` template; add a key/block or document the intentional silence.
