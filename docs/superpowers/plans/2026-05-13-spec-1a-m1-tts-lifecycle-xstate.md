@@ -172,10 +172,13 @@ Path C — UI user action (speaker tap / question onClick) — NOT via bus
 
 ```text
 src/lib/lifecycle-tts/
-├── types.ts                       # LifecycleEvent, Verbosity, EventTemplate, Talkativeness, GameTTSConfig, LifecycleSubject + subjectToken, TtsSettings
-├── talkativeness-presets.ts       # Quiet / Default / Chatty profiles per gradeBand
-├── talkativeness-presets.test.ts
-├── resolve.ts                     # resolveVerbosity() + resolveCopy() — pure functions
+├── types.ts                       # LifecycleEvent, Talkativeness, EventBindings + EventBindingsMap, ResolutionLayers, RoundContextValue, LifecycleSubject + subjectToken, TtsSettings
+├── sentinel-values.ts             # INHERITED / DONT_SPEAK sentinel constants (§9.3)
+├── defaults.ts                    # global defaults layer — mostly INHERITED (§9.2 layer 4)
+├── defaults.test.ts
+├── round-context.tsx              # RoundContextProvider + useRoundContext + module-level mirror (§9.6)
+├── round-context.test.tsx
+├── resolve.ts                     # resolveTemplate() — single pure resolver: layer chain + sentinels + i18n.exists + interpolation + soundEffect (§9.1–§9.7)
 ├── resolve.test.ts
 ├── errors.ts                      # LocalVoiceUnavailableError (§7.2)
 ├── pick-tts-settings.ts           # pickTtsSettings() — boundary-coerces SettingsDoc → Required<TtsSettings> (§5.5)
@@ -221,6 +224,7 @@ src/components/answer-game/GameOptions/
 | File                                                             | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/types/game-events.ts`                                       | **Two-tier `BaseGameEvent` restructure** (`roundIndex` moves to new `RoundScopedGameEvent`); add `game.prepare` + 4 lifecycle literals (`lifecycle.cancel`, `lifecycle.tts.played`, `lifecycle.tts.unavailable`, `lifecycle.tts.cloud-fallback`) to `GameEventType`; add `GamePrepareEvent` + 4 new lifecycle event interfaces; extend the `GameEvent` union. Full set per **Chunk D** in Task 4. (`lifecycle.speak` already exists.)                                                         |
+| `src/lib/game-engine/definition-types.ts`                        | Rename the forward-reference import `EventTemplate` → `EventBindings`; `GameDefinition.tts` becomes `tts?: EventBindingsMap` (spec §9.2). The `SideEffect` `'speak'` member stays flat: `{ type: 'speak'; lifecycleEvent }`.                                                                                                                                                                                                                                                                  |
 | `src/components/answer-game/types.ts`                            | Add `gradeBand: GradeBand` to per-game `AnswerGameConfig`. **Drop `ttsEnabled`.** `talkativeness` lives on user `SettingsDoc`, NOT on per-game config (spec §5.5, §13.1.B #11) — access via `useSettings()`.                                                                                                                                                                                                                                                                                  |
 | `src/games/spot-all/types.ts`                                    | Drop `ttsEnabled`; add `gradeBand: GradeBand` to `SpotAllConfig`. (SpotAll's `speakPrompt` consolidation is deferred per Spec Delta 1 — only the type changes here so the config blob stays consistent.)                                                                                                                                                                                                                                                                                      |
 | `src/db/schemas/settings.ts`                                     | **v3 → v4 RxDB schema migration.** Add `talkativeness: 'on-demand' \| 'helpful' \| 'chatty'` (default `'helpful'`) + `useOfflineVoicesOnly: boolean` (default `true`) at the top level. Drop `ttsEnabled`. Full v4 schema per spec §5.8 — every field declared because master enforces `additionalProperties: false`. Preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage`, all volume fields, etc. exactly.                                                |
@@ -229,7 +233,7 @@ src/components/answer-game/GameOptions/
 | `src/components/answer-game/useGameTTS.test.tsx`                 | Update tests for the talkativeness-gated `speakTile`; mock `useSettings()`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `src/components/answer-game/useRoundTTS.ts`                      | **DELETE.** All three XState games drive round-start speech via `entry: [speak({ lifecycleEvent: 'round.start' })]` on the machine's `playing` state. No callers remain after Tasks 9, 10, 11.                                                                                                                                                                                                                                                                                                |
 | `src/components/answer-game/useRoundTTS.test.tsx`                | **DELETE** alongside the source file.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `src/games/number-match/definition.ts`                           | Add `tts:` block (matches `Partial<Record<LifecycleEvent, EventTemplate>>` from `definition-types.ts:39`); add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to `playing` state.                                                                                                                                                                                                                                                                                    |
+| `src/games/number-match/definition.ts`                           | Add `tts:` block (`EventBindingsMap` — per-variant i18n keys + `DONT_SPEAK` / `INHERITED` sentinels, spec §9.3); add `entry: [{ type: 'speak', params: { lifecycleEvent: 'round.start' } }]` to `playing` state.                                                                                                                                                                                                                                                                              |
 | `src/games/word-spell/definition.ts`                             | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `src/games/sort-numbers/definition.ts`                           | Same shape — `tts:` block + `speak` entry on `playing`.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `src/games/number-match/NumberMatch/NumberMatch.tsx`             | Replace stacked numeral + question siblings with `<QuestionRow>`; pass `event="round.start"` to AudioButton.                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -245,7 +249,7 @@ src/components/answer-game/GameOptions/
 | `src/components/SettingsPanel/SettingsPanel.tsx`                 | Add 3-stop Talkativeness slider (`on-demand` \| `helpful` \| `chatty`) replacing the legacy `ttsEnabled` toggle; read/write via `useSettings()`. Tooltip explains "The speaker button always works." Spec §8.2.                                                                                                                                                                                                                                                                               |
 | `src/components/AdvancedConfigModal.tsx`                         | Add `gradeBand` select to per-game config form (no Talkativeness here — it lives in SettingsPanel as a user-level setting per §13.1.B #11).                                                                                                                                                                                                                                                                                                                                                   |
 | `src/components/AdvancedConfigModal.test.tsx`                    | Add test that selecting a gradeBand writes to the config draft.                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `src/lib/i18n/locales/en/games.json`                             | Add `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*` keys (events: `game-prepare`, `game-start`, `round-start`, `round-error`, `round-correct`, `round-advance`, `level-complete`, `game-end`).                                                                                                                                                                                                                                                                                 |
+| `src/lib/i18n/locales/en/games.json`                             | Add `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*` keys — per-variant `tts.<game-id>.<event-kebab>.helpful` / `.chatty` (spec §9.4); `on-demand` defaults to `DONT_SPEAK`, so it gets no keys (§9.8).                                                                                                                                                                                                                                                                         |
 | `src/lib/i18n/locales/pt-BR/games.json`                          | Mirror keys (placeholder English values; Portuguese translations follow-up).                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `src/routes/$locale/_app/game/$gameId.tsx`                       | Update `InstructionsOverlay` import + JSX to `GameOptionsOverlay`.                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `src/routes/__root.tsx`                                          | **Mount `LifecycleTtsProvider` once** — inside `ServiceWorkerProvider`, outside the route outlet — so a single actor spans every route (spec §5.5.1). A sibling `useLifecycleTtsUnavailableHandler` subscribes to `lifecycle.tts.unavailable` and drives PR #409's `VoiceUnavailableDialogProvider`.                                                                                                                                                                                          |
@@ -282,7 +286,7 @@ src/components/answer-game/InstructionsOverlay/
 
 - **SpotAll AudioButton + speakPrompt consolidation.** Follow-up tied to PR 1d (#368). Open as `M1 follow-up: SpotAll AudioButton` once #368 lands.
 - **Per-event `customConfig.events` override surface.** Code-only — game designers set it on customConfigs. M2 work.
-- **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of `byGradeBand` defaults across multiple games. Deferred until M2 expands the event vocabulary.
+- **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of per-variant `EventBindings` across multiple games. Deferred until M2 expands the event vocabulary.
 - **ARIA live region implementation.** M2 — ARIA live regions for round outcomes are decoupled from TTS and ship separately. Known gap surfaced by 2026-05-13 review (P2); see Deferred / Open Questions below. (The new 2026-05-16 spec carries ARIA under §12.2 acceptance criteria but not as a dedicated section.)
 - **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
 
@@ -292,15 +296,16 @@ src/components/answer-game/InstructionsOverlay/
 
 **Files:**
 
-- Create: `src/lib/lifecycle-tts/types.ts`
-- Verify: `src/lib/game-engine/definition-types.ts:1-7` (already imports these types)
+- Create: `src/lib/lifecycle-tts/types.ts` (overwrites the pre-spec forward-reference pin from `a653cf284`)
+- Modify: `src/lib/game-engine/definition-types.ts` (`EventTemplate` → `EventBindingsMap`)
 
 - [ ] **Step 1: Create the types module**
 
-Create `src/lib/lifecycle-tts/types.ts`:
+Create `src/lib/lifecycle-tts/types.ts`. This overwrites the pre-spec pin: the legacy `Verbosity`, `EventTemplate`, and `TalkativenessPreset` exports are **deleted** — their only consumer is the engine forward reference, updated in Step 2:
 
 ```ts
-import type { GradeBand, SettingsDoc } from '@/types/game-events';
+import type { SoundKey } from '@/lib/audio/AudioFeedback';
+import type { SettingsDoc } from '@/types/game-events';
 
 // Full 19-event lifecycle surface (spec §4.1). The actor's priority/throttle
 // tables (Task 8) and bus union (Task 4) are keyed on this exact set.
@@ -330,20 +335,56 @@ export type LifecycleEvent =
   | 'lifecycle.tts.unavailable' // No voice available under user's privacy settings
   | 'lifecycle.tts.cloud-fallback'; // System default cloud voice in use (useOfflineVoicesOnly: false)
 
-export type Verbosity = 'off' | 'brief' | 'full';
-
 export type Talkativeness = 'on-demand' | 'helpful' | 'chatty';
 
-export type EventTemplate = {
-  /** i18n keys, one per verbosity mode. Spec §9.3 + §9.4. */
-  tts: { brief: string; full: string };
-  byGradeBand: Record<GradeBand, Verbosity>;
-  default: Verbosity;
+// --- Event bindings (spec §9.2 + §9.3) --------------------------------------
+// Sentinel semantics (constants live in ./sentinel-values.ts, Task 2):
+//   string    → i18n key to speak for this variant
+//   null      → DONT_SPEAK: explicit "do not speak" — stops the layer chain
+//   undefined → INHERITED: no opinion — fall through to the next layer
+export type TtsBindings = Partial<Record<Talkativeness, string | null>>;
+
+export type EventBindings = {
+  /** `null` = DONT_SPEAK for every variant; absent = INHERITED. */
+  tts?: TtsBindings | null;
+  soundEffect?: {
+    key: SoundKey;
+    mode: 'parallel' | 'sequenced';
+  } | null;
 };
 
-export type GameTTSConfig = Partial<
-  Record<LifecycleEvent, EventTemplate>
+export type EventBindingsMap = Partial<
+  Record<LifecycleEvent, EventBindings>
 >;
+
+// 4-layer resolution chain (spec §9.2), walked top to bottom; first
+// non-INHERITED binding wins per field. In M1 `skin` is always undefined
+// (reserved for M3) and `customConfig` has no write surface yet (M2) — the
+// resolver supports both so those phases are purely additive.
+export interface ResolutionLayers {
+  customConfig?: EventBindingsMap;
+  skin?: EventBindingsMap;
+  definition: EventBindingsMap; // required — every game has one
+  defaults: EventBindingsMap;
+}
+
+// --- RoundContext value (spec §9.6) -----------------------------------------
+// Hybrid shape: universal fields every game populates + game-specific
+// fields for template-authoring naturalness. The React Provider + hook +
+// module-level mirror live in ./round-context.tsx (Task 3.5).
+export interface RoundContextValue {
+  currentTarget: string; // generic answer label — "frog" / "5" / "ascending 1-10"
+  gameName: string;
+  correctCount: number;
+  totalRounds: number;
+  currentWord?: string; // WordSpell
+  currentCount?: number; // NumberMatch
+  currentDirection?: 'ascending' | 'descending'; // SortNumbers
+  currentFrom?: number; // SortNumbers
+  currentTo?: number; // SortNumbers
+  currentStep?: number; // SortNumbers
+  // currentTarget covers SpotAll
+}
 
 // --- Branded subject token (spec §4.3) -------------------------------------
 // `subject` is an opaque ID (tile ID, phoneme key, word ID, locale, max 64
@@ -388,197 +429,139 @@ export type SpeakPayload = {
 };
 ```
 
-- [ ] **Step 2: Verify typecheck**
+- [ ] **Step 2: Update the engine forward reference**
+
+In `src/lib/game-engine/definition-types.ts`, swap the import and the `tts` field to the spec §9.2 map shape:
+
+```ts
+import type {
+  EventBindingsMap,
+  LifecycleEvent,
+} from '@/lib/lifecycle-tts/types';
+
+// …
+
+export interface GameDefinition<TRound = unknown> {
+  // …unchanged fields…
+  tts?: EventBindingsMap;
+}
+```
+
+`SideEffect`'s `'speak'` member is already flat (`{ type: 'speak'; lifecycleEvent: LifecycleEvent }`) — leave it untouched. Every machine snippet in this plan uses the matching flat params shape (see the Task 9 integration note).
+
+- [ ] **Step 3: Verify typecheck**
 
 Run: `yarn typecheck`
-Expected: PASS — the engine's `definition-types.ts:8` and `useGameEngine.ts:11` imports resolve. No type errors anywhere.
+Expected: PASS — the engine's `definition-types.ts` and `useGameEngine.ts:11` imports resolve. No type errors anywhere.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/lib/lifecycle-tts/types.ts
-git commit -m "feat(lifecycle-tts): add types module — satisfies engine forward reference"
+git add src/lib/lifecycle-tts/types.ts src/lib/game-engine/definition-types.ts
+git commit -m "feat(lifecycle-tts): spec §9 EventBindings types — replaces pre-spec EventTemplate pin"
 ```
 
 ---
 
-## Task 2: Talkativeness Presets
+## Task 2: Sentinel Values + Global Defaults Layer
+
+The Talkativeness→Verbosity preset tables are gone — under spec §9 the user's `talkativeness` **is** the variant key inside each `EventBindings`, so there is no mapping layer to build. What remains of "global tuning" is layer 4 of the §9.2 chain: the `defaults` map (mostly `INHERITED`) plus the sentinel constants every layer uses.
 
 **Files:**
 
-- Create: `src/lib/lifecycle-tts/talkativeness-presets.ts`
-- Create: `src/lib/lifecycle-tts/talkativeness-presets.test.ts`
+- Create: `src/lib/lifecycle-tts/sentinel-values.ts`
+- Create: `src/lib/lifecycle-tts/defaults.ts`
+- Create: `src/lib/lifecycle-tts/defaults.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
-Create `src/lib/lifecycle-tts/talkativeness-presets.test.ts`:
+Create `src/lib/lifecycle-tts/defaults.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { resolvePresetVerbosity } from './talkativeness-presets';
+import { DEFAULT_EVENT_BINDINGS } from './defaults';
+import { DONT_SPEAK, INHERITED } from './sentinel-values';
 
-describe('resolvePresetVerbosity', () => {
-  it('Default at pre-k speaks round.start full', () => {
+describe('sentinel values', () => {
+  it('DONT_SPEAK and INHERITED are distinct sentinels (null vs undefined)', () => {
+    // The resolver branches on this distinction (§9.3) — guard it.
+    expect(DONT_SPEAK).toBeNull();
+    expect(INHERITED).toBeUndefined();
+  });
+});
+
+describe('DEFAULT_EVENT_BINDINGS', () => {
+  it('turn.action is SFX-only: tts DONT_SPEAK, soundEffect bound', () => {
+    expect(DEFAULT_EVENT_BINDINGS['turn.action']?.tts).toBeNull();
     expect(
-      resolvePresetVerbosity('helpful', 'pre-k', 'round.start'),
-    ).toBe('full');
+      DEFAULT_EVENT_BINDINGS['turn.action']?.soundEffect?.key,
+    ).toBe('tile-place');
   });
 
-  it('Quiet at year3-4 turns round.correct off', () => {
-    expect(
-      resolvePresetVerbosity('on-demand', 'year3-4', 'round.correct'),
-    ).toBe('off');
-  });
-
-  it('Chatty at year5-6 still speaks round.start brief', () => {
-    expect(
-      resolvePresetVerbosity('chatty', 'year5-6', 'round.start'),
-    ).toBe('brief');
-  });
-
-  it('returns undefined for unmapped (preset, event) pairs to fall through to registry default', () => {
-    // round.idle has no preset opinion — falls through.
-    expect(
-      resolvePresetVerbosity('helpful', 'k', 'round.idle'),
-    ).toBeUndefined();
+  it('round.start is INHERITED — each game owns its round.start copy', () => {
+    expect(DEFAULT_EVENT_BINDINGS['round.start']).toBeUndefined();
   });
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lib/lifecycle-tts/talkativeness-presets.test.ts --reporter=verbose`
-Expected: FAIL — `resolvePresetVerbosity` not exported.
+Run: `npx vitest run src/lib/lifecycle-tts/defaults.test.ts --reporter=verbose`
+Expected: FAIL — modules not created yet.
 
-- [ ] **Step 3: Implement the presets module**
+- [ ] **Step 3: Implement sentinels + defaults**
 
-Create `src/lib/lifecycle-tts/talkativeness-presets.ts`:
+Create `src/lib/lifecycle-tts/sentinel-values.ts` (verbatim from spec §9.3):
 
 ```ts
-import type { LifecycleEvent, Talkativeness, Verbosity } from './types';
-import type { GradeBand } from '@/types/game-events';
-
-type PresetProfile = Partial<
-  Record<GradeBand, Partial<Record<LifecycleEvent, Verbosity>>>
->;
+/**
+ * Sentinel: this binding has no opinion — fall through to next layer.
+ */
+export const INHERITED = undefined;
 
 /**
- * Quiet / Default / Chatty profiles. Each profile maps (gradeBand, event)
- * pairs to a verbosity. Unmapped pairs return undefined so the caller
- * falls through to `definition.tts[event].byGradeBand` / `.default`.
- *
- * Spec §5.3 (Talkativeness vocabulary) + §9.2 (layer chain).
+ * Sentinel: this binding explicitly says "do not speak" — stops the chain.
  */
-const PRESETS: Record<Talkativeness, PresetProfile> = {
-  'on-demand': {
-    'pre-k': {
-      'game.start': 'brief',
-      'round.start': 'brief',
-      'round.error': 'brief',
-      'round.correct': 'off',
-      'level.complete': 'brief',
-      'game.end': 'brief',
-    },
-    k: {
-      'game.start': 'brief',
-      'round.start': 'brief',
-      'round.error': 'brief',
-      'round.correct': 'off',
-      'level.complete': 'brief',
-      'game.end': 'brief',
-    },
-    'year1-2': {
-      'game.start': 'off',
-      'round.start': 'brief',
-      'round.error': 'brief',
-      'round.correct': 'off',
-      'level.complete': 'off',
-      'game.end': 'brief',
-    },
-    'year3-4': {
-      'game.start': 'off',
-      'round.start': 'off',
-      'round.error': 'brief',
-      'round.correct': 'off',
-      'level.complete': 'off',
-      'game.end': 'off',
-    },
-    'year5-6': {
-      'game.start': 'off',
-      'round.start': 'off',
-      'round.error': 'off',
-      'round.correct': 'off',
-      'level.complete': 'off',
-      'game.end': 'off',
-    },
-  },
-  helpful: {
-    // Undefined for every (gradeBand, event) — falls through to registry.
-  },
-  chatty: {
-    'pre-k': {
-      'game.prepare': 'full',
-      'game.start': 'full',
-      'round.start': 'full',
-      'round.error': 'full',
-      'round.correct': 'full',
-      'round.advance': 'full',
-      'level.complete': 'full',
-      'game.end': 'full',
-    },
-    k: {
-      'game.prepare': 'full',
-      'game.start': 'full',
-      'round.start': 'full',
-      'round.error': 'full',
-      'round.correct': 'full',
-      'round.advance': 'full',
-      'level.complete': 'full',
-      'game.end': 'full',
-    },
-    'year1-2': {
-      'game.start': 'full',
-      'round.start': 'full',
-      'round.error': 'full',
-      'round.correct': 'full',
-      'level.complete': 'full',
-    },
-    'year3-4': {
-      'round.start': 'brief',
-      'round.error': 'full',
-      'level.complete': 'brief',
-    },
-    'year5-6': {
-      'round.start': 'brief',
-      'round.error': 'brief',
-    },
-  },
-};
+export const DONT_SPEAK = null;
+```
 
-export const resolvePresetVerbosity = (
-  preset: Talkativeness,
-  gradeBand: GradeBand,
-  event: LifecycleEvent,
-): Verbosity | undefined => {
-  return PRESETS[preset][gradeBand]?.[event];
+Create `src/lib/lifecycle-tts/defaults.ts` — layer 4 of the §9.2 chain. Mostly `INHERITED` (i.e. absent): each game owns its own copy via `definition.tts`; the global layer only carries cross-game SFX-only events:
+
+```ts
+import { DONT_SPEAK } from './sentinel-values';
+import type { EventBindingsMap } from './types';
+
+/**
+ * Global fallback layer (§9.2 layer 4). Mostly INHERITED — an event absent
+ * here means "no global opinion". `turn.action` is the one cross-game
+ * default in M1: tile pickup/place is interaction feedback — SFX only,
+ * never spoken (§4.1).
+ */
+export const DEFAULT_EVENT_BINDINGS: EventBindingsMap = {
+  'turn.action': {
+    tts: DONT_SPEAK,
+    soundEffect: { key: 'tile-place', mode: 'parallel' },
+  },
 };
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lib/lifecycle-tts/talkativeness-presets.test.ts --reporter=verbose`
-Expected: PASS — all four tests green.
+Run: `npx vitest run src/lib/lifecycle-tts/defaults.test.ts --reporter=verbose`
+Expected: PASS — all three tests green.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/lib/lifecycle-tts/talkativeness-presets.ts src/lib/lifecycle-tts/talkativeness-presets.test.ts
-git commit -m "feat(lifecycle-tts): add Quiet/Default/Chatty talkativeness presets"
+git add src/lib/lifecycle-tts/sentinel-values.ts src/lib/lifecycle-tts/defaults.ts src/lib/lifecycle-tts/defaults.test.ts
+git commit -m "feat(lifecycle-tts): INHERITED/DONT_SPEAK sentinels + global defaults layer (spec §9.2–§9.3)"
 ```
 
 ---
 
-## Task 3: Verbosity + Copy Resolver
+## Task 3: `resolveTemplate` — Single Pure Resolver (spec §9.1–§9.7)
+
+One pure function replaces the old `resolveVerbosity` + `resolveCopy` pair: it walks the 4-layer chain (customConfig → skin → definition → defaults) with **per-field fall-through** (tts and soundEffect resolve independently), respects the `INHERITED` / `DONT_SPEAK` sentinels, guards missing i18n keys via `i18n.exists()` (§9.5), interpolates `{{var}}`s from `RoundContextValue` (§9.6–§9.7), and returns `{ text, soundEffect }`. No flags awareness (`talkativeness === 'on-demand'` and `useOfflineVoicesOnly` gate before/after in the actor), no subscriptions, no side effects.
 
 **Files:**
 
@@ -590,81 +573,197 @@ git commit -m "feat(lifecycle-tts): add Quiet/Default/Chatty talkativeness prese
 Create `src/lib/lifecycle-tts/resolve.test.ts`:
 
 ```ts
-import { describe, expect, it } from 'vitest';
-import { resolveCopy, resolveVerbosity } from './resolve';
-import type { EventTemplate, GameTTSConfig } from './types';
+import { describe, expect, it, vi } from 'vitest';
+import { resolveTemplate } from './resolve';
+import { DONT_SPEAK } from './sentinel-values';
+import type { ResolutionLayers, RoundContextValue } from './types';
 
-const wordSpellRoundStart: EventTemplate = {
-  tts: {
-    brief: 'tts.word-spell.round-start.brief',
-    full: 'tts.word-spell.round-start.full',
-  },
-  byGradeBand: {
-    'pre-k': 'full',
-    k: 'full',
-    'year1-2': 'full',
-    'year3-4': 'brief',
-    'year5-6': 'brief',
-  },
-  default: 'full',
+const roundContext: RoundContextValue = {
+  currentTarget: 'frog',
+  gameName: 'Word Spell',
+  correctCount: 2,
+  totalRounds: 10,
+  currentWord: 'frog',
 };
 
-const tts: GameTTSConfig = {
-  'round.start': wordSpellRoundStart,
+const en: Record<string, string> = {
+  'tts.word-spell.round-start.helpful': 'Spell the word {{word}}.',
+  'tts.word-spell.round-start.chatty':
+    "Let's spell. Spell the word {{word}}. You can do it!",
+  'custom.round-start.helpful': 'Custom: {{word}}!',
+  'tts.word-spell.round-start.broken': 'Spell {{notAVar}}.',
 };
 
-describe('resolveVerbosity', () => {
-  it('uses preset override when present', () => {
-    expect(
-      resolveVerbosity({
-        tts,
-        event: 'round.start',
-        gradeBand: 'pre-k',
-        talkativeness: 'on-demand',
+const t = (key: string, vars?: Record<string, string | number>) =>
+  Object.entries(vars ?? {}).reduce(
+    (acc, [k, v]) => acc.replaceAll(`{{${k}}}`, String(v)),
+    en[key] ?? key,
+  );
+const i18n = { exists: (key: string) => key in en };
+
+const base = (
+  definition: ResolutionLayers['definition'],
+): ResolutionLayers => ({ definition, defaults: {} });
+
+const WORD_SPELL_ROUND_START: ResolutionLayers['definition'] = {
+  'round.start': {
+    tts: {
+      helpful: 'tts.word-spell.round-start.helpful',
+      chatty: 'tts.word-spell.round-start.chatty',
+    },
+    soundEffect: { key: 'tile-place', mode: 'parallel' },
+  },
+};
+
+describe('resolveTemplate', () => {
+  it('resolves the definition key for the active variant and interpolates {{word}}', () => {
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: base(WORD_SPELL_ROUND_START),
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBe('Spell the word frog.');
+    expect(out.soundEffect).toEqual({
+      key: 'tile-place',
+      mode: 'parallel',
+    });
+  });
+
+  it('customConfig (layer 1) overrides definition (layer 3)', () => {
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: {
+        ...base(WORD_SPELL_ROUND_START),
+        customConfig: {
+          'round.start': {
+            tts: { helpful: 'custom.round-start.helpful' },
+          },
+        },
+      },
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBe('Custom: frog!');
+  });
+
+  it('variant INHERITED in customConfig falls through to definition', () => {
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'chatty',
+      gameId: 'word-spell',
+      layers: {
+        ...base(WORD_SPELL_ROUND_START),
+        customConfig: {
+          'round.start': {
+            tts: { helpful: 'custom.round-start.helpful' },
+          },
+        },
+      },
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBe(
+      "Let's spell. Spell the word frog. You can do it!",
+    );
+  });
+
+  it('DONT_SPEAK at a higher layer stops the chain', () => {
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: {
+        ...base(WORD_SPELL_ROUND_START),
+        customConfig: {
+          'round.start': { tts: { helpful: DONT_SPEAK } },
+        },
+      },
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBeNull();
+  });
+
+  it('returns null text + null soundEffect when no layer binds the event', () => {
+    const out = resolveTemplate({
+      event: 'round.idle',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: base(WORD_SPELL_ROUND_START),
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBeNull();
+    expect(out.soundEffect).toBeNull();
+  });
+
+  it('missing i18n key → null + dev warn (§9.5)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: base({
+        'round.start': {
+          tts: { helpful: 'tts.word-spell.round-start.nope' },
+        },
       }),
-    ).toBe('brief');
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBeNull();
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
-  it('falls through preset → registry byGradeBand → default', () => {
-    expect(
-      resolveVerbosity({
-        tts,
-        event: 'round.start',
-        gradeBand: 'year3-4',
-        talkativeness: 'helpful',
+  it('leftover {{var}} after interpolation → null + dev warn (§9.7)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const out = resolveTemplate({
+      event: 'round.start',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: base({
+        'round.start': {
+          tts: { helpful: 'tts.word-spell.round-start.broken' },
+        },
       }),
-    ).toBe('brief');
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBeNull();
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
-  it('returns off when event has no template at all', () => {
-    expect(
-      resolveVerbosity({
-        tts,
-        event: 'round.idle',
-        gradeBand: 'pre-k',
-        talkativeness: 'helpful',
+  it('soundEffect resolves independently of tts (SFX-only binding still plays)', () => {
+    const out = resolveTemplate({
+      event: 'turn.action',
+      variant: 'helpful',
+      gameId: 'word-spell',
+      layers: base({
+        'turn.action': {
+          tts: DONT_SPEAK,
+          soundEffect: { key: 'tile-place', mode: 'parallel' },
+        },
       }),
-    ).toBe('off');
-  });
-});
-
-describe('resolveCopy', () => {
-  it('returns the brief i18n key when verbosity is brief', () => {
-    expect(
-      resolveCopy({ tts, event: 'round.start', verbosity: 'brief' }),
-    ).toBe('tts.word-spell.round-start.brief');
-  });
-
-  it('returns null when verbosity is off', () => {
-    expect(
-      resolveCopy({ tts, event: 'round.start', verbosity: 'off' }),
-    ).toBeNull();
-  });
-
-  it('returns null when event has no template', () => {
-    expect(
-      resolveCopy({ tts, event: 'round.idle', verbosity: 'full' }),
-    ).toBeNull();
+      roundContext,
+      t,
+      i18n,
+    });
+    expect(out.text).toBeNull();
+    expect(out.soundEffect?.key).toBe('tile-place');
   });
 });
 ```
@@ -672,89 +771,222 @@ describe('resolveCopy', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/lib/lifecycle-tts/resolve.test.ts --reporter=verbose`
-Expected: FAIL — `resolveVerbosity` / `resolveCopy` not exported.
+Expected: FAIL — `resolveTemplate` not exported.
 
 - [ ] **Step 3: Implement the resolver**
 
-Create `src/lib/lifecycle-tts/resolve.ts`:
+Create `src/lib/lifecycle-tts/resolve.ts` (spec §9.1 signature; §9.5 `safeTranslate` semantics; §9.7 interpolation table):
 
 ```ts
-import { resolvePresetVerbosity } from './talkativeness-presets';
+import type { SoundKey } from '@/lib/audio/AudioFeedback';
 import type {
-  GameTTSConfig,
+  EventBindingsMap,
   LifecycleEvent,
+  ResolutionLayers,
+  RoundContextValue,
   Talkativeness,
-  Verbosity,
 } from './types';
-import type { GradeBand } from '@/types/game-events';
 
-export interface ResolveVerbosityInput {
-  tts: GameTTSConfig | undefined;
+export interface ResolveInput {
   event: LifecycleEvent;
-  gradeBand: GradeBand;
-  talkativeness: Talkativeness;
+  variant: Talkativeness;
+  gameId: string;
+  layers: ResolutionLayers;
+  roundContext: RoundContextValue;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+  i18n: { exists: (key: string) => boolean };
 }
 
-/**
- * Resolution chain (spec §9.2, simplified for M1 — no customConfig.events
- * surface yet, that lands in M2; skin.tts? layer reserved for M3):
- *
- *   1. talkativeness preset override         ← parent/teacher form (M1)
- *   2. definition.tts[event].byGradeBand     ← per-game default
- *   3. definition.tts[event].default         ← per-game baseline
- *   4. 'off'                                 ← no template = silent
- */
-export const resolveVerbosity = ({
-  tts,
-  event,
-  gradeBand,
-  talkativeness,
-}: ResolveVerbosityInput): Verbosity => {
-  const presetOverride = resolvePresetVerbosity(
-    talkativeness,
-    gradeBand,
-    event,
-  );
-  if (presetOverride !== undefined) return presetOverride;
+export interface ResolveOutput {
+  text: string | null;
+  soundEffect: { key: SoundKey; mode: 'parallel' | 'sequenced' } | null;
+}
 
-  const template = tts?.[event];
-  if (!template) return 'off';
-
-  return template.byGradeBand[gradeBand] ?? template.default;
+const devWarn = (msg: string): void => {
+  if (import.meta.env.DEV) console.warn(`[lifecycle-tts] ${msg}`);
 };
 
-export interface ResolveCopyInput {
-  tts: GameTTSConfig | undefined;
-  event: LifecycleEvent;
-  verbosity: Verbosity;
-}
+// §9.7 — every {{var}} a template may reference, from RoundContextValue.
+// After interpolation, leftover `{{`/`}}` means a var wasn't substituted.
+const buildInterpolation = (
+  rc: RoundContextValue,
+  gameId: string,
+): Record<string, string | number> => ({
+  word: rc.currentWord ?? '',
+  count: rc.currentCount ?? '',
+  target: rc.currentTarget,
+  direction: rc.currentDirection ?? '',
+  from: rc.currentFrom ?? '',
+  to: rc.currentTo ?? '',
+  step: rc.currentStep ?? '',
+  gameName: rc.gameName ?? gameId,
+  correctCount: rc.correctCount ?? 0,
+  totalRounds: rc.totalRounds ?? 0,
+});
+
+/** Walk the chain for the tts field: i18n key | DONT_SPEAK | INHERITED. */
+const resolveTtsKey = (
+  inOrder: (EventBindingsMap | undefined)[],
+  event: LifecycleEvent,
+  variant: Talkativeness,
+): string | null | undefined => {
+  for (const layer of inOrder) {
+    const binding = layer?.[event];
+    if (binding === undefined) continue; // event INHERITED at this layer
+    const tts = binding.tts;
+    if (tts === undefined) continue; // tts INHERITED at this layer
+    if (tts === null) return null; // DONT_SPEAK for all variants — stop
+    const v = tts[variant];
+    if (v === undefined) continue; // this variant INHERITED — fall through
+    return v; // i18n key, or null = DONT_SPEAK for this variant — stop
+  }
+  return undefined; // no layer bound it
+};
+
+/** Walk the chain for the soundEffect field, independently of tts (§9.3). */
+const resolveSoundEffect = (
+  inOrder: (EventBindingsMap | undefined)[],
+  event: LifecycleEvent,
+): ResolveOutput['soundEffect'] => {
+  for (const layer of inOrder) {
+    const binding = layer?.[event];
+    if (binding === undefined) continue;
+    if (binding.soundEffect === undefined) continue; // INHERITED
+    return binding.soundEffect; // bound, or null = explicit silence — stop
+  }
+  return null;
+};
 
 /**
- * Returns the i18n key for the resolved verbosity, or null when nothing
- * should be spoken (verbosity off, or no template registered).
+ * Pure function (spec §9.1): no flags awareness, no subscriptions, no side
+ * effects beyond the DEV warn. Layer order per §9.2; `skin` is always
+ * undefined in M1 (M3 reservation) — one cheap branch.
  */
-export const resolveCopy = ({
-  tts,
-  event,
-  verbosity,
-}: ResolveCopyInput): string | null => {
-  if (verbosity === 'off') return null;
-  const template = tts?.[event];
-  if (!template) return null;
-  return template.tts[verbosity];
+export const resolveTemplate = (input: ResolveInput): ResolveOutput => {
+  const { event, variant, gameId, layers, roundContext, t, i18n } =
+    input;
+  const inOrder = [
+    layers.customConfig,
+    layers.skin,
+    layers.definition,
+    layers.defaults,
+  ];
+
+  const soundEffect = resolveSoundEffect(inOrder, event);
+
+  const key = resolveTtsKey(inOrder, event, variant);
+  if (key === null || key === undefined)
+    return { text: null, soundEffect };
+
+  if (!i18n.exists(key)) {
+    devWarn(`Missing translation key: ${key}`);
+    return { text: null, soundEffect };
+  }
+
+  const text = t(key, buildInterpolation(roundContext, gameId));
+  if (text.includes('{{') || text.includes('}}')) {
+    devWarn(`Uninterpolated variable in: ${key}`);
+    return { text: null, soundEffect };
+  }
+
+  return { text, soundEffect };
 };
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/lib/lifecycle-tts/resolve.test.ts --reporter=verbose`
-Expected: PASS — all six tests green.
+Expected: PASS — all eight tests green.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add src/lib/lifecycle-tts/resolve.ts src/lib/lifecycle-tts/resolve.test.ts
-git commit -m "feat(lifecycle-tts): add pure verbosity + copy resolvers"
+git commit -m "feat(lifecycle-tts): resolveTemplate — 4-layer pure resolver with sentinels + interpolation (spec §9)"
+```
+
+---
+
+## Task 3.5: `RoundContext` — Provider + Hook + Module-Level Mirror (spec §9.6)
+
+Closes 2026-06-09 finding C3c: Tasks 8.5 and 13 consume `useRoundContext` / `roundToPayload(round)`, but no task created the context. The module exports three things:
+
+1. **`RoundContextProvider`** — React provider each game component mounts around its playing tree, fed from the same closure that already computes the round (e.g. `roundOrder[engineRoundIndex]` in `NumberMatch.tsx:127`). Mount sites are wired in Task 15 alongside `QuestionRow`.
+2. **`useRoundContext()`** — throwing hook for in-tree consumers (AudioButton payloads, Task 13).
+3. **A module-level mirror** — `getActiveRoundContext(): RoundContextValue | null`, updated by the provider and cleared on unmount. The app-level actor (Tasks 8/8.5) is mounted **above** the games and cannot call hooks; the Provider injects this getter into the machine input so `resolveAndDispatchSpeech` can resolve with current round data — including the §6.6 re-fire after `SETTINGS_CHANGED`, which must re-interpolate against the live round. Exactly one game is active at a time, so a single slot is safe (same singleton rationale as the bus).
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/round-context.tsx`
+- Create: `src/lib/lifecycle-tts/round-context.test.tsx`
+
+- [ ] **Step 1: Write the failing test**
+
+Create `src/lib/lifecycle-tts/round-context.test.tsx` asserting: (a) `useRoundContext` throws outside the provider; (b) returns the value inside it; (c) `getActiveRoundContext()` mirrors the latest provider value; (d) returns `null` again after the provider unmounts.
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/lifecycle-tts/round-context.test.tsx --reporter=verbose`
+Expected: FAIL — module not created.
+
+- [ ] **Step 3: Implement**
+
+```tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  type PropsWithChildren,
+} from 'react';
+import type { RoundContextValue } from './types';
+
+const RoundContext = createContext<RoundContextValue | null>(null);
+
+// Module-level mirror for the app-level actor, which mounts above the
+// games and cannot read React context. One game is active at a time, so
+// a single slot is safe (same singleton rationale as the bus).
+let activeRoundContext: RoundContextValue | null = null;
+export const getActiveRoundContext = (): RoundContextValue | null =>
+  activeRoundContext;
+
+export const RoundContextProvider = ({
+  value,
+  children,
+}: PropsWithChildren<{ value: RoundContextValue }>) => {
+  useEffect(() => {
+    activeRoundContext = value;
+  }, [value]);
+  useEffect(
+    () => () => {
+      activeRoundContext = null;
+    },
+    [],
+  );
+  return (
+    <RoundContext.Provider value={value}>
+      {children}
+    </RoundContext.Provider>
+  );
+};
+
+export const useRoundContext = (): RoundContextValue => {
+  const ctx = useContext(RoundContext);
+  if (!ctx)
+    throw new Error('useRoundContext requires <RoundContextProvider>');
+  return ctx;
+};
+```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/lifecycle-tts/round-context.test.tsx --reporter=verbose`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/round-context.tsx src/lib/lifecycle-tts/round-context.test.tsx
+git commit -m "feat(lifecycle-tts): RoundContext provider + hook + actor-readable mirror (spec §9.6)"
 ```
 
 ---
