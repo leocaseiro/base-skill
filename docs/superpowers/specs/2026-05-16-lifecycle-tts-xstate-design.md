@@ -22,7 +22,7 @@ Five user-visible shifts in M1:
 
 The infrastructure shift underneath:
 
-- **Singleton XState actor** at the React Provider root — solves the "multiple `useLifecycleTTS` instances cause N-fold speech repetition" class of bugs that plan-365's adversarial review flagged.
+- **Singleton XState actor** at the app layout (`$locale/_app.tsx`, §5.5.1) — solves the "multiple `useLifecycleTTS` instances cause N-fold speech repetition" class of bugs that plan-365's adversarial review flagged.
 - **Two parallel sub-machines** (speech + SFX) — independent channels that overlap or sequence per per-event mode.
 - **Priority + throttle queue** for speech; throttle-only for SFX.
 - **Bus pub/sub for lifecycle events** (engine-emitted); **direct `useLifecycleTts()` send** for UI-tap actions.
@@ -211,8 +211,8 @@ export type LifecycleEvent =
 | Event                          | Trigger                                                                                                   | Default priority | Default speech throttle (ms) | Default SFX throttle (ms) |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------- | ---------------- | ---------------------------- | ------------------------- |
 | `game.prepare`                 | `GameOptionsOverlay` mount                                                                                | 2                | 0                            | —                         |
-| `game.start`                   | Game machine `loading.entry`                                                                              | 2                | 0                            | —                         |
-| `game.resume`                  | Game machine `loading.entry` when `initialState` present (see §4.2.1)                                     | 2                | 0                            | —                         |
+| `game.start`                   | `useGameEngine` mount effect (single emit site, §4.2.1)                                                   | 2                | 0                            | —                         |
+| `game.resume`                  | `useGameEngine` mount effect when `options.initialState` present (see §4.2.1)                             | 2                | 0                            | —                         |
 | `game.end`                     | Engine `gameOver.entry`                                                                                   | 3                | 0                            | —                         |
 | `round.start`                  | `playingRound.entry`                                                                                      | 2                | 0                            | —                         |
 | `round.idle`                   | gradeBand timer fires in `playingRound` (8s pre-K, 12s y1-2)                                              | 2                | 0                            | —                         |
@@ -949,7 +949,7 @@ export function useLifecycleTts(): LifecycleTtsActorRef {
 }
 ```
 
-- **Missing-provider behaviour: throw.** The Provider is root-mounted (§5.5.1),
+- **Missing-provider behaviour: throw.** The Provider is app-mounted (§5.5.1),
   so the throw can never fire in-app; it only fires in a Storybook story or test
   that forgot the decorator — a loud, actionable signal. (No noop, no Suspense:
   there is nothing async to await — the actor is created synchronously.)
@@ -2228,8 +2228,9 @@ tests/storybook/
 - `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `useOfflineVoicesOnly: true` so first-paint matches the v4 schema defaults (no code-path change; same RxJS observable wrapping pattern reused).
 - `src/db/create-database.ts` — schema version bump.
 - `src/components/answer-game/answer-game-reducer.ts` — emit `lifecycle.speak` for `round.*` + `game.*` events via SideEffect.
-- `src/components/answer-game/AnswerGameProvider.tsx` — no lifecycle emit; `game.start`/`game.resume` are emitted solely by the engine `loading.entry` action (see §4.2.1).
-- `src/routes/__root.tsx` — mount `LifecycleTtsProvider` (inside `ServiceWorkerProvider`, outside route outlet) per §5.5.1.
+- `src/components/answer-game/AnswerGameProvider.tsx` — no lifecycle emit; `game.start`/`game.resume` are emitted solely by the `useGameEngine` mount effect (see §4.2.1).
+- `src/lib/game-engine/useGameEngine.ts` — mount-effect single emit-site for `game.start`/`game.resume` + optional `UseGameEngineOptions.initialState` (§4.2.1).
+- `src/routes/$locale/_app.tsx` — mount `LifecycleTtsProvider` inside `AppLayoutInner`, nested within `DbProvider` → `I18nextProvider` → `VoiceUnavailableDialogProvider`, per the amended §5.5.1.
 - `src/components/answer-game/types.ts` — `AnswerGameConfig` gains `gradeBand`, `talkativeness`; drop `ttsEnabled`.
 - `src/components/answer-game/useGameTTS.ts` — deprecate; route to lifecycle-tts where applicable.
 - `src/components/answer-game/useRoundTTS.ts` — **removed**; callers migrate to `useLifecycleTts` / `useSpeakButton`.
@@ -2381,12 +2382,13 @@ test coverage · `G-6 (exempt)` = SpotAll bindings (game slated for redo).
 
 - [ ] `InstructionsOverlay` renamed to `GameOptionsOverlay`; does NOT auto-speak how-to-play on mount.
 - [ ] `lifecycle.speak { lifecycleEvent: 'game.prepare' }` emitted on overlay mount.
-- [ ] `game.start` speaks full how-to-play after "Let's go".
+- [ ] `game.start` speaks the how-to-play copy after "Let's go".
 - [ ] NumberMatch's bare-numeral speech bug fixed.
 - [ ] `ttsEnabled` migrated to `talkativeness` via RxDB v4.
-- [ ] AudioButton renders when `talkativeness !== 'on-demand'` ... wait, button always renders. AudioButton always available; uses `helpful` variant on tap.
+- [ ] AudioButton always renders and is always tappable (§5.4 no hard-mute); taps use the `helpful` variant by default.
 - [ ] Mid-round Talkativeness change to `'on-demand'` triggers AudioButton pulse on next `round.start` (per §5.6.1). Verifiable via unit test on `useSpeakButton`.
 - [ ] All four games use `<QuestionRow>` with AudioButton.
+- [ ] ARIA live region (`role="status"`) announces round outcomes in the migrated games, independently of TTS settings (criterion restored from the 2026-05-03 canon spec, 2026-06-10; plan Task 15.5).
 - [ ] SortNumbers gains AudioButton (currently missing).
 - [ ] SpotAllPrompt consolidates into `useSpeakButton`.
 - [ ] Talkativeness slider lives in `SettingsPanel` with tooltip.
