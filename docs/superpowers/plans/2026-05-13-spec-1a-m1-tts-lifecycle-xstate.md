@@ -6,9 +6,9 @@
 
 **Architecture:** Build the `src/lib/lifecycle-tts/` module whose forward-reference the engine already imports (`GameDefinition.tts`, `SideEffect 'speak'`). Each game's `src/games/<id>/definition.ts` carries its own `tts:` block — there is no parallel registry directory. A **single `lifecycleTtsMachine` XState actor** is mounted once at the app layout (`$locale/_app.tsx`, Spec Delta 4) via `LifecycleTtsProvider`; it owns all game audio (speech + SFX) through two parallel sub-machines, a priority/throttle/single-queued speech policy, and the injected `WebSpeechSpeaker` + `HtmlAudioSoundEffectPlayer` adapters. Game machines emit `{ type: 'speak', params: { lifecycleEvent } }` actions; `useGameEngine` → `executeSideEffects` emits a single `lifecycle.speak` bus event; the actor is the **one** bus subscriber and relays it as `SPEAK_AUTO`, resolving copy via the pure `resolveTemplate()` (spec §9): the 4-layer chain (customConfig → skin → definition → defaults) selects the i18n key for the user's `talkativeness` variant (forwarded via `SETTINGS_CHANGED`, spec §5.5), honoring `INHERITED`/`DONT_SPEAK` sentinels, interpolating `{{var}}`s from the active `RoundContext`, and invoking the speaker — auto-speech suppressed when `talkativeness === 'on-demand'` per spec §6.1's `autoAllowed` guard. On-demand surfaces (AudioButton, question onClick) call `useSpeakButton().speak()` → `SPEAK_USER` directly on the actor (bus uninvolved) — taps **always** speak per spec §5.4 (no hard-mute); the OS volume slider is the escape hatch.
 
-**Tech Stack:** React 18, TypeScript, xstate@5, @xstate/react@5, Vitest, i18next, Web Speech API, existing GameEventBus.
+**Tech Stack:** React 19, TypeScript, xstate@5, @xstate/react@5, Vitest, i18next, Web Speech API, existing GameEventBus.
 
-**Spec:** [docs/superpowers/specs/2026-05-16-lifecycle-tts-xstate-design.md](../specs/2026-05-16-lifecycle-tts-xstate-design.md) (M1 XState rewrite; supersedes the 2026-05-03 canon spec). §14 M1 acceptance criteria. §13.1.A-C locks (closed 2026-05-23) drive the Talkativeness vocab, settings shape, and bus rename below — Phase 0 is the executor's first step.
+**Spec:** [docs/superpowers/specs/2026-05-16-lifecycle-tts-xstate-design.md](../specs/2026-05-16-lifecycle-tts-xstate-design.md) (M1 XState rewrite; supersedes the 2026-05-03 canon spec). §12.2 M1 acceptance criteria. §13.1.A-C locks (closed 2026-05-23) drive the Talkativeness vocab, settings shape, and bus rename below — Phase 0 is the executor's first step.
 
 **Supersedes:** The plan in closed PR #349 (`docs/superpowers/plans/2026-05-06-spec-1a-m1-tts-lifecycle.md`) — pre-dates PR 1a/1b XState engine, prescribed a parallel registry that conflicts with the engine's `GameDefinition.tts` contract.
 
@@ -24,7 +24,7 @@
 
 Refreshed against the 2026-05-16 spec (which now incorporates the deltas previously logged here against the 2026-05-03 canon). After the refresh, **only one true delta remains** — the rest aligned with spec text and are dropped.
 
-1. **SpotAll deferred from M1.** Spec §14 M1 includes "AudioButton on all 4 games" and "SpotAllPrompt consolidates into useLifecycleTts." SpotAll is not on the XState engine yet (still uses `src/games/spot-all/spot-all-reducer.ts`). PR 1d (#368) migrates SpotAll; that PR will add the AudioButton + consolidation as a follow-up. M1 ships TTS for WordSpell, NumberMatch, and SortNumbers only. **Status:** still a real delta — spec §14 lists SpotAll inclusion as an M1 criterion that we are knowingly missing pending PR 1d.
+1. **SpotAll deferred from M1.** Spec §12.2 M1 includes "AudioButton on all 4 games" and "SpotAllPrompt consolidates into useLifecycleTts." SpotAll is not on the XState engine yet (still uses `src/games/spot-all/spot-all-reducer.ts`). PR 1d (#368) migrates SpotAll; that PR will add the AudioButton + consolidation as a follow-up. M1 ships TTS for WordSpell, NumberMatch, and SortNumbers only. **Status:** still a real delta — spec §12.2 lists SpotAll inclusion as an M1 criterion that we are knowingly missing pending PR 1d.
 
 **Re-verified and dropped (no longer deltas vs the 2026-05-16 spec):**
 
@@ -33,7 +33,7 @@ Refreshed against the 2026-05-16 spec (which now incorporates the deltas previou
 
 **New delta vs the 2026-05-13 plan draft (closed by §13.1.B #11 lock, 2026-05-23):**
 
-1. **`talkativeness` moved from per-game `AnswerGameConfig` to user-level `SettingsDoc`.** The 2026-05-13 plan draft placed `talkativeness` on per-game `AnswerGameConfig` alongside `autoSpeak`/`ttsOnDemandAllowed`/`gradeBand`. The 2026-05-16 spec §5.5 + §13.1.B #11 locks it on the user-level `SettingsDoc` accessed via the existing `useSettings()` hook — so one custom game cannot override the parent's chosen verbosity. Per-game `AnswerGameConfig` keeps only `gradeBand` (per-level tuning, not per-user). The `autoSpeak` / `ttsOnDemandAllowed` flags from the draft are dropped entirely:
+1. **Spec Delta 2 — `talkativeness` moved from per-game `AnswerGameConfig` to user-level `SettingsDoc`.** The 2026-05-13 plan draft placed `talkativeness` on per-game `AnswerGameConfig` alongside `autoSpeak`/`ttsOnDemandAllowed`/`gradeBand`. The 2026-05-16 spec §5.5 + §13.1.B #11 locks it on the user-level `SettingsDoc` accessed via the existing `useSettings()` hook — so one custom game cannot override the parent's chosen verbosity. Per-game `AnswerGameConfig` keeps only `gradeBand` (per-level tuning, not per-user). The `autoSpeak` / `ttsOnDemandAllowed` flags from the draft are dropped entirely:
    - `autoSpeak` is **derived**, not stored: `autoSpeak = talkativeness !== 'on-demand'` (§5.3). Two flags can't drift apart.
    - `ttsOnDemandAllowed` is rejected by spec §5.4 (no hard-mute). Taps always speak. OS volume slider is the escape hatch.
 
@@ -71,7 +71,7 @@ In M1, Layer 2 is **always `undefined`** (no themed skin ships TTS templates yet
 
 ### G-3 — Mini Games (between rounds and levels)
 
-M1 ships the **mini-game event reservations** (spec §10.4) — `mini-game.start | mini-game.complete | mini-game.skip` are baked into the bus type union in **Phase 0 Commit 4** and listed in spec §4.1's 17-event `LifecycleEvent` type, but **no firing code lands in M1**. PR 1b+ adds real mini-game machines (DinoEggHatch, FireworksPainter, BubblePop, etc.) and the firing-side wiring; the dismissal contract (`bus.emit({ type: 'lifecycle.cancel' })`) is locked here so PR 1b+ doesn't re-litigate it.
+M1 ships the **mini-game event reservations** (spec §10.4) — `mini-game.start | mini-game.complete | mini-game.skip` are baked into the bus type union in **Phase 0 Commit 4** and listed in spec §4.1's 19-member `LifecycleEvent` union (17 lifecycle moments + 2 availability signals), but **no firing code lands in M1**. PR 1b+ adds real mini-game machines (DinoEggHatch, FireworksPainter, BubblePop, etc.) and the firing-side wiring; the dismissal contract (`bus.emit({ type: 'lifecycle.cancel' })`) is locked here so PR 1b+ doesn't re-litigate it.
 
 **Phase 0 Commit 4 covers this** — `'mini-game.*'` is registered as its own top-level namespace (segment-prefix wildcards don't conflate it with `'game.*'` per spec §4.4 / §13.1.A #9).
 
@@ -102,7 +102,7 @@ The producer is the `lifecycleTtsMachine` actor built in the lifecycle-tts modul
 
 ### G-5 — Distractions reused across games (forward-looking note)
 
-No M1 code changes — but a forward-looking framing: the 17-event `LifecycleEvent` taxonomy (spec §4.1) is designed to be **emitter-agnostic**. `round.error` / `round.correct` / `round.advance` fire from any game's XState machine (not just answer-game), which means a future "distractions" data source can emit the same events and trigger the same TTS + UI animation paths. The plan's resolver (Task 3) does not bake assumptions about emitter identity — it just reads `gameId` + `lifecycleEvent` from the bus envelope. SpotAll (G-6) is exempt from this plan but its distractions strategy seeds G-5.
+No M1 code changes — but a forward-looking framing: the 19-member `LifecycleEvent` taxonomy (spec §4.1) is designed to be **emitter-agnostic**. `round.error` / `round.correct` / `round.advance` fire from any game's XState machine (not just answer-game), which means a future "distractions" data source can emit the same events and trigger the same TTS + UI animation paths. The plan's resolver (Task 3) does not bake assumptions about emitter identity — it just reads `gameId` + `lifecycleEvent` from the bus envelope. SpotAll (G-6) is exempt from this plan but its distractions strategy seeds G-5.
 
 ### G-6 — SpotAll exempt (will be redone from scratch)
 
@@ -188,6 +188,7 @@ src/lib/lifecycle-tts/
 ├── i18n-template-coverage.test.ts # CI: every {{var}} in tts.* keys ∈ §9.7 interpolation table (§11.2)
 ├── errors.ts                      # LocalVoiceUnavailableError (§7.2)
 ├── pick-tts-settings.ts           # pickTtsSettings() — boundary-coerces SettingsDoc → Required<TtsSettings> (§5.5)
+├── speaker.ts                     # Speaker + SoundEffectPlayer interfaces, SpeechUtterance + SoundEffectRequest types (§7.1)
 ├── web-speech-speaker.ts          # WebSpeechSpeaker class — Speaker impl + Chrome watchdogs + pickVoice() offline ladder (§7.2)
 ├── web-speech-speaker.test.ts
 ├── html-audio-sound-effect-player.ts   # HtmlAudioSoundEffectPlayer — SoundEffectPlayer impl (§7.3)
@@ -213,6 +214,7 @@ tests/storybook/
 
 src/components/questions/QuestionRow/
 ├── QuestionRow.tsx                # Inline AudioButton + content layout (icon left)
+├── QuestionRow.module.css
 ├── QuestionRow.test.tsx
 ├── QuestionRow.stories.tsx
 
@@ -221,6 +223,13 @@ src/components/answer-game/GameOptions/
 ├── GameOptionsOverlay.test.tsx
 ├── GameOptionsOverlay.stories.tsx
 └── useConfigDraft.ts              # Moved unchanged from InstructionsOverlay/
+
+src/db/migrations/
+├── lifecycle-tts-settings-v4.ts   # v3→v4 allowlist migration (§5.8/§5.9)
+└── lifecycle-tts-settings-v4.collection.test.ts
+
+src/components/SettingsPanel/
+└── CloudVoiceModal.tsx            # §8.3 parent-confirmation modal (Sub-task 17C)
 ```
 
 ### Modified files
@@ -229,11 +238,12 @@ src/components/answer-game/GameOptions/
 
 | File                                                             | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/types/game-events.ts`                                       | **Two-tier `BaseGameEvent` restructure** (`roundIndex` moves to new `RoundScopedGameEvent`); add `game.prepare` + 4 lifecycle literals (`lifecycle.cancel`, `lifecycle.tts.played`, `lifecycle.tts.unavailable`, `lifecycle.tts.cloud-fallback`) to `GameEventType`; add `GamePrepareEvent` + 4 new lifecycle event interfaces; extend the `GameEvent` union. Full set per **Chunk D** in Task 4. (`lifecycle.speak` already exists.)                                                         |
+| `src/types/game-events.ts`                                       | **Two-tier `BaseGameEvent` restructure** (`roundIndex` moves to new `RoundScopedGameEvent`); add `game.prepare` + 4 lifecycle literals (`lifecycle.cancel`, `lifecycle.tts.played`, `lifecycle.tts.unavailable`, `lifecycle.tts.cloud-fallback`) to `GameEventType`; add `GamePrepareEvent` + 4 new lifecycle event interfaces; extend the `GameEvent` union. Full set per Task 4 Step 3. (`lifecycle.speak` already exists.)                                                                 |
 | `src/lib/game-engine/definition-types.ts`                        | Rename the forward-reference import `EventTemplate` → `EventBindings`; `GameDefinition.tts` becomes `tts?: EventBindingsMap` (spec §9.2). The `SideEffect` `'speak'` member stays flat: `{ type: 'speak'; lifecycleEvent }`.                                                                                                                                                                                                                                                                  |
 | `src/components/answer-game/types.ts`                            | Add `gradeBand: GradeBand` to per-game `AnswerGameConfig`. **Drop `ttsEnabled`.** `talkativeness` lives on user `SettingsDoc`, NOT on per-game config (spec §5.5, §13.1.B #11) — access via `useSettings()`.                                                                                                                                                                                                                                                                                  |
 | `src/games/spot-all/types.ts`                                    | Drop `ttsEnabled`; add `gradeBand: GradeBand` to `SpotAllConfig`. (SpotAll's `speakPrompt` consolidation is deferred per Spec Delta 1 — only the type changes here so the config blob stays consistent.)                                                                                                                                                                                                                                                                                      |
 | `src/db/schemas/settings.ts`                                     | **v3 → v4 RxDB schema migration.** Add `talkativeness: 'on-demand' \| 'helpful' \| 'chatty'` (default `'helpful'`) + `useOfflineVoicesOnly: boolean` (default `true`) at the top level. Drop `ttsEnabled`. Full v4 schema per spec §5.8 — every field declared because master enforces `additionalProperties: false`. Preserve `speechRate`, `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage`, all volume fields, etc. exactly.                                                |
+| `src/db/create-database.ts`                                      | Register `4: migrateSettingsV4` in `settings.migrationStrategies` (Task 5) — without this the v4 migration never runs.                                                                                                                                                                                                                                                                                                                                                                        |
 | `src/db/hooks/useSettings.ts`                                    | Extend `DEFAULT_SETTINGS` with `talkativeness: 'helpful'` + `useOfflineVoicesOnly: true` so first-paint (before RxDB resolves) matches v4 defaults. No code-path change — reuse the existing `useRxQuery` wrapping.                                                                                                                                                                                                                                                                           |
 | `src/components/answer-game/useGameTTS.ts`                       | **Deprecated / superseded by the actor.** Auto-speech vs on-demand is now decided in the `lifecycleTtsMachine` (`SPEAK_AUTO` gated by the `autoAllowed` guard `talkativeness !== 'on-demand'`; `SPEAK_USER` never gated, §6.1). `speakTile`'s legacy `config.ttsEnabled` gate flips to the user-level `talkativeness` gate during the Task 5 `ttsEnabled` sweep; remaining call sites migrate to `useLifecycleTts()` / `useSpeakButton()`. Add `@deprecated` JSDoc so no new callers slip in. |
 | `src/components/answer-game/useGameTTS.test.tsx`                 | Update tests for the talkativeness-gated `speakTile`; mock `useSettings()`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -262,6 +272,9 @@ src/components/answer-game/GameOptions/
 | `src/lib/game-engine/useGameEngine.ts`                           | **Single emit-site for `game.start` / `game.resume`** — the hook's mount effect is the SOLE emitter, distinguished by the new optional `UseGameEngineOptions.initialState` (absent → `game.start`, present → `game.resume`). Spec Delta 5 (spec §4.2.1's `loading.entry` has no implementable seam). See Task 8.6.                                                                                                                                                                            |
 | `src/components/answer-game/AnswerGameProvider.tsx`              | **MUST NOT emit `game.start` or `game.resume`** — both come solely from the `useGameEngine` mount-effect single emit-site (Spec Delta 5), so they can never double-fire on mount. `game.prepare` is emitted by `GameOptionsOverlay` on mount, not the provider.                                                                                                                                                                                                                               |
 | `src/components/answer-game/GameEngine.flows.mdx`                | Document new TTS data flow (Task 19).                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `src/lib/audio/AudioFeedback.ts`                                 | Export `SOUND_PATHS` (single source of truth for SFX paths, §7.3); add `@deprecated` JSDoc + dev warn to `playSound` / `queueSound` (Task 7).                                                                                                                                                                                                                                                                                                                                                 |
+| `src/lib/game-engine/GameEngine.flows.mdx`                       | Update — references `useRoundTTS`, deleted in Task 11 (Task 19).                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `src/lib/game-engine/debugging.mdx`                              | Update — `useRoundTTS` debugging row + speech-queue prose (Task 19).                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `src/components/answer-game/GameEngine.reference.mdx`            | Document `useLifecycleTts` hook + `GameDefinition.tts` field + how to add TTS to a new game (Task 19).                                                                                                                                                                                                                                                                                                                                                                                        |
 
 <!-- markdownlint-enable MD060 -->
@@ -293,7 +306,7 @@ src/components/answer-game/InstructionsOverlay/
 - **SpotAll AudioButton + speakPrompt consolidation.** Follow-up tied to PR 1d (#368). Open as `M1 follow-up: SpotAll AudioButton` once #368 lands.
 - **Per-event `customConfig.events` override surface.** Code-only — game designers set it on customConfigs. M2 work.
 - **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of per-variant `EventBindings` across multiple games. Deferred until M2 expands the event vocabulary.
-- ~~ARIA live region implementation.~~ **Promoted into M1** (Task 15.5, closes 2026-06-09 C6): minimal `<div role="status" aria-live="polite">` wrapper around round outcomes in the three migrated games — spec §7.3/§12.2 list it as an M1 criterion and it costs ~5 lines of JSX per game.
+- ~~ARIA live region implementation.~~ **Promoted into M1** (Task 15.5, closes 2026-06-09 C6): minimal `<div role="status" aria-live="polite">` wrapper around round outcomes in the three migrated games — an M1 criterion in spec §12.2 (added 2026-06-10 on PR #391), ~5 lines of JSX per game.
 - **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
 
 ---
@@ -311,7 +324,6 @@ Create `src/lib/lifecycle-tts/types.ts`. This overwrites the pre-spec pin: the l
 
 ```ts
 import type { SoundKey } from '@/lib/audio/AudioFeedback';
-import type { SettingsDoc } from '@/types/game-events';
 
 // Full 19-event lifecycle surface (spec §4.1). The actor's priority/throttle
 // tables (Task 8) and bus union (Task 4) are keyed on this exact set.
@@ -405,30 +417,32 @@ export const subjectToken = (raw: string): LifecycleSubject =>
   raw as LifecycleSubject;
 
 // --- TTS settings slice (spec §5.1) ----------------------------------------
-// Focused, all-non-optional subset of SettingsDoc for audio consumers.
-// Defaults are applied at the boundary by pickTtsSettings() (Task 8.5), so
-// downstream code never sees `undefined` and never needs scattered `?? N`.
-export type TtsSettings = Required<
-  Pick<
-    SettingsDoc,
-    | 'talkativeness'
-    | 'useOfflineVoicesOnly'
-    | 'speechRate'
-    | 'voiceVolume'
-    | 'soundEffectsVolume'
-    | 'preferredVoiceURI'
-    | 'preferredVoiceDeviceId'
-    | 'activeLanguage'
-  >
->;
+// Focused, all-non-optional settings shape for audio consumers. Defaults are
+// applied at the boundary by pickTtsSettings() (Task 8.5), so downstream code
+// never sees `undefined` and never needs scattered `?? N`.
+// Deliberately a STANDALONE shape, not Pick<SettingsDoc, …>: SettingsDoc
+// (exported from `@/db/schemas/settings`, not `@/types/game-events`) only
+// gains `talkativeness` / `useOfflineVoicesOnly` in Task 5 — a Pick here
+// would make Task 1's typecheck gate depend on Task 5. Task 5's config-shape
+// test asserts the two shapes stay in sync.
+export type TtsSettings = {
+  talkativeness: Talkativeness;
+  useOfflineVoicesOnly: boolean;
+  speechRate: number;
+  voiceVolume: number;
+  soundEffectsVolume: number;
+  preferredVoiceURI: string;
+  preferredVoiceDeviceId: string;
+  activeLanguage: string;
+};
 
 // --- Speak payload (derived from spec §6 / §9 usage) -----------------------
-// The interpolation + voice-routing data SPEAK_AUTO / SPEAK_USER carry into
-// the actor. NOTE (executor): reconcile SpeakPayload's exact fields against
-// the actor's §6 needs (resolveAndDispatchSpeech reads `text` + `subject` +
-// `lang`; `event` is also carried on the SPEAK_* event itself).
+// The voice-routing data SPEAK_AUTO / SPEAK_USER carry into the actor.
+// `event` deliberately omitted — it rides on the SPEAK_* event itself.
+// `text` present = explicit utterance (e.g. SettingsPanel voice preview,
+// spec §6.1.1): the actor speaks it verbatim and skips the resolver
+// (Task 8, resolveAndDispatchSpeech step 0).
 export type SpeakPayload = {
-  event: LifecycleEvent;
   text?: string;
   subject?: LifecycleSubject;
   lang?: string;
@@ -915,11 +929,12 @@ git commit -m "feat(lifecycle-tts): resolveTemplate — 4-layer pure resolver wi
 
 ## Task 3.5: `RoundContext` — Provider + Hook + Module-Level Mirror (spec §9.6)
 
-Closes 2026-06-09 finding C3c: Tasks 8.5 and 13 consume `useRoundContext` / `roundToPayload(round)`, but no task created the context. The module exports three things:
+Closes 2026-06-09 finding C3c: Tasks 8.5 and 13 consume `useRoundContext` / `roundToPayload(…)`, but no task created the context. The module exports four things:
 
 1. **`RoundContextProvider`** — React provider each game component mounts around its playing tree, fed from the same closure that already computes the round (e.g. `roundOrder[engineRoundIndex]` in `NumberMatch.tsx:127`). Mount sites are wired in Task 15 alongside `QuestionRow`.
 2. **`useRoundContext()`** — throwing hook for in-tree consumers (AudioButton payloads, Task 13).
-3. **A module-level mirror** — `getActiveRoundContext(): RoundContextValue | null`, updated by the provider and cleared on unmount. The app-level actor (Tasks 8/8.5) is mounted **above** the games and cannot call hooks; the Provider injects this getter into the machine input so `resolveAndDispatchSpeech` can resolve with current round data — including the §6.6 re-fire after `SETTINGS_CHANGED`, which must re-interpolate against the live round. Exactly one game is active at a time, so a single slot is safe (same singleton rationale as the bus).
+3. **`roundToPayload(rc)`** — maps a `RoundContextValue | null` to a `SpeakPayload | null` for tap-to-speak surfaces (§6.1.1): the subject comes from the live round's `currentTarget`; `text` stays undefined so the actor resolves copy via `resolveTemplate`.
+4. **A module-level mirror** — `getActiveRoundContext(): RoundContextValue | null`, updated by the provider and cleared on unmount. The app-level actor (Tasks 8/8.5) is mounted **above** the games and cannot call hooks; the Provider injects this getter into the machine input so `resolveAndDispatchSpeech` can resolve with current round data — including the §6.6 re-fire after `SETTINGS_CHANGED`, which must re-interpolate against the live round. Exactly one game is active at a time, so a single slot is safe (same singleton rationale as the bus).
 
 **Files:**
 
@@ -928,7 +943,7 @@ Closes 2026-06-09 finding C3c: Tasks 8.5 and 13 consume `useRoundContext` / `rou
 
 - [ ] **Step 1: Write the failing test**
 
-Create `src/lib/lifecycle-tts/round-context.test.tsx` asserting: (a) `useRoundContext` throws outside the provider; (b) returns the value inside it; (c) `getActiveRoundContext()` mirrors the latest provider value; (d) returns `null` again after the provider unmounts.
+Create `src/lib/lifecycle-tts/round-context.test.tsx` asserting: (a) `useRoundContext` throws outside the provider; (b) returns the value inside it; (c) `getActiveRoundContext()` mirrors the latest provider value; (d) returns `null` again after the provider unmounts; (e) `roundToPayload(null)` is `null` and `roundToPayload(rc)` carries `subjectToken(rc.currentTarget)`.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -944,7 +959,8 @@ import {
   useEffect,
   type PropsWithChildren,
 } from 'react';
-import type { RoundContextValue } from './types';
+import { subjectToken } from './types';
+import type { RoundContextValue, SpeakPayload } from './types';
 
 const RoundContext = createContext<RoundContextValue | null>(null);
 
@@ -981,6 +997,13 @@ export const useRoundContext = (): RoundContextValue => {
     throw new Error('useRoundContext requires <RoundContextProvider>');
   return ctx;
 };
+
+// §6.1.1 — tap payloads derive their subject from the live round; `text`
+// stays undefined so the actor resolves copy via resolveTemplate.
+export const roundToPayload = (
+  rc: RoundContextValue | null,
+): SpeakPayload | null =>
+  rc ? { subject: subjectToken(rc.currentTarget) } : null;
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1015,7 +1038,7 @@ This task lands the full bus-event surface the actor runtime needs (spec §4.3 +
 
 - [ ] **Step 1: Write the failing test**
 
-Append to `src/lib/game-event-bus.test.ts`. Note `GamePrepareEvent extends BaseGameEvent` — it is **non-round**, so the literal carries **no** `roundIndex` (Chunk D reclassification):
+Append to `src/lib/game-event-bus.test.ts`. Note `GamePrepareEvent extends BaseGameEvent` — it is **non-round**, so the literal carries **no** `roundIndex` (two-tier `BaseGameEvent` reclassification, Step 3):
 
 ```ts
 import { getGameEventBus } from './game-event-bus';
@@ -1111,14 +1134,20 @@ export interface LifecycleTtsPlayedEvent extends BaseGameEvent {
   roundIndex?: number; // dual-natured (round verbs only)
 }
 
-export interface LifecycleTtsUnavailableEvent extends BaseGameEvent {
+// Availability SIGNALS, not game events: emitted by the speaker (Task 6),
+// which has no game envelope in scope — deliberately do NOT extend
+// BaseGameEvent (no gameId/sessionId/profileId/roundIndex). `subject`
+// carries the locale that failed or fell back (§4.3).
+export interface LifecycleTtsUnavailableEvent {
   type: 'lifecycle.tts.unavailable';
   subject: LifecycleSubject;
+  timestamp: number;
 }
 
-export interface LifecycleTtsCloudFallbackEvent extends BaseGameEvent {
+export interface LifecycleTtsCloudFallbackEvent {
   type: 'lifecycle.tts.cloud-fallback';
   subject: LifecycleSubject;
+  timestamp: number;
 }
 
 // (f) GameEvent discriminated union — add new members
@@ -1466,7 +1495,7 @@ git commit -m "chore(test+story): migrate ttsEnabled fixtures to talkativeness +
 
 ## Task 6: `WebSpeechSpeaker` — Speaker adapter + Chrome watchdogs
 
-The actor invokes a `Speaker` to perform speech. `WebSpeechSpeaker` is the Web Speech API implementation: it centralizes every Chrome/Safari/Firefox workaround (keepalive timer, end-event watchdog, `voiceschanged` cache, rAF cancel guard) and implements the §5.7 offline-voice ladder in `pickVoice()`. It is constructed **inside `LifecycleTtsProvider`** (Task 9) and handed to the machine via input — never a module global.
+The actor invokes a `Speaker` to perform speech. `WebSpeechSpeaker` is the Web Speech API implementation: it centralizes every Chrome/Safari/Firefox workaround (keepalive timer, end-event watchdog, `voiceschanged` cache, rAF cancel guard) and implements the §5.7 offline-voice ladder in `pickVoice()`. It is constructed **inside `LifecycleTtsProvider`** (Task 8.5) and handed to the machine via input — never a module global.
 
 **Files:**
 
@@ -1898,6 +1927,7 @@ export class WebSpeechSpeaker implements Speaker {
       this.bus.emit({
         type: 'lifecycle.tts.unavailable',
         subject: subjectToken(locale),
+        timestamp: Date.now(),
       });
       throw new LocalVoiceUnavailableError(locale);
     }
@@ -1906,6 +1936,7 @@ export class WebSpeechSpeaker implements Speaker {
     this.bus.emit({
       type: 'lifecycle.tts.cloud-fallback',
       subject: subjectToken(locale),
+      timestamp: Date.now(),
     });
     return undefined;
   }
@@ -1922,7 +1953,7 @@ Browser-quirk mitigations summary (spec §7.2):
 - iOS Brave returns broken voice objects → `safeGetVoices()` filters them (already on master).
 - Stale handlers fire after unmount → `finalize()` clears all listeners; `dispose()` clears keepalive.
 
-The bus emits at the §5.7 ladder are how M1 integrates with PR #409's `VoiceUnavailableDialogProvider`: the speaker emits `lifecycle.tts.unavailable`; the `useLifecycleTtsUnavailableHandler` hook (Task 9) subscribes and drives the existing AlertDialog. The speaker never owns a dialog.
+The bus emits at the §5.7 ladder are how M1 integrates with PR #409's `VoiceUnavailableDialogProvider`: the speaker emits `lifecycle.tts.unavailable`; the `useLifecycleTtsUnavailableHandler` hook (Task 8.5) subscribes and drives the existing AlertDialog. The speaker never owns a dialog.
 
 - [ ] **Step 5: Run test to verify it passes**
 
@@ -1946,6 +1977,7 @@ The actor's second `invoke`d adapter. Plays SFX clips via a fresh `<audio>` elem
 
 - Create: `src/lib/lifecycle-tts/html-audio-sound-effect-player.ts`
 - Create: `src/lib/lifecycle-tts/html-audio-sound-effect-player.test.ts`
+- Modify: `src/lib/audio/AudioFeedback.ts` — add `export` to `SOUND_PATHS` (module-private on master) + `@deprecated` JSDoc and dev-mode `console.warn` on `playSound` / `queueSound` (§7.3)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2156,6 +2188,12 @@ const makeSpeaker = (): {
 
 const fakeBus = { emit: vi.fn(), subscribe: vi.fn() };
 
+// Resolver stub — resolution itself is covered by resolve.test.ts (Task 3).
+const stubResolve = () => ({
+  text: 'Spell the word cat.',
+  soundEffect: null,
+});
+
 describe('lifecycleTtsMachine — speech channel gating', () => {
   it('SPEAK_AUTO speaks when talkativeness is helpful (autoAllowed)', () => {
     const { speaker } = makeSpeaker();
@@ -2165,12 +2203,13 @@ describe('lifecycleTtsMachine — speech channel gating', () => {
         settings: settings('helpful'),
         speaker,
         bus: fakeBus as never,
+        resolve: stubResolve,
       },
     }).start();
     actor.send({
       type: 'SPEAK_AUTO',
       event: 'round.start',
-      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+      payload: { text: 'Spell the word cat.', lang: 'en-AU' },
     });
     expect(speakSpy).toHaveBeenCalledTimes(1);
   });
@@ -2183,12 +2222,13 @@ describe('lifecycleTtsMachine — speech channel gating', () => {
         settings: settings('on-demand'),
         speaker,
         bus: fakeBus as never,
+        resolve: stubResolve,
       },
     }).start();
     actor.send({
       type: 'SPEAK_AUTO',
       event: 'round.start',
-      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+      payload: { text: 'Spell the word cat.', lang: 'en-AU' },
     });
     expect(speakSpy).not.toHaveBeenCalled();
   });
@@ -2201,12 +2241,13 @@ describe('lifecycleTtsMachine — speech channel gating', () => {
         settings: settings('on-demand'),
         speaker,
         bus: fakeBus as never,
+        resolve: stubResolve,
       },
     }).start();
     actor.send({
       type: 'SPEAK_USER',
       event: 'round.start',
-      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+      payload: { text: 'Spell the word cat.', lang: 'en-AU' },
       variant: 'helpful',
     });
     expect(speakSpy).toHaveBeenCalledTimes(1);
@@ -2220,12 +2261,13 @@ describe('lifecycleTtsMachine — speech channel gating', () => {
         settings: settings('helpful'),
         speaker,
         bus: fakeBus as never,
+        resolve: stubResolve,
       },
     }).start();
     actor.send({
       type: 'SPEAK_AUTO',
       event: 'round.start',
-      payload: { text: 'Spell the word cat.', locale: 'en-AU' },
+      payload: { text: 'Spell the word cat.', lang: 'en-AU' },
     });
     resolveCurrent();
     await Promise.resolve();
@@ -2252,16 +2294,41 @@ Create `src/lib/lifecycle-tts/lifecycle-tts-machine.ts`. The machine skeleton is
 
 ```ts
 // src/lib/lifecycle-tts/lifecycle-tts-machine.ts
-import { setup, fromPromise, assign } from 'xstate';
+import { and, setup, fromPromise, assign } from 'xstate';
 import type { ResolveOutput } from './resolve';
-import type { Speaker, SpeechUtterance } from './speaker';
+import type {
+  SoundEffectRequest,
+  Speaker,
+  SpeechUtterance,
+} from './speaker';
 import type {
   LifecycleEvent,
   LifecycleSubject,
+  SpeakPayload,
   Talkativeness,
   TtsSettings,
 } from './types';
 import type { TypedGameEventBus } from '@/lib/game-event-bus';
+
+// Machine context — §6.3 single-current/single-queued slots + §6.4
+// throttle bookkeeping.
+type SpeechSlot = {
+  payload: SpeakPayload;
+  event: LifecycleEvent;
+  subject: LifecycleSubject | null;
+  source: 'auto' | 'user';
+  variant: Talkativeness;
+  enqueuedAt: number;
+};
+
+type TtsContext = {
+  settings: TtsSettings;
+  currentSpeech: SpeechSlot | null;
+  queuedSpeech: SpeechSlot | null;
+  currentSoundEffect: SoundEffectRequest | null;
+  lastSpeechEnqueueAt: Partial<Record<LifecycleEvent, number>>;
+  lastSoundEffectAt: Partial<Record<LifecycleEvent, number>>;
+};
 
 export const lifecycleTtsMachine = setup({
   types: {} as {
@@ -2406,7 +2473,7 @@ export const lifecycleTtsMachine = setup({
           },
           on: {
             SPEAK_AUTO: {
-              guard: 'sfxBindingAndNotThrottled',
+              guard: and(['sfxHasBinding', 'sfxNotThrottled']),
               actions: ['cancelSoundEffect', 'dispatchSoundEffect'],
               target: 'playing',
               reenter: true,
@@ -2444,7 +2511,9 @@ export const lifecycleTtsMachine = setup({
 **Priority + throttle tables (§6.4).** Define these module-level maps and consume them in `resolveAndDispatchSpeech` / the SFX throttle guard:
 
 ```ts
-export const eventPriority: Record<LifecycleEvent, number> = {
+// Partial — events absent here (e.g. the two availability signals)
+// read as priority 2 via `eventPriority[event] ?? 2`.
+export const eventPriority: Partial<Record<LifecycleEvent, number>> = {
   'turn.action': 0,
   'turn.error': 1,
   'mini-game.skip': 1,
@@ -2471,7 +2540,7 @@ export const speechThrottleMs: Record<LifecycleEvent, number> = {
   'round.error': 1500,
   'round.idle': 0,
   // remaining events: 0
-} as const satisfies Record<LifecycleEvent, number>;
+} as const satisfies Partial<Record<LifecycleEvent, number>>;
 
 export const soundEffectThrottleMs: Record<LifecycleEvent, number> = {
   'turn.action': 50,
@@ -2480,14 +2549,14 @@ export const soundEffectThrottleMs: Record<LifecycleEvent, number> = {
   'round.error': 400,
   'round.correct': 400,
   // remaining events: 0
-} as const satisfies Record<LifecycleEvent, number>;
+} as const satisfies Partial<Record<LifecycleEvent, number>>;
 ```
 
 `resolveAndDispatchSpeech` algorithm (§6.4):
 
-0. Resolve the copy via the injected closure: `resolve(gameId, event, context.settings.talkativeness)` → `{ text, soundEffect }` (Task 3's `resolveTemplate`; `SPEAK_USER` passes the caller's explicit `variant` instead). If `text` is null and `soundEffect` is null → drop (the `speechHasBinding` / `sfxHasBinding` guards read this result).
-1. Look up `lastSpeechEnqueueAt[event]`. If `now - last < speechThrottleMs[event]`, drop.
-2. Compute incoming priority.
+0. If the incoming `payload.text` is set (explicit utterance — SettingsPanel voice preview, §6.1.1), speak it verbatim and skip resolution. Otherwise resolve the copy via the injected closure: `resolve(gameId, event, context.settings.talkativeness)` → `{ text, soundEffect }` (Task 3's `resolveTemplate`; `SPEAK_USER` passes the caller's explicit `variant` instead). If `text` is null and `soundEffect` is null → drop (the `speechHasBinding` / `sfxHasBinding` guards read this result).
+1. Look up `lastSpeechEnqueueAt[event]`. If `now - last < (speechThrottleMs[event] ?? 0)`, drop.
+2. Compute incoming priority (`eventPriority[event] ?? 2`).
 3. If `incoming.priority > current.priority` → cancel current, set current = incoming, drop queued.
 4. Else if `incoming.priority > queued?.priority` → replace queued.
 5. Else if `incoming.priority === queued?.priority && same event type` → replace queued.
@@ -2555,6 +2624,9 @@ Mount the singleton actor at the app layout (`$locale/_app.tsx`, Spec Delta 4) a
 - Create: `src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts`
 - Create: `src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.test.tsx`
 - Create: `src/lib/lifecycle-tts/subject-utils.ts`
+- Create: `src/lib/lifecycle-tts/subject-utils.test.ts`
+- Create: `src/lib/lifecycle-tts/use-current-profile.ts`
+- Create: `src/lib/lifecycle-tts/use-current-session.ts`
 - Create: `tests/storybook/with-lifecycle-tts.tsx`
 - Modify: `src/routes/$locale/_app.tsx` (mount `LifecycleTtsProvider` inside `AppLayoutInner`, within `VoiceUnavailableDialogProvider`; mount the `useLifecycleTtsUnavailableHandler` bridge as a sibling — Spec Delta 4)
 
@@ -2673,6 +2745,7 @@ import { lifecycleTtsMachine } from './lifecycle-tts-machine';
 import { pickTtsSettings } from './pick-tts-settings';
 import { resolveTemplate } from './resolve';
 import { getActiveRoundContext } from './round-context';
+import type { LifecycleEvent, Talkativeness } from './types';
 import { WebSpeechSpeaker } from './web-speech-speaker';
 import { useSettings } from '@/db/hooks/useSettings';
 import { getGameEventBus } from '@/lib/game-event-bus';
@@ -2788,6 +2861,8 @@ The actor remounts when the `$locale` param changes — acceptable: speech re-in
 
 - [ ] **Step 5: Implement the hooks + decorator**
 
+Also create in this step (consumed by Task 16's `game.prepare` emit — spec §8.5 A1 + §11.2): `use-current-profile.ts` (active profile with `ANONYMOUS_PROFILE_ID` fallback), `use-current-session.ts` (current session via RxDB `sessions.findOne()`), and `subject-utils.test.ts` covering `isSubjectMatch()` null/string discipline (§10.3).
+
 Create `src/lib/lifecycle-tts/use-lifecycle-tts.ts` (spec §6.1.1 — `use(Context)` + throw):
 
 ```ts
@@ -2812,17 +2887,20 @@ Create `src/lib/lifecycle-tts/use-speak-button.ts` (spec §6.1.1 + §8.7 — `SP
 
 ```ts
 // src/lib/lifecycle-tts/use-speak-button.ts
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import { useLifecycleTts } from './use-lifecycle-tts';
+import { getActiveRoundContext, roundToPayload } from './round-context';
 import { isSubjectMatch } from './subject-utils';
 import { subjectToken } from './types';
+import { useLifecycleTts } from './use-lifecycle-tts';
 import type { LifecycleEvent, Talkativeness } from './types';
 import type { SpeakPayload } from './types';
 
 export interface UseSpeakButtonOpts {
   event: LifecycleEvent;
-  payload: SpeakPayload;
+  /** Explicit payload (e.g. SettingsPanel voice preview). Omit in-game —
+   *  the hook derives it from the RoundContext mirror (§6.1.1). */
+  payload?: SpeakPayload;
   variant?: Talkativeness;
 }
 
@@ -2835,18 +2913,24 @@ export interface UseSpeakButtonResult {
 export const PREVIEW_PAYLOAD: SpeakPayload = {
   text: '',
   subject: subjectToken('preview'),
-  locale: 'en-AU',
+  lang: 'en-AU',
 };
 
 export const useSpeakButton = (
   opts: UseSpeakButtonOpts,
 ): UseSpeakButtonResult => {
   const actor = useLifecycleTts();
+  // §6.1.1 fallback chain: explicit ?? roundToPayload(mirror) ?? preview.
+  // Reads the mirror (not useRoundContext) so the hook never throws
+  // outside a game — SettingsPanel preview works without a provider.
+  const payload =
+    opts.payload ??
+    roundToPayload(getActiveRoundContext()) ??
+    PREVIEW_PAYLOAD;
   // Match THIS button's utterance by the real payload subject (§8.7 —
   // closes FYI F-3): branding the event name as the subject would make
   // two buttons for the same event light up together.
-  const expectedSubject =
-    opts.payload?.subject ?? PREVIEW_PAYLOAD.subject;
+  const expectedSubject = payload.subject ?? null;
 
   // Track playing state by matching this button's expected subject against the
   // in-flight utterance. The actor clears `current` on speak-end and cancel —
@@ -2865,16 +2949,16 @@ export const useSpeakButton = (
     actor.send({
       type: 'SPEAK_USER',
       event: opts.event,
-      payload: opts.payload ?? PREVIEW_PAYLOAD,
+      payload,
       variant: opts.variant ?? 'helpful',
     });
-  }, [actor, opts.event, opts.payload, opts.variant]);
+  }, [actor, opts.event, payload, opts.variant]);
 
   return { speak, isSpeaking };
 };
 ```
 
-`useSpeakButton(explicit?)` resolves the payload `explicit ?? roundToPayload(round) ?? PREVIEW_PAYLOAD`. SettingsPanel renders the voice-preview button with an explicit payload (`{ text: t('settings.voicePreview'), subject: 'preview', locale: settings.activeLanguage }`), so the preview works without a `RoundContext`; in-game the round payload is used.
+`useSpeakButton` resolves the payload `opts.payload ?? roundToPayload(getActiveRoundContext()) ?? PREVIEW_PAYLOAD` (`roundToPayload` from Task 3.5). SettingsPanel renders the voice-preview button with an explicit payload (`{ text: t('settings.voicePreview'), subject: 'preview', lang: settings.activeLanguage }`), so the preview works without a `RoundContext`; in-game the round payload is used.
 
 Create `src/lib/lifecycle-tts/subject-utils.ts` (spec §10.3 — single place for null/string discipline):
 
@@ -2942,7 +3026,7 @@ Expected: PASS — Provider provides the actor; `useLifecycleTts` throws outside
 - [ ] **Step 7: Commit**
 
 ```bash
-git add src/lib/lifecycle-tts/lifecycle-tts-context.ts src/lib/lifecycle-tts/pick-tts-settings.ts src/lib/lifecycle-tts/lifecycle-tts-provider.tsx src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts.ts src/lib/lifecycle-tts/use-lifecycle-tts.test.ts src/lib/lifecycle-tts/use-speak-button.ts src/lib/lifecycle-tts/use-speak-button.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.test.tsx src/lib/lifecycle-tts/subject-utils.ts tests/storybook/with-lifecycle-tts.tsx src/routes/\$locale/_app.tsx
+git add src/lib/lifecycle-tts/lifecycle-tts-context.ts src/lib/lifecycle-tts/pick-tts-settings.ts src/lib/lifecycle-tts/lifecycle-tts-provider.tsx src/lib/lifecycle-tts/lifecycle-tts-provider.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts.ts src/lib/lifecycle-tts/use-lifecycle-tts.test.ts src/lib/lifecycle-tts/use-speak-button.ts src/lib/lifecycle-tts/use-speak-button.test.tsx src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.ts src/lib/lifecycle-tts/use-lifecycle-tts-unavailable-handler.test.tsx src/lib/lifecycle-tts/subject-utils.ts src/lib/lifecycle-tts/subject-utils.test.ts src/lib/lifecycle-tts/use-current-profile.ts src/lib/lifecycle-tts/use-current-session.ts tests/storybook/with-lifecycle-tts.tsx src/routes/\$locale/_app.tsx
 git commit -m "feat(lifecycle-tts): app-mounted LifecycleTtsProvider + Context + hooks + Storybook decorator (Spec Delta 4, spec §6.1.1, §7.2.1)"
 ```
 
@@ -3627,10 +3711,6 @@ const speak = vi.fn();
 vi.mock('@/lib/lifecycle-tts/use-speak-button', () => ({
   useSpeakButton: () => ({ speak, isSpeaking: false }),
 }));
-vi.mock('@/components/questions/RoundContext', () => ({
-  useRoundContext: () => ({}),
-}));
-
 describe('AudioButton', () => {
   beforeEach(() => speak.mockClear());
 
@@ -3666,7 +3746,6 @@ Replace `src/components/questions/AudioButton/AudioButton.tsx`:
 ```tsx
 import { useTranslation } from 'react-i18next';
 import { useSpeakButton } from '@/lib/lifecycle-tts/use-speak-button';
-import { useRoundContext } from '@/components/questions/RoundContext';
 import type {
   LifecycleEvent,
   Talkativeness,
@@ -3688,12 +3767,10 @@ export const AudioButton = ({
   event = 'round.start',
   variant = 'helpful',
 }: AudioButtonProps): JSX.Element => {
-  const round = useRoundContext();
-  const { speak, isSpeaking } = useSpeakButton({
-    event,
-    payload: { round },
-    variant,
-  });
+  // No payload — useSpeakButton derives it from the RoundContext mirror
+  // (roundToPayload, Task 3.5) and falls back to PREVIEW_PAYLOAD outside
+  // a game, so AudioButton renders anywhere without a provider.
+  const { speak, isSpeaking } = useSpeakButton({ event, variant });
   const { t } = useTranslation();
 
   return (
@@ -3785,10 +3862,9 @@ Expected: FAIL — components still gate by `ttsEnabled` (or no longer route cli
 In each of the four files, locate the onClick handler that calls `speak()` or `useGameTTS().speakPrompt()`, and replace with a `useSpeakButton` tap (spec §8.7):
 
 ```tsx
-const { speak } = useSpeakButton({
-  event: 'round.start',
-  payload: { round },
-});
+// payload omitted — useSpeakButton derives it from the live RoundContext
+// mirror (roundToPayload), falling back to PREVIEW_PAYLOAD (Task 8.5).
+const { speak } = useSpeakButton({ event: 'round.start' });
 
 const handleClick = () => {
   // No gate — taps always speak per spec §5.4 (no hard-mute).
@@ -3871,9 +3947,9 @@ git commit -m "feat(games): inline QuestionRow + AudioButton on word-spell, numb
 
 ---
 
-## Task 15.5: ARIA live region for round outcomes (spec §7.3 / §12.2)
+## Task 15.5: ARIA live region for round outcomes (spec §12.2)
 
-Closes 2026-06-09 finding C6 (ARIA half): spec §12.2 lists "ARIA live region announces round outcomes independently of TTS" as an **M1** acceptance criterion, and §7.3 promises ARIA + visual cues always run regardless of audio settings. Without it, a family on the quiet `on-demand` preset (or any assistive-tech user) gets **no** round-outcome announcement at all. The fix is deliberately minimal — no architecture, just markup.
+Closes 2026-06-09 finding C6 (ARIA half): the superseded 2026-05-03 canon spec promised ARIA + visual cues independent of the TTS layer, and the criterion is now in spec §12.2 (added 2026-06-10 on PR #391 alongside the §4.2.1/§5.5.1 amendments). Without it, a family on the quiet `on-demand` preset (or any assistive-tech user) gets **no** round-outcome announcement at all. The fix is deliberately minimal — no architecture, just markup.
 
 **Files:**
 
@@ -4108,7 +4184,7 @@ const idx = SLIDER_VALUES.indexOf(settings.talkativeness ?? 'helpful');
 
 <div className="settings-row">
   <Label htmlFor="talkativeness-slider">
-    {t('settings.talkativeness.label')}
+    How much should the game talk?
   </Label>
   <Slider
     id="talkativeness-slider"
@@ -4116,27 +4192,37 @@ const idx = SLIDER_VALUES.indexOf(settings.talkativeness ?? 'helpful');
     max={2}
     step={1}
     value={[idx]}
+    aria-valuetext={t(
+      `settings.talkativeness.descriptor.${SLIDER_VALUES[idx]}`,
+    )}
     onValueChange={([i]) => update({ talkativeness: SLIDER_VALUES[i] })}
   />
   <div className="slider-labels">
-    <span>🤫 {t('settings.talkativeness.onDemand')}</span>
-    <span>💬 {t('settings.talkativeness.helpful')}</span>
-    <span>🗣️ {t('settings.talkativeness.chatty')}</span>
+    <span>
+      <span aria-hidden="true">🤫</span> Shhh
+    </span>
+    <span>
+      <span aria-hidden="true">💬</span> Talk a bit
+    </span>
+    <span>
+      <span aria-hidden="true">🗣️</span> Talk a lot
+    </span>
   </div>
+  <p className="settings-row__descriptor">
+    {t(`settings.talkativeness.descriptor.${SLIDER_VALUES[idx]}`)}
+  </p>
   <Tooltip>
-    {t('settings.talkativeness.tooltip', {
-      defaultValue:
-        'The speaker button always works. This setting only controls how much the game talks on its own.',
-    })}
+    Pick how much help your child needs. Quiet focus / Read along /
+    Coach me through it.
   </Tooltip>
 </div>;
 ```
 
-The Storybook control uses `argTypes` radio (per project convention — slider is the user-facing UI, radio is the dev surface). i18n keys land in Task 18.
+Copy is spec §8.2 **verbatim and locked**: the heading label, the three stop labels, and the intent-framed tooltip stay literal — "no new label keys"; the emoji sit in `aria-hidden` spans (no `aria-label` on the parent — NVDA/VoiceOver double-announce risk). The **only** new §8.2 i18n keys are the three descriptors (`settings.talkativeness.descriptor.*`, Task 18), which drive both the persistent below-slider `<p>` and the slider's `aria-valuetext` — one copy track. The Storybook control uses `argTypes` radio (per project convention — slider is the user-facing UI, radio is the dev surface).
 
 - [ ] **Step 3b: Persistent descriptor + `aria-valuetext` (spec §8.2 — closes FYI F-7)**
 
-Below the slider, render a persistent one-line descriptor for the active stop using the §9.8 keys `settings.talkativeness.descriptor.on-demand` / `.helpful` / `.chatty` (added in Task 18) — the emoji stop labels alone don't tell a parent what each mode means. Set `aria-valuetext` on the slider input to the same string so screen readers announce the meaning, not a bare slider number. Add two assertions to the Step 1 test: the descriptor text changes when the slider moves, and the input exposes the matching `aria-valuetext`.
+The Step 3 snippet already renders the persistent descriptor `<p>` and wires `aria-valuetext` (spec §8.2 — the descriptor strings drive both, no separate copy track). This step adds the test coverage: assert the descriptor text changes when the slider moves, and the slider exposes the matching `aria-valuetext`.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -4163,8 +4249,8 @@ it('renders a gradeBand select with pre-k / k / year1-2 / year3-4 / year5-6', ()
   render(<AdvancedConfigModal {...defaultProps} />);
   const select = screen.getByLabelText(/grade band/i);
   expect(select).toBeInTheDocument();
-  // Default selection per spec §5.3 (helpful at k).
-  expect(select).toHaveValue('k');
+  // Default selection: 'pre-k' — spec §5.3 safest default (F-8).
+  expect(select).toHaveValue('pre-k');
 });
 
 it('writes gradeBand to the config draft on selection', () => {
@@ -4242,13 +4328,13 @@ git commit -m "feat(advanced-config): add gradeBand select to per-game config (t
 
 Closes 2026-06-09 finding C6 (privacy half): the v4 schema ships `useOfflineVoicesOnly` (Task 5) but no task gave it a UI. Spec §8.3: **any** toggle change (both directions) triggers a parent-confirmation modal — kid-tap protection so a child can't silently re-route audio.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 11: Write the failing tests**
 
 Add to `SettingsPanel.test.tsx`: (a) toggling `useOfflineVoicesOnly` in either direction opens the modal and does NOT flip the setting yet; (b) `Cancel` leaves the setting unchanged; (c) `Yes, allow` flips it via `useSettings().update`.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 12: Run tests to verify they fail**
 
-- [ ] **Step 3: Implement the toggle + modal**
+- [ ] **Step 13: Implement the toggle + modal**
 
 Create `src/components/SettingsPanel/CloudVoiceModal.tsx` (reuse the project's existing AlertDialog primitives). Copy from spec §8.3 verbatim, via i18n keys (Task 18 adds them):
 
@@ -4260,9 +4346,9 @@ Wire the toggle in `SettingsPanel.tsx`: tap → open modal → confirm → `upda
 
 Browser caveats go in a `(?)` info-button tooltip next to the toggle label (key `settings.cloudVoiceCaveats`), NOT in the modal body — §8.3 rationale: modal copy stays scannable.
 
-- [ ] **Step 4: Run tests + typecheck — PASS**
+- [ ] **Step 14: Run tests + typecheck — PASS**
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 15: Commit**
 
 ```bash
 git add src/components/SettingsPanel/SettingsPanel.tsx src/components/SettingsPanel/SettingsPanel.test.tsx src/components/SettingsPanel/CloudVoiceModal.tsx
@@ -4390,21 +4476,26 @@ Also add the Talkativeness slider labels (used by SettingsPanel — Task 17A) an
 {
   "settings": {
     // ... existing keys
+    // §8.2: slider label / stop labels / tooltip stay literal in the
+    // component ("no new label keys") — the three descriptors are the
+    // only new §8.2 keys; they drive the <p> descriptor AND aria-valuetext.
     "talkativeness": {
-      "label": "How much should the game talk?",
-      "onDemand": "Shhh",
-      "helpful": "Talk a bit",
-      "chatty": "Talk a lot",
-      "tooltip": "The speaker button always works. This setting only controls how much the game talks on its own.",
       "descriptor": {
-        "on-demand": "Only speaks when you tap the speaker button.",
-        "helpful": "Speaks instructions and important moments.",
-        "chatty": "Speaks often, with extra encouragement.",
+        "on-demand": "Game stays quiet. Tap the speaker button to hear questions.",
+        "helpful": "Game speaks the question and key tips.",
+        "chatty": "Game talks through every round.",
       },
     },
     "cloudVoiceTitle": "Use online voices too?",
     "cloudVoiceBody": "Online voices need an internet connection — they won't work when you're offline. Turning this on lets the game also use voices from a cloud service in addition to the voices already on your device.",
     "cloudVoiceCaveats": "Voice lists are reported by your browser and not always accurate. On iPhone and iPad all voices are already on-device. On Android, turning this off may leave a very short voice list.",
+  },
+  "audio": {
+    // §8.7 AudioButton aria-labels (counted in the §9.8 ~70-key total).
+    "replay": {
+      "idle": "Hear the question",
+      "playing": "Playing — tap to replay",
+    },
   },
   "config": {
     // ... existing keys
@@ -4521,7 +4612,7 @@ Expected: clean output. Per issue #420, `yarn fix:md` / `markdownlint --fix` cor
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/components/answer-game/*.mdx
+git add src/components/answer-game/*.mdx src/lib/game-engine/*.mdx
 git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefinition.tts contract"
 ```
 
@@ -4529,7 +4620,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 
 ## Self-Review Checklist (run before opening the PR)
 
-- [ ] **Spec coverage.** Re-read spec §14 M1 acceptance criteria. Confirm each item has at least one task that implements it. Items deferred to follow-ups are listed in "Out of scope for M1" with the issue/PR they track.
+- [ ] **Spec coverage.** Re-read spec §12.2 M1 acceptance criteria. Confirm each item has at least one task that implements it. Items deferred to follow-ups are listed in "Out of scope for M1" with the issue/PR they track.
 - [ ] **Placeholder scan.** Search this plan for `TBD`, `TODO`, `implement later`, `similar to`. Should be zero (architecture-docs `TODO(PR …)` comments aside).
 - [ ] **Type consistency.** `LifecycleEvent`, `Talkativeness`, `EventBindings`, `EventBindingsMap`, `ResolutionLayers`, `RoundContextValue` are defined in Task 1 and used identically throughout. `GameDefinition.tts?: EventBindingsMap` matches `definition-types.ts` after Task 1 Step 2.
 - [ ] **NumberMatch "speak the answer" bug.** Task 9 includes both the binding (`tts.number-match.round-start.helpful`) and the machine `entry: [speak]` wiring. The dev-server smoke test in Task 9 Step 6 is the user-visible acceptance gate.
@@ -4544,11 +4635,11 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 
 - [ ] `src/lib/lifecycle-tts/types.ts` exists and satisfies the forward reference at `src/lib/game-engine/definition-types.ts:8`.
 - [ ] `InstructionsOverlay` → `GameOptionsOverlay` rename complete; **does not auto-speak** how-to-play on mount.
-- [ ] `game.prepare` bus event added; emitted by `GameOptionsOverlay` on mount.
+- [ ] `lifecycle.speak { lifecycleEvent: 'game.prepare' }` emitted by `GameOptionsOverlay` on mount (C4 — the bare `GamePrepareEvent` type exists for future analytics consumers only).
 - [ ] `game.start` lifecycle event speaks the registered helpful/chatty copy after "Let's go" (via the `useGameEngine` mount-effect single emit-site — Task 8.6, Spec Delta 5 — which emits `lifecycle.speak { lifecycleEvent: 'game.start' }` to the app-mounted actor). **Not** the `playing`-state entry: that fires `round.start`, not `game.start`.
 - [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.helpful` ("Find the matching number for {{count}}.").
 - [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'pre-k'`, spec §5.3 safest).
-- [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); always speaks the resolved `full` copy for its `event` prop when tapped.
+- [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); a tap speaks the copy resolved for the `helpful` variant by default (overridable via `useSpeakButton({ variant })`, spec §8.7 + §12.2).
 - [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) route onClick speech through `useSpeakButton().speak()` (`SPEAK_USER`) with **no gate** (taps always speak per §5.4). (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
 - [ ] `<QuestionRow>` renders inline (icon left, content right) on all breakpoints; AudioButton ≥ 44×44 px; content wraps to extra lines.
 - [ ] WordSpell, NumberMatch, SortNumbers each have an inline AudioButton via `<QuestionRow>`.
@@ -4560,7 +4651,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] WordSpell, NumberMatch, SortNumbers each have a `tts:` block on their `GameDefinition`.
 - [ ] i18n keys for `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*`, `settings.talkativeness.*`, and `config.gradeBand.*` exist in `en` and `pt-BR` (pt-BR may be English placeholders).
 - [ ] `useRoundTTS` removed; all round-start auto-speech goes through the XState machine `entry` actions.
-- [ ] ARIA live region (`role="status"`) announces round outcomes in all three migrated games, independently of TTS settings (Task 15.5, spec §7.3/§12.2).
+- [ ] ARIA live region (`role="status"`) announces round outcomes in all three migrated games, independently of TTS settings (Task 15.5, spec §12.2).
 - [ ] `useOfflineVoicesOnly` toggle ships with the `CloudVoiceModal` parent confirmation in both directions (Sub-task 17C, spec §8.3).
 - [ ] AudioButton shows the §8.7 restart flash on re-tap preemption and the §5.6.1 one-shot pulse on the first `round.start` after `talkativeness` flips to `on-demand` (Task 13).
 - [ ] `LIFECYCLE_TTS_PLAYED` forwarding rail live in the engine (Task 8.7, spec §10.2) — M1 machines unaffected, Spec 1b drops in with zero engine churn.
@@ -4576,7 +4667,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 
 ---
 
-**Status:** Plan ready for execution. Pick `superpowers:subagent-driven-development` (recommended — fresh subagent per task) or `superpowers:executing-plans` (inline batch). **Read the Deferred / Open Questions section below before starting — three P0 architectural calls await resolution at execution time.**
+**Status:** Plan ready for execution. Pick `superpowers:subagent-driven-development` (recommended — fresh subagent per task) or `superpowers:executing-plans` (inline batch). **The former P0 architectural calls (C2 resolver model, C3a emit seam, C3f mount site) were RESOLVED 2026-06-10 and are folded into the plan body — do not re-litigate them from the Deferred / Open Questions history below; the history quotes superseded models on purpose.**
 
 ---
 
