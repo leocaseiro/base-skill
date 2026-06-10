@@ -292,7 +292,7 @@ src/components/answer-game/InstructionsOverlay/
 - **SpotAll AudioButton + speakPrompt consolidation.** Follow-up tied to PR 1d (#368). Open as `M1 follow-up: SpotAll AudioButton` once #368 lands.
 - **Per-event `customConfig.events` override surface.** Code-only — game designers set it on customConfigs. M2 work.
 - **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of per-variant `EventBindings` across multiple games. Deferred until M2 expands the event vocabulary.
-- **ARIA live region implementation.** M2 — ARIA live regions for round outcomes are decoupled from TTS and ship separately. Known gap surfaced by 2026-05-13 review (P2); see Deferred / Open Questions below. (The new 2026-05-16 spec carries ARIA under §12.2 acceptance criteria but not as a dedicated section.)
+- ~~ARIA live region implementation.~~ **Promoted into M1** (Task 15.5, closes 2026-06-09 C6): minimal `<div role="status" aria-live="polite">` wrapper around round outcomes in the three migrated games — spec §7.3/§12.2 list it as an M1 criterion and it costs ~5 lines of JSX per game.
 - **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
 
 ---
@@ -1160,6 +1160,8 @@ This is the load-bearing settings refactor. Two parallel changes, **kept in one 
 **Files:**
 
 - Modify: `src/db/schemas/settings.ts` — full v4 schema per §5.8
+- Create: `src/db/migrations/lifecycle-tts-settings-v4.ts` — allowlist migration (§5.8/§5.9)
+- Modify: `src/db/create-database.ts` — register strategy `4:` (without this the migration never runs)
 - Modify: `src/db/hooks/useSettings.ts` — extend `DEFAULT_SETTINGS`
 - Modify: `src/components/answer-game/types.ts` — drop `ttsEnabled`, add `gradeBand: GradeBand`
 - Modify: `src/games/spot-all/types.ts` — same shape change on `SpotAllConfig`
@@ -1199,20 +1201,59 @@ Expected: FAIL — schema is still v3.
 
 In `src/db/schemas/settings.ts`, replace the v3 schema with the v4 schema from spec §5.8 in full. Because master enforces `additionalProperties: false`, **every field must be declared explicitly**. Preserve `speechRate` (range 0.5..2, default 1), `preferredVoiceURI`, `preferredVoiceDeviceId`, `activeLanguage` (default `'en-AU'` per [project_default_language_en_au](../../../../.claude/projects/-Users-leocaseiro-Sites-base-skill/memory/project_default_language_en_au.md)), all volume fields, `tapForgivenessThreshold/TimeMs`, `showSubtitles`, `themeId`, etc. Drop `ttsEnabled`. Add `talkativeness` (enum `['on-demand', 'helpful', 'chatty']`, default `'helpful'`) and `useOfflineVoicesOnly` (boolean, default `true`).
 
-Add `settingsMigrations[4]` mapping:
+Create `src/db/migrations/lifecycle-tts-settings-v4.ts` exporting the migration as a named, unit-testable function — **explicit field allowlist, never `{ ...rest }` spread** (spec §5.9: under `additionalProperties: false`, a spread leaks unknown legacy fields that the v4 schema then rejects at validation). Spec §5.8 verbatim:
 
 ```ts
-4: (oldDoc: SettingsDocV3 & Record<string, unknown>): SettingsDoc => {
-  const { ttsEnabled, ...rest } = oldDoc;
-  return {
-    ...rest,
-    talkativeness: ttsEnabled === false ? 'on-demand' : 'helpful',
-    useOfflineVoicesOnly: true,
-  } as SettingsDoc;
-},
+// src/db/migrations/lifecycle-tts-settings-v4.ts
+import type { SettingsDoc, SettingsDocV3 } from '@/db/schemas/settings';
+
+// v3 → v4 — explicit field allowlist; no `{ ...rest }` spread (§5.9).
+// `additionalProperties: false` in the v4 schema would reject any legacy
+// field that leaked through, so we enumerate every v3 field that survives.
+export const migrateSettingsV4 = (
+  oldDoc: SettingsDocV3,
+): SettingsDoc => ({
+  id: oldDoc.id,
+  profileId: oldDoc.profileId,
+  updatedAt: oldDoc.updatedAt,
+  soundEffectsVolume: oldDoc.soundEffectsVolume,
+  voiceVolume: oldDoc.voiceVolume,
+  speechRate: oldDoc.speechRate,
+  activeLanguage: oldDoc.activeLanguage,
+  showSubtitles: oldDoc.showSubtitles,
+  themeId: oldDoc.themeId,
+  preferredVoiceURI: oldDoc.preferredVoiceURI,
+  preferredVoiceDeviceId: oldDoc.preferredVoiceDeviceId,
+  tapForgivenessThreshold: oldDoc.tapForgivenessThreshold,
+  tapForgivenessTimeMs: oldDoc.tapForgivenessTimeMs,
+  // === NEW v4 fields ===
+  talkativeness: oldDoc.ttsEnabled === false ? 'on-demand' : 'helpful',
+  useOfflineVoicesOnly: true, // privacy-safe default
+  // `ttsEnabled` is intentionally dropped — replaced by `talkativeness`.
+  // Any other unknown legacy field on `oldDoc` is also dropped because
+  // this allowlist never references it.
+});
 ```
 
 Bump the schema version: `version: 4` (was `3`).
+
+**Register the migration in `src/db/create-database.ts`** — without this it never runs and existing IndexedDB docs fail to load. Strategies 1–3 live inline under `settings.migrationStrategies`; follow the `migrateWordSpellConfig` import pattern for the testable v4:
+
+```ts
+// src/db/create-database.ts
+import { migrateSettingsV4 } from '@/db/migrations/lifecycle-tts-settings-v4';
+
+// … in the collections map:
+settings: {
+  schema: settingsSchema,
+  migrationStrategies: {
+    1: /* unchanged */,
+    2: /* unchanged */,
+    3: /* unchanged */,
+    4: migrateSettingsV4,
+  },
+},
+```
 
 - [ ] **Step 4: Extend `DEFAULT_SETTINGS` in `useSettings.ts` + export it and `UseSettingsResult`**
 
@@ -1382,7 +1423,7 @@ Suggested commit sequence (one commit per sub-task above):
 
 ```bash
 # 5A — schema + DEFAULT_SETTINGS
-git add src/db/schemas/settings.ts src/db/hooks/useSettings.ts src/db/migrations/lifecycle-tts-settings-v4.collection.test.ts
+git add src/db/schemas/settings.ts src/db/create-database.ts src/db/hooks/useSettings.ts src/db/migrations/lifecycle-tts-settings-v4.ts src/db/migrations/lifecycle-tts-settings-v4.collection.test.ts
 git commit -m "feat(settings): add talkativeness + useOfflineVoicesOnly to SettingsDoc; v3→v4 RxDB migration"
 
 # 5B — per-game type + gradeBand
@@ -2996,6 +3037,58 @@ git commit -m "feat(game-engine): single emit-site for game.start/game.resume in
 
 ---
 
+## Task 8.7: `LIFECYCLE_TTS_PLAYED` bus→machine forwarding rail (spec §10.2)
+
+Closes 2026-06-09 finding C3b: Tasks 9–11 assert the §10.2 transition-gate rail "ships in M1", but no task wired it. This task builds the forwarding: `useGameEngine` subscribes to `lifecycle.tts.played` on the bus and forwards matching events (same `gameId`) into the running machine as `LIFECYCLE_TTS_PLAYED`. M1 game machines declare no `LIFECYCLE_TTS_PLAYED` transitions — XState ignores unhandled events, so M1 behavior is unchanged — but Spec 1b's phoneme-explain sequence (and the SRS recorder's play-count signal, §10.2.5) drop in with zero engine churn.
+
+**Files:**
+
+- Modify: `src/lib/game-engine/useGameEngine.ts` — bus subscription + forward
+- Modify: `src/lib/game-engine/useGameEngine.test.tsx` — forwarding + gameId-filter tests
+
+- [ ] **Step 1: Write the failing test**
+
+Build a test definition whose machine declares a `LIFECYCLE_TTS_PLAYED` transition (e.g. `assign({ lastPlayed: ({ event }) => event.lifecycleEvent })`), render `useGameEngine` with it, emit `lifecycle.tts.played` on the bus with the matching `gameId`, and assert the machine consumed it. Emit again with a different `gameId` and assert it was ignored.
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `npx vitest run src/lib/game-engine/useGameEngine.test.tsx --reporter=verbose`
+Expected: FAIL — no forwarding yet.
+
+- [ ] **Step 3: Implement the forward**
+
+```ts
+// useGameEngine.ts — LIFECYCLE_TTS_PLAYED rail (spec §10.2, Task 8.7)
+useEffect(() => {
+  return getGameEventBus().subscribe('lifecycle.tts.played', (e) => {
+    if (e.gameId !== envelope.gameId) return;
+    send({
+      type: 'LIFECYCLE_TTS_PLAYED',
+      lifecycleEvent: e.lifecycleEvent,
+      // subject is null-coerced at the single emit site (§6.7);
+      // machines match it via isSubjectMatch() (§10.3).
+      subject: e.subject,
+    });
+  });
+}, [send, envelope.gameId]);
+```
+
+(Match the bus's actual subscribe signature — Task 4's `bus.subscribe('game.prepare', …)` shows the per-type form; return its unsubscribe from the effect.)
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `npx vitest run src/lib/game-engine/useGameEngine.test.tsx --reporter=verbose && yarn typecheck`
+Expected: PASS — matching events forwarded, foreign `gameId` ignored, M1 machines unaffected.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/lib/game-engine/useGameEngine.ts src/lib/game-engine/useGameEngine.test.tsx
+git commit -m "feat(game-engine): forward lifecycle.tts.played into machines as LIFECYCLE_TTS_PLAYED (spec §10.2 rail)"
+```
+
+---
+
 ## Task 9: NumberMatch — `tts:` block + machine `speak` entry (fixes "speak the answer" bug)
 
 **Files:**
@@ -3008,7 +3101,9 @@ The current behavior at `NumberMatch.tsx` reads the bare numeral aloud (the "5" 
 
 > **Integration note (applies to Tasks 9–11).** The machine `entry: [{ type: 'speak', … }]` action is **not** wired to any hook. The engine's `speak` side-effect provider (`useGameEngine` → `executeSideEffects`, in [src/lib/game-engine/side-effects.ts](../../src/lib/game-engine/side-effects.ts)) emits a single `lifecycle.speak` bus event; the **app-mounted `lifecycleTtsMachine` actor** (Tasks 6–8.5) is the bus subscriber that relays it as `SPEAK_AUTO` and performs the speech via `WebSpeechSpeaker`. There is no `useLifecycleTts` per-game subscriber and no `useRoundTTS` — the per-game machine emits to the bus, the single actor consumes. Auto-speech stays gated by the actor's `autoAllowed` guard (`talkativeness !== 'on-demand'`, §6.1); the game machine never reads settings.
 >
-> **`LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2, ships in M1).** The engine recognizes `LIFECYCLE_TTS_PLAYED` as a state-machine transition signal: a game machine can gate a transition on `lifecycle.tts.played` matching `gameId + lifecycleEvent + subject`, so a sequenced speech flow advances only after the prior utterance resolves. **This mechanism (the engine wiring that turns the `lifecycle.tts.played` bus event into a machine-consumable `LIFECYCLE_TTS_PLAYED` event) ships in M1** so Spec 1b's phoneme-explain sequence drops in with **zero engine churn**. The phoneme **content** (the `explaining.phoneme*` states + CSS classes) is **Spec 1b**, not this PR. Example of the future shape M1 enables:
+> **Two layers, two shapes (closes 2026-06-09 C4, shape half).** Machine entries use the XState **action-descriptor** form `{ type: 'speak', params: { lifecycleEvent } }`; the engine-provided `speak` action then executes the flat `SideEffect` object `{ type: 'speak', lifecycleEvent }` (`definition-types.ts`). Snippets showing `params` are the XState layer — the `SideEffect` itself is always flat. Do not "fix" one into the other.
+>
+> **`LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2, ships in M1).** The engine recognizes `LIFECYCLE_TTS_PLAYED` as a state-machine transition signal: a game machine can gate a transition on `lifecycle.tts.played` matching `gameId + lifecycleEvent + subject`, so a sequenced speech flow advances only after the prior utterance resolves. **This mechanism (the engine wiring that turns the `lifecycle.tts.played` bus event into a machine-consumable `LIFECYCLE_TTS_PLAYED` event) ships in M1 — built by Task 8.7** — so Spec 1b's phoneme-explain sequence drops in with **zero engine churn**. The phoneme **content** (the `explaining.phoneme*` states + CSS classes) is **Spec 1b**, not this PR. Example of the future shape M1 enables:
 >
 > ```ts
 > // Future Spec 1b sequence — rail exists in M1, content lands in 1b
@@ -3210,7 +3305,7 @@ git commit -m "fix(number-match): replace bare-numeral readout with registry-bac
 - Modify: `src/games/word-spell/definition.ts`
 - Modify: `src/games/word-spell/definition.test.ts`
 
-Mirror the shape of Task 9, but with WordSpell template variables (`{{word}}` instead of `{{count}}`). The same **integration note** and **`LIFECYCLE_TTS_PLAYED` transition-gate rail** from Task 9 apply: the `speak` entry emits `lifecycle.speak` to the app-mounted actor (no per-game hook), and the engine's `LIFECYCLE_TTS_PLAYED` rail (spec §10.2) ships in M1.
+Mirror the shape of Task 9, but with WordSpell template variables (`{{word}}` instead of `{{count}}`). The same **integration note** and **`LIFECYCLE_TTS_PLAYED` transition-gate rail** from Task 9 apply: the `speak` entry emits `lifecycle.speak` to the app-mounted actor (no per-game hook), and the engine's `LIFECYCLE_TTS_PLAYED` rail (spec §10.2) ships in M1 via Task 8.7.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3293,7 +3388,7 @@ git commit -m "feat(word-spell): add TTS registry + round.start speak entry to m
 - Delete: `src/components/answer-game/useRoundTTS.ts`
 - Delete: `src/components/answer-game/useRoundTTS.test.tsx`
 
-By the end of this task, all three XState-migrated games drive round-start speech via the machine — the `speak` entry emits `lifecycle.speak` to the app-mounted actor (Task 9 integration note), consumed by the single `lifecycleTtsMachine`. `useRoundTTS` has no remaining callers and is deleted; its old per-tree subscription model is fully replaced by the actor. The `LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2) ships in M1 as part of the engine, not the per-game machine.
+By the end of this task, all three XState-migrated games drive round-start speech via the machine — the `speak` entry emits `lifecycle.speak` to the app-mounted actor (Task 9 integration note), consumed by the single `lifecycleTtsMachine`. `useRoundTTS` has no remaining callers and is deleted; its old per-tree subscription model is fully replaced by the actor. The `LIFECYCLE_TTS_PLAYED` transition-gate rail (spec §10.2) ships in M1 as part of the engine (Task 8.7), not the per-game machine.
 
 - [ ] **Step 1: Add the `tts:` block + entry action**
 
@@ -3475,6 +3570,11 @@ git commit -m "feat(questions): add QuestionRow inline layout wrapper"
 - Modify: `src/components/questions/AudioButton/AudioButton.stories.tsx`
 
 Spec §5.4 ("no hard-mute"): the button **always renders** when the game UI is visible. There is no setting that hides it — `talkativeness` only gates auto-speech, not taps. The legacy `ttsEnabled: false → hidden` behavior is gone.
+
+**Also in scope (closes 2026-06-09 C6, AudioButton half):**
+
+1. **Re-tap restart flash (§8.7).** `SPEAK_USER` always preempts; on re-tap while speaking, apply the one-shot `.audio-button--restart-flash` class (200ms background flash + icon scale-down keyframe, auto-cleared via `setTimeout`), visually distinct from the steady `.audio-button--playing` pulsing ring so the user sees the restart. No aria change on the flash (over-announcement). Add a test: re-tap while `isSpeaking` → flash class applied, removed after the timeout.
+2. **Talkativeness→`on-demand` transition pulse (§5.6.1).** `useSpeakButton` watches for `talkativeness` transitions to `'on-demand'` and fires the same flash class **once on the next `round.start`** — advertising "the game just got quieter; tap me to hear the question." ~5 lines CSS keyframe + 1 `useEffect` in the hook. Add a test: flip settings to `on-demand`, fire `round.start`, assert the one-shot pulse.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -3737,6 +3837,46 @@ git commit -m "feat(games): inline QuestionRow + AudioButton on word-spell, numb
 
 ---
 
+## Task 15.5: ARIA live region for round outcomes (spec §7.3 / §12.2)
+
+Closes 2026-06-09 finding C6 (ARIA half): spec §12.2 lists "ARIA live region announces round outcomes independently of TTS" as an **M1** acceptance criterion, and §7.3 promises ARIA + visual cues always run regardless of audio settings. Without it, a family on the quiet `on-demand` preset (or any assistive-tech user) gets **no** round-outcome announcement at all. The fix is deliberately minimal — no architecture, just markup.
+
+**Files:**
+
+- Modify: `src/games/number-match/NumberMatch/NumberMatch.tsx`
+- Modify: `src/games/word-spell/WordSpell/WordSpell.tsx`
+- Modify: `src/games/sort-numbers/SortNumbers/SortNumbers.tsx`
+- Modify: the corresponding `.test.tsx` files
+
+- [ ] **Step 1: Write the failing tests**
+
+In each game's test file: render a round-complete state and assert `screen.getByRole('status')` contains the outcome text (e.g. `/correct|well done/i`); assert the element exists even when `talkativeness` is `'on-demand'` (announcement is independent of TTS).
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+- [ ] **Step 3: Wrap the round-outcome string in each game**
+
+~5 lines of JSX per game, where the round outcome already renders:
+
+```tsx
+<div role="status" aria-live="polite">
+  {roundOutcomeText}
+</div>
+```
+
+`role="status"` implies `aria-live="polite"` + `aria-atomic="true"` in modern browsers; keep the explicit attribute for older AT combos. Do NOT put the live region on confetti/animation wrappers — text node only, so screen readers read exactly the outcome.
+
+- [ ] **Step 4: Run tests + typecheck — PASS**
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/games/number-match/NumberMatch/NumberMatch.tsx src/games/word-spell/WordSpell/WordSpell.tsx src/games/sort-numbers/SortNumbers/SortNumbers.tsx src/games/*/**/*.test.tsx
+git commit -m "feat(a11y): ARIA live region announces round outcomes independently of TTS (spec §7.3/§12.2)"
+```
+
+---
+
 ## Task 16: Rename InstructionsOverlay → GameOptionsOverlay; remove auto-speak; emit game.prepare
 
 **REQUIRED SKILL:** `write-storybook` (the moved file gets a new title: `'AnswerGame/GameOptions/GameOptionsOverlay'`).
@@ -3782,10 +3922,14 @@ describe('GameOptionsOverlay (renamed from InstructionsOverlay)', () => {
     expect(speakMock).not.toHaveBeenCalled();
   });
 
-  it('emits game.prepare on mount', () => {
+  it('emits lifecycle.speak { game.prepare } on mount', () => {
     const received: string[] = [];
-    const unsub = getGameEventBus().subscribe('game.prepare', (e) =>
-      received.push(e.gameId),
+    const unsub = getGameEventBus().subscribe(
+      'lifecycle.speak',
+      (e) => {
+        if (e.lifecycleEvent === 'game.prepare')
+          received.push(e.gameId);
+      },
     );
     render(
       <GameOptionsOverlay text="How to play …" gameId="word-spell" />,
@@ -3798,7 +3942,7 @@ describe('GameOptionsOverlay (renamed from InstructionsOverlay)', () => {
 
 - [ ] **Step 3: Run tests to verify they fail**
 
-Expected: FAIL — auto-speak useEffect still fires; no `game.prepare` emit.
+Expected: FAIL — auto-speak useEffect still fires; no `lifecycle.speak` emit.
 
 - [ ] **Step 4: Update GameOptionsOverlay**
 
@@ -3806,9 +3950,11 @@ In `GameOptionsOverlay.tsx`:
 
 - Rename the exported component: `InstructionsOverlay` → `GameOptionsOverlay`.
 - Delete the `useEffect` block at lines 173–174 that calls `speak(text)`.
-- Add a new `useEffect(() => { ... }, [])` that emits `game.prepare`.
+- Add a new `useEffect(() => { ... }, [])` that emits `lifecycle.speak` with `lifecycleEvent: 'game.prepare'`.
 
-**Envelope source for `game.prepare`** (spec §8.5 — A1 pre-engine path). `GameOptionsOverlay` reads `profileId` and `sessionId` for the bus envelope from the two new hooks (it fires pre-engine, so it cannot source them from engine context):
+**The emit MUST be `lifecycle.speak`, not a bare `game.prepare` event** (closes 2026-06-09 finding C4): the actor is the single bus subscriber and it subscribes **only** to `lifecycle.speak` — a bare `game.prepare` emit would be silently dropped and the Game Options speech would never play. (Task 4's `GamePrepareEvent` type still exists on the bus union for future analytics/SRS consumers; the TTS path is `lifecycle.speak`.)
+
+**Envelope source** (spec §8.5 — A1 pre-engine path). `GameOptionsOverlay` reads `profileId` and `sessionId` for the bus envelope from the two new hooks (it fires pre-engine, so it cannot source them from engine context):
 
 ```tsx
 // inside GameOptionsOverlay.tsx
@@ -3816,7 +3962,8 @@ const profile = useCurrentProfile();
 const session = useCurrentSession();
 useEffect(() => {
   getGameEventBus().emit({
-    type: 'game.prepare',
+    type: 'lifecycle.speak',
+    lifecycleEvent: 'game.prepare',
     gameId,
     sessionId: session.id,
     profileId: profile.id,
@@ -3864,6 +4011,7 @@ git commit -m "feat(answer-game): rename InstructionsOverlay → GameOptionsOver
 
 - Modify: `src/components/SettingsPanel/SettingsPanel.tsx`
 - Modify: `src/components/SettingsPanel/SettingsPanel.test.tsx`
+- Create: `src/components/SettingsPanel/CloudVoiceModal.tsx` (Sub-task 17C, spec §8.3)
 - Modify: `src/components/AdvancedConfigModal.tsx`
 - Modify: `src/components/AdvancedConfigModal.test.tsx`
 
@@ -4052,6 +4200,39 @@ git commit -m "feat(advanced-config): add gradeBand select to per-game config (t
 
 ---
 
+### Sub-task 17C: `useOfflineVoicesOnly` toggle + `CloudVoiceModal` (spec §8.3)
+
+Closes 2026-06-09 finding C6 (privacy half): the v4 schema ships `useOfflineVoicesOnly` (Task 5) but no task gave it a UI. Spec §8.3: **any** toggle change (both directions) triggers a parent-confirmation modal — kid-tap protection so a child can't silently re-route audio.
+
+- [ ] **Step 1: Write the failing tests**
+
+Add to `SettingsPanel.test.tsx`: (a) toggling `useOfflineVoicesOnly` in either direction opens the modal and does NOT flip the setting yet; (b) `Cancel` leaves the setting unchanged; (c) `Yes, allow` flips it via `useSettings().update`.
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+- [ ] **Step 3: Implement the toggle + modal**
+
+Create `src/components/SettingsPanel/CloudVoiceModal.tsx` (reuse the project's existing AlertDialog primitives). Copy from spec §8.3 verbatim, via i18n keys (Task 18 adds them):
+
+- Title `settings.cloudVoiceTitle`: "Use online voices too?"
+- Body `settings.cloudVoiceBody`: "Online voices need an internet connection — they won't work when you're offline. Turning this on lets the game also use voices from a cloud service in addition to the voices already on your device."
+- Actions: `Cancel` (default; leaves setting unchanged) / `Yes, allow` (flips the toggle).
+
+Wire the toggle in `SettingsPanel.tsx`: tap → open modal → confirm → `update({ useOfflineVoicesOnly: next })`. When confirming `true` (re-enabling offline-only) while the active voice is a cloud voice, the speaker falls back to the first local voice for the locale + `console.warn` (spec §8.3; the speaker-side fallback already lands in Task 6's `pickVoice` ladder).
+
+Browser caveats go in a `(?)` info-button tooltip next to the toggle label (key `settings.cloudVoiceCaveats`), NOT in the modal body — §8.3 rationale: modal copy stays scannable.
+
+- [ ] **Step 4: Run tests + typecheck — PASS**
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/SettingsPanel/SettingsPanel.tsx src/components/SettingsPanel/SettingsPanel.test.tsx src/components/SettingsPanel/CloudVoiceModal.tsx
+git commit -m "feat(settings): useOfflineVoicesOnly toggle with CloudVoiceModal parent confirmation (spec §8.3)"
+```
+
+---
+
 ## Task 18: i18n keys (en + pt-BR)
 
 **Files:**
@@ -4178,6 +4359,9 @@ Also add the Talkativeness slider labels (used by SettingsPanel — Task 17A) an
       "chatty": "Talk a lot",
       "tooltip": "The speaker button always works. This setting only controls how much the game talks on its own.",
     },
+    "cloudVoiceTitle": "Use online voices too?",
+    "cloudVoiceBody": "Online voices need an internet connection — they won't work when you're offline. Turning this on lets the game also use voices from a cloud service in addition to the voices already on your device.",
+    "cloudVoiceCaveats": "Voice lists are reported by your browser and not always accurate. On iPhone and iPad all voices are already on-device. On Android, turning this off may leave a very short voice list.",
   },
   "config": {
     // ... existing keys
@@ -4290,6 +4474,10 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] WordSpell, NumberMatch, SortNumbers each have a `tts:` block on their `GameDefinition`.
 - [ ] i18n keys for `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*`, `settings.talkativeness.*`, and `config.gradeBand.*` exist in `en` and `pt-BR` (pt-BR may be English placeholders).
 - [ ] `useRoundTTS` removed; all round-start auto-speech goes through the XState machine `entry` actions.
+- [ ] ARIA live region (`role="status"`) announces round outcomes in all three migrated games, independently of TTS settings (Task 15.5, spec §7.3/§12.2).
+- [ ] `useOfflineVoicesOnly` toggle ships with the `CloudVoiceModal` parent confirmation in both directions (Sub-task 17C, spec §8.3).
+- [ ] AudioButton shows the §8.7 restart flash on re-tap preemption and the §5.6.1 one-shot pulse on the first `round.start` after `talkativeness` flips to `on-demand` (Task 13).
+- [ ] `LIFECYCLE_TTS_PLAYED` forwarding rail live in the engine (Task 8.7, spec §10.2) — M1 machines unaffected, Spec 1b drops in with zero engine churn.
 - [ ] Architecture docs (`GameEngine.flows.mdx`, `GameEngine.reference.mdx`) updated to document the new TTS data flow.
 
 ## Out of scope for M1 (deferred — tracked separately)
@@ -4297,7 +4485,6 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - SpotAll AudioButton + `speakPrompt` consolidation → follow-up tied to PR 1d (#368).
 - Per-event `customConfig.events` override surface → M2.
 - `LifecycleTTSExplorer.stories.tsx` registry-table viewer → M2.
-- ARIA live regions for round outcomes → M2.
 - `round.idle` timer + per-game predicate → M2.
 
 ---
