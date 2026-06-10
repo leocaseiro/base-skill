@@ -234,25 +234,42 @@ Priorities and throttles are overridable per game/skin/customConfig via the same
 
 ### 4.2.1 `game.start` / `game.resume` emission contract
 
-The engine `loading.entry` action is the **single emit site** for BOTH
+> **Amended 2026-06-10** (plan PR #394 round 2, finding C3a / plan Spec
+> Delta 5). The original text prescribed an "engine `loading.entry` action"
+> — that seam does not exist: per-game machines start `initial: 'playing'`,
+> there is no shared engine machine, no `loading` state, and
+> `executeSideEffects` has no `initialState`. The single-emit-site
+> **contract** is unchanged; the **seam** is the `useGameEngine` mount
+> effect — the one hook every game passes through.
+
+The `useGameEngine` mount effect is the **single emit site** for BOTH
 `game.start` and `game.resume`. `AnswerGameProvider` MUST NOT emit either —
 there is exactly one emit site so the events can never double-fire on mount.
-The two are distinguished by the `initialState` prop: absent → `game.start`,
-present (resuming a persisted session) → `game.resume`.
+The two are distinguished by the new optional
+`UseGameEngineOptions.initialState` (a persisted session snapshot; the
+session-resume feature is post-M1, so M1 callers never pass it): absent →
+`game.start`, present → `game.resume`.
 
 ```ts
-// src/lib/game-engine/side-effects.ts — loading.entry action
-const lifecycleEvent = input.initialState
-  ? 'game.resume'
-  : 'game.start';
-getGameEventBus().emit({
-  type: 'lifecycle.speak',
-  lifecycleEvent,
-  gameId: ctx.gameId,
-  sessionId: ctx.sessionId,
-  profileId: ctx.profileId,
-  // roundIndex omitted — game.* are non-round events (see §4.3 two-tier)
-});
+// src/lib/game-engine/useGameEngine.ts — mount effect (single emit site)
+useEffect(() => {
+  const lifecycleEvent = options?.initialState
+    ? 'game.resume'
+    : 'game.start';
+  getGameEventBus().emit({
+    type: 'lifecycle.speak',
+    lifecycleEvent,
+    gameId: envelope.gameId,
+    sessionId: envelope.sessionId,
+    profileId: envelope.profileId,
+    timestamp: Date.now(),
+    // roundIndex omitted — game.* are non-round events (see §4.3 two-tier)
+  });
+  // React StrictMode double-invokes mount effects in dev; the duplicate
+  // SPEAK_AUTO is dropped by the §6.4 replace policy (equal priority,
+  // same event, nothing queued → drop incoming).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 ```
 
 ### 4.3 Bus event additions
@@ -600,10 +617,23 @@ No subscription churn beyond the RxDB observable that `useSettings()` already ma
 
 ### 5.5.1 Provider mount site
 
+> **Amended 2026-06-10** (plan PR #394 round 2, finding C3f / plan Spec
+> Delta 4). The original text prescribed `__root.tsx`, but that file is the
+> bare document shell: above `DbProvider`, `useSettings()` silently degrades
+> to static defaults (commit `76dc53e36`), making the Talkativeness slider
+> inert — and the resolver's i18n plus the unavailable-dialog handler would
+> equally lack their contexts.
+
 `LifecycleTtsProvider` mounts once in
-[src/routes/\_\_root.tsx](../../../src/routes/__root.tsx) — inside
-`ServiceWorkerProvider`, outside the route outlet — so a single actor instance
-spans every route (including SettingsPanel previews). In development a
+[src/routes/$locale/\_app.tsx](../../../src/routes/$locale/_app.tsx) —
+inside `AppLayoutInner`, nested within `DbProvider` → `I18nextProvider` →
+`VoiceUnavailableDialogProvider` — so a single actor instance spans every
+speakable route (games, settings, parent pages; including SettingsPanel
+previews) with live settings, working i18n, and a reachable
+unavailable-dialog. Coverage is unchanged versus a root mount: outside
+`$locale/_app/` only the `/` → `/$locale` redirect exists, and it never
+speaks. The actor remounts when the `$locale` param changes — acceptable,
+speech re-initializes in the new language. In development a
 context-existence guard warns if a second `LifecycleTtsProvider` is ever mounted
 (`useContext(LifecycleTtsContext)` returning non-null at Provider mount =
 duplicate), catching accidental double-mounts.
