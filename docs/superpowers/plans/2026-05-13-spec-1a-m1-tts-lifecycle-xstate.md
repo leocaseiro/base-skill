@@ -4,7 +4,7 @@
 
 **Goal:** Ship the user-visible TTS copy fixes from #229 — rename InstructionsOverlay, stop auto-speaking how-to-play, fix NumberMatch's "speak the answer" bug, add `talkativeness` (`on-demand | helpful | chatty`) to the user-level `SettingsDoc` (v3→v4 RxDB migration), add `gradeBand` to per-game `AnswerGameConfig`, deprecate `ttsEnabled`, add an inline QuestionRow + AudioButton on the three XState-migrated games (WordSpell, NumberMatch, SortNumbers), and surface the Talkativeness slider in `SettingsPanel`.
 
-**Architecture:** Build the `src/lib/lifecycle-tts/` module whose forward-reference the engine already imports (`GameDefinition.tts`, `SideEffect 'speak'`). Each game's `src/games/<id>/definition.ts` carries its own `tts:` block — there is no parallel registry directory. A **single `lifecycleTtsMachine` XState actor** is mounted once at the React root via `LifecycleTtsProvider` (spec §5.5.1); it owns all game audio (speech + SFX) through two parallel sub-machines, a priority/throttle/single-queued speech policy, and the injected `WebSpeechSpeaker` + `HtmlAudioSoundEffectPlayer` adapters. Game machines emit `{ type: 'speak', params: { lifecycleEvent } }` actions; `useGameEngine` → `executeSideEffects` emits a single `lifecycle.speak` bus event; the actor is the **one** bus subscriber and relays it as `SPEAK_AUTO`, looking up the active game's `definition.tts[lifecycleEvent]`, resolving verbosity from the user's `talkativeness` (forwarded via `SETTINGS_CHANGED`, spec §5.5) + per-game `gradeBand`, interpolating the i18n template, and invoking the speaker — auto-speech suppressed when `talkativeness === 'on-demand'` per spec §6.1's `autoAllowed` guard. On-demand surfaces (AudioButton, question onClick) call `useSpeakButton().speak()` → `SPEAK_USER` directly on the actor (bus uninvolved) — taps **always** speak per spec §5.4 (no hard-mute); the OS volume slider is the escape hatch.
+**Architecture:** Build the `src/lib/lifecycle-tts/` module whose forward-reference the engine already imports (`GameDefinition.tts`, `SideEffect 'speak'`). Each game's `src/games/<id>/definition.ts` carries its own `tts:` block — there is no parallel registry directory. A **single `lifecycleTtsMachine` XState actor** is mounted once at the React root via `LifecycleTtsProvider` (spec §5.5.1); it owns all game audio (speech + SFX) through two parallel sub-machines, a priority/throttle/single-queued speech policy, and the injected `WebSpeechSpeaker` + `HtmlAudioSoundEffectPlayer` adapters. Game machines emit `{ type: 'speak', params: { lifecycleEvent } }` actions; `useGameEngine` → `executeSideEffects` emits a single `lifecycle.speak` bus event; the actor is the **one** bus subscriber and relays it as `SPEAK_AUTO`, resolving copy via the pure `resolveTemplate()` (spec §9): the 4-layer chain (customConfig → skin → definition → defaults) selects the i18n key for the user's `talkativeness` variant (forwarded via `SETTINGS_CHANGED`, spec §5.5), honoring `INHERITED`/`DONT_SPEAK` sentinels, interpolating `{{var}}`s from the active `RoundContext`, and invoking the speaker — auto-speech suppressed when `talkativeness === 'on-demand'` per spec §6.1's `autoAllowed` guard. On-demand surfaces (AudioButton, question onClick) call `useSpeakButton().speak()` → `SPEAK_USER` directly on the actor (bus uninvolved) — taps **always** speak per spec §5.4 (no hard-mute); the OS volume slider is the escape hatch.
 
 **Tech Stack:** React 18, TypeScript, xstate@5, @xstate/react@5, Vitest, i18next, Web Speech API, existing GameEventBus.
 
@@ -1299,7 +1299,7 @@ Also run: `yarn typecheck` — expect failures across the codebase from the inve
 In `src/components/answer-game/types.ts`, **delete** line 17 (`ttsEnabled: boolean`) and add:
 
 ```ts
-/** Grade band — selects per-event verbosity from `definition.tts[event].byGradeBand`. */
+/** Grade band — drives round.idle nudge timing (spec §10.1) and future per-band tuning. Not part of copy resolution (§9 resolves per-variant). */
 gradeBand: GradeBand;
 ```
 
@@ -2196,6 +2196,7 @@ Create `src/lib/lifecycle-tts/lifecycle-tts-machine.ts`. The machine skeleton is
 ```ts
 // src/lib/lifecycle-tts/lifecycle-tts-machine.ts
 import { setup, fromPromise, assign } from 'xstate';
+import type { ResolveOutput } from './resolve';
 import type { Speaker, SpeechUtterance } from './speaker';
 import type {
   LifecycleEvent,
@@ -2208,7 +2209,21 @@ import type { TypedGameEventBus } from '@/lib/game-event-bus';
 export const lifecycleTtsMachine = setup({
   types: {} as {
     context: TtsContext;
-    input: { settings: TtsSettings; speaker: Speaker; bus: TypedGameEventBus }; // speaker + bus injected by Provider (§7.2.1)
+    input: {
+      settings: TtsSettings;
+      speaker: Speaker;
+      bus: TypedGameEventBus;
+      // Pre-bound resolver closure (built in Task 8.5): wraps Task 3's
+      // resolveTemplate with the registry layers for the event's gameId,
+      // DEFAULT_EVENT_BINDINGS, i18n (t + exists), and Task 3.5's
+      // getActiveRoundContext() — so the machine stays free of React and
+      // i18n imports, and the §6.6 re-fire re-resolves with live data.
+      resolve: (
+        gameId: string,
+        event: LifecycleEvent,
+        variant: Talkativeness,
+      ) => ResolveOutput;
+    }; // all injected by Provider (§7.2.1)
     events:
       | {
           type: 'SPEAK_AUTO';
@@ -2413,6 +2428,7 @@ export const soundEffectThrottleMs: Record<LifecycleEvent, number> = {
 
 `resolveAndDispatchSpeech` algorithm (§6.4):
 
+0. Resolve the copy via the injected closure: `resolve(gameId, event, context.settings.talkativeness)` → `{ text, soundEffect }` (Task 3's `resolveTemplate`; `SPEAK_USER` passes the caller's explicit `variant` instead). If `text` is null and `soundEffect` is null → drop (the `speechHasBinding` / `sfxHasBinding` guards read this result).
 1. Look up `lastSpeechEnqueueAt[event]`. If `now - last < speechThrottleMs[event]`, drop.
 2. Compute incoming priority.
 3. If `incoming.priority > current.priority` → cancel current, set current = incoming, drop queued.
@@ -2593,12 +2609,24 @@ Create `src/lib/lifecycle-tts/lifecycle-tts-provider.tsx` (spec §5.5 + §5.5.1 
 // src/lib/lifecycle-tts/lifecycle-tts-provider.tsx
 import { use, useEffect, useMemo, type PropsWithChildren } from 'react';
 import { useActorRef } from '@xstate/react';
+import { useTranslation } from 'react-i18next';
+import { DEFAULT_EVENT_BINDINGS } from './defaults';
 import { LifecycleTtsContext } from './lifecycle-tts-context';
 import { lifecycleTtsMachine } from './lifecycle-tts-machine';
 import { pickTtsSettings } from './pick-tts-settings';
+import { resolveTemplate } from './resolve';
+import { getActiveRoundContext } from './round-context';
 import { WebSpeechSpeaker } from './web-speech-speaker';
 import { useSettings } from '@/db/hooks/useSettings';
 import { getGameEventBus } from '@/lib/game-event-bus';
+import { getGameDefinition } from '@/games/registry';
+
+const EMPTY_ROUND_CONTEXT = {
+  currentTarget: '',
+  gameName: '',
+  correctCount: 0,
+  totalRounds: 0,
+};
 
 export const LifecycleTtsProvider = ({
   children,
@@ -2607,11 +2635,12 @@ export const LifecycleTtsProvider = ({
   const existing = use(LifecycleTtsContext);
   if (import.meta.env.DEV && existing) {
     console.error(
-      'Duplicate LifecycleTtsProvider mounted — there must be exactly one (root-mounted per §5.5.1).',
+      'Duplicate LifecycleTtsProvider mounted — there must be exactly one (app-mounted per §5.5.1).',
     );
   }
 
   const { settings } = useSettings();
+  const { t, i18n } = useTranslation();
   const bus = getGameEventBus();
   const speaker = useMemo(
     () => new WebSpeechSpeaker(pickTtsSettings(settings), bus),
@@ -2620,8 +2649,40 @@ export const LifecycleTtsProvider = ({
     [],
   );
 
+  // Pre-bound resolver closure injected into the machine (Task 8 input.resolve):
+  // wraps Task 3's pure resolveTemplate with the layer lookup + i18n + the
+  // Task 3.5 round-context mirror. Game-prepare and other pre-round events
+  // resolve against an empty RoundContext (their templates use {{gameName}}
+  // only). Add a `getGameDefinition(gameId)` helper to src/games/registry.ts
+  // if one does not already exist.
+  const resolve = useMemo(
+    () =>
+      (gameId: string, event: LifecycleEvent, variant: Talkativeness) =>
+        resolveTemplate({
+          event,
+          variant,
+          gameId,
+          layers: {
+            definition: getGameDefinition(gameId)?.tts ?? {},
+            defaults: DEFAULT_EVENT_BINDINGS,
+          },
+          roundContext: getActiveRoundContext() ?? {
+            ...EMPTY_ROUND_CONTEXT,
+            gameName: gameId,
+          },
+          t,
+          i18n: { exists: (key: string) => i18n.exists(key) },
+        }),
+    [t, i18n],
+  );
+
   const actorRef = useActorRef(lifecycleTtsMachine, {
-    input: { settings: pickTtsSettings(settings), speaker, bus },
+    input: {
+      settings: pickTtsSettings(settings),
+      speaker,
+      bus,
+      resolve,
+    },
   });
 
   // Forward settings on every change — the machine's forwardSettings action
@@ -2987,12 +3048,14 @@ describe('NumberMatch machine — TTS entry actions', () => {
     );
   });
 
-  it('definition.tts has a round.start template', () => {
+  it('definition.tts has a round.start binding for both spoken variants', () => {
     expect(numberMatchDefinition.tts).toBeDefined();
-    expect(numberMatchDefinition.tts?.['round.start']).toBeDefined();
-    expect(numberMatchDefinition.tts?.['round.start']?.tts.full).toBe(
-      'tts.number-match.round-start.full',
-    );
+    expect(
+      numberMatchDefinition.tts?.['round.start']?.tts?.helpful,
+    ).toBe('tts.number-match.round-start.helpful');
+    expect(
+      numberMatchDefinition.tts?.['round.start']?.tts?.chatty,
+    ).toBe('tts.number-match.round-start.chatty');
   });
 });
 ```
@@ -3007,106 +3070,61 @@ Expected: FAIL — `playing` state has no `entry`; `definition.tts` is undefined
 In `src/games/number-match/definition.ts`, modify the exported definition (replace lines 631–639):
 
 ```ts
-import type { GameTTSConfig } from '@/lib/lifecycle-tts/types';
+import { DONT_SPEAK } from '@/lib/lifecycle-tts/sentinel-values';
+import type { EventBindingsMap } from '@/lib/lifecycle-tts/types';
 
-const numberMatchTTS: GameTTSConfig = {
+// Per-variant bindings (spec §9.3 + §9.4). Two deliberate omissions:
+// - `on-demand` keys are omitted (INHERITED): no lower layer binds these
+//   events in M1, so the chain resolves to silence — and auto-speech is
+//   additionally gated by the actor's `autoAllowed` guard (§6.1). The one
+//   explicit DONT_SPEAK (round.error) mirrors the spec §9.3 example and
+//   stays silent even if a global default for round.error appears later.
+// - `soundEffect` is omitted in M1 — SFX stays on the machines' existing
+//   `playSound` actions; actor-driven SFX migrates in M2 (avoids
+//   double-play while both paths exist).
+const numberMatchTTS: EventBindingsMap = {
   'game.prepare': {
     tts: {
-      brief: 'tts.number-match.game-prepare.brief',
-      full: 'tts.number-match.game-prepare.full',
+      helpful: 'tts.number-match.game-prepare.helpful',
+      chatty: 'tts.number-match.game-prepare.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'brief',
-      k: 'brief',
-      'year1-2': 'brief',
-      'year3-4': 'brief',
-      'year5-6': 'brief',
-    },
-    default: 'brief',
   },
   'game.start': {
     tts: {
-      brief: 'tts.number-match.game-start.brief',
-      full: 'tts.number-match.game-start.full',
+      helpful: 'tts.number-match.game-start.helpful',
+      chatty: 'tts.number-match.game-start.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'full',
-      'year3-4': 'brief',
-      'year5-6': 'brief',
-    },
-    default: 'full',
   },
   'round.start': {
     tts: {
-      brief: 'tts.number-match.round-start.brief',
-      full: 'tts.number-match.round-start.full',
+      helpful: 'tts.number-match.round-start.helpful',
+      chatty: 'tts.number-match.round-start.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'full',
-      'year3-4': 'brief',
-      'year5-6': 'brief',
-    },
-    default: 'full',
   },
   'round.error': {
     tts: {
-      brief: 'tts.number-match.round-error.brief',
-      full: 'tts.number-match.round-error.full',
+      'on-demand': DONT_SPEAK,
+      helpful: 'tts.number-match.round-error.helpful',
+      chatty: 'tts.number-match.round-error.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'brief',
-      'year3-4': 'brief',
-      'year5-6': 'off',
-    },
-    default: 'brief',
   },
   'round.correct': {
     tts: {
-      brief: 'tts.number-match.round-correct.brief',
-      full: 'tts.number-match.round-correct.full',
+      helpful: 'tts.number-match.round-correct.helpful',
+      chatty: 'tts.number-match.round-correct.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'brief',
-      'year1-2': 'brief',
-      'year3-4': 'off',
-      'year5-6': 'off',
-    },
-    default: 'brief',
   },
   'level.complete': {
     tts: {
-      brief: 'tts.number-match.level-complete.brief',
-      full: 'tts.number-match.level-complete.full',
+      helpful: 'tts.number-match.level-complete.helpful',
+      chatty: 'tts.number-match.level-complete.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'full',
-      'year3-4': 'brief',
-      'year5-6': 'brief',
-    },
-    default: 'full',
   },
   'game.end': {
     tts: {
-      brief: 'tts.number-match.game-end.brief',
-      full: 'tts.number-match.game-end.full',
+      helpful: 'tts.number-match.game-end.helpful',
+      chatty: 'tts.number-match.game-end.chatty',
     },
-    byGradeBand: {
-      'pre-k': 'full',
-      k: 'full',
-      'year1-2': 'full',
-      'year3-4': 'full',
-      'year5-6': 'brief',
-    },
-    default: 'full',
   },
 };
 
@@ -3208,9 +3226,9 @@ describe('WordSpell machine — TTS entry actions', () => {
     );
   });
 
-  it('definition.tts has a round.start template using {{word}}', () => {
-    expect(wordSpellDefinition.tts?.['round.start']?.tts.full).toBe(
-      'tts.word-spell.round-start.full',
+  it('definition.tts has a round.start binding using {{word}}', () => {
+    expect(wordSpellDefinition.tts?.['round.start']?.tts?.helpful).toBe(
+      'tts.word-spell.round-start.helpful',
     );
   });
 });
@@ -3925,7 +3943,7 @@ git commit -m "feat(settings-panel): replace ttsEnabled toggle with Talkativenes
 
 ### Sub-task 17B: AdvancedConfigModal — add `gradeBand` select (per-game)
 
-`gradeBand` is per-level / per-game tuning (it selects the verbosity row from `definition.tts[event].byGradeBand`) — appropriate for the per-game modal.
+`gradeBand` is per-level / per-game tuning — it drives the `round.idle` nudge timing (spec §10.1) and future per-band behavior; copy selection itself is per-variant (§9) — appropriate for the per-game modal.
 
 - [ ] **Step 6: Write the failing test**
 
@@ -4022,103 +4040,107 @@ git commit -m "feat(advanced-config): add gradeBand select to per-game config (t
 
 Add to `src/lib/i18n/locales/en/games.json`:
 
+Key shape is `tts.<game-id>.<event-kebab>.<variant>` (spec §9.4) — variants are `helpful` and `chatty`; `on-demand` gets **no keys** because it defaults to `DONT_SPEAK` (§9.8). `helpful` is the complete instructional line; `chatty` adds encouragement around it:
+
 ```jsonc
 {
   // ... existing keys
   "tts": {
     "word-spell": {
       "game-prepare": {
-        "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "helpful": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "chatty": "{{gameName}}! Ready to play? Tap Let's go to start, or pick a level.",
       },
       "game-start": {
-        "brief": "Let's spell.",
-        "full": "Let's spell some words. Drag the tiles to spell each word.",
+        "helpful": "Let's spell some words. Drag the tiles to spell each word.",
+        "chatty": "Let's spell some words! Drag the tiles to spell each word. You can do it!",
       },
       "round-start": {
-        "brief": "{{word}}",
-        "full": "Spell the word {{word}}.",
+        "helpful": "Spell the word {{word}}.",
+        "chatty": "Let's spell. Spell the word {{word}}. You can do it!",
       },
       "round-error": {
-        "brief": "Try again.",
-        "full": "Try again. The word is {{word}}.",
+        "helpful": "Try again. The word is {{word}}.",
+        "chatty": "Almost! Try again — the word is {{word}}.",
       },
       "round-correct": {
-        "brief": "Yes!",
-        "full": "Yes — {{word}}!",
+        "helpful": "Yes — {{word}}!",
+        "chatty": "Yes! You spelled {{word}}! Amazing!",
       },
       "level-complete": {
-        "brief": "Level complete.",
-        "full": "Level complete. You spelled {{count}} words.",
+        "helpful": "Level complete. You spelled {{correctCount}} words.",
+        "chatty": "Level complete! You spelled {{correctCount}} words. Keep going!",
       },
       "game-end": {
-        "brief": "Done.",
-        "full": "Game over. You spelled {{count}} words.",
+        "helpful": "Game over. You spelled {{correctCount}} words.",
+        "chatty": "Game over! You spelled {{correctCount}} words. Great job!",
       },
     },
     "number-match": {
       "game-prepare": {
-        "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "helpful": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "chatty": "{{gameName}}! Ready? Tap Let's go to start, or pick a level.",
       },
       "game-start": {
-        "brief": "Let's match.",
-        "full": "Let's match numbers. Find the matching number for the dots.",
+        "helpful": "Let's match numbers. Find the matching number for the dots.",
+        "chatty": "Let's match numbers! Count the dots and find the matching number. Here we go!",
       },
       "round-start": {
-        "brief": "Find {{count}}.",
-        "full": "Find the matching number for {{count}}.",
+        "helpful": "Find the matching number for {{count}}.",
+        "chatty": "Count the dots! Find the matching number for {{count}}. You can do it!",
       },
       "round-error": {
-        "brief": "Try again.",
-        "full": "Try again. Count the dots.",
+        "helpful": "Try again. Count the dots.",
+        "chatty": "Not quite! Count the dots one by one, then try again.",
       },
       "round-correct": {
-        "brief": "Yes!",
-        "full": "Yes — that's {{count}}!",
+        "helpful": "Yes — that's {{count}}!",
+        "chatty": "Yes! That's {{count}}! Well counted!",
       },
       "level-complete": {
-        "brief": "Level complete.",
-        "full": "Level complete.",
+        "helpful": "Level complete.",
+        "chatty": "Level complete! Keep it up!",
       },
       "game-end": {
-        "brief": "Done.",
-        "full": "Game over. Great job!",
+        "helpful": "Game over. You got {{correctCount}} of {{totalRounds}}.",
+        "chatty": "Game over! You got {{correctCount}} of {{totalRounds}}. Great job!",
       },
     },
     "sort-numbers": {
       "game-prepare": {
-        "brief": "{{gameName}}",
-        "full": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "helpful": "{{gameName}}. Tap Let's go to start, or pick a level.",
+        "chatty": "{{gameName}}! Ready to sort? Tap Let's go to start.",
       },
       "game-start": {
-        "brief": "Let's sort.",
-        "full": "Let's sort numbers. Drag them into the right order.",
+        "helpful": "Let's sort numbers. Drag them into the right order.",
+        "chatty": "Let's sort numbers! Drag them into the right order. Here we go!",
       },
       "round-start": {
-        "brief": "{{direction}} from {{from}} to {{to}}.",
-        "full": "Sort these numbers in {{direction}} order, skip by {{step}}.",
+        "helpful": "Sort these numbers in {{direction}} order, skip by {{step}}.",
+        "chatty": "Sort these numbers in {{direction}} order from {{from}} to {{to}}, skip by {{step}}. You can do it!",
       },
       "round-error": {
-        "brief": "Not quite.",
-        "full": "That's not in {{direction}} order yet. Try again.",
+        "helpful": "That's not in {{direction}} order yet. Try again.",
+        "chatty": "Almost! That's not in {{direction}} order yet. Check each number and try again.",
       },
       "round-correct": {
-        "brief": "Yes!",
-        "full": "Yes — sorted!",
+        "helpful": "Yes — sorted!",
+        "chatty": "Yes! All sorted! Nice work!",
       },
       "level-complete": {
-        "brief": "Level complete.",
-        "full": "Level complete.",
+        "helpful": "Level complete.",
+        "chatty": "Level complete! Keep going!",
       },
       "game-end": {
-        "brief": "Done.",
-        "full": "Game over. Great job!",
+        "helpful": "Game over. Great job!",
+        "chatty": "Game over! You sorted them all. Great job!",
       },
     },
   },
 }
 ```
+
+Every `{{var}}` above must exist in the §9.7 interpolation table (`word`, `count`, `target`, `direction`, `from`, `to`, `step`, `gameName`, `correctCount`, `totalRounds`) — the resolver returns `null` + dev-warns on any leftover `{{`.
 
 Also add the Talkativeness slider labels (used by SettingsPanel — Task 17A) and the per-game gradeBand labels (used by AdvancedConfigModal — Task 17B):
 
@@ -4216,8 +4238,8 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 
 - [ ] **Spec coverage.** Re-read spec §14 M1 acceptance criteria. Confirm each item has at least one task that implements it. Items deferred to follow-ups are listed in "Out of scope for M1" with the issue/PR they track.
 - [ ] **Placeholder scan.** Search this plan for `TBD`, `TODO`, `implement later`, `similar to`. Should be zero (architecture-docs `TODO(PR …)` comments aside).
-- [ ] **Type consistency.** `LifecycleEvent`, `GameTTSConfig`, `Verbosity`, `Talkativeness` are defined in Task 1 and used identically throughout. `EventTemplate` shape matches `definition-types.ts:7`.
-- [ ] **NumberMatch "speak the answer" bug.** Task 9 includes both the registry entry (`tts.number-match.round-start.full`) and the machine `entry: [speak]` wiring. The dev-server smoke test in Task 9 Step 6 is the user-visible acceptance gate.
+- [ ] **Type consistency.** `LifecycleEvent`, `Talkativeness`, `EventBindings`, `EventBindingsMap`, `ResolutionLayers`, `RoundContextValue` are defined in Task 1 and used identically throughout. `GameDefinition.tts?: EventBindingsMap` matches `definition-types.ts` after Task 1 Step 2.
+- [ ] **NumberMatch "speak the answer" bug.** Task 9 includes both the binding (`tts.number-match.round-start.helpful`) and the machine `entry: [speak]` wiring. The dev-server smoke test in Task 9 Step 6 is the user-visible acceptance gate.
 - [ ] **No `useRoundTTS` survivors.** `rg useRoundTTS src/` after Task 11 returns nothing.
 - [ ] **No `ttsEnabled` survivors.** `rg ttsEnabled src/` after Task 5 returns nothing (or only in migration code paths that map legacy values).
 - [ ] **CLAUDE.md compliance.** `yarn fix:md` clean; Storybook titles PascalCase; full worktree paths in commit messages and PR body.
@@ -4231,7 +4253,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] `InstructionsOverlay` → `GameOptionsOverlay` rename complete; **does not auto-speak** how-to-play on mount.
 - [ ] `game.prepare` bus event added; emitted by `GameOptionsOverlay` on mount.
 - [ ] `game.start` lifecycle event speaks the registered full-mode copy after "Let's go" (via the engine `loading.entry` single emit-site — Task 8.6, spec §4.2.1 — which emits `lifecycle.speak { lifecycleEvent: 'game.start' }` to the root-mounted actor). **Not** the `playing`-state entry: that fires `round.start`, not `game.start`.
-- [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.full` ("Find the matching number for {{count}}.").
+- [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.helpful` ("Find the matching number for {{count}}.").
 - [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'k'`).
 - [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); always speaks the resolved `full` copy for its `event` prop when tapped.
 - [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) route onClick speech through `useSpeakButton().speak()` (`SPEAK_USER`) with **no gate** (taps always speak per §5.4). (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
