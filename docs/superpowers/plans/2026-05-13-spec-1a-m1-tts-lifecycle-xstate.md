@@ -185,6 +185,7 @@ src/lib/lifecycle-tts/
 ├── round-context.test.tsx
 ├── resolve.ts                     # resolveTemplate() — single pure resolver: layer chain + sentinels + i18n.exists + interpolation + soundEffect (§9.1–§9.7)
 ├── resolve.test.ts
+├── i18n-template-coverage.test.ts # CI: every {{var}} in tts.* keys ∈ §9.7 interpolation table (§11.2)
 ├── errors.ts                      # LocalVoiceUnavailableError (§7.2)
 ├── pick-tts-settings.ts           # pickTtsSettings() — boundary-coerces SettingsDoc → Required<TtsSettings> (§5.5)
 ├── web-speech-speaker.ts          # WebSpeechSpeaker class — Speaker impl + Chrome watchdogs + pickVoice() offline ladder (§7.2)
@@ -1190,6 +1191,16 @@ expect(migrated2.talkativeness).toBe('helpful');
 // Untouched fields preserved
 expect(migrated.speechRate).toBe(1.2);
 expect(migrated.preferredVoiceURI).toBe('Karen');
+
+// Non-leakage (REQUIRED by spec §5.8/§5.9): an unknown legacy field on
+// the v3 source doc is dropped by the allowlist — it never reaches v4,
+// where additionalProperties: false would reject it.
+const v3WithLeak = {
+  ...v3Doc,
+  legacyDebugFlag: 'leaked',
+} as SettingsDocV3 & { legacyDebugFlag: string };
+const migrated3 = migrateSettingsV4(v3WithLeak);
+expect(migrated3).not.toHaveProperty('legacyDebugFlag');
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1300,9 +1311,9 @@ describe('AnswerGameConfig shape (M1)', () => {
       wrongTileBehavior: 'reject',
       tileBankMode: 'exact',
       totalRounds: 5,
-      gradeBand: 'k',
+      gradeBand: 'pre-k',
     };
-    expect(cfg.gradeBand).toBe('k');
+    expect(cfg.gradeBand).toBe('pre-k');
   });
 
   it('rejects the legacy ttsEnabled field at the type level', () => {
@@ -1373,15 +1384,15 @@ Don't grep-replace blindly — the semantics differ by call site.
 
 <!-- markdownlint-disable MD060 -->
 
-| Pattern in caller                                                                      | Replaces `ttsEnabled` with                                                                                                                                                                                             |
-| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `if (!ttsEnabled) return` inside a useEffect that auto-speaks on mount or round change | `useSettings().settings.talkativeness !== 'on-demand'` (auto-speech is gated only by user-level talkativeness)                                                                                                         |
-| `if (!ttsEnabled) return null` inside AudioButton / question onClick branches          | **Remove the gate entirely** — taps always speak per §5.4. Button always renders.                                                                                                                                      |
-| `disabled={!ttsEnabled}` on a button/input that drives on-demand speech                | **Remove the disabled prop** — taps always speak per §5.4.                                                                                                                                                             |
-| Default per-game config construction (e.g. `{ ttsEnabled: true }`)                     | Replace with `{ gradeBand: 'k' }` (drop `ttsEnabled`; auto-speech now comes from user-level talkativeness).                                                                                                            |
-| Test fixture / mock config                                                             | Same as default config construction; talkativeness is mocked at the `useSettings()` level, not per-game.                                                                                                               |
-| Form value binding (`ConfigFormFields`, `useConfigDraft`)                              | Replace `ttsEnabled` checkbox with `gradeBand` select. Talkativeness slider is added separately in `SettingsPanel`, NOT in per-game form (§8.2, §13.1.B #11).                                                          |
-| Legacy migration path (RxDB `customGame.config` load)                                  | Map `{ ttsEnabled: false }` to `{ gradeBand: 'k' }` (drop tts field; user-level migration to `talkativeness: 'on-demand'` is handled by the schema migration in sub-task 5A — config-form values do not duplicate it). |
+| Pattern in caller                                                                      | Replaces `ttsEnabled` with                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `if (!ttsEnabled) return` inside a useEffect that auto-speaks on mount or round change | `useSettings().settings.talkativeness !== 'on-demand'` (auto-speech is gated only by user-level talkativeness)                                                                                                             |
+| `if (!ttsEnabled) return null` inside AudioButton / question onClick branches          | **Remove the gate entirely** — taps always speak per §5.4. Button always renders.                                                                                                                                          |
+| `disabled={!ttsEnabled}` on a button/input that drives on-demand speech                | **Remove the disabled prop** — taps always speak per §5.4.                                                                                                                                                                 |
+| Default per-game config construction (e.g. `{ ttsEnabled: true }`)                     | Replace with `{ gradeBand: 'pre-k' }` (spec §5.3 safest default — drop `ttsEnabled`; auto-speech now comes from user-level talkativeness).                                                                                 |
+| Test fixture / mock config                                                             | Same as default config construction; talkativeness is mocked at the `useSettings()` level, not per-game.                                                                                                                   |
+| Form value binding (`ConfigFormFields`, `useConfigDraft`)                              | Replace `ttsEnabled` checkbox with `gradeBand` select. Talkativeness slider is added separately in `SettingsPanel`, NOT in per-game form (§8.2, §13.1.B #11).                                                              |
+| Legacy migration path (RxDB `customGame.config` load)                                  | Map `{ ttsEnabled: false }` to `{ gradeBand: 'pre-k' }` (drop tts field; user-level migration to `talkativeness: 'on-demand'` is handled by the schema migration in sub-task 5A — config-form values do not duplicate it). |
 
 <!-- markdownlint-enable MD060 -->
 
@@ -2653,7 +2664,7 @@ Create `src/lib/lifecycle-tts/lifecycle-tts-provider.tsx` (spec §5.5 + §5.5.1 
 
 ```tsx
 // src/lib/lifecycle-tts/lifecycle-tts-provider.tsx
-import { use, useEffect, useMemo, type PropsWithChildren } from 'react';
+import { useEffect, useMemo, type PropsWithChildren } from 'react';
 import { useActorRef } from '@xstate/react';
 import { useTranslation } from 'react-i18next';
 import { DEFAULT_EVENT_BINDINGS } from './defaults';
@@ -2674,16 +2685,25 @@ const EMPTY_ROUND_CONTEXT = {
   totalRounds: 0,
 };
 
+// Module-level DEV mount counter (closes FYI F-2): a context read only
+// detects an ANCESTOR Provider — a sibling double-mount would slip past.
+// StrictMode's mount/cleanup/mount sequence never exceeds 1 concurrently.
+let mountedProviders = 0;
+
 export const LifecycleTtsProvider = ({
   children,
 }: PropsWithChildren) => {
-  // DEV duplicate-mount guard: a non-null context here = a second Provider.
-  const existing = use(LifecycleTtsContext);
-  if (import.meta.env.DEV && existing) {
-    console.error(
-      'Duplicate LifecycleTtsProvider mounted — there must be exactly one (app-mounted per §5.5.1).',
-    );
-  }
+  useEffect(() => {
+    mountedProviders += 1;
+    if (import.meta.env.DEV && mountedProviders > 1) {
+      console.error(
+        'Duplicate LifecycleTtsProvider mounted — there must be exactly one (app-mounted per §5.5.1).',
+      );
+    }
+    return () => {
+      mountedProviders -= 1;
+    };
+  }, []);
 
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
@@ -2822,10 +2842,11 @@ export const useSpeakButton = (
   opts: UseSpeakButtonOpts,
 ): UseSpeakButtonResult => {
   const actor = useLifecycleTts();
-  const expectedSubject = useMemo(
-    () => subjectToken(`${opts.event}`),
-    [opts.event],
-  );
+  // Match THIS button's utterance by the real payload subject (§8.7 —
+  // closes FYI F-3): branding the event name as the subject would make
+  // two buttons for the same event light up together.
+  const expectedSubject =
+    opts.payload?.subject ?? PREVIEW_PAYLOAD.subject;
 
   // Track playing state by matching this button's expected subject against the
   // in-flight utterance. The actor clears `current` on speak-end and cancel —
@@ -3442,33 +3463,42 @@ Create `src/components/questions/QuestionRow/QuestionRow.test.tsx`:
 
 ```tsx
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { QuestionRow } from './QuestionRow';
 
+// AudioButton needs the actor context; stub the hook like Task 13's tests.
+vi.mock('@/lib/lifecycle-tts/use-speak-button', () => ({
+  useSpeakButton: () => ({ speak: vi.fn(), isSpeaking: false }),
+}));
+
 describe('QuestionRow', () => {
-  it('renders the audio slot on the left and content on the right', () => {
+  it('renders the AudioButton on the left and children on the right', () => {
     render(
-      <QuestionRow
-        audio={<button data-testid="audio">A</button>}
-        content={<span data-testid="content">cat</span>}
-      />,
+      <QuestionRow audioEvent="round.start">
+        <span data-testid="content">cat</span>
+      </QuestionRow>,
     );
-    const row = screen.getByTestId('audio').parentElement;
-    expect(row).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument(); // AudioButton
     expect(screen.getByTestId('content')).toBeInTheDocument();
   });
 
-  it('wraps content to a new line without truncating long text', () => {
+  it('defaults audioEvent to round.start when omitted', () => {
     render(
-      <QuestionRow
-        audio={<button>A</button>}
-        content={
-          <span>
-            Sort these numbers in ascending order from one hundred to
-            five hundred, skipping by ten.
-          </span>
-        }
-      />,
+      <QuestionRow>
+        <span>cat</span>
+      </QuestionRow>,
+    );
+    expect(screen.getByRole('button')).toBeInTheDocument();
+  });
+
+  it('wraps children to a new line without truncating long text', () => {
+    render(
+      <QuestionRow>
+        <span>
+          Sort these numbers in ascending order from one hundred to five
+          hundred, skipping by ten.
+        </span>
+      </QuestionRow>,
     );
     const content = screen.getByText(/Sort these numbers/);
     expect(content).toBeInTheDocument();
@@ -3488,24 +3518,30 @@ Expected: FAIL — module not found.
 
 Create `src/components/questions/QuestionRow/QuestionRow.tsx`:
 
+Prop contract is spec §8.6 verbatim (`audioEvent` + `children` — closes FYI F-1): the row owns its `AudioButton`, callers only say which lifecycle event a tap re-speaks.
+
 ```tsx
 import type { JSX, ReactNode } from 'react';
+import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
+import type { LifecycleEvent } from '@/lib/lifecycle-tts/types';
 import styles from './QuestionRow.module.css';
 
 export interface QuestionRowProps {
-  /** Audio button (or other left-aligned control). */
-  audio: ReactNode;
+  /** Lifecycle event a tap re-speaks. Defaults to round.start (§8.6). */
+  audioEvent?: LifecycleEvent;
   /** Question text or visual content. */
-  content: ReactNode;
+  children: ReactNode;
 }
 
 export const QuestionRow = ({
-  audio,
-  content,
+  audioEvent = 'round.start',
+  children,
 }: QuestionRowProps): JSX.Element => (
   <div className={styles['row']} role="group">
-    <div className={styles['audio']}>{audio}</div>
-    <div className={styles['content']}>{content}</div>
+    <div className={styles['audio']}>
+      <AudioButton event={audioEvent} />
+    </div>
+    <div className={styles['content']}>{children}</div>
   </div>
 );
 ```
@@ -3543,7 +3579,7 @@ export type { QuestionRowProps } from './QuestionRow/QuestionRow';
 
 - [ ] **Step 4: Create the Storybook story**
 
-Create `src/components/questions/QuestionRow/QuestionRow.stories.tsx` following `write-storybook` conventions (load that skill before authoring). Single Playground story, controls for `audio` and `content`, decorator providing theme. Title: `'Questions/QuestionRow'`.
+Create `src/components/questions/QuestionRow/QuestionRow.stories.tsx` following `write-storybook` conventions (load that skill before authoring). Single Playground story, `audioEvent` as a select control over the `LifecycleEvent` union, `children` as text; decorators provide theme + the `withLifecycleTts` actor decorator (Task 8.5). Title: `'Questions/QuestionRow'`.
 
 - [ ] **Step 5: Run tests + storybook smoke test**
 
@@ -3808,16 +3844,14 @@ In each game component, find the JSX block that currently renders the question (
 
 ```tsx
 import { QuestionRow } from '@/components/questions';
-import { AudioButton } from '@/components/questions/AudioButton/AudioButton';
 
-// inside the JSX:
-<QuestionRow
-  audio={<AudioButton event="round.start" />}
-  content={/* existing question content */}
-/>;
+// inside the JSX (QuestionRow owns the AudioButton — spec §8.6):
+<QuestionRow audioEvent="round.start">
+  {/* existing question content */}
+</QuestionRow>;
 ```
 
-Remove any pre-existing standalone AudioButton wiring that passed `prompt` strings — `event` carries everything now.
+Remove any pre-existing standalone AudioButton wiring that passed `prompt` strings — `audioEvent` carries everything now. This is also where each game mounts its `RoundContextProvider` (Task 3.5) around the playing tree, fed from the closure that already computes the round.
 
 - [ ] **Step 4: Run tests + VR smoke**
 
@@ -4100,6 +4134,10 @@ const idx = SLIDER_VALUES.indexOf(settings.talkativeness ?? 'helpful');
 
 The Storybook control uses `argTypes` radio (per project convention — slider is the user-facing UI, radio is the dev surface). i18n keys land in Task 18.
 
+- [ ] **Step 3b: Persistent descriptor + `aria-valuetext` (spec §8.2 — closes FYI F-7)**
+
+Below the slider, render a persistent one-line descriptor for the active stop using the §9.8 keys `settings.talkativeness.descriptor.on-demand` / `.helpful` / `.chatty` (added in Task 18) — the emoji stop labels alone don't tell a parent what each mode means. Set `aria-valuetext` on the slider input to the same string so screen readers announce the meaning, not a bare slider number. Add two assertions to the Step 1 test: the descriptor text changes when the slider moves, and the input exposes the matching `aria-valuetext`.
+
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run src/components/SettingsPanel/SettingsPanel.test.tsx --reporter=verbose`
@@ -4164,7 +4202,7 @@ In `AdvancedConfigModal.tsx`, add a new field within the per-game config form:
 <label>
   {t('config.gradeBand.label', { defaultValue: 'Grade band' })}
   <select
-    value={value.config.gradeBand ?? 'k'}
+    value={value.config.gradeBand ?? 'pre-k'}
     onChange={(e) =>
       // P1-fix: onChange signature is (patch: Partial<Draft>) — pass single-key patch.
       onChange({
@@ -4358,6 +4396,11 @@ Also add the Talkativeness slider labels (used by SettingsPanel — Task 17A) an
       "helpful": "Talk a bit",
       "chatty": "Talk a lot",
       "tooltip": "The speaker button always works. This setting only controls how much the game talks on its own.",
+      "descriptor": {
+        "on-demand": "Only speaks when you tap the speaker button.",
+        "helpful": "Speaks instructions and important moments.",
+        "chatty": "Speaks often, with extra encouragement.",
+      },
     },
     "cloudVoiceTitle": "Use online voices too?",
     "cloudVoiceBody": "Online voices need an internet connection — they won't work when you're offline. Turning this on lets the game also use voices from a cloud service in addition to the voices already on your device.",
@@ -4381,24 +4424,67 @@ Also add the Talkativeness slider labels (used by SettingsPanel — Task 17A) an
 
 Copy the same JSON structure into `src/lib/i18n/locales/pt-BR/games.json`. Values may stay as English placeholders for M1 — Portuguese translations land in a follow-up issue (open one and reference it in the commit).
 
-- [ ] **Step 3: Run lint + typecheck**
+- [ ] **Step 3: Create the template-coverage CI test (spec §11.2 — closes FYI F-6)**
+
+Create `src/lib/lifecycle-tts/i18n-template-coverage.test.ts`: walk every `tts.*` leaf string in `en/games.json`, extract each `{{var}}`, and assert it is in the §9.7 interpolation table. This is the CI guard against template/`RoundContextValue` drift — it would have caught the `{{count}}`-in-word-spell bug fixed in this plan's round 2.
+
+```ts
+import { describe, expect, it } from 'vitest';
+import en from '@/lib/i18n/locales/en/games.json';
+
+// Must mirror buildInterpolation() in resolve.ts (§9.7).
+const INTERPOLATION_VARS = new Set([
+  'word',
+  'count',
+  'target',
+  'direction',
+  'from',
+  'to',
+  'step',
+  'gameName',
+  'correctCount',
+  'totalRounds',
+]);
+
+const leafStrings = (node: unknown): string[] =>
+  typeof node === 'string'
+    ? [node]
+    : Object.values(node ?? {}).flatMap(leafStrings);
+
+describe('i18n template coverage (spec §11.2)', () => {
+  it('every {{var}} in tts.* templates exists in the §9.7 interpolation table', () => {
+    const templates = leafStrings((en as Record<string, unknown>).tts);
+    expect(templates.length).toBeGreaterThan(0);
+    for (const template of templates) {
+      for (const [, varName] of template.matchAll(/\{\{(\w+)\}\}/g)) {
+        expect(
+          INTERPOLATION_VARS.has(varName),
+          `unknown var {{${varName}}} in "${template}"`,
+        ).toBe(true);
+      }
+    }
+  });
+});
+```
+
+- [ ] **Step 4: Run tests + typecheck**
 
 ```bash
-yarn fix:md      # if any docs touched
+npx vitest run src/lib/lifecycle-tts/i18n-template-coverage.test.ts --reporter=verbose
 yarn typecheck
 ```
 
-Expected: PASS.
+Expected: PASS. (JSON + one test file — no markdown touched, nothing to `lint:md`.)
 
-- [ ] **Step 4: Run the game in dev to verify keys resolve**
+- [ ] **Step 5: Run the game in dev to verify keys resolve**
 
 `yarn dev`, open each game with the user-level Talkativeness set to `helpful` or `chatty` in SettingsPanel, confirm speech matches the registered templates.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/lib/i18n/locales/
-git commit -m "i18n: add tts.* keys for word-spell, number-match, sort-numbers + Voice & Instructions form labels"
+git add src/lib/i18n/locales/ src/lib/lifecycle-tts/i18n-template-coverage.test.ts
+git commit -m "i18n: add per-variant tts.* keys + template-coverage CI test (spec §9.4, §11.2)"
 ```
 
 ---
@@ -4427,10 +4513,10 @@ The skill walks through what sections need updating. Expect to cover:
 - The removal of `useRoundTTS`
 - The InstructionsOverlay → GameOptionsOverlay rename + behavior change
 
-- [ ] **Step 2: Run `yarn fix:md` on the touched docs**
+- [ ] **Step 2: Format + lint the touched docs (check-only — never `--fix`)**
 
-Run: `yarn fix:md`
-Expected: clean output, no remaining markdownlint or Prettier violations.
+Run: `npx prettier --write <touched .mdx files> && yarn lint:md`
+Expected: clean output. Per issue #420, `yarn fix:md` / `markdownlint --fix` corrupt code spans in agent-authored docs — use Prettier for formatting and markdownlint **check-only**; fix any remaining violations by hand.
 
 - [ ] **Step 3: Commit**
 
@@ -4449,7 +4535,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] **NumberMatch "speak the answer" bug.** Task 9 includes both the binding (`tts.number-match.round-start.helpful`) and the machine `entry: [speak]` wiring. The dev-server smoke test in Task 9 Step 6 is the user-visible acceptance gate.
 - [ ] **No `useRoundTTS` survivors.** `rg useRoundTTS src/` after Task 11 returns nothing.
 - [ ] **No `ttsEnabled` survivors.** `rg ttsEnabled src/` after Task 5 returns nothing (or only in migration code paths that map legacy values).
-- [ ] **CLAUDE.md compliance.** `yarn fix:md` clean; Storybook titles PascalCase; full worktree paths in commit messages and PR body.
+- [ ] **CLAUDE.md compliance.** `yarn lint:md` + `npx prettier --check` clean (never `yarn fix:md` / `markdownlint --fix` on plan/spec docs — issue #420); Storybook titles PascalCase; full worktree paths in commit messages and PR body.
 - [ ] **VR baselines.** Any layout-affecting tasks (12, 15, 16) include a `yarn test:vr:update` step with diff review.
 
 ---
@@ -4461,7 +4547,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] `game.prepare` bus event added; emitted by `GameOptionsOverlay` on mount.
 - [ ] `game.start` lifecycle event speaks the registered helpful/chatty copy after "Let's go" (via the `useGameEngine` mount-effect single emit-site — Task 8.6, Spec Delta 5 — which emits `lifecycle.speak { lifecycleEvent: 'game.start' }` to the app-mounted actor). **Not** the `playing`-state entry: that fires `round.start`, not `game.start`.
 - [ ] NumberMatch's "speak the answer" bug fixed — bare-numeral readout replaced by `tts.number-match.round-start.helpful` ("Find the matching number for {{count}}.").
-- [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'k'`).
+- [ ] `ttsEnabled` removed from both `AnswerGameConfig` (per-game) and `SettingsDoc` (user). User-level `talkativeness: 'on-demand' | 'helpful' | 'chatty'` added to `SettingsDoc` via RxDB v3→v4 migration (default `'helpful'`; legacy `ttsEnabled: false` maps to `'on-demand'`). Per-game `gradeBand: GradeBand` added to `AnswerGameConfig` (default `'pre-k'`, spec §5.3 safest).
 - [ ] `AudioButton` **always renders** (spec §5.4 no hard-mute); always speaks the resolved `full` copy for its `event` prop when tapped.
 - [ ] The three question components used by the XState-migrated games (TextQuestion, ImageQuestion, EmojiQuestion) route onClick speech through `useSpeakButton().speak()` (`SPEAK_USER`) with **no gate** (taps always speak per §5.4). (DotGroupQuestion is a SpotAll surface and migrates with the SpotAll follow-up — see Spec Delta 1.)
 - [ ] `<QuestionRow>` renders inline (icon left, content right) on all breakpoints; AudioButton ≥ 44×44 px; content wraps to extra lines.
@@ -4478,6 +4564,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] `useOfflineVoicesOnly` toggle ships with the `CloudVoiceModal` parent confirmation in both directions (Sub-task 17C, spec §8.3).
 - [ ] AudioButton shows the §8.7 restart flash on re-tap preemption and the §5.6.1 one-shot pulse on the first `round.start` after `talkativeness` flips to `on-demand` (Task 13).
 - [ ] `LIFECYCLE_TTS_PLAYED` forwarding rail live in the engine (Task 8.7, spec §10.2) — M1 machines unaffected, Spec 1b drops in with zero engine churn.
+- [ ] Known, documented gap (FYI F-11): `round.error` machine wiring in Task 9 is best-effort — the binding + i18n keys ship, but the firing path may defer to M2 if non-trivial (Task 9 Step 4). Not silent: errors keep their visual cue, and `turn.error` SFX still fires.
 - [ ] Architecture docs (`GameEngine.flows.mdx`, `GameEngine.reference.mdx`) updated to document the new TTS data flow.
 
 ## Out of scope for M1 (deferred — tracked separately)
@@ -4591,15 +4678,15 @@ Second multi-persona pass (coherence, feasibility, scope, design, adversarial) a
 
 #### FYI / P2 (2026-06-09 — DEFERRED, triage at execution)
 
-- **QuestionRow prop API mismatch** — plan uses `{ audio, content }`; spec §8.6 uses `{ audioEvent, children }`. Reconcile to the spec shape in Task 12.
-- **Provider DEV duplicate-guard misses sibling providers** — `use(Context)` only detects an ancestor Provider, not a sibling double-mount; use a module-level mount counter instead.
-- **`useSpeakButton` `isSpeaking` brands subject as the event name** — matching on `subjectToken(event)` breaks multi-button match; use the real payload `subject` per §8.7.
-- **Talkativeness presets gate events with no M1 wiring** — `round.advance` / `round.celebrate`, `game.resume`, `turn.action` appear in presets but have no firing path in M1; trim or annotate.
-- **Task 5A migration test lacks the unknown-field-drop assertion** — §5.8 requires asserting an unknown legacy field is dropped (non-leakage); the current Step 1 asserts only the `ttsEnabled` branches + field preservation.
-- **`i18n-template-coverage.test.ts` (§11.2) has no task** — the spec's template-coverage test is unowned; add a task or note the gap.
-- **Talkativeness slider missing persistent descriptor + `aria-valuetext`** — §8.2 requires a below-slider text descriptor and `aria-valuetext`; Task 17 omits both.
-- **`gradeBand` default `'k'` vs spec §5.3 safest `'pre-k'`** — the migration/default uses `'k'`; spec §5.3 prefers `'pre-k'` (always speaks) as the safe default.
-- **`useOfflineVoicesOnly` re-enable active-cloud-voice fallback UI unspecified** — §8.3's feedback when re-enabling offline-only while a cloud voice is active is not described in any task.
-- **`(?)` info-button caveats tooltip not in Task 17** — the settings info-button tooltip copy is unspecified.
-- **`round.error` entry wiring deferred in Task 9 with no acceptance note** — the optional `round.error` tracking is deferred to M2 without an explicit acceptance criterion documenting the gap.
-- **`game.resume` emitted (Task 8.6) but has no M1 i18n key / tts block** — on refresh, `game.resume` resolves to `null` because no game registers a `game.resume` template; add a key/block or document the intentional silence.
+- **RESOLVED 2026-06-10 — QuestionRow prop API mismatch** — plan uses `{ audio, content }`; spec §8.6 uses `{ audioEvent, children }`. Reconcile to the spec shape in Task 12.
+- **RESOLVED 2026-06-10 — Provider DEV duplicate-guard misses sibling providers** — `use(Context)` only detects an ancestor Provider, not a sibling double-mount; use a module-level mount counter instead.
+- **RESOLVED 2026-06-10 — `useSpeakButton` `isSpeaking` brands subject as the event name** — matching on `subjectToken(event)` breaks multi-button match; use the real payload `subject` per §8.7.
+- **MOOT 2026-06-10 (D1 deleted the preset tables) — Talkativeness presets gate events with no M1 wiring** — `round.advance` / `round.celebrate`, `game.resume`, `turn.action` appear in presets but have no firing path in M1; trim or annotate.
+- **RESOLVED 2026-06-10 — Task 5A migration test lacks the unknown-field-drop assertion** — §5.8 requires asserting an unknown legacy field is dropped (non-leakage); the current Step 1 asserts only the `ttsEnabled` branches + field preservation.
+- **RESOLVED 2026-06-10 (Task 18 Step 3) — `i18n-template-coverage.test.ts` (§11.2) has no task** — the spec's template-coverage test is unowned; add a task or note the gap.
+- **RESOLVED 2026-06-10 (17A Step 3b) — Talkativeness slider missing persistent descriptor + `aria-valuetext`** — §8.2 requires a below-slider text descriptor and `aria-valuetext`; Task 17 omits both.
+- **RESOLVED 2026-06-10 ('pre-k' applied) — `gradeBand` default `'k'` vs spec §5.3 safest `'pre-k'`** — the migration/default uses `'k'`; spec §5.3 prefers `'pre-k'` (always speaks) as the safe default.
+- **RESOLVED 2026-06-10 (Sub-task 17C: local-voice fallback + console.warn per §8.3) — `useOfflineVoicesOnly` re-enable active-cloud-voice fallback UI unspecified** — §8.3's feedback when re-enabling offline-only while a cloud voice is active is not described in any task.
+- **RESOLVED 2026-06-10 (Sub-task 17C + `settings.cloudVoiceCaveats` key) — `(?)` info-button caveats tooltip not in Task 17** — the settings info-button tooltip copy is unspecified.
+- **RESOLVED 2026-06-10 (acceptance-criteria note added) — `round.error` entry wiring deferred in Task 9 with no acceptance note** — the optional `round.error` tracking is deferred to M2 without an explicit acceptance criterion documenting the gap.
+- **RESOLVED 2026-06-10 (Task 8.6 documents intentional silence) — `game.resume` emitted (Task 8.6) but has no M1 i18n key / tts block** — on refresh, `game.resume` resolves to `null` because no game registers a `game.resume` template; add a key/block or document the intentional silence.
