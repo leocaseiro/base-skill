@@ -186,6 +186,10 @@ src/lib/lifecycle-tts/
 ├── resolve.ts                     # resolveTemplate() — single pure resolver: layer chain + sentinels + i18n.exists + interpolation + soundEffect (§9.1–§9.7)
 ├── resolve.test.ts
 ├── i18n-template-coverage.test.ts # CI: every {{var}} in tts.* keys ∈ §9.7 interpolation table (§11.2)
+├── idle-timeout.ts                # gradeBand → ms table for round.idle (§10.1)
+├── idle-timeout.test.ts
+├── grade-band.ts                  # gradeLevel → GradeBand mapping (§11.2)
+├── grade-band.test.ts
 ├── errors.ts                      # LocalVoiceUnavailableError (§7.2)
 ├── pick-tts-settings.ts           # pickTtsSettings() — boundary-coerces SettingsDoc → Required<TtsSettings> (§5.5)
 ├── speaker.ts                     # Speaker + SoundEffectPlayer interfaces, SpeechUtterance + SoundEffectRequest types (§7.1)
@@ -307,7 +311,6 @@ src/components/answer-game/InstructionsOverlay/
 - **Per-event `customConfig.events` override surface.** Code-only — game designers set it on customConfigs. M2 work.
 - **`LifecycleTTSExplorer.stories.tsx`.** M2 — the registry-table viewer is for game-designer review of per-variant `EventBindings` across multiple games. Deferred until M2 expands the event vocabulary.
 - ~~ARIA live region implementation.~~ **Promoted into M1** (Task 15.5, closes 2026-06-09 C6): minimal `<div role="status" aria-live="polite">` wrapper around round outcomes in the three migrated games — an M1 criterion in spec §12.2 (added 2026-06-10 on PR #391), ~5 lines of JSX per game.
-- **`round.idle` timer + per-game predicate.** M2 — spec §10.1.
 
 ---
 
@@ -3331,6 +3334,26 @@ const numberMatchTTS: EventBindingsMap = {
       chatty: 'tts.number-match.round-error.chatty',
     },
   },
+  'round.idle': {
+    tts: {
+      'on-demand': DONT_SPEAK, // idle nudge is auto-speech only (§10.1.1)
+      helpful: 'tts.number-match.round-idle.helpful',
+      chatty: 'tts.number-match.round-idle.chatty',
+    },
+  },
+  'turn.correct': {
+    tts: {
+      helpful: 'tts.number-match.turn-correct.helpful',
+      chatty: 'tts.number-match.turn-correct.chatty',
+    },
+  },
+  'turn.error': {
+    tts: {
+      'on-demand': DONT_SPEAK,
+      helpful: 'tts.number-match.turn-error.helpful',
+      chatty: 'tts.number-match.turn-error.chatty',
+    },
+  },
   'round.correct': {
     tts: {
       helpful: 'tts.number-match.round-correct.helpful',
@@ -3379,6 +3402,7 @@ playing: {
 Also add `speak` entries at the appropriate transitions for the other events the registry handles. Minimum set for M1:
 
 - `roundComplete` state (already has `playSound`): also add `{ type: 'speak', params: { lifecycleEvent: 'round.correct' } }`.
+- Where the machine already distinguishes right/wrong placement actions, add `speak` with `turn.correct` / `turn.error` (F-38 — §9.8 lists both as M1 user-visible; the actor's §6.4 throttles, 400/800 ms, absorb rapid-fire). Skip if a machine has no such action seam — do not invent one.
 - Optional: track `round.error` via an `assign` + `entry`-like pattern on `placeTile` actions — defer to M2 if the wiring is non-trivial; M1's must-haves are `round.start` (fixes the "5" bug) + `game.end` (already present at line 624).
 
 - [ ] **Step 4b: Remove the legacy `useRoundTTS` caller from NumberMatch**
@@ -3524,6 +3548,55 @@ Expected: PASS — no references to `useRoundTTS` left; all SortNumbers tests pa
 ```bash
 git add src/games/sort-numbers/definition.ts src/games/sort-numbers/definition.test.ts src/games/sort-numbers/SortNumbers/SortNumbers.tsx
 git commit -m "feat(sort-numbers): add TTS registry + round.start speak entry; remove legacy useRoundTTS caller + module"
+```
+
+---
+
+## Task 11.5: `round.idle` — gradeBand-aware idle nudge (spec §10.1 + §10.1.1)
+
+Closes F-38 (decision 2026-06-12): spec §10.1.1 promotes `round.idle` into M1 — the plan's former M2 deferral is reversed. The timer lives in **each game machine**, not in lifecycle-tts: it fires once per round, `idleTimeoutMs[gradeBand]` ms after round start, only while no zone has a correct placement AND no tile has been picked up; it is cancelled on the first correct placement, restarted **once** on the first wrong placement, and never restarted again that round. `0` disables it (year3-4 / year5-6).
+
+**Files:**
+
+- Create: `src/lib/lifecycle-tts/idle-timeout.ts` + `idle-timeout.test.ts`
+- Create: `src/lib/lifecycle-tts/grade-band.ts` + `grade-band.test.ts`
+- Modify: `src/games/number-match/definition.ts`, `src/games/word-spell/definition.ts`, `src/games/sort-numbers/definition.ts` (timer wiring + `round.idle` binding)
+
+- [ ] **Step 1: Write the failing tests**
+
+`idle-timeout.test.ts`: the §10.1 table verbatim — `pre-k`/`k` → 8000, `year1-2` → 12000, `year3-4`/`year5-6` → 0. `grade-band.test.ts`: the gradeLevel → `GradeBand` mapping covers every grade the profile model can hold. Per-machine (extend each definition.test.ts): with fake timers, entering `playing` and advancing by the band's timeout with no progress fires `speak({ lifecycleEvent: 'round.idle' })` exactly once; a correct placement before the timeout cancels it; a wrong placement restarts it once (advance again → second fire), but never a third time; `gradeBand: 'year3-4'` never fires.
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+- [ ] **Step 3: Implement the table + mapping**
+
+`src/lib/lifecycle-tts/idle-timeout.ts` (spec §10.1 verbatim):
+
+```ts
+import type { GradeBand } from '@/types/game-events';
+
+export const idleTimeoutMs: Record<GradeBand, number> = {
+  'pre-k': 8000,
+  k: 8000,
+  'year1-2': 12000,
+  'year3-4': 0, // disabled
+  'year5-6': 0, // disabled
+};
+```
+
+`src/lib/lifecycle-tts/grade-band.ts`: `gradeLevelToGradeBand(level)` mapping the profile grade field onto the five bands (spec §11.2 annotation).
+
+- [ ] **Step 4: Wire the timer into the three machines**
+
+Per the spec §10.1 state sketch — XState `after` with a dynamic delay (`delays: { IDLE_TIMEOUT: ({ context }) => idleTimeoutMs[context.gradeBand] }`), a `noProgressYet` guard, plus an `idleEnabled` guard so a `0` delay never fires; cancel on first correct placement, restart once on first wrong placement (a `idleRestartsUsed` counter in context). The `speak` action is the engine-provided one (Task 9 integration note) — `round.idle` flows to the actor like every other `lifecycle.speak`; `on-demand` stays silent via the binding's `DONT_SPEAK`.
+
+- [ ] **Step 5: Run tests + typecheck — PASS**
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/lib/lifecycle-tts/idle-timeout.ts src/lib/lifecycle-tts/idle-timeout.test.ts src/lib/lifecycle-tts/grade-band.ts src/lib/lifecycle-tts/grade-band.test.ts src/games/*/definition.ts src/games/*/definition.test.ts
+git commit -m "feat(lifecycle-tts): gradeBand-aware round.idle nudge timer in the three game machines (spec §10.1)"
 ```
 
 ---
@@ -4391,6 +4464,18 @@ Key shape is `tts.<game-id>.<event-kebab>.<variant>` (spec §9.4) — variants a
         "helpful": "Try again. The word is {{word}}.",
         "chatty": "Almost! Try again — the word is {{word}}.",
       },
+      "round-idle": {
+        "helpful": "Take your time. Tap the speaker if you need to hear it again.",
+        "chatty": "No rush — try one of the letters when you're ready.",
+      },
+      "turn-correct": {
+        "helpful": "Yes.",
+        "chatty": "Great — keep going!",
+      },
+      "turn-error": {
+        "helpful": "Not that one.",
+        "chatty": "Not that one — try another letter.",
+      },
       "round-correct": {
         "helpful": "Yes — {{word}}!",
         "chatty": "Yes! You spelled {{word}}! Amazing!",
@@ -4421,6 +4506,18 @@ Key shape is `tts.<game-id>.<event-kebab>.<variant>` (spec §9.4) — variants a
         "helpful": "Try again. Count the dots.",
         "chatty": "Not quite! Count the dots one by one, then try again.",
       },
+      "round-idle": {
+        "helpful": "Take your time. Which numbers match?",
+        "chatty": "Tap a number when you're ready.",
+      },
+      "turn-correct": {
+        "helpful": "Yes.",
+        "chatty": "Yes, that's {{count}}!",
+      },
+      "turn-error": {
+        "helpful": "Not that one.",
+        "chatty": "Not that one — count the dots again.",
+      },
       "round-correct": {
         "helpful": "Yes — that's {{count}}!",
         "chatty": "Yes! That's {{count}}! Well counted!",
@@ -4450,6 +4547,18 @@ Key shape is `tts.<game-id>.<event-kebab>.<variant>` (spec §9.4) — variants a
       "round-error": {
         "helpful": "That's not in {{direction}} order yet. Try again.",
         "chatty": "Almost! That's not in {{direction}} order yet. Check each number and try again.",
+      },
+      "round-idle": {
+        "helpful": "Take your time. Drag the numbers in order.",
+        "chatty": "No rush — start with the smallest one.",
+      },
+      "turn-correct": {
+        "helpful": "Yes.",
+        "chatty": "Yes — keep sorting!",
+      },
+      "turn-error": {
+        "helpful": "Not there.",
+        "chatty": "Not there — where does it belong?",
       },
       "round-correct": {
         "helpful": "Yes — sorted!",
@@ -4652,6 +4761,7 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - [ ] i18n keys for `tts.word-spell.*`, `tts.number-match.*`, `tts.sort-numbers.*`, `settings.talkativeness.*`, and `config.gradeBand.*` exist in `en` and `pt-BR` (pt-BR may be English placeholders).
 - [ ] `useRoundTTS` removed; all round-start auto-speech goes through the XState machine `entry` actions.
 - [ ] ARIA live region (`role="status"`) announces round outcomes in all three migrated games, independently of TTS settings (Task 15.5, spec §12.2).
+- [ ] `round.idle` nudge fires per spec §10.1 semantics (once per round, gradeBand-timed, cancel-on-correct, one restart on wrong, disabled at year3-4+) in all three migrated games (Task 11.5).
 - [ ] `useOfflineVoicesOnly` toggle ships with the `CloudVoiceModal` parent confirmation in both directions (Sub-task 17C, spec §8.3).
 - [ ] AudioButton shows the §8.7 restart flash on re-tap preemption and the §5.6.1 one-shot pulse on the first `round.start` after `talkativeness` flips to `on-demand` (Task 13).
 - [ ] `LIFECYCLE_TTS_PLAYED` forwarding rail live in the engine (Task 8.7, spec §10.2) — M1 machines unaffected, Spec 1b drops in with zero engine churn.
@@ -4663,7 +4773,6 @@ git commit -m "docs(architecture): document TTS lifecycle data flow + GameDefini
 - SpotAll AudioButton + `speakPrompt` consolidation → follow-up tied to PR 1d (#368).
 - Per-event `customConfig.events` override surface → M2.
 - `LifecycleTTSExplorer.stories.tsx` registry-table viewer → M2.
-- `round.idle` timer + per-game predicate → M2.
 
 ---
 
@@ -4750,7 +4859,7 @@ A multi-persona review (coherence, feasibility, product-lens, design-lens, scope
 
 ### From 2026-06-09 ce-doc-review
 
-**Round-2 resolution note (2026-06-10).** All eight non-compile-blocker clusters below are now RESOLVED in the plan body: D1 = spec-wins §9 rewrite (Tasks 1–3.5, commits `8c1358185` + `0eb9d5921`); D2 = mount in `$locale/_app.tsx` (Spec Delta 4); C3a = `useGameEngine` mount-effect seam (Spec Delta 5, Task 8.6); C3b = Task 8.7 forwarding rail; C3c = Task 3.5 RoundContext; C4 = `lifecycle.speak` emit + two-layer shape note; C5 = allowlist migration registered in `create-database.ts`; C6 = Task 13 additions + Task 15.5 ARIA + Sub-task 17C CloudVoiceModal. Spec §4.2.1 + §5.5.1 amended on PR #391 (`86a8a7c1f`). The FYI/P2 list below remains open for triage.
+**Round-2 resolution note (2026-06-10).** All eight non-compile-blocker clusters below are now RESOLVED in the plan body: D1 = spec-wins §9 rewrite (Tasks 1–3.5, commits `8c1358185` + `0eb9d5921`); D2 = mount in `$locale/_app.tsx` (Spec Delta 4); C3a = `useGameEngine` mount-effect seam (Spec Delta 5, Task 8.6); C3b = Task 8.7 forwarding rail; C3c = Task 3.5 RoundContext; C4 = `lifecycle.speak` emit + two-layer shape note; C5 = allowlist migration registered in `create-database.ts`; C6 = Task 13 additions + Task 15.5 ARIA + Sub-task 17C CloudVoiceModal. Spec §4.2.1 + §5.5.1 amended on PR #391 (`86a8a7c1f`). The FYI/P2 list below was triaged 2026-06-10 (all 12 applied/moot — see the per-item statuses). F-38 (round.idle M1 promotion, found by the 2026-06-10 consistency sweep) was decided 2026-06-12: implement in M1 → Task 11.5 + turn.\* keys/bindings.
 
 Second multi-persona pass (coherence, feasibility, scope, design, adversarial) against the **actor-rewrite** plan. Findings are grouped into clusters C1–C7 plus an FYI/P2 list. The compile-blocker clusters (C1, C3d, C3e, C7) were fixed in the 2026-06-09 commit that lands this subsection; the rest are tracked here for resolution at execution. Entry format: `Cn — severity — status — Title — why it matters — fix — flagged by`.
 
